@@ -1,0 +1,48 @@
+name: IXI Mobile Slug Round-Trip Certification
+
+on:
+  push:
+    branches:
+      - mobile/commercial-aos-v1-slug-roundtrip
+    paths:
+      - "tests/ixi-mobile-slug-roundtrip-contract.test.mjs"
+      - ".github/workflows/ixi-mobile-slug-roundtrip.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ixi-mobile-slug-roundtrip-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  certify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      NEXT_PUBLIC_SHARETRIBE_CLIENT_ID: ci-placeholder
+
+    steps:
+      - name: Checkout exact branch commit
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install repository dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Re-run certified foundation contract
+        run: node --test tests/ixi-mobile-foundation-contract.test.mjs
+
+      - name: Re-run certified card face contract
+        run: node --test tests/ixi-mobile-card-faces-contract.test.mjs
+
+      - name: Run slug round-trip contract
+        run: node --test tests/ixi-mobile-slug-roundtrip-contract.test.mjs
+
+      - name: Build production application
+        run: npm run build
