@@ -451,7 +451,8 @@ export default function IXITechWorkOrderApp({
   }
 
   async function saveMaterial(draft, input, response) {
-    const id = clean(draft?.identity?.materialUsageId || draft?.identity?.clientRequestId) || `MAT-${Date.now()}`;
+    const id = clean(draft?.identity?.materialUsageId);
+    if (!id || !draft?.financialBinding?.financialDocumentId) throw new Error("MATERIAL IS NOT BOUND TO IXI FINANCIAL");
     let next = addReference(record, "materialRecordIds", id, "materialActual", draft?.material?.extendedCost);
     next = addDocuments(next, input?.attachments || draft?.attachments, "material", id, clean(input?.vendorLabel || draft?.material?.vendorLabel), actorName);
     await commit(next, { action: "material-save", material: draft, response });
