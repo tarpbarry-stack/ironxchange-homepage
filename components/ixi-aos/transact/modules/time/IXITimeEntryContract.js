@@ -42,21 +42,24 @@ export function createIXITimeEntryDraft({ context = {}, workOrder = {}, input = 
       overtime: Boolean(input.overtime),
       description: clean(input.description),
       notes: clean(input.notes),
+      startedAt: clean(input.startedAt),
+      endedAt: clean(input.endedAt),
       source: clean(input.source || (woId || woNumber ? "work-record" : "standalone-transact"))
     },
+    session: input.session && typeof input.session === "object" ? { ...input.session } : null,
     attachments: Array.isArray(input.attachments) ? input.attachments : [],
-    status: "draft",
+    status: clean(input.status || "draft").toLowerCase(),
     createdAt
   };
 }
 
-export function validateIXITimeEntry(draft = {}) {
+export function validateIXITimeEntry(draft = {}, { allowZeroHours = false } = {}) {
   const errors = {};
   if (!clean(draft.context?.employeePassportId || draft.context?.employeeId)) errors.employee = "required";
   if (!clean(draft.context?.primaryPassportId || draft.context?.primaryObjectId || draft.context?.primaryLabel)) errors.primary = "required";
   if (!clean(draft.time?.workType)) errors.workType = "required";
   if (!clean(draft.time?.date)) errors.date = "required";
-  if (!(num(draft.time?.hours) > 0)) errors.hours = "required";
+  if (allowZeroHours ? num(draft.time?.hours) < 0 : !(num(draft.time?.hours) > 0)) errors.hours = "required";
   if (!clean(draft.time?.description)) errors.description = "required";
   return { valid: Object.keys(errors).length === 0, errors };
 }
