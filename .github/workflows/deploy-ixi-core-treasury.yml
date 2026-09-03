@@ -1,0 +1,146 @@
+name: Deploy IX-Core Treasury
+
+"on":
+  workflow_dispatch:
+    inputs:
+      commit_sha:
+        description: Immutable IX-Core commit SHA
+        required: true
+        default: b0b162f33637264458e4fb539a92249b3bf6ea06
+  push:
+    branches: [main]
+    paths: ['.github/workflows/deploy-ixi-core-treasury.yml']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ixi-core-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+      AWS_INSTANCE_ID: ${{ secrets.AWS_INSTANCE_ID }}
+      IXI_CORE_SHA: ${{ inputs.commit_sha || 'b0b162f33637264458e4fb539a92249b3bf6ea06' }}
+    steps:
+      - name: Validate immutable release
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$IXI_CORE_SHA" =~ ^[0-9a-f]{40}$ ]]
+          resolved_sha="$(curl -fsSL -H 'Accept: application/vnd.github+json' -H 'X-GitHub-Api-Version: 2022-11-28' "https://api.github.com/repos/tarpbarry-stack/ixi-core/commits/$IXI_CORE_SHA" | jq -r '.sha')"
+          test "$resolved_sha" = "$IXI_CORE_SHA"
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Deploy guarded Treasury release
+        shell: bash
+        run: |
+          set -euo pipefail
+          remote_script="$(cat <<'REMOTE_SCRIPT'
+          set -eu
+          APP=/var/www/ix-core
+          RELEASE_SHA=__IXI_CORE_SHA__
+          STAGE=/tmp/ixi-core-treasury-__IXI_CORE_SHA__
+          ARCHIVE=/tmp/ixi-core-treasury-__IXI_CORE_SHA__.tgz
+          BACKUP=/var/backups/ixi-core-releases/treasury-pre-__IXI_CORE_SHA__.tgz
+          CHANGED='financial/IXIFinancialCommandEngine.js financial/IXIFinancialCommandRoutes.js financial/IXIFinancialDocumentFactoryRegistry.js financial/IXIFinancialDynamoStore.js financial/IXIFinancialLifecycleEngine.js financial/IXIFinancialPaymentFactory.js financial/IXIFinancialPermissionEngine.js financial/IXIFinancialRoutes.js financial/IXIFinancialValidationBridge.js'
+          ADDED='financial/IXIFinancialTreasuryFactory.js'
+          SUCCESS=0
+
+          run_pm2() { if [ "$PM2_USER" = root ]; then pm2 "$@"; else sudo -u ubuntu -H pm2 "$@"; fi; }
+          rollback() {
+            if [ "$SUCCESS" -eq 0 ] && [ -f "$BACKUP" ]; then
+              echo 'Deployment failed; restoring previous IX-Core source.' >&2
+              cd "$APP"
+              rm -f financial/IXIFinancialTreasuryFactory.js
+              tar -xzf "$BACKUP"
+              run_pm2 reload IX-Core --update-env || run_pm2 restart IX-Core --update-env || true
+            fi
+          }
+          trap rollback EXIT
+
+          test -d "$APP"
+          if pm2 describe IX-Core >/dev/null 2>&1; then PM2_USER=root;
+          elif sudo -u ubuntu -H pm2 describe IX-Core >/dev/null 2>&1; then PM2_USER=ubuntu;
+          else echo 'PM2 process IX-Core was not found.' >&2; exit 1; fi
+
+          cd "$APP"
+          printf '%s  %s\n' \
+            'f4fbeea6270271e4518be2709b974beb43c583580df36ded7efb4d922de89057' 'financial/IXIFinancialCommandEngine.js' \
+            '2115ff5736ecd8adaa3e0ec1f564ab446412dc32ec7481bbdc7873cac7007e46' 'financial/IXIFinancialCommandRoutes.js' \
+            'e2c8c69cc42ded24c6463d09f50a7903556766eda00877e183cf34c1ef8b5fe3' 'financial/IXIFinancialDocumentFactoryRegistry.js' \
+            'abe1564217dc71a08df17def1059540b5c90a5f3a67596ada06587b4ffa843c2' 'financial/IXIFinancialDynamoStore.js' \
+            'dd4f59470326fee17d79ea53ea85f85ded15a3f0f003ff93df3229f880d532b4' 'financial/IXIFinancialLifecycleEngine.js' \
+            '50e5ca495d3b67c8b64ca194334e06bc8df175a8f6ac439e0e4af6dfc1e701e0' 'financial/IXIFinancialPaymentFactory.js' \
+            '3bf786bb0da8a3d91706bd8aeefe613bd49ce2d35650657e414a3cd25a0247b8' 'financial/IXIFinancialPermissionEngine.js' \
+            '42c15631fcb267a6859621ba76c257e1b6cb8abfc2c5fd7709443e9bd4266f18' 'financial/IXIFinancialRoutes.js' \
+            '49db06658042f53f2103d66ae9f062d3407b140431aebbd23fce8d9aaef3bcc0' 'financial/IXIFinancialValidationBridge.js' | sha256sum -c -
+
+          mkdir -p /var/backups/ixi-core-releases
+          tar -czf "$BACKUP" $CHANGED
+          rm -rf "$STAGE"
+          mkdir -p "$STAGE"
+          curl -fsSL "https://github.com/tarpbarry-stack/ixi-core/archive/$RELEASE_SHA.tar.gz" -o "$ARCHIVE"
+          tar -xzf "$ARCHIVE" --strip-components=1 -C "$STAGE"
+
+          cd "$STAGE"
+          npm ci --ignore-scripts
+          npm audit --omit=dev --audit-level=low
+          npm test
+          for file in $CHANGED $ADDED; do node --check "$file"; done
+          node - <<'NODE'
+          const {createFinancialDocumentByType}=require('./financial/IXIFinancialDocumentFactoryRegistry');
+          const {validateFinancialDocument}=require('./financial/IXIFinancialValidationBridge');
+          const {createFinancialLifecycleSnapshot}=require('./financial/IXIFinancialLifecycleEngine');
+          const {IXI_FINANCIAL_ACTIONS,getEffectiveFinancialPermissions}=require('./financial/IXIFinancialPermissionEngine');
+          const entity='PASS-ENTITY-PROBE',actor='PASS-ACTOR-PROBE',references=[{passportId:entity,role:'entity'}];
+          const account=createFinancialDocumentByType({documentType:'treasury-account',input:{financialDocumentId:'ifd_cash_probe',entityPassportId:entity,actorPassportId:actor,references,treasuryAccount:{account:{name:'Operating',accountType:'checking',currency:'USD'},opening:{effectiveDate:'2026-09-03',amount:1000},control:{minimumCash:100}}}});
+          const transfer=createFinancialDocumentByType({documentType:'payment',input:{amount:100,paymentDirection:'outflow',transactionReference:'XFER-PROBE',references,treasuryMovement:{transactionClass:'account-transfer',fromCashAccountFinancialDocumentId:'ifd_cash_probe',toCashAccountFinancialDocumentId:'ifd_cash_probe_2',entityPassportId:entity,actorPassportId:actor}}});
+          const permissions=getEffectiveFinancialPermissions({roles:['financial-accounting']}),lifecycle=createFinancialLifecycleSnapshot({documents:[transfer]});
+          if(!validateFinancialDocument(account).ok||!validateFinancialDocument(transfer).ok||transfer.accountingTreatment.companyCashNetChange!==0||lifecycle.paid!==0||lifecycle.collected!==0||!permissions.includes(IXI_FINANCIAL_ACTIONS.MANAGE_TREASURY)||!permissions.includes(IXI_FINANCIAL_ACTIONS.POST_TREASURY_MOVEMENT)||!permissions.includes(IXI_FINANCIAL_ACTIONS.RECONCILE_TREASURY)) throw new Error('Treasury deploy probe failed.');
+          NODE
+
+          cd "$APP"
+          for file in $CHANGED $ADDED; do install -D -m 0644 "$STAGE/$file" "$APP/$file"; done
+          run_pm2 reload IX-Core --update-env
+          attempt=0
+          until curl -fsS http://127.0.0.1:4100/health >/dev/null; do attempt=$((attempt + 1)); [ "$attempt" -lt 15 ] || exit 1; sleep 2; done
+          route_status="$(curl -sS -o "$STAGE/treasury-route.json" -w '%{http_code}' -X POST -H 'Content-Type: application/json' -d '{"documentType":"treasury-account","input":{}}' http://127.0.0.1:4100/financial/commands/create)"
+          case "$route_status" in 401|403) ;; *) cat "$STAGE/treasury-route.json" >&2; exit 1 ;; esac
+
+          SUCCESS=1
+          trap - EXIT
+          rm -rf "$STAGE"
+          rm -f "$ARCHIVE"
+          printf 'IX-Core Treasury %s deployed; health=200; protected-route=%s\n' "$RELEASE_SHA" "$route_status"
+          REMOTE_SCRIPT
+          )"
+          remote_script="${remote_script//__IXI_CORE_SHA__/$IXI_CORE_SHA}"
+          parameters="$(jq -cn --arg command "$remote_script" '{commands:[$command]}')"
+          command_id="$(aws ssm send-command --region "$AWS_REGION" --instance-ids "$AWS_INSTANCE_ID" --document-name AWS-RunShellScript --comment "Deploy IX-Core Treasury $IXI_CORE_SHA" --parameters "$parameters" --query 'Command.CommandId' --output text)"
+          aws ssm wait command-executed --region "$AWS_REGION" --command-id "$command_id" --instance-id "$AWS_INSTANCE_ID" || true
+          invocation="$(aws ssm get-command-invocation --region "$AWS_REGION" --command-id "$command_id" --instance-id "$AWS_INSTANCE_ID")"
+          printf '%s' "$invocation" | jq -r '.StandardOutputContent'
+          printf '%s' "$invocation" | jq -r '.StandardErrorContent' >&2
+          test "$(printf '%s' "$invocation" | jq -r '.Status')" = Success
+
+      - name: Record Treasury release
+        shell: bash
+        run: |
+          {
+            echo '## IX-Core Treasury release'
+            echo "- Commit: \`$IXI_CORE_SHA\`"
+            echo '- 58+ Financial tests and Treasury invariants: passed'
+            echo '- Production dependency audit: passed'
+            echo '- Health and protected route: passed'
+          } >> "$GITHUB_STEP_SUMMARY"
