@@ -1,0 +1,184 @@
+name: Deploy IX-Core Tech Work
+
+on:
+  workflow_dispatch:
+    inputs:
+      commit_sha:
+        description: Immutable IX-Core commit SHA
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ixi-core-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+      AWS_INSTANCE_ID: ${{ secrets.AWS_INSTANCE_ID }}
+      IXI_CORE_SHA: ${{ inputs.commit_sha }}
+
+    steps:
+      - name: Validate immutable release
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$IXI_CORE_SHA" =~ ^[0-9a-f]{40}$ ]]
+          resolved_sha="$(curl -fsSL \
+            -H 'Accept: application/vnd.github+json' \
+            -H 'X-GitHub-Api-Version: 2022-11-28' \
+            "https://api.github.com/repos/tarpbarry-stack/ixi-core/commits/$IXI_CORE_SHA" | jq -r '.sha')"
+          test "$resolved_sha" = "$IXI_CORE_SHA"
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Deploy guarded Tech Work release
+        id: deploy
+        shell: bash
+        run: |
+          set -euo pipefail
+          remote_script="$(cat <<'REMOTE_SCRIPT'
+          set -eu
+          APP=/var/www/ix-core
+          RELEASE_SHA=__IXI_CORE_SHA__
+          STAGE=/tmp/ixi-core-tech-work-__IXI_CORE_SHA__
+          ARCHIVE=/tmp/ixi-core-tech-work-__IXI_CORE_SHA__.tgz
+          BACKUP=/var/backups/ixi-core-releases/tech-work-pre-__IXI_CORE_SHA__.tgz
+          FILES='financial/IXIFinancialWorkOrderFactory.js financial/IXIFinancialValidationBridge.js'
+          SUCCESS=0
+
+          run_pm2() {
+            if [ "$PM2_USER" = root ]; then pm2 "$@"; else sudo -u ubuntu -H pm2 "$@"; fi
+          }
+
+          rollback() {
+            if [ "$SUCCESS" -eq 0 ] && [ -f "$BACKUP" ]; then
+              echo 'Deployment failed; restoring previous Work Order source.' >&2
+              cd "$APP"
+              tar -xzf "$BACKUP"
+              run_pm2 reload IX-Core --update-env || run_pm2 restart IX-Core --update-env || true
+            fi
+          }
+          trap rollback EXIT
+
+          test -d "$APP"
+          if pm2 describe IX-Core >/dev/null 2>&1; then
+            PM2_USER=root
+          elif sudo -u ubuntu -H pm2 describe IX-Core >/dev/null 2>&1; then
+            PM2_USER=ubuntu
+          else
+            echo 'PM2 process IX-Core was not found.' >&2
+            exit 1
+          fi
+
+          cd "$APP"
+          printf '%s  %s\n' \
+            '252b85a4515f6131fbf786890e2f385c663749865631b341739256e499049c05' \
+            'financial/IXIFinancialWorkOrderFactory.js' \
+            '459943d055bbd0c9916c5a93f1df12c0a913169ae14222eec4377e350e5a9317' \
+            'financial/IXIFinancialValidationBridge.js' | sha256sum -c -
+
+          mkdir -p /var/backups/ixi-core-releases
+          tar -czf "$BACKUP" $FILES
+          rm -rf "$STAGE"
+          mkdir -p "$STAGE"
+          curl -fsSL "https://github.com/tarpbarry-stack/ixi-core/archive/$RELEASE_SHA.tar.gz" -o "$ARCHIVE"
+          tar -xzf "$ARCHIVE" --strip-components=1 -C "$STAGE"
+
+          cd "$STAGE"
+          npm ci --ignore-scripts
+          npm test
+          node --check financial/IXIFinancialWorkOrderFactory.js
+          node --check financial/IXIFinancialValidationBridge.js
+          node - <<'NODE'
+          const { createWorkOrderDocument } = require('./financial/IXIFinancialWorkOrderFactory');
+          const { validateFinancialDocument } = require('./financial/IXIFinancialValidationBridge');
+          const document = createWorkOrderDocument({
+            financialDocumentId: 'ifd_tech_work_deploy_probe',
+            workOrderType: 'technology',
+            description: 'Tech Work deploy probe',
+            references: [{ passportId: 'passport:machine:deploy-probe', role: 'asset' }],
+            techWorkOrder: {
+              schema: 'ixi-tech-work-order-v1',
+              context: { primaryPassportId: 'passport:machine:deploy-probe' },
+              work: { type: 'diagnostic', status: 'in-progress', priority: 'normal', impact: 'normal', description: 'Tech Work deploy probe' },
+              technology: { environment: 'field' }
+            }
+          });
+          if (!validateFinancialDocument(document).ok || document.workOrder || !document.documentNumber.startsWith('TECHWO-')) {
+            throw new Error('Tech Work deploy probe failed.');
+          }
+          NODE
+
+          for file in $FILES; do
+            install -D -m 0644 "$STAGE/$file" "$APP/$file"
+          done
+          run_pm2 reload IX-Core --update-env
+
+          attempt=0
+          until curl -fsS http://127.0.0.1:4100/health >/dev/null; do
+            attempt=$((attempt + 1))
+            [ "$attempt" -lt 15 ] || exit 1
+            sleep 2
+          done
+
+          route_status="$(curl -sS -o "$STAGE/tech-work-route.json" -w '%{http_code}' \
+            -X POST -H 'Content-Type: application/json' \
+            -d '{"documentType":"work-order","input":{"workOrderType":"technology"}}' \
+            http://127.0.0.1:4100/financial/commands/create)"
+          case "$route_status" in 401|403) ;; *) cat "$STAGE/tech-work-route.json" >&2; exit 1 ;; esac
+
+          SUCCESS=1
+          trap - EXIT
+          rm -rf "$STAGE"
+          rm -f "$ARCHIVE"
+          printf 'IX-Core Tech Work %s deployed; health=200; protected-route=%s\n' "$RELEASE_SHA" "$route_status"
+          REMOTE_SCRIPT
+          )"
+
+          remote_script="${remote_script//__IXI_CORE_SHA__/$IXI_CORE_SHA}"
+          parameters="$(jq -cn --arg command "$remote_script" '{commands:[$command]}')"
+          command_id="$(aws ssm send-command \
+            --region "$AWS_REGION" \
+            --instance-ids "$AWS_INSTANCE_ID" \
+            --document-name AWS-RunShellScript \
+            --comment "Deploy IX-Core Tech Work $IXI_CORE_SHA" \
+            --parameters "$parameters" \
+            --query 'Command.CommandId' \
+            --output text)"
+          echo "command_id=$command_id" >> "$GITHUB_OUTPUT"
+
+          aws ssm wait command-executed \
+            --region "$AWS_REGION" \
+            --command-id "$command_id" \
+            --instance-id "$AWS_INSTANCE_ID" || true
+          invocation="$(aws ssm get-command-invocation \
+            --region "$AWS_REGION" \
+            --command-id "$command_id" \
+            --instance-id "$AWS_INSTANCE_ID")"
+          printf '%s' "$invocation" | jq -r '.StandardOutputContent'
+          printf '%s' "$invocation" | jq -r '.StandardErrorContent' >&2
+          test "$(printf '%s' "$invocation" | jq -r '.Status')" = Success
+
+      - name: Record release
+        shell: bash
+        run: |
+          {
+            echo '## IX-Core Tech Work release'
+            echo "- Commit: \`$IXI_CORE_SHA\`"
+            echo "- SSM command: \`${{ steps.deploy.outputs.command_id }}\`"
+            echo '- Financial tests: passed'
+            echo '- Tech Work validation probe: passed'
+            echo '- Health: passed'
+            echo '- Protected Tech Work route: passed'
+          } >> "$GITHUB_STEP_SUMMARY"
