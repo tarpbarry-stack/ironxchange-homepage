@@ -81,7 +81,7 @@ export default function IXIAosCard001FoundryGreenStyles() {
       .ixi-generic-face-v12.skin-foundry-green .gfv12-scroll {
         background-image:
           linear-gradient(180deg, rgba(4,17,10,.92), rgba(3,12,7,.96)),
-          url("/ixi/skins/foundry-green-medallion.webp"),
+          url("/ixi/skins/foundry-green-ixi-seal.svg"),
           url("/ixi/skins/foundry-green-guilloche.svg"),
           url("/ixi/skins/foundry-green-paper.webp") !important;
         background-position: center, center 96%, center, center !important;
@@ -234,7 +234,7 @@ export default function IXIAosCard001FoundryGreenStyles() {
       .skin-foundry-green .f3-value-card {
         background-image:
           linear-gradient(90deg, rgba(204,204,167,.92), rgba(196,198,160,.68)),
-          url("/ixi/skins/foundry-green-medallion.webp"),
+          url("/ixi/skins/foundry-green-ixi-seal.svg"),
           url("/ixi/skins/foundry-green-paper.webp") !important;
         background-position: center, 108% 62%, center !important;
         background-repeat: no-repeat, no-repeat, repeat !important;
@@ -294,7 +294,7 @@ export default function IXIAosCard001FoundryGreenStyles() {
         background-color: #061009 !important;
         background-image:
           linear-gradient(180deg, rgba(3,13,7,.64), rgba(2,8,5,.86)),
-          url("/ixi/skins/foundry-green-medallion.webp"),
+          url("/ixi/skins/foundry-green-ixi-seal.svg"),
           url("/ixi/skins/foundry-green-guilloche.svg") !important;
         background-position: center, center, center !important;
         background-repeat: no-repeat, no-repeat, repeat !important;

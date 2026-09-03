@@ -37,7 +37,7 @@ const forgedAssets = [
 const foundryAssets = [
   "public/ixi/skins/foundry-green-paper.webp",
   "public/ixi/skins/foundry-green-guilloche.svg",
-  "public/ixi/skins/foundry-green-medallion.webp"
+  "public/ixi/skins/foundry-green-ixi-seal.svg"
 ].map(file => path.join(root, file));
 
 test("AOS active skin menu retains V12 Natural and archives legacy choices", () => {
@@ -133,7 +133,8 @@ test("Foundry Green adapts currency material by face without changing geometry",
   assert.match(foundryGreen, /\.ixi-location-f3-v12\.skin-foundry-green/);
   assert.match(foundryGreen, /foundry-green-paper\.webp/);
   assert.match(foundryGreen, /foundry-green-guilloche\.svg/);
-  assert.match(foundryGreen, /foundry-green-medallion\.webp/);
+  assert.match(foundryGreen, /foundry-green-ixi-seal\.svg/);
+  assert.doesNotMatch(foundryGreen, /foundry-green-medallion\.webp/);
   assert.match(foundryGreen, /\.board-command-rail/);
   assert.match(foundryGreen, /aos-generic-console-slot:has\(\.skin-foundry-green\)/);
   foundryAssets.forEach(file => assert.equal(fs.existsSync(file), true));
