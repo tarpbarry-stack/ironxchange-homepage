@@ -134,6 +134,59 @@ export default function IXIV12ReadabilityFoundation() {
         line-height: var(--ixi-v12-leading-micro) !important;
         letter-spacing: .025em !important;
       }
+
+      /*
+       * V12 EDIT-SHELL CONTRACT
+       * -----------------------
+       * The legacy generic editor intentionally covered the full face with an
+       * opaque sheet. V12 cards keep their native chassis visible during edit.
+       * The editor is contained inside the real working-body shell so header,
+       * command deck, thumbnails and Object Rail remain physically present.
+       */
+      .ixi-v12-readable-card .ixi-generic-overview .gov-editor {
+        inset: 43px 7px 51px !important;
+        overflow: hidden;
+        border: 1px solid var(--line);
+        border-radius: 5px;
+        background: #090c0a;
+        box-shadow: inset 0 1px rgba(255,255,255,.035);
+      }
+
+      .ixi-v12-readable-card .ixi-generic-overview.gov-001 .gov-editor,
+      .ixi-v12-readable-card .ixi-generic-overview.gov-003 .gov-editor {
+        inset: 43px 7px 108px !important;
+      }
+
+      .ixi-v12-readable-card .gov-editor-head {
+        border-bottom: 1px solid var(--line);
+        background: #151916;
+      }
+
+      .ixi-v12-readable-card .gov-editor-scroll {
+        padding: 8px;
+        scrollbar-width: thin;
+        scrollbar-color: #3d4540 #090b0a;
+      }
+
+      .ixi-v12-readable-card .gov-editor-scroll > label {
+        padding: 7px;
+        border: 1px solid var(--line);
+        border-radius: 5px;
+        background: #111411;
+      }
+
+      .ixi-v12-readable-card .gov-editor-scroll > label span {
+        font-family: var(--ixi-v12-font-ui) !important;
+        font-size: var(--ixi-v12-type-micro) !important;
+        font-weight: var(--ixi-v12-weight-micro) !important;
+        line-height: var(--ixi-v12-leading-micro) !important;
+      }
+
+      .ixi-v12-readable-card .gov-editor-scroll > label input {
+        font-family: var(--ixi-v12-font-ui) !important;
+        font-size: var(--ixi-v12-type-label) !important;
+        font-weight: var(--ixi-v12-weight-label) !important;
+      }
     `}</style>
   );
 }
