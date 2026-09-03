@@ -5,6 +5,8 @@ import {
   KeyboardSensor,
   MouseSensor,
   TouchSensor,
+  closestCenter,
+  pointerWithin,
   useSensor,
   useSensors
 } from "@dnd-kit/core";
@@ -21,8 +23,7 @@ import IXISortableMachineCard from "../../components/ixi-chassis/IXISortableMach
 import {
   createWorkspaceDragStartHandler,
   createWorkspaceDragCancelHandler,
-  createWorkspaceDragEndHandler,
-  workspaceCollisionDetection
+  createWorkspaceDragEndHandler
 } from "../../components/ixi-chassis/IXIDndEngineHelpers";
 import {
   createEmptyWorkspacePlacements,
@@ -75,12 +76,26 @@ function isOwnedPrivateCandidate(listing = {}) {
   );
 }
 
+function mobileWorkspaceCollisionDetection(args) {
+  const activeId = String(args?.active?.id || "");
+  const withoutActive = collisions =>
+    (Array.isArray(collisions) ? collisions : []).filter(
+      collision => String(collision?.id || "") !== activeId
+    );
+
+  const pointerHits = withoutActive(pointerWithin(args));
+  if (pointerHits.length) return pointerHits;
+
+  return withoutActive(closestCenter(args));
+}
+
 export default function MobileTouchDndCertificationPage() {
   const [listings, setListings] = useState([]);
   const [status, setStatus] = useState("loading");
   const [error, setError] = useState("");
   const [layoutMode, setLayoutMode] = useState("I");
   const [activeDndId, setActiveDndId] = useState("");
+  const [activeOverlayWidth, setActiveOverlayWidth] = useState(0);
   const [placements, setPlacements] = useState(() => createEmptyWorkspacePlacements());
 
   const sensors = useSensors(
@@ -159,7 +174,9 @@ export default function MobileTouchDndCertificationPage() {
     [boardIds, listingById]
   );
 
-  function clearMachineDragState() {}
+  function clearMachineDragState() {
+    setActiveOverlayWidth(0);
+  }
 
   function getMachineContainer(objectId) {
     return getObjectWorkspaceSurface({ placements, objectId }) || "board";
@@ -199,12 +216,12 @@ export default function MobileTouchDndCertificationPage() {
     );
   }
 
-  const handleWorkspaceDragStart = createWorkspaceDragStartHandler({ setActiveDndId });
-  const handleWorkspaceDragCancel = createWorkspaceDragCancelHandler({
+  const baseHandleWorkspaceDragStart = createWorkspaceDragStartHandler({ setActiveDndId });
+  const baseHandleWorkspaceDragCancel = createWorkspaceDragCancelHandler({
     setActiveDndId,
     clearMachineDragState
   });
-  const handleWorkspaceDragEnd = createWorkspaceDragEndHandler({
+  const baseHandleWorkspaceDragEnd = createWorkspaceDragEndHandler({
     getMachineContainer,
     machineContainers: placements,
     moveMachineWithinContainer,
@@ -219,8 +236,49 @@ export default function MobileTouchDndCertificationPage() {
     clearMachineDragState
   });
 
+  function handleWorkspaceDragStart(event) {
+    const measuredWidth = Number(event?.active?.rect?.current?.initial?.width || 0);
+    setActiveOverlayWidth(measuredWidth > 0 ? measuredWidth : 0);
+    baseHandleWorkspaceDragStart(event);
+  }
+
+  function handleWorkspaceDragCancel(event) {
+    baseHandleWorkspaceDragCancel(event);
+  }
+
+  function handleWorkspaceDragEnd(event) {
+    baseHandleWorkspaceDragEnd(event);
+  }
+
   const activeListing = activeDndId ? listingById.get(String(activeDndId)) : null;
   const boardClassName = layoutMode === "II" ? "board board-two" : "board board-one";
+
+  function renderExactMobileOverlay({ object }) {
+    if (!object) return null;
+    const width = activeOverlayWidth > 0 ? activeOverlayWidth : undefined;
+
+    return (
+      <div className="mobileExactDragOverlay" style={width ? { width } : undefined}>
+        <IXIImmutableScaledSurface
+          nativeWidth={300}
+          nativeHeight={475}
+          horizontalPadding={0}
+          className="mobile-dnd-overlay-surface"
+        >
+          <IXIMachineCard
+            listing={object}
+            cardContext="inventory"
+            sellerMode
+            machineFace={1}
+            showSave={false}
+            suppressFamilyLog
+            from="aos-work"
+            useDndDrag={false}
+          />
+        </IXIImmutableScaledSurface>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -246,11 +304,12 @@ export default function MobileTouchDndCertificationPage() {
         {status === "ready" ? (
           <IXIDragEngine
             sensors={sensors}
-            workspaceCollisionDetection={workspaceCollisionDetection}
+            workspaceCollisionDetection={mobileWorkspaceCollisionDetection}
             handleWorkspaceDragStart={handleWorkspaceDragStart}
             handleWorkspaceDragEnd={handleWorkspaceDragEnd}
             handleWorkspaceDragCancel={handleWorkspaceDragCancel}
             getActiveDndObject={() => activeListing}
+            renderActiveDndOverlay={renderExactMobileOverlay}
             activeDndId={activeDndId}
             ixiCardState={{}}
             cardScaleMode="xl"
@@ -258,7 +317,7 @@ export default function MobileTouchDndCertificationPage() {
             listingOrigin="aos-work"
           >
             <SortableContext items={boardIds} strategy={rectSortingStrategy}>
-              <section className={boardClassName} data-layout-mode={layoutMode} data-touch-dnd="hold-300ms">
+              <section className={boardClassName} data-layout-mode={layoutMode} data-touch-dnd="hold-300ms" data-self-collision="ignored">
                 {orderedListings.map(listing => {
                   const id = String(getListingId(listing));
                   return (
@@ -314,6 +373,8 @@ export default function MobileTouchDndCertificationPage() {
       <style jsx global>{`
         .mobile-dnd-machine-surface .card-board-zone{touch-action:auto;-webkit-user-select:none;user-select:none}
         .mobile-dnd-machine-surface.dragging{opacity:.28}
+        .mobileExactDragOverlay{box-sizing:border-box;min-width:0;pointer-events:none}
+        .mobile-dnd-overlay-surface{pointer-events:none}
       `}</style>
     </>
   );
