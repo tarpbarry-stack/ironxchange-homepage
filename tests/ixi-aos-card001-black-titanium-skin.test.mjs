@@ -28,7 +28,6 @@ const forgedCommand = read("components/ixi-aos/cards/001/IXIAosCard001ForgedComm
 const texturePath = path.join(root, "public/ixi/skins/black-titanium-grain.svg");
 const saddleTexturePath = path.join(root, "public/ixi/skins/saddle-steel-grain.svg");
 const forgedAssets = [
-  "public/ixi/skins/forged-command-shell-v3.webp",
   "public/ixi/skins/forged-command-leather.webp",
   "public/ixi/skins/forged-command-steel.webp"
 ].map(file => path.join(root, file));
@@ -85,19 +84,14 @@ test("Saddle Steel is appearance-only and uses one lightweight material asset", 
 });
 
 test("Forged Command uses compact photographic materials without changing card or rail geometry", () => {
-  const decorativeOverlay = /\.ixi-generic-overview\.skin-forged-command::after[\s\S]*?z-index:\s*170;[\s\S]*?\}/;
-  assert.match(forgedCommand, decorativeOverlay);
-
-  const withoutPaintOverlay = forgedCommand.replace(decorativeOverlay, "");
   const forbiddenGeometry = /(?:^|\n)\s*(?:width|height|min-width|max-width|min-height|max-height|padding|margin|gap|grid-template|position|inset|top|right|bottom|left|transform)\s*:/;
-  const withoutCustomProperties = withoutPaintOverlay.replace(/--[\w-]+\s*:[^;]+;/g, "");
+  const withoutCustomProperties = forgedCommand.replace(/--[\w-]+\s*:[^;]+;/g, "");
   assert.doesNotMatch(withoutCustomProperties, forbiddenGeometry);
 
   assert.match(forgedCommand, /\.board-command-rail/);
-  assert.match(forgedCommand, /pointer-events:\s*none/);
-  assert.match(forgedCommand, /forged-command-shell-v3\.webp/);
-  assert.match(forgedCommand, /clip-path:\s*inset\(0 round 13px\)/);
-  assert.match(forgedCommand, /\.skin-forged-command \.board-command-rail[\s\S]*?z-index:\s*190\s*!important/);
+  assert.doesNotMatch(forgedCommand, /forged-command-shell-v\d+\.webp/);
+  assert.doesNotMatch(forgedCommand, /\.skin-forged-command \.board-command-rail[\s\S]*?(?:border-radius|overflow|z-index)\s*:/);
+  assert.match(forgedCommand, /aos-generic-console-slot:has\(\.skin-forged-command\)/);
   assert.match(forgedCommand, /forged-command-leather\.webp/);
   assert.match(forgedCommand, /forged-command-steel\.webp/);
 

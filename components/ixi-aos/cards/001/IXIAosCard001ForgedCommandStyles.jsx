@@ -1,6 +1,7 @@
 /*
  * Card 001 — FORGED COMMAND
- * Asset-assisted physical skin authored on the canonical 300 × 475 chassis.
+ * Body-first physical skin authored on the canonical 300 × 475 chassis.
+ * The native card edge, actuators and IXI rail remain the structural authority.
  * Work and Focus are inherited from the sitewide scale engine.
  */
 export default function IXIAosCard001ForgedCommandStyles() {
@@ -48,27 +49,16 @@ export default function IXIAosCard001ForgedCommandStyles() {
         background-position: center !important;
         background-size: cover !important;
         background-blend-mode: screen, screen, soft-light, soft-light, multiply, normal !important;
+        background-clip: padding-box !important;
         color: var(--fc-ivory) !important;
         box-shadow:
-          inset 0 1px 0 rgba(255,238,204,.26),
-          inset 1px 0 0 rgba(255,219,156,.065),
-          inset -1px 0 0 rgba(0,0,0,.82),
-          inset 0 -1px 0 rgba(0,0,0,.96),
+          inset 0 0 0 1px rgba(8,6,4,.96),
+          inset 0 0 0 2px rgba(225,189,120,.36),
+          inset 0 0 0 4px rgba(13,14,12,.92),
+          inset 0 0 14px rgba(0,0,0,.84),
+          inset 0 1px 0 rgba(255,238,204,.32),
+          0 1px 0 rgba(225,189,120,.20),
           0 20px 44px rgba(0,0,0,.78) !important;
-      }
-
-      .ixi-generic-overview.skin-forged-command::after,
-      .ixi-aos-location-f2.skin-forged-command::after,
-      .ixi-location-f3-v12.skin-forged-command::after,
-      .ixi-generic-face-v12.skin-forged-command::after {
-        content: "";
-        position: absolute;
-        inset: 0;
-        border-radius: inherit;
-        background: url("/ixi/skins/forged-command-shell-v3.webp") center / 100% 100% no-repeat;
-        clip-path: inset(0 round 13px);
-        pointer-events: none;
-        z-index: 170;
       }
 
       .skin-forged-command :is(.gov-head,.ops-header,.f3-head,.gfv12-head) {
@@ -295,7 +285,6 @@ export default function IXIAosCard001ForgedCommandStyles() {
 
       .skin-forged-command .board-command-rail {
         border-top-color: #a47b4d !important;
-        border-radius: 0 0 12px 12px !important;
         background-color: var(--fc-leather) !important;
         background-image:
           linear-gradient(180deg, rgba(255,232,194,.17), transparent 38%),
@@ -308,8 +297,6 @@ export default function IXIAosCard001ForgedCommandStyles() {
           inset 0 1px 0 rgba(255,235,202,.17),
           inset 0 -1px 0 rgba(0,0,0,.88),
           0 -3px 10px rgba(0,0,0,.66) !important;
-        overflow: hidden !important;
-        z-index: 190 !important;
       }
 
       .skin-forged-command .board-command-rail .rail-zone {
@@ -331,6 +318,25 @@ export default function IXIAosCard001ForgedCommandStyles() {
       .skin-forged-command .board-command-rail .destination-armed::after {
         background: var(--fc-brass-hot) !important;
         box-shadow: 0 0 9px rgba(225,189,120,.42) !important;
+      }
+
+      .aos-generic-console-slot:has(.skin-forged-command) > .ixi-object-card-actuator {
+        border-color: rgba(225,189,120,.34) !important;
+        background-color: #282722 !important;
+        background-image:
+          linear-gradient(90deg, rgba(255,238,207,.18), transparent 38%, rgba(0,0,0,.42)),
+          url("/ixi/skins/forged-command-steel.webp") !important;
+        background-position: center !important;
+        background-size: cover !important;
+        box-shadow:
+          inset 1px 0 0 rgba(255,234,195,.18),
+          inset -1px 0 0 rgba(0,0,0,.74),
+          0 1px 4px rgba(0,0,0,.62) !important;
+      }
+
+      .aos-generic-console-slot:has(.skin-forged-command) > .ixi-object-card-actuator:hover {
+        background-color: var(--fc-brass) !important;
+        box-shadow: 0 0 8px rgba(225,189,120,.34) !important;
       }
 
       .aos-card001-v12-identity-shell.skin-forged-command .aos-card001-ixi-identity,
