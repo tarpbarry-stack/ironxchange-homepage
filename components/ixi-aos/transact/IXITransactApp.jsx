@@ -29,11 +29,12 @@ import { patchIXIAosFinancialDocument } from "../financial-runtime/IXIAosFinanci
 
 const clean = value => String(value ?? "").trim();
 
-export default function IXITransactApp({ object = {}, actor = {}, entity = {}, activeWorkOrder = null, permissions = [], financialRecords = [], onFinancialRecordsChange = null, onClose = null, onOpenModule = null, onSendFront = null, onSendBack = null, onCycleColor = null, onCycleOutline = null, armedDestination = "", onSendToArmedDestination = null }) {
+export default function IXITransactApp({ object = {}, actor = {}, entity = {}, activeWorkOrder = null, activeTechWorkOrder = null, permissions = [], financialRecords = [], onFinancialRecordsChange = null, onClose = null, onOpenModule = null, onSendFront = null, onSendBack = null, onCycleColor = null, onCycleOutline = null, armedDestination = "", onSendToArmedDestination = null }) {
   const context = useMemo(() => createIXITransactContext({ object, actor, entity, activeWorkOrder, permissions }), [object, actor, entity, activeWorkOrder, permissions]);
   const modules = useMemo(() => getIXITransactModules({ objectType: context.primary.objectType, permissions: context.permissions }), [context]);
   const [moduleId, setModuleId] = useState("");
   const [workOrderSnapshot, setWorkOrderSnapshot] = useState(activeWorkOrder || null);
+  const [techWorkOrderSnapshot, setTechWorkOrderSnapshot] = useState(activeTechWorkOrder || null);
   const [saleSnapshot, setSaleSnapshot] = useState(object.assetSale || object.saleRecord || null);
   const [settlementSnapshot, setSettlementSnapshot] = useState(object.assetSettlement || object.settlementRecord || null);
   const [collectionCases, setCollectionCases] = useState(Array.isArray(object.collectionCases) ? object.collectionCases : []);
@@ -44,11 +45,46 @@ export default function IXITransactApp({ object = {}, actor = {}, entity = {}, a
   useEffect(() => {
     setWorkOrderSnapshot(activeWorkOrder || null);
   }, [activeWorkOrder]);
+  useEffect(() => {
+    setTechWorkOrderSnapshot(activeTechWorkOrder || null);
+  }, [activeTechWorkOrder]);
   const active = modules.find(item => item.id === moduleId) || null;
   const back = () => setModuleId("");
 
   async function open(item) { setModuleId(item.id); await onOpenModule?.(item, context, {}); }
   async function change(id, label, group, documentType, key, record, changePayload = {}, sourceContext = context, extra = {}) { await onOpenModule?.({ id: `${id}-${changePayload.action || "change"}`, label, group, documentType }, sourceContext, { [key]: record, change: changePayload, originatingObject: sourceContext.primary, returnTo: id, ...extra }); }
+
+  async function persistTechWorkOrder(record, changePayload = {}, sourceContext = context) {
+    const financialDocumentId = clean(record?.financialBinding?.financialDocumentId || record?.identity?.techWorkOrderId);
+    if (!financialDocumentId) throw new Error("TECH WORK ORDER IS NOT BOUND TO IXI FINANCIAL");
+    const action = clean(changePayload?.action || "update");
+    const requestId = globalThis.crypto?.randomUUID?.() || `techwo-update-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    const result = await patchIXIAosFinancialDocument({
+      financialDocumentId,
+      expectedRevision: record?.financialBinding?.revision,
+      commandId: requestId,
+      idempotencyKey: requestId,
+      patch: {
+        techWorkOrder: record,
+        financialState: action === "close" ? "closed" : "incurred",
+        ...(action === "complete" ? { completedAt: record?.dates?.completedAt || new Date().toISOString() } : {})
+      },
+      metadata: { transactModule: "tech-work-order", action }
+    });
+    const serverRecord = result?.data?.record || result?.record || {};
+    const stored = serverRecord?.financialDocument?.techWorkOrder || record;
+    const canonical = {
+      ...stored,
+      financialBinding: {
+        financialDocumentId,
+        revision: Number(serverRecord?.server?.revision || record?.financialBinding?.revision || 0)
+      }
+    };
+    setTechWorkOrderSnapshot(canonical);
+    await onFinancialRecordsChange?.();
+    await onOpenModule?.({ id: `tech-work-order-${action}`, label: "TECH WORK ORDER UPDATE", group: "work", documentType: "work-order" }, sourceContext, { techWorkOrder: canonical, change: changePayload, originatingObject: sourceContext.primary, returnTo: "technology-work" });
+    return canonical;
+  }
 
   if (moduleId === "bill") return <IXIBillStandaloneApp context={context} object={object} authority={actor?.billAuthority || actor?.financialAuthority || actor?.purchasingAuthority || {}} onBack={back} onRecordChange={(record, changePayload) => change("bill", "BILL / INVOICE UPDATE", "spend", "bill", "billRecord", record, changePayload)} />;
 
@@ -70,7 +106,7 @@ export default function IXITransactApp({ object = {}, actor = {}, entity = {}, a
   else if (moduleId === "financial-reporting") body = <IXIFinancialReportingApp context={context} object={object} journals={object?.generalLedgerJournals || object?.glJournals || []} chart={object?.generalLedgerChart || null} periods={object?.accountingPeriods || (object?.generalLedgerPeriod ? [object.generalLedgerPeriod] : [])} onBack={back} />;
   else if (moduleId === "settlement") body = <IXISettlementApp context={context} object={object} sale={saleSnapshot || object.assetSale || object.saleRecord || null} acquisition={object.assetAcquisition || object.acquisitionRecord || null} financialRecords={object?.assetFinancialTransactions || object?.relatedFinancialRecords || object?.financialRecords || []} initialRecord={settlementSnapshot} onBack={back} onRecordChange={async (record, changePayload, sourceContext) => { setSettlementSnapshot(record); await change("settlement", "SETTLEMENT UPDATE", "settle", changePayload?.action === "owner-payment" ? "payment" : "settlement", "assetSettlement", record, changePayload, sourceContext || context, { sale: saleSnapshot, waterfall: record?.waterfall || null, paymentStatus: record?.paymentStatus || null }); }} />;
   else if (moduleId === "work-order") body = <IXIWorkOrderApp context={context} initialWorkOrder={workOrderSnapshot || activeWorkOrder} onBack={back} onCreate={async (record, sourceContext) => { setWorkOrderSnapshot(record); await onOpenModule?.({ id: "work-order-create", label: "CREATE WORK ORDER", group: "work", documentType: "work-order" }, sourceContext, { workOrder: record }); await onFinancialRecordsChange?.(); }} onAction={async (id, workOrder, sourceContext, payload = {}) => { let nextWorkOrder = workOrder; if (id === "complete") nextWorkOrder = { ...(workOrder || {}), work: { ...(workOrder?.work || {}), status: "complete" }, financial: { ...(workOrder?.financial || {}), status: "complete" } }; const financialDocumentId = clean(nextWorkOrder?.financialBinding?.financialDocumentId || nextWorkOrder?.identity?.workOrderId); if (!financialDocumentId) throw new Error("WORK ORDER IS NOT BOUND TO IXI FINANCIAL"); const requestId = globalThis.crypto?.randomUUID?.() || `wo-update-${Date.now()}-${Math.random().toString(16).slice(2)}`; const result = await patchIXIAosFinancialDocument({ financialDocumentId, expectedRevision: nextWorkOrder?.financialBinding?.revision, commandId: requestId, idempotencyKey: requestId, patch: { workOrder: nextWorkOrder, financialState: id === "complete" ? "closed" : "incurred", ...(id === "complete" ? { completedAt: new Date().toISOString() } : {}) }, metadata: { transactModule: "work-order", action: id } }); const revision = Number(result?.data?.record?.server?.revision || result?.record?.server?.revision || nextWorkOrder?.financialBinding?.revision || 0); nextWorkOrder = { ...nextWorkOrder, financialBinding: { financialDocumentId, revision } }; setWorkOrderSnapshot(nextWorkOrder); await onFinancialRecordsChange?.(); await onOpenModule?.({ id, label: String(id).toUpperCase(), group: "work-order-action", documentType: id }, sourceContext, { workOrder: nextWorkOrder, ...payload }); if (id === "complete" && nextWorkOrder?.work?.customerService === true) setModuleId("service-invoice"); }} />;
-  else if (moduleId === "technology-work") body = <IXITechWorkOrderApp context={context} onBack={back} onCreate={async (record, sourceContext) => onOpenModule?.({ id: "tech-work-order-create", label: "CREATE TECH WORK ORDER", group: "work", documentType: "technology-work-order" }, sourceContext, { techWorkOrder: record })} onRecordChange={(record, changePayload, sourceContext) => change("tech-work-order", "TECH WORK ORDER UPDATE", "work", "technology-work-order", "techWorkOrder", record, changePayload, sourceContext || context)} />;
+  else if (moduleId === "technology-work") body = <IXITechWorkOrderApp context={context} initialTechWorkOrder={techWorkOrderSnapshot || activeTechWorkOrder} onBack={back} onCreate={async (record, sourceContext, response) => { setTechWorkOrderSnapshot(record); await onOpenModule?.({ id: "tech-work-order-create", label: "CREATE TECH WORK ORDER", group: "work", documentType: "work-order" }, sourceContext, { techWorkOrder: record, response }); await onFinancialRecordsChange?.(); }} onRecordChange={persistTechWorkOrder} />;
   else if (moduleId === "access-policy") body = <IXIAccessPolicyApp context={context} object={object} onBack={back} onRecordChange={(record, changePayload, sourceContext) => change("access-policy", "ACCESS / POLICY UPDATE", "security", "authority-policy", "authorityPolicy", record, changePayload, sourceContext || context)} />;
   else if (active) body = <div className="tx-module"><button className="tx-back" onClick={back}>‹ TRAN$ACT</button><div className="tx-module-title"><span>{active.group.toUpperCase()}</span><strong>{active.label}</strong></div><div className="tx-module-placeholder"><b>{active.label}</b><span>MODULE CHASSIS READY</span><small>{active.documentType} · {context.primary.label}</small></div></div>;
   else body = <>{context.activeWorkOrder ? <button className="tx-open-work" onClick={() => { setWorkOrderSnapshot(context.activeWorkOrder); open({ id: "work-order", label: "CONTINUE WORK", group: "work", documentType: "work-order" }); }}><span>OPEN WORK</span><strong>{clean(context.activeWorkOrder.workOrderNumber || context.activeWorkOrder.number || context.activeWorkOrder.id) || "WORK ORDER"}</strong><small>{clean(context.activeWorkOrder.title || context.activeWorkOrder.description) || "IN PROGRESS"}</small><b>CONTINUE ›</b></button> : null}<div className="tx-label">CREATE / OPEN</div><div className="tx-grid">{modules.map(item => <button key={item.id} onClick={() => open(item)}><span>{item.group.toUpperCase()}</span><strong>{item.label}</strong><small>{item.documentType}</small></button>)}</div></>;
