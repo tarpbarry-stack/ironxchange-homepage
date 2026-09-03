@@ -6,6 +6,9 @@ import IXIFacePreview
 import IXIFaceReferenceOverlay
   from "./IXIFaceReferenceOverlay";
 
+import IXIFaceLabScaledCard
+  from "./IXIFaceLabScaledCard";
+
 import IXIAosCardCatalogBench
   from "../ixi-aos-card-library/IXIAosCardCatalogBench";
 
@@ -56,11 +59,6 @@ export default function IXIFaceStudio() {
   setStudioMode
 ] = useState("faces");
 
-  const [
-  previewSize,
-  setPreviewSize
-] = useState("both");
-  
   const [
   referenceOverlayVisible,
   setReferenceOverlayVisible
@@ -290,48 +288,6 @@ if (
       <button
         type="button"
         className={
-          previewSize === "both"
-            ? "active"
-            : ""
-        }
-        onClick={() =>
-          setPreviewSize("both")
-        }
-      >
-        BOTH
-      </button>
-
-      <button
-        type="button"
-        className={
-          previewSize === "compact"
-            ? "active"
-            : ""
-        }
-        onClick={() =>
-          setPreviewSize("compact")
-        }
-      >
-        COMPACT
-      </button>
-
-      <button
-        type="button"
-        className={
-          previewSize === "tall"
-            ? "active"
-            : ""
-        }
-        onClick={() =>
-          setPreviewSize("tall")
-        }
-      >
-        TALL
-      </button>
-
-      <button
-        type="button"
-        className={
           referenceOverlayVisible
             ? "active"
             : ""
@@ -348,68 +304,27 @@ if (
   </div>
 
   <div className="preview-stage">
-    <div
-      className={[
-        "preview-shells",
+    <div className="preview-shells">
+      <IXIFaceLabScaledCard
+        surfaceLabel="Face Lab Faces"
+      >
+        <div className="preview-shell">
+          <IXIFacePreview
+            face={selectedFace}
+            previewSize="tall"
+            onCycleFace={
+              cycleSelectedFace
+            }
+          />
 
-        previewSize === "both"
-          ? "show-both"
-          : "show-single"
-      ]
-        .filter(Boolean)
-        .join(" ")}
-    >
-      {previewSize === "both" ||
-      previewSize === "compact" ? (
-        <div className="preview-unit">
-          <div className="preview-unit-label">
-            COMPACT · 298 × 391
-          </div>
-
-          <div className="preview-shell">
-            <IXIFacePreview
-              face={selectedFace}
-              previewSize="compact"
-              onCycleFace={
-                cycleSelectedFace
-              }
-            />
-
-            {referenceOverlayVisible ? (
-              <IXIFaceReferenceOverlay
-                previewSize="compact"
-                railHeight={19}
-              />
-            ) : null}
-          </div>
-        </div>
-      ) : null}
-
-      {previewSize === "both" ||
-      previewSize === "tall" ? (
-        <div className="preview-unit">
-          <div className="preview-unit-label">
-            TALL · 298 × 470
-          </div>
-
-          <div className="preview-shell">
-            <IXIFacePreview
-              face={selectedFace}
+          {referenceOverlayVisible ? (
+            <IXIFaceReferenceOverlay
               previewSize="tall"
-              onCycleFace={
-                cycleSelectedFace
-              }
+              railHeight={19}
             />
-
-            {referenceOverlayVisible ? (
-              <IXIFaceReferenceOverlay
-                previewSize="tall"
-                railHeight={19}
-              />
-            ) : null}
-          </div>
+          ) : null}
         </div>
-      ) : null}
+      </IXIFaceLabScaledCard>
     </div>
   </div>
 </section>
@@ -567,42 +482,12 @@ if (
   overflow: auto;
 }
 
-.preview-shells.show-single {
-  justify-content: center;
-}
-
-.preview-unit {
-  flex: 0 0 auto;
-
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-
-  gap: 10px;
-}
-
-.preview-unit-label {
-  color: rgba(255,255,255,.34);
-
-  font-size: 7px;
-  font-weight: 950;
-  letter-spacing: .58px;
-
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-
-
-
-
-        
-
 .preview-shell{
  position: relative;
 
 width: 298px;
-  min-height: 0;
-  height: auto;
+  min-height: 470px;
+  height: 470px;
   
   display:flex;
   align-items:flex-start;

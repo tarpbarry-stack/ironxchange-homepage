@@ -461,12 +461,6 @@ export default function IXIAosCardCatalogBench({
 
 
         <div className="card-stage">
-
-          <div className="native-label">
-            NATIVE CARD ·
-            298 × 471
-          </div>
-
           <IXIAosCardCatalogPreview
             template={
               selectedTemplate
@@ -999,7 +993,7 @@ export default function IXIAosCardCatalogBench({
 
         .card-stage {
           min-height:
-            560px;
+            760px;
 
           display: flex;
           flex-direction:
@@ -1016,26 +1010,6 @@ export default function IXIAosCardCatalogBench({
 
           padding:
             28px;
-        }
-
-
-        .native-label {
-          color:
-            rgba(
-              255,
-              255,
-              255,
-              .28
-            );
-
-          font-size:
-            7px;
-
-          font-weight:
-            950;
-
-          letter-spacing:
-            .08em;
         }
 
 

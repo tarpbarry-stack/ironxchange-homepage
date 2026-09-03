@@ -113,3 +113,58 @@ test("mobile lab stays frozen while AOS and Theater join the site-wide control",
     /transform: scale\(\.60\)/u
   );
 });
+
+test("Face Lab uses the shared V12 scale engine around the protected native datum", () => {
+  const scaledPreview = read(
+    "components/ixi-face-studio/IXIFaceLabScaledCard.jsx"
+  );
+
+  assert.match(
+    scaledPreview,
+    /IXICardScaleControl/u
+  );
+  assert.match(
+    scaledPreview,
+    /IXIScaledCardShell/u
+  );
+  assert.match(
+    scaledPreview,
+    /readSitewideCardScaleMode/u
+  );
+  assert.match(
+    scaledPreview,
+    /writeSitewideCardScaleMode/u
+  );
+  assert.match(
+    scaledPreview,
+    /FACE_LAB_SHELL_WIDTH = 300/u
+  );
+  assert.match(
+    scaledPreview,
+    /FACE_LAB_SHELL_HEIGHT = 475/u
+  );
+  assert.match(
+    scaledPreview,
+    /FACE_LAB_DATUM_WIDTH = 298/u
+  );
+  assert.match(
+    scaledPreview,
+    /FACE_LAB_DATUM_HEIGHT = 471/u
+  );
+
+  const consumers = [
+    "components/ixi-face-studio/IXIFaceStudio.jsx",
+    "components/ixi-face-studio/IXITransactFaceLabFrame.jsx",
+    "components/ixi-aos-card-library/IXIAosCardCatalogPreview.jsx",
+    "pages/facelab/location-f3-owned.js",
+    "pages/facelab/location-f3-leased.js"
+  ];
+
+  for (const path of consumers) {
+    assert.match(
+      read(path),
+      /IXIFaceLabScaledCard/u,
+      `${path} must use the shared Face Lab scale wrapper`
+    );
+  }
+});

@@ -4,6 +4,7 @@ import Link from "next/link";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import IXIAosLocationFace3OwnedV12 from "../../components/ixi-aos/cards/location/IXIAosLocationFace3OwnedV12";
+import IXIFaceLabScaledCard from "../../components/ixi-face-studio/IXIFaceLabScaledCard";
 
 const SAMPLE_OBJECT = Object.freeze({
   objectId: "facelab-location-f3-owned",
@@ -99,8 +100,9 @@ export default function LocationF3OwnedFaceLabPage() {
           <nav><Link href="/facelab/location-f3-leased">OPEN LEASED</Link><Link href="/facelab">BACK TO FACE LAB</Link></nav>
         </div>
         <section className="stage">
-          <div className="native-label">NATIVE CARD · 298 × 471</div>
-          <IXIAosLocationFace3OwnedV12 object={SAMPLE_OBJECT} ixiState={{}} financialSnapshot={SAMPLE_FINANCIAL} runtimeData={SAMPLE_FINANCIAL} skinId="v12" onIxiStateChange={() => {}} onSaveObject={async () => {}} onAddObject={() => {}} onOpenTransact={() => {}} onRecall={() => {}} onBoard={() => {}} onReturn={() => {}} />
+          <IXIFaceLabScaledCard surfaceLabel="Face Lab Location F3">
+            <IXIAosLocationFace3OwnedV12 object={SAMPLE_OBJECT} ixiState={{}} financialSnapshot={SAMPLE_FINANCIAL} runtimeData={SAMPLE_FINANCIAL} skinId="v12" onIxiStateChange={() => {}} onSaveObject={async () => {}} onAddObject={() => {}} onOpenTransact={() => {}} onRecall={() => {}} onBoard={() => {}} onReturn={() => {}} />
+          </IXIFaceLabScaledCard>
         </section>
       </main>
       <Footer />
@@ -109,7 +111,7 @@ export default function LocationF3OwnedFaceLabPage() {
         .toolbar{min-height:52px;display:flex;align-items:center;justify-content:space-between;gap:18px;padding:8px 14px;border:1px solid rgba(255,255,255,.08);border-radius:10px;background:#121212}
         .toolbar div{display:flex;flex-direction:column;gap:4px}.toolbar span{color:#ffc400;font-size:8px;font-weight:950;letter-spacing:.08em}.toolbar strong{color:#eee;font-size:11px;font-weight:950}
         .toolbar nav{display:flex;gap:8px}.toolbar :global(a){height:28px;display:inline-flex;align-items:center;padding:0 11px;border:1px solid rgba(255,196,0,.28);border-radius:5px;background:rgba(255,196,0,.07);color:#ffc400;font-size:7px;font-weight:950;text-decoration:none}
-        .stage{min-height:650px;display:flex;flex-direction:column;align-items:center;gap:12px;padding:42px 20px 80px}.native-label{color:rgba(255,255,255,.34);font-size:7px;font-weight:950;letter-spacing:.08em}
+        .stage{min-height:650px;display:flex;flex-direction:column;align-items:center;gap:12px;padding:42px 20px 80px}
       `}</style>
     </>
   );

@@ -4,6 +4,7 @@ import Link from "next/link";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import IXIAosLocationFace3LeasedV12 from "../../components/ixi-aos/cards/location/IXIAosLocationFace3LeasedV12";
+import IXIFaceLabScaledCard from "../../components/ixi-face-studio/IXIFaceLabScaledCard";
 
 const SAMPLE_OBJECT = Object.freeze({
   objectId: "facelab-location-f3-leased",
@@ -108,21 +109,22 @@ export default function LocationF3LeasedFaceLabPage() {
         </div>
 
         <section className="preview-stage">
-          <div className="native-label">NATIVE CARD · 298 × 471</div>
-          <IXIAosLocationFace3LeasedV12
-            object={SAMPLE_OBJECT}
-            ixiState={{}}
-            financialSnapshot={SAMPLE_FINANCIAL}
-            runtimeData={SAMPLE_FINANCIAL}
-            skinId="v12"
-            onIxiStateChange={() => {}}
-            onSaveObject={async () => {}}
-            onAddObject={() => {}}
-            onOpenTransact={() => {}}
-            onRecall={() => {}}
-            onBoard={() => {}}
-            onReturn={() => {}}
-          />
+          <IXIFaceLabScaledCard surfaceLabel="Face Lab Location F3">
+            <IXIAosLocationFace3LeasedV12
+              object={SAMPLE_OBJECT}
+              ixiState={{}}
+              financialSnapshot={SAMPLE_FINANCIAL}
+              runtimeData={SAMPLE_FINANCIAL}
+              skinId="v12"
+              onIxiStateChange={() => {}}
+              onSaveObject={async () => {}}
+              onAddObject={() => {}}
+              onOpenTransact={() => {}}
+              onRecall={() => {}}
+              onBoard={() => {}}
+              onReturn={() => {}}
+            />
+          </IXIFaceLabScaledCard>
         </section>
       </main>
 
@@ -186,12 +188,6 @@ export default function LocationF3LeasedFaceLabPage() {
           align-items: center;
           gap: 12px;
           padding: 42px 20px 80px;
-        }
-        .native-label {
-          color: rgba(255,255,255,.34);
-          font-size: 7px;
-          font-weight: 950;
-          letter-spacing: .08em;
         }
       `}</style>
     </>

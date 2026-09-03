@@ -3,6 +3,9 @@ import Head from "next/head";
 import Navbar from "../Navbar";
 import Footer from "../Footer";
 
+import IXIFaceLabScaledCard
+  from "./IXIFaceLabScaledCard";
+
 export default function IXITransactFaceLabFrame({
   title = "TRAN$ACT MODULE",
   route = "",
@@ -26,13 +29,11 @@ export default function IXITransactFaceLabFrame({
         </div>
 
         <div className="lab-stage">
-          <div className="native-label">
-            NATIVE CARD · 298 × 471 · V13 · SCROLLABLE VIEWPORT
-          </div>
-
-          <div className="native-card">
+          <IXIFaceLabScaledCard
+            surfaceLabel="Face Lab TRAN$ACT"
+          >
             {children}
-          </div>
+          </IXIFaceLabScaledCard>
         </div>
       </main>
 
@@ -85,26 +86,6 @@ export default function IXITransactFaceLabFrame({
           padding: 28px;
         }
 
-        .native-label {
-          margin-bottom: 10px;
-          color: #777;
-          font-size: 8px;
-          font-weight: 900;
-          letter-spacing: .08em;
-        }
-
-        .native-card {
-          width: 298px;
-          height: 471px;
-          overflow-y: auto;
-          overflow-x: hidden;
-          border: 1px solid rgba(255,196,0,.25);
-          border-radius: 10px;
-          background: #050706;
-          box-shadow: 0 22px 54px rgba(0,0,0,.58);
-          scrollbar-width: thin;
-          scrollbar-color: #6f5700 #111;
-        }
       `}</style>
     </>
   );
