@@ -1,0 +1,52 @@
+name: Wire IXI Ticket agent worker
+
+on:
+  push:
+    branches:
+      - ticket/commercial-agent-bridge-v1
+    paths:
+      - .github/workflows/ticket-agent-worker-wire.yml
+
+permissions:
+  contents: write
+
+jobs:
+  wire-and-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ticket/commercial-agent-bridge-v1
+          fetch-depth: 0
+
+      - name: Wire real worker launch
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('lib/ixi-tickets/ixiTicketClient.js')
+          s=p.read_text()
+          old='const response = await fetch("/api/ixi-agent/dispatch", {'
+          new='const response = await fetch("/api/ixi-agent/worker/launch", {'
+          if old not in s:
+              raise SystemExit('worker launch marker not found')
+          s=s.replace(old,new,1)
+          p.write_text(s)
+          PY
+          grep -q '/api/ixi-agent/worker/launch' lib/ixi-tickets/ixiTicketClient.js
+          grep -q 'launchTicketWorker' pages/api/ixi-agent/worker/launch.js
+          grep -q 'createWorkerResponse' lib/ixi-agent/ixiAgentOpenAI.js
+
+      - name: Build
+        run: |
+          npm install
+          npm run build
+
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add lib/ixi-tickets/ixiTicketClient.js
+          git diff --cached --quiet && exit 0
+          git commit -m "Launch real worker from Ticket dispatch"
+          git push origin HEAD:ticket/commercial-agent-bridge-v1
