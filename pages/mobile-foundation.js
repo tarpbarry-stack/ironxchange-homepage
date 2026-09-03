@@ -9,12 +9,15 @@ import {
 } from "../lib/ixi-mobile/IXIMobileRuntime.mjs";
 
 const TARGET_PHONE_WIDTHS = [320, 360, 375, 390, 412, 430];
+const FIRST_MACHINE_FACE = 1;
+const LAST_MACHINE_FACE = 4;
 
 export default function MobileFoundationPage() {
   const [viewportWidth, setViewportWidth] = useState(390);
   const [listing, setListing] = useState(null);
   const [status, setStatus] = useState("loading");
   const [error, setError] = useState("");
+  const [machineFace, setMachineFace] = useState(FIRST_MACHINE_FACE);
 
   useEffect(() => {
     function syncViewport() {
@@ -81,10 +84,18 @@ export default function MobileFoundationPage() {
     [viewportWidth]
   );
 
+  function cycleProductionMachineFace() {
+    setMachineFace(current =>
+      current >= LAST_MACHINE_FACE
+        ? FIRST_MACHINE_FACE
+        : current + 1
+    );
+  }
+
   return (
     <>
       <Head>
-        <title>IXI Mobile Foundation Certification</title>
+        <title>IXI Mobile Card Face Certification</title>
         <meta
           name="viewport"
           content="width=device-width, initial-scale=1, viewport-fit=cover"
@@ -94,13 +105,13 @@ export default function MobileFoundationPage() {
       <main className="mobile-foundation-shell">
         <header className="certification-header">
           <div>
-            <strong>IXI MOBILE FOUNDATION</strong>
-            <span>TRANCHE 1 · ONE REAL PRODUCTION CARD</span>
+            <strong>IXI MOBILE · CARD FACES</strong>
+            <span>TRANCHE 2 · PRODUCTION FACE CYCLE ONLY</span>
           </div>
           <div className="runtime-readout" aria-label="Mobile runtime status">
             <span>{viewportMode.toUpperCase()}</span>
             <span>{Math.round(viewportWidth)}px</span>
-            <span>{metrics.scale.toFixed(3)}×</span>
+            <span>{metrics.scale.toFixed(3)}× · F{machineFace}</span>
           </div>
         </header>
 
@@ -143,6 +154,8 @@ export default function MobileFoundationPage() {
                   from="browse"
                   showSave={false}
                   suppressFamilyLog
+                  machineFace={machineFace}
+                  onCycleMachineFace={cycleProductionMachineFace}
                 />
               </div>
             </div>
