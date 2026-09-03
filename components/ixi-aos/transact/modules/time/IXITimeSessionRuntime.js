@@ -63,7 +63,7 @@ export function formatIXITimeDuration(ms = 0) {
   return `${h}:${m}:${s}`;
 }
 
-export function startIXITimeSession({ context = {}, workOrder = {}, workType = "", description = "" } = {}) {
+export function startIXITimeSession({ context = {}, workOrder = {}, workType = "", description = "", write = true, at = Date.now() } = {}) {
   const store = readStore();
   const key = getIXITimeEmployeeKey(context);
   const existing = store[key];
@@ -79,7 +79,7 @@ export function startIXITimeSession({ context = {}, workOrder = {}, workType = "
     throw error;
   }
 
-  const startedAt = nowIso();
+  const startedAt = new Date(at).toISOString();
   const sameTarget = existing && clean(existing.targetKey) === targetKey;
   const session = sameTarget
     ? {
@@ -119,18 +119,20 @@ export function startIXITimeSession({ context = {}, workOrder = {}, workType = "
         updatedAt: startedAt
       };
 
-  store[key] = session;
-  writeStore(store);
+  if (write) {
+    store[key] = session;
+    writeStore(store);
+  }
   return session;
 }
 
-export function pauseIXITimeSession(context = {}) {
+export function pauseIXITimeSession(context = {}, { write = true, at = Date.now(), session = null } = {}) {
   const store = readStore();
   const key = getIXITimeEmployeeKey(context);
-  const current = store[key];
+  const current = session || store[key];
   if (!current || current.status !== "running") return current || null;
-  const pausedAt = nowIso();
-  const accumulatedMs = getIXITimeSessionElapsedMs(current, Date.now());
+  const pausedAt = new Date(at).toISOString();
+  const accumulatedMs = getIXITimeSessionElapsedMs(current, at);
   const next = {
     ...current,
     status: "paused",
@@ -140,20 +142,24 @@ export function pauseIXITimeSession(context = {}) {
     pauseCount: Number(current.pauseCount || 0) + 1,
     updatedAt: pausedAt
   };
-  store[key] = next;
-  writeStore(store);
+  if (write) {
+    store[key] = next;
+    writeStore(store);
+  }
   return next;
 }
 
-export function resumeIXITimeSession(context = {}) {
+export function resumeIXITimeSession(context = {}, { write = true, at = Date.now(), session = null } = {}) {
   const store = readStore();
   const key = getIXITimeEmployeeKey(context);
-  const current = store[key];
+  const current = session || store[key];
   if (!current || current.status !== "paused") return current || null;
-  const resumedAt = nowIso();
+  const resumedAt = new Date(at).toISOString();
   const next = { ...current, status: "running", resumedAt, lastStartedAt: resumedAt, updatedAt: resumedAt };
-  store[key] = next;
-  writeStore(store);
+  if (write) {
+    store[key] = next;
+    writeStore(store);
+  }
   return next;
 }
 
@@ -173,13 +179,13 @@ export function markIXITimeSessionRecorded(context = {}, recordedThroughMs = nul
   return next;
 }
 
-export function stopIXITimeSession(context = {}, { clear = false } = {}) {
+export function stopIXITimeSession(context = {}, { clear = false, write = true, at = Date.now(), session = null } = {}) {
   const store = readStore();
   const key = getIXITimeEmployeeKey(context);
-  const current = store[key];
+  const current = session || store[key];
   if (!current) return null;
-  const endedAt = nowIso();
-  const accumulatedMs = getIXITimeSessionElapsedMs(current);
+  const endedAt = new Date(at).toISOString();
+  const accumulatedMs = getIXITimeSessionElapsedMs(current, at);
   const stopped = {
     ...current,
     status: "stopped",
@@ -188,9 +194,19 @@ export function stopIXITimeSession(context = {}, { clear = false } = {}) {
     accumulatedMs,
     updatedAt: endedAt
   };
-  if (clear) delete store[key]; else store[key] = stopped;
-  writeStore(store);
+  if (write) {
+    if (clear) delete store[key]; else store[key] = stopped;
+    writeStore(store);
+  }
   return stopped;
+}
+
+export function replaceIXITimeSession(context = {}, session = null) {
+  const store = readStore();
+  const key = getIXITimeEmployeeKey(context);
+  if (session) store[key] = session; else delete store[key];
+  writeStore(store);
+  return session;
 }
 
 export function clearIXITimeSession(context = {}) {
@@ -223,6 +239,7 @@ export default {
   resumeIXITimeSession,
   markIXITimeSessionRecorded,
   stopIXITimeSession,
+  replaceIXITimeSession,
   clearIXITimeSession,
   subscribeIXITimeSession
 };

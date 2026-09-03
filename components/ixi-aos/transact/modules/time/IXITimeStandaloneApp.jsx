@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import { createIXITimeEntry } from "./IXITimeEntryCommands";
+import { createIXITimeEntry, createIXITimeSessionRecord, updateIXITimeSessionRecord } from "./IXITimeEntryCommands";
+import { getIXIFinancialDocument, loadIXIAosPassportFinancialDocuments } from "../../../financial-runtime/IXIAosFinancialReadClient";
 import {
   clearIXITimeSession,
   formatIXITimeDuration,
@@ -8,6 +9,7 @@ import {
   getIXITimeSessionElapsedMs,
   getIXITimeTargetKey,
   pauseIXITimeSession,
+  replaceIXITimeSession,
   resumeIXITimeSession,
   startIXITimeSession,
   stopIXITimeSession,
@@ -148,6 +150,7 @@ function calculateRangeHours(start, end) {
 export default function IXITimeStandaloneApp({
   context = {},
   object = {},
+  financialRecords = [],
   onBack = null,
   onRecordChange = null
 }) {
@@ -157,6 +160,8 @@ export default function IXITimeStandaloneApp({
   const [description, setDescription] = useState("");
   const [notes, setNotes] = useState("");
   const [session, setSession] = useState(null);
+  const [sessionRecord, setSessionRecord] = useState(null);
+  const [employeeFinancialRecords, setEmployeeFinancialRecords] = useState([]);
   const [tick, setTick] = useState(Date.now());
   const [finishedSession, setFinishedSession] = useState(null);
   const [savedRecord, setSavedRecord] = useState(null);
@@ -178,6 +183,39 @@ export default function IXITimeStandaloneApp({
   const originLabel = clean(primary.label) || "AOS OBJECT";
   const originType = clean(primary.objectType) || "AOS OBJECT";
   const targetKey = useMemo(() => getIXITimeTargetKey(context, {}), [context]);
+  const timeRecords = useMemo(() => [...financialRecords, ...employeeFinancialRecords].map(raw => {
+    const document = getIXIFinancialDocument(raw);
+    if (!document || clean(document.documentType).toLowerCase() !== "time-entry" || !document.timeEntry) return null;
+    const stored = raw?.record || raw;
+    return {
+      ...document.timeEntry,
+      identity: {
+        ...(document.timeEntry.identity || {}),
+        timeEntryId: clean(document.financialDocumentId),
+        number: clean(document.documentNumber) || clean(document.financialDocumentId)
+      },
+      financialBinding: {
+        financialDocumentId: clean(document.financialDocumentId),
+        revision: Number(stored?.server?.revision || stored?.revision || 1),
+        financialLineId: clean(document?.lines?.[0]?.financialLineId)
+      }
+    };
+  }).filter(Boolean).filter((record, index, list) => list.findIndex(item => item.financialBinding.financialDocumentId === record.financialBinding.financialDocumentId) === index), [financialRecords, employeeFinancialRecords]);
+
+  const actorKey = clean(actor.passportId || actor.employeeId || actor.userId || actor.id);
+  const serverSessionRecord = useMemo(() => timeRecords.find(record =>
+    clean(record.context?.employeePassportId || record.context?.employeeId) === actorKey &&
+    ["running", "paused", "stopped"].includes(clean(record.status).toLowerCase())
+  ) || null, [timeRecords, actorKey]);
+
+  useEffect(() => {
+    if (!clean(actor.passportId) || clean(actor.passportId) === clean(primary.passportId)) return;
+    const controller = new AbortController();
+    loadIXIAosPassportFinancialDocuments({ passportId: actor.passportId, signal: controller.signal })
+      .then(setEmployeeFinancialRecords)
+      .catch(error => { if (error?.name !== "AbortError") setError(clean(error?.message) || "EMPLOYEE TIMER HISTORY COULD NOT BE LOADED"); });
+    return () => controller.abort();
+  }, [actor.passportId, primary.passportId]);
 
   function refreshSession() {
     const active = getIXIActiveTimeSession(context);
@@ -196,6 +234,20 @@ export default function IXITimeStandaloneApp({
     };
   }, [targetKey]);
 
+  useEffect(() => {
+    if (!serverSessionRecord?.session) return;
+    setSessionRecord(serverSessionRecord);
+    setSession(serverSessionRecord.session);
+    replaceIXITimeSession(context, serverSessionRecord.session);
+    if (serverSessionRecord.status === "stopped") {
+      setFinishedSession(serverSessionRecord.session);
+      setDescription(clean(serverSessionRecord.time?.description));
+      setScreen("finish");
+    } else if (clean(serverSessionRecord.session.targetKey) === targetKey) {
+      setScreen("timer");
+    }
+  }, [serverSessionRecord?.financialBinding?.financialDocumentId, serverSessionRecord?.financialBinding?.revision, targetKey]);
+
   const activeElsewhere = Boolean(
     session &&
     ["running", "paused"].includes(session.status) &&
@@ -212,43 +264,123 @@ export default function IXITimeStandaloneApp({
       setError(t.required);
       return;
     }
+    if (!clean(primary.passportId || object.passportId)) {
+      setError("THIS OBJECT NEEDS AN IXI PASSPORT BEFORE TIME CAN START.");
+      return;
+    }
+    setSaving(true);
     try {
       const next = startIXITimeSession({
         context,
         workOrder: {},
         workType,
-        description
+        description,
+        write: false
       });
-      setSession(next);
+      const result = await createIXITimeSessionRecord({
+        object: {
+          passportId: clean(primary.passportId || object.passportId),
+          objectId: clean(primary.objectId || object.objectId || object.id),
+          objectType: clean(primary.objectType || object.objectType || object.type),
+          label: originLabel
+        },
+        context,
+        input: {
+          clientRequestId: next.sessionId,
+          employeePassportId: actor.passportId,
+          employeeId: actor.employeeId || actor.userId,
+          workType,
+          date: new Date(next.startedAt).toISOString().slice(0, 10),
+          startedAt: next.startedAt,
+          hours: 0,
+          description,
+          source: "standalone-live-timer",
+          session: next
+        },
+        metadata: { source: "ixi-transact-standalone-time", originatingTargetKey: targetKey }
+      });
+      setSessionRecord(result.draft);
+      setSession(replaceIXITimeSession(context, result.draft.session));
       setScreen("timer");
     } catch (err) {
-      setError(err?.code === "IXI_ACTIVE_TIMER_EXISTS" ? t.conflict : clean(err?.message));
+      const conflict = err?.code === "IXI_ACTIVE_TIMER_EXISTS" || /active timer|conflict/i.test(clean(err?.message));
+      setError(conflict ? t.conflict : clean(err?.message));
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function persistTransition(next, status, action) {
+    if (!sessionRecord) throw new Error("The active timer is not bound to IXI Financial.");
+    const hours = getIXITimeSessionElapsedMs(next) / 3600000;
+    const requestId = `${next.sessionId}:${action}:${next.updatedAt}`;
+    const result = await updateIXITimeSessionRecord({
+      record: sessionRecord,
+      input: {
+        clientRequestId: requestId,
+        status,
+        session: next,
+        time: {
+          hours,
+          startedAt: next.startedAt,
+          endedAt: next.endedAt || "",
+          description: clean(next.description) || description
+        }
+      },
+      metadata: { source: "ixi-transact-standalone-time", action }
+    });
+    setSessionRecord(result.draft);
+    setSession(replaceIXITimeSession(context, result.draft.session));
+    return result.draft;
+  }
+
+  async function transition(makeNext, status, action) {
+    if (saving) return;
+    setSaving(true);
+    setError("");
+    try {
+      const next = makeNext();
+      if (!next) return;
+      await persistTransition(next, status, action);
+    } catch (err) {
+      setError(clean(err?.message) || t.failed);
+    } finally {
+      setSaving(false);
     }
   }
 
   function pause() {
-    const next = pauseIXITimeSession(context);
-    setSession(next);
+    return transition(() => pauseIXITimeSession(context, { write: false, session }), "paused", "pause");
   }
 
   function resume() {
-    const next = resumeIXITimeSession(context);
-    setSession(next);
+    return transition(() => resumeIXITimeSession(context, { write: false, session }), "running", "resume");
   }
 
-  function finish() {
-    const stopped = stopIXITimeSession(context, { clear: false });
-    if (!stopped) return;
-    setFinishedSession(stopped);
-    setDescription(clean(stopped.description) || description);
-    setScreen("finish");
+  async function finish() {
+    if (saving) return;
+    setSaving(true);
+    setError("");
+    try {
+      const stopped = stopIXITimeSession(context, { clear: false, write: false, session });
+      if (!stopped) return;
+      await persistTransition(stopped, "stopped", "stop");
+      setFinishedSession(stopped);
+      setDescription(clean(stopped.description) || description);
+      setScreen("finish");
+    } catch (err) {
+      setError(clean(err?.message) || t.failed);
+    } finally {
+      setSaving(false);
+    }
   }
 
   function reset() {
-    clearIXITimeSession(context);
+    const active = getIXIActiveTimeSession(context);
     requestIdRef.current = clientId();
     setScreen("ready");
-    setSession(null);
+    setSession(active);
+    setSessionRecord(active ? serverSessionRecord : null);
     setFinishedSession(null);
     setSavedRecord(null);
     setDescription("");
@@ -296,8 +428,6 @@ export default function IXITimeStandaloneApp({
       const record = result?.draft || null;
       if (!record) throw new Error("Time persistence did not return a record.");
       setSavedRecord(record);
-      clearIXITimeSession(context);
-      setSession(null);
       setScreen("saved");
       await onRecordChange?.(record, {
         action: "time-save",
@@ -319,14 +449,47 @@ export default function IXITimeStandaloneApp({
     const sourceSession = finishedSession || session;
     const milliseconds = Number(sourceSession?.accumulatedMs || elapsedMs || 0);
     const hours = milliseconds / 3600000;
-    await persist({
-      mode: "live",
-      date: sourceSession?.startedAt ? new Date(sourceSession.startedAt).toISOString().slice(0, 10) : localDate(),
-      startTime: sourceSession?.startedAt ? new Date(sourceSession.startedAt).toTimeString().slice(0, 5) : "",
-      endTime: sourceSession?.endedAt ? new Date(sourceSession.endedAt).toTimeString().slice(0, 5) : new Date().toTimeString().slice(0, 5),
-      hours,
-      description
-    }, "standalone-live-timer");
+    if (!(hours > 0) || !sessionRecord) {
+      setError("A persisted timer with positive elapsed time is required.");
+      return;
+    }
+    setSaving(true);
+    setError("");
+    try {
+      const attachments = attachment ? [{ fileName: attachment.name, mimeType: attachment.type, size: attachment.size, status: "local-pending-upload" }] : [];
+      const result = await updateIXITimeSessionRecord({
+        record: sessionRecord,
+        input: {
+          clientRequestId: `${sourceSession.sessionId}:record:${sourceSession.endedAt}`,
+          status: "recorded",
+          session: sourceSession,
+          attachments,
+          time: {
+            mode: "live",
+            date: new Date(sourceSession.startedAt).toISOString().slice(0, 10),
+            startTime: new Date(sourceSession.startedAt).toTimeString().slice(0, 5),
+            endTime: new Date(sourceSession.endedAt).toTimeString().slice(0, 5),
+            startedAt: sourceSession.startedAt,
+            endedAt: sourceSession.endedAt,
+            hours,
+            description,
+            notes,
+            source: "standalone-live-timer"
+          }
+        },
+        metadata: { source: "ixi-transact-standalone-time", action: "record" }
+      });
+      setSavedRecord(result.draft);
+      clearIXITimeSession(context);
+      setSession(null);
+      setSessionRecord(null);
+      setScreen("saved");
+      await onRecordChange?.(result.draft, { action: "time-save", response: result.response, originatingObject: primary }, context);
+    } catch (err) {
+      setError(clean(err?.message) || t.failed);
+    } finally {
+      setSaving(false);
+    }
   }
 
   async function saveManual() {
@@ -356,7 +519,7 @@ export default function IXITimeStandaloneApp({
       <button className={current === "ready" ? "on" : ""} onClick={() => !session && setScreen("ready")}>▣<br/>{t.ready}</button>
       <button className={current === "timer" ? "on" : ""} onClick={() => session && clean(session.targetKey) === targetKey && setScreen("timer")}>◷<br/>{t.timer}</button>
       <button className={`finish ${current === "finish" ? "on" : ""}`} onClick={() => finishedSession && setScreen("finish")}>☑<br/>{t.finish}</button>
-      <button className={`history ${current === "saved" ? "on" : ""}`} onClick={() => savedRecord && setScreen("saved")}>▤<br/>{t.history}</button>
+      <button className={`history ${current === "saved" ? "on" : ""}`} onClick={() => (savedRecord || timeRecords.length) && setScreen("saved")}>▤<br/>{t.history}</button>
     </div>
   );
 
@@ -450,18 +613,18 @@ export default function IXITimeStandaloneApp({
         </>
       ) : null}
 
-      {screen === "saved" && savedRecord ? (
+      {screen === "saved" && (savedRecord || timeRecords.length) ? (
         <>
           <Header />
-          <div className="ts-saved"><div className="ts-check">✓</div><span>{t.saved}</span><strong>{clean(savedRecord.identity?.timeEntryId || savedRecord.identity?.clientRequestId) || "TIME RECORD"}</strong><b>{Number(savedRecord.time?.hours || 0).toFixed(2)} HRS</b></div>
+          {(() => { const shown = savedRecord || timeRecords[0]; return <><div className="ts-saved"><div className="ts-check">✓</div><span>{savedRecord ? t.saved : t.history}</span><strong>{clean(shown.identity?.number || shown.identity?.timeEntryId) || "TIME RECORD"}</strong><b>{Number(shown.time?.hours || 0).toFixed(2)} HRS</b></div>
           <div className="ts-record">
             <div><small>{t.origin}</small><b>{originLabel}</b></div>
             <div><small>{t.employee}</small><b>{employeeLabel}</b></div>
-            <div><small>{t.workType}</small><b>{clean(savedRecord.time?.workType).toUpperCase()}</b></div>
-            <div><small>{t.performed}</small><b>{clean(savedRecord.time?.description)}</b></div>
-            <div><small>{t.date}</small><b>{savedRecord.time?.date}</b></div>
+            <div><small>{t.workType}</small><b>{clean(shown.time?.workType).toUpperCase()}</b></div>
+            <div><small>{t.performed}</small><b>{clean(shown.time?.description)}</b></div>
+            <div><small>{t.date}</small><b>{shown.time?.date}</b></div>
           </div>
-          <button className="ts-start" onClick={() => onRecordChange?.(savedRecord, { action: "view-time-record" }, context)}>{t.view}</button>
+          <button className="ts-start" onClick={() => onRecordChange?.(shown, { action: "view-time-record" }, context)}>{t.view}</button></>; })()}
           <button className="ts-new" onClick={reset}>{t.newTime}</button>
           <Nav current="saved" />
         </>

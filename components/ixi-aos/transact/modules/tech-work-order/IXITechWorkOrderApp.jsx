@@ -616,6 +616,7 @@ export default function IXITechWorkOrderApp({
 
     const hours = milliseconds / 3600000;
     const input = {
+      clientRequestId: `${session.sessionId}:${action}:${Math.round(getIXITimeSessionElapsedMs(session))}`,
       mode: "live",
       employeePassportId: context.actor?.passportId,
       employeeId: context.actor?.employeeId,
