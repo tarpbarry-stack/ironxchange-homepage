@@ -184,6 +184,18 @@ test("Face Lab scales both exact V12 native card families", () => {
     faceStudio,
     /preview-shell-operating[\s\S]*?height: 475px/u
   );
+  assert.match(
+    faceStudio,
+    /surfaceLabel="Face Lab Faces"/u
+  );
+  assert.equal(
+    (
+      faceStudio.match(
+        /showScaleControl=\{false\}/gu
+      ) || []
+    ).length,
+    2
+  );
 
   assert.match(
     facePreview,

@@ -33,7 +33,10 @@ function formatDimension(value) {
 export default function IXIFaceLabScaledCard({
   children,
   surfaceLabel = "Face Lab",
-  objectFamily = "private"
+  objectFamily = "private",
+  scaleMode: controlledScaleMode,
+  onScaleModeChange,
+  showScaleControl = true
 }) {
   const geometryFamily =
     objectFamily === "marketplace"
@@ -41,18 +44,26 @@ export default function IXIFaceLabScaledCard({
       : "private";
 
   const [
-    scaleMode,
-    setScaleMode
+    localScaleMode,
+    setLocalScaleMode
   ] = useState("xl");
 
+  const scaleMode =
+    controlledScaleMode ||
+    localScaleMode;
+
   useEffect(() => {
+    if (controlledScaleMode) {
+      return;
+    }
+
     const savedMode =
       readSitewideCardScaleMode();
 
     if (savedMode) {
-      setScaleMode(savedMode);
+      setLocalScaleMode(savedMode);
     }
-  }, []);
+  }, [controlledScaleMode]);
 
   const footprint =
     getIXIObjectFootprint({
@@ -67,11 +78,20 @@ export default function IXIFaceLabScaledCard({
     footprint.nativeHeight;
 
   function updateScaleMode(nextMode) {
-    setScaleMode(
+    const savedMode =
       writeSitewideCardScaleMode(
         nextMode
-      )
-    );
+      );
+
+    if (
+      typeof onScaleModeChange ===
+      "function"
+    ) {
+      onScaleModeChange(savedMode);
+      return;
+    }
+
+    setLocalScaleMode(savedMode);
   }
 
   return (
@@ -127,11 +147,13 @@ export default function IXIFaceLabScaledCard({
         </div>
       </IXIScaledCardShell>
 
-      <IXICardScaleControl
-        value={scaleMode}
-        onChange={updateScaleMode}
-        surfaceLabel={surfaceLabel}
-      />
+      {showScaleControl ? (
+        <IXICardScaleControl
+          value={scaleMode}
+          onChange={updateScaleMode}
+          surfaceLabel={surfaceLabel}
+        />
+      ) : null}
 
       <style jsx>{`
         .ixi-face-lab-scaled-preview {

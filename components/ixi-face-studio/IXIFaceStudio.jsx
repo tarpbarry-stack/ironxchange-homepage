@@ -1,4 +1,7 @@
-import { useState } from "react";
+import {
+  useEffect,
+  useState
+} from "react";
 
 import IXIFacePreview
   from "./IXIFacePreview";
@@ -14,6 +17,14 @@ import IXIAosCardCatalogBench
 
 import IXILocationObjectFace1
   from "../ixi-mos/location/IXILocationObjectFace1";
+
+import IXICardScaleControl
+  from "../ixi-chassis/IXICardScaleControl";
+
+import {
+  readSitewideCardScaleMode,
+  writeSitewideCardScaleMode
+} from "../ixi-chassis/IXIScaleEngine";
 
 
 const FACE_TREE = [
@@ -68,6 +79,28 @@ export default function IXIFaceStudio() {
   referenceOverlayVisible,
   setReferenceOverlayVisible
 ] = useState(true);
+
+  const [
+    faceScaleMode,
+    setFaceScaleMode
+  ] = useState("xl");
+
+  useEffect(() => {
+    const savedMode =
+      readSitewideCardScaleMode();
+
+    if (savedMode) {
+      setFaceScaleMode(savedMode);
+    }
+  }, []);
+
+  function updateFaceScaleMode(nextMode) {
+    setFaceScaleMode(
+      writeSitewideCardScaleMode(
+        nextMode
+      )
+    );
+  }
 
   function cycleSelectedFace() {
     const activeGroup =
@@ -367,6 +400,9 @@ if (
         <IXIFaceLabScaledCard
           objectFamily="marketplace"
           surfaceLabel="Face Lab Marketplace Faces"
+          scaleMode={faceScaleMode}
+          onScaleModeChange={updateFaceScaleMode}
+          showScaleControl={false}
         >
           <div className="preview-shell preview-shell-marketplace">
             <IXIFacePreview
@@ -392,6 +428,9 @@ if (
         <IXIFaceLabScaledCard
           objectFamily="private"
           surfaceLabel="Face Lab Operating Faces"
+          scaleMode={faceScaleMode}
+          onScaleModeChange={updateFaceScaleMode}
+          showScaleControl={false}
         >
           <div className="preview-shell preview-shell-operating">
             <IXIFacePreview
@@ -412,6 +451,12 @@ if (
         </IXIFaceLabScaledCard>
       ) : null}
     </div>
+
+    <IXICardScaleControl
+      value={faceScaleMode}
+      onChange={updateFaceScaleMode}
+      surfaceLabel="Face Lab Faces"
+    />
   </div>
 </section>
       <aside className="face-inspector">
