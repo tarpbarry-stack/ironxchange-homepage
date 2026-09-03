@@ -20,11 +20,32 @@ function sameOrigin(req) {
   return origin === expectedOrigin(req);
 }
 
+function readiness() {
+  const checks = {
+    openai: Boolean(clean(process.env.OPENAI_API_KEY)),
+    ticketMcpUrl: Boolean(clean(process.env.IXI_AGENT_MCP_PUBLIC_URL)),
+    ticketMcpAuth: Boolean(clean(process.env.IXI_AGENT_BRIDGE_SECRET)),
+    executionMcpUrl: Boolean(clean(process.env.IXI_EXECUTION_MCP_URL)),
+    executionMcpAuth: Boolean(clean(process.env.IXI_EXECUTION_MCP_TOKEN))
+  };
+  return {
+    ok: true,
+    service: "ixi-agent-worker",
+    contractVersion: "1.0.0",
+    readyForReviewResearch: checks.openai && checks.ticketMcpUrl && checks.ticketMcpAuth,
+    readyForExecution: checks.openai && checks.ticketMcpUrl && checks.ticketMcpAuth && checks.executionMcpUrl,
+    checks
+  };
+}
+
 export default async function handler(req, res) {
   res.setHeader("Cache-Control", "no-store, max-age=0");
+
+  if (req.method === "GET") return res.status(200).json(readiness());
+
   if (req.method !== "POST") {
-    res.setHeader("Allow", "POST");
-    return res.status(405).json({ ok: false, error: { code: "IXI_AGENT_METHOD_NOT_ALLOWED", message: "POST required." } });
+    res.setHeader("Allow", "GET, POST");
+    return res.status(405).json({ ok: false, error: { code: "IXI_AGENT_METHOD_NOT_ALLOWED", message: "GET or POST required." } });
   }
   if (!sameOrigin(req)) {
     return res.status(403).json({ ok: false, error: { code: "IXI_AGENT_ORIGIN_DENIED", message: "Cross-origin worker launch denied." } });
