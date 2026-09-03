@@ -1,32 +1,68 @@
 import {
   createIXIAosObjectFinancialDocument,
-  createIXIAosFinancialObjectReference
+  createIXIAosFinancialObjectReference,
 } from "../../../financial-runtime/IXIAosFinancialRuntimeAdapter";
 import {
   createIXIMaterialDraft,
-  validateIXIMaterial
+  validateIXIMaterial,
 } from "./IXIMaterialContract";
-import {
-  runIXIActionNoticeLifecycle
-} from "../../../../ixi-object-system/IXIActionNoticeEngine";
+import { runIXIActionNoticeLifecycle } from "../../../../ixi-object-system/IXIActionNoticeEngine";
 
-const clean = value => String(value ?? "").trim();
+const clean = (value) => String(value ?? "").trim();
+
+function stableIdentity(input = {}, commandId = "") {
+  const id = clean(commandId || input.clientRequestId);
+  if (!id) {
+    const error = new Error(
+      "Material usage requires a stable command identity.",
+    );
+    error.code = "IXI_MATERIAL_COMMAND_ID_REQUIRED";
+    throw error;
+  }
+  return id;
+}
 
 function pushUniqueReference(refs, reference) {
-  if (!reference) return;
-  const key = [
-    clean(reference.passportId),
-    clean(reference.externalId),
-    clean(reference.role),
-    clean(reference.label)
-  ].join("|");
-  if (refs.some(item => [
-    clean(item.passportId),
-    clean(item.externalId),
-    clean(item.role),
-    clean(item.label)
-  ].join("|") === key)) return;
-  refs.push(reference);
+  if (!reference?.passportId || !reference?.role) return;
+  const key = `${clean(reference.passportId)}|${clean(reference.role)}`;
+  if (
+    !refs.some(
+      (item) => `${clean(item.passportId)}|${clean(item.role)}` === key,
+    )
+  )
+    refs.push(reference);
+}
+
+function responseRecord(response = {}) {
+  return response?.data?.record || response?.record || {};
+}
+
+function canonicalize(draft, response) {
+  const stored = responseRecord(response);
+  const document =
+    stored?.financialDocument || response?.financialDocument || {};
+  const financialDocumentId = clean(document.financialDocumentId);
+  if (!financialDocumentId) {
+    const error = new Error(
+      "IXI Financial did not return a canonical Material identity.",
+    );
+    error.code = "IXI_MATERIAL_IDENTITY_MISSING";
+    throw error;
+  }
+  return {
+    ...(document.materialUsage || draft),
+    identity: {
+      ...(document.materialUsage?.identity || draft.identity),
+      clientRequestId: clean(draft.identity?.clientRequestId),
+      materialUsageId: financialDocumentId,
+      number: clean(document.documentNumber) || financialDocumentId,
+    },
+    financialBinding: {
+      financialDocumentId,
+      revision: Number(stored?.server?.revision || stored?.revision || 1),
+      financialLineId: clean(document?.lines?.[0]?.financialLineId),
+    },
+  };
 }
 
 export async function createIXIMaterialUsage({
@@ -39,141 +75,127 @@ export async function createIXIMaterialUsage({
   metadata = {},
   apiBaseUrl = "",
   headers = {},
-  signal
+  signal,
 } = {}) {
-  const draft = createIXIMaterialDraft({ context, workOrder, input });
+  const resolvedCommandId = stableIdentity(input, commandId);
+  const draft = createIXIMaterialDraft({
+    context,
+    workOrder,
+    input: { ...input, clientRequestId: resolvedCommandId },
+  });
   const validation = validateIXIMaterial(draft);
   if (!validation.valid) {
     const error = new Error("Material usage is incomplete");
     error.validation = validation;
     throw error;
   }
-
   const resolvedObject = {
     ...object,
     passportId: clean(object.passportId || draft.context.primaryPassportId),
     objectId: clean(object.objectId || draft.context.primaryObjectId),
     objectType: clean(object.objectType || draft.context.primaryObjectType),
-    label: clean(object.label || draft.context.primaryLabel)
+    label: clean(object.label || draft.context.primaryLabel),
   };
-  const resolvedCommandId = clean(commandId || input.clientRequestId || draft.identity.clientRequestId || `MAT-${Date.now()}`);
-  const resolvedIdempotencyKey = clean(idempotencyKey || `ixi-material:${resolvedCommandId}`);
-  const noticeObjectId = clean(
-    context.primary?.objectId ||
-    context.primary?.passportId ||
-    resolvedObject.objectId ||
-    resolvedObject.passportId
+  const references = [];
+  pushUniqueReference(
+    references,
+    createIXIAosFinancialObjectReference({
+      object: context.primary || resolvedObject,
+      role: "origin",
+    }),
   );
-
-  return runIXIActionNoticeLifecycle({
-    objectId: noticeObjectId,
-    commandId: resolvedCommandId,
-    source: "ixi-transact-material",
-    savingMessage: "RECORDING MATERIAL...",
-    successMessage: result => {
-      const id = clean(
-        result?.draft?.identity?.materialUsageId ||
-        result?.draft?.identity?.clientRequestId
-      );
-      return id ? `MATERIAL ${id} RECORDED` : "MATERIAL RECORDED";
-    },
-    errorMessage: "MATERIAL SAVE FAILED",
-    operation: async () => {
-      const additionalReferences = [];
-      pushUniqueReference(additionalReferences, createIXIAosFinancialObjectReference({ object: context.primary || resolvedObject, role: "origin" }));
-      pushUniqueReference(additionalReferences, createIXIAosFinancialObjectReference({ object: context.location || {}, role: "location" }));
-      pushUniqueReference(additionalReferences, createIXIAosFinancialObjectReference({ object: context.actor || {}, role: "employee" }));
-      pushUniqueReference(additionalReferences, createIXIAosFinancialObjectReference({ object: context.entity || {}, role: "entity" }));
-
-      if (clean(draft.context.workOrderId || draft.context.workOrderNumber)) {
-        pushUniqueReference(additionalReferences, {
-          role: draft.context.techWorkOrderId ? "tech-work-order" : "work-order",
-          label: draft.context.workOrderNumber,
-          objectType: draft.context.techWorkOrderId ? "technology-work-order" : "work-order",
-          externalId: draft.context.techWorkOrderId || draft.context.workOrderId || draft.context.workOrderNumber
-        });
-      }
-
-      if (clean(draft.material.purchaseOrderId || draft.material.purchaseOrderNumber)) {
-        pushUniqueReference(additionalReferences, {
-          role: "purchase-order",
-          label: draft.material.purchaseOrderNumber || draft.material.purchaseOrderId,
-          objectType: "purchase-order",
-          externalId: draft.material.purchaseOrderId || draft.material.purchaseOrderNumber
-        });
-      }
-
-      if (clean(draft.material.inventoryPassportId || draft.material.inventoryItemId)) {
-        pushUniqueReference(additionalReferences, {
-          role: "inventory-item",
-          label: draft.material.description,
-          objectType: "inventory-item",
-          passportId: draft.material.inventoryPassportId,
-          externalId: draft.material.inventoryItemId
-        });
-      }
-
-      const response = await createIXIAosObjectFinancialDocument({
-        object: resolvedObject,
-        documentType: "material-usage",
-        input: {
-          currency: draft.costAttribution.currency,
-          amount: draft.material.extendedCost,
-          description: draft.material.description,
-          status: "posted",
-          material: draft.material,
-          costAttribution: draft.costAttribution,
-          inventoryAdjustment: draft.inventoryAdjustment,
-          receivingConsumption: draft.receivingConsumption,
-          attachments: draft.attachments,
-          references: additionalReferences
-        },
-        additionalReferences,
+  pushUniqueReference(
+    references,
+    createIXIAosFinancialObjectReference({
+      object: context.location || {},
+      role: "location",
+    }),
+  );
+  pushUniqueReference(
+    references,
+    createIXIAosFinancialObjectReference({
+      object: context.actor || {},
+      role: "employee",
+    }),
+  );
+  pushUniqueReference(
+    references,
+    createIXIAosFinancialObjectReference({
+      object: context.entity || {},
+      role: "entity",
+    }),
+  );
+  if (
+    draft.context.employeePassportId &&
+    !references.some(
+      (ref) =>
+        ref.passportId === draft.context.employeePassportId &&
+        ref.role === "employee",
+    )
+  )
+    pushUniqueReference(references, {
+      passportId: draft.context.employeePassportId,
+      role: "employee",
+      label: draft.context.employeeLabel,
+      objectType: "employee",
+    });
+  if (draft.material.inventoryPassportId)
+    pushUniqueReference(references, {
+      passportId: draft.material.inventoryPassportId,
+      role: "inventory-item",
+      label: draft.material.description,
+      objectType: "inventory-item",
+    });
+  const sourceFinancialDocumentId = clean(draft.context.workOrderId);
+  const operation = () =>
+    createIXIAosObjectFinancialDocument({
+      object: resolvedObject,
+      documentType: "material-usage",
+      input: {
+        currency: draft.costAttribution.currency,
+        financialState: "incurred",
+        occurredAt: `${draft.material.dateUsed}T12:00:00.000Z`,
+        description: draft.material.description,
+        memo: draft.material.notes,
+        amount: draft.material.extendedCost,
+        sourceFinancialDocumentId,
+        materialUsage: draft,
+        attachments: draft.attachments,
+        references,
+      },
+      additionalReferences: references,
+      commandId: resolvedCommandId,
+      idempotencyKey: clean(
+        idempotencyKey || `ixi-material:${resolvedCommandId}`,
+      ),
+      metadata: {
+        ...metadata,
+        transactModule: "material",
+        materialSchema: draft.schema,
+        materialSource: draft.material.source,
+        economicEvent: false,
+        clientRequestId: resolvedCommandId,
+        workOrderId: sourceFinancialDocumentId,
+      },
+      apiBaseUrl,
+      headers,
+      signal,
+    });
+  const noticeObjectId = clean(
+    draft.context.primaryObjectId || draft.context.primaryPassportId,
+  );
+  const response = noticeObjectId
+    ? await runIXIActionNoticeLifecycle({
+        objectId: noticeObjectId,
         commandId: resolvedCommandId,
-        idempotencyKey: resolvedIdempotencyKey,
-        metadata: {
-          ...metadata,
-          transactModule: "material",
-          materialSchema: draft.schema,
-          materialSource: draft.material.source,
-          economicEvent: false,
-          originatingPassportId: draft.context.primaryPassportId,
-          originatingObjectId: draft.context.primaryObjectId,
-          originatingObjectType: draft.context.primaryObjectType,
-          originatingLabel: draft.context.primaryLabel,
-          workOrderId: draft.context.workOrderId,
-          techWorkOrderId: draft.context.techWorkOrderId,
-          workOrderNumber: draft.context.workOrderNumber,
-          purchaseOrderId: draft.material.purchaseOrderId,
-          purchaseOrderLineId: draft.material.purchaseOrderLineId,
-          inventoryAdjustmentRequired: Boolean(draft.inventoryAdjustment?.required),
-          inventoryMutationStatus: draft.inventoryAdjustment?.status || "not-required",
-          receivingConsumptionStatus: draft.receivingConsumption?.status || "not-required"
-        },
-        apiBaseUrl,
-        headers,
-        signal
-      });
-
-      const materialUsageId = clean(
-        response?.materialUsageId ||
-        response?.document?.documentId ||
-        response?.financialDocument?.documentId ||
-        draft.identity.materialUsageId ||
-        draft.identity.clientRequestId ||
-        resolvedCommandId
-      );
-
-      return {
-        draft: {
-          ...draft,
-          identity: { ...draft.identity, materialUsageId },
-          status: "posted"
-        },
-        response
-      };
-    }
-  });
+        source: "ixi-transact-material",
+        savingMessage: "RECORDING MATERIAL...",
+        successMessage: "MATERIAL RECORDED",
+        errorMessage: "MATERIAL SAVE FAILED",
+        operation,
+      })
+    : await operation();
+  return { draft: canonicalize(draft, response), response };
 }
 
 export default { createIXIMaterialUsage };
