@@ -9,13 +9,18 @@ export default function IXIAosFace1CardRuntime({
   object = {},
   onSaveObject = null,
   maxFields = null,
+  includeBusinessIdentifier = false,
+  allowAddFields = false,
   children
 }) {
-  const face1Object = buildFace1GenericEditObject(object, { maxFields });
+  const face1Object = buildFace1GenericEditObject(object, { maxFields, includeBusinessIdentifier });
+  if (allowAddFields) {
+    face1Object.metadata = { ...(face1Object.metadata || {}), face1AllowAddFields: true };
+  }
 
   const handleSave = async payload => {
     const editedObject = payload?.object || payload;
-    const restoredObject = restoreFace1GenericSave(object, editedObject);
+    const restoredObject = restoreFace1GenericSave(object, editedObject, { allowAddedDefinitions: allowAddFields });
     await onSaveObject?.({
       ...(payload && payload.object ? payload : {}),
       objectId: restoredObject?.objectId || restoredObject?.id,
@@ -30,9 +35,7 @@ export default function IXIAosFace1CardRuntime({
 
   return (
     <div className="ixi-v12-library-readable ixi-v12-face1-edit" style={{ width: 298, height: 471 }}>
-      {typeof children === "function"
-        ? children({ object: face1Object, onSaveObject: handleSave })
-        : children}
+      {typeof children === "function" ? children({ object: face1Object, onSaveObject: handleSave }) : children}
       <IXIAosV12LibraryReadability />
       <IXIAosV12Face1EditPatch />
     </div>
