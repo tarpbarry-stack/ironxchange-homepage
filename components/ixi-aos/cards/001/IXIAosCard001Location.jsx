@@ -1,5 +1,6 @@
 import IXIAosLocationOverviewCard from "../location/IXIAosLocationOverviewCard";
 import IXIAosV12CardPolish from "../../card-runtime/modules/IXIAosV12CardPolish";
+import IXIV12ReadabilityFoundation from "../../card-runtime/modules/IXIV12ReadabilityFoundation";
 import IXIAosDataContractCardAdapter from "../../card-runtime/IXIAosDataContractCardAdapter";
 import IXIAosCommercialEditorBridge from "../../card-runtime/modules/IXIAosCommercialEditorBridge";
 import {
@@ -73,21 +74,24 @@ export default function IXIAosCard001Location(props) {
             const [addressLineOne, addressLineTwo] = getAddressLines(object);
 
             return (
-              <div className="aos-card001-v12-identity-shell">
+              <div className="aos-card001-v12-identity-shell ixi-v12-readable-card">
                 <IXIAosLocationOverviewCard {...contractProps} object={object} variant="001" />
 
                 {ixiIdentity ? (
-                  <span className="aos-card001-ixi-identity" title={ixiIdentity}>
+                  <span className="aos-card001-ixi-identity ixi-v12-object-id" title={ixiIdentity}>
                     {ixiIdentity}
                   </span>
                 ) : null}
 
                 <div className="aos-card001-customer-identity" aria-label="Customer yard identity">
-                  <small>{customerIdLine}</small>
-                  <strong>{addressLineOne}</strong>
-                  {addressLineTwo ? <strong>{addressLineTwo}</strong> : null}
+                  <small className="ixi-v12-customer-identity-label">{customerIdLine}</small>
+                  <strong className="ixi-v12-customer-identity-value">{addressLineOne}</strong>
+                  {addressLineTwo ? (
+                    <strong className="ixi-v12-customer-identity-value">{addressLineTwo}</strong>
+                  ) : null}
                 </div>
 
+                <IXIV12ReadabilityFoundation />
                 <IXIAosV12CardPolish />
                 <style jsx global>{`
                   .aos-card001-v12-identity-shell {
@@ -102,11 +106,7 @@ export default function IXIAosCard001Location(props) {
                     z-index: 240;
                     max-width: 122px;
                     overflow: hidden;
-                    color: rgba(255,255,255,.42);
-                    font-size: 6px;
-                    font-weight: 950;
-                    line-height: 1;
-                    letter-spacing: .08em;
+                    color: rgba(255,255,255,.50);
                     text-overflow: ellipsis;
                     text-transform: uppercase;
                     white-space: nowrap;
@@ -116,8 +116,8 @@ export default function IXIAosCard001Location(props) {
                     top: 17px !important;
                   }
 
-                  /* Preserve the original V12 descriptor shell, outline and yellow diamond.
-                     Replace text only; never cover or repaint the shell. */
+                  /* Text replacement only. Preserve the original V12 descriptor shell,
+                     outline, yellow diamond, geometry and sizing exactly. */
                   .aos-card001-v12-identity-shell .gov-001 .gov-descriptor > div {
                     visibility: hidden !important;
                   }
@@ -139,31 +139,6 @@ export default function IXIAosCard001Location(props) {
                     background: transparent;
                     text-align: center;
                     pointer-events: none;
-                  }
-                  .aos-card001-customer-identity small {
-                    display: block;
-                    max-width: 94%;
-                    margin-bottom: 4px;
-                    overflow: hidden;
-                    color: #969d98;
-                    font-size: 6px;
-                    font-weight: 900;
-                    line-height: 1;
-                    text-overflow: ellipsis;
-                    text-transform: uppercase;
-                    white-space: nowrap;
-                  }
-                  .aos-card001-customer-identity strong {
-                    display: block;
-                    max-width: 94%;
-                    overflow: hidden;
-                    color: #eef1ef;
-                    font-size: 8px;
-                    font-weight: 900;
-                    line-height: 1.18;
-                    text-overflow: ellipsis;
-                    text-transform: uppercase;
-                    white-space: nowrap;
                   }
                 `}</style>
               </div>
