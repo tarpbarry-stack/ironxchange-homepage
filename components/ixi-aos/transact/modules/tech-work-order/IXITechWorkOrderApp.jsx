@@ -4,6 +4,7 @@ import {
   createIXITechWorkOrderDraft,
   normalizeIXITechWorkOrder
 } from "./IXITechWorkOrderContract";
+import { createIXITechWorkOrder } from "./IXITechWorkOrderCommands";
 import {
   applyIXITechWorkOrderAction,
   getIXITechWorkOrderActuals
@@ -310,6 +311,10 @@ export default function IXITechWorkOrderApp({
   }
 
   useEffect(() => {
+    setRecord(initialTechWorkOrder ? normalizeIXITechWorkOrder(initialTechWorkOrder) : null);
+  }, [initialTechWorkOrder]);
+
+  useEffect(() => {
     refreshTimer();
     const unsubscribe = subscribeIXITimeSession(refreshTimer);
     const interval = setInterval(() => setTimerTick(Date.now()), 1000);
@@ -332,21 +337,21 @@ export default function IXITechWorkOrderApp({
 
   async function commit(next, change = {}) {
     const normalized = normalizeIXITechWorkOrder(next);
-    await onRecordChange?.(normalized, change, context);
-    setRecord(normalized);
-    return normalized;
+    const persisted = await onRecordChange?.(normalized, change, context);
+    const canonical = normalizeIXITechWorkOrder(persisted || normalized);
+    setRecord(canonical);
+    return canonical;
   }
 
   async function create() {
     if (busy) return;
 
     const now = Date.now();
+    const commandId = globalThis.crypto?.randomUUID?.() || `techwo-create-${now}-${Math.random().toString(16).slice(2)}`;
     const resolvedDescription = clean(description) || "Technology work order";
     const draft = createIXITechWorkOrderDraft({
       context,
       input: {
-        techWorkOrderId: `TECHWO-${now}`,
-        number: `TECHWO-${String(now).slice(-6)}`,
         title: resolvedDescription.slice(0, 80),
         description: resolvedDescription,
         type,
@@ -369,16 +374,37 @@ export default function IXITechWorkOrderApp({
       note: resolvedDescription
     }];
 
-    setRecord(draft);
-    setTab("work");
-    setSubmodule("");
-    setCompletionOpen(false);
     setError("");
-    setNotice(`TECHWO ${draft.identity.number} CREATED`);
 
     setBusy(true);
     try {
-      await onCreate?.(draft, context);
+      const persisted = await createIXITechWorkOrder({
+        object: context.primary || {},
+        context,
+        input: {
+          title: draft.work.title,
+          description: draft.work.description,
+          type: draft.work.type,
+          priority: draft.work.priority,
+          impact: draft.work.impact,
+          environment: draft.technology.environment,
+          systemName: draft.technology.systemName,
+          version: draft.technology.version,
+          assignedTo: draft.people.assignedTo,
+          status: draft.work.status,
+          startedAt: draft.dates.startedAt,
+          activityProjection: draft.activityProjection
+        },
+        commandId,
+        idempotencyKey: commandId
+      });
+      const canonical = persisted.draft;
+      setRecord(canonical);
+      setTab("work");
+      setSubmodule("");
+      setCompletionOpen(false);
+      setNotice(`TECHWO ${canonical.identity.number} CREATED`);
+      await onCreate?.(canonical, context, persisted.response);
     } catch (err) {
       setError(clean(err?.message) || "TECHWO CREATE PERSISTENCE FAILED");
     } finally {
@@ -869,11 +895,11 @@ export default function IXITechWorkOrderApp({
                 <label>{t.rootCause}</label>
                 <textarea value={completionText} onChange={event => setCompletionText(event.target.value)} placeholder={t.resolutionPlaceholder} />
                 <button
-                  disabled={busy}
+                  disabled={busy || !clean(completionText)}
                   onClick={() => lifecycle("complete", {
                     disposition: "fully-functioning",
-                    resolution: clean(completionText) || "Technology work completed",
-                    workPerformed: clean(completionText) || "Technology work completed",
+                    resolution: clean(completionText),
+                    workPerformed: clean(completionText),
                     validation: "Completed by assigned technician",
                     finalImpact: "normal"
                   })}
