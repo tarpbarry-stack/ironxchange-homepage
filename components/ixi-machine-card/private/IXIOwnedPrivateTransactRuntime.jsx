@@ -39,6 +39,39 @@ function findActiveWorkOrder(records = []) {
   return null;
 }
 
+function findActiveTechWorkOrder(records = []) {
+  const ordered = [...records].sort((a, b) => {
+    const right = Date.parse(getIXIFinancialDocument(b)?.occurredAt || b?.server?.updatedAt || 0) || 0;
+    const left = Date.parse(getIXIFinancialDocument(a)?.occurredAt || a?.server?.updatedAt || 0) || 0;
+    return right - left;
+  });
+
+  for (const record of ordered) {
+    const document = getIXIFinancialDocument(record);
+    if (clean(document?.documentType).toLowerCase() !== "work-order") continue;
+    if (clean(document?.workOrderType).toLowerCase() !== "technology") continue;
+    const techWorkOrder = document?.techWorkOrder;
+    if (!techWorkOrder || typeof techWorkOrder !== "object") continue;
+    const status = clean(techWorkOrder?.work?.status).toLowerCase();
+    if (["complete", "completed", "closed", "canceled", "cancelled"].includes(status)) continue;
+    const financialDocumentId = clean(document?.financialDocumentId);
+    return {
+      ...techWorkOrder,
+      identity: {
+        ...(techWorkOrder.identity || {}),
+        techWorkOrderId: clean(techWorkOrder?.identity?.techWorkOrderId) || financialDocumentId,
+        workOrderId: clean(techWorkOrder?.identity?.workOrderId) || financialDocumentId,
+        number: clean(techWorkOrder?.identity?.number) || clean(document?.documentNumber) || financialDocumentId
+      },
+      financialBinding: {
+        financialDocumentId,
+        revision: Number(record?.server?.revision || record?.revision || 0)
+      }
+    };
+  }
+  return null;
+}
+
 function RuntimeState({ title, detail, onRetry, onClose }) {
   return (
     <div className="tx-runtime-state">
@@ -98,6 +131,7 @@ export default function IXIOwnedPrivateTransactRuntime({
   }, [refresh]);
 
   const activeWorkOrder = useMemo(() => findActiveWorkOrder(state.records), [state.records]);
+  const activeTechWorkOrder = useMemo(() => findActiveTechWorkOrder(state.records), [state.records]);
   const hydratedObject = useMemo(() => ({
     ...object,
     financialRecords: state.records,
@@ -123,6 +157,7 @@ export default function IXIOwnedPrivateTransactRuntime({
       actor={actor}
       entity={entity}
       activeWorkOrder={activeWorkOrder}
+      activeTechWorkOrder={activeTechWorkOrder}
       permissions={state.access?.permissions || []}
       financialRecords={state.records}
       onFinancialRecordsChange={() => refresh()}
