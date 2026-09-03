@@ -1,7 +1,6 @@
 import IXIAosGenericObjectLayout007 from "../generic/IXIAosGenericObjectLayout007";
 import IXIAosGenericCardRailShell from "../generic/IXIAosGenericCardRailShell";
 import IXIAosDataContractCardAdapter from "../../card-runtime/IXIAosDataContractCardAdapter";
-import IXIAosV12LibraryReadability from "../../card-runtime/modules/IXIAosV12LibraryReadability";
-import IXIAosV12Face1EditPatch from "../../card-runtime/modules/IXIAosV12Face1EditPatch";
+import IXIAosFace1CardRuntime from "../../card-runtime/modules/IXIAosFace1CardRuntime";
 import IXIAosCardHeaderIdentity from "../../card-runtime/modules/IXIAosCardHeaderIdentity";
-export default function IXIAosCard008Profile(props){return <IXIAosDataContractCardAdapter {...props}>{contractProps=><IXIAosCardHeaderIdentity object={contractProps.object} className="ixi-v12-library-readable ixi-v12-face1-edit"><IXIAosGenericCardRailShell {...contractProps} object={contractProps.object} face={1}><IXIAosGenericObjectLayout007 {...contractProps} object={contractProps.object}/></IXIAosGenericCardRailShell><IXIAosV12LibraryReadability/><IXIAosV12Face1EditPatch/></IXIAosCardHeaderIdentity>}</IXIAosDataContractCardAdapter>}
+export default function IXIAosCard008Profile(props){return <IXIAosDataContractCardAdapter {...props}>{contractProps=><IXIAosFace1CardRuntime cardNumber={8} object={contractProps.object} onSaveObject={contractProps.onSaveObject}>{face1=><IXIAosCardHeaderIdentity object={face1.object}><IXIAosGenericCardRailShell {...contractProps} object={face1.object} face={1}><IXIAosGenericObjectLayout007 {...contractProps} object={face1.object} onSaveObject={face1.onSaveObject}/></IXIAosGenericCardRailShell></IXIAosCardHeaderIdentity>}</IXIAosFace1CardRuntime>}</IXIAosDataContractCardAdapter>}
