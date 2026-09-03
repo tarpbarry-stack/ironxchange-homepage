@@ -1,17 +1,254 @@
-const clean = value => String(value ?? "").trim();
-const num = value => Number.isFinite(Number(value)) ? Number(value) : 0;
-const money = value => Math.round(num(value) * 100) / 100;
-const arr = value => Array.isArray(value) ? value : [];
+const clean = (value) => String(value ?? "").trim();
+const num = (value) => (Number.isFinite(Number(value)) ? Number(value) : 0);
+const money = (value) => Math.round(num(value) * 100) / 100;
+const arr = (value) => (Array.isArray(value) ? value : []);
 const now = () => new Date().toISOString();
-function actor(a={}) { return { actorId: clean(a.passportId || a.employeeId || a.userId || a.id), actorLabel: clean(a.displayName || a.name || a.label) }; }
-function event(type, a={}, extra={}) { return { eventId:`AP-${type.toUpperCase()}-${Date.now()}`, type, occurredAt:now(), ...actor(a), ...extra }; }
-export function createIXIPayableCase(payable={}, a={}) { const stamp=Date.now(); return { schema:"ixi-payables-case-v1", identity:{ payableCaseId:`AP-${stamp}`, number:`AP-${String(stamp).slice(-6)}` }, payable:{ billId:clean(payable.billId), billNumber:clean(payable.billNumber), vendorLabel:clean(payable.vendorLabel), originalAmount:money(payable.originalAmount), openBalance:money(payable.balance), dueDate:clean(payable.dueDate), currency:clean(payable.currency||"USD") }, control:{ ownerId:actor(a).actorId, ownerLabel:actor(a).actorLabel, hold:false, holdReason:"", escalated:false, priority:"normal", nextActionAt:"", nextAction:"" }, dispute:{ open:false, amount:0, reason:"", openedAt:"", resolvedAt:"", resolution:"" }, scheduledPayments:[], contacts:[], approvals:[], activity:[event("case-opened",a,{billId:clean(payable.billId)})], status:"open", audit:{createdAt:now(),updatedAt:now()} }; }
-export function logIXIPayablesContact(record={}, input={}, a={}) { const item=event("contact",a,{method:clean(input.method||"phone"),contactName:clean(input.contactName),notes:clean(input.notes)}); return {...record,contacts:[...arr(record.contacts),item],control:{...(record.control||{}),nextAction:clean(input.nextAction),nextActionAt:clean(input.nextActionAt)},activity:[...arr(record.activity),item],audit:{...(record.audit||{}),updatedAt:item.occurredAt}}; }
-export function setIXIPayablesHold(record={}, input={}, a={}) { const hold=Boolean(input.hold), item=event(hold?"hold-placed":"hold-released",a,{reason:clean(input.reason)}); return {...record,control:{...(record.control||{}),hold,holdReason:hold?clean(input.reason):""},status:hold?"hold":"open",activity:[...arr(record.activity),item],audit:{...(record.audit||{}),updatedAt:item.occurredAt}}; }
-export function openIXIPayablesDispute(record={}, input={}, a={}) { const amount=money(input.amount), openBalance=money(input.openBalance || record.payable?.openBalance); if (!(amount>0)) throw new Error("Disputed amount must be greater than zero."); if (openBalance>0 && amount>openBalance+0.005) throw new Error("Disputed amount cannot exceed the open A/P balance."); const item=event("dispute-opened",a,{amount,reason:clean(input.reason)}); return {...record,dispute:{open:true,amount,reason:clean(input.reason),openedAt:item.occurredAt,resolvedAt:"",resolution:""},status:"disputed",activity:[...arr(record.activity),item],audit:{...(record.audit||{}),updatedAt:item.occurredAt}}; }
-export function resolveIXIPayablesDispute(record={}, input={}, a={}) { const item=event("dispute-resolved",a,{resolution:clean(input.resolution)}); return {...record,dispute:{...(record.dispute||{}),open:false,resolvedAt:item.occurredAt,resolution:item.resolution},status:record.control?.hold?"hold":"open",activity:[...arr(record.activity),item],audit:{...(record.audit||{}),updatedAt:item.occurredAt}}; }
-export function scheduleIXIPayablesPayment(record={}, input={}, a={}) { const amount=money(input.amount), openBalance=money(input.openBalance || record.payable?.openBalance), alreadyScheduled=money(arr(record.scheduledPayments).filter(item=>item.status==="scheduled").reduce((sum,item)=>sum+num(item.amount),0)); if (!(amount>0)) throw new Error("Scheduled payment amount must be greater than zero."); if (openBalance>0 && alreadyScheduled+amount>openBalance+0.005) throw new Error("Scheduled payments cannot exceed the open A/P balance."); if (record.control?.hold) throw new Error("Payment is on hold. Release the hold before scheduling payment."); const item={scheduleId:`APS-${Date.now()}`,amount,date:clean(input.date),method:clean(input.method||"ach"),reference:clean(input.reference),status:"scheduled",createdAt:now(),...actor(a)}; const ev=event("payment-scheduled",a,{scheduleId:item.scheduleId,amount,date:item.date}); return {...record,payable:{...(record.payable||{}),openBalance:openBalance||record.payable?.openBalance},scheduledPayments:[...arr(record.scheduledPayments),item],activity:[...arr(record.activity),ev],audit:{...(record.audit||{}),updatedAt:ev.occurredAt}}; }
-export function markIXIPayablesSchedulePaid(record={}, scheduleId="", paymentId="", a={}) { let found=null; const scheduledPayments=arr(record.scheduledPayments).map(item=>{if(item.scheduleId!==scheduleId)return item;found=item;return{...item,status:"paid",paymentId:clean(paymentId),paidAt:now()};}); const ev=event("scheduled-payment-posted",a,{scheduleId,amount:num(found?.amount),paymentId:clean(paymentId)}); return {...record,scheduledPayments,activity:[...arr(record.activity),ev],audit:{...(record.audit||{}),updatedAt:ev.occurredAt}}; }
-export function setIXIPayablesEscalation(record={}, input={}, a={}) { const escalated=Boolean(input.escalated), ev=event(escalated?"escalated":"escalation-cleared",a,{reason:clean(input.reason)}); return {...record,control:{...(record.control||{}),escalated,priority:escalated?"high":record.control?.priority||"normal"},activity:[...arr(record.activity),ev],audit:{...(record.audit||{}),updatedAt:ev.occurredAt}}; }
-export function closeIXIPayableCase(record={}, a={}) { const ev=event("case-closed",a); return {...record,status:"paid",activity:[...arr(record.activity),ev],audit:{...(record.audit||{}),updatedAt:ev.occurredAt}}; }
-export default { createIXIPayableCase, logIXIPayablesContact, setIXIPayablesHold, openIXIPayablesDispute, resolveIXIPayablesDispute, scheduleIXIPayablesPayment, markIXIPayablesSchedulePaid, setIXIPayablesEscalation, closeIXIPayableCase };
+function actor(a = {}) {
+  return {
+    actorId: clean(a.passportId || a.employeeId || a.userId || a.id),
+    actorLabel: clean(a.displayName || a.name || a.label),
+  };
+}
+function event(type, a = {}, extra = {}) {
+  return {
+    eventId: `AP-${type.toUpperCase()}-${Date.now()}`,
+    type,
+    occurredAt: now(),
+    ...actor(a),
+    ...extra,
+  };
+}
+export function createIXIPayableCase(payable = {}, a = {}) {
+  const stamp = Date.now();
+  return {
+    schema: "ixi-payables-case-v1",
+    identity: {
+      payableCaseId: `AP-${stamp}`,
+      number: `AP-${String(stamp).slice(-6)}`,
+    },
+    payable: {
+      billId: clean(payable.billId),
+      billNumber: clean(payable.billNumber),
+      vendorLabel: clean(payable.vendorLabel),
+      originalAmount: money(payable.originalAmount),
+      openBalance: money(payable.balance),
+      dueDate: clean(payable.dueDate),
+      currency: clean(payable.currency || "USD"),
+    },
+    control: {
+      ownerId: actor(a).actorId,
+      ownerLabel: actor(a).actorLabel,
+      hold: false,
+      holdReason: "",
+      escalated: false,
+      priority: "normal",
+      nextActionAt: "",
+      nextAction: "",
+    },
+    dispute: {
+      open: false,
+      amount: 0,
+      reason: "",
+      openedAt: "",
+      resolvedAt: "",
+      resolution: "",
+    },
+    scheduledPayments: [],
+    contacts: [],
+    approvals: [],
+    activity: [event("case-opened", a, { billId: clean(payable.billId) })],
+    status: "open",
+    audit: { createdAt: now(), updatedAt: now() },
+  };
+}
+export function logIXIPayablesContact(record = {}, input = {}, a = {}) {
+  const item = event("contact", a, {
+    method: clean(input.method || "phone"),
+    contactName: clean(input.contactName),
+    notes: clean(input.notes),
+  });
+  return {
+    ...record,
+    contacts: [...arr(record.contacts), item],
+    control: {
+      ...(record.control || {}),
+      nextAction: clean(input.nextAction),
+      nextActionAt: clean(input.nextActionAt),
+    },
+    activity: [...arr(record.activity), item],
+    audit: { ...(record.audit || {}), updatedAt: item.occurredAt },
+  };
+}
+export function setIXIPayablesHold(record = {}, input = {}, a = {}) {
+  const hold = Boolean(input.hold),
+    reason = clean(input.reason);
+  if (!reason)
+    throw new Error(
+      hold ? "Hold reason is required." : "Release reason is required.",
+    );
+  const item = event(hold ? "hold-placed" : "hold-released", a, { reason });
+  return {
+    ...record,
+    control: {
+      ...(record.control || {}),
+      hold,
+      holdReason: hold ? reason : "",
+    },
+    status: hold ? "hold" : "open",
+    activity: [...arr(record.activity), item],
+    audit: { ...(record.audit || {}), updatedAt: item.occurredAt },
+  };
+}
+export function openIXIPayablesDispute(record = {}, input = {}, a = {}) {
+  const amount = money(input.amount),
+    openBalance = money(input.openBalance || record.payable?.openBalance),
+    reason = clean(input.reason);
+  if (!(amount > 0))
+    throw new Error("Disputed amount must be greater than zero.");
+  if (!reason) throw new Error("Dispute reason is required.");
+  if (openBalance > 0 && amount > openBalance + 0.005)
+    throw new Error("Disputed amount cannot exceed the open A/P balance.");
+  const item = event("dispute-opened", a, { amount, reason });
+  return {
+    ...record,
+    dispute: {
+      open: true,
+      amount,
+      reason,
+      openedAt: item.occurredAt,
+      resolvedAt: "",
+      resolution: "",
+    },
+    status: "disputed",
+    activity: [...arr(record.activity), item],
+    audit: { ...(record.audit || {}), updatedAt: item.occurredAt },
+  };
+}
+export function resolveIXIPayablesDispute(record = {}, input = {}, a = {}) {
+  const resolution = clean(input.resolution);
+  if (!resolution) throw new Error("Dispute resolution is required.");
+  const item = event("dispute-resolved", a, { resolution });
+  return {
+    ...record,
+    dispute: {
+      ...(record.dispute || {}),
+      open: false,
+      resolvedAt: item.occurredAt,
+      resolution: item.resolution,
+    },
+    status: record.control?.hold ? "hold" : "open",
+    activity: [...arr(record.activity), item],
+    audit: { ...(record.audit || {}), updatedAt: item.occurredAt },
+  };
+}
+export function scheduleIXIPayablesPayment(record = {}, input = {}, a = {}) {
+  const amount = money(input.amount),
+    openBalance = money(input.openBalance || record.payable?.openBalance),
+    alreadyScheduled = money(
+      arr(record.scheduledPayments)
+        .filter((item) => item.status === "scheduled")
+        .reduce((sum, item) => sum + num(item.amount), 0),
+    ),
+    date = clean(input.date),
+    reference = clean(input.reference);
+  if (!(amount > 0))
+    throw new Error("Scheduled payment amount must be greater than zero.");
+  if (!date) throw new Error("Scheduled payment date is required.");
+  if (!reference) throw new Error("Scheduled payment reference is required.");
+  if (openBalance > 0 && alreadyScheduled + amount > openBalance + 0.005)
+    throw new Error("Scheduled payments cannot exceed the open A/P balance.");
+  if (record.control?.hold)
+    throw new Error(
+      "Payment is on hold. Release the hold before scheduling payment.",
+    );
+  const item = {
+    scheduleId: `APS-${Date.now()}`,
+    amount,
+    date,
+    method: clean(input.method || "ach"),
+    reference,
+    status: "scheduled",
+    createdAt: now(),
+    ...actor(a),
+  };
+  const ev = event("payment-scheduled", a, {
+    scheduleId: item.scheduleId,
+    amount,
+    date: item.date,
+  });
+  return {
+    ...record,
+    payable: {
+      ...(record.payable || {}),
+      openBalance: openBalance || record.payable?.openBalance,
+    },
+    scheduledPayments: [...arr(record.scheduledPayments), item],
+    activity: [...arr(record.activity), ev],
+    audit: { ...(record.audit || {}), updatedAt: ev.occurredAt },
+  };
+}
+export function markIXIPayablesSchedulePaid(
+  record = {},
+  scheduleId = "",
+  paymentId = "",
+  a = {},
+) {
+  let found = null;
+  const scheduledPayments = arr(record.scheduledPayments).map((item) => {
+    if (item.scheduleId !== scheduleId) return item;
+    found = item;
+    return {
+      ...item,
+      status: "paid",
+      paymentId: clean(paymentId),
+      paidAt: now(),
+    };
+  });
+  const ev = event("scheduled-payment-posted", a, {
+    scheduleId,
+    amount: num(found?.amount),
+    paymentId: clean(paymentId),
+  });
+  return {
+    ...record,
+    scheduledPayments,
+    activity: [...arr(record.activity), ev],
+    audit: { ...(record.audit || {}), updatedAt: ev.occurredAt },
+  };
+}
+export function setIXIPayablesEscalation(record = {}, input = {}, a = {}) {
+  const escalated = Boolean(input.escalated),
+    ev = event(escalated ? "escalated" : "escalation-cleared", a, {
+      reason: clean(input.reason),
+    });
+  return {
+    ...record,
+    control: {
+      ...(record.control || {}),
+      escalated,
+      priority: escalated ? "high" : record.control?.priority || "normal",
+    },
+    activity: [...arr(record.activity), ev],
+    audit: { ...(record.audit || {}), updatedAt: ev.occurredAt },
+  };
+}
+export function closeIXIPayableCase(record = {}, a = {}) {
+  const ev = event("case-closed", a);
+  return {
+    ...record,
+    status: "paid",
+    activity: [...arr(record.activity), ev],
+    audit: { ...(record.audit || {}), updatedAt: ev.occurredAt },
+  };
+}
+export default {
+  createIXIPayableCase,
+  logIXIPayablesContact,
+  setIXIPayablesHold,
+  openIXIPayablesDispute,
+  resolveIXIPayablesDispute,
+  scheduleIXIPayablesPayment,
+  markIXIPayablesSchedulePaid,
+  setIXIPayablesEscalation,
+  closeIXIPayableCase,
+};

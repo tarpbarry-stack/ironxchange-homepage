@@ -1,14 +1,689 @@
 import { useMemo, useState } from "react";
 import { buildIXIPayablesProjection } from "./IXIPayablesProjectionEngine";
-import { createIXIPayableCase, logIXIPayablesContact, setIXIPayablesHold, openIXIPayablesDispute, resolveIXIPayablesDispute, scheduleIXIPayablesPayment, markIXIPayablesSchedulePaid, setIXIPayablesEscalation, closeIXIPayableCase } from "./IXIPayablesRecordEngine";
-import { postIXIPayablesPayment, postIXIPayablesCredit } from "./IXIPayablesCommands";
+import {
+  createIXIPayableCase,
+  logIXIPayablesContact,
+  setIXIPayablesHold,
+  openIXIPayablesDispute,
+  resolveIXIPayablesDispute,
+  scheduleIXIPayablesPayment,
+  markIXIPayablesSchedulePaid,
+  setIXIPayablesEscalation,
+  closeIXIPayableCase,
+} from "./IXIPayablesRecordEngine";
+import {
+  saveIXIPayablesControl,
+  postIXIPayablesPayment,
+  postIXIPayablesCredit,
+} from "./IXIPayablesCommands";
+import { getIXIPayablesPolicy } from "./IXIPayablesPolicyEngine";
 import IXIPayablesStyles from "./IXIPayablesStyles";
-const clean=v=>String(v??"").trim();const money=(v,c="USD")=>new Intl.NumberFormat("en-US",{style:"currency",currency:c||"USD"}).format(Number(v||0));const today=()=>new Date().toISOString().slice(0,10);
-const COPY={en:{title:"PAYABLES / A/P",sub:"Vendor obligations · approvals · cash out",all:"ALL",overdue:"OVERDUE",approval:"APPROVAL",exceptions:"EXCEPTIONS",total:"TOTAL A/P",current:"CURRENT",scheduled:"SCHEDULED",record:"PAYABLE CONTROL",back:"‹ A/P",contact:"LOG CONTACT",hold:"PLACE HOLD",release:"RELEASE HOLD",dispute:"OPEN DISPUTE",resolve:"RESOLVE DISPUTE",schedule:"SCHEDULE PAYMENT",pay:"POST PAYMENT",credit:"POST VENDOR CREDIT",escalate:"ESCALATE"},es:{title:"CUENTAS POR PAGAR",sub:"Obligaciones · aprobaciones · salidas",all:"TODAS",overdue:"VENCIDAS",approval:"APROBACIÓN",exceptions:"EXCEPCIONES",total:"TOTAL C/P",current:"CORRIENTE",scheduled:"PROGRAMADO",record:"CONTROL DE PAGO",back:"‹ C/P",contact:"REGISTRAR CONTACTO",hold:"RETENER",release:"LIBERAR",dispute:"ABRIR DISPUTA",resolve:"RESOLVER DISPUTA",schedule:"PROGRAMAR PAGO",pay:"REGISTRAR PAGO",credit:"CRÉDITO PROVEEDOR",escalate:"ESCALAR"}};
-function F({label,children}){return <div className="ap-field"><label>{label}</label>{children}</div>}
-export default function IXIPayablesApp({context={},object={},financialRecords=[],initialCases=[],language="en",onBack=null,onRecordChange=null}){const[lang,setLang]=useState(language==="es"?"es":"en"),t=COPY[lang],[cases,setCases]=useState(Array.isArray(initialCases)?initialCases:[]),[selectedId,setSelectedId]=useState(""),[filter,setFilter]=useState("all"),[busy,setBusy]=useState(false),[error,setError]=useState(""),[contact,setContact]=useState({method:"phone",contactName:"",notes:"",nextAction:"",nextActionAt:""}),[moneyInput,setMoneyInput]=useState({amount:"",date:today(),method:"ach",reference:"",reason:""});const projection=useMemo(()=>buildIXIPayablesProjection({financialRecords,payableCases:cases}),[financialRecords,cases]);const selected=projection.payables.find(x=>x.billId===selectedId)||null;const visible=projection.payables.filter(x=>filter==="all"?x.balance>0:filter==="overdue"?x.status==="overdue":filter==="approval"?x.status==="needs-approval":filter==="exceptions"?["match-exception","hold","disputed"].includes(x.status):true);
-function ensureCase(payable){let c=cases.find(x=>clean(x.payable?.billId)===payable.billId);if(!c){c=createIXIPayableCase(payable,context.actor||{});setCases(xs=>[...xs,c]);onRecordChange?.(c,{action:"open-case"},context);}return c}
-async function mutatePayable(payable,fn,action){const current=ensureCase(payable),next=fn(current);setCases(xs=>[...xs.filter(x=>clean(x.payable?.billId)!==payable.billId),next]);await onRecordChange?.(next,{action},context);return next}
-async function financialAction(kind){if(!selected||busy)return;setBusy(true);setError("");try{const current=ensureCase(selected);if(kind==="payment"){const result=await postIXIPayablesPayment({object,context,payable:selected,input:moneyInput,metadata:{source:"ixi-transact-payables"}});let next=current;const scheduled=current.scheduledPayments?.find(x=>x.status==="scheduled"&&Number(x.amount)===Number(moneyInput.amount));if(scheduled)next=markIXIPayablesSchedulePaid(current,scheduled.scheduleId,result.payment.paymentId,context.actor||{});const remaining=Math.max(0,Number(selected.balance)-Number(moneyInput.amount));if(remaining<=0)next=closeIXIPayableCase(next,context.actor||{});setCases(xs=>[...xs.filter(x=>clean(x.payable?.billId)!==selected.billId),next]);await onRecordChange?.(next,{action:"payment",financialResponse:result.response,payment:result.payment},context);}else{const result=await postIXIPayablesCredit({object,context,payable:selected,input:moneyInput,metadata:{source:"ixi-transact-payables"}});await onRecordChange?.(current,{action:"credit",financialResponse:result.response,credit:result.credit},context);}setMoneyInput({amount:"",date:today(),method:"ach",reference:"",reason:""});}catch(e){setError(clean(e?.message)||"A/P action failed.")}finally{setBusy(false)}}
-if(selected){const c=selected.payableCase||cases.find(x=>clean(x.payable?.billId)===selected.billId)||null;return <div className="ixi-ap"><div className="ap-head"><div><div className="ap-kicker">IXI TRAN$ACT</div><strong>{t.record}</strong><small>{selected.billNumber} · {selected.vendorLabel}</small></div><button className="ap-back" onClick={()=>setSelectedId("")}>{t.back}</button></div><div className="ap-title"><strong>{selected.vendorLabel}</strong><span>{selected.billNumber} · DUE {selected.dueDate||"—"} · {selected.status.toUpperCase()}</span></div><div className="ap-balance"><span>OPEN A/P BALANCE</span><strong>{money(selected.balance,selected.currency)}</strong></div><div className="ap-row"><span>ORIGINAL BILL</span><b>{money(selected.originalAmount,selected.currency)}</b></div><div className="ap-row"><span>PAID</span><b>{money(selected.paid,selected.currency)}</b></div><div className="ap-row"><span>VENDOR CREDITS</span><b>{money(selected.credited,selected.currency)}</b></div><div className="ap-row"><span>AGING</span><b className={selected.daysPastDue?"red":""}>{selected.daysPastDue?`${selected.daysPastDue} DAYS PAST DUE`:"CURRENT"}</b></div><div className="ap-row"><span>APPROVAL</span><b>{selected.approvalStatus.toUpperCase()}</b></div><div className="ap-row"><span>PO / MATCH</span><b>{selected.matchStatus.toUpperCase()}</b></div>{c?.control?.hold?<div className="ap-alert"><strong>PAYMENT HOLD</strong><small>{c.control.holdReason||"Payment intentionally blocked."}</small></div>:null}{c?.dispute?.open?<div className="ap-alert"><strong>DISPUTE OPEN · {money(c.dispute.amount,selected.currency)}</strong><small>{c.dispute.reason}</small></div>:null}<div className="ap-section">CONTROL</div><div className="ap-grid2"><button className="ap-action" onClick={()=>mutatePayable(selected,r=>setIXIPayablesHold(r,{hold:!r.control?.hold,reason:contact.notes},context.actor||{}),c?.control?.hold?"release-hold":"place-hold")}>{c?.control?.hold?t.release:t.hold}</button><button className="ap-action" onClick={()=>mutatePayable(selected,r=>setIXIPayablesEscalation(r,{escalated:!r.control?.escalated,reason:contact.notes},context.actor||{}),"escalation")}>{t.escalate}</button></div><F label="CONTACT / CONTROL NOTES"><textarea value={contact.notes} onChange={e=>setContact(x=>({...x,notes:e.target.value}))}/></F><div className="ap-grid2"><F label="CONTACT"><input value={contact.contactName} onChange={e=>setContact(x=>({...x,contactName:e.target.value}))}/></F><F label="METHOD"><select value={contact.method} onChange={e=>setContact(x=>({...x,method:e.target.value}))}><option>phone</option><option>email</option><option>vendor portal</option><option>internal</option></select></F></div><button className="ap-action" onClick={()=>mutatePayable(selected,r=>logIXIPayablesContact(r,contact,context.actor||{}),"contact")}>{t.contact}</button><div className="ap-section">DISPUTE</div><div className="ap-grid2"><F label="DISPUTED AMOUNT"><input inputMode="decimal" value={moneyInput.amount} onChange={e=>setMoneyInput(x=>({...x,amount:e.target.value}))}/></F><F label="REASON"><input value={moneyInput.reason} onChange={e=>setMoneyInput(x=>({...x,reason:e.target.value}))}/></F></div><div className="ap-actions">{c?.dispute?.open?<button className="ap-action green" onClick={()=>mutatePayable(selected,r=>resolveIXIPayablesDispute(r,{resolution:moneyInput.reason||"resolved"},context.actor||{}),"resolve-dispute")}>{t.resolve}</button>:<button className="ap-action danger" onClick={()=>mutatePayable(selected,r=>openIXIPayablesDispute(r,{amount:moneyInput.amount,reason:moneyInput.reason},context.actor||{}),"open-dispute")}>{t.dispute}</button>}<button className="ap-action" onClick={()=>mutatePayable(selected,r=>scheduleIXIPayablesPayment(r,{amount:moneyInput.amount,date:moneyInput.date,method:moneyInput.method,reference:moneyInput.reference},context.actor||{}),"schedule-payment")}>{t.schedule}</button></div><div className="ap-section">IXI FINANCIAL</div><div className="ap-grid2"><F label="AMOUNT"><input inputMode="decimal" value={moneyInput.amount} onChange={e=>setMoneyInput(x=>({...x,amount:e.target.value}))}/></F><F label="DATE"><input type="date" value={moneyInput.date} onChange={e=>setMoneyInput(x=>({...x,date:e.target.value}))}/></F></div><div className="ap-grid2"><F label="METHOD"><select value={moneyInput.method} onChange={e=>setMoneyInput(x=>({...x,method:e.target.value}))}><option value="ach">ACH</option><option value="wire">WIRE</option><option value="check">CHECK</option><option value="card">CARD</option><option value="other">OTHER</option></select></F><F label="REFERENCE"><input value={moneyInput.reference} onChange={e=>setMoneyInput(x=>({...x,reference:e.target.value}))}/></F></div>{error?<div className="ap-error">{error}</div>:null}<div className="ap-actions"><button className="ap-action primary" disabled={busy||c?.control?.hold} onClick={()=>financialAction("payment")}>{t.pay}</button><button className="ap-action" disabled={busy} onClick={()=>financialAction("credit")}>{t.credit}</button></div><div className="ap-section">ACTIVITY</div>{(c?.activity||[]).slice().reverse().map(x=><div className="ap-activity" key={x.eventId}><strong>{clean(x.type).replace(/-/g," ").toUpperCase()}</strong><small>{x.actorLabel||"SYSTEM"} · {x.occurredAt}</small></div>)}<div className="ap-foot">A hold, dispute, approval or scheduled payment never changes A/P. Only canonical IXI Financial payment or credit records reduce the liability.</div><IXIPayablesStyles/></div>}
-return <div className="ixi-ap"><div className="ap-head"><div><div className="ap-kicker">IXI TRAN$ACT</div><strong>{t.title}</strong><small>{t.sub} · {context.primary?.label||"AOS"}</small></div><div><button className="ap-back" onClick={()=>setLang(lang==="en"?"es":"en")}>{lang==="en"?"ESP":"ENG"}</button></div></div><div className="ap-summary"><div><small>{t.total}</small><strong>{money(projection.totals.totalAP)}</strong></div><div><small>{t.overdue}</small><strong className="red">{money(projection.totals.overdue)}</strong></div><div><small>{t.approval}</small><strong className="yellow">{money(projection.totals.needsApproval)}</strong></div><div><small>{t.scheduled}</small><strong className="green">{money(projection.totals.scheduled)}</strong></div></div><div className="ap-tabs"><button className={filter==="all"?"on":""} onClick={()=>setFilter("all")}>{t.all}</button><button className={filter==="overdue"?"on":""} onClick={()=>setFilter("overdue")}>{t.overdue}</button><button className={filter==="approval"?"on":""} onClick={()=>setFilter("approval")}>{t.approval}</button><button className={filter==="exceptions"?"on":""} onClick={()=>setFilter("exceptions")}>{t.exceptions}</button></div><div className="ap-section">OPEN PAYABLES</div><div className="ap-list">{visible.length?visible.map(p=><button key={p.billId} className="ap-item" onClick={()=>{ensureCase(p);setSelectedId(p.billId)}}><div className="ap-item-top"><strong>{p.vendorLabel}</strong><b>{money(p.balance,p.currency)}</b></div><small>{p.billNumber} · DUE {p.dueDate||"—"}</small><span className="ap-pill">{p.status.replace(/-/g," ").toUpperCase()}{p.daysPastDue?` · ${p.daysPastDue}D`:""}</span></button>):<div className="ap-empty">NO OPEN PAYABLES IN THIS VIEW</div>}</div><button className="ap-action" style={{marginTop:8}} onClick={()=>onBack?.()}>‹ TRAN$ACT</button><div className="ap-foot">A/P is projected from canonical Bills, outgoing Payments and Vendor Credits in IXI Financial.</div><IXIPayablesStyles/></div>}
+const clean = (v) => String(v ?? "").trim();
+const money = (v, c = "USD") =>
+  new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: c || "USD",
+  }).format(Number(v || 0));
+const today = () => new Date().toISOString().slice(0, 10);
+const COPY = {
+  en: {
+    title: "PAYABLES / A/P",
+    sub: "Vendor obligations · approvals · cash out",
+    all: "ALL",
+    overdue: "OVERDUE",
+    approval: "APPROVAL",
+    exceptions: "EXCEPTIONS",
+    total: "TOTAL A/P",
+    current: "CURRENT",
+    scheduled: "SCHEDULED",
+    record: "PAYABLE CONTROL",
+    back: "‹ A/P",
+    contact: "LOG CONTACT",
+    hold: "PLACE HOLD",
+    release: "RELEASE HOLD",
+    dispute: "OPEN DISPUTE",
+    resolve: "RESOLVE DISPUTE",
+    schedule: "SCHEDULE PAYMENT",
+    pay: "POST PAYMENT",
+    credit: "POST VENDOR CREDIT",
+    escalate: "ESCALATE",
+  },
+  es: {
+    title: "CUENTAS POR PAGAR",
+    sub: "Obligaciones · aprobaciones · salidas",
+    all: "TODAS",
+    overdue: "VENCIDAS",
+    approval: "APROBACIÓN",
+    exceptions: "EXCEPCIONES",
+    total: "TOTAL C/P",
+    current: "CORRIENTE",
+    scheduled: "PROGRAMADO",
+    record: "CONTROL DE PAGO",
+    back: "‹ C/P",
+    contact: "REGISTRAR CONTACTO",
+    hold: "RETENER",
+    release: "LIBERAR",
+    dispute: "ABRIR DISPUTA",
+    resolve: "RESOLVER DISPUTA",
+    schedule: "PROGRAMAR PAGO",
+    pay: "REGISTRAR PAGO",
+    credit: "CRÉDITO PROVEEDOR",
+    escalate: "ESCALAR",
+  },
+};
+function F({ label, children }) {
+  return (
+    <div className="ap-field">
+      <label>{label}</label>
+      {children}
+    </div>
+  );
+}
+export default function IXIPayablesApp({
+  context = {},
+  object = {},
+  financialRecords = [],
+  initialCases = [],
+  language = "en",
+  onBack = null,
+  onRecordChange = null,
+  onFinancialRecordsChange = null,
+}) {
+  const [lang, setLang] = useState(language === "es" ? "es" : "en"),
+    t = COPY[lang],
+    [cases, setCases] = useState(
+      Array.isArray(initialCases) ? initialCases : [],
+    ),
+    [selectedId, setSelectedId] = useState(""),
+    [filter, setFilter] = useState("all"),
+    [busy, setBusy] = useState(false),
+    [error, setError] = useState(""),
+    [contact, setContact] = useState({
+      method: "phone",
+      contactName: "",
+      notes: "",
+      nextAction: "",
+      nextActionAt: "",
+    }),
+    [moneyInput, setMoneyInput] = useState({
+      amount: "",
+      date: today(),
+      method: "ach",
+      reference: "",
+      reason: "",
+    });
+  const projection = useMemo(
+    () => buildIXIPayablesProjection({ financialRecords, payableCases: cases }),
+    [financialRecords, cases],
+  );
+  const selected =
+    projection.payables.find((x) => x.billId === selectedId) || null;
+  const policy = getIXIPayablesPolicy({ context, payable: selected });
+  const visible = projection.payables.filter((x) =>
+    filter === "all"
+      ? x.balance > 0 || x.status === "needs-approval"
+      : filter === "overdue"
+        ? x.status === "overdue"
+        : filter === "approval"
+          ? x.status === "needs-approval"
+          : filter === "exceptions"
+            ? ["match-exception", "hold", "disputed"].includes(x.status)
+            : true,
+  );
+  function ensureCase(payable) {
+    return (
+      payable?.payableCase ||
+      cases.find((x) => clean(x.payable?.billId) === payable.billId) ||
+      createIXIPayableCase(payable, context.actor || {})
+    );
+  }
+  async function mutatePayable(payable, fn, action) {
+    if (!policy.canManage) {
+      setError("You do not have permission to manage A/P controls.");
+      return null;
+    }
+    setBusy(true);
+    setError("");
+    try {
+      const current = ensureCase(payable),
+        next = fn(current),
+        saved = await saveIXIPayablesControl({
+          object,
+          context,
+          payable,
+          record: next,
+          action,
+        });
+      await onRecordChange?.(saved, { action }, context);
+      setCases((xs) => [
+        ...xs.filter((x) => clean(x.payable?.billId) !== payable.billId),
+        saved,
+      ]);
+      await onFinancialRecordsChange?.();
+      return saved;
+    } catch (e) {
+      setError(clean(e?.message) || "A/P control update failed.");
+      return null;
+    } finally {
+      setBusy(false);
+    }
+  }
+  async function financialAction(kind) {
+    if (!selected || busy) return;
+    if (kind === "payment" && !policy.canPostPayment) {
+      setError("Payment is not authorized for this Bill and user.");
+      return;
+    }
+    if (kind === "credit" && !policy.canApplyCredit) {
+      setError("Vendor credit is not authorized for this Bill and user.");
+      return;
+    }
+    setBusy(true);
+    setError("");
+    try {
+      const current = ensureCase(selected);
+      if (kind === "payment") {
+        const result = await postIXIPayablesPayment({
+          object,
+          context,
+          payable: selected,
+          input: moneyInput,
+          metadata: { source: "ixi-transact-payables" },
+        });
+        let next = current;
+        const scheduled = current.scheduledPayments?.find(
+          (x) =>
+            x.status === "scheduled" &&
+            Number(x.amount) === Number(moneyInput.amount),
+        );
+        if (scheduled)
+          next = markIXIPayablesSchedulePaid(
+            current,
+            scheduled.scheduleId,
+            result.payment.paymentId,
+            context.actor || {},
+          );
+        const remaining = Math.max(
+          0,
+          Number(selected.balance) - Number(moneyInput.amount),
+        );
+        if (remaining <= 0)
+          next = closeIXIPayableCase(next, context.actor || {});
+        const saved = await saveIXIPayablesControl({
+          object,
+          context,
+          payable: selected,
+          record: next,
+          action: "payment",
+        });
+        await onRecordChange?.(
+          saved,
+          {
+            action: "payment",
+            financialResponse: result.response,
+            payment: result.payment,
+          },
+          context,
+        );
+        setCases((xs) => [
+          ...xs.filter((x) => clean(x.payable?.billId) !== selected.billId),
+          saved,
+        ]);
+      } else {
+        const result = await postIXIPayablesCredit({
+          object,
+          context,
+          payable: selected,
+          input: moneyInput,
+          metadata: { source: "ixi-transact-payables" },
+        });
+        await onRecordChange?.(
+          current,
+          {
+            action: "credit",
+            financialResponse: result.response,
+            credit: result.credit,
+          },
+          context,
+        );
+      }
+      await onFinancialRecordsChange?.();
+      setMoneyInput({
+        amount: "",
+        date: today(),
+        method: "ach",
+        reference: "",
+        reason: "",
+      });
+    } catch (e) {
+      setError(clean(e?.message) || "A/P action failed.");
+    } finally {
+      setBusy(false);
+    }
+  }
+  if (selected) {
+    const c =
+      selected.payableCase ||
+      cases.find((x) => clean(x.payable?.billId) === selected.billId) ||
+      null;
+    return (
+      <div className="ixi-ap">
+        <div className="ap-head">
+          <div>
+            <div className="ap-kicker">IXI TRAN$ACT</div>
+            <strong>{t.record}</strong>
+            <small>
+              {selected.billNumber} · {selected.vendorLabel}
+            </small>
+          </div>
+          <button className="ap-back" onClick={() => setSelectedId("")}>
+            {t.back}
+          </button>
+        </div>
+        <div className="ap-title">
+          <strong>{selected.vendorLabel}</strong>
+          <span>
+            {selected.billNumber} · DUE {selected.dueDate || "—"} ·{" "}
+            {selected.status.toUpperCase()}
+          </span>
+        </div>
+        <div className="ap-balance">
+          <span>OPEN A/P BALANCE</span>
+          <strong>{money(selected.balance, selected.currency)}</strong>
+        </div>
+        <div className="ap-row">
+          <span>ORIGINAL BILL</span>
+          <b>{money(selected.originalAmount, selected.currency)}</b>
+        </div>
+        <div className="ap-row">
+          <span>PAID</span>
+          <b>{money(selected.paid, selected.currency)}</b>
+        </div>
+        <div className="ap-row">
+          <span>VENDOR CREDITS</span>
+          <b>{money(selected.credited, selected.currency)}</b>
+        </div>
+        <div className="ap-row">
+          <span>AGING</span>
+          <b className={selected.daysPastDue ? "red" : ""}>
+            {selected.daysPastDue
+              ? `${selected.daysPastDue} DAYS PAST DUE`
+              : "CURRENT"}
+          </b>
+        </div>
+        <div className="ap-row">
+          <span>APPROVAL</span>
+          <b>{selected.approvalStatus.toUpperCase()}</b>
+        </div>
+        <div className="ap-row">
+          <span>PO / MATCH</span>
+          <b>{selected.matchStatus.toUpperCase()}</b>
+        </div>
+        {c?.control?.hold ? (
+          <div className="ap-alert">
+            <strong>PAYMENT HOLD</strong>
+            <small>
+              {c.control.holdReason || "Payment intentionally blocked."}
+            </small>
+          </div>
+        ) : null}
+        {c?.dispute?.open ? (
+          <div className="ap-alert">
+            <strong>
+              DISPUTE OPEN · {money(c.dispute.amount, selected.currency)}
+            </strong>
+            <small>{c.dispute.reason}</small>
+          </div>
+        ) : null}
+        <div className="ap-section">CONTROL</div>
+        <div className="ap-grid2">
+          <button
+            className="ap-action"
+            onClick={() =>
+              mutatePayable(
+                selected,
+                (r) =>
+                  setIXIPayablesHold(
+                    r,
+                    { hold: !r.control?.hold, reason: contact.notes },
+                    context.actor || {},
+                  ),
+                c?.control?.hold ? "release-hold" : "place-hold",
+              )
+            }
+          >
+            {c?.control?.hold ? t.release : t.hold}
+          </button>
+          <button
+            className="ap-action"
+            onClick={() =>
+              mutatePayable(
+                selected,
+                (r) =>
+                  setIXIPayablesEscalation(
+                    r,
+                    { escalated: !r.control?.escalated, reason: contact.notes },
+                    context.actor || {},
+                  ),
+                "escalation",
+              )
+            }
+          >
+            {t.escalate}
+          </button>
+        </div>
+        <F label="CONTACT / CONTROL NOTES">
+          <textarea
+            value={contact.notes}
+            onChange={(e) =>
+              setContact((x) => ({ ...x, notes: e.target.value }))
+            }
+          />
+        </F>
+        <div className="ap-grid2">
+          <F label="CONTACT">
+            <input
+              value={contact.contactName}
+              onChange={(e) =>
+                setContact((x) => ({ ...x, contactName: e.target.value }))
+              }
+            />
+          </F>
+          <F label="METHOD">
+            <select
+              value={contact.method}
+              onChange={(e) =>
+                setContact((x) => ({ ...x, method: e.target.value }))
+              }
+            >
+              <option>phone</option>
+              <option>email</option>
+              <option>vendor portal</option>
+              <option>internal</option>
+            </select>
+          </F>
+        </div>
+        <button
+          className="ap-action"
+          onClick={() =>
+            mutatePayable(
+              selected,
+              (r) => logIXIPayablesContact(r, contact, context.actor || {}),
+              "contact",
+            )
+          }
+        >
+          {t.contact}
+        </button>
+        <div className="ap-section">DISPUTE</div>
+        <div className="ap-grid2">
+          <F label="DISPUTED AMOUNT">
+            <input
+              inputMode="decimal"
+              value={moneyInput.amount}
+              onChange={(e) =>
+                setMoneyInput((x) => ({ ...x, amount: e.target.value }))
+              }
+            />
+          </F>
+          <F label="REASON">
+            <input
+              value={moneyInput.reason}
+              onChange={(e) =>
+                setMoneyInput((x) => ({ ...x, reason: e.target.value }))
+              }
+            />
+          </F>
+        </div>
+        <div className="ap-actions">
+          {c?.dispute?.open ? (
+            <button
+              className="ap-action green"
+              onClick={() =>
+                mutatePayable(
+                  selected,
+                  (r) =>
+                    resolveIXIPayablesDispute(
+                      r,
+                      { resolution: moneyInput.reason || "resolved" },
+                      context.actor || {},
+                    ),
+                  "resolve-dispute",
+                )
+              }
+            >
+              {t.resolve}
+            </button>
+          ) : (
+            <button
+              className="ap-action danger"
+              onClick={() =>
+                mutatePayable(
+                  selected,
+                  (r) =>
+                    openIXIPayablesDispute(
+                      r,
+                      { amount: moneyInput.amount, reason: moneyInput.reason },
+                      context.actor || {},
+                    ),
+                  "open-dispute",
+                )
+              }
+            >
+              {t.dispute}
+            </button>
+          )}
+          <button
+            className="ap-action"
+            onClick={() =>
+              mutatePayable(
+                selected,
+                (r) =>
+                  scheduleIXIPayablesPayment(
+                    r,
+                    {
+                      amount: moneyInput.amount,
+                      date: moneyInput.date,
+                      method: moneyInput.method,
+                      reference: moneyInput.reference,
+                    },
+                    context.actor || {},
+                  ),
+                "schedule-payment",
+              )
+            }
+          >
+            {t.schedule}
+          </button>
+        </div>
+        <div className="ap-section">IXI FINANCIAL</div>
+        <div className="ap-grid2">
+          <F label="AMOUNT">
+            <input
+              inputMode="decimal"
+              value={moneyInput.amount}
+              onChange={(e) =>
+                setMoneyInput((x) => ({ ...x, amount: e.target.value }))
+              }
+            />
+          </F>
+          <F label="DATE">
+            <input
+              type="date"
+              value={moneyInput.date}
+              onChange={(e) =>
+                setMoneyInput((x) => ({ ...x, date: e.target.value }))
+              }
+            />
+          </F>
+        </div>
+        <div className="ap-grid2">
+          <F label="METHOD">
+            <select
+              value={moneyInput.method}
+              onChange={(e) =>
+                setMoneyInput((x) => ({ ...x, method: e.target.value }))
+              }
+            >
+              <option value="ach">ACH</option>
+              <option value="wire">WIRE</option>
+              <option value="check">CHECK</option>
+              <option value="card">CARD</option>
+              <option value="other">OTHER</option>
+            </select>
+          </F>
+          <F label="REFERENCE">
+            <input
+              value={moneyInput.reference}
+              onChange={(e) =>
+                setMoneyInput((x) => ({ ...x, reference: e.target.value }))
+              }
+            />
+          </F>
+        </div>
+        {error ? <div className="ap-error">{error}</div> : null}
+        <div className="ap-actions">
+          <button
+            className="ap-action primary"
+            disabled={busy || !policy.canPostPayment}
+            onClick={() => financialAction("payment")}
+          >
+            {t.pay}
+          </button>
+          <button
+            className="ap-action"
+            disabled={busy || !policy.canApplyCredit}
+            onClick={() => financialAction("credit")}
+          >
+            {t.credit}
+          </button>
+        </div>
+        <div className="ap-section">ACTIVITY</div>
+        {(c?.activity || [])
+          .slice()
+          .reverse()
+          .map((x) => (
+            <div className="ap-activity" key={x.eventId}>
+              <strong>{clean(x.type).replace(/-/g, " ").toUpperCase()}</strong>
+              <small>
+                {x.actorLabel || "SYSTEM"} · {x.occurredAt}
+              </small>
+            </div>
+          ))}
+        <div className="ap-foot">
+          A hold, dispute, approval or scheduled payment never changes A/P. Only
+          canonical IXI Financial payment or credit records reduce the
+          liability.
+        </div>
+        <IXIPayablesStyles />
+      </div>
+    );
+  }
+  return (
+    <div className="ixi-ap">
+      <div className="ap-head">
+        <div>
+          <div className="ap-kicker">IXI TRAN$ACT</div>
+          <strong>{t.title}</strong>
+          <small>
+            {t.sub} · {context.primary?.label || "AOS"}
+          </small>
+        </div>
+        <div>
+          <button
+            className="ap-back"
+            onClick={() => setLang(lang === "en" ? "es" : "en")}
+          >
+            {lang === "en" ? "ESP" : "ENG"}
+          </button>
+        </div>
+      </div>
+      <div className="ap-summary">
+        <div>
+          <small>{t.total}</small>
+          <strong>{money(projection.totals.totalAP)}</strong>
+        </div>
+        <div>
+          <small>{t.overdue}</small>
+          <strong className="red">{money(projection.totals.overdue)}</strong>
+        </div>
+        <div>
+          <small>{t.approval}</small>
+          <strong className="yellow">
+            {money(projection.totals.needsApproval)}
+          </strong>
+        </div>
+        <div>
+          <small>{t.scheduled}</small>
+          <strong className="green">
+            {money(projection.totals.scheduled)}
+          </strong>
+        </div>
+      </div>
+      <div className="ap-tabs">
+        <button
+          className={filter === "all" ? "on" : ""}
+          onClick={() => setFilter("all")}
+        >
+          {t.all}
+        </button>
+        <button
+          className={filter === "overdue" ? "on" : ""}
+          onClick={() => setFilter("overdue")}
+        >
+          {t.overdue}
+        </button>
+        <button
+          className={filter === "approval" ? "on" : ""}
+          onClick={() => setFilter("approval")}
+        >
+          {t.approval}
+        </button>
+        <button
+          className={filter === "exceptions" ? "on" : ""}
+          onClick={() => setFilter("exceptions")}
+        >
+          {t.exceptions}
+        </button>
+      </div>
+      <div className="ap-section">OPEN PAYABLES</div>
+      <div className="ap-list">
+        {visible.length ? (
+          visible.map((p) => (
+            <button
+              key={p.billId}
+              className="ap-item"
+              onClick={() => setSelectedId(p.billId)}
+            >
+              <div className="ap-item-top">
+                <strong>{p.vendorLabel}</strong>
+                <b>{money(p.balance, p.currency)}</b>
+              </div>
+              <small>
+                {p.billNumber} · DUE {p.dueDate || "—"}
+              </small>
+              <span className="ap-pill">
+                {p.status.replace(/-/g, " ").toUpperCase()}
+                {p.daysPastDue ? ` · ${p.daysPastDue}D` : ""}
+              </span>
+            </button>
+          ))
+        ) : (
+          <div className="ap-empty">NO OPEN PAYABLES IN THIS VIEW</div>
+        )}
+      </div>
+      <button
+        className="ap-action"
+        style={{ marginTop: 8 }}
+        onClick={() => onBack?.()}
+      >
+        ‹ TRAN$ACT
+      </button>
+      <div className="ap-foot">
+        A/P is projected from canonical Bills, outgoing Payments and Vendor
+        Credits in IXI Financial.
+      </div>
+      <IXIPayablesStyles />
+    </div>
+  );
+}
