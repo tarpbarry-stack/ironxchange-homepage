@@ -1,0 +1,38 @@
+{
+  "contract": "ixi-ticket-closeout",
+  "contractVersion": "1.0.0",
+  "ticketId": "ticket-574bcdc4-e28f-43fe-8670-28dd2aa5377a",
+  "runId": "ixi-chat-20260904-card009-id-edit",
+  "expectedRevision": 4,
+  "closeout": {
+    "summary": "Corrected Card 009's business-ID editor row to contain exactly a fixed ID label and the editable customer ID number; the red-marked right-hand ID box is removed.",
+    "editResults": [
+      {
+        "editId": "edit-f13ee1cb-a902-471f-b05a-4c736c182061",
+        "status": "completed",
+        "result": "The left ID caption is fixed, the middle canonical business-ID value remains editable and persisted for imported/customer data, and the right-hand disabled ID end cell is removed. Normal field remove controls remain unchanged."
+      }
+    ],
+    "filesChanged": [
+      "components/ixi-aos/cards/generic/IXIAosGenericMediaDominant009.jsx",
+      "tests/ixi-ticket-card009-business-id-contract.test.mjs"
+    ],
+    "tests": [
+      "node --test tests/ixi-ticket-card009-business-id-contract.test.mjs tests/ixi-ticket-card009-media-contract.test.mjs tests/ixi-ticket-card009-layout-contract.test.mjs — 9 passed, 0 failed",
+      "PR #140 reviewed as 2 files only and merged",
+      "Vercel production deployment dpl_ECHEfxeGiUxX6Shfx7uy4CVKs71a — READY",
+      "preview.ironxchange.com alias confirmed on corrected deployment"
+    ],
+    "before": "The first implementation left a third disabled ID box at the right side of the business-ID edit row.",
+    "after": "The business-ID row now has exactly two cells: fixed ID and editable customer number. The third red-marked box is gone.",
+    "risks": [],
+    "notes": [
+      "Normal custom fields retain their × removal controls.",
+      "Card dimensions, media, data mapping, relationships, commands, rail, and other editor fields are unchanged.",
+      "Corrected main commit: 1dcbb01d46870793abd1698437d013f048d491b8"
+    ],
+    "prs": [
+      "https://github.com/tarpbarry-stack/ironxchange-homepage/pull/140"
+    ]
+  }
+}
