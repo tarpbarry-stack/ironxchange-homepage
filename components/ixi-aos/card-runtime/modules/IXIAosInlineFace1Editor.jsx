@@ -26,6 +26,12 @@ function parseValue(definition, rawValue) {
   return rawValue;
 }
 
+function isBusinessIdentifier(definition = {}) {
+  const role = clean(definition?.presentationRole || definition?.semanticRole).toLowerCase();
+  const fieldId = clean(definition?.fieldId).toLowerCase();
+  return role === "business-identifier" || fieldId === "businessidentifier" || fieldId === "business-identifier";
+}
+
 function blankDefinition(index, used) {
   let sequence = index + 1;
   let fieldId = `field_${sequence}`;
@@ -45,6 +51,7 @@ export default function IXIAosInlineFace1Editor({
   cardNumber,
   object = {},
   onSaveObject = null,
+  fixedBusinessIdentifierLabel = false,
   children
 }) {
   const [runtimeObject, setRuntimeObject] = useState(object);
@@ -122,7 +129,9 @@ export default function IXIAosInlineFace1Editor({
     const normalized = definitions.map((definition, index) => ({
       ...definition,
       fieldId: clean(definition.fieldId),
-      label: clean(definition.label) || `FIELD ${index + 1}`,
+      label: fixedBusinessIdentifierLabel && isBusinessIdentifier(definition)
+        ? "ID"
+        : clean(definition.label) || `FIELD ${index + 1}`,
       type: clean(definition.type || definition.fieldType || "text") || "text",
       fieldType: clean(definition.fieldType || definition.type || "text") || "text",
       editable: definition.editable !== false,
@@ -199,17 +208,23 @@ export default function IXIAosInlineFace1Editor({
               <span>VALUE</span>
               <i />
             </div>
-            {definitions.map((definition, index) => (
-              <div className="ixi-inline-row" key={definition.fieldId}>
-                <input
-                  aria-label={`Field ${index + 1} name`}
-                  value={definition.label}
-                  onChange={event => setDefinitions(current => current.map(item => (
-                    item.fieldId === definition.fieldId
-                      ? { ...item, label: event.target.value }
-                      : item
-                  )))}
-                />
+            {definitions.map((definition, index) => {
+              const fixedBusinessId = fixedBusinessIdentifierLabel && isBusinessIdentifier(definition);
+              return (
+              <div className={`ixi-inline-row ${fixedBusinessId ? "business-id" : ""}`} key={definition.fieldId}>
+                {fixedBusinessId ? (
+                  <span className="ixi-inline-fixed-label">ID</span>
+                ) : (
+                  <input
+                    aria-label={`Field ${index + 1} name`}
+                    value={definition.label}
+                    onChange={event => setDefinitions(current => current.map(item => (
+                      item.fieldId === definition.fieldId
+                        ? { ...item, label: event.target.value }
+                        : item
+                    )))}
+                  />
+                )}
                 <input
                   aria-label={`${definition.label} value`}
                   value={draft[definition.fieldId] ?? ""}
@@ -218,15 +233,15 @@ export default function IXIAosInlineFace1Editor({
                     [definition.fieldId]: event.target.value
                   }))}
                 />
-                <button
+                {!fixedBusinessId ? <button
                   type="button"
                   aria-label={`Remove ${definition.label}`}
                   onClick={() => removeField(definition.fieldId)}
                 >
                   ×
-                </button>
+                </button> : null}
               </div>
-            ))}
+            );})}
             <button className="ixi-inline-add" type="button" onClick={addField}>
               + ADD FIELD
             </button>
@@ -246,6 +261,8 @@ export default function IXIAosInlineFace1Editor({
         .ixi-inline-columns,.ixi-inline-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.35fr) 25px;gap:4px;align-items:center}
         .ixi-inline-columns{height:17px;color:#858c87;font:800 5px/1 Arial}
         .ixi-inline-row{margin-bottom:4px}
+        .ixi-inline-row.business-id{grid-template-columns:minmax(0,1fr) minmax(0,1.35fr);padding:3px;border:1px solid rgba(255,196,0,.20);border-radius:5px;background:rgba(255,196,0,.025)}
+        .ixi-inline-fixed-label{height:24px;display:flex;align-items:center;padding:0 6px;border:1px solid #59615b;border-radius:4px;background:#111411;color:#ffc400;font:950 9px/22px Arial}
         .ixi-inline-row input{width:100%;min-width:0;height:24px;padding:0 6px;border:1px solid #59615b;border-radius:4px;background:#090c0a;color:#f3f5f3;font:700 9px/22px Arial;outline:none}
         .ixi-inline-row input:focus{border-color:#ffc40088}
         .ixi-inline-row button,.ixi-inline-add{height:24px;border:1px solid #ffffff16;border-radius:4px;background:#111411;color:#dce0dd;font:800 7px/22px Arial}

@@ -16,6 +16,7 @@ test("shared commercial editor protects durable business identity", () => {
   assert.match(editor, /isBusinessIdentifier/u);
   assert.match(editor, /Customer business identifier cannot be removed/u);
   assert.match(editor, /disabled=\{protectedId/u);
+  assert.match(editor, /getBusinessIdentifierValue\(object\)/u);
 });
 
 test("shared commercial editor supports customer-defined schema changes", () => {

@@ -27,13 +27,15 @@ test("Cards 001-006 and 008 use the shared commercial editor bridge", () => {
 
 test("commercial editor bridge intercepts only canonical EDIT and preserves durable save payload", () => {
   const source = read("components/ixi-aos/card-runtime/modules/IXIAosCommercialEditorBridge.jsx");
+  const sessionSource = read("components/ixi-aos/card-runtime/modules/useIXIAosObjectEditSession.js");
+  const persistenceSource = `${source}\n${sessionSource}`;
   assert.match(source, /button\.header-action\.edit/u);
   assert.match(source, /runIXIActionNoticeLifecycle/u);
   assert.match(source, /successMessage: "SAVED"/u);
   assert.match(source, /errorMessage: "NOT SAVED"/u);
-  assert.match(source, /fieldDefinitions:/u);
-  assert.match(source, /metadata:/u);
-  assert.match(source, /media:/u);
+  assert.match(persistenceSource, /fieldDefinitions:/u);
+  assert.match(persistenceSource, /metadata:/u);
+  assert.match(persistenceSource, /media:/u);
 });
 
 test("shared commercial editor keeps customer ID protected while allowing schema editing", () => {

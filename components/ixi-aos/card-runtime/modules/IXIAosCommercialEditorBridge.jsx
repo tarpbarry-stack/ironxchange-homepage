@@ -1,7 +1,6 @@
-import { useEffect, useState } from "react";
-
 import IXIAosCommercialObjectEditor from "./IXIAosCommercialObjectEditor";
 import { runIXIActionNoticeLifecycle } from "../../../ixi-object-system/IXIActionNoticeEngine";
+import useIXIAosObjectEditSession from "./useIXIAosObjectEditSession";
 
 function clean(value) {
   return String(value ?? "").trim();
@@ -27,17 +26,15 @@ function objectIdOf(object = {}) {
 export default function IXIAosCommercialEditorBridge({
   object = {},
   onSaveObject = null,
+  persistenceAdapter = onSaveObject,
   mediaEnabled = true,
   minimumCustomFields = 0,
   children
 }) {
-  const [runtimeObject, setRuntimeObject] = useState(object);
-  const [editing, setEditing] = useState(false);
-  const [saving, setSaving] = useState(false);
-
-  useEffect(() => {
-    setRuntimeObject(object);
-  }, [object]);
+  const editSession = useIXIAosObjectEditSession({
+    object,
+    persistenceAdapter
+  });
 
   function captureEdit(event) {
     const target = event?.target;
@@ -46,7 +43,7 @@ export default function IXIAosCommercialEditorBridge({
 
     event.preventDefault();
     event.stopPropagation();
-    setEditing(true);
+    editSession.begin();
   }
 
   async function save(nextObject) {
@@ -54,45 +51,20 @@ export default function IXIAosCommercialEditorBridge({
       throw new Error("Commercial editor save requires an object payload.");
     }
 
-    const objectId = objectIdOf(nextObject) || objectIdOf(runtimeObject);
-    setSaving(true);
-
-    try {
-      await runIXIActionNoticeLifecycle({
-        objectId,
-        savingMessage: "SAVING...",
-        successMessage: "SAVED",
-        errorMessage: "NOT SAVED",
-        commandId: "aos-object-save",
-        source: "aos-commercial-editor",
-        operation: async () => {
-          if (typeof onSaveObject === "function") {
-            await onSaveObject({
-              objectId,
-              object: nextObject,
-              displayName: nextObject.displayName,
-              fields: { ...(nextObject?.fields || {}) },
-              fieldDefinitions: Array.isArray(nextObject?.fieldDefinitions)
-                ? nextObject.fieldDefinitions
-                : [],
-              media: Array.isArray(nextObject?.media) ? nextObject.media : [],
-              metadata: { ...(nextObject?.metadata || {}) }
-            });
-          }
-          return nextObject;
-        }
-      });
-
-      setRuntimeObject(nextObject);
-      setEditing(false);
-      return nextObject;
-    } finally {
-      setSaving(false);
-    }
+    const objectId = objectIdOf(nextObject) || objectIdOf(editSession.runtimeObject);
+    return runIXIActionNoticeLifecycle({
+      objectId,
+      savingMessage: "SAVING...",
+      successMessage: "SAVED",
+      errorMessage: "NOT SAVED",
+      commandId: "aos-object-save",
+      source: "aos-commercial-editor",
+      operation: () => editSession.save(nextObject)
+    });
   }
 
   const rendered = typeof children === "function"
-    ? children({ object: runtimeObject })
+    ? children({ object: editSession.runtimeObject })
     : children;
 
   return (
@@ -103,11 +75,13 @@ export default function IXIAosCommercialEditorBridge({
     >
       {rendered}
 
-      {editing ? (
+      {editSession.editing ? (
         <IXIAosCommercialObjectEditor
-          object={runtimeObject}
-          saving={saving}
-          onCancel={() => setEditing(false)}
+          object={editSession.runtimeObject}
+          saving={editSession.saving}
+          error={editSession.error}
+          conflict={editSession.conflict}
+          onCancel={editSession.cancel}
           onSave={save}
           mediaEnabled={mediaEnabled}
           minimumCustomFields={minimumCustomFields}

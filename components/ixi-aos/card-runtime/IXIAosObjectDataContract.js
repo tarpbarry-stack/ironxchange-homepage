@@ -167,38 +167,50 @@ export function ensureBusinessIdentifierDefinition(object = {}, definitions = nu
 }
 
 export function getBusinessIdentifierValue(object = {}) {
+  const fields = getObjectFields(object);
+  if (Object.prototype.hasOwnProperty.call(fields, BUSINESS_IDENTIFIER_FIELD_ID)) {
+    const fieldValue = fields?.[BUSINESS_IDENTIFIER_FIELD_ID];
+    if (fieldValue && typeof fieldValue === "object") {
+      return clean(fieldValue?.value || fieldValue?.label || fieldValue?.name);
+    }
+    return clean(fieldValue);
+  }
+
   const persisted = normalizePersistedBusinessIdentifiers(object);
 
   if (persisted.length) {
     return persisted[0].value;
   }
 
-  const value = getObjectFields(object)?.[BUSINESS_IDENTIFIER_FIELD_ID];
-
-  if (value && typeof value === "object") {
-    return clean(value?.value || value?.label || value?.name);
-  }
-
-  return clean(value);
+  return "";
 }
 
 export function getBusinessIdentifiers(object = {}) {
   const persisted = normalizePersistedBusinessIdentifiers(object);
+  const fields = getObjectFields(object);
+  const hasEditorValue = Object.prototype.hasOwnProperty.call(
+    fields,
+    BUSINESS_IDENTIFIER_FIELD_ID
+  );
+  const editorValue = fields?.[BUSINESS_IDENTIFIER_FIELD_ID];
+  const value = hasEditorValue
+    ? clean(
+        editorValue && typeof editorValue === "object"
+          ? editorValue?.value || editorValue?.label || editorValue?.name
+          : editorValue
+      )
+    : clean(persisted[0]?.value);
 
-  if (persisted.length) {
-    return persisted;
-  }
-
-  const value = getBusinessIdentifierValue(object);
   if (!value) return [];
 
   const schema = getBusinessIdentifierSchema(object);
   const definition = createBusinessIdentifierDefinition(object, 0);
 
   return [{
+    ...(persisted[0] || {}),
     label: clean(definition?.label || schema?.defaultLabel) || "ID",
     value
-  }];
+  }, ...persisted.slice(1)];
 }
 
 export function createStableCustomFieldDefinition(existingDefinitions = [], index = 0) {

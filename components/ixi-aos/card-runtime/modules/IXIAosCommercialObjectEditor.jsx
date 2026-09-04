@@ -4,7 +4,8 @@ import IXIAosPrimaryMediaEditor from "./IXIAosPrimaryMediaEditor";
 import {
   BUSINESS_IDENTIFIER_FIELD_ID,
   BUSINESS_IDENTIFIER_ROLE,
-  ensureBusinessIdentifierDefinition
+  ensureBusinessIdentifierDefinition,
+  getBusinessIdentifierValue
 } from "../IXIAosObjectDataContract";
 import {
   asArray,
@@ -90,6 +91,8 @@ function normalizeDefinitions(object = {}) {
 export default function IXIAosCommercialObjectEditor({
   object = {},
   saving = false,
+  error = null,
+  conflict = null,
   onCancel = null,
   onSave = null,
   mediaEnabled = true,
@@ -122,7 +125,10 @@ export default function IXIAosCommercialObjectEditor({
 
     const nextDraft = {};
     nextDefinitions.forEach(definition => {
-      nextDraft[definition.fieldId] = inputValue(getObjectFields(object)?.[definition.fieldId]);
+      const value = isBusinessIdentifier(definition)
+        ? getBusinessIdentifierValue(object)
+        : getObjectFields(object)?.[definition.fieldId];
+      nextDraft[definition.fieldId] = inputValue(value);
     });
 
     setName(getObjectDisplayName(object));
@@ -178,7 +184,9 @@ export default function IXIAosCommercialObjectEditor({
       .map((definition, index) => ({
         ...definition,
         fieldId: clean(definition?.fieldId),
-        label: clean(definition?.label) || `FIELD ${index + 1}`,
+        label: isBusinessIdentifier(definition)
+          ? "ID"
+          : clean(definition?.label) || `FIELD ${index + 1}`,
         fieldType: clean(definition?.fieldType || definition?.type || "text") || "text",
         type: clean(definition?.type || definition?.fieldType || "text") || "text",
         editable: definition?.editable !== false,
@@ -225,6 +233,13 @@ export default function IXIAosCommercialObjectEditor({
       </header>
 
       <main>
+        {error ? (
+          <div className={`editor-notice ${conflict ? "conflict" : "error"}`} role="alert">
+            <strong>{conflict ? "REVISION CONFLICT" : "NOT SAVED"}</strong>
+            <span>{clean(error?.message) || "The draft is preserved. Review the problem and retry."}</span>
+          </div>
+        ) : null}
+
         {mediaEnabled ? (
           <IXIAosPrimaryMediaEditor media={media} onChange={setMedia} />
         ) : null}
@@ -245,12 +260,16 @@ export default function IXIAosCommercialObjectEditor({
             const protectedId = isBusinessIdentifier(definition);
             return (
               <div className={`field-row ${protectedId ? "business-id" : ""}`} key={definition.fieldId}>
-                <input
-                  aria-label={`Field ${index + 1} label`}
-                  value={definition.label}
-                  disabled={definition.editable === false}
-                  onChange={event => updateDefinition(definition.fieldId, { label: event.target.value })}
-                />
+                {protectedId ? (
+                  <span className="fixed-field-label">ID</span>
+                ) : (
+                  <input
+                    aria-label={`Field ${index + 1} label`}
+                    value={definition.label}
+                    disabled={definition.editable === false}
+                    onChange={event => updateDefinition(definition.fieldId, { label: event.target.value })}
+                  />
+                )}
                 <input
                   aria-label={`${definition.label} value`}
                   value={draft[definition.fieldId] ?? ""}
@@ -291,7 +310,7 @@ export default function IXIAosCommercialObjectEditor({
       </main>
 
       <style jsx global>{`
-        .ixi-aos-commercial-editor,.ixi-aos-commercial-editor *{box-sizing:border-box}.ixi-aos-commercial-editor{position:absolute;inset:0;z-index:260;background:#0b0d0c;color:#eef1ef;font-family:Arial,Helvetica,sans-serif}.ixi-aos-commercial-editor>header{height:43px;display:flex;align-items:center;justify-content:space-between;padding:0 9px;border-bottom:1px solid #303531;background:#151815}.ixi-aos-commercial-editor>header small{display:block;color:#ffc400;font-size:5px;font-weight:950}.ixi-aos-commercial-editor>header strong{display:block;margin-top:3px;font-size:10px}.ixi-aos-commercial-editor>header nav{display:flex;gap:4px}.ixi-aos-commercial-editor button,.ixi-aos-commercial-editor select{height:24px;border:1px solid #3a403b;border-radius:4px;background:#111411;color:#dce0dd;font-size:6px;font-weight:950}.ixi-aos-commercial-editor>header button{padding:0 9px}.ixi-aos-commercial-editor>header button:first-child{border-color:#ffc40066;color:#ffc400}.ixi-aos-commercial-editor button:disabled,.ixi-aos-commercial-editor select:disabled{opacity:.42;cursor:not-allowed}.ixi-aos-commercial-editor>main{position:absolute;top:43px;left:0;right:0;bottom:0;padding:8px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#4b514d transparent}.ixi-aos-commercial-editor section{margin-top:8px}.ixi-aos-commercial-editor h4{height:20px;margin:0;display:flex;align-items:center;color:#ffc400;font-size:6px;font-weight:950;letter-spacing:.06em}.ixi-aos-commercial-editor .identity-field{display:block;padding:7px;border:1px solid #2b302c;border-radius:5px;background:#101310}.ixi-aos-commercial-editor label>span{display:block;margin-bottom:4px;color:#8d958f;font-size:5px;font-weight:900}.ixi-aos-commercial-editor input{width:100%;height:26px;padding:0 7px;border:1px solid #343a35;border-radius:4px;background:#090b0a;color:#edf0ee;font-size:7px;font-weight:850;outline:none}.ixi-aos-commercial-editor .field-columns,.ixi-aos-commercial-editor .field-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr) 62px 26px;gap:4px}.ixi-aos-commercial-editor .field-columns{padding:0 4px 4px;color:#68716b;font-size:4.7px;font-weight:900}.ixi-aos-commercial-editor .field-row{margin-bottom:4px}.ixi-aos-commercial-editor .field-row select{width:100%;padding:0 4px}.ixi-aos-commercial-editor .field-row button{width:26px;padding:0}.ixi-aos-commercial-editor .field-row.business-id{padding:4px;border:1px solid #ffc40033;border-radius:5px;background:#ffc40008}.ixi-aos-commercial-editor .add-field{width:100%;margin-top:4px;border-color:#ffc40044;color:#ffc400;background:#111411}
+        .ixi-aos-commercial-editor,.ixi-aos-commercial-editor *{box-sizing:border-box}.ixi-aos-commercial-editor{position:absolute;inset:0;z-index:260;background:#0b0d0c;color:#eef1ef;font-family:Arial,Helvetica,sans-serif}.ixi-aos-commercial-editor>header{height:43px;display:flex;align-items:center;justify-content:space-between;padding:0 9px;border-bottom:1px solid #303531;background:#151815}.ixi-aos-commercial-editor>header small{display:block;color:#ffc400;font-size:5px;font-weight:950}.ixi-aos-commercial-editor>header strong{display:block;margin-top:3px;font-size:10px}.ixi-aos-commercial-editor>header nav{display:flex;gap:4px}.ixi-aos-commercial-editor button,.ixi-aos-commercial-editor select{height:24px;border:1px solid #3a403b;border-radius:4px;background:#111411;color:#dce0dd;font-size:6px;font-weight:950}.ixi-aos-commercial-editor>header button{padding:0 9px}.ixi-aos-commercial-editor>header button:first-child{border-color:#ffc40066;color:#ffc400}.ixi-aos-commercial-editor button:disabled,.ixi-aos-commercial-editor select:disabled{opacity:.42;cursor:not-allowed}.ixi-aos-commercial-editor>main{position:absolute;top:43px;left:0;right:0;bottom:0;padding:8px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#4b514d transparent}.ixi-aos-commercial-editor .editor-notice{display:flex;flex-direction:column;gap:3px;padding:7px;border:1px solid #a73a3a;border-radius:5px;background:#2a1111;color:#f5d7d7}.ixi-aos-commercial-editor .editor-notice.conflict{border-color:#ffc40066;background:#ffc4000d;color:#ffe89a}.ixi-aos-commercial-editor .editor-notice strong{font-size:6px;letter-spacing:.05em}.ixi-aos-commercial-editor .editor-notice span{font-size:6px;line-height:1.35}.ixi-aos-commercial-editor section{margin-top:8px}.ixi-aos-commercial-editor h4{height:20px;margin:0;display:flex;align-items:center;color:#ffc400;font-size:6px;font-weight:950;letter-spacing:.06em}.ixi-aos-commercial-editor .identity-field{display:block;padding:7px;border:1px solid #2b302c;border-radius:5px;background:#101310}.ixi-aos-commercial-editor label>span{display:block;margin-bottom:4px;color:#8d958f;font-size:5px;font-weight:900}.ixi-aos-commercial-editor input{width:100%;height:26px;padding:0 7px;border:1px solid #343a35;border-radius:4px;background:#090b0a;color:#edf0ee;font-size:7px;font-weight:850;outline:none}.ixi-aos-commercial-editor .fixed-field-label{height:26px;display:flex;align-items:center;padding:0 7px;border:1px solid #5e552d;border-radius:4px;background:#12140f;color:#ffc400;font-size:7px;font-weight:950}.ixi-aos-commercial-editor .field-columns,.ixi-aos-commercial-editor .field-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr) 62px 26px;gap:4px}.ixi-aos-commercial-editor .field-columns{padding:0 4px 4px;color:#68716b;font-size:4.7px;font-weight:900}.ixi-aos-commercial-editor .field-row{margin-bottom:4px}.ixi-aos-commercial-editor .field-row select{width:100%;padding:0 4px}.ixi-aos-commercial-editor .field-row button{width:26px;padding:0}.ixi-aos-commercial-editor .field-row.business-id{padding:4px;border:1px solid #ffc40033;border-radius:5px;background:#ffc40008}.ixi-aos-commercial-editor .add-field{width:100%;margin-top:4px;border-color:#ffc40044;color:#ffc400;background:#111411}
       `}</style>
     </div>
   );

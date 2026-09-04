@@ -83,6 +83,7 @@ export default function IXIAosDataContractCardAdapter({
     ...props,
     object,
     onSaveObject,
+    hasPersistenceAdapter: typeof props?.onSaveObject === "function",
     aosDataContractVersion: AOS_OBJECT_DATA_CONTRACT_VERSION
   };
 
