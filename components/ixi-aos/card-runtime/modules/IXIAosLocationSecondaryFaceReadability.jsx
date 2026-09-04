@@ -89,6 +89,119 @@ export default function IXIAosLocationSecondaryFaceReadability() {
         font-size: 10px !important;
       }
 
+      /*
+       * Face 2 · Commercial information architecture
+       * The card header is the sole editing authority. Rows use the same
+       * heading-first, value-second rhythm as the approved Face 3 layout.
+       */
+      .ixi-location-secondary-readable .ixi-aos-location-f2 .gate-code {
+        min-height: 52px !important;
+        flex-basis: 52px !important;
+        grid-template-columns: 25px minmax(0, 1fr) !important;
+        padding: 6px 8px !important;
+      }
+      .ixi-location-secondary-readable .ixi-aos-location-f2 .gate-copy {
+        padding-left: 8px !important;
+      }
+      .ixi-location-secondary-readable .ixi-aos-location-f2 .gate-copy strong {
+        margin-top: 4px !important;
+        white-space: nowrap !important;
+      }
+      .ixi-location-secondary-readable .ixi-aos-location-f2 .ops-section h3 {
+        width: 100% !important;
+        height: auto !important;
+        min-height: 28px !important;
+        padding: 6px 8px !important;
+        white-space: normal !important;
+      }
+      .ixi-location-secondary-readable .ixi-aos-location-f2 .ops-row {
+        min-height: 52px !important;
+        grid-template-columns: 16px minmax(0, 1fr) !important;
+        grid-template-rows: auto auto !important;
+        column-gap: 7px !important;
+        row-gap: 4px !important;
+        align-content: center !important;
+        padding: 7px 8px !important;
+      }
+      .ixi-location-secondary-readable .ixi-aos-location-f2 .ops-icon {
+        grid-column: 1 !important;
+        grid-row: 1 / span 2 !important;
+        align-self: center !important;
+      }
+      .ixi-location-secondary-readable .ixi-aos-location-f2 .ops-label {
+        grid-column: 2 !important;
+        grid-row: 1 !important;
+        white-space: normal !important;
+        overflow: visible !important;
+        text-overflow: clip !important;
+      }
+      .ixi-location-secondary-readable .ixi-aos-location-f2 .ops-row > strong,
+      .ixi-location-secondary-readable .ixi-aos-location-f2 .ops-row > input,
+      .ixi-location-secondary-readable .ixi-aos-location-f2 .ops-row > select,
+      .ixi-location-secondary-readable .ixi-aos-location-f2 .ops-inline-triple {
+        width: 100% !important;
+        min-width: 0 !important;
+        grid-column: 2 !important;
+        grid-row: 2 !important;
+      }
+      .ixi-location-secondary-readable .ixi-aos-location-f2 .ops-row > strong {
+        white-space: normal !important;
+        overflow: visible !important;
+        text-overflow: clip !important;
+      }
+      .ixi-location-secondary-readable .ixi-aos-location-f2 .ops-inline-triple {
+        grid-template-columns: minmax(0, 1fr) 44px 64px !important;
+        gap: 4px !important;
+      }
+      .ixi-location-secondary-readable .ixi-aos-location-f2 .site-instructions {
+        min-height: 72px !important;
+        grid-template-columns: 18px minmax(0, 1fr) !important;
+        gap: 8px !important;
+        padding: 9px 8px !important;
+      }
+      .ixi-location-secondary-readable .ixi-aos-location-f2 .site-instructions strong,
+      .ixi-location-secondary-readable .ixi-aos-location-f2 .site-instructions textarea {
+        width: 100% !important;
+        min-width: 0 !important;
+        white-space: normal !important;
+        overflow: visible !important;
+        text-overflow: clip !important;
+      }
+      .ixi-location-secondary-readable .ixi-aos-location-f2 .ops-relationship {
+        min-height: 52px !important;
+        grid-template-columns: 16px minmax(0, 1fr) 12px !important;
+        grid-template-rows: auto auto !important;
+        column-gap: 7px !important;
+        row-gap: 4px !important;
+        align-content: center !important;
+        padding: 7px 8px !important;
+      }
+      .ixi-location-secondary-readable .ixi-aos-location-f2 .rel-icon {
+        grid-column: 1 !important;
+        grid-row: 1 / span 2 !important;
+        align-self: center !important;
+      }
+      .ixi-location-secondary-readable .ixi-aos-location-f2 .rel-label {
+        grid-column: 2 !important;
+        grid-row: 1 !important;
+        white-space: normal !important;
+        overflow: visible !important;
+        text-overflow: clip !important;
+      }
+      .ixi-location-secondary-readable .ixi-aos-location-f2 .ops-relationship strong {
+        grid-column: 2 !important;
+        grid-row: 2 !important;
+        white-space: normal !important;
+        overflow: visible !important;
+        text-overflow: clip !important;
+      }
+      .ixi-location-secondary-readable .ixi-aos-location-f2 .ops-relationship b {
+        grid-column: 3 !important;
+        grid-row: 1 / span 2 !important;
+        align-self: center !important;
+        justify-self: end !important;
+      }
+
       /* Face 3 · Financial */
       .ixi-location-secondary-readable .ixi-location-f3-v12 .f3-section > h3,
       .ixi-location-secondary-readable .ixi-location-f3-v12 .f3-contact h4,
