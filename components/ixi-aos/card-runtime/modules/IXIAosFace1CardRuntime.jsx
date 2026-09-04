@@ -1,5 +1,5 @@
 import IXIAosV12LibraryReadability from "./IXIAosV12LibraryReadability";
-import IXIAosV12Face1EditPatch from "./IXIAosV12Face1EditPatch";
+import IXIAosInlineFace1Editor from "./IXIAosInlineFace1Editor";
 import {
   buildFace1GenericEditObject,
   restoreFace1GenericSave
@@ -11,12 +11,11 @@ export default function IXIAosFace1CardRuntime({
   maxFields = null,
   includeBusinessIdentifier = false,
   allowAddFields = false,
+  cardNumber = null,
   children
 }) {
   const face1Object = buildFace1GenericEditObject(object, { maxFields, includeBusinessIdentifier });
-  if (allowAddFields) {
-    face1Object.metadata = { ...(face1Object.metadata || {}), face1AllowAddFields: true };
-  }
+  if (allowAddFields) face1Object.metadata = { ...(face1Object.metadata || {}), face1AllowAddFields: true };
 
   const handleSave = async payload => {
     const editedObject = payload?.object || payload;
@@ -33,11 +32,18 @@ export default function IXIAosFace1CardRuntime({
     });
   };
 
+  const content = runtimeObject => typeof children === "function"
+    ? children({ object: runtimeObject, onSaveObject: handleSave })
+    : children;
+
   return (
-    <div className="ixi-v12-library-readable ixi-v12-face1-edit" style={{ width: 298, height: 471 }}>
-      {typeof children === "function" ? children({ object: face1Object, onSaveObject: handleSave }) : children}
+    <div className="ixi-v12-library-readable" style={{ width: 298, height: 471 }}>
+      {cardNumber ? (
+        <IXIAosInlineFace1Editor cardNumber={cardNumber} object={face1Object} onSaveObject={handleSave}>
+          {runtimeObject => content(runtimeObject)}
+        </IXIAosInlineFace1Editor>
+      ) : content(face1Object)}
       <IXIAosV12LibraryReadability />
-      <IXIAosV12Face1EditPatch />
     </div>
   );
 }
