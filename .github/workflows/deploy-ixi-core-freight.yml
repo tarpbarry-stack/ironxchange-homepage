@@ -53,7 +53,9 @@ jobs:
           STAGE=/tmp/ixi-core-freight-__IXI_CORE_SHA__
           ARCHIVE=/tmp/ixi-core-freight-__IXI_CORE_SHA__.tgz
           BACKUP=/var/backups/ixi-core-releases/freight-pre-__IXI_CORE_SHA__.tgz
-          FILES='index.js freight/constants.js freight/contracts/freightOrderContract.js freight/routes/freightAuthenticatedRequest.js freight/routes/freightRouter.js freight/services/freightService.js'
+          RUNTIME_FILES='index.js freight/routes/freightAuthenticatedRequest.js'
+          CHECKSUM_FILE='freight/routes/freightAuthenticatedRequest.js'
+          STAGE_FILES='index.js freight/constants.js freight/contracts/freightOrderContract.js freight/routes/freightAuthenticatedRequest.js freight/routes/freightRouter.js freight/services/freightService.js'
           SUCCESS=0
           ROLLBACK_ARMED=0
 
@@ -81,21 +83,20 @@ jobs:
 
           cd "$APP"
           ALREADY_CURRENT=1
-          for file in $FILES; do cmp -s "$APP/$file" "$STAGE/$file" || ALREADY_CURRENT=0; done
+          cmp -s "$APP/$CHECKSUM_FILE" "$STAGE/$CHECKSUM_FILE" || ALREADY_CURRENT=0
+          grep -A4 '"/freight/v1"' "$APP/index.js" | grep -q 'ixiInternalFinancialRequest' || ALREADY_CURRENT=0
           if [ "$ALREADY_CURRENT" -ne 1 ]; then
             printf '%s  %s\n' \
-              '8c33fe1ec5651ddbe740e5d3e7190c47afb13fe2a2bfd7ff0c713e7a106284b8' 'index.js' \
-              'e55c97d368164b107822159733b6b8785981ce83a02117be6ada231cac728720' 'freight/constants.js' \
-              '054337a22bd2b2c26ebdd65e50e4cf06b467da9d56e3c1ceb8a91d44fa9b7a21' 'freight/contracts/freightOrderContract.js' \
-              'bbce203a0381957b728bdb8d7e45756851f7ae8d44a50fb360f5ee614698f2c3' 'freight/routes/freightAuthenticatedRequest.js' \
-              '05efbecbc932d0c6add567879c36a91f5ec0d9c0b5cafbf48eee9bc0336cb172' 'freight/routes/freightRouter.js' \
-              '216b3dea4cd6f853fb1bb62598ec77e5877b1af02dabeef04a6613303c1bd4e3' 'freight/services/freightService.js' | sha256sum -c -
+              'bbce203a0381957b728bdb8d7e45756851f7ae8d44a50fb360f5ee614698f2c3' 'freight/routes/freightAuthenticatedRequest.js' | sha256sum -c -
+            grep -q 'const.*ixiInternalFinancialRequest' "$APP/index.js"
+            grep -q '"/financial"' "$APP/index.js"
+            grep -q '"/freight/v1"' "$APP/index.js"
           fi
 
           cd "$STAGE"
           npm ci --ignore-scripts --no-audit
           npm test
-          for file in $FILES; do node --check "$file"; done
+          for file in $STAGE_FILES; do node --check "$file"; done
           node - <<'NODE'
           const {freightRouter}=require('./freight/routes/freightRouter');
           const service=require('./freight/services/freightService');
@@ -107,9 +108,26 @@ jobs:
           if [ "$ALREADY_CURRENT" -ne 1 ]; then
             cd "$APP"
             mkdir -p /var/backups/ixi-core-releases
-            tar -czf "$BACKUP" $FILES
+            tar -czf "$BACKUP" $RUNTIME_FILES
             ROLLBACK_ARMED=1
-            for file in $FILES; do install -D -m 0644 "$STAGE/$file" "$APP/$file"; done
+            install -D -m 0644 "$STAGE/$CHECKSUM_FILE" "$APP/$CHECKSUM_FILE"
+            node - "$APP/index.js" <<'NODE'
+          const fs=require('fs');
+          const path=process.argv[2];
+          let source=fs.readFileSync(path,'utf8');
+          const internal='ixiInternalFinancialRequest';
+          const routeStart=source.indexOf('"/freight/v1"');
+          if(routeStart<0) throw new Error('Live Freight route mount missing.');
+          const routeWindow=source.slice(routeStart,routeStart+260);
+          if(!routeWindow.includes(internal)){
+            const anchor='"/freight/v1",\n  ixiAuthenticatedFinancialRequest,';
+            if(source.split(anchor).length!==2) throw new Error('Live Freight authentication mount is ambiguous.');
+            source=source.replace(anchor,'"/freight/v1",\n  ixiInternalFinancialRequest,\n  ixiAuthenticatedFinancialRequest,');
+          }
+          const next=`${path}.freight-auth-next`;
+          fs.writeFileSync(next,source,{mode:0o644});
+          fs.renameSync(next,path);
+          NODE
             run_pm2 reload IX-Core --update-env
           fi
 
@@ -121,12 +139,8 @@ jobs:
           done
           cd "$APP"
           printf '%s  %s\n' \
-            '6eee62d9cd279620e26af0432f07a4d07681dcb5f9f4335e992479a7ea2a92b3' 'index.js' \
-            'e55c97d368164b107822159733b6b8785981ce83a02117be6ada231cac728720' 'freight/constants.js' \
-            '054337a22bd2b2c26ebdd65e50e4cf06b467da9d56e3c1ceb8a91d44fa9b7a21' 'freight/contracts/freightOrderContract.js' \
-            '2795f89f5a203129756a808f96fbb6c2d374d820a5bc0244abde9e6f30603b9f' 'freight/routes/freightAuthenticatedRequest.js' \
-            '05efbecbc932d0c6add567879c36a91f5ec0d9c0b5cafbf48eee9bc0336cb172' 'freight/routes/freightRouter.js' \
-            '216b3dea4cd6f853fb1bb62598ec77e5877b1af02dabeef04a6613303c1bd4e3' 'freight/services/freightService.js' | sha256sum -c -
+            '2795f89f5a203129756a808f96fbb6c2d374d820a5bc0244abde9e6f30603b9f' 'freight/routes/freightAuthenticatedRequest.js' | sha256sum -c -
+          grep -A4 '"/freight/v1"' "$APP/index.js" | grep -q 'ixiInternalFinancialRequest'
 
           SUCCESS=1
           ROLLBACK_ARMED=0
