@@ -76,6 +76,8 @@ jobs:
           else echo 'PM2 process IX-Core was not found.' >&2; exit 1; fi
 
           cd "$APP"
+          echo 'Current guarded IX-Core source baseline:'
+          sha256sum $EXISTING
           printf '%s  %s\n' \
             'c4762c2516054ca56e04242c9c0e6476767731e9318081cf713af17161d82317' 'financial/IXIFinancialCloseControlEngine.js' \
             '4b491ae930825053e3c0d6576e6f66224cb15efa2da008d55215e5c44923f85f' 'financial/IXIFinancialCommandEngine.js' \
