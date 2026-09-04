@@ -17,9 +17,14 @@ export default function IXIAosFace1CardRuntime({
   const face1Object = buildFace1GenericEditObject(object, { maxFields, includeBusinessIdentifier });
   if (allowAddFields) face1Object.metadata = { ...(face1Object.metadata || {}), face1AllowAddFields: true };
 
+  const editableCardContract = Number(cardNumber) >= 4 && Number(cardNumber) <= 17;
+
   const handleSave = async payload => {
     const editedObject = payload?.object || payload;
-    const restoredObject = restoreFace1GenericSave(object, editedObject, { allowAddedDefinitions: allowAddFields });
+    const restoredObject = restoreFace1GenericSave(object, editedObject, {
+      allowAddedDefinitions: allowAddFields || editableCardContract,
+      allowDefinitionEdits: editableCardContract
+    });
     await onSaveObject?.({
       ...(payload && payload.object ? payload : {}),
       objectId: restoredObject?.objectId || restoredObject?.id,
