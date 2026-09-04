@@ -1,0 +1,37 @@
+{
+  "contract": "ixi-ticket-closeout",
+  "contractVersion": "1.0.0",
+  "ticketId": "ticket-574bcdc4-e28f-43fe-8670-28dd2aa5377a",
+  "runId": "ixi-chat-20260904-card009-edit-id",
+  "expectedRevision": 12,
+  "closeout": {
+    "summary": "Card 009 Edit now includes the canonical customer ID as a fixed ID label with an editable value, without displacing STATUS or changing Face 1.",
+    "editResults": [
+      {
+        "editId": "edit-f13ee1cb-a902-471f-b05a-4c736c182061",
+        "status": "completed",
+        "result": "Enabled businessIdentifier in Card 009's Face 1 edit runtime and raised its field allowance from six to seven. Edit now presents ID, YEAR, MAKE, MODEL, SERIAL #, HOURS, and STATUS; the ID caption is fixed while the canonical customer number remains editable and persisted."
+      }
+    ],
+    "filesChanged": [
+      "components/ixi-aos/cards/009/IXIAosCard009.jsx",
+      "tests/ixi-ticket-card009-business-id-contract.test.mjs"
+    ],
+    "tests": [
+      "11 focused Card 009 contract tests passed; 0 failed",
+      "PR #142 verified as exactly two changed files and merged",
+      "Production deployment dpl_JDWB3RUtQEowa1sjHiNGHDouQfma READY and owns preview.ironxchange.com"
+    ],
+    "before": "Card 009 Edit displayed YEAR, MAKE, MODEL, SERIAL #, HOURS, and STATUS but omitted the object's customer ID because includeBusinessIdentifier defaulted to false.",
+    "after": "Card 009 Edit includes the fixed ID label and editable canonical customer number in addition to all six existing rows. Face 1 and the rest of Card 009 remain unchanged.",
+    "risks": [],
+    "notes": [
+      "Only the Card 009 runtime opt-in and its focused regression test changed.",
+      "The shared runtime, all other AOS cards, Card 009 display geometry, media, relationships, commands, and rail are unchanged.",
+      "Main commit: bbe3afa3f22a6564fe183ff14b3fbc0739fc8f08"
+    ],
+    "prs": [
+      "https://github.com/tarpbarry-stack/ironxchange-homepage/pull/142"
+    ]
+  }
+}
