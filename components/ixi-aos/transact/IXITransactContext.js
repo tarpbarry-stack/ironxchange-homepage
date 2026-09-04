@@ -39,7 +39,14 @@ export function createIXITransactContext({
       phone: clean(entity.phone || entity.businessPhone),
       email: clean(entity.email || entity.businessEmail),
       website: clean(entity.website),
-      address: clean(entity.address || entity.officeLocation)
+      address: clean(entity.address || entity.officeLocation),
+      salesTermsDocument: {
+        ...objectValue(
+          entity.salesTermsDocument ||
+            source.salesTermsDocument ||
+            fields.salesTermsDocument,
+        ),
+      },
     },
 
     location: {

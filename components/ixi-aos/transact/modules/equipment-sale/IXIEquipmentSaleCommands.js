@@ -20,6 +20,40 @@ function canonical(record, result) {
   return { ...value, identity: { ...value.identity, salesOrderId: document.financialDocumentId, financialDocumentId: document.financialDocumentId, number: document.documentNumber || value?.identity?.number }, financialBinding: { financialDocumentId: document.financialDocumentId, revision: Number(envelope?.server?.revision || 1), line: document?.lines?.[0] || null } };
 }
 
+function canonicalInvoice(invoice, result) {
+  const envelope = result?.record || result?.data?.record || result?.persistence?.data?.record || {};
+  const document = envelope.financialDocument || result?.financialDocument || invoice || {};
+  return {
+    ...document,
+    financialBinding: {
+      financialDocumentId: clean(document.financialDocumentId),
+      revision: Number(envelope?.server?.revision || invoice?.financialBinding?.revision || 1),
+      line: document?.lines?.[0] || null
+    }
+  };
+}
+
+function invoiceDescription(record = {}) {
+  return `Equipment Invoice · ${clean(record?.asset?.label) || "Machine"} · ${clean(record?.customer?.name) || "Customer"}`;
+}
+
+function invoiceMetadata(record = {}, input = {}, invoice = {}) {
+  return {
+    ...(invoice?.metadata || {}),
+    transactModule: "equipment-sale",
+    invoiceType: "asset-sale",
+    invoiceStatus: "draft",
+    directEntry: !clean(invoice?.sourceFinancialDocumentId || invoice?.metadata?.salesOrderId),
+    directEntryReason: clean(input.directEntryReason),
+    customerPoNumber: clean(input.customerPoNumber),
+    administrativeNote: clean(input.memo),
+    commercialBreakdown: record?.totals || {},
+    customer: record?.customer || {},
+    asset: record?.asset || {},
+    brand: record?.brand || {}
+  };
+}
+
 export async function saveIXIEquipmentSale({ object = {}, context = {}, record = {}, action = "save", signal } = {}) {
   const id = clean(record?.financialBinding?.financialDocumentId);
   if (id) {
@@ -48,4 +82,66 @@ export async function saveIXIEquipmentInvoiceDraft(invoice = {}, input = {}) {
   if (clean(invoice.financialState).toLowerCase() !== "draft") throw new Error("An issued Invoice is immutable. Use a credit or replacement control.");
   const commandId = crypto.randomUUID();
   return patchIXIAosFinancialDocument({ financialDocumentId: id, expectedRevision: revision, commandId, idempotencyKey: `ixi-equipment-invoice-draft:${commandId}`, patch: { dueDate: clean(input.dueDate), memo: clean(input.memo), externalReference: clean(input.customerPoNumber), metadata: { ...(invoice.metadata || {}), invoiceStatus: "draft", customerPoNumber: clean(input.customerPoNumber), administrativeNote: clean(input.memo) } }, metadata: { transactModule: "equipment-sale", action: "edit-draft-invoice" } });
+}
+
+export async function saveIXIEquipmentInvoice({ object = {}, context = {}, record = {}, invoice = null, input = {}, signal } = {}) {
+  const id = clean(invoice?.financialBinding?.financialDocumentId || invoice?.financialDocumentId);
+  const linkedSalesOrderId = clean(invoice?.sourceFinancialDocumentId || invoice?.metadata?.salesOrderId);
+  const amount = Number(record?.totals?.total || 0);
+  const description = invoiceDescription(record);
+  const metadata = invoiceMetadata(record, input, invoice || {});
+
+  if (id) {
+    if (clean(invoice?.financialState).toLowerCase() !== "draft") throw new Error("An issued Invoice is immutable. Use a credit or replacement control.");
+    const commandId = crypto.randomUUID();
+    const commercialPatch = linkedSalesOrderId ? {} : {
+      occurredAt: clean(record?.commercial?.orderDate),
+      description,
+      paymentTerms: clean(record?.commercial?.paymentTerms),
+      references: refs(context, record),
+      lines: [{ ...(invoice?.lines?.[0] || {}), description, quantity: 1, rate: amount, amount, currency: clean(record?.commercial?.currency || "USD"), references: refs(context, record) }],
+      totals: { subtotal: amount, total: amount }
+    };
+    const response = await patchIXIAosFinancialDocument({
+      financialDocumentId: id,
+      expectedRevision: Number(invoice?.financialBinding?.revision || 0),
+      commandId,
+      idempotencyKey: `ixi-equipment-invoice:${commandId}`,
+      patch: { ...commercialPatch, dueDate: clean(input.dueDate || record?.commercial?.dueDate), memo: clean(input.memo), externalReference: clean(input.customerPoNumber), metadata },
+      metadata: { transactModule: "equipment-sale", action: linkedSalesOrderId ? "edit-linked-draft-invoice" : "edit-direct-draft-invoice" },
+      signal
+    });
+    return { response, invoice: canonicalInvoice(invoice, response) };
+  }
+
+  const references = refs(context, record);
+  const commandId = crypto.randomUUID();
+  const response = await createIXIAosObjectFinancialDocument({
+    object,
+    documentType: "invoice",
+    commandId,
+    idempotencyKey: `ixi-equipment-invoice:${commandId}`,
+    signal,
+    input: {
+      financialState: "draft",
+      currency: clean(record?.commercial?.currency || "USD"),
+      occurredAt: clean(record?.commercial?.orderDate),
+      dueDate: clean(input.dueDate || record?.commercial?.dueDate),
+      description,
+      memo: clean(input.memo),
+      externalReference: clean(input.customerPoNumber),
+      amount,
+      quantity: 1,
+      rate: amount,
+      category: "equipment-sale",
+      customerPassportId: clean(record?.customer?.passportId),
+      issuedByPassportId: clean(context?.actor?.passportId),
+      paymentTerms: clean(record?.commercial?.paymentTerms),
+      references,
+      metadata
+    },
+    additionalReferences: references,
+    metadata: { transactModule: "equipment-sale", action: "create-direct-draft-invoice" }
+  });
+  return { response, invoice: canonicalInvoice(null, response) };
 }
