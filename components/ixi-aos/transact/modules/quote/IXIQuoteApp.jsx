@@ -16,6 +16,7 @@ import IXIQuoteStyles from "./IXIQuoteStyles";
 const clean = value => String(value ?? "").trim();
 const money = value => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(Number(value || 0));
 const EMPTY = {
+  dealType: "standard-sale", rpo: {}, additionalTermsRows: [],
   customerName: "", customerContactName: "", customerPhone: "", customerEmail: "", customerAddress: "", customerCityStateZip: "",
   quotedPrice: "", tax: "", freight: "", fees: "", tradeAllowance: "", tradeDescription: "",
   quoteDate: IXIQuoteDefaults.quoteDate, validThrough: "", paymentTerms: "", depositTerms: "", deliveryTerms: "",
@@ -32,6 +33,33 @@ function Input({ value, onChange, ...props }) {
 
 function Area({ value, onChange, ...props }) {
   return <textarea {...props} value={value ?? ""} onChange={event => onChange(event.target.value)} />;
+}
+
+function DealTypeSelector({ value, onChange, compact = false }) {
+  return <div className={`qt-deal-type ${compact ? "compact" : ""}`}><span>TRANSACTION TYPE</span><div><button type="button" className={value !== "rental-purchase-option" ? "active" : ""} onClick={() => onChange("standard-sale")}>STANDARD SALE</button><button type="button" className={value === "rental-purchase-option" ? "active" : ""} onClick={() => onChange("rental-purchase-option")}>RENTAL PURCHASE OPTION</button></div></div>;
+}
+
+const RPO_FIELDS = [
+  ["startDate", "RPO START DATE", "date"], ["firstPaymentDate", "FIRST PAYMENT DATE", "date"], ["finalOptionDate", "FINAL OPTION DATE", "date"],
+  ["termMonths", "TERM (MONTHS)", "number"], ["paymentCount", "PAYMENT COUNT", "number"], ["initialPayment", "INITIAL PAYMENT / DEPOSIT", "decimal"],
+  ["periodicPayment", "PERIODIC PAYMENT", "decimal"], ["taxPerPayment", "TAX PER PAYMENT", "decimal"], ["recurringFees", "RECURRING FEES", "decimal"],
+  ["purchaseCreditAmount", "AMOUNT APPLIED PER PAYMENT", "decimal"], ["purchaseCreditPercent", "PERCENT APPLIED", "decimal"], ["optionPrice", "PURCHASE OPTION PRICE", "decimal"],
+  ["currentPayoff", "CURRENT PAYOFF", "decimal"], ["usageLimit", "USAGE / HOUR LIMIT", "text"], ["excessUsageRate", "EXCESS USAGE RATE", "text"]
+];
+
+function RPOEditor({ rpo = {}, patchRpo, compact = false, disabled = false }) {
+  const fields = compact ? RPO_FIELDS.filter(([key]) => ["startDate", "termMonths", "periodicPayment", "paymentCount", "purchaseCreditAmount", "optionPrice"].includes(key)) : RPO_FIELDS;
+  return <section className={`qt-rpo ${compact ? "compact" : ""}`}><h2>RENTAL PURCHASE OPTION TERMS</h2><div className="qt-form-grid">
+    <Field label="PAYMENT FREQUENCY"><select disabled={disabled} value={rpo.paymentFrequency || "monthly"} onChange={event => patchRpo("paymentFrequency", event.target.value)}><option value="weekly">Weekly</option><option value="biweekly">Biweekly</option><option value="monthly">Monthly</option><option value="quarterly">Quarterly</option><option value="custom">Custom</option></select></Field>
+    <Field label="PURCHASE CREDIT METHOD"><select disabled={disabled} value={rpo.purchaseCreditType || "amount"} onChange={event => patchRpo("purchaseCreditType", event.target.value)}><option value="amount">Fixed amount per payment</option><option value="percent">Percentage of payment</option></select></Field>
+    {fields.map(([key, label, type]) => <Field key={key} label={label}><Input disabled={disabled} type={type === "date" ? "date" : type === "number" ? "number" : undefined} inputMode={type === "decimal" ? "decimal" : undefined} value={rpo[key]} onChange={value => patchRpo(key, value)} /></Field>)}
+    {!compact ? <><Field wide label="EARLY BUYOUT TERMS"><Area disabled={disabled} value={rpo.earlyBuyoutTerms} onChange={value => patchRpo("earlyBuyoutTerms", value)} /></Field><Field label="DELIVERY TERMS"><Area disabled={disabled} value={rpo.deliveryTerms} onChange={value => patchRpo("deliveryTerms", value)} /></Field><Field label="RETURN TERMS"><Area disabled={disabled} value={rpo.returnTerms} onChange={value => patchRpo("returnTerms", value)} /></Field><Field label="MAINTENANCE RESPONSIBILITY"><Area disabled={disabled} value={rpo.maintenanceResponsibility} onChange={value => patchRpo("maintenanceResponsibility", value)} /></Field><Field label="INSURANCE REQUIREMENTS"><Area disabled={disabled} value={rpo.insuranceRequirements} onChange={value => patchRpo("insuranceRequirements", value)} /></Field><Field label="LATE FEE TERMS"><Area disabled={disabled} value={rpo.lateFeeTerms} onChange={value => patchRpo("lateFeeTerms", value)} /></Field><Field label="DEFAULT TERMS"><Area disabled={disabled} value={rpo.defaultTerms} onChange={value => patchRpo("defaultTerms", value)} /></Field><Field wide label="RPO NOTES"><Area disabled={disabled} value={rpo.notes} onChange={value => patchRpo("notes", value)} /></Field></> : null}
+  </div></section>;
+}
+
+function AdditionalTermsEditor({ terms = [], onChange }) {
+  const update = (index, key, value) => onChange(terms.map((term, current) => current === index ? { ...term, [key]: value } : term));
+  return <section className="qt-additional-terms"><div className="qt-section-head"><h2>ADDITIONAL TRANSACTION TERMS</h2><button type="button" onClick={() => onChange([...terms, { termId: globalThis.crypto?.randomUUID?.() || `TERM-${Date.now()}`, label: "", value: "", scope: "transaction", customerFacing: true }])}>+ ADD TERM</button></div><p>Add any transaction-specific or RPO provision without changing the standard form.</p>{terms.map((term, index) => <div className="qt-term-row" key={term.termId || index}><Input value={term.label} onChange={value => update(index, "label", value)} placeholder="Term name" /><Area value={term.value} onChange={value => update(index, "value", value)} placeholder="Term language or value" /><select value={term.scope || "transaction"} onChange={event => update(index, "scope", event.target.value)}><option value="transaction">Whole transaction</option><option value="rpo">RPO only</option><option value="invoice">Invoice</option></select><label><input type="checkbox" checked={term.customerFacing !== false} onChange={event => update(index, "customerFacing", event.target.checked)} /> CUSTOMER FACING</label><button type="button" onClick={() => onChange(terms.filter((_, current) => current !== index))}>REMOVE</button></div>)}</section>;
 }
 
 function Logo({ brand }) {
@@ -60,7 +88,7 @@ function QuotePresentation({ record }) {
   return <article className="qt-document">
     <header className="qt-document-head">
       <div className="qt-company"><Logo brand={brand} /><div><strong>{brand.companyName || "COMPANY"}</strong><span>{brand.address}</span><span>{[brand.phone, brand.email, brand.website].filter(Boolean).join(" · ")}</span></div></div>
-      <div className="qt-document-id"><h1>{presentation.headline || "EQUIPMENT QUOTATION"}</h1><b>{record.identity?.number || "DRAFT QUOTE"}</b><span>REVISION {record.identity?.revision || 1}</span></div>
+      <div className="qt-document-id"><h1>{presentation.headline || "EQUIPMENT QUOTATION"}</h1><b>{record.identity?.number || "DRAFT QUOTE"}</b><span>{record.dealType === "rental-purchase-option" ? "RENTAL PURCHASE OPTION" : "STANDARD SALE"} · REVISION {record.identity?.revision || 1}</span></div>
     </header>
     <section className="qt-document-meta">
       <div><span>PREPARED FOR</span><strong>{customer.name || "CUSTOMER"}</strong><p>{customer.contactName}</p><p>{customer.phone}</p><p>{customer.email}</p><p>{customer.address}</p><p>{customer.cityStateZip}</p></div>
@@ -80,12 +108,15 @@ function QuotePresentation({ record }) {
       <TotalRows totals={record.totals} />
     </div>
     <section className="qt-terms"><h2>CONDITION & TERMS</h2>{presentation.conditionTerms ? <p><b>CONDITION</b>{presentation.conditionTerms}</p> : null}{presentation.warrantyTerms ? <p><b>WARRANTY</b>{presentation.warrantyTerms}</p> : null}{presentation.additionalTerms ? <p>{presentation.additionalTerms}</p> : null}</section>
+    {record.dealType === "rental-purchase-option" ? <section className="qt-terms"><h2>RENTAL PURCHASE OPTION</h2><p><b>START / OPTION</b>{record.rpo?.startDate || "—"} / {record.rpo?.finalOptionDate || "—"}</p><p><b>SCHEDULE</b>{record.rpo?.paymentCount || 0} {record.rpo?.paymentFrequency || "monthly"} payments of {money(record.rpo?.periodicPayment)}</p><p><b>APPLIED TO PURCHASE</b>{record.rpo?.purchaseCreditType === "percent" ? `${record.rpo?.purchaseCreditPercent || 0}% per payment` : `${money(record.rpo?.purchaseCreditAmount)} per payment`}</p><p><b>PURCHASE OPTION</b>{money(record.rpo?.optionPrice)}</p><p><b>RETURN TERMS</b>{record.rpo?.returnTerms || "—"}</p></section> : null}
+    {record.additionalTerms?.filter(term => term.customerFacing).length ? <section className="qt-terms"><h2>ADDITIONAL TRANSACTION TERMS</h2>{record.additionalTerms.filter(term => term.customerFacing).map(term => <p key={term.termId}><b>{term.label || "TERM"}</b>{term.value}</p>)}</section> : null}
     <footer><strong>{brand.companyName || "COMPANY"}</strong><span>Prepared through IXI TRAN$ACT · Quote {record.identity?.number || "DRAFT"}</span></footer>
   </article>;
 }
 
-function QuoteEditor({ input, patch }) {
+function QuoteEditor({ input, patch, patchRpo, setAdditionalTerms }) {
   return <div className="qt-editor">
+    <section className="qt-deal-section"><DealTypeSelector value={input.dealType} onChange={value => patch("dealType", value)} /></section>
     <section><h2>CUSTOMER</h2><div className="qt-form-grid">
       <Field label="COMPANY / CUSTOMER"><Input value={input.customerName} onChange={value => patch("customerName", value)} /></Field>
       <Field label="CONTACT"><Input value={input.customerContactName} onChange={value => patch("customerContactName", value)} /></Field>
@@ -118,6 +149,8 @@ function QuoteEditor({ input, patch }) {
       <Field label="ADDITIONAL CUSTOMER TERMS" wide><Area value={input.additionalTerms} onChange={value => patch("additionalTerms", value)} /></Field>
     </div></section>
     <section className="internal"><h2>INTERNAL — NOT CUSTOMER FACING</h2><Field label="SALES NOTES" wide><Area value={input.internalNotes} onChange={value => patch("internalNotes", value)} /></Field></section>
+    {input.dealType === "rental-purchase-option" ? <RPOEditor rpo={input.rpo} patchRpo={patchRpo} /> : null}
+    <AdditionalTermsEditor terms={input.additionalTermsRows} onChange={setAdditionalTerms} />
   </div>;
 }
 
@@ -143,6 +176,8 @@ export default function IXIQuoteApp({ context = {}, object = {}, initialRecord =
   const draft = useMemo(() => record ? updateIXIQuoteDraft(record, { context, object, input }) : createIXIQuoteDraft({ context, object, input }), [record, context, object, input]);
   const completeness = useMemo(() => getIXIQuoteCompleteness(draft), [draft]);
   const patch = (key, value) => { setInput(current => ({ ...current, [key]: value })); setSavedMessage(""); };
+  const patchRpo = (key, value) => { setInput(current => ({ ...current, rpo: { ...(current.rpo || {}), [key]: value } })); setSavedMessage(""); };
+  const setAdditionalTerms = value => { setInput(current => ({ ...current, additionalTermsRows: value })); setSavedMessage(""); };
 
   async function save(nextRecord = draft, action = "save") {
     if (busy) return null;
@@ -185,7 +220,7 @@ export default function IXIQuoteApp({ context = {}, object = {}, initialRecord =
       </div>
       <div className="qt-workspace-status"><span>{draft.identity?.number || "UNNUMBERED DRAFT"} · REV {draft.identity?.revision || 1}</span><span>COMPLETENESS {completeness.percent}% · SAVE IS ALWAYS AVAILABLE</span>{savedMessage ? <b>{savedMessage}</b> : null}</div>
       {error ? <div className="qt-workspace-error">{error}</div> : null}
-      <main className="qt-workspace-body">{worksheetMode === "preview" ? <QuotePresentation record={draft} /> : <QuoteEditor input={input} patch={patch} />}</main>
+      <main className="qt-workspace-body">{worksheetMode === "preview" ? <QuotePresentation record={draft} /> : <QuoteEditor input={input} patch={patch} patchRpo={patchRpo} setAdditionalTerms={setAdditionalTerms} />}</main>
     </div>, document.body
   ) : null;
 
@@ -193,11 +228,13 @@ export default function IXIQuoteApp({ context = {}, object = {}, initialRecord =
     <div className="ixi-quote-card" style={{ "--quote-accent": /^#[0-9a-f]{6}$/i.test(clean(brand.accentColor)) ? brand.accentColor : "#ffc400" }}>
       <div className="qt-card-head"><button onClick={onBack}>‹</button><div><span>IXI TRAN$ACT</span><strong>QUOTE</strong></div><Logo brand={brand} /></div>
       <div className="qt-card-company">{brand.companyName}</div>
+      <DealTypeSelector compact value={input.dealType} onChange={value => patch("dealType", value)} />
       <div className="qt-card-asset"><span>EQUIPMENT</span><strong>{draft.asset?.label || "CURRENT MACHINE"}</strong><small>{[draft.asset?.serialNumber, draft.asset?.stockNumber].filter(Boolean).join(" · ") || "PASSPORT-LINKED"}</small></div>
       <div className="qt-card-fields">
         <Field label="CUSTOMER / COMPANY"><Input value={input.customerName} onChange={value => patch("customerName", value)} placeholder="Name" /></Field>
         <div className="qt-card-two"><Field label="PHONE"><Input value={input.customerPhone} onChange={value => patch("customerPhone", value)} placeholder="Phone" /></Field><Field label="PRICE"><Input inputMode="decimal" value={input.quotedPrice} onChange={value => patch("quotedPrice", value)} placeholder="$0" /></Field></div>
       </div>
+      {input.dealType === "rental-purchase-option" ? <div className="qt-card-rpo"><RPOEditor compact rpo={input.rpo} patchRpo={patchRpo} /></div> : null}
       <div className="qt-card-total"><span>QUOTED TOTAL</span><strong>{money(draft.totals?.total)}</strong></div>
       <div className="qt-card-meter"><div><i style={{ width: `${completeness.percent}%` }} /></div><span>{completeness.percent}% FORMAL COMPLETENESS</span></div>
       {error ? <div className="qt-card-error">{error}</div> : null}

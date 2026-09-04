@@ -56,6 +56,11 @@ test("Sales Order and Invoice are separate launcher entries with canonical forms
   assert.match(commands, /create-direct-draft-invoice/u);
   assert.match(commands, /expectedRevision/u);
   assert.match(commands, /commercialBreakdown/u);
+  assert.match(commands, /dealType/u);
+  assert.match(commands, /additionalTerms/u);
+  assert.match(app, /RENTAL PURCHASE OPTION/u);
+  assert.match(app, /AMOUNT APPLIED \/ PAYMENT/u);
+  assert.match(app, /ADDITIONAL TERMS/u);
   assert.match(shell, /changePayload\?\.invoice \|\| salesInvoiceSnapshot/u);
   assert.match(context, /salesTermsDocument/u);
 });
@@ -76,6 +81,8 @@ test("equipment Quote is a canonical AWS-backed application with a full branded 
   assert.match(app, /OPEN WORKSHEET/u);
   assert.match(app, /FORMAL PREVIEW/u);
   assert.match(app, /SAVE IS ALWAYS AVAILABLE/u);
+  assert.match(app, /RENTAL PURCHASE OPTION TERMS/u);
+  assert.match(app, /ADDITIONAL TRANSACTION TERMS/u);
   assert.match(shell, /initialRecord=\{quoteSnapshot\}/u);
 });
 
