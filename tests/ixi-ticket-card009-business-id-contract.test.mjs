@@ -34,6 +34,10 @@ test("Card 009 removes only the duplicate adapter-level business-ID overlay", ()
   assert.match(card009Source, /<IXIAosGenericMediaDominant009/u);
 });
 
+test("Card 009 includes the business ID in Edit without displacing an existing field", () => {
+  assert.match(card009Source, /<IXIAosFace1CardRuntime cardNumber=\{9\} object=\{contractProps\.object\} onSaveObject=\{contractProps\.onSaveObject\} maxFields=\{7\} includeBusinessIdentifier>/u);
+});
+
 test("Card 009 shell and existing controls remain intact", () => {
   assert.match(source, /const W = 298;/u);
   assert.match(source, /const H = 471;/u);
