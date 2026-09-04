@@ -188,14 +188,13 @@ onLotNumberKeyDown,
         }
 
         .aof1-title-row {
-          position: relative;
-
           height: 34px;
           min-height: 34px;
 
-          display: flex;
-          justify-content:
-            space-between;
+          display: grid;
+          grid-template-columns:
+            minmax(0, 1fr)
+            max-content;
           align-items: flex-start;
 
           gap: 10px;
@@ -205,11 +204,9 @@ onLotNumberKeyDown,
 
         .aof1-title-row h3 {
           margin: 0;
-
-          max-width:
-            calc(
-              100% - 62px
-            );
+          min-width: 0;
+          width: 100%;
+          max-width: none;
 
           color: #f2f2f2;
 
@@ -227,11 +224,10 @@ onLotNumberKeyDown,
         }
 
         .aof1-hours {
-          position: absolute;
-          top: 1px;
-          right: 0;
-
-          width: 58px;
+          position: static;
+          width: auto;
+          min-width: max-content;
+          justify-self: end;
 
           color:
             rgba(
