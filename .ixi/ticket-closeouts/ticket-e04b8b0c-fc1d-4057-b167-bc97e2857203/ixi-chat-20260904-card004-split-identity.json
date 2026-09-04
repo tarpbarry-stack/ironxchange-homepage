@@ -1,0 +1,39 @@
+{
+  "contract": "ixi-ticket-closeout",
+  "contractVersion": "1.0.0",
+  "ticketId": "ticket-e04b8b0c-fc1d-4057-b167-bc97e2857203",
+  "runId": "ixi-chat-20260904-card004-split-identity",
+  "expectedRevision": 3,
+  "closeout": {
+    "summary": "Card 004 now removes the separate small ID overlay and divides its existing right-side V12 summary shell into stacked ID and OPEN POSITIONS sections.",
+    "editResults": [
+      {
+        "editId": "edit-d2a29274-a051-46c0-b42e-821f20f29819",
+        "status": "completed",
+        "result": "Suppressed only Card 004's adapter-level ID overlay, wired its designated Face 1 summary controller, added a single center divider, and populated the two sections from the canonical business identifier and open-jobs object field."
+      }
+    ],
+    "filesChanged": [
+      "components/ixi-aos/cards/004/IXIAosCard004Personnel.jsx",
+      "components/ixi-aos/cards/004/IXIAosCard004CommercialFace1.jsx",
+      "tests/ixi-ticket-card004-split-summary-contract.test.mjs"
+    ],
+    "tests": [
+      "12 focused Card 004, relationship-shell, and top-edit contract tests passed; 0 failed",
+      "PR #143 verified as exactly three changed files and merged",
+      "Production deployment dpl_FKMP4uhQsqbvrHVjYp7FF2C7w1qg READY and owns preview.ironxchange.com"
+    ],
+    "before": "Card 004 showed a separate floating business-ID block over an undivided right-side hero compartment.",
+    "after": "The floating ID block is absent. The original right-side summary shell has two equal stacked cells separated by one V12 divider: ID above and OPEN POSITIONS below.",
+    "risks": [],
+    "notes": [
+      "The ID remains included in Card 004 Edit and saves through the canonical business-identifier contract.",
+      "Open positions reads the object's openJobs/open-positions field rather than an unrelated child-status aggregate.",
+      "Card 004's relationship shell, command row, rail, dimensions, and shared editor are preserved.",
+      "Main commit: b4d7bcc9c1e5be112d8bba4271359bad0e1af760"
+    ],
+    "prs": [
+      "https://github.com/tarpbarry-stack/ironxchange-homepage/pull/143"
+    ]
+  }
+}
