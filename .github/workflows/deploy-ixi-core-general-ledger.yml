@@ -81,11 +81,11 @@ jobs:
           printf '%s  %s\n' \
             'c4762c2516054ca56e04242c9c0e6476767731e9318081cf713af17161d82317' 'financial/IXIFinancialCloseControlEngine.js' \
             '4b491ae930825053e3c0d6576e6f66224cb15efa2da008d55215e5c44923f85f' 'financial/IXIFinancialCommandEngine.js' \
-            '3a096f7724e5ff0db598325b8df17e6f0504212dde39c2e9e9f1120ce2196692' 'financial/IXIFinancialCommandRoutes.js' \
+            'c488ecd605c21e5675f4e304414b6ef55eea7b95cc7d7455575d38b7a25f7124' 'financial/IXIFinancialCommandRoutes.js' \
             '84f859c1389df54932082c4ac0e479a0b7e1daa6c5411fc6009ec9d4ffe74a91' 'financial/IXIFinancialDocumentFactoryRegistry.js' \
             '6df438ef2aa73bc39335b7d7875a804794fa84751e6cde452a1a31804db21251' 'financial/IXIFinancialPermissionEngine.js' \
-            'a12c8f461780fe618c96aecdbad9ae17fa177bba51b679925376eb8be39ffa98' 'financial/IXIFinancialPurchaseOrderFactory.js' \
-            'a6f8bb84a12938ef47add50878701faf44764764cedc64f696e58c8ba940e843' 'financial/IXIFinancialRoutes.js' \
+            '2d869cc5b2671e6d8fa4e99e48051a9ca1c7ecb0b73a96a410a1ac5b6af0c2d5' 'financial/IXIFinancialPurchaseOrderFactory.js' \
+            'ec966856fda05a92cb6ce537457f6e3854fc0272609649b7e119020c55df162c' 'financial/IXIFinancialRoutes.js' \
             'b93a7cd55d54c345d8c7ebddc37ed3f24b3fd112d6ab9b3684669df70222004b' 'financial/IXIFinancialValidationBridge.js' | sha256sum -c -
 
           mkdir -p /var/backups/ixi-core-releases
