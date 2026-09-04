@@ -1,0 +1,42 @@
+{
+  "contract": "ixi-ticket-closeout",
+  "contractVersion": "1.0.0",
+  "ticketId": "ticket-98c714af-b083-4047-b6d5-59f5e11b1870",
+  "runId": "ixi-chat-20260904-card009-media",
+  "expectedRevision": 4,
+  "closeout": {
+    "summary": "Corrected only Card 009's media identity overlay: it now shows the protected business ID label/value instead of duplicating the full YEAR / MAKE / MODEL object heading.",
+    "editResults": [
+      {
+        "editId": "edit-5dc4d9a6-7f8c-4465-b883-12f3c5e5f41b",
+        "status": "completed",
+        "result": "The Card 009 media area now contains only the business ID slot and Add/Change Photo control over the image; the duplicate complete object heading is removed."
+      }
+    ],
+    "filesChanged": [
+      "components/ixi-aos/cards/generic/IXIAosGenericMediaDominant009.jsx",
+      "tests/ixi-ticket-card009-media-contract.test.mjs"
+    ],
+    "tests": [
+      "Card 009 media contract plus prior Card 009 layout contract: 6/6 PASS.",
+      "git diff --check: PASS.",
+      "Vercel production deployment dpl_G74fwhmZnguVEvEB6SNP98vqaYF4 for merge b758c603db1aa0419031f9f7c4a93dae9b5e3824: READY.",
+      "preview.ironxchange.com alias assigned with no alias error."
+    ],
+    "before": "Card 009's media overlay showed the object type and full object display name, duplicating the YEAR / MAKE / MODEL identity already displayed in the card header.",
+    "after": "Card 009's media overlay shows only the existing protected business ID label/value beside the unchanged Add/Change Photo control.",
+    "risks": [],
+    "notes": [
+      "The Card 009 photo, header, 298×471 shell, prior SERIAL/HOURS/STATUS layout, relationships, commands, rail, editor, data contract, permissions, and sharing behavior were not changed.",
+      "No other card was changed.",
+      "Pull request #137 merged to main at b758c603db1aa0419031f9f7c4a93dae9b5e3824."
+    ],
+    "prs": [
+      {
+        "number": 137,
+        "url": "https://github.com/tarpbarry-stack/ironxchange-homepage/pull/137",
+        "state": "merged"
+      }
+    ]
+  }
+}
