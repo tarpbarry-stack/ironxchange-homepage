@@ -10,6 +10,7 @@ export default function IXIAosFace1CardRuntime({
   onSaveObject = null,
   maxFields = null,
   includeBusinessIdentifier = false,
+  fixedBusinessIdentifierLabel = false,
   allowAddFields = false,
   cardNumber = null,
   children
@@ -44,7 +45,7 @@ export default function IXIAosFace1CardRuntime({
   return (
     <div className="ixi-v12-library-readable" style={{ width: 298, height: 471 }}>
       {cardNumber ? (
-        <IXIAosInlineFace1Editor cardNumber={cardNumber} object={face1Object} onSaveObject={handleSave}>
+        <IXIAosInlineFace1Editor cardNumber={cardNumber} object={face1Object} onSaveObject={handleSave} fixedBusinessIdentifierLabel={fixedBusinessIdentifierLabel}>
           {runtimeObject => content(runtimeObject)}
         </IXIAosInlineFace1Editor>
       ) : content(face1Object)}
