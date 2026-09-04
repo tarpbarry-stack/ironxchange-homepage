@@ -1,0 +1,112 @@
+name: Run Ticket closeout lifecycle repair v2
+
+on:
+  push:
+    branches:
+      - ticket/commercial-aws-completion-v1
+    paths:
+      - .github/workflows/ticket-closeout-lifecycle-repair-v2.yml
+
+permissions:
+  contents: write
+
+jobs:
+  repair-ticket-closeout-v2:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ticket/commercial-aws-completion-v1
+          fetch-depth: 0
+      - name: Patch lifecycle UI
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          client = Path('lib/ixi-tickets/ixiTicketClient.js')
+          s = client.read_text()
+          marker = 'export async function submitTicketCloseout(ticketId, expectedRevision, closeout = {}) {'
+          if 'export async function startRemoteTicket' not in s:
+              insert = '''export async function startRemoteTicket(ticket) {
+            if (!ticket?.ticketId) throw new Error("Ticket ID is required to start work.");
+            if (!Number.isInteger(ticket.revision) || ticket.revision < 1) {
+              throw new Error("Synchronize this Ticket to AWS before starting work.");
+            }
+            if (!["ready-for-chat", "reopened"].includes(ticket.status)) return ticket;
+            return extractTicket(await updateRemoteTicket(ticket.ticketId, { status: "working" }, ticket.revision));
+          }
+
+          '''
+              if marker not in s: raise SystemExit('client marker missing')
+              client.write_text(s.replace(marker, insert + marker, 1))
+
+          cmd = Path('components/ixi-tickets/IXITicketCommand.jsx')
+          s = cmd.read_text()
+          imp = 'import { startRemoteTicket } from "../../lib/ixi-tickets/ixiTicketClient";'
+          if imp not in s:
+              target = 'import { IXI_TICKET_STATUS } from "../../lib/ixi-tickets/IXITicketContract";\n'
+              if target not in s: raise SystemExit('import marker missing')
+              s = s.replace(target, target + imp + '\n', 1)
+
+          if 'async function startWork()' not in s:
+              marker = '  async function submitCloseout() {\n'
+              fn = '''  async function startWork() {
+            if (!selected || actionBusy) return;
+            setActionBusy(true);
+            setActionNotice("");
+            try {
+              await startRemoteTicket(selected);
+              setActionNotice("Work started. Ticket is now WORKING and can be closed out when complete.");
+              await refreshRemoteTickets();
+            } catch (error) {
+              setActionNotice(error.message || "Ticket could not be moved to WORKING.");
+            } finally {
+              setActionBusy(false);
+            }
+          }
+
+          '''
+              if marker not in s: raise SystemExit('function marker missing')
+              s = s.replace(marker, fn + marker, 1)
+
+          if 'START WORK ON TICKET' not in s:
+              anchor = '<button onClick={() => openTicket(selected.ticketId, "floating")}>OPEN WORKSHEET</button>'
+              if anchor not in s: raise SystemExit('worksheet action marker missing')
+              add = '''{[IXI_TICKET_STATUS.READY_FOR_CHAT, IXI_TICKET_STATUS.REOPENED].includes(selected.status) ? (
+                    <button disabled={actionBusy || !Number.isInteger(selected.revision)} onClick={startWork}>START WORK ON TICKET</button>
+                  ) : null}
+                  ''' + anchor
+              s = s.replace(anchor, add, 1)
+
+          if 'START WORK BEFORE CLOSEOUT' not in s:
+              old = '<button disabled={actionBusy || !Number.isInteger(selected.revision) || selected.status === IXI_TICKET_STATUS.CLOSED} onClick={submitCloseout}>\n                      {actionBusy ? "SUBMITTING..." : "SUBMIT WORK FOR VERIFICATION"}\n                    </button>'
+              new = '''<button
+                      disabled={actionBusy || !Number.isInteger(selected.revision) || ![IXI_TICKET_STATUS.WORKING, IXI_TICKET_STATUS.PR_OPEN].includes(selected.status)}
+                      onClick={submitCloseout}
+                      title={[IXI_TICKET_STATUS.WORKING, IXI_TICKET_STATUS.PR_OPEN].includes(selected.status) ? "Submit completed work for verification" : "Start work on this Ticket before closeout"}
+                    >
+                      {actionBusy ? "SUBMITTING..." : [IXI_TICKET_STATUS.WORKING, IXI_TICKET_STATUS.PR_OPEN].includes(selected.status) ? "SUBMIT COMPLETED WORK FOR VERIFICATION" : "START WORK BEFORE CLOSEOUT"}
+                    </button>'''
+              if old not in s: raise SystemExit('closeout marker missing')
+              s = s.replace(old, new, 1)
+
+          cmd.write_text(s)
+          PY
+      - name: Build
+        run: |
+          npm install
+          npm run build
+      - name: Commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add lib/ixi-tickets/ixiTicketClient.js components/ixi-tickets/IXITicketCommand.jsx
+          git diff --cached --quiet && exit 0
+          git commit -m "Repair Ticket working-to-closeout lifecycle"
+          git push origin HEAD:ticket/commercial-aws-completion-v1

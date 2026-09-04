@@ -1,0 +1,166 @@
+name: Deploy IX-Core Ticket single-owner build mode
+
+on:
+  push:
+    branches:
+      - ticket/commercial-aws-completion-v1
+    paths:
+      - .github/workflows/ticket-single-user-audit.yml
+
+permissions:
+  contents: read
+
+jobs:
+  deploy-ticket-single-owner:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+      AWS_INSTANCE_ID: ${{ secrets.AWS_INSTANCE_ID }}
+
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Deploy Ticket-only single-owner boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          remote=$(cat <<'REMOTE'
+          set -eu
+          cd /var/www/ix-core
+
+          stamp=$(date +%Y%m%d-%H%M%S)
+          cp index.js "index.js.before-ticket-single-owner-${stamp}"
+
+          cat > tickets/routes/ticketSingleOwnerRequest.js <<'JS'
+          "use strict";
+
+          const SINGLE_OWNER = Object.freeze({
+            actorPassportId: "ixi-ticket-owner",
+            entityPassportId: "ixi-ticket-owner-entity",
+            aosEntityId: "ixi-ticket-single-owner",
+            identityEntityId: "ixi-ticket-single-owner"
+          });
+
+          function ticketSingleOwnerRequest(req, _res, next) {
+            const principal = {
+              principalId: SINGLE_OWNER.actorPassportId,
+              actorPassportId: SINGLE_OWNER.actorPassportId,
+              entityPassportId: SINGLE_OWNER.entityPassportId,
+              entityId: SINGLE_OWNER.identityEntityId,
+              roles: ["owner"],
+              permissions: ["tickets.manage", "tickets.create", "tickets.view", "tickets.verify"]
+            };
+
+            req.ixiAuthorityPrincipal = principal;
+            req.ixiTicketContext = {
+              authenticated: true,
+              actorPassportId: SINGLE_OWNER.actorPassportId,
+              entityPassportId: SINGLE_OWNER.entityPassportId,
+              aosEntityId: SINGLE_OWNER.aosEntityId,
+              identityEntityId: SINGLE_OWNER.identityEntityId,
+              principal
+            };
+
+            return next();
+          }
+
+          module.exports = {
+            SINGLE_OWNER,
+            ticketSingleOwnerRequest
+          };
+          JS
+
+          node --check tickets/routes/ticketSingleOwnerRequest.js
+
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('/var/www/ix-core/index.js')
+          s = p.read_text()
+
+          old_import = '''const {
+            ticketAuthenticatedRequest
+          } = require(
+            "./tickets/routes/ticketAuthenticatedRequest"
+          );'''
+
+          new_import = '''const {
+            ticketSingleOwnerRequest
+          } = require(
+            "./tickets/routes/ticketSingleOwnerRequest"
+          );'''
+
+          if old_import not in s:
+              raise SystemExit('Ticket auth import block not found; refusing unsafe patch')
+          s = s.replace(old_import, new_import, 1)
+
+          old_mount = '''app.use(
+            "/tickets/v1",
+            ixiAuthenticatedFinancialRequest,
+            ticketAuthenticatedRequest,
+            ticketRouter
+          );'''
+
+          new_mount = '''app.use(
+            "/tickets/v1",
+            ticketSingleOwnerRequest,
+            ticketRouter
+          );'''
+
+          if old_mount not in s:
+              raise SystemExit('Ticket mount block not found; refusing unsafe patch')
+          s = s.replace(old_mount, new_mount, 1)
+          p.write_text(s)
+          PY
+
+          node --check index.js
+          grep -n -C 4 -E 'ticketSingleOwnerRequest|/tickets/v1' index.js
+
+          sudo -u ubuntu pm2 restart IX-Core --update-env
+          sleep 3
+          curl -fsS http://127.0.0.1:4100/health
+          echo
+          REMOTE
+          )
+
+          parameters="$(jq -cn --arg command "$remote" '{commands:[$command]}')"
+          command_id="$(aws ssm send-command \
+            --region "$AWS_REGION" \
+            --instance-ids "$AWS_INSTANCE_ID" \
+            --document-name AWS-RunShellScript \
+            --comment "Deploy Ticket single-owner build mode" \
+            --parameters "$parameters" \
+            --query 'Command.CommandId' \
+            --output text)"
+
+          set +e
+          aws ssm wait command-executed \
+            --region "$AWS_REGION" \
+            --command-id "$command_id" \
+            --instance-id "$AWS_INSTANCE_ID"
+          waiter=$?
+          set -e
+
+          echo "STDOUT"
+          aws ssm get-command-invocation \
+            --region "$AWS_REGION" \
+            --command-id "$command_id" \
+            --instance-id "$AWS_INSTANCE_ID" \
+            --query 'StandardOutputContent' \
+            --output text
+
+          echo "STDERR"
+          aws ssm get-command-invocation \
+            --region "$AWS_REGION" \
+            --command-id "$command_id" \
+            --instance-id "$AWS_INSTANCE_ID" \
+            --query 'StandardErrorContent' \
+            --output text
+
+          exit "$waiter"
