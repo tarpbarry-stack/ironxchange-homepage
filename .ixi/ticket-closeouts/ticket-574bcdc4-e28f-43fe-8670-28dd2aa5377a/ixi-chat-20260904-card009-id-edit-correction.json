@@ -1,0 +1,37 @@
+{
+  "contract": "ixi-ticket-closeout",
+  "contractVersion": "1.0.0",
+  "ticketId": "ticket-574bcdc4-e28f-43fe-8670-28dd2aa5377a",
+  "runId": "ixi-chat-20260904-card009-id-edit-correction",
+  "expectedRevision": 6,
+  "closeout": {
+    "summary": "Corrected Card 009 so the business-ID editor row contains exactly a fixed ID label and the editable customer ID number; the ticket's red-marked right-hand ID box is removed.",
+    "editResults": [
+      {
+        "editId": "edit-f13ee1cb-a902-471f-b05a-4c736c182061",
+        "status": "completed",
+        "result": "Kept ID fixed in the left cell, kept the canonical customer ID number editable in the middle cell, and removed the right-hand disabled ID cell. Normal field × controls remain unchanged."
+      }
+    ],
+    "filesChanged": [
+      "components/ixi-aos/cards/generic/IXIAosGenericMediaDominant009.jsx",
+      "tests/ixi-ticket-card009-business-id-contract.test.mjs"
+    ],
+    "tests": [
+      "9 focused Card 009 contract tests passed; 0 failed",
+      "PR #140 contains only the component correction and its regression test",
+      "Production deployment dpl_ECHEfxeGiUxX6Shfx7uy4CVKs71a READY with preview.ironxchange.com alias"
+    ],
+    "before": "The first implementation left the red-marked right-hand disabled ID box in the business-ID edit row.",
+    "after": "The ID row is exactly two cells: fixed ID and editable customer number. The red-marked third box is absent.",
+    "risks": [],
+    "notes": [
+      "Normal custom-field × controls are unchanged.",
+      "Card geometry and all non-ID Card 009 infrastructure are unchanged.",
+      "Corrected main commit: 1dcbb01d46870793abd1698437d013f048d491b8"
+    ],
+    "prs": [
+      "https://github.com/tarpbarry-stack/ironxchange-homepage/pull/140"
+    ]
+  }
+}
