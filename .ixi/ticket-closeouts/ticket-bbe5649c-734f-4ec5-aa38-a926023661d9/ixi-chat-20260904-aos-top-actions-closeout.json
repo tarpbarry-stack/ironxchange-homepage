@@ -1,0 +1,38 @@
+{
+  "contract": "ixi-ticket-closeout",
+  "contractVersion": "1.0.0",
+  "ticketId": "ticket-bbe5649c-734f-4ec5-aa38-a926023661d9",
+  "runId": "ixi-chat-20260904-aos-top-actions-closeout",
+  "expectedRevision": 4,
+  "closeout": {
+    "summary": "Restored the Cards 001–003 SAVE/CANCEL header contract across AOS Cards 004–017, including 007A, 007B, and 007C.",
+    "editResults": [
+      {
+        "editId": "edit-eb782357-72b7-4de5-8402-636f8e9acbb5",
+        "status": "completed",
+        "result": "SAVE and CANCEL now occupy the same top-right card-header position used by Cards 001–003 throughout Cards 004–017 and the 007A/B/C variants."
+      }
+    ],
+    "filesChanged": [
+      "components/ixi-aos/card-runtime/modules/IXIAosInlineFace1Editor.jsx",
+      "tests/ixi-aos-top-edit-actions-contract.test.mjs"
+    ],
+    "tests": [
+      "AOS top edit-action contract: Cards 004–017 use top:8px/right:8px header placement.",
+      "AOS top edit-action contract: actions remain outside the field editor.",
+      "AOS top edit-action contract: every numbered card 004–017 uses the shared Face 1 runtime.",
+      "AOS top edit-action contract: 007A, 007B, and 007C remain on the shared Card 007 contract.",
+      "Vercel production deployment for merge 3569b8a7a48e087f81c31ceb1e1c014e58289c58: READY."
+    ],
+    "before": "Cards 004–017 displayed SAVE/CANCEL inside the editor region instead of using the clean top-right header behavior established by Cards 001–003.",
+    "after": "The shared Face 1 editor places SAVE/CANCEL at the top-right header position and applies that contract uniformly to Cards 004–017, including 007A/B/C.",
+    "risks": [],
+    "notes": [
+      "Implementation commit: b608dbd4b46841a455e529a937c229e353c0437c.",
+      "Contract-test commit: 7726541a627a8f9292b642269ddfe8b298b8b67a.",
+      "Production merge: 3569b8a7a48e087f81c31ceb1e1c014e58289c58.",
+      "Owner confirmed the work is done and explicitly requested closure."
+    ],
+    "prs": []
+  }
+}
