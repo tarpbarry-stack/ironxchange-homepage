@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useIXIAosCardCommands } from "../IXIAosCardCommandContext";
+import { useIXIAosEditorCommands } from "../IXIAosEditorCommandContext";
 import { getObjectActionCapabilities } from "../IXIAosSemanticObjectPresentation";
 import IXIAosOfficeSkinCompatibilityStyles from "./IXIAosOfficeSkinCompatibilityStyles";
 import IXIAosLocationVisualCorrections from "./IXIAosLocationVisualCorrections";
@@ -34,6 +35,7 @@ export default function IXIAosCardHeaderControls({
   onSkinChange = null
 }) {
   const runtimeCommands = useIXIAosCardCommands();
+  const editorCommands = useIXIAosEditorCommands();
   const runtimeObject = runtimeCommands?.object || null;
   const hasRuntimeObject = Boolean(runtimeObject && typeof runtimeObject === "object");
   const effective = hasRuntimeObject ? getObjectActionCapabilities(runtimeObject) : null;
@@ -49,7 +51,10 @@ export default function IXIAosCardHeaderControls({
     : canTransact === true;
 
   const showAdd = canAdd === true && effective?.canCreate !== false && typeof onAdd === "function";
-  const showEdit = canEdit === true && effective?.canEdit !== false && typeof onToggleEdit === "function";
+  const resolvedOnEdit = typeof editorCommands?.openEditor === "function"
+    ? editorCommands.openEditor
+    : onToggleEdit;
+  const showEdit = canEdit === true && effective?.canEdit !== false && typeof resolvedOnEdit === "function";
   const showTransact = transactRequested && effective?.canTransact !== false && typeof resolvedOnTransact === "function";
   const showConsole = effective?.canOpenConsole !== false && typeof onOpenConsole === "function";
   const showHide = canHide !== false && effective?.canHide !== false && typeof onHide === "function";
@@ -80,7 +85,7 @@ export default function IXIAosCardHeaderControls({
   return (
     <div className={`ixi-aos-card-header-controls skin-${resolvedSkinId}`} data-card-skin={resolvedSkinId} onPointerDown={event => event.stopPropagation()}>
       {showAdd ? <button type="button" className="header-action add" onClick={event => { stop(event); onAdd(); }}>+</button> : null}
-      {showEdit ? <button type="button" className={`header-action edit ${editing ? "active" : ""}`} onClick={event => { stop(event); if (!editing) onToggleEdit(); }}>EDIT</button> : null}
+      {showEdit ? <button type="button" className={`header-action edit ${editing ? "active" : ""}`} onClick={event => { stop(event); if (!editing) resolvedOnEdit({ faceNumber: editorCommands?.faceNumber || 1 }); }}>EDIT</button> : null}
       {showTransact ? <button type="button" className="header-action transact" onClick={event => { stop(event); resolvedOnTransact(); }}>$</button> : null}
 
       <div className="menu-shell">

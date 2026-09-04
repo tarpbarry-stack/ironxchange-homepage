@@ -25,11 +25,15 @@ test("Cards 001-006 and 008 use the shared commercial editor bridge", () => {
   }
 });
 
-test("commercial editor bridge intercepts only canonical EDIT and preserves durable save payload", () => {
+test("commercial editor bridge exposes one explicit EDIT command and preserves durable save payload", () => {
   const source = read("components/ixi-aos/card-runtime/modules/IXIAosCommercialEditorBridge.jsx");
+  const controls = read("components/ixi-aos/card-runtime/modules/IXIAosCardHeaderControls.jsx");
   const sessionSource = read("components/ixi-aos/card-runtime/modules/useIXIAosObjectEditSession.js");
   const persistenceSource = `${source}\n${sessionSource}`;
-  assert.match(source, /button\.header-action\.edit/u);
+  assert.match(source, /IXIAosEditorCommandProvider/u);
+  assert.match(source, /openEditor=\{editSession\.begin\}/u);
+  assert.doesNotMatch(source, /onClickCapture|closest\?\.\("button\.header-action\.edit"\)/u);
+  assert.match(controls, /editorCommands\?\.openEditor/u);
   assert.match(source, /runIXIActionNoticeLifecycle/u);
   assert.match(source, /successMessage: "SAVED"/u);
   assert.match(source, /errorMessage: "NOT SAVED"/u);
@@ -51,10 +55,10 @@ test("shared commercial editor keeps customer ID protected while allowing schema
 test("admission registry advances only repaired first-wave cards", () => {
   const source = read("components/ixi-aos/card-runtime/IXIAosCommercialAdmissionRegistry.js");
   for (const card of ["001", "002", "003", "004", "005", "006", "007", "008", "009"]) {
-    assert.match(source, new RegExp(`\\"${card}\\"[\\s\\S]*?status: \\"ready-for-runtime-qa\\"`, "u"));
+    assert.match(source, new RegExp(`"${card}"[\\s\\S]*?status: "ready-for-runtime-qa"`, "u"));
   }
   for (const card of ["010", "011", "012", "013", "014", "015", "016", "017"]) {
-    assert.match(source, new RegExp(`\\"${card}\\"[\\s\\S]*?status: \\"repair-required\\"`, "u"));
+    assert.match(source, new RegExp(`"${card}"[\\s\\S]*?status: "ready-for-runtime-qa"`, "u"));
   }
   assert.match(source, /"009B"[\s\S]*?status: "unverified"/u);
 });

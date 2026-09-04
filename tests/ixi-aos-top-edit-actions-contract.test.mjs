@@ -7,29 +7,27 @@ function read(path) {
 }
 
 const donor = read("components/ixi-aos/cards/location/IXIAosLocationOverviewCard.jsx");
-const editor = read("components/ixi-aos/card-runtime/modules/IXIAosInlineFace1Editor.jsx");
+const editor = read("components/ixi-aos/card-runtime/modules/IXIAosCommercialObjectEditor.jsx");
+const bridge = read("components/ixi-aos/card-runtime/modules/IXIAosCommercialEditorBridge.jsx");
 const runtime = read("components/ixi-aos/card-runtime/modules/IXIAosFace1CardRuntime.jsx");
 
-test("Cards 004-017 use the same top edit-action placement as Cards 001-003", () => {
+test("Cards 001-017 use the commercial editor header actions", () => {
   assert.match(donor, /\.gov-inline-edit-actions\{position:absolute;top:8px;right:8px/u);
-  assert.match(editor, /\.ixi-inline-edit-actions\{position:absolute;top:8px;right:8px/u);
-  assert.match(editor, /className="ixi-inline-edit-actions"/u);
-  assert.match(editor, />\s*\{saving \? "SAVING" : "SAVE"\}\s*<\/button>/u);
+  assert.match(editor, /<nav>/u);
+  assert.match(editor, /disabled=\{saving\} onClick=\{save\}>SAVE<\/button>/u);
   assert.match(editor, />CANCEL<\/button>/u);
 });
 
-test("edit actions remain in the card header rather than inside the field editor", () => {
-  const actionsIndex = editor.indexOf('className="ixi-inline-edit-actions"');
-  const fieldEditorIndex = editor.indexOf('className="ixi-inline-field-editor"');
+test("edit actions remain in the commercial editor header rather than inside fields", () => {
+  const actionsIndex = editor.indexOf("<nav>");
+  const fieldEditorIndex = editor.indexOf("<section>");
   assert.ok(actionsIndex > -1);
   assert.ok(fieldEditorIndex > actionsIndex);
-
-  const fieldEditorMarkup = editor.slice(fieldEditorIndex, editor.indexOf("</section>", fieldEditorIndex));
-  assert.doesNotMatch(fieldEditorMarkup, /className="ixi-inline-edit-actions"/u);
+  assert.match(bridge, /IXIAosEditorCommandProvider/u);
 });
 
 test("the shared repair covers every numbered card from 004 through 017", () => {
-  assert.match(runtime, /<IXIAosInlineFace1Editor/u);
+  assert.doesNotMatch(runtime, /IXIAosInlineFace1Editor/u);
 
   for (let number = 4; number <= 17; number += 1) {
     const card = String(number).padStart(3, "0");
@@ -41,7 +39,8 @@ test("the shared repair covers every numbered card from 004 through 017", () => 
           ? "Profile"
           : "";
     const source = read(`components/ixi-aos/cards/${card}/IXIAosCard${card}${suffix}.jsx`);
-    assert.match(source, /IXIAosFace1CardRuntime/u, `Card ${card} must use the shared Face 1 edit runtime`);
+    assert.match(source, /IXIAosCommercialEditorBridge/u, `Card ${card} must use the commercial editor`);
+    assert.match(source, /IXIAosFace1CardRuntime/u, `Card ${card} must preserve its Face 1 presentation runtime`);
     assert.match(source, new RegExp(`cardNumber=\\{${number}\\}`, "u"), `Card ${card} must publish its card number`);
   }
 });

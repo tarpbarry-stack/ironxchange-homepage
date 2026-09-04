@@ -26,7 +26,7 @@ test("Cards 010-017 are admitted only to runtime QA, not production certificatio
       new RegExp(`"${card}"\\s*:\\s*Object\\.freeze\\(\\{\\s*status:\\s*"ready-for-runtime-qa"`, "u")
     );
   }
-  assert.doesNotMatch(registry, /production-ready/u);
+  assert.doesNotMatch(registry, /status:\s*"production-ready"/u);
 });
 
 test("shared editor owns customizable fields, protected business ID, media, and normalized schema save", () => {

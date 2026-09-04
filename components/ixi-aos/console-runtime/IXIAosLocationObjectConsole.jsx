@@ -15,6 +15,7 @@ import {
 import { IXIAosCardCommandProvider } from "../card-runtime/IXIAosCardCommandContext";
 import IXIAosActionNotice from "../card-runtime/modules/IXIAosActionNotice";
 import IXIAosLocationSecondaryFaceReadability from "../card-runtime/modules/IXIAosLocationSecondaryFaceReadability";
+import IXIAosCommercialEditorBridge from "../card-runtime/modules/IXIAosCommercialEditorBridge";
 import {
   clean,
   getObjectLabel,
@@ -181,43 +182,48 @@ export default function IXIAosLocationObjectConsole({
      * Faces 2-5 share one opt-in readability boundary. Face 1 is returned
      * above and can never inherit this typography contract.
      */
-    let secondaryFace = null;
-
-    if (resolved === 2) {
-      secondaryFace = (
-        <IXIAosLocationFace2Operations
-          {...shared}
-          skinId="v12"
-        />
-      );
-    } else if (resolved === 3) {
-      secondaryFace = (
-        <IXIAosLocationFace3Financial
-          {...shared}
-          runtimeData={financialSnapshot}
-          financialSnapshot={financialSnapshot}
-          skinId="v12"
-        />
-      );
-    } else {
-      const runtimeData = resolved === 4
-        ? financialSnapshot
-        : maintenanceSnapshot;
-
-      secondaryFace = (
-        <IXIAosGenericConfiguredFaceV12
-          {...shared}
-          faceNumber={resolved}
-          runtimeData={runtimeData}
-        />
-      );
-    }
-
     return (
-      <div className="ixi-location-secondary-readable">
-        {secondaryFace}
-        <IXIAosLocationSecondaryFaceReadability />
-      </div>
+      <IXIAosCommercialEditorBridge
+        object={object}
+        onSaveObject={onSaveObject}
+        persistenceAdapter={typeof onSaveObject === "function" ? onSaveObject : null}
+        faceNumber={resolved}
+        mediaEnabled
+      >
+        {({ object: runtimeObject }) => {
+          const secondaryShared = { ...shared, object: runtimeObject };
+          let secondaryFace = null;
+
+          if (resolved === 2) {
+            secondaryFace = <IXIAosLocationFace2Operations {...secondaryShared} skinId="v12" />;
+          } else if (resolved === 3) {
+            secondaryFace = (
+              <IXIAosLocationFace3Financial
+                {...secondaryShared}
+                runtimeData={financialSnapshot}
+                financialSnapshot={financialSnapshot}
+                skinId="v12"
+              />
+            );
+          } else {
+            const runtimeData = resolved === 4 ? financialSnapshot : maintenanceSnapshot;
+            secondaryFace = (
+              <IXIAosGenericConfiguredFaceV12
+                {...secondaryShared}
+                faceNumber={resolved}
+                runtimeData={runtimeData}
+              />
+            );
+          }
+
+          return (
+            <div className="ixi-location-secondary-readable">
+              {secondaryFace}
+              <IXIAosLocationSecondaryFaceReadability />
+            </div>
+          );
+        }}
+      </IXIAosCommercialEditorBridge>
     );
   }
 

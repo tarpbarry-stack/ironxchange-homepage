@@ -1,5 +1,4 @@
 import IXIAosV12LibraryReadability from "./IXIAosV12LibraryReadability";
-import IXIAosInlineFace1Editor from "./IXIAosInlineFace1Editor";
 import {
   buildFace1GenericEditObject,
   restoreFace1GenericSave
@@ -22,7 +21,7 @@ export default function IXIAosFace1CardRuntime({
   const face1Object = buildFace1GenericEditObject(object, { maxFields, includeBusinessIdentifier });
   if (allowAddFields) face1Object.metadata = { ...(face1Object.metadata || {}), face1AllowAddFields: true };
 
-  const editableCardContract = Number(cardNumber) >= 4 && Number(cardNumber) <= 17;
+  const editableCardContract = Number(cardNumber) >= 1 && Number(cardNumber) <= 17;
 
   const handleSave = async payload => {
     const editedObject = payload?.object || payload;
@@ -68,11 +67,7 @@ export default function IXIAosFace1CardRuntime({
 
   return (
     <div className="ixi-v12-library-readable" style={{ width: 298, height: 471 }}>
-      {cardNumber ? (
-        <IXIAosInlineFace1Editor cardNumber={cardNumber} object={face1Object} onSaveObject={handleSave} fixedBusinessIdentifierLabel={fixedBusinessIdentifierLabel}>
-          {runtimeObject => content(runtimeObject)}
-        </IXIAosInlineFace1Editor>
-      ) : content(face1Object)}
+      {content(face1Object)}
       <IXIAosV12LibraryReadability />
     </div>
   );

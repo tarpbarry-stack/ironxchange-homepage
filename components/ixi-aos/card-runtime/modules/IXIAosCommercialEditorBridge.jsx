@@ -1,5 +1,6 @@
 import IXIAosCommercialObjectEditor from "./IXIAosCommercialObjectEditor";
 import { runIXIActionNoticeLifecycle } from "../../../ixi-object-system/IXIActionNoticeEngine";
+import { IXIAosEditorCommandProvider } from "../IXIAosEditorCommandContext";
 import useIXIAosObjectEditSession from "./useIXIAosObjectEditSession";
 
 function clean(value) {
@@ -19,8 +20,8 @@ function objectIdOf(object = {}) {
 /*
  * Commercial edit bridge for numbered AOS cards.
  *
- * The normal card face is untouched. The bridge intercepts only the canonical
- * IXIAosCardHeaderControls EDIT command and opens the shared commercial editor.
+ * The normal card face is untouched. The bridge publishes the canonical EDIT
+ * command through context and opens the shared commercial editor explicitly.
  * It never infers taxonomy or parent meaning and it never substitutes sample data.
  */
 export default function IXIAosCommercialEditorBridge({
@@ -29,22 +30,13 @@ export default function IXIAosCommercialEditorBridge({
   persistenceAdapter = onSaveObject,
   mediaEnabled = true,
   minimumCustomFields = 0,
+  faceNumber = 1,
   children
 }) {
   const editSession = useIXIAosObjectEditSession({
     object,
     persistenceAdapter
   });
-
-  function captureEdit(event) {
-    const target = event?.target;
-    const button = target?.closest?.("button.header-action.edit");
-    if (!button) return;
-
-    event.preventDefault();
-    event.stopPropagation();
-    editSession.begin();
-  }
 
   async function save(nextObject) {
     if (!nextObject || typeof nextObject !== "object") {
@@ -71,9 +63,14 @@ export default function IXIAosCommercialEditorBridge({
     <div
       className="ixi-aos-commercial-editor-bridge"
       data-commercial-editor-bridge
-      onClickCapture={captureEdit}
+      data-editor-face={Number(faceNumber) || 1}
     >
-      {rendered}
+      <IXIAosEditorCommandProvider
+        openEditor={editSession.begin}
+        faceNumber={faceNumber}
+      >
+        {rendered}
+      </IXIAosEditorCommandProvider>
 
       {editSession.editing ? (
         <IXIAosCommercialObjectEditor
