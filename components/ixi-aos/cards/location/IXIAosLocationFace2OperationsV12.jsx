@@ -159,8 +159,8 @@ function Section({ title, children }) {
   );
 }
 
-function EditableRow({ row, fields, editAll, activeField, saving, onBeginField, onPatch, onCommitField }) {
-  const isEditing = editAll || activeField === row.id;
+function EditableRow({ row, fields, editAll, onPatch }) {
+  const isEditing = editAll;
   const display = getFieldDisplayValue(fields, row);
 
   if (row.synthetic && row.id === "cityStateZip") {
@@ -175,11 +175,6 @@ function EditableRow({ row, fields, editAll, activeField, saving, onBeginField, 
             <input value={fields.postalCode ?? ""} placeholder="ZIP" onChange={event => onPatch("postalCode", event.target.value)} />
           </div>
         ) : <strong>{display}</strong>}
-        {!editAll ? (
-          <button type="button" className="ops-row-edit" disabled={saving} onClick={() => activeField === row.id ? onCommitField() : onBeginField(row.id)}>
-            {activeField === row.id ? "SAVE" : "EDIT"}
-          </button>
-        ) : null}
       </div>
     );
   }
@@ -197,11 +192,6 @@ function EditableRow({ row, fields, editAll, activeField, saving, onBeginField, 
           <input type={row.type === "number" ? "number" : "text"} value={fields?.[row.id] ?? ""} placeholder={row.fallback || ""} onChange={event => onPatch(row.id, event.target.value)} />
         )
       ) : <strong>{display}</strong>}
-      {!editAll ? (
-        <button type="button" className="ops-row-edit" disabled={saving} onClick={() => activeField === row.id ? onCommitField() : onBeginField(row.id)}>
-          {activeField === row.id ? "SAVE" : "EDIT"}
-        </button>
-      ) : null}
     </div>
   );
 }
@@ -249,16 +239,10 @@ export default function IXIAosLocationFace2OperationsV12({
 
   const [draft, setDraft] = useState(() => ({ ...persistedFields }));
   const [editAll, setEditAll] = useState(false);
-  const [activeField, setActiveField] = useState("");
   const [saving, setSaving] = useState(false);
   const displayName = clean(object?.displayName || object?.name) || "YARD NAME";
   const relationships = Array.isArray(object?.relationships) ? object.relationships : [];
-  const visibleFields = editAll || activeField ? draft : persistedFields;
-
-  function beginField(fieldId) {
-    setDraft(current => ({ ...persistedFields, ...current }));
-    setActiveField(fieldId);
-  }
+  const visibleFields = editAll ? draft : persistedFields;
 
   function patch(fieldId, value) {
     setDraft(current => ({ ...current, [fieldId]: value }));
@@ -282,27 +266,19 @@ export default function IXIAosLocationFace2OperationsV12({
     }
   }
 
-  async function commitField() {
-    await persist(draft);
-    setActiveField("");
-  }
-
   function beginEditAll() {
     setDraft({ ...persistedFields });
-    setActiveField("");
     setEditAll(true);
   }
 
   async function saveEditAll() {
     await persist(draft);
     setEditAll(false);
-    setActiveField("");
   }
 
   function cancelEditAll() {
     setDraft({ ...persistedFields });
     setEditAll(false);
-    setActiveField("");
   }
 
   function command(event, callback) {
@@ -346,14 +322,13 @@ export default function IXIAosLocationFace2OperationsV12({
       <main className="ops-scroll">
         <section className="gate-code">
           <div className="gate-mark">▣</div>
-          <div className="gate-copy"><span>GATE CODE</span>{editAll || activeField === "gateCode" ? <input value={visibleFields.gateCode ?? ""} placeholder="4821" onChange={event => patch("gateCode", event.target.value)} /> : <strong>{clean(visibleFields.gateCode) || "4821"}</strong>}</div>
-          {!editAll ? <button type="button" className="ops-row-edit gate-edit" disabled={saving} onClick={() => activeField === "gateCode" ? commitField() : beginField("gateCode")}>{activeField === "gateCode" ? "SAVE" : "EDIT"}</button> : null}
+          <div className="gate-copy"><span>GATE CODE</span>{editAll ? <input value={visibleFields.gateCode ?? ""} placeholder="4821" onChange={event => patch("gateCode", event.target.value)} /> : <strong>{clean(visibleFields.gateCode) || "4821"}</strong>}</div>
         </section>
 
         {FIELD_GROUPS.map(group => (
           <Section key={group.id} title={group.label}>
             {group.rows.map(row => (
-              <EditableRow key={row.id} row={row} fields={visibleFields} editAll={editAll} activeField={activeField} saving={saving} onBeginField={beginField} onPatch={patch} onCommitField={commitField} />
+              <EditableRow key={row.id} row={row} fields={visibleFields} editAll={editAll} onPatch={patch} />
             ))}
           </Section>
         ))}
@@ -361,8 +336,7 @@ export default function IXIAosLocationFace2OperationsV12({
         <Section title="SITE INSTRUCTIONS">
           <div className="site-instructions">
             <span className="instruction-icon">✎</span>
-            {editAll || activeField === "siteInstructions" ? <textarea value={visibleFields.siteInstructions ?? ""} placeholder="ENTER SITE ACCESS / ARRIVAL / STAGING INSTRUCTIONS" onChange={event => patch("siteInstructions", event.target.value)} /> : <strong>{clean(visibleFields.siteInstructions) || "ENTER NORTH GATE FROM RAMA DR. CALL ON ARRIVAL. LOWBOYS STAGE LEFT OF SHOP."}</strong>}
-            {!editAll ? <button type="button" className="ops-row-edit instruction-edit" disabled={saving} onClick={() => activeField === "siteInstructions" ? commitField() : beginField("siteInstructions")}>{activeField === "siteInstructions" ? "SAVE" : "EDIT"}</button> : null}
+            {editAll ? <textarea value={visibleFields.siteInstructions ?? ""} placeholder="ENTER SITE ACCESS / ARRIVAL / STAGING INSTRUCTIONS" onChange={event => patch("siteInstructions", event.target.value)} /> : <strong>{clean(visibleFields.siteInstructions) || "ENTER NORTH GATE FROM RAMA DR. CALL ON ARRIVAL. LOWBOYS STAGE LEFT OF SHOP."}</strong>}
           </div>
         </Section>
 
@@ -381,8 +355,8 @@ export default function IXIAosLocationFace2OperationsV12({
         </Section>
 
         <Section title="VERIFICATION">
-          <EditableRow row={{ id: "lastVerifiedDate", label: "LAST VERIFIED", icon: "✓", fallback: "AUG 12, 2026" }} fields={visibleFields} editAll={editAll} activeField={activeField} saving={saving} onBeginField={beginField} onPatch={patch} onCommitField={commitField} />
-          <EditableRow row={{ id: "lastVerifiedBy", label: "VERIFIED BY", icon: "●", fallback: "JOHN CARTER" }} fields={visibleFields} editAll={editAll} activeField={activeField} saving={saving} onBeginField={beginField} onPatch={patch} onCommitField={commitField} />
+          <EditableRow row={{ id: "lastVerifiedDate", label: "LAST VERIFIED", icon: "✓", fallback: "AUG 12, 2026" }} fields={visibleFields} editAll={editAll} onPatch={patch} />
+          <EditableRow row={{ id: "lastVerifiedBy", label: "VERIFIED BY", icon: "●", fallback: "JOHN CARTER" }} fields={visibleFields} editAll={editAll} onPatch={patch} />
         </Section>
       </main>
 
