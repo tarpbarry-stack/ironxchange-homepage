@@ -801,7 +801,7 @@ export default function IXITransactApp({
             changePayload,
             sourceContext || context,
             {
-              invoice: salesInvoiceSnapshot,
+              invoice: changePayload?.invoice || salesInvoiceSnapshot,
               quote: quoteSnapshot,
             },
           );
