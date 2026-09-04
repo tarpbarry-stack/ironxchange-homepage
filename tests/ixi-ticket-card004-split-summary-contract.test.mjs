@@ -49,9 +49,13 @@ test("Open positions comes from object data and the field extension stays off", 
 
 test("Card 004 Edit keeps ID fixed while its canonical value remains editable", () => {
   assert.match(card004, /includeBusinessIdentifier fixedBusinessIdentifierLabel allowAddFields/u);
+  assert.match(card004, /function card004EditableObject\(object = \{\}\)/u);
+  assert.match(card004, /existing \|\| createBusinessIdentifierDefinition\(object, 0\)/u);
+  assert.match(card004, /object=\{card004EditableObject\(contractProps\.object\)\}/u);
   assert.match(face1Runtime, /fixedBusinessIdentifierLabel=\{fixedBusinessIdentifierLabel\}/u);
   assert.match(inlineEditor, /<span className="ixi-inline-fixed-label">ID<\/span>/u);
   assert.match(inlineEditor, /value=\{draft\[definition\.fieldId\] \?\? ""\}/u);
   assert.match(inlineEditor, /!fixedBusinessId \? <button/u);
   assert.match(inlineEditor, /label: fixedBusinessIdentifierLabel && isBusinessIdentifier\(definition\)[\s\S]*?\? "ID"/u);
+  assert.match(face1Runtime, /businessIdentifiers: value[\s\S]*?label: "ID", value/u);
 });
