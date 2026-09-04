@@ -12,6 +12,9 @@ test("CT-260904-000006 fixes the Card 009 business-ID label while keeping its va
   assert.match(source, /<span className="c009-editor-fixed-label">ID<\/span>/u);
   assert.match(source, /aria-label=\{`\$\{definition\.label\} value`\}/u);
   assert.match(source, /onChange=\{event => setDraft\(current => \(\{ \.\.\.current, \[definition\.fieldId\]: event\.target\.value \}\)\)\}/u);
+  assert.match(source, /!isBusinessIdentifier\(definition\) \? \(\s*<button type="button" onClick=\{\(\) => removeField\(definition\.fieldId\)\}>×<\/button>/u);
+  assert.doesNotMatch(source, /disabled=\{isBusinessIdentifier\(definition\)\}/u);
+  assert.match(source, /\.c009-editor-row\.business-id\{grid-template-columns:\.85fr 1\.25fr\}/u);
 });
 
 test("Card 009 renders a fixed ID caption with the canonical business-ID value", () => {
