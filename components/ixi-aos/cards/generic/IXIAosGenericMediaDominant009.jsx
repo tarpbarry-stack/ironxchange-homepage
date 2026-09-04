@@ -149,7 +149,7 @@ function Card009Editor({ object, saving, onCancel, onSave }) {
       .map((definition, index) => ({
         ...definition,
         fieldId: clean(definition.fieldId),
-        label: clean(definition.label) || `FIELD ${index + 1}`,
+        label: isBusinessIdentifier(definition) ? "ID" : (clean(definition.label) || `FIELD ${index + 1}`),
         fieldType: clean(definition.fieldType || definition.type || "text") || "text",
         type: clean(definition.type || definition.fieldType || "text") || "text",
         editable: definition.editable !== false,
@@ -194,13 +194,17 @@ function Card009Editor({ object, saving, onCancel, onSave }) {
           <div className="c009-editor-title">FIELDS</div>
           {definitions.map((definition, index) => (
             <div className={`c009-editor-row ${isBusinessIdentifier(definition) ? "business-id" : ""}`} key={definition.fieldId}>
-              <input
-                aria-label={`Field ${index + 1} label`}
-                value={definition.label}
-                onChange={event => setDefinitions(current => current.map(item =>
-                  item.fieldId === definition.fieldId ? { ...item, label: event.target.value } : item
-                ))}
-              />
+              {isBusinessIdentifier(definition) ? (
+                <span className="c009-editor-fixed-label">ID</span>
+              ) : (
+                <input
+                  aria-label={`Field ${index + 1} label`}
+                  value={definition.label}
+                  onChange={event => setDefinitions(current => current.map(item =>
+                    item.fieldId === definition.fieldId ? { ...item, label: event.target.value } : item
+                  ))}
+                />
+              )}
               <input
                 aria-label={`${definition.label} value`}
                 value={draft[definition.fieldId] ?? ""}
@@ -327,7 +331,7 @@ export default function IXIAosGenericMediaDominant009({
         <section className="c009-media">
           {image ? <img src={image} alt={getObjectDisplayName(runtimeObject)} /> : <div className="c009-media-empty"><b>IXI</b><span>PRIMARY MEDIA</span></div>}
           <div className="c009-media-shade" />
-          <div className="c009-media-id"><span>{businessIdentifier?.label || "ID"}</span><strong>{businessIdentifierValue || "—"}</strong></div>
+          <div className="c009-media-id"><span>ID</span><strong>{businessIdentifierValue || "—"}</strong></div>
           {actions.canEdit ? (
             <button className="c009-photo-action" type="button" disabled={saving} onClick={event => {
               event.preventDefault();
@@ -392,6 +396,7 @@ export default function IXIAosGenericMediaDominant009({
         .c009-relations{min-height:0;flex:1;overflow:hidden;border:1px solid var(--line);border-radius:5px;background:#0e110f}.c009-section-title{height:18px;display:flex;align-items:center;padding:0 7px;border-bottom:1px solid var(--soft);background:#141714;color:var(--y);font-size:5.5px;font-weight:950;letter-spacing:.05em}.c009-rel-scroll{height:calc(100% - 18px);overflow-y:auto;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.24) transparent}.c009-rel-scroll::-webkit-scrollbar,.c009-editor-scroll::-webkit-scrollbar{width:3px}.c009-rel-scroll::-webkit-scrollbar-track,.c009-editor-scroll::-webkit-scrollbar-track{background:transparent}.c009-rel-scroll::-webkit-scrollbar-thumb,.c009-editor-scroll::-webkit-scrollbar-thumb{border-radius:999px;background:rgba(255,255,255,.22)}.c009-rel-scroll::-webkit-scrollbar-thumb:hover,.c009-editor-scroll::-webkit-scrollbar-thumb:hover{background:rgba(255,196,0,.48)}.c009-rel-scroll button{width:100%;height:26px;display:flex;align-items:center;justify-content:space-between;padding:0 7px;border:0;border-bottom:1px solid #222723;background:transparent;color:#e8ebe8;text-align:left}.c009-rel-scroll button span{min-width:0}.c009-rel-scroll small{display:block;color:#7f8781;font-size:4.5px;font-weight:900}.c009-rel-scroll strong{display:block;margin-top:2px;overflow:hidden;font-size:6.5px;font-weight:900;text-overflow:ellipsis;white-space:nowrap}.c009-rel-scroll button>b{color:var(--y);font-size:10px}.c009-empty{height:100%;display:flex;align-items:center;justify-content:center;color:#59605b;font-size:5px;font-weight:900}
         .c009-commands{position:absolute;left:7px;right:7px;bottom:23px;height:28px;display:grid;grid-template-columns:repeat(3,1fr);gap:4px;padding:3px 0}.c009-commands button{border:1px solid #2c312d;border-radius:4px;background:linear-gradient(180deg,#131613,#0d100e);color:#8b938d;font-size:7px;font-weight:900}.c009-commands button b{margin-left:3px;color:#d7dbd8;font-size:5.5px;letter-spacing:.04em}
         .c009-editor{position:absolute;inset:0;z-index:200;background:#0b0d0c;color:#f3f5f3}.c009-editor-head{height:43px;display:flex;align-items:center;justify-content:space-between;padding:0 9px;border-bottom:1px solid #303531;background:#151815}.c009-editor-head small{display:block;color:var(--y);font-size:5px;font-weight:950}.c009-editor-head strong{display:block;margin-top:3px;font-size:10px}.c009-editor-head nav{display:flex;gap:4px}.c009-editor-head button{height:22px;padding:0 8px;border:1px solid #ffffff16;border-radius:4px;background:#111411;color:#dce0dd;font-size:6px;font-weight:950}.c009-editor-head nav button:first-child{color:var(--y)}.c009-editor-scroll{position:absolute;top:43px;left:0;right:0;bottom:0;padding:8px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.24) transparent}.c009-editor-scroll section{margin-top:8px;padding:7px;border:1px solid #2b302c;border-radius:6px;background:#101310}.c009-editor-title{margin-bottom:6px;color:var(--y);font-size:5.5px;font-weight:950;letter-spacing:.06em}.c009-editor-scroll label{display:block}.c009-editor-scroll label span{display:block;margin-bottom:4px;color:#8d958f;font-size:5px;font-weight:900}.c009-editor-scroll input{width:100%;height:25px;padding:0 7px;border:1px solid #333934;border-radius:4px;background:#090b0a;color:#edf0ee;font-size:7px;font-weight:850;outline:none}.c009-editor-row{display:grid;grid-template-columns:.85fr 1.25fr 24px;gap:4px;margin-bottom:4px}.c009-editor-row.business-id{padding:3px;border:1px solid rgba(255,196,0,.20);border-radius:5px;background:rgba(255,196,0,.025)}.c009-editor-row button,.c009-add-field{border:1px solid #333934;border-radius:4px;background:#111411;color:#9da49f;font-weight:950}.c009-editor-row button{font-size:12px}.c009-editor-row button:disabled{color:var(--y);font-size:5px}.c009-add-field{width:100%;height:25px;color:var(--y);font-size:6px;letter-spacing:.05em}
+        .c009-editor-fixed-label{height:25px;display:flex;align-items:center;padding:0 7px;border:1px solid #333934;border-radius:4px;background:#111411;color:var(--y);font-size:7px;font-weight:950}
       `}</style>
     </article>
   );

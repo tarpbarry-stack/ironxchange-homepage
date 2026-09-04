@@ -9,7 +9,7 @@ const source = fs.readFileSync(
 
 test("CT-260904-000004 leaves only business ID and photo action content over Card 009 media", () => {
   assert.match(source, /const businessIdentifier = definitions\.find\(isBusinessIdentifier\) \|\| null;/u);
-  assert.match(source, /className="c009-media-id"><span>\{businessIdentifier\?\.label \|\| "ID"\}<\/span><strong>\{businessIdentifierValue \|\| "—"\}<\/strong><\/div>/u);
+  assert.match(source, /className="c009-media-id"><span>ID<\/span><strong>\{businessIdentifierValue \|\| "—"\}<\/strong><\/div>/u);
   assert.doesNotMatch(source, /className="c009-media-id"><span>\{getObjectLabel\(runtimeObject\)\}<\/span><strong>\{getObjectDisplayName\(runtimeObject\)\}/u);
   assert.match(source, /className="c009-photo-action"/u);
 });
