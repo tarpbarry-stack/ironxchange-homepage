@@ -5,6 +5,9 @@ on:
     branches:
       - mobile/commercial-aos-v1-browse-dnd-final
       - mobile/commercial-aos-v1-dnd-closeout
+  pull_request:
+    branches:
+      - main
 
 jobs:
   certify:
