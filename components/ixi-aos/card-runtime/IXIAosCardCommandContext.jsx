@@ -46,6 +46,11 @@ export function IXIAosCardCommandProvider({
   const [localNotice, setLocalNotice] = useState(externalNotice);
   const noticeRef = useRef(externalNotice);
   const timersRef = useRef(new Map());
+  const externalUpdateRef = useRef(onIxiStateChange);
+  const objectIdRef = useRef(resolvedObjectId);
+
+  externalUpdateRef.current = onIxiStateChange;
+  objectIdRef.current = resolvedObjectId;
 
   useEffect(() => {
     noticeRef.current = externalNotice;
@@ -59,6 +64,21 @@ export function IXIAosCardCommandProvider({
       window.clearTimeout(timeoutId);
     }
     timersRef.current.clear();
+
+    const currentNotice = noticeRef.current;
+    const currentObjectId = objectIdRef.current;
+    const updateExternalState = externalUpdateRef.current;
+
+    // Action notices are deliberately transient. If the card surface closes
+    // before its timer fires, clear the shared notice so it cannot remain
+    // painted over the listing card indefinitely.
+    if (
+      currentNotice?.message &&
+      currentObjectId &&
+      typeof updateExternalState === "function"
+    ) {
+      updateExternalState(currentObjectId, { actionNotice: null });
+    }
   }, []);
 
   const publishNotice = useCallback((notice) => {

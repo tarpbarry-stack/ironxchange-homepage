@@ -37,3 +37,10 @@ test("Work Order lifecycle updates use revision-controlled financial patches", (
   assert.match(route, /\["GET", "PATCH"\]/u);
 });
 
+test("closing a TRANSACT surface clears any shared transient action notice", () => {
+  const provider = read("components/ixi-aos/card-runtime/IXIAosCardCommandContext.jsx");
+
+  assert.match(provider, /externalUpdateRef/u);
+  assert.match(provider, /currentNotice\?\.message/u);
+  assert.match(provider, /updateExternalState\(currentObjectId, \{ actionNotice: null \}\)/u);
+});
