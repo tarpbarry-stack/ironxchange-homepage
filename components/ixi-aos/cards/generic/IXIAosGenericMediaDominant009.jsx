@@ -254,6 +254,8 @@ export default function IXIAosGenericMediaDominant009({
   const fields = getObjectFields(runtimeObject);
   const relationships = getObjectRelationships(runtimeObject);
   const image = getPrimaryImage(runtimeObject);
+  const businessIdentifier = definitions.find(isBusinessIdentifier) || null;
+  const businessIdentifierValue = inputValue(fields?.[businessIdentifier?.fieldId]);
 
   const populatedFields = definitions
     .filter(definition => !isBusinessIdentifier(definition))
@@ -325,7 +327,7 @@ export default function IXIAosGenericMediaDominant009({
         <section className="c009-media">
           {image ? <img src={image} alt={getObjectDisplayName(runtimeObject)} /> : <div className="c009-media-empty"><b>IXI</b><span>PRIMARY MEDIA</span></div>}
           <div className="c009-media-shade" />
-          <div className="c009-media-id"><span>{getObjectLabel(runtimeObject)}</span><strong>{getObjectDisplayName(runtimeObject)}</strong></div>
+          <div className="c009-media-id"><span>{businessIdentifier?.label || "ID"}</span><strong>{businessIdentifierValue || "—"}</strong></div>
           {actions.canEdit ? (
             <button className="c009-photo-action" type="button" disabled={saving} onClick={event => {
               event.preventDefault();
