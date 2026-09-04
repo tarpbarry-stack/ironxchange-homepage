@@ -6,7 +6,7 @@ name: Deploy IX-Core Freight
       commit_sha:
         description: Immutable IX-Core commit SHA
         required: true
-        default: 6500b42fb8f194b30af403ecfbb28d97147c8e43
+        default: bf3114cbc329523206993d3b9a4411de11df03f5
   push:
     branches: [main]
     paths: [".github/workflows/deploy-ixi-core-freight.yml"]
@@ -25,7 +25,7 @@ jobs:
     env:
       AWS_REGION: ${{ secrets.AWS_REGION }}
       AWS_INSTANCE_ID: ${{ secrets.AWS_INSTANCE_ID }}
-      IXI_CORE_SHA: ${{ inputs.commit_sha || '6500b42fb8f194b30af403ecfbb28d97147c8e43' }}
+      IXI_CORE_SHA: ${{ inputs.commit_sha || 'bf3114cbc329523206993d3b9a4411de11df03f5' }}
     steps:
       - name: Validate immutable release
         shell: bash
@@ -53,7 +53,7 @@ jobs:
           STAGE=/tmp/ixi-core-freight-__IXI_CORE_SHA__
           ARCHIVE=/tmp/ixi-core-freight-__IXI_CORE_SHA__.tgz
           BACKUP=/var/backups/ixi-core-releases/freight-pre-__IXI_CORE_SHA__.tgz
-          FILES='freight/constants.js freight/contracts/freightOrderContract.js freight/routes/freightRouter.js freight/services/freightService.js'
+          FILES='index.js freight/constants.js freight/contracts/freightOrderContract.js freight/routes/freightAuthenticatedRequest.js freight/routes/freightRouter.js freight/services/freightService.js'
           SUCCESS=0
           ROLLBACK_ARMED=0
 
@@ -84,10 +84,12 @@ jobs:
           for file in $FILES; do cmp -s "$APP/$file" "$STAGE/$file" || ALREADY_CURRENT=0; done
           if [ "$ALREADY_CURRENT" -ne 1 ]; then
             printf '%s  %s\n' \
-              '341c1a71e46df79ae11b3e60c074db08db52779d86bf5a9589019179ea27ee7b' 'freight/constants.js' \
-              '7783f7596ab5c0ae439eca450c3ab8d58ec943e8306ec7ce9994bc305a4e3ea5' 'freight/contracts/freightOrderContract.js' \
-              '6e268713aef4d25e3e7fb08daaf6eea9b3d3c2eea3604904e45c0d5975718728' 'freight/routes/freightRouter.js' \
-              '43c934fbba449e4bcce37ea07dcd88d3b882dcf6a607e9dfe449322326a7e39a' 'freight/services/freightService.js' | sha256sum -c -
+              '8c33fe1ec5651ddbe740e5d3e7190c47afb13fe2a2bfd7ff0c713e7a106284b8' 'index.js' \
+              'e55c97d368164b107822159733b6b8785981ce83a02117be6ada231cac728720' 'freight/constants.js' \
+              '054337a22bd2b2c26ebdd65e50e4cf06b467da9d56e3c1ceb8a91d44fa9b7a21' 'freight/contracts/freightOrderContract.js' \
+              'bbce203a0381957b728bdb8d7e45756851f7ae8d44a50fb360f5ee614698f2c3' 'freight/routes/freightAuthenticatedRequest.js' \
+              '05efbecbc932d0c6add567879c36a91f5ec0d9c0b5cafbf48eee9bc0336cb172' 'freight/routes/freightRouter.js' \
+              '216b3dea4cd6f853fb1bb62598ec77e5877b1af02dabeef04a6613303c1bd4e3' 'freight/services/freightService.js' | sha256sum -c -
           fi
 
           cd "$STAGE"
@@ -119,8 +121,10 @@ jobs:
           done
           cd "$APP"
           printf '%s  %s\n' \
+            '6eee62d9cd279620e26af0432f07a4d07681dcb5f9f4335e992479a7ea2a92b3' 'index.js' \
             'e55c97d368164b107822159733b6b8785981ce83a02117be6ada231cac728720' 'freight/constants.js' \
             '054337a22bd2b2c26ebdd65e50e4cf06b467da9d56e3c1ceb8a91d44fa9b7a21' 'freight/contracts/freightOrderContract.js' \
+            '2795f89f5a203129756a808f96fbb6c2d374d820a5bc0244abde9e6f30603b9f' 'freight/routes/freightAuthenticatedRequest.js' \
             '05efbecbc932d0c6add567879c36a91f5ec0d9c0b5cafbf48eee9bc0336cb172' 'freight/routes/freightRouter.js' \
             '216b3dea4cd6f853fb1bb62598ec77e5877b1af02dabeef04a6613303c1bd4e3' 'freight/services/freightService.js' | sha256sum -c -
 
@@ -153,7 +157,7 @@ jobs:
           {
             echo '## IX-Core Freight release'
             printf -- '- Commit: `%s`\n' "$IXI_CORE_SHA"
-            echo '- 88 Financial, Freight, and Sales control tests: passed'
+            echo '- 90 Financial, Freight, and Sales control tests: passed'
             echo '- Live source checksum and rollback controls: passed'
             echo '- AWS IX-Core health and Freight invoice-route probes: passed'
           } >> "$GITHUB_STEP_SUMMARY"
