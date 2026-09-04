@@ -1,7 +1,5 @@
 import { useEffect, useState } from "react";
 
-import IXITicketLauncher from "./ixi-tickets/IXITicketLauncher";
-
 export default function Navbar() {
   const [loggedIn, setLoggedIn] = useState(false);
 
@@ -37,8 +35,6 @@ export default function Navbar() {
       </div>
 
       <div className="nav-links">
-        {loggedIn ? <IXITicketLauncher /> : null}
-
         <div className="social-mini">
           <a href="https://www.facebook.com/profile.php?id=61589249515383" aria-label="Facebook" target="_blank" rel="noreferrer">
             <i className="fa-brands fa-facebook-f"></i>
