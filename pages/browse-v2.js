@@ -45,6 +45,8 @@ import ListingShareProvider
   from "../components/ixi-marketplace/ListingShareProvider";
 import MarketplaceCardIntelligence
   from "../components/ixi-marketplace/MarketplaceCardIntelligence";
+import IXIMarketplaceFaceTypography
+  from "../components/ixi-marketplace/IXIMarketplaceFaceTypography";
 import IXIChassisControls from "../components/ixi-chassis/IXIChassisControls";
 import IXIPocketL1 from "../components/ixi-chassis/IXIPocketL1";
 import IXIPocketL2 from "../components/ixi-chassis/IXIPocketL2";
@@ -1199,6 +1201,7 @@ function updateCardScaleMode(nextMode) {
   return (
     <ListingShareProvider>
       <MarketplaceCardIntelligence />
+      <IXIMarketplaceFaceTypography />
       <Head>
         <title>IXI Marketplace | IronXchange</title>
 
