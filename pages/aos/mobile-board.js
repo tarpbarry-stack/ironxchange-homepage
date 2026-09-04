@@ -1,5 +1,5 @@
 import Head from "next/head";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   PointerSensor,
   KeyboardSensor,
@@ -31,8 +31,20 @@ import {
 } from "../../lib/ixiMachineStateClient";
 
 const IXI_AOS_WORK_LAYOUT_ID = "__ixi_aos_work_layout__";
-const I_SCALE_MODE = "focus";
-const II_SCALE_MODE = "compact";
+const MOBILE_BOARD_HORIZONTAL_PADDING = 2;
+const MOBILE_BOARD_COLUMN_GAP = 4;
+
+function resolveMobileCardScaleMode(layoutMode, viewportWidth) {
+  const width = Math.max(320, Number(viewportWidth) || 320);
+
+  if (layoutMode === "II") {
+    return width >= 392 ? "compact" : "micro";
+  }
+
+  if (width >= 424) return "focus";
+  if (width >= 364) return "work";
+  return "xl";
+}
 
 function publicDataOf(listing = {}) {
   return listing?.publicData || listing?.attributes?.publicData || {};
@@ -118,8 +130,18 @@ export default function MobileBoardCertificationPage() {
   const [placements, setPlacements] = useState({});
   const [sourceSurface, setSourceSurface] = useState("");
   const [activeDndId, setActiveDndId] = useState("");
+  const [viewportWidth, setViewportWidth] = useState(320);
+  const [saveState, setSaveState] = useState("idle");
+  const [saveError, setSaveError] = useState("");
 
-  const cardScaleMode = layoutMode === "II" ? II_SCALE_MODE : I_SCALE_MODE;
+  const persistenceQueueRef = useRef(Promise.resolve());
+  const latestSaveSequenceRef = useRef(0);
+  const lastPendingSaveRef = useRef(null);
+
+  const cardScaleMode = resolveMobileCardScaleMode(
+    layoutMode,
+    viewportWidth
+  );
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -129,6 +151,23 @@ export default function MobileBoardCertificationPage() {
       coordinateGetter: sortableKeyboardCoordinates
     })
   );
+
+  useEffect(() => {
+    function syncViewportWidth() {
+      const visualViewportWidth = Number(window.visualViewport?.width);
+      const nextWidth = visualViewportWidth || window.innerWidth || 320;
+      setViewportWidth(Math.max(320, Math.floor(nextWidth)));
+    }
+
+    syncViewportWidth();
+    window.addEventListener("resize", syncViewportWidth);
+    window.visualViewport?.addEventListener("resize", syncViewportWidth);
+
+    return () => {
+      window.removeEventListener("resize", syncViewportWidth);
+      window.visualViewport?.removeEventListener("resize", syncViewportWidth);
+    };
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -234,10 +273,10 @@ export default function MobileBoardCertificationPage() {
     [sourceIds, listingById]
   );
 
-  function saveWorkspaceLayout(nextPlacements) {
+  async function saveWorkspaceLayout(nextPlacements) {
     if (!ixiUserId) return null;
 
-    return saveIxiMachinePatch({
+    return await saveIxiMachinePatch({
       userId: ixiUserId,
       listingId: IXI_AOS_WORK_LAYOUT_ID,
       patch: {
@@ -248,29 +287,79 @@ export default function MobileBoardCertificationPage() {
     });
   }
 
+  function enqueuePersistence({ patches = [], nextPlacements }) {
+    const sequence = latestSaveSequenceRef.current + 1;
+    latestSaveSequenceRef.current = sequence;
+
+    const pendingSave = {
+      patches: patches.filter(item => item?.listingId),
+      nextPlacements
+    };
+
+    lastPendingSaveRef.current = pendingSave;
+    setSaveState("saving");
+    setSaveError("");
+
+    const persist = async () => {
+      const patchResults = await Promise.all(
+        pendingSave.patches.map(item =>
+          saveIxiMachinePatch({
+            userId: ixiUserId,
+            listingId: item.listingId,
+            patch: item.patch || {}
+          })
+        )
+      );
+
+      const layoutResult = await saveWorkspaceLayout(
+        pendingSave.nextPlacements
+      );
+
+      if (!layoutResult || patchResults.some(result => !result)) {
+        throw new Error("The AOS order could not be confirmed.");
+      }
+
+      if (sequence === latestSaveSequenceRef.current) {
+        lastPendingSaveRef.current = null;
+        setSaveState("saved");
+      }
+    };
+
+    const queuedSave = persistenceQueueRef.current
+      .catch(() => null)
+      .then(persist);
+
+    persistenceQueueRef.current = queuedSave.catch(saveFailure => {
+      if (sequence === latestSaveSequenceRef.current) {
+        setSaveState("error");
+        setSaveError(
+          saveFailure?.message || "The AOS order could not be confirmed."
+        );
+      }
+
+      return null;
+    });
+
+    return persistenceQueueRef.current;
+  }
+
+  function retryLastSave() {
+    if (!lastPendingSaveRef.current) return;
+    enqueuePersistence(lastPendingSaveRef.current);
+  }
+
   function executeIXITransaction(result) {
     if (!result) return;
 
     const nextIxiCardState = result.nextIxiCardState || ixiCardState;
     const nextPlacements = result.nextMachineContainers || placements;
-
-    setIxiCardState(nextIxiCardState);
-    setPlacements(nextPlacements);
-
     const patches = Array.isArray(result.patchesToPersist)
       ? result.patchesToPersist
       : [];
 
-    patches.forEach(item => {
-      if (!item?.listingId) return;
-      saveIxiMachinePatch({
-        userId: ixiUserId,
-        listingId: item.listingId,
-        patch: item.patch || {}
-      });
-    });
-
-    saveWorkspaceLayout(nextPlacements);
+    setIxiCardState(nextIxiCardState);
+    setPlacements(nextPlacements);
+    enqueuePersistence({ patches, nextPlacements });
   }
 
   function moveMachineWithinContainer(containerKey, dragId, overId, insertAfter) {
@@ -333,6 +422,7 @@ export default function MobileBoardCertificationPage() {
         activeDndId={activeDndId}
         ixiCardState={ixiCardState}
         cardScaleMode={cardScaleMode}
+        overlayZIndex={1000000}
       >
         <main className="shell">
           <header className="header">
@@ -343,6 +433,15 @@ export default function MobileBoardCertificationPage() {
             <div className="modeReadout">
               <span>{activeDndId ? "MOVING" : layoutMode === "II" ? "TWO-CARD" : "ONE-CARD"}</span>
               <span>{sourceSurface || "—"} · {sourceIds.length || "—"}</span>
+              <span className={`saveState ${saveState}`}>
+                {saveState === "saving"
+                  ? "SAVING"
+                  : saveState === "saved"
+                    ? "SAVED"
+                    : saveState === "error"
+                      ? "SAVE FAILED"
+                      : cardScaleMode.toUpperCase()}
+              </span>
             </div>
           </header>
 
@@ -364,6 +463,13 @@ export default function MobileBoardCertificationPage() {
               II
             </button>
           </nav>
+
+          {saveState === "error" ? (
+            <div className="saveFailure" role="alert">
+              <span>{saveError}</span>
+              <button type="button" onClick={retryLastSave}>RETRY SAVE</button>
+            </div>
+          ) : null}
 
           {status === "loading" ? <div className="message">Loading your AOS board…</div> : null}
           {status === "error" ? (
@@ -437,14 +543,15 @@ export default function MobileBoardCertificationPage() {
         :global(html),:global(body){margin:0;min-width:0;overflow-x:hidden;background:#070707}
         .shell{box-sizing:border-box;min-height:100dvh;width:100%;padding:max(8px,env(safe-area-inset-top)) 0 max(28px,env(safe-area-inset-bottom));overflow-x:hidden;background:#070707;color:#f5f5f5;font-family:Inter,Arial,sans-serif}
         .header{box-sizing:border-box;width:calc(100% - 16px);margin:0 8px 8px;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;gap:10px;border:1px solid rgba(255,255,255,.08);border-radius:10px;background:rgba(15,15,15,.94)}
-        .header>div:first-child{min-width:0;display:grid;gap:3px}.header strong{color:#ffc400;font-size:11px;line-height:1.1;letter-spacing:.8px}.header span{color:rgba(255,255,255,.68);font-size:9px;line-height:1.2;letter-spacing:.45px}.modeReadout{flex:0 0 auto;display:grid;justify-items:end;gap:2px}.modeReadout span:first-child{color:#7fe1ff;font-weight:800}
+        .header>div:first-child{min-width:0;display:grid;gap:3px}.header strong{color:#ffc400;font-size:11px;line-height:1.1;letter-spacing:.8px}.header span{color:rgba(255,255,255,.68);font-size:9px;line-height:1.2;letter-spacing:.45px}.modeReadout{flex:0 0 auto;display:grid;justify-items:end;gap:2px}.modeReadout span:first-child{color:#7fe1ff;font-weight:800}.modeReadout .saveState.saving{color:#ffc400}.modeReadout .saveState.saved{color:#70d8ff}.modeReadout .saveState.error{color:#ff7777}
         .layoutSwitch{box-sizing:border-box;width:calc(100% - 16px);margin:0 8px 10px;display:grid;grid-template-columns:1fr 1fr;gap:6px}
         .layoutSwitch button{height:44px;border:1px solid rgba(255,255,255,.13);border-radius:8px;background:#111;color:#8f9692;font:900 16px/1 Inter,Arial,sans-serif;letter-spacing:1px}.layoutSwitch button.active{border-color:rgba(255,196,0,.8);background:#19160b;color:#ffc400;box-shadow:inset 0 0 0 1px rgba(255,196,0,.16)}
-        .board{box-sizing:border-box;width:100%;display:grid;align-items:start;justify-items:center;overflow:visible;padding:0 5px}
+        .board{box-sizing:border-box;width:100%;display:grid;align-items:start;justify-items:center;overflow:visible;padding:0 ${MOBILE_BOARD_HORIZONTAL_PADDING}px}
         .board-one{grid-template-columns:minmax(0,1fr);gap:16px 0}
-        .board-two{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 4px}
+        .board-two{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px ${MOBILE_BOARD_COLUMN_GAP}px}
         .message{margin:70px 16px 0;padding:18px;display:grid;gap:8px;text-align:center;font-size:12px;color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.08);border-radius:10px;background:#111}.message.error{color:#ff9b9b;border-color:rgba(255,80,80,.22)}.message strong{color:#ffc400;font-size:11px;letter-spacing:.7px}
-        :global(.mobile-aos-sortable-card[data-dragging="true"]){z-index:40!important}
+        .saveFailure{box-sizing:border-box;width:calc(100% - 16px);margin:0 8px 10px;padding:8px 10px;display:flex;align-items:center;justify-content:space-between;gap:10px;border:1px solid rgba(255,80,80,.35);border-radius:8px;background:rgba(64,8,8,.65);color:#ffaaaa;font-size:10px;font-weight:800;letter-spacing:.3px}.saveFailure button{min-width:108px;min-height:44px;border:1px solid rgba(255,196,0,.65);border-radius:7px;background:#19160b;color:#ffc400;font:900 10px/1 Inter,Arial,sans-serif;letter-spacing:.6px}
+        :global(.ixi-drag-overlay-card){position:relative;z-index:1000000;pointer-events:none}
       `}</style>
     </>
   );
