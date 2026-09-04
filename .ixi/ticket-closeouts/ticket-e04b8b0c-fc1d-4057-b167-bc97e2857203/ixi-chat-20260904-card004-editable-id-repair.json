@@ -1,0 +1,40 @@
+{
+  "contract": "ixi-ticket-closeout",
+  "contractVersion": "1.0.0",
+  "ticketId": "ticket-e04b8b0c-fc1d-4057-b167-bc97e2857203",
+  "runId": "ixi-chat-20260904-card004-editable-id-repair",
+  "expectedRevision": 9,
+  "closeout": {
+    "summary": "Verification repair: Card 004 now explicitly materializes its canonical ID definition before the Edit UI renders, keeps the label fixed, permits value editing, prevents row deletion, and synchronizes the value to durable businessIdentifiers[].",
+    "editResults": [
+      {
+        "editId": "edit-d2a29274-a051-46c0-b42e-821f20f29819",
+        "status": "completed",
+        "result": "Corrected the failed prior implementation by constructing the Card 004 businessIdentifier field before the shared editor receives the object and by synchronizing edited values through both the synthetic field and durable businessIdentifiers array."
+      }
+    ],
+    "filesChanged": [
+      "components/ixi-aos/cards/004/IXIAosCard004Personnel.jsx",
+      "components/ixi-aos/card-runtime/modules/IXIAosFace1CardRuntime.jsx",
+      "tests/ixi-ticket-card004-split-summary-contract.test.mjs"
+    ],
+    "tests": [
+      "18 focused Card 004, relationship-shell, top-edit, and Card 009 regression tests passed; 0 failed",
+      "git diff --check passed",
+      "PR #146 verified as exactly three changed files and squash-merged",
+      "Production deployment dpl_GcVdYcrV8mQG2GvvbsX1DbApGxKy READY and owns preview.ironxchange.com"
+    ],
+    "before": "Live verification showed Card 004 Edit rendering only company, openJobs, and teams; the ID row was absent because the prior fix only protected a business-ID definition if one already existed.",
+    "after": "Card 004 creates the canonical businessIdentifier definition before Edit renders, so ID is always present with a fixed label, editable value, no delete button, and durable save synchronization.",
+    "risks": [],
+    "notes": [
+      "The repair is Card 004-scoped at object preparation; other cards retain their existing rendering behavior.",
+      "Card 009 regression tests remain green.",
+      "Card 004's Face 1 summary, OPEN POSITIONS cell, relationship shell, rail, commands, and geometry are unchanged.",
+      "Main commit: 076412a2be1fd9a01543a45ff72d4a19e78edc00"
+    ],
+    "prs": [
+      "https://github.com/tarpbarry-stack/ironxchange-homepage/pull/146"
+    ]
+  }
+}
