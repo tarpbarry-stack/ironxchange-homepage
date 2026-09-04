@@ -7,6 +7,11 @@ const source = fs.readFileSync(
   "utf8"
 );
 
+const card009Source = fs.readFileSync(
+  new URL("../components/ixi-aos/cards/009/IXIAosCard009.jsx", import.meta.url),
+  "utf8"
+);
+
 test("CT-260904-000006 fixes the Card 009 business-ID label while keeping its value editable", () => {
   assert.match(source, /label: isBusinessIdentifier\(definition\) \? "ID"/u);
   assert.match(source, /<span className="c009-editor-fixed-label">ID<\/span>/u);
@@ -22,6 +27,11 @@ test("Card 009 renders a fixed ID caption with the canonical business-ID value",
   assert.match(source, /const businessIdentifierValue = inputValue\(fields\?\.\[businessIdentifier\?\.fieldId\]\);/u);
   assert.match(source, /className="c009-media-id"><span>ID<\/span><strong>\{businessIdentifierValue \|\| "—"\}<\/strong><\/div>/u);
   assert.doesNotMatch(source, /businessIdentifier\?\.label \|\| "ID"/u);
+});
+
+test("Card 009 removes only the duplicate adapter-level business-ID overlay", () => {
+  assert.match(card009Source, /<IXIAosDataContractCardAdapter \{\.\.\.props\} minimumCustomFields=\{7\} showBusinessIdentifier=\{false\}>/u);
+  assert.match(card009Source, /<IXIAosGenericMediaDominant009/u);
 });
 
 test("Card 009 shell and existing controls remain intact", () => {
