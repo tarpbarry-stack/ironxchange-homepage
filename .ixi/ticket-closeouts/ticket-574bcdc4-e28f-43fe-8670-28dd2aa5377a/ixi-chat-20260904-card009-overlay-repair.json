@@ -1,0 +1,37 @@
+{
+  "contract": "ixi-ticket-closeout",
+  "contractVersion": "1.0.0",
+  "ticketId": "ticket-574bcdc4-e28f-43fe-8670-28dd2aa5377a",
+  "runId": "ixi-chat-20260904-card009-overlay-repair",
+  "expectedRevision": 9,
+  "closeout": {
+    "summary": "Card 009 now suppresses the duplicate adapter-level business-ID overlay while retaining its lower fixed ID and editable canonical customer number.",
+    "editResults": [
+      {
+        "editId": "edit-f13ee1cb-a902-471f-b05a-4c736c182061",
+        "status": "completed",
+        "result": "Disabled the shared adapter business-ID overlay only in IXIAosCard009. The lower media ID remains fixed as ID; its canonical customer number remains editable, importable, and persisted."
+      }
+    ],
+    "filesChanged": [
+      "components/ixi-aos/cards/009/IXIAosCard009.jsx",
+      "tests/ixi-ticket-card009-business-id-contract.test.mjs"
+    ],
+    "tests": [
+      "10 focused Card 009 contract tests passed; 0 failed",
+      "PR #141 verified as two files and merged",
+      "Production deployment dpl_CEdp9ashDUEAcxwGVeSggQ3MB5io READY and owns preview.ironxchange.com"
+    ],
+    "before": "Card 009 displayed its intended lower ID plus a second adapter-injected ID overlay at the top-right red-marked position.",
+    "after": "Only Card 009's lower ID remains. The duplicate top-right adapter overlay is absent, and the customer ID value remains editable through the existing object contract.",
+    "risks": [],
+    "notes": [
+      "The shared adapter and all other AOS cards are unchanged.",
+      "Card 009 geometry, media, relationships, commands, rail, and non-ID fields are unchanged.",
+      "Main commit: fe1f81001b3576b57761876ca41ca4f5b2e7b614"
+    ],
+    "prs": [
+      "https://github.com/tarpbarry-stack/ironxchange-homepage/pull/141"
+    ]
+  }
+}
