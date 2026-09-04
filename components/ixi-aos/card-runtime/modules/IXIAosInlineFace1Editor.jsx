@@ -1,17 +1,261 @@
 import { useEffect, useMemo, useState } from "react";
-import { clean, getFieldDefinitions, getObjectDisplayName, getObjectFields } from "../IXIAosSemanticObjectPresentation";
+import {
+  clean,
+  getFieldDefinitions,
+  getObjectDisplayName,
+  getObjectFields
+} from "../IXIAosSemanticObjectPresentation";
 
-function valueText(value){if(Array.isArray(value))return value.join(", ");if(value&&typeof value==="object")return clean(value?.displayName||value?.label||value?.name||value?.value);return String(value??"");}
-function parseValue(definition,rawValue){const type=clean(definition?.fieldType||definition?.type).toLowerCase();if(["number","integer","money","currency"].includes(type)){const n=Number(rawValue);return Number.isFinite(n)?n:null;}if(["tags","array","list","multi-select","multiselect"].includes(type))return String(rawValue||"").split(",").map(clean).filter(Boolean);return rawValue;}
-function blankDefinition(index,used){let n=index+1;let id=`field_${n}`;while(used.has(id))id=`field_${++n}`;return {fieldId:id,label:`FIELD ${n}`,type:"text",fieldType:"text",editable:true,presentationOrder:index,metadata:{userDefined:true}};}
+function valueText(value) {
+  if (Array.isArray(value)) return value.join(", ");
+  if (value && typeof value === "object") {
+    return clean(value?.displayName || value?.label || value?.name || value?.value);
+  }
+  return String(value ?? "");
+}
 
-export default function IXIAosInlineFace1Editor({cardNumber,object={},onSaveObject=null,children}){
- const [runtimeObject,setRuntimeObject]=useState(object),[editing,setEditing]=useState(false),[saving,setSaving]=useState(false),[name,setName]=useState(getObjectDisplayName(object)),[definitions,setDefinitions]=useState([]),[draft,setDraft]=useState({});
- useEffect(()=>{if(!editing)setRuntimeObject(object)},[object,editing]);
- const editable=useMemo(()=>getFieldDefinitions(runtimeObject).filter(d=>d?.editable!==false&&clean(d?.fieldId)),[runtimeObject]);
- function beginEdit(event){const button=event?.target?.closest?.("button.header-action.edit");if(!button||editing)return;event.preventDefault();event.stopPropagation();const defs=editable.map((d,i)=>({...d,presentationOrder:Number.isFinite(Number(d?.presentationOrder))?Number(d.presentationOrder):i}));const values={};defs.forEach(d=>{values[d.fieldId]=valueText(getObjectFields(runtimeObject)?.[d.fieldId])});setDefinitions(defs);setDraft(values);setName(getObjectDisplayName(runtimeObject));setEditing(true);}
- function addField(){setDefinitions(current=>{const used=new Set(current.map(d=>d.fieldId));const def=blankDefinition(current.length,used);setDraft(values=>({...values,[def.fieldId]:""}));return [...current,def];});}
- function removeField(id){setDefinitions(current=>current.filter(d=>d.fieldId!==id));setDraft(current=>{const next={...current};delete next[id];return next;});}
- async function save(event){event?.preventDefault?.();event?.stopPropagation?.();if(saving)return;const normalized=definitions.map((d,i)=>({...d,fieldId:clean(d.fieldId),label:clean(d.label)||`FIELD ${i+1}`,type:clean(d.type||d.fieldType||"text")||"text",fieldType:clean(d.fieldType||d.type||"text")||"text",editable:d.editable!==false,presentationOrder:i})).filter(d=>d.fieldId);const nextFields={...getObjectFields(runtimeObject)};normalized.forEach(d=>{nextFields[d.fieldId]=parseValue(d,draft[d.fieldId])});const nextObject={...runtimeObject,displayName:clean(name)||getObjectDisplayName(runtimeObject),fields:nextFields,fieldDefinitions:normalized,metadata:{...(runtimeObject?.metadata||{}),fieldDefinitions:normalized}};setSaving(true);try{await onSaveObject?.({object:nextObject,objectId:nextObject?.objectId||nextObject?.id,displayName:nextObject.displayName,fields:nextFields,fieldDefinitions:normalized,metadata:nextObject.metadata});setRuntimeObject(nextObject);setEditing(false);}finally{setSaving(false)}}
- return <div className={`ixi-007-edit-contract c${String(cardNumber).padStart(3,"0")}-edit ${editing?"is-editing":""}`} onClickCapture={beginEdit}>{typeof children==="function"?children(runtimeObject):children}{editing?<div className="ixi-007-editor" onPointerDown={e=>e.stopPropagation()}><div className="ixi-007-editor-head"><label><span>OBJECT NAME</span><input value={name} onChange={e=>setName(e.target.value)}/></label><nav><button disabled={saving} onClick={save}>{saving?"SAVING":"SAVE"}</button><button disabled={saving} onClick={()=>setEditing(false)}>CANCEL</button></nav></div><div className="ixi-007-editor-scroll"><div className="ixi-007-columns"><span>FIELD NAME</span><span>VALUE</span><i/></div>{definitions.map((d,i)=><div className="ixi-007-row" key={d.fieldId}><input aria-label={`Field ${i+1} name`} value={d.label} onChange={e=>setDefinitions(current=>current.map(x=>x.fieldId===d.fieldId?{...x,label:e.target.value}:x))}/><input aria-label={`${d.label} value`} value={draft[d.fieldId]??""} onChange={e=>setDraft(current=>({...current,[d.fieldId]:e.target.value}))}/><button type="button" onClick={()=>removeField(d.fieldId)}>×</button></div>)}<button className="ixi-007-add" type="button" onClick={addField}>+ ADD FIELD</button></div></div>:null}<style jsx>{`.ixi-007-edit-contract{position:relative;width:298px;height:471px}.ixi-007-editor{position:absolute;inset:43px 7px 51px;z-index:500;overflow:hidden;border:1px solid #343a35;border-radius:6px;background:#0b0d0c}.ixi-007-editor-head{height:48px;display:flex;align-items:center;gap:6px;padding:5px;border-bottom:1px solid #303531;background:#151815}.ixi-007-editor-head label{flex:1;min-width:0}.ixi-007-editor-head span{display:block;margin-bottom:3px;color:#aeb5b0;font:700 6px/1 Arial}.ixi-007-editor-head input,.ixi-007-row input{width:100%;min-width:0;height:24px;padding:0 6px;border:1px solid #59615b;border-radius:4px;background:#090c0a;color:#f3f5f3;font:700 9px/22px Arial;outline:none}.ixi-007-editor-head nav{display:flex;gap:3px}.ixi-007-editor-head button,.ixi-007-row button,.ixi-007-add{height:24px;border:1px solid #ffffff16;border-radius:4px;background:#111411;color:#dce0dd;font:800 7px/22px Arial}.ixi-007-editor-head nav button:first-child{color:#ffc400}.ixi-007-editor-scroll{height:calc(100% - 48px);padding:6px;overflow-y:auto}.ixi-007-columns,.ixi-007-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.35fr) 25px;gap:4px;align-items:center}.ixi-007-columns{height:17px;color:#858c87;font:800 5px/1 Arial}.ixi-007-row{margin-bottom:4px}.ixi-007-row button{padding:0;color:#8f9791;font-size:12px}.ixi-007-add{width:100%;margin-top:3px;color:#ffc400}.is-editing :global(.ixi-aos-card-header-controls){visibility:hidden!important}`}</style></div>;
+function parseValue(definition, rawValue) {
+  const type = clean(definition?.fieldType || definition?.type).toLowerCase();
+  if (["number", "integer", "money", "currency"].includes(type)) {
+    const number = Number(rawValue);
+    return Number.isFinite(number) ? number : null;
+  }
+  if (["tags", "array", "list", "multi-select", "multiselect"].includes(type)) {
+    return String(rawValue || "").split(",").map(clean).filter(Boolean);
+  }
+  return rawValue;
+}
+
+function blankDefinition(index, used) {
+  let sequence = index + 1;
+  let fieldId = `field_${sequence}`;
+  while (used.has(fieldId)) fieldId = `field_${++sequence}`;
+  return {
+    fieldId,
+    label: `FIELD ${sequence}`,
+    type: "text",
+    fieldType: "text",
+    editable: true,
+    presentationOrder: index,
+    metadata: { userDefined: true }
+  };
+}
+
+export default function IXIAosInlineFace1Editor({
+  cardNumber,
+  object = {},
+  onSaveObject = null,
+  children
+}) {
+  const [runtimeObject, setRuntimeObject] = useState(object);
+  const [editing, setEditing] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [name, setName] = useState(getObjectDisplayName(object));
+  const [definitions, setDefinitions] = useState([]);
+  const [draft, setDraft] = useState({});
+
+  useEffect(() => {
+    if (!editing) setRuntimeObject(object);
+  }, [object, editing]);
+
+  const editable = useMemo(
+    () => getFieldDefinitions(runtimeObject).filter(
+      definition => definition?.editable !== false && clean(definition?.fieldId)
+    ),
+    [runtimeObject]
+  );
+
+  function beginEdit(event) {
+    const button = event?.target?.closest?.("button.header-action.edit");
+    if (!button || editing) return;
+    event.preventDefault();
+    event.stopPropagation();
+
+    const nextDefinitions = editable.map((definition, index) => ({
+      ...definition,
+      presentationOrder: Number.isFinite(Number(definition?.presentationOrder))
+        ? Number(definition.presentationOrder)
+        : index
+    }));
+    const nextDraft = {};
+    nextDefinitions.forEach(definition => {
+      nextDraft[definition.fieldId] = valueText(
+        getObjectFields(runtimeObject)?.[definition.fieldId]
+      );
+    });
+
+    setDefinitions(nextDefinitions);
+    setDraft(nextDraft);
+    setName(getObjectDisplayName(runtimeObject));
+    setEditing(true);
+  }
+
+  function cancel(event) {
+    event?.preventDefault?.();
+    event?.stopPropagation?.();
+    setEditing(false);
+  }
+
+  function addField() {
+    setDefinitions(current => {
+      const used = new Set(current.map(definition => definition.fieldId));
+      const definition = blankDefinition(current.length, used);
+      setDraft(values => ({ ...values, [definition.fieldId]: "" }));
+      return [...current, definition];
+    });
+  }
+
+  function removeField(fieldId) {
+    setDefinitions(current => current.filter(definition => definition.fieldId !== fieldId));
+    setDraft(current => {
+      const next = { ...current };
+      delete next[fieldId];
+      return next;
+    });
+  }
+
+  async function save(event) {
+    event?.preventDefault?.();
+    event?.stopPropagation?.();
+    if (saving) return;
+
+    const normalized = definitions.map((definition, index) => ({
+      ...definition,
+      fieldId: clean(definition.fieldId),
+      label: clean(definition.label) || `FIELD ${index + 1}`,
+      type: clean(definition.type || definition.fieldType || "text") || "text",
+      fieldType: clean(definition.fieldType || definition.type || "text") || "text",
+      editable: definition.editable !== false,
+      presentationOrder: index
+    })).filter(definition => definition.fieldId);
+
+    const nextFields = { ...getObjectFields(runtimeObject) };
+    normalized.forEach(definition => {
+      nextFields[definition.fieldId] = parseValue(
+        definition,
+        draft[definition.fieldId]
+      );
+    });
+
+    const nextObject = {
+      ...runtimeObject,
+      displayName: clean(name) || getObjectDisplayName(runtimeObject),
+      fields: nextFields,
+      fieldDefinitions: normalized,
+      metadata: {
+        ...(runtimeObject?.metadata || {}),
+        fieldDefinitions: normalized
+      }
+    };
+
+    setSaving(true);
+    try {
+      await onSaveObject?.({
+        object: nextObject,
+        objectId: nextObject?.objectId || nextObject?.id,
+        displayName: nextObject.displayName,
+        fields: nextFields,
+        fieldDefinitions: normalized,
+        metadata: nextObject.metadata
+      });
+      setRuntimeObject(nextObject);
+      setEditing(false);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div
+      className={`ixi-face1-edit-contract c${String(cardNumber).padStart(3, "0")}-edit ${editing ? "is-editing" : ""}`}
+      onClickCapture={beginEdit}
+    >
+      {typeof children === "function" ? children(runtimeObject) : children}
+
+      {editing ? (
+        <>
+          <input
+            className="ixi-inline-name"
+            aria-label="Display name"
+            value={name}
+            onChange={event => setName(event.target.value)}
+            onPointerDown={event => event.stopPropagation()}
+          />
+
+          <nav
+            className="ixi-inline-edit-actions"
+            aria-label="Edit actions"
+            onPointerDown={event => event.stopPropagation()}
+          >
+            <button type="button" disabled={saving} onClick={save}>
+              {saving ? "SAVING" : "SAVE"}
+            </button>
+            <button type="button" disabled={saving} onClick={cancel}>CANCEL</button>
+          </nav>
+
+          <section className="ixi-inline-field-editor" onPointerDown={event => event.stopPropagation()}>
+            <div className="ixi-inline-columns">
+              <span>FIELD NAME</span>
+              <span>VALUE</span>
+              <i />
+            </div>
+            {definitions.map((definition, index) => (
+              <div className="ixi-inline-row" key={definition.fieldId}>
+                <input
+                  aria-label={`Field ${index + 1} name`}
+                  value={definition.label}
+                  onChange={event => setDefinitions(current => current.map(item => (
+                    item.fieldId === definition.fieldId
+                      ? { ...item, label: event.target.value }
+                      : item
+                  )))}
+                />
+                <input
+                  aria-label={`${definition.label} value`}
+                  value={draft[definition.fieldId] ?? ""}
+                  onChange={event => setDraft(current => ({
+                    ...current,
+                    [definition.fieldId]: event.target.value
+                  }))}
+                />
+                <button
+                  type="button"
+                  aria-label={`Remove ${definition.label}`}
+                  onClick={() => removeField(definition.fieldId)}
+                >
+                  ×
+                </button>
+              </div>
+            ))}
+            <button className="ixi-inline-add" type="button" onClick={addField}>
+              + ADD FIELD
+            </button>
+          </section>
+        </>
+      ) : null}
+
+      <style jsx>{`
+        .ixi-face1-edit-contract{position:relative;width:298px;height:471px}
+        .ixi-inline-name{position:absolute;top:20px;left:10px;z-index:510;width:174px;height:18px;padding:0 5px;border:1px solid #3b423d;border-radius:3px;background:#111512;color:#f6f7f6;font:800 11px/16px Arial;outline:none}
+        .ixi-inline-name:focus{border-color:#ffc40088}
+        .ixi-inline-edit-actions{position:absolute;top:8px;right:8px;z-index:520;display:flex;gap:3px}
+        .ixi-inline-edit-actions button{height:24px;padding:0 7px;border:1px solid #3b423d;border-radius:4px;background:#101310;color:#dfe3e0;font:950 6px/22px Arial}
+        .ixi-inline-edit-actions button:first-child{border-color:#ffc40055;color:#ffc400}
+        .ixi-inline-edit-actions button:disabled{opacity:.55}
+        .ixi-inline-field-editor{position:absolute;inset:43px 7px 51px;z-index:500;padding:6px;overflow-y:auto;border:1px solid #343a35;border-radius:6px;background:#0b0d0c;scrollbar-width:thin;scrollbar-color:#4b514d transparent}
+        .ixi-inline-columns,.ixi-inline-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.35fr) 25px;gap:4px;align-items:center}
+        .ixi-inline-columns{height:17px;color:#858c87;font:800 5px/1 Arial}
+        .ixi-inline-row{margin-bottom:4px}
+        .ixi-inline-row input{width:100%;min-width:0;height:24px;padding:0 6px;border:1px solid #59615b;border-radius:4px;background:#090c0a;color:#f3f5f3;font:700 9px/22px Arial;outline:none}
+        .ixi-inline-row input:focus{border-color:#ffc40088}
+        .ixi-inline-row button,.ixi-inline-add{height:24px;border:1px solid #ffffff16;border-radius:4px;background:#111411;color:#dce0dd;font:800 7px/22px Arial}
+        .ixi-inline-row button{padding:0;color:#8f9791;font-size:12px}
+        .ixi-inline-add{width:100%;margin-top:3px;color:#ffc400}
+        .is-editing :global(.ixi-aos-card-header-controls),
+        .is-editing :global(.ixi-aos-header-ixi-number){visibility:hidden!important}
+        .is-editing :global([class*="identity"] h2),
+        .is-editing :global([class*="identity"]>strong){visibility:hidden!important}
+      `}</style>
+    </div>
+  );
 }
