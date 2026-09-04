@@ -14,6 +14,7 @@ import {
 
 import { IXIAosCardCommandProvider } from "../card-runtime/IXIAosCardCommandContext";
 import IXIAosActionNotice from "../card-runtime/modules/IXIAosActionNotice";
+import IXIAosLocationSecondaryFaceReadability from "../card-runtime/modules/IXIAosLocationSecondaryFaceReadability";
 import {
   clean,
   getObjectLabel,
@@ -177,20 +178,20 @@ export default function IXIAosLocationObjectConsole({
     if (resolved === 1) return <Card {...shared} />;
 
     /*
-     * Faces 2 and 3 are trusted Location applications shared by
-     * Cards 001 / 002 / 003. They are not generic schema faces.
+     * Faces 2-5 share one opt-in readability boundary. Face 1 is returned
+     * above and can never inherit this typography contract.
      */
+    let secondaryFace = null;
+
     if (resolved === 2) {
-      return (
+      secondaryFace = (
         <IXIAosLocationFace2Operations
           {...shared}
           skinId="v12"
         />
       );
-    }
-
-    if (resolved === 3) {
-      return (
+    } else if (resolved === 3) {
+      secondaryFace = (
         <IXIAosLocationFace3Financial
           {...shared}
           runtimeData={financialSnapshot}
@@ -198,20 +199,25 @@ export default function IXIAosLocationObjectConsole({
           skinId="v12"
         />
       );
+    } else {
+      const runtimeData = resolved === 4
+        ? financialSnapshot
+        : maintenanceSnapshot;
+
+      secondaryFace = (
+        <IXIAosGenericConfiguredFaceV12
+          {...shared}
+          faceNumber={resolved}
+          runtimeData={runtimeData}
+        />
+      );
     }
 
-    const runtimeData = resolved === 4
-      ? financialSnapshot
-      : resolved === 5
-        ? maintenanceSnapshot
-        : {};
-
     return (
-      <IXIAosGenericConfiguredFaceV12
-        {...shared}
-        faceNumber={resolved}
-        runtimeData={runtimeData}
-      />
+      <div className="ixi-location-secondary-readable">
+        {secondaryFace}
+        <IXIAosLocationSecondaryFaceReadability />
+      </div>
     );
   }
 
