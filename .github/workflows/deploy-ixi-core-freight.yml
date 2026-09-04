@@ -88,7 +88,7 @@ jobs:
           if [ "$ALREADY_CURRENT" -ne 1 ]; then
             printf '%s  %s\n' \
               'bbce203a0381957b728bdb8d7e45756851f7ae8d44a50fb360f5ee614698f2c3' 'freight/routes/freightAuthenticatedRequest.js' | sha256sum -c -
-            grep -q 'const.*ixiInternalFinancialRequest' "$APP/index.js"
+            grep -q 'ixiInternalFinancialRequest' "$APP/index.js"
             grep -q '"/financial"' "$APP/index.js"
             grep -q '"/freight/v1"' "$APP/index.js"
           fi
@@ -120,9 +120,10 @@ jobs:
           if(routeStart<0) throw new Error('Live Freight route mount missing.');
           const routeWindow=source.slice(routeStart,routeStart+260);
           if(!routeWindow.includes(internal)){
-            const anchor='"/freight/v1",\n  ixiAuthenticatedFinancialRequest,';
-            if(source.split(anchor).length!==2) throw new Error('Live Freight authentication mount is ambiguous.');
-            source=source.replace(anchor,'"/freight/v1",\n  ixiInternalFinancialRequest,\n  ixiAuthenticatedFinancialRequest,');
+            const anchor=/("\/freight\/v1"\s*,\s*)(ixiAuthenticatedFinancialRequest\s*,)/g;
+            const matches=[...source.matchAll(anchor)];
+            if(matches.length!==1) throw new Error('Live Freight authentication mount is ambiguous.');
+            source=source.replace(anchor,'$1ixiInternalFinancialRequest,\n  $2');
           }
           const next=`${path}.freight-auth-next`;
           fs.writeFileSync(next,source,{mode:0o644});
