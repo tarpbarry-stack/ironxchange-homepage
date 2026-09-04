@@ -10,13 +10,33 @@ test("unfinished chassis are not exposed as operational TRANSACT applications", 
   const visible = registry.getIXITransactModules({ objectType: "machine" });
   const all = registry.getIXITransactModules({ objectType: "machine", includeUnavailable: true });
 
-  assert.equal(visible.some(item => ["receipt", "quote", "invoice", "service-invoice"].includes(item.id)), false);
+  assert.equal(visible.some(item => ["receipt", "invoice", "service-invoice"].includes(item.id)), false);
+  assert.equal(visible.some(item => item.id === "quote"), true);
   assert.equal(visible.every(item => item.readiness === "operational"), true);
-  assert.equal(all.find(item => item.id === "quote")?.readiness, "sales-build");
+  assert.equal(all.find(item => item.id === "quote")?.readiness, "operational");
   assert.equal(all.find(item => item.id === "invoice")?.readiness, "sales-build");
   assert.equal(all.find(item => item.id === "service-invoice")?.readiness, "sales-build");
   assert.equal(all.find(item => item.id === "technology-work")?.documentType, "work-order");
   assert.equal(all.find(item => item.id === "service-quote")?.documentType, "service-quote");
+});
+
+test("equipment Quote is a canonical AWS-backed application with a full branded worksheet", async () => {
+  const [commands, contract, app, shell] = await Promise.all([
+    read("components/ixi-aos/transact/modules/quote/IXIQuoteCommands.js"),
+    read("components/ixi-aos/transact/modules/quote/IXIQuoteContract.js"),
+    read("components/ixi-aos/transact/modules/quote/IXIQuoteApp.jsx"),
+    read("components/ixi-aos/transact/IXITransactApp.jsx")
+  ]);
+
+  assert.match(commands, /documentType:\s*"quote"/u);
+  assert.match(commands, /patchIXIAosFinancialDocument/u);
+  assert.match(commands, /expectedRevision/u);
+  assert.match(contract, /ixi-equipment-quote-v1/u);
+  assert.doesNotMatch(contract, /customer name is required|quoted price is required/iu);
+  assert.match(app, /OPEN WORKSHEET/u);
+  assert.match(app, /FORMAL PREVIEW/u);
+  assert.match(app, /SAVE IS ALWAYS AVAILABLE/u);
+  assert.match(shell, /initialRecord=\{quoteSnapshot\}/u);
 });
 
 test("Purchase Order lifecycle persists with revision control and canonical readback", async () => {

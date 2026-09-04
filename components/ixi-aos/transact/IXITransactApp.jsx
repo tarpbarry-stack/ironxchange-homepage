@@ -16,6 +16,7 @@ import IXIAssetAcquisitionApp from "./modules/asset-acquisition/IXIAssetAcquisit
 import IXIRentalExpenseApp from "./modules/rental-expense/IXIRentalExpenseApp";
 import IXIRentalIncomeApp from "./modules/rental-income/IXIRentalIncomeApp";
 import IXIServiceQuoteApp from "./modules/service-quote/IXIServiceQuoteApp";
+import IXIQuoteApp from "./modules/quote/IXIQuoteApp";
 import IXIServiceInvoiceApp from "./modules/service-invoice/IXIServiceInvoiceApp";
 import IXIAssetSaleApp from "./modules/sold/IXIAssetSaleApp";
 import IXISettlementApp from "./modules/settlement/IXISettlementApp";
@@ -269,6 +270,26 @@ export default function IXITransactApp({
       }
     }
     return null;
+  }, [object, financialRecords]);
+  const quoteSnapshot = useMemo(() => {
+    if (object.quote || object.quoteRecord) return object.quote || object.quoteRecord;
+    const records = financialRecords.length
+      ? financialRecords
+      : object?.assetFinancialTransactions || object?.relatedFinancialRecords || object?.financialRecords || [];
+    const durable = records.map((item) => {
+      const document = financialDocumentOf(item);
+      if (document?.documentType !== "quote" || !document?.quote) return null;
+      return {
+        ...document.quote,
+        financialBinding: {
+          financialDocumentId: document.financialDocumentId,
+          revision: financialRevisionOf(item),
+          financialLineId: clean(document?.lines?.[0]?.financialLineId),
+          line: document?.lines?.[0] || null
+        }
+      };
+    }).filter(Boolean);
+    return durable.sort((left, right) => String(right?.audit?.updatedAt || "").localeCompare(String(left?.audit?.updatedAt || "")))[0] || null;
   }, [object, financialRecords]);
   const billRecords = useMemo(() => {
     const candidates = financialRecords.length
@@ -669,6 +690,29 @@ export default function IXITransactApp({
             },
           );
           setModuleId("work-order");
+        }}
+      />
+    );
+  else if (moduleId === "quote")
+    body = (
+      <IXIQuoteApp
+        context={context}
+        object={object}
+        initialRecord={quoteSnapshot}
+        onBack={back}
+        onRecordChange={async (record, changePayload, sourceContext) => {
+          await onFinancialRecordsChange?.();
+          await change(
+            "quote",
+            "QUOTE UPDATE",
+            "sell",
+            "quote",
+            "quote",
+            record,
+            changePayload,
+            sourceContext || context,
+            { customer: record?.customer || null, asset: record?.asset || null, totals: record?.totals || null }
+          );
         }}
       />
     );
