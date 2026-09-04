@@ -6,7 +6,7 @@ name: Deploy IX-Core Financial Controls
       commit_sha:
         description: Immutable IX-Core commit SHA
         required: true
-        default: 940562de7a24f547e3d30a72c4381c942f39d4ae
+        default: 621147a7d1777d313dee3f57bf2f3baca440f768
   push:
     branches: [main]
     paths: [".github/workflows/deploy-ixi-core-general-ledger.yml"]
@@ -25,7 +25,7 @@ jobs:
     env:
       AWS_REGION: ${{ secrets.AWS_REGION }}
       AWS_INSTANCE_ID: ${{ secrets.AWS_INSTANCE_ID }}
-      IXI_CORE_SHA: ${{ inputs.commit_sha || '940562de7a24f547e3d30a72c4381c942f39d4ae' }}
+      IXI_CORE_SHA: ${{ inputs.commit_sha || '621147a7d1777d313dee3f57bf2f3baca440f768' }}
     steps:
       - name: Validate immutable release
         shell: bash
@@ -53,8 +53,9 @@ jobs:
           STAGE=/tmp/ixi-core-general-ledger-__IXI_CORE_SHA__
           ARCHIVE=/tmp/ixi-core-general-ledger-__IXI_CORE_SHA__.tgz
           BACKUP=/var/backups/ixi-core-releases/general-ledger-pre-__IXI_CORE_SHA__.tgz
-          CHANGED='financial/IXIFinancialCloseControlEngine.js financial/IXIFinancialCommandEngine.js financial/IXIFinancialCommandRoutes.js financial/IXIFinancialDocumentFactoryRegistry.js financial/IXIFinancialOperationalControlFactory.js financial/IXIFinancialPermissionEngine.js financial/IXIFinancialPurchaseOrderFactory.js financial/IXIFinancialRoutes.js financial/IXIFinancialValidationBridge.js'
+          CHANGED='financial/IXIFinancialCloseControlEngine.js financial/IXIFinancialCommandEngine.js financial/IXIFinancialCommandRoutes.js financial/IXIFinancialDocumentFactoryRegistry.js financial/IXIFinancialOperationalControlFactory.js financial/IXIFinancialPermissionEngine.js financial/IXIFinancialPurchaseOrderFactory.js financial/IXIFinancialQuoteFactory.js financial/IXIFinancialRoutes.js financial/IXIFinancialValidationBridge.js'
           EXISTING='financial/IXIFinancialCloseControlEngine.js financial/IXIFinancialCommandEngine.js financial/IXIFinancialCommandRoutes.js financial/IXIFinancialDocumentFactoryRegistry.js financial/IXIFinancialPermissionEngine.js financial/IXIFinancialPurchaseOrderFactory.js financial/IXIFinancialRoutes.js financial/IXIFinancialValidationBridge.js'
+          NEW='financial/IXIFinancialQuoteFactory.js'
           SUCCESS=0
 
           run_pm2() { if [ "$PM2_USER" = root ]; then pm2 "$@"; else sudo -u ubuntu -H pm2 "$@"; fi; }
@@ -63,6 +64,7 @@ jobs:
               echo 'Deployment failed; restoring previous IX-Core source.' >&2
               cd "$APP"
               tar -xzf "$BACKUP"
+              rm -f $NEW
               run_pm2 reload IX-Core --update-env || run_pm2 restart IX-Core --update-env || true
             fi
           }
@@ -108,6 +110,9 @@ jobs:
           const {createPurchaseOrderDocument}=require('./financial/IXIFinancialPurchaseOrderFactory');
           const purchaseOrder=createPurchaseOrderDocument({financialDocumentId:'ifd_po_probe',purchaseOrderRecord:{schema:'ixi-purchase-order-record-v1',identity:{purchaseOrderRecordId:'POREC-PROBE'},status:'sent'},amount:100});
           if(purchaseOrder.purchaseOrderRecord.status!=='sent'||purchaseOrder.purchaseOrderRecord.identity.purchaseOrderRecordId!=='POREC-PROBE') throw new Error('Purchase Order control deploy probe failed.');
+          const {createQuoteDocument}=require('./financial/IXIFinancialQuoteFactory');
+          const quote=createQuoteDocument({financialDocumentId:'ifd_quote_probe',documentNumber:'QT-PROBE',references:[{role:'asset',passportId:'pass_asset_probe'},{role:'entity',passportId:'pass_entity_probe'},{role:'employee',passportId:'pass_actor_probe'}],quote:{schema:'ixi-equipment-quote-v1',identity:{revision:1},context:{primaryPassportId:'pass_asset_probe',entityPassportId:'pass_entity_probe',actorPassportId:'pass_actor_probe'},customer:{name:'Probe Customer'},asset:{passportId:'pass_asset_probe',label:'Probe Machine'},totals:{subtotal:100,tax:0,freight:0,fees:0,tradeAllowance:0,total:100},status:'draft'}});
+          if(quote.documentType!=='quote'||quote.quote.totals.total!==100||quote.accountingTreatment.economicEvent!==false||quote.accountingTreatment.createsReceivable!==false) throw new Error('Equipment Quote control deploy probe failed.');
           NODE
 
           cd "$APP"
@@ -122,6 +127,7 @@ jobs:
           collection_status="$(curl -sS -o "$STAGE/collection-route.json" -w '%{http_code}' -X POST -H 'Content-Type: application/json' -d '{"documentType":"collection","input":{"sourceFinancialDocumentId":"ifd_invoice_probe","collectionCase":{"receivable":{"invoiceId":"ifd_invoice_probe","originalAmount":100,"openBalance":100},"customer":{"label":"Probe"}}}}' http://127.0.0.1:4100/financial/commands/create)"
           settlement_status="$(curl -sS -o "$STAGE/settlement-route.json" -w '%{http_code}' -X POST -H 'Content-Type: application/json' -d '{"documentType":"settlement","input":{"sourceFinancialDocumentId":"ifd_sale_probe","assetSettlement":{"context":{"assetPassportId":"pass_asset_probe"},"references":{"saleId":"ifd_sale_probe"},"waterfall":{"shareTotal":100,"balanced":true,"totalFinalDue":100,"owners":[{"ownerId":"owner_probe","label":"Probe Owner","finalDue":100,"balanceDue":100}]},"controls":{"approvalNote":"deployment probe"},"status":"ready","paymentStatus":"unpaid"}}}' http://127.0.0.1:4100/financial/commands/create)"
           purchase_order_status="$(curl -sS -o "$STAGE/purchase-order-route.json" -w '%{http_code}' -X POST -H 'Content-Type: application/json' -d '{"documentType":"purchase-order","input":{"amount":100,"purchaseOrderRecord":{"schema":"ixi-purchase-order-record-v1","identity":{"purchaseOrderRecordId":"POREC-PROBE"},"status":"sent"}}}' http://127.0.0.1:4100/financial/commands/create)"
+          quote_status="$(curl -sS -o "$STAGE/quote-route.json" -w '%{http_code}' -X POST -H 'Content-Type: application/json' -d '{"documentType":"quote","input":{"quote":{"schema":"ixi-equipment-quote-v1","identity":{"revision":1},"context":{"primaryPassportId":"pass_asset_probe"},"customer":{"name":"Probe Customer"},"asset":{"passportId":"pass_asset_probe","label":"Probe Machine"},"totals":{"subtotal":100,"tax":0,"freight":0,"fees":0,"tradeAllowance":0,"total":100},"status":"draft"},"references":[{"role":"asset","passportId":"pass_asset_probe"}]}}' http://127.0.0.1:4100/financial/commands/create)"
           case "$gl_status" in 401|403) ;; *) cat "$STAGE/gl-route.json" >&2; exit 1 ;; esac
           case "$close_status" in 401|403) ;; *) cat "$STAGE/close-route.json" >&2; exit 1 ;; esac
           case "$reopen_status" in 401|403) ;; *) cat "$STAGE/reopen-route.json" >&2; exit 1 ;; esac
@@ -129,12 +135,13 @@ jobs:
           case "$collection_status" in 401|403) ;; *) cat "$STAGE/collection-route.json" >&2; exit 1 ;; esac
           case "$settlement_status" in 401|403) ;; *) cat "$STAGE/settlement-route.json" >&2; exit 1 ;; esac
           case "$purchase_order_status" in 401|403) ;; *) cat "$STAGE/purchase-order-route.json" >&2; exit 1 ;; esac
+          case "$quote_status" in 401|403) ;; *) cat "$STAGE/quote-route.json" >&2; exit 1 ;; esac
 
           SUCCESS=1
           trap - EXIT
           rm -rf "$STAGE"
           rm -f "$ARCHIVE"
-          printf 'IX-Core Financial Controls %s deployed; health=200; gl=%s; close=%s; reopen=%s; rules=%s; collections=%s; settlement=%s; purchase-order=%s\n' "$RELEASE_SHA" "$gl_status" "$close_status" "$reopen_status" "$rule_status" "$collection_status" "$settlement_status" "$purchase_order_status"
+          printf 'IX-Core Financial Controls %s deployed; health=200; gl=%s; close=%s; reopen=%s; rules=%s; collections=%s; settlement=%s; purchase-order=%s; quote=%s\n' "$RELEASE_SHA" "$gl_status" "$close_status" "$reopen_status" "$rule_status" "$collection_status" "$settlement_status" "$purchase_order_status" "$quote_status"
           REMOTE_SCRIPT
           )"
           remote_script="${remote_script//__IXI_CORE_SHA__/$IXI_CORE_SHA}"
@@ -152,7 +159,7 @@ jobs:
           {
             echo '## IX-Core Financial Controls release'
             echo "- Commit: `$IXI_CORE_SHA`"
-            echo '- 75 Financial tests and operational-control invariants: passed'
+            echo '- 79 Financial tests and operational-control invariants: passed'
             echo '- Production dependency audit: passed'
-            echo '- Health and protected GL / close / reopen / posting-rule / Collections / Settlement / Purchase Order routes: passed'
+            echo '- Health and protected GL / close / reopen / posting-rule / Collections / Settlement / Purchase Order / Quote routes: passed'
           } >> "$GITHUB_STEP_SUMMARY"

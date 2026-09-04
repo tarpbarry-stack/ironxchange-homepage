@@ -30,7 +30,16 @@ export function createIXITransactContext({
 
     entity: {
       passportId: clean(getAosPassportId(entity) || source.entityPassportId || fields.entityPassportId),
-      label: clean(entity.displayName || entity.name || source.entityName)
+      label: clean(entity.displayName || entity.companyName || entity.name || entity.label || source.entityName || source.companyName || source.sellerCompany),
+      displayName: clean(entity.displayName || entity.companyName || entity.name || entity.label),
+      companyName: clean(entity.companyName || entity.displayName || entity.name || entity.label || source.companyName || source.sellerCompany),
+      legalName: clean(entity.legalName),
+      logoUrl: clean(entity.logoUrl || entity.logo || source.sellerLogo || source.logoUrl),
+      accentColor: clean(entity.accentColor || entity.brandColor),
+      phone: clean(entity.phone || entity.businessPhone),
+      email: clean(entity.email || entity.businessEmail),
+      website: clean(entity.website),
+      address: clean(entity.address || entity.officeLocation)
     },
 
     location: {

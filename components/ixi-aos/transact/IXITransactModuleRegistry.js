@@ -18,7 +18,7 @@ export const IXI_TRANSACT_MODULES = Object.freeze([
   Object.freeze({ id: "bill", label: "BILL / INVOICE", group: "spend", documentType: "bill", readiness: "operational" }),
   Object.freeze({ id: "receipt", label: "RECEIPT", group: "spend", documentType: "receipt", readiness: "planned", available: false }),
   Object.freeze({ id: "purchase-order", label: "PURCHASE ORDER", group: "buy", documentType: "purchase-order", readiness: "operational" }),
-  Object.freeze({ id: "quote", label: "QUOTE", group: "sell", documentType: "quote", readiness: "sales-build", available: false }),
+  Object.freeze({ id: "quote", label: "QUOTE", group: "sell", documentType: "quote", readiness: "operational" }),
   Object.freeze({ id: "invoice", label: "INVOICE", group: "sell", documentType: "invoice", readiness: "sales-build", available: false }),
   Object.freeze({ id: "settlement", label: "SETTLEMENT", group: "settle", documentType: "settlement", readiness: "operational" }),
   Object.freeze({ id: "access-policy", label: "ACCESS / POLICY", group: "security", documentType: "authority-policy", enterpriseSecurity: true, readiness: "operational" })
