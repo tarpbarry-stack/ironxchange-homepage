@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - mobile/commercial-aos-v1-browse-dnd-final
+      - mobile/commercial-aos-v1-dnd-closeout
 
 jobs:
   certify:
