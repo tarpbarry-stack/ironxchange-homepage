@@ -1,0 +1,38 @@
+{
+  "contract": "ixi-ticket-closeout",
+  "contractVersion": "1.0.0",
+  "ticketId": "ticket-574bcdc4-e28f-43fe-8670-28dd2aa5377a",
+  "runId": "ixi-chat-20260904-card009-id-edit",
+  "expectedRevision": 3,
+  "closeout": {
+    "summary": "Card 009 now keeps the business identifier caption fixed as ID while preserving the identifier number as an editable, persisted canonical object field.",
+    "editResults": [
+      {
+        "editId": "edit-f13ee1cb-a902-471f-b05a-4c736c182061",
+        "status": "completed",
+        "result": "Replaced the business-ID label input with a fixed ID caption, retained the editable value input and existing save/import field mapping, fixed the media caption to ID, and removed no other Card 009 content."
+      }
+    ],
+    "filesChanged": [
+      "components/ixi-aos/cards/generic/IXIAosGenericMediaDominant009.jsx",
+      "tests/ixi-ticket-card009-business-id-contract.test.mjs",
+      "tests/ixi-ticket-card009-media-contract.test.mjs"
+    ],
+    "tests": [
+      "node --test tests/ixi-ticket-card009-business-id-contract.test.mjs tests/ixi-ticket-card009-media-contract.test.mjs tests/ixi-ticket-card009-layout-contract.test.mjs — 9 passed, 0 failed",
+      "Vercel production deployment dpl_GaRHAZQeV8moXFmhAPAbZcbyDXRZ — READY",
+      "preview.ironxchange.com alias confirmed on deployment dpl_GaRHAZQeV8moXFmhAPAbZcbyDXRZ"
+    ],
+    "before": "The business identifier label could be edited in Card 009's field editor, and the media caption rendered that mutable label.",
+    "after": "Card 009 displays a fixed ID caption on the media face and in the edit row; only the canonical business identifier number is editable and saved.",
+    "risks": [],
+    "notes": [
+      "Card dimensions remain 298 × 471.",
+      "Photo action, detail strip, relationships, commands, object rail, and all non-ID editor fields are unchanged.",
+      "Merged production commit: 07b7fc0ab70863dc4db8a4a2a6468a65685a9a69"
+    ],
+    "prs": [
+      "https://github.com/tarpbarry-stack/ironxchange-homepage/pull/139"
+    ]
+  }
+}
