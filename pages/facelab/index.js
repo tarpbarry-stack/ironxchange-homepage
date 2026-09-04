@@ -4,6 +4,9 @@ import Link from "next/link";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 
+import IXIFaceLabTypography
+  from "../../components/ixi-face-studio/IXIFaceLabTypography";
+
 import IXIFaceStudio
   from "../../components/ixi-face-studio/IXIFaceStudio";
 
@@ -40,6 +43,8 @@ export default function IXIFaceLabPage() {
       </main>
 
       <Footer />
+
+      <IXIFaceLabTypography />
 
       <style jsx>{`
         .face-lab-page {
