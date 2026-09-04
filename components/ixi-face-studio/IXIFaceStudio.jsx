@@ -245,7 +245,11 @@ if (
   );
 }  
   return (
-    <div className="face-lab">
+    <div
+      className="face-lab"
+      data-selected-face={selectedFace}
+      data-preview-typography={selectedFace === "AOF1" || selectedFace === "EOF1" ? "protected" : "readable"}
+    >
       <aside className="face-tree">
 
         <div className="studio-title">
