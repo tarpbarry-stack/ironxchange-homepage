@@ -49,3 +49,10 @@ test("shared commercial editor remains presentation-only and noun agnostic", () 
     /LOCATION|PERSONNEL|EQUIPMENT|PROJECT|DOCUMENT|INCIDENT|AGREEMENT|TRIP/u
   );
 });
+
+test("shared commercial editor preserves the native hard-shell container outline", () => {
+  assert.match(editor, /overflow:hidden/u);
+  assert.match(editor, /border:1px solid #454b47/u);
+  assert.match(editor, /border-radius:13px/u);
+  assert.match(editor, /box-shadow:inset 0 1px #ffffff12,0 18px 40px #0008/u);
+});
