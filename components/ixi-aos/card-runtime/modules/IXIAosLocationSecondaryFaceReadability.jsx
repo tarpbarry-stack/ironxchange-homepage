@@ -170,6 +170,108 @@ export default function IXIAosLocationSecondaryFaceReadability() {
         line-height: 12px !important;
       }
 
+      /*
+       * Face 3 · Commercial information architecture
+       * Headings own line one; values own line two. The existing card scroll
+       * absorbs the added height, so financial data never competes for width.
+       */
+      .ixi-location-secondary-readable .ixi-location-f3-v12 .f3-split,
+      .ixi-location-secondary-readable .ixi-location-f3-v12 .f3-cost-grid,
+      .ixi-location-secondary-readable .ixi-location-f3-v12 .f3-three-sections {
+        grid-template-columns: minmax(0, 1fr) !important;
+        gap: 6px !important;
+      }
+      .ixi-location-secondary-readable .ixi-location-f3-v12 .f3-cost-grid {
+        padding: 4px !important;
+      }
+      .ixi-location-secondary-readable .ixi-location-f3-v12 .f3-cost-grid .f3-row:nth-child(odd) {
+        border-right: 0 !important;
+      }
+      .ixi-location-secondary-readable .ixi-location-f3-v12 .f3-row {
+        min-height: 52px !important;
+        grid-template-columns: 16px minmax(0, 1fr) auto !important;
+        grid-template-rows: auto auto !important;
+        column-gap: 7px !important;
+        row-gap: 4px !important;
+        align-content: center !important;
+        padding: 7px 8px !important;
+      }
+      .ixi-location-secondary-readable .ixi-location-f3-v12 .f3-row-icon {
+        grid-column: 1 !important;
+        grid-row: 1 / span 2 !important;
+        align-self: center !important;
+      }
+      .ixi-location-secondary-readable .ixi-location-f3-v12 .f3-row-label {
+        grid-column: 2 / 4 !important;
+        grid-row: 1 !important;
+        white-space: normal !important;
+        overflow: visible !important;
+        text-overflow: clip !important;
+      }
+      .ixi-location-secondary-readable .ixi-location-f3-v12 .f3-row > strong {
+        grid-column: 2 !important;
+        grid-row: 2 !important;
+        justify-self: start !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+      }
+      .ixi-location-secondary-readable .ixi-location-f3-v12 .f3-row > em {
+        grid-column: 3 !important;
+        grid-row: 2 !important;
+        align-self: center !important;
+        justify-self: end !important;
+        white-space: nowrap !important;
+      }
+      .ixi-location-secondary-readable .ixi-location-f3-v12 .f3-row > input {
+        width: 100% !important;
+        min-width: 0 !important;
+        grid-column: 2 !important;
+        grid-row: 2 !important;
+      }
+      .ixi-location-secondary-readable .ixi-location-f3-v12 .f3-three-sections .f3-row {
+        grid-template-columns: minmax(0, 1fr) auto !important;
+      }
+      .ixi-location-secondary-readable .ixi-location-f3-v12 .f3-three-sections .f3-row-icon {
+        display: none !important;
+      }
+      .ixi-location-secondary-readable .ixi-location-f3-v12 .f3-three-sections .f3-row-label {
+        grid-column: 1 / 3 !important;
+      }
+      .ixi-location-secondary-readable .ixi-location-f3-v12 .f3-three-sections .f3-row > strong,
+      .ixi-location-secondary-readable .ixi-location-f3-v12 .f3-three-sections .f3-row > input {
+        grid-column: 1 !important;
+      }
+      .ixi-location-secondary-readable .ixi-location-f3-v12 .f3-three-sections .f3-row > em {
+        grid-column: 2 !important;
+      }
+      .ixi-location-secondary-readable .ixi-location-f3-v12 .f3-value-card p {
+        min-height: 52px !important;
+        display: grid !important;
+        grid-template-columns: minmax(0, 1fr) !important;
+        gap: 4px !important;
+        align-content: center !important;
+        justify-content: initial !important;
+        padding: 7px 0 !important;
+      }
+      .ixi-location-secondary-readable .ixi-location-f3-v12 .f3-value-card p > span {
+        grid-row: 1 !important;
+        white-space: normal !important;
+      }
+      .ixi-location-secondary-readable .ixi-location-f3-v12 .f3-value-card p > strong,
+      .ixi-location-secondary-readable .ixi-location-f3-v12 .f3-value-card p > input {
+        width: 100% !important;
+        min-width: 0 !important;
+        grid-row: 2 !important;
+        justify-self: stretch !important;
+        text-align: left !important;
+        white-space: nowrap !important;
+      }
+      .ixi-location-secondary-readable .ixi-location-f3-v12 .f3-summary strong,
+      .ixi-location-secondary-readable .ixi-location-f3-v12 .f3-total strong {
+        white-space: nowrap !important;
+      }
+
       /* Faces 4-5 · Configured operational faces */
       .ixi-location-secondary-readable .ixi-generic-face-v12 .gfv12-banner b,
       .ixi-location-secondary-readable .ixi-generic-face-v12 .gfv12-banner span,
