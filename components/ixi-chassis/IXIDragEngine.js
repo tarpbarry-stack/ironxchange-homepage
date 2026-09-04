@@ -24,7 +24,8 @@ export default function IXIDragEngine({
   ixiCardState = {},
   cardScaleMode = "xl",
   cardContext = "workspace",
-  listingOrigin = "saved"
+  listingOrigin = "saved",
+  overlayZIndex = 999
 }) {
   const activeDndObject =
     typeof getActiveDndObject === "function"
@@ -138,7 +139,9 @@ export default function IXIDragEngine({
       onDragCancel={handleWorkspaceDragCancel}
     >
       {children}
-      <DragOverlay dropAnimation={null}>{renderOverlay()}</DragOverlay>
+      <DragOverlay dropAnimation={null} zIndex={overlayZIndex}>
+        {renderOverlay()}
+      </DragOverlay>
     </DndContext>
   );
 }
