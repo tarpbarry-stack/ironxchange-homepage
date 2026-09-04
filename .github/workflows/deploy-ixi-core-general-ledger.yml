@@ -57,10 +57,11 @@ jobs:
           EXISTING='financial/IXIFinancialCloseControlEngine.js financial/IXIFinancialCommandEngine.js financial/IXIFinancialCommandRoutes.js financial/IXIFinancialDocumentFactoryRegistry.js financial/IXIFinancialPermissionEngine.js financial/IXIFinancialPurchaseOrderFactory.js financial/IXIFinancialRoutes.js financial/IXIFinancialValidationBridge.js'
           NEW='financial/IXIFinancialQuoteFactory.js'
           SUCCESS=0
+          ROLLBACK_ARMED=0
 
           run_pm2() { if [ "$PM2_USER" = root ]; then pm2 "$@"; else sudo -u ubuntu -H pm2 "$@"; fi; }
           rollback() {
-            if [ "$SUCCESS" -eq 0 ] && [ -f "$BACKUP" ]; then
+            if [ "$SUCCESS" -eq 0 ] && [ "$ROLLBACK_ARMED" -eq 1 ] && [ -f "$BACKUP" ]; then
               echo 'Deployment failed; restoring previous IX-Core source.' >&2
               cd "$APP"
               tar -xzf "$BACKUP"
@@ -75,10 +76,15 @@ jobs:
           elif sudo -u ubuntu -H pm2 describe IX-Core >/dev/null 2>&1; then PM2_USER=ubuntu;
           else echo 'PM2 process IX-Core was not found.' >&2; exit 1; fi
 
+          rm -rf "$STAGE"
+          mkdir -p "$STAGE"
+          curl -fsSL "https://github.com/tarpbarry-stack/ixi-core/archive/$RELEASE_SHA.tar.gz" -o "$ARCHIVE"
+          tar -xzf "$ARCHIVE" --strip-components=1 -C "$STAGE"
+
           cd "$APP"
           echo 'Current guarded IX-Core source baseline:'
           sha256sum $EXISTING
-          printf '%s  %s\n' \
+          if printf '%s  %s\n' \
             'c4762c2516054ca56e04242c9c0e6476767731e9318081cf713af17161d82317' 'financial/IXIFinancialCloseControlEngine.js' \
             '4b491ae930825053e3c0d6576e6f66224cb15efa2da008d55215e5c44923f85f' 'financial/IXIFinancialCommandEngine.js' \
             'c488ecd605c21e5675f4e304414b6ef55eea7b95cc7d7455575d38b7a25f7124' 'financial/IXIFinancialCommandRoutes.js' \
@@ -86,14 +92,17 @@ jobs:
             '6df438ef2aa73bc39335b7d7875a804794fa84751e6cde452a1a31804db21251' 'financial/IXIFinancialPermissionEngine.js' \
             '2d869cc5b2671e6d8fa4e99e48051a9ca1c7ecb0b73a96a410a1ac5b6af0c2d5' 'financial/IXIFinancialPurchaseOrderFactory.js' \
             'ec966856fda05a92cb6ce537457f6e3854fc0272609649b7e119020c55df162c' 'financial/IXIFinancialRoutes.js' \
-            'b93a7cd55d54c345d8c7ebddc37ed3f24b3fd112d6ab9b3684669df70222004b' 'financial/IXIFinancialValidationBridge.js' | sha256sum -c -
-
-          mkdir -p /var/backups/ixi-core-releases
-          tar -czf "$BACKUP" $EXISTING
-          rm -rf "$STAGE"
-          mkdir -p "$STAGE"
-          curl -fsSL "https://github.com/tarpbarry-stack/ixi-core/archive/$RELEASE_SHA.tar.gz" -o "$ARCHIVE"
-          tar -xzf "$ARCHIVE" --strip-components=1 -C "$STAGE"
+            'b93a7cd55d54c345d8c7ebddc37ed3f24b3fd112d6ab9b3684669df70222004b' 'financial/IXIFinancialValidationBridge.js' | sha256sum -c -; then
+            BASELINE_OK=1
+          else
+            BASELINE_OK=0
+          fi
+          ALREADY_CURRENT=1
+          for file in $CHANGED; do cmp -s "$APP/$file" "$STAGE/$file" || ALREADY_CURRENT=0; done
+          if [ "$BASELINE_OK" -ne 1 ] && [ "$ALREADY_CURRENT" -ne 1 ]; then
+            echo 'Live IX-Core is neither the certified baseline nor this immutable release.' >&2
+            exit 1
+          fi
 
           cd "$STAGE"
           npm ci --ignore-scripts
@@ -118,8 +127,13 @@ jobs:
           NODE
 
           cd "$APP"
-          for file in $CHANGED; do install -D -m 0644 "$STAGE/$file" "$APP/$file"; done
-          run_pm2 reload IX-Core --update-env
+          if [ "$ALREADY_CURRENT" -ne 1 ]; then
+            mkdir -p /var/backups/ixi-core-releases
+            tar -czf "$BACKUP" $EXISTING
+            ROLLBACK_ARMED=1
+            for file in $CHANGED; do install -D -m 0644 "$STAGE/$file" "$APP/$file"; done
+            run_pm2 reload IX-Core --update-env
+          fi
           attempt=0
           until curl -fsS http://127.0.0.1:4100/health >/dev/null; do attempt=$((attempt + 1)); [ "$attempt" -lt 15 ] || exit 1; sleep 2; done
           gl_status="$(curl -sS -o "$STAGE/gl-route.json" -w '%{http_code}' http://127.0.0.1:4100/financial/gl?period=2026-09)"
@@ -140,6 +154,7 @@ jobs:
           case "$quote_status" in 401|403) ;; *) cat "$STAGE/quote-route.json" >&2; exit 1 ;; esac
 
           SUCCESS=1
+          ROLLBACK_ARMED=0
           trap - EXIT
           rm -rf "$STAGE"
           rm -f "$ARCHIVE"
@@ -149,11 +164,17 @@ jobs:
           remote_script="${remote_script//__IXI_CORE_SHA__/$IXI_CORE_SHA}"
           parameters="$(jq -cn --arg command "$remote_script" '{commands:[$command]}')"
           command_id="$(aws ssm send-command --region "$AWS_REGION" --instance-ids "$AWS_INSTANCE_ID" --document-name AWS-RunShellScript --comment "Deploy IX-Core General Ledger $IXI_CORE_SHA" --parameters "$parameters" --query 'Command.CommandId' --output text)"
-          aws ssm wait command-executed --region "$AWS_REGION" --command-id "$command_id" --instance-id "$AWS_INSTANCE_ID" || true
-          invocation="$(aws ssm get-command-invocation --region "$AWS_REGION" --command-id "$command_id" --instance-id "$AWS_INSTANCE_ID")"
+          invocation=''
+          status='Pending'
+          for attempt in $(seq 1 240); do
+            invocation="$(aws ssm get-command-invocation --region "$AWS_REGION" --command-id "$command_id" --instance-id "$AWS_INSTANCE_ID" 2>/dev/null || true)"
+            status="$(printf '%s' "$invocation" | jq -r '.Status // "Pending"')"
+            case "$status" in Success|Failed|Cancelled|TimedOut|Cancelling) break ;; esac
+            sleep 5
+          done
           printf '%s' "$invocation" | jq -r '.StandardOutputContent'
           printf '%s' "$invocation" | jq -r '.StandardErrorContent' >&2
-          test "$(printf '%s' "$invocation" | jq -r '.Status')" = Success
+          test "$status" = Success
 
       - name: Record General Ledger release
         shell: bash
