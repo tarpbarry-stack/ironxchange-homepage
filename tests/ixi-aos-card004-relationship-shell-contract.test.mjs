@@ -26,3 +26,19 @@ test("the fill behavior stays opt-in so other V12 container cards do not move", 
     /className=\{`gcv12-relationships \$\{stretchRelationships \? "gcv12-relationships-fill" : ""\}`\}/u
   );
 });
+
+test("Cards 005 and 006 opt into the same V12 relationship-shell fill", () => {
+  for (const path of [
+    "components/ixi-aos/cards/005/IXIAosCard005Personnel.jsx",
+    "components/ixi-aos/cards/006/IXIAosCard006Personnel.jsx"
+  ]) {
+    assert.match(read(path), /IXIAosGenericContainerLayoutV12[\s\S]*stretchRelationships/u);
+  }
+});
+
+test("Card 007B fills its relationship shell to its retained command row", () => {
+  const card007B = read("components/ixi-aos/cards/generic/IXIAosGenericUniversalLayout007B.jsx");
+  assert.match(card007B, /\.ixi-universal-card-007b \.u007-relationships\s*\{\s*flex: 1 0 104px !important;/u);
+  assert.match(card007B, /\.ixi-universal-card-007b \.u007-body\s*\{\s*bottom: 50px !important;/u);
+  assert.match(card007B, /\.ixi-universal-card-007b \.u007-commands\s*\{\s*bottom: 23px !important;/u);
+});
