@@ -181,7 +181,7 @@ jobs:
         run: |
           {
             echo '## IX-Core Financial Controls release'
-            echo "- Commit: `$IXI_CORE_SHA`"
+            printf -- '- Commit: `%s`\n' "$IXI_CORE_SHA"
             echo '- 79 Financial tests and operational-control invariants: passed'
             echo '- Production dependency audit: passed'
             echo '- Health and protected GL / close / reopen / posting-rule / Collections / Settlement / Purchase Order / Quote routes: passed'
