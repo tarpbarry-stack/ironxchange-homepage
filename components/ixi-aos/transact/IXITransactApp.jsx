@@ -17,6 +17,7 @@ import IXIRentalExpenseApp from "./modules/rental-expense/IXIRentalExpenseApp";
 import IXIRentalIncomeApp from "./modules/rental-income/IXIRentalIncomeApp";
 import IXIServiceQuoteApp from "./modules/service-quote/IXIServiceQuoteApp";
 import IXIQuoteApp from "./modules/quote/IXIQuoteApp";
+import IXIEquipmentSaleApp from "./modules/equipment-sale/IXIEquipmentSaleApp";
 import IXIServiceInvoiceApp from "./modules/service-invoice/IXIServiceInvoiceApp";
 import IXIAssetSaleApp from "./modules/sold/IXIAssetSaleApp";
 import IXISettlementApp from "./modules/settlement/IXISettlementApp";
@@ -291,6 +292,67 @@ export default function IXITransactApp({
     }).filter(Boolean);
     return durable.sort((left, right) => String(right?.audit?.updatedAt || "").localeCompare(String(left?.audit?.updatedAt || "")))[0] || null;
   }, [object, financialRecords]);
+  const salesOrderSnapshot = useMemo(() => {
+    if (object.salesOrder || object.salesOrderRecord)
+      return object.salesOrder || object.salesOrderRecord;
+    const records = financialRecords.length
+      ? financialRecords
+      : object?.assetFinancialTransactions || object?.relatedFinancialRecords || object?.financialRecords || [];
+    const durable = records.map((item) => {
+      const document = financialDocumentOf(item);
+      if (document?.documentType !== "sales-order" || !document?.salesOrder) return null;
+      return {
+        ...document.salesOrder,
+        financialBinding: {
+          financialDocumentId: document.financialDocumentId,
+          revision: financialRevisionOf(item),
+          financialLineId: clean(document?.lines?.[0]?.financialLineId),
+          line: document?.lines?.[0] || null,
+        },
+      };
+    }).filter(Boolean);
+    return durable.sort((left, right) =>
+      String(right?.audit?.updatedAt || "").localeCompare(String(left?.audit?.updatedAt || ""))
+    )[0] || null;
+  }, [object, financialRecords]);
+  const salesInvoiceSnapshot = useMemo(() => {
+    if (object.salesInvoice || object.salesInvoiceRecord)
+      return object.salesInvoice || object.salesInvoiceRecord;
+    const records = financialRecords.length
+      ? financialRecords
+      : object?.assetFinancialTransactions || object?.relatedFinancialRecords || object?.financialRecords || [];
+    const salesOrderId = clean(
+      salesOrderSnapshot?.financialBinding?.financialDocumentId ||
+        salesOrderSnapshot?.identity?.salesOrderId,
+    );
+    const durable = records.map((item) => {
+      const document = financialDocumentOf(item);
+      if (document?.documentType !== "invoice") return null;
+      const metadata = document?.metadata || {};
+      const belongsToEquipmentSale =
+        clean(metadata.transactModule) === "equipment-sale" ||
+        clean(metadata.invoiceType) === "asset-sale" ||
+        (salesOrderId &&
+          [document?.sourceFinancialDocumentId, metadata.salesOrderId]
+            .map(clean)
+            .includes(salesOrderId));
+      if (!belongsToEquipmentSale) return null;
+      return {
+        ...document,
+        financialBinding: {
+          financialDocumentId: document.financialDocumentId,
+          revision: financialRevisionOf(item),
+          financialLineId: clean(document?.lines?.[0]?.financialLineId),
+          line: document?.lines?.[0] || null,
+        },
+      };
+    }).filter(Boolean);
+    return durable.sort((left, right) =>
+      String(right?.updatedAt || right?.occurredAt || "").localeCompare(
+        String(left?.updatedAt || left?.occurredAt || ""),
+      )
+    )[0] || null;
+  }, [object, financialRecords, salesOrderSnapshot]);
   const billRecords = useMemo(() => {
     const candidates = financialRecords.length
       ? financialRecords
@@ -712,6 +774,36 @@ export default function IXITransactApp({
             changePayload,
             sourceContext || context,
             { customer: record?.customer || null, asset: record?.asset || null, totals: record?.totals || null }
+          );
+        }}
+      />
+    );
+  else if (moduleId === "sales-order" || moduleId === "invoice")
+    body = (
+      <IXIEquipmentSaleApp
+        context={context}
+        object={object}
+        quote={quoteSnapshot}
+        initialRecord={salesOrderSnapshot}
+        invoice={salesInvoiceSnapshot}
+        initialTab={moduleId === "invoice" ? "invoice" : "order"}
+        entryMode={moduleId}
+        onBack={back}
+        onRecordChange={async (record, changePayload, sourceContext) => {
+          await onFinancialRecordsChange?.();
+          await change(
+            moduleId,
+            moduleId === "invoice" ? "INVOICE UPDATE" : "SALES ORDER UPDATE",
+            "sell",
+            moduleId === "invoice" ? "invoice" : "sales-order",
+            "salesOrder",
+            record,
+            changePayload,
+            sourceContext || context,
+            {
+              invoice: salesInvoiceSnapshot,
+              quote: quoteSnapshot,
+            },
           );
         }}
       />
