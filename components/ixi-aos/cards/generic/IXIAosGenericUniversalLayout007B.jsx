@@ -32,6 +32,10 @@ export default function IXIAosGenericUniversalLayout007B(props) {
           bottom: 50px !important;
         }
 
+        .ixi-universal-card-007b .u007-relationships {
+          flex: 1 0 104px !important;
+        }
+
         .ixi-universal-card-007b .u007-commands {
           bottom: 23px !important;
         }
