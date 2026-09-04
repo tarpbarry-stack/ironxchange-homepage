@@ -1,0 +1,43 @@
+{
+  "contract": "ixi-ticket-closeout",
+  "contractVersion": "1.0.0",
+  "ticketId": "ticket-ea310977-b17d-4e29-bdda-163f3d50a7ee",
+  "runId": "ixi-chat-20260904-card009-layout",
+  "expectedRevision": 5,
+  "closeout": {
+    "summary": "Updated only AOS Card 009 Face 1 as directed: removed the YEAR / MAKE / MODEL row, returned its height to RELATIONSHIPS, enlarged SERIAL # / HOURS / STATUS values, widened Serial, and narrowed Hours.",
+    "editResults": [
+      {
+        "editId": "edit-4e74c60c-38f8-4152-a907-77788a5bf9db",
+        "status": "completed",
+        "result": "The unnecessary YEAR / MAKE / MODEL line is removed. RELATIONSHIPS expands into the freed space. SERIAL #, HOURS, and STATUS values use the deleted row's 8px value size; headers remain unchanged; Serial is wider and Hours is narrower."
+      }
+    ],
+    "filesChanged": [
+      "components/ixi-aos/cards/generic/IXIAosGenericMediaDominant009.jsx",
+      "tests/ixi-ticket-card009-layout-contract.test.mjs"
+    ],
+    "tests": [
+      "CT-260904-000001 scoped Card 009 contract: 4/4 PASS.",
+      "git diff --check: PASS.",
+      "Vercel production deployment dpl_EJZEoqmsdvWUfm2xofcczGutK3yW for merge d89c516f1fdd9c2b33c902a6ec06ea2e03ea2dab: READY.",
+      "Production alias preview.ironxchange.com assigned with no alias error."
+    ],
+    "before": "Card 009 displayed a 48px YEAR / MAKE / MODEL row above a cramped equal-width SERIAL # / HOURS / STATUS row with 6.5px values, limiting serial-number visibility and relationship space.",
+    "after": "Card 009 no longer displays YEAR / MAKE / MODEL. RELATIONSHIPS receives the released height. The remaining SERIAL # / HOURS / STATUS row preserves its 4.5px headers, uses 8px values, and allocates more width to Serial and less to Hours.",
+    "risks": [],
+    "notes": [
+      "No Card 009 shell, media, commands, rail, editor, data contract, permissions, or sharing behavior was changed.",
+      "No other card was changed.",
+      "A broader pre-existing FaceLab admission test still expects Cards 001–003 to be blocked even though current main marks them ready; this patch did not touch that stale registry assertion.",
+      "Pull request #134 merged to main at d89c516f1fdd9c2b33c902a6ec06ea2e03ea2dab."
+    ],
+    "prs": [
+      {
+        "number": 134,
+        "url": "https://github.com/tarpbarry-stack/ironxchange-homepage/pull/134",
+        "state": "merged"
+      }
+    ]
+  }
+}
