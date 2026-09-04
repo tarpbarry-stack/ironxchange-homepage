@@ -6,19 +6,27 @@ import IXIAosDataContractCardAdapter from "../../card-runtime/IXIAosDataContract
 import IXIAosFace1CardRuntime from "../../card-runtime/modules/IXIAosFace1CardRuntime";
 import IXIAosCardHeaderIdentity from "../../card-runtime/modules/IXIAosCardHeaderIdentity";
 
-const PREVIEW_LABELS = Object.freeze([
-  "STATUS",
-  "REGION",
-  "OWNER",
-  "PRIORITY",
-  "REFERENCE",
-  "CATEGORY",
-  "CONTACT",
-  "NOTES"
-]);
+function fieldIdFromLabel(label = "", fallback = "field") {
+  const words = String(label || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
 
-function restorePreviewLabels(object = {}) {
-  const isFaceLabPreview = object?.metadata?.source === "aos-card-catalog-preview" || String(object?.objectId || "").startsWith("preview-universal-007");
+  if (!words.length) return fallback;
+
+  return words
+    .map((word, index) => index === 0 ? word : `${word.charAt(0).toUpperCase()}${word.slice(1)}`)
+    .join("");
+}
+
+function normalizePreviewFieldIdentity(object = {}) {
+  const isFaceLabPreview =
+    object?.metadata?.source === "aos-card-catalog-preview" ||
+    String(object?.objectId || "").startsWith("preview-universal-007");
+
   if (!isFaceLabPreview) return object;
 
   const sourceDefinitions = Array.isArray(object?.fieldDefinitions)
@@ -27,13 +35,45 @@ function restorePreviewLabels(object = {}) {
       ? object.metadata.fieldDefinitions
       : [];
 
-  const fieldDefinitions = sourceDefinitions.map((definition, index) => ({
-    ...definition,
-    label: PREVIEW_LABELS[index] || definition?.label || `FIELD ${index + 1}`
-  }));
+  const sourceFields = object?.fields && typeof object.fields === "object"
+    ? object.fields
+    : {};
+
+  const usedIds = new Set();
+  const idMap = new Map();
+
+  const fieldDefinitions = sourceDefinitions.map((definition, index) => {
+    const oldId = String(definition?.fieldId || `field_${index + 1}`).trim();
+    const label = String(definition?.label || definition?.displayLabel || oldId).trim();
+
+    let nextId = /^field_\d+$/i.test(oldId)
+      ? fieldIdFromLabel(label, oldId)
+      : oldId;
+
+    let sequence = 2;
+    const baseId = nextId;
+    while (usedIds.has(nextId)) nextId = `${baseId}${sequence++}`;
+
+    usedIds.add(nextId);
+    idMap.set(oldId, nextId);
+
+    return {
+      ...definition,
+      fieldId: nextId,
+      label
+    };
+  });
+
+  const fields = { ...sourceFields };
+  idMap.forEach((nextId, oldId) => {
+    if (nextId === oldId || !Object.prototype.hasOwnProperty.call(sourceFields, oldId)) return;
+    fields[nextId] = sourceFields[oldId];
+    delete fields[oldId];
+  });
 
   return {
     ...object,
+    fields,
     fieldDefinitions,
     metadata: {
       ...(object?.metadata || {}),
@@ -44,7 +84,7 @@ function restorePreviewLabels(object = {}) {
 
 export default function IXIAosCard007EmployeeApplication(props) {
   const [faceLabVariant, setFaceLabVariant] = useState("007A");
-  const object = restorePreviewLabels(props?.object || {});
+  const object = normalizePreviewFieldIdentity(props?.object || {});
   const isFaceLabPreview = object?.metadata?.source === "aos-card-catalog-preview" || String(object?.objectId || "").startsWith("preview-universal-007");
 
   return (
