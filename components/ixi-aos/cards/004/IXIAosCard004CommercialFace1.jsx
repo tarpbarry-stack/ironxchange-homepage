@@ -29,7 +29,7 @@ function nextCustomId(definitions = []) {
   return `card004_custom_${index}`;
 }
 
-export default function IXIAosCard004CommercialFace1({ object = {}, children = [], onSaveObject = null, childrenRenderer = null }) {
+export default function IXIAosCard004CommercialFace1({ object = {}, children = [], onSaveObject = null, childrenRenderer = null, showFieldExtension = false }) {
   const [runtimeObject, setRuntimeObject] = useState(object);
   const [adding, setAdding] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -65,8 +65,11 @@ export default function IXIAosCard004CommercialFace1({ object = {}, children = [
   const aggregateGroups = useMemo(() => buildChildAggregateGroups(asArray(children).filter(Boolean)), [children]);
   const heroGroup = aggregateGroups.find(group => group.hero) || aggregateGroups[0] || null;
   const heroEntries = heroGroup?.entries || [];
-  const openJobsEntry = heroEntries.find(entry => /open\s*jobs?/i.test(clean(entry?.label))) || heroEntries[1] || heroEntries[0] || null;
-  const openJobsValue = openJobsEntry?.value ?? 0;
+  const openJobsDefinition = rawDefinitions.find(definition => /open\s*(jobs?|positions?)/i.test(`${clean(definition?.fieldId)} ${clean(definition?.label)}`)) || null;
+  const openJobsEntry = heroEntries.find(entry => /open\s*(jobs?|positions?)/i.test(clean(entry?.label))) || null;
+  const openJobsValue = openJobsDefinition
+    ? fields?.[openJobsDefinition.fieldId] ?? 0
+    : openJobsEntry?.value ?? 0;
   const currentCustom = customDefinitions(runtimeObject);
 
   async function addField(event) {
@@ -111,16 +114,16 @@ export default function IXIAosCard004CommercialFace1({ object = {}, children = [
 
       <div className="c004-commercial-summary" onPointerDown={event => event.stopPropagation()}>
         <div className="c004-summary-half c004-id-row">
-          <small>{clean(businessDefinition.label) || "CUSTOMER ID"}</small>
+          <small>ID</small>
           <strong>{businessId || "—"}</strong>
         </div>
         <div className="c004-summary-half c004-open-jobs-row">
-          <small>{clean(openJobsEntry?.label) || "OPEN JOBS"}</small>
+          <small>OPEN POSITIONS</small>
           <strong>{openJobsValue}</strong>
         </div>
       </div>
 
-      <div className="c004-field-extension" onPointerDown={event => event.stopPropagation()}>
+      {showFieldExtension ? <div className="c004-field-extension" onPointerDown={event => event.stopPropagation()}>
         {currentCustom.map(definition => (
           <div className="c004-custom-row" key={definition.fieldId}>
             <small>{clean(definition.label) || "FIELD"}</small>
@@ -136,7 +139,7 @@ export default function IXIAosCard004CommercialFace1({ object = {}, children = [
             <div><button type="button" disabled={saving || !clean(fieldName)} onClick={addField}>ADD</button><button type="button" disabled={saving} onClick={event => { event.preventDefault(); event.stopPropagation(); setAdding(false); }}>CANCEL</button></div>
           </div>
         )}
-      </div>
+      </div> : null}
 
       <style jsx>{`
         .c004-commercial-face1{position:relative;width:298px;height:471px}

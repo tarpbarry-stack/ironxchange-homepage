@@ -1,0 +1,38 @@
+import assert from "node:assert/strict";
+import fs from "node:fs";
+import test from "node:test";
+
+const card004 = fs.readFileSync(
+  new URL("../components/ixi-aos/cards/004/IXIAosCard004Personnel.jsx", import.meta.url),
+  "utf8"
+);
+
+const face1 = fs.readFileSync(
+  new URL("../components/ixi-aos/cards/004/IXIAosCard004CommercialFace1.jsx", import.meta.url),
+  "utf8"
+);
+
+test("CT-260904-000009 removes only Card 004's duplicate adapter ID overlay", () => {
+  assert.match(card004, /<IXIAosDataContractCardAdapter \{\.\.\.props\} showBusinessIdentifier=\{false\}>/u);
+  assert.match(card004, /includeBusinessIdentifier allowAddFields/u);
+});
+
+test("Card 004 uses its designated Face 1 summary controller", () => {
+  assert.match(card004, /import IXIAosCard004CommercialFace1/u);
+  assert.match(card004, /<IXIAosCard004CommercialFace1/u);
+  assert.match(card004, /stretchRelationships/u);
+});
+
+test("Card 004 divides the existing summary shell into ID and open positions", () => {
+  assert.match(face1, /grid-template-rows:1fr 1fr/u);
+  assert.match(face1, /border-bottom:1px solid #252a26/u);
+  assert.match(face1, /<small>ID<\/small>/u);
+  assert.match(face1, /<small>OPEN POSITIONS<\/small>/u);
+});
+
+test("Open positions comes from object data and the field extension stays off", () => {
+  assert.match(face1, /const openJobsDefinition = rawDefinitions\.find/u);
+  assert.match(face1, /fields\?\.\[openJobsDefinition\.fieldId\] \?\? 0/u);
+  assert.match(face1, /showFieldExtension = false/u);
+  assert.match(face1, /\{showFieldExtension \? <div className="c004-field-extension"/u);
+});
