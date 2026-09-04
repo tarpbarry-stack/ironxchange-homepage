@@ -1179,8 +1179,8 @@ onMachinePlacementChange ? (
 }
 
      .title-row {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) max-content;
   align-items: flex-start;
   gap: 10px;
 
@@ -1189,17 +1189,18 @@ onMachinePlacementChange ? (
   max-height: 36px;
 
   overflow: hidden;
-  position: relative;
 }
 
-       .card .title-row h3 {
+       .card .title-row > h3:not(.hours-inline) {
           margin: 0;
+          min-width: 0;
+          width: 100%;
+          max-width: none;
           color: #f2f2f2;
 
           font-size: 15.5px;
           font-weight: 900;
           line-height: 1.12;
-          max-width: calc(100% - 58px);
           letter-spacing: -0.28px;
           text-rendering: geometricPrecision;
           display: -webkit-box;
@@ -1216,11 +1217,11 @@ overflow: hidden;
           letter-spacing: .18px;
           line-height: 1;
           white-space: nowrap;
-          position: absolute;
-top: 1px;
-right: 0;
-width: 54px;
-text-align: right;
+          position: static;
+          width: auto;
+          min-width: max-content;
+          justify-self: end;
+          text-align: right;
         }
 
 .hours-input {
