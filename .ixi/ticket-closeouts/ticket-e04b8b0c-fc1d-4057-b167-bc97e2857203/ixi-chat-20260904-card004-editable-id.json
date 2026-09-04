@@ -1,0 +1,40 @@
+{
+  "contract": "ixi-ticket-closeout",
+  "contractVersion": "1.0.0",
+  "ticketId": "ticket-e04b8b0c-fc1d-4057-b167-bc97e2857203",
+  "runId": "ixi-chat-20260904-card004-editable-id",
+  "expectedRevision": 6,
+  "closeout": {
+    "summary": "Card 004 Edit now matches the approved Card 009 ID contract: the ID label is fixed, the customer ID value is editable, and the canonical ID row cannot be removed.",
+    "editResults": [
+      {
+        "editId": "edit-d2a29274-a051-46c0-b42e-821f20f29819",
+        "status": "completed",
+        "result": "Added a Card 004-only editor opt-in that fixes the yellow ID label, retains an editable business-identifier value input, prevents deletion of that row, and normalizes the saved label to ID."
+      }
+    ],
+    "filesChanged": [
+      "components/ixi-aos/cards/004/IXIAosCard004Personnel.jsx",
+      "components/ixi-aos/card-runtime/modules/IXIAosFace1CardRuntime.jsx",
+      "components/ixi-aos/card-runtime/modules/IXIAosInlineFace1Editor.jsx",
+      "tests/ixi-ticket-card004-split-summary-contract.test.mjs"
+    ],
+    "tests": [
+      "13 focused Card 004, relationship-shell, and top-edit contract tests passed; 0 failed",
+      "git diff --check passed",
+      "PR #145 verified as exactly four changed files and squash-merged",
+      "Production deployment dpl_AnjsMs4qWqX2HTuQvHFwwjWcQpm5 READY and owns preview.ironxchange.com"
+    ],
+    "before": "Card 004 included the business ID in Edit, but the ID label itself could be renamed and the canonical ID row could be deleted.",
+    "after": "Card 004 shows a fixed yellow ID label beside an editable customer ID value; the ID row has no delete control and saves through the canonical business-identifier contract.",
+    "risks": [],
+    "notes": [
+      "The shared editor defaults remain unchanged; only Card 004 opts into the fixed-business-ID behavior.",
+      "The existing Card 004 right-side ID / OPEN POSITIONS summary, relationship shell, rail, commands, and card geometry are unchanged.",
+      "Main commit: 9c638ee8fb08f0478cb4543e10a9af46c3d48da8"
+    ],
+    "prs": [
+      "https://github.com/tarpbarry-stack/ironxchange-homepage/pull/145"
+    ]
+  }
+}
