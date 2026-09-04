@@ -23,11 +23,12 @@ test("unfinished chassis are not exposed as operational TRANSACT applications", 
   assert.equal(all.find(item => item.id === "service-quote")?.documentType, "service-quote");
 });
 
-test("Sales Order and Invoice are separate launcher entries over one canonical Equipment Sale workspace", async () => {
-  const [registrySource, shell, app, context] = await Promise.all([
+test("Sales Order and Invoice are separate launcher entries with canonical forms on the native card face", async () => {
+  const [registrySource, shell, app, commands, context] = await Promise.all([
     read("components/ixi-aos/transact/IXITransactModuleRegistry.js"),
     read("components/ixi-aos/transact/IXITransactApp.jsx"),
     read("components/ixi-aos/transact/modules/equipment-sale/IXIEquipmentSaleApp.jsx"),
+    read("components/ixi-aos/transact/modules/equipment-sale/IXIEquipmentSaleCommands.js"),
     read("components/ixi-aos/transact/IXITransactContext.js"),
   ]);
   const registry = await import(`data:text/javascript;base64,${Buffer.from(registrySource).toString("base64")}`);
@@ -43,6 +44,19 @@ test("Sales Order and Invoice are separate launcher entries over one canonical E
   assert.match(shell, /invoice=\{salesInvoiceSnapshot\}/u);
   assert.match(shell, /initialTab=\{moduleId === "invoice" \? "invoice" : "order"\}/u);
   assert.match(app, /entryMode === "invoice"/u);
+  assert.match(app, /className="es-card-form"/u);
+  assert.match(app, /CUSTOMER \/ COMPANY/u);
+  assert.match(app, /SERIAL \/ VIN/u);
+  assert.match(app, /CREATE INVOICE/u);
+  assert.match(app, /SAVE ORDER/u);
+  assert.match(app, />EXPAND</u);
+  assert.doesNotMatch(app, /OPEN WORKSPACE/u);
+  assert.match(commands, /documentType:\s*"invoice"/u);
+  assert.match(commands, /financialState:\s*"draft"/u);
+  assert.match(commands, /create-direct-draft-invoice/u);
+  assert.match(commands, /expectedRevision/u);
+  assert.match(commands, /commercialBreakdown/u);
+  assert.match(shell, /changePayload\?\.invoice \|\| salesInvoiceSnapshot/u);
   assert.match(context, /salesTermsDocument/u);
 });
 
