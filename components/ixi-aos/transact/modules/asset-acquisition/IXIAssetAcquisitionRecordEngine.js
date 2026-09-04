@@ -8,7 +8,17 @@ export function getIXIAcquisitionActuals(record = {}, transactions = []) {
   const cutoff = clean(record?.makeReady?.inServiceDate);
   const acquisitionId = clean(record?.identity?.acquisitionId || record?.identity?.number);
   const assetPassportId = clean(record?.context?.primaryPassportId);
-  const eligible = arr(transactions).filter((item) => {
+  const canonical = arr(transactions).map((item) => {
+    const envelope = item?.record || item || {};
+    const document = envelope?.financialDocument || item?.financialDocument || envelope;
+    return {
+      ...document,
+      server: envelope?.server || item?.server || {},
+      metadata: { ...(envelope?.metadata || {}), ...(document?.metadata || {}) },
+      references: arr(document?.references || envelope?.references || item?.references),
+    };
+  });
+  const eligible = canonical.filter((item) => {
     const refs = arr(item?.references || item?.additionalReferences);
     const related = refs.some((ref) => clean(ref?.externalId) === acquisitionId || clean(ref?.passportId) === assetPassportId) || clean(item?.acquisitionId) === acquisitionId || clean(item?.assetPassportId) === assetPassportId;
     if (!related) return false;
@@ -19,7 +29,14 @@ export function getIXIAcquisitionActuals(record = {}, transactions = []) {
   const grouped = {};
   for (const item of eligible) {
     const category = clean(item?.acquisitionCategory || item?.metadata?.acquisitionCategory || item?.category || "other");
-    const amount = round(item?.amount || item?.total || item?.financial?.amount);
+    const amount = round(
+      item?.amount ||
+      item?.total ||
+      item?.totals?.total ||
+      item?.billRecord?.bill?.amount ||
+      item?.lines?.reduce((sum, line) => sum + num(line?.amount), 0) ||
+      item?.financial?.amount,
+    );
     if (!grouped[category])
       grouped[category] = {
         category,

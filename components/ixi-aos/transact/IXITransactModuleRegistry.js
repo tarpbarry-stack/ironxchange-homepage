@@ -5,6 +5,7 @@ export const IXI_TRANSACT_MODULES = Object.freeze([
   Object.freeze({ id: "time", label: "TIME", group: "work", documentType: "time-entry", readiness: "operational" }),
   Object.freeze({ id: "material", label: "PART / MATERIAL", group: "work", documentType: "material-usage", readiness: "operational" }),
   Object.freeze({ id: "asset-acquisition", label: "ASSET ACQUISITION", group: "asset", documentType: "asset-acquisition", readiness: "operational" }),
+  Object.freeze({ id: "freight", label: "FREIGHT", group: "move", documentType: "freight", readiness: "operational" }),
   Object.freeze({ id: "rental-expense", label: "RENTAL EXPENSE", group: "rent", documentType: "rental-expense", readiness: "operational" }),
   Object.freeze({ id: "rental-income", label: "RENTAL INCOME", group: "rent", documentType: "rental-income", readiness: "operational" }),
   Object.freeze({ id: "service-quote", label: "SERVICE QUOTE", group: "sell", documentType: "service-quote", readiness: "operational" }),
@@ -25,8 +26,8 @@ export const IXI_TRANSACT_MODULES = Object.freeze([
   Object.freeze({ id: "access-policy", label: "ACCESS / POLICY", group: "security", documentType: "authority-policy", enterpriseSecurity: true, readiness: "operational" })
 ]);
 
-const MACHINE_ORDER = Object.freeze(["work-order","expense","technology-work","time","material","asset-acquisition","rental-expense","rental-income","service-quote","service-invoice","purchase-order","receipt","bill","payables","treasury","general-ledger","financial-reporting","quote","sales-order","invoice","sold","collections","settlement","access-policy"]);
-const LOCATION_ORDER = Object.freeze(["work-order","expense","purchase-order","bill","payables","treasury","general-ledger","financial-reporting","receipt","technology-work","time","material","asset-acquisition","rental-expense","rental-income","service-quote","service-invoice","quote","sales-order","invoice","sold","collections","settlement","access-policy"]);
+const MACHINE_ORDER = Object.freeze(["work-order","expense","technology-work","time","material","asset-acquisition","freight","rental-expense","rental-income","service-quote","service-invoice","purchase-order","receipt","bill","payables","treasury","general-ledger","financial-reporting","quote","sales-order","invoice","sold","collections","settlement","access-policy"]);
+const LOCATION_ORDER = Object.freeze(["work-order","expense","purchase-order","freight","bill","payables","treasury","general-ledger","financial-reporting","receipt","technology-work","time","material","asset-acquisition","rental-expense","rental-income","service-quote","service-invoice","quote","sales-order","invoice","sold","collections","settlement","access-policy"]);
 
 function sortByOrder(items, order) {
   const rank = new Map(order.map((id, index) => [id, index]));

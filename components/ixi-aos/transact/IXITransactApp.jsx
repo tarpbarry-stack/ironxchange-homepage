@@ -13,6 +13,7 @@ import { hydrateIXIBillRecord } from "./modules/bill/IXIBillContract";
 import IXITimeStandaloneApp from "./modules/time/IXITimeStandaloneApp";
 import IXIMaterialStandaloneApp from "./modules/material/IXIMaterialStandaloneApp";
 import IXIAssetAcquisitionApp from "./modules/asset-acquisition/IXIAssetAcquisitionApp";
+import IXIFreightApp from "./modules/freight/IXIFreightApp";
 import IXIRentalExpenseApp from "./modules/rental-expense/IXIRentalExpenseApp";
 import IXIRentalIncomeApp from "./modules/rental-income/IXIRentalIncomeApp";
 import IXIServiceQuoteApp from "./modules/service-quote/IXIServiceQuoteApp";
@@ -634,6 +635,27 @@ export default function IXITransactApp({
             record,
             changePayload,
             sourceContext || context,
+          );
+        }}
+      />
+    );
+  else if (moduleId === "freight")
+    body = (
+      <IXIFreightApp
+        context={context}
+        object={object}
+        onBack={back}
+        onFinancialRecordsChange={onFinancialRecordsChange}
+        onRecordChange={async (record, changePayload) => {
+          await change(
+            "freight",
+            "FREIGHT UPDATE",
+            "move",
+            "freight",
+            "freightOrder",
+            record,
+            changePayload,
+            context,
           );
         }}
       />
