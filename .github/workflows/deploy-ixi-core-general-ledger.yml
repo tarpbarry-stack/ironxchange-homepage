@@ -84,7 +84,12 @@ jobs:
           cd "$APP"
           echo 'Current guarded IX-Core source baseline:'
           sha256sum $EXISTING
-          if printf '%s  %s\n' \
+          ALREADY_CURRENT=1
+          for file in $CHANGED; do cmp -s "$APP/$file" "$STAGE/$file" || ALREADY_CURRENT=0; done
+          BASELINE_OK=0
+          if [ "$ALREADY_CURRENT" -eq 1 ]; then
+            echo 'Live IX-Core exactly matches the immutable release.'
+          elif printf '%s  %s\n' \
             'c4762c2516054ca56e04242c9c0e6476767731e9318081cf713af17161d82317' 'financial/IXIFinancialCloseControlEngine.js' \
             '4b491ae930825053e3c0d6576e6f66224cb15efa2da008d55215e5c44923f85f' 'financial/IXIFinancialCommandEngine.js' \
             'c488ecd605c21e5675f4e304414b6ef55eea7b95cc7d7455575d38b7a25f7124' 'financial/IXIFinancialCommandRoutes.js' \
@@ -97,8 +102,6 @@ jobs:
           else
             BASELINE_OK=0
           fi
-          ALREADY_CURRENT=1
-          for file in $CHANGED; do cmp -s "$APP/$file" "$STAGE/$file" || ALREADY_CURRENT=0; done
           if [ "$BASELINE_OK" -ne 1 ] && [ "$ALREADY_CURRENT" -ne 1 ]; then
             echo 'Live IX-Core is neither the certified baseline nor this immutable release.' >&2
             exit 1
@@ -106,7 +109,15 @@ jobs:
 
           cd "$STAGE"
           npm ci --ignore-scripts
-          npm audit --omit=dev --audit-level=low
+          AUDIT_OK=0
+          for audit_attempt in 1 2 3; do
+            if npm audit --omit=dev --audit-level=low --fetch-timeout=60000 --fetch-retries=2; then
+              AUDIT_OK=1
+              break
+            fi
+            sleep $((audit_attempt * 5))
+          done
+          test "$AUDIT_OK" -eq 1
           npm test
           for file in $CHANGED; do node --check "$file"; done
           node - <<'NODE'
