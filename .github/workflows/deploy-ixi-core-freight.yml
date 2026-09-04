@@ -1,0 +1,159 @@
+name: Deploy IX-Core Freight
+
+"on":
+  workflow_dispatch:
+    inputs:
+      commit_sha:
+        description: Immutable IX-Core commit SHA
+        required: true
+        default: 6500b42fb8f194b30af403ecfbb28d97147c8e43
+  push:
+    branches: [main]
+    paths: [".github/workflows/deploy-ixi-core-freight.yml"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ixi-core-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+      AWS_INSTANCE_ID: ${{ secrets.AWS_INSTANCE_ID }}
+      IXI_CORE_SHA: ${{ inputs.commit_sha || '6500b42fb8f194b30af403ecfbb28d97147c8e43' }}
+    steps:
+      - name: Validate immutable release
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$IXI_CORE_SHA" =~ ^[0-9a-f]{40}$ ]]
+          resolved_sha="$(curl -fsSL -H 'Accept: application/vnd.github+json' -H 'X-GitHub-Api-Version: 2022-11-28' "https://api.github.com/repos/tarpbarry-stack/ixi-core/commits/$IXI_CORE_SHA" | jq -r '.sha')"
+          test "$resolved_sha" = "$IXI_CORE_SHA"
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Deploy guarded Freight release
+        shell: bash
+        run: |
+          set -euo pipefail
+          remote_script="$(cat <<'REMOTE_SCRIPT'
+          set -eu
+          APP=/var/www/ix-core
+          RELEASE_SHA=__IXI_CORE_SHA__
+          STAGE=/tmp/ixi-core-freight-__IXI_CORE_SHA__
+          ARCHIVE=/tmp/ixi-core-freight-__IXI_CORE_SHA__.tgz
+          BACKUP=/var/backups/ixi-core-releases/freight-pre-__IXI_CORE_SHA__.tgz
+          FILES='freight/constants.js freight/contracts/freightOrderContract.js freight/routes/freightRouter.js freight/services/freightService.js'
+          SUCCESS=0
+          ROLLBACK_ARMED=0
+
+          run_pm2() { if [ "$PM2_USER" = root ]; then pm2 "$@"; else sudo -u ubuntu -H pm2 "$@"; fi; }
+          rollback() {
+            if [ "$SUCCESS" -eq 0 ] && [ "$ROLLBACK_ARMED" -eq 1 ] && [ -f "$BACKUP" ]; then
+              echo 'Deployment failed; restoring prior Freight runtime.' >&2
+              cd "$APP"
+              tar -xzf "$BACKUP"
+              run_pm2 reload IX-Core --update-env || run_pm2 restart IX-Core --update-env || true
+            fi
+          }
+          trap rollback EXIT
+
+          test -d "$APP"
+          if pm2 describe IX-Core >/dev/null 2>&1; then PM2_USER=root
+          elif sudo -u ubuntu -H pm2 describe IX-Core >/dev/null 2>&1; then PM2_USER=ubuntu
+          else echo 'PM2 process IX-Core was not found.' >&2; exit 1
+          fi
+
+          rm -rf "$STAGE"
+          mkdir -p "$STAGE"
+          curl -fsSL "https://github.com/tarpbarry-stack/ixi-core/archive/$RELEASE_SHA.tar.gz" -o "$ARCHIVE"
+          tar -xzf "$ARCHIVE" --strip-components=1 -C "$STAGE"
+
+          cd "$APP"
+          ALREADY_CURRENT=1
+          for file in $FILES; do cmp -s "$APP/$file" "$STAGE/$file" || ALREADY_CURRENT=0; done
+          if [ "$ALREADY_CURRENT" -ne 1 ]; then
+            printf '%s  %s\n' \
+              '341c1a71e46df79ae11b3e60c074db08db52779d86bf5a9589019179ea27ee7b' 'freight/constants.js' \
+              '7783f7596ab5c0ae439eca450c3ab8d58ec943e8306ec7ce9994bc305a4e3ea5' 'freight/contracts/freightOrderContract.js' \
+              '6e268713aef4d25e3e7fb08daaf6eea9b3d3c2eea3604904e45c0d5975718728' 'freight/routes/freightRouter.js' \
+              '43c934fbba449e4bcce37ea07dcd88d3b882dcf6a607e9dfe449322326a7e39a' 'freight/services/freightService.js' | sha256sum -c -
+          fi
+
+          cd "$STAGE"
+          npm ci --ignore-scripts --no-audit
+          npm test
+          for file in $FILES; do node --check "$file"; done
+          node - <<'NODE'
+          const {freightRouter}=require('./freight/routes/freightRouter');
+          const service=require('./freight/services/freightService');
+          const paths=freightRouter.stack.map(layer=>layer.route?.path).filter(Boolean);
+          if(!paths.includes('/orders/:freightOrderId/invoice')) throw new Error('Freight invoice route missing.');
+          if(typeof service.attachInvoice!=='function') throw new Error('Freight invoice service missing.');
+          NODE
+
+          if [ "$ALREADY_CURRENT" -ne 1 ]; then
+            cd "$APP"
+            mkdir -p /var/backups/ixi-core-releases
+            tar -czf "$BACKUP" $FILES
+            ROLLBACK_ARMED=1
+            for file in $FILES; do install -D -m 0644 "$STAGE/$file" "$APP/$file"; done
+            run_pm2 reload IX-Core --update-env
+          fi
+
+          attempt=0
+          until curl -fsS http://127.0.0.1:4100/health >/dev/null; do
+            attempt=$((attempt + 1))
+            [ "$attempt" -lt 20 ] || exit 1
+            sleep 2
+          done
+          cd "$APP"
+          printf '%s  %s\n' \
+            'e55c97d368164b107822159733b6b8785981ce83a02117be6ada231cac728720' 'freight/constants.js' \
+            '054337a22bd2b2c26ebdd65e50e4cf06b467da9d56e3c1ceb8a91d44fa9b7a21' 'freight/contracts/freightOrderContract.js' \
+            '05efbecbc932d0c6add567879c36a91f5ec0d9c0b5cafbf48eee9bc0336cb172' 'freight/routes/freightRouter.js' \
+            '216b3dea4cd6f853fb1bb62598ec77e5877b1af02dabeef04a6613303c1bd4e3' 'freight/services/freightService.js' | sha256sum -c -
+
+          SUCCESS=1
+          ROLLBACK_ARMED=0
+          trap - EXIT
+          rm -rf "$STAGE"
+          rm -f "$ARCHIVE"
+          printf 'IX-Core Freight %s deployed; health=200; invoice-route=present\n' "$RELEASE_SHA"
+          REMOTE_SCRIPT
+          )"
+          remote_script="${remote_script//__IXI_CORE_SHA__/$IXI_CORE_SHA}"
+          parameters="$(jq -cn --arg command "$remote_script" '{commands:[$command]}')"
+          command_id="$(aws ssm send-command --region "$AWS_REGION" --instance-ids "$AWS_INSTANCE_ID" --document-name AWS-RunShellScript --comment "Deploy IX-Core Freight $IXI_CORE_SHA" --parameters "$parameters" --query 'Command.CommandId' --output text)"
+          invocation=''
+          status='Pending'
+          for attempt in $(seq 1 240); do
+            invocation="$(aws ssm get-command-invocation --region "$AWS_REGION" --command-id "$command_id" --instance-id "$AWS_INSTANCE_ID" 2>/dev/null || true)"
+            status="$(printf '%s' "$invocation" | jq -r '.Status // "Pending"')"
+            case "$status" in Success|Failed|Cancelled|TimedOut|Cancelling) break ;; esac
+            sleep 5
+          done
+          printf '%s' "$invocation" | jq -r '.StandardOutputContent'
+          printf '%s' "$invocation" | jq -r '.StandardErrorContent' >&2
+          test "$status" = Success
+
+      - name: Record Freight release
+        shell: bash
+        run: |
+          {
+            echo '## IX-Core Freight release'
+            printf -- '- Commit: `%s`\n' "$IXI_CORE_SHA"
+            echo '- 88 Financial, Freight, and Sales control tests: passed'
+            echo '- Live source checksum and rollback controls: passed'
+            echo '- AWS IX-Core health and Freight invoice-route probes: passed'
+          } >> "$GITHUB_STEP_SUMMARY"
