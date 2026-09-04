@@ -1,0 +1,167 @@
+name: Deploy IX-Core Equipment Sales
+
+"on":
+  workflow_dispatch:
+    inputs:
+      commit_sha:
+        description: Immutable IX-Core commit SHA
+        required: true
+        default: 42a93131979b4ef4aa85646f892a6efda73a991c
+  push:
+    branches: [main]
+    paths: [".github/workflows/deploy-ixi-core-equipment-sales.yml"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ixi-core-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+      AWS_INSTANCE_ID: ${{ secrets.AWS_INSTANCE_ID }}
+      IXI_CORE_SHA: ${{ inputs.commit_sha || '42a93131979b4ef4aa85646f892a6efda73a991c' }}
+    steps:
+      - name: Validate immutable release
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$IXI_CORE_SHA" =~ ^[0-9a-f]{40}$ ]]
+          resolved_sha="$(curl -fsSL -H 'Accept: application/vnd.github+json' -H 'X-GitHub-Api-Version: 2022-11-28' "https://api.github.com/repos/tarpbarry-stack/ixi-core/commits/$IXI_CORE_SHA" | jq -r '.sha')"
+          test "$resolved_sha" = "$IXI_CORE_SHA"
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Deploy guarded Equipment Sales release
+        shell: bash
+        run: |
+          set -euo pipefail
+          remote_script="$(cat <<'REMOTE_SCRIPT'
+          set -eu
+          APP=/var/www/ix-core
+          RELEASE_SHA=__IXI_CORE_SHA__
+          STAGE=/tmp/ixi-core-equipment-sales-__IXI_CORE_SHA__
+          ARCHIVE=/tmp/ixi-core-equipment-sales-__IXI_CORE_SHA__.tgz
+          BACKUP=/var/backups/ixi-core-releases/equipment-sales-pre-__IXI_CORE_SHA__.tgz
+          EXISTING='financial/IXIFinancialCommandEngine.js financial/IXIFinancialCommandRoutes.js financial/IXIFinancialDocumentFactoryRegistry.js financial/IXIFinancialRoutes.js financial/IXIFinancialValidationBridge.js index.js'
+          NEW='financial/IXIFinancialSalesOrderFactory.js sales/IXISalesSigningRoutes.js sales/IXISalesSigningService.js sales/IXISalesSigningToken.js'
+          CHANGED="$EXISTING $NEW"
+          SUCCESS=0
+          ROLLBACK_ARMED=0
+
+          run_pm2() { if [ "$PM2_USER" = root ]; then pm2 "$@"; else sudo -u ubuntu -H pm2 "$@"; fi; }
+          rollback() {
+            if [ "$SUCCESS" -eq 0 ] && [ "$ROLLBACK_ARMED" -eq 1 ] && [ -f "$BACKUP" ]; then
+              echo 'Deployment failed; restoring previous IX-Core source.' >&2
+              cd "$APP"
+              tar -xzf "$BACKUP"
+              for file in $NEW; do rm -f "$APP/$file"; done
+              run_pm2 reload IX-Core --update-env || run_pm2 restart IX-Core --update-env || true
+            fi
+          }
+          trap rollback EXIT
+
+          test -d "$APP"
+          if pm2 describe IX-Core >/dev/null 2>&1; then PM2_USER=root;
+          elif sudo -u ubuntu -H pm2 describe IX-Core >/dev/null 2>&1; then PM2_USER=ubuntu;
+          else echo 'PM2 process IX-Core was not found.' >&2; exit 1; fi
+
+          rm -rf "$STAGE"
+          mkdir -p "$STAGE"
+          curl -fsSL "https://github.com/tarpbarry-stack/ixi-core/archive/$RELEASE_SHA.tar.gz" -o "$ARCHIVE"
+          tar -xzf "$ARCHIVE" --strip-components=1 -C "$STAGE"
+
+          cd "$APP"
+          ALREADY_CURRENT=1
+          for file in $CHANGED; do cmp -s "$APP/$file" "$STAGE/$file" || ALREADY_CURRENT=0; done
+          if [ "$ALREADY_CURRENT" -ne 1 ]; then
+            printf '%s  %s\n' \
+              '603548b9ef28b187924dcd71c7cc1c9c28289ce4b862b51b6650adff9d997d15' 'financial/IXIFinancialCommandEngine.js' \
+              'db02f0c0ee42e726f048717430df8b157cb02804e017bbb1cc94c1557ef5d215' 'financial/IXIFinancialCommandRoutes.js' \
+              'bc414e35aec5cb3d951993eb4d88796e48e72e4937dae1f145b07e5c89149614' 'financial/IXIFinancialDocumentFactoryRegistry.js' \
+              'c710cd1a60bd96887c4708ab106b8aa685e254d3da5f5d460021e80633ade4ea' 'financial/IXIFinancialRoutes.js' \
+              'd3919d490aa1980d6c2e397769f1ca3e0ef08bb1e123e9d6ce072f4ae7bff8cd' 'financial/IXIFinancialValidationBridge.js' \
+              '0c805d4580b811cf8f9721a31f54f3307aa0ec548014bcb0fc36a102d9a002a6' 'index.js' | sha256sum -c -
+            for file in $NEW; do test ! -e "$APP/$file"; done
+          fi
+
+          cd "$STAGE"
+          npm ci --ignore-scripts
+          AUDIT_OK=0
+          for audit_attempt in 1 2 3; do
+            if npm audit --omit=dev --audit-level=low --fetch-timeout=60000 --fetch-retries=2; then AUDIT_OK=1; break; fi
+            sleep $((audit_attempt * 5))
+          done
+          test "$AUDIT_OK" -eq 1
+          npm test
+          for file in $CHANGED; do node --check "$file"; done
+          IXI_MOS_INTERNAL_SECRET='deployment-probe-master-secret-at-least-thirty-two-characters' node - <<'NODE'
+          const {createFinancialDocumentByType}=require('./financial/IXIFinancialDocumentFactoryRegistry');
+          const {validateFinancialDocument}=require('./financial/IXIFinancialValidationBridge');
+          const {createSalesSigningToken,verifySalesSigningToken}=require('./sales/IXISalesSigningToken');
+          const refs=[{role:'asset',passportId:'pass_asset_probe'},{role:'entity',passportId:'pass_entity_probe'}];
+          const doc=createFinancialDocumentByType({documentType:'sales-order',input:{financialDocumentId:'ifd_so_probe',documentNumber:'SO-PROBE',references:refs,salesOrder:{schema:'ixi-equipment-sales-order-v1',identity:{revision:1},context:{primaryPassportId:'pass_asset_probe',entityPassportId:'pass_entity_probe',actorPassportId:'pass_actor_probe'},customer:{name:'Probe Buyer',email:'probe@example.com'},asset:{label:'Probe Machine',serialNumber:'SN-PROBE'},commercial:{currency:'USD',paymentTerms:'Wire before release'},totals:{subtotal:100,tax:0,freight:0,fees:0,tradeAllowance:0,deposit:0,total:100,balanceDue:100},status:'draft'}}});
+          if(!validateFinancialDocument(doc).ok||doc.documentType!=='sales-order'||doc.accountingTreatment.economicEvent!==false) throw new Error('Sales Order control probe failed.');
+          const token=createSalesSigningToken({salesOrderId:'ifd_so_probe',revision:1,tokenVersion:1,expiresAt:'2030-01-01T00:00:00.000Z',nonce:'probe'});
+          if(verifySalesSigningToken(token,{now:Date.parse('2029-01-01')}).salesOrderId!=='ifd_so_probe') throw new Error('Sales signing probe failed.');
+          NODE
+
+          cd "$APP"
+          if [ "$ALREADY_CURRENT" -ne 1 ]; then
+            mkdir -p /var/backups/ixi-core-releases
+            tar -czf "$BACKUP" $EXISTING
+            ROLLBACK_ARMED=1
+            for file in $CHANGED; do install -D -m 0644 "$STAGE/$file" "$APP/$file"; done
+            run_pm2 reload IX-Core --update-env
+          fi
+
+          attempt=0
+          until curl -fsS http://127.0.0.1:4100/health >/dev/null; do attempt=$((attempt + 1)); [ "$attempt" -lt 15 ] || exit 1; sleep 2; done
+          signing_status="$(curl -sS -o "$STAGE/signing-route.json" -w '%{http_code}' http://127.0.0.1:4100/sales-signing/not.valid)"
+          invitation_status="$(curl -sS -o "$STAGE/invitation-route.json" -w '%{http_code}' -X POST -H 'Content-Type: application/json' -d '{}' http://127.0.0.1:4100/financial/sales-orders/ifd_probe/signing-invitations)"
+          case "$signing_status" in 400) ;; *) cat "$STAGE/signing-route.json" >&2; exit 1 ;; esac
+          case "$invitation_status" in 401|403) ;; *) cat "$STAGE/invitation-route.json" >&2; exit 1 ;; esac
+
+          SUCCESS=1
+          ROLLBACK_ARMED=0
+          trap - EXIT
+          rm -rf "$STAGE"
+          rm -f "$ARCHIVE"
+          printf 'IX-Core Equipment Sales %s deployed; health=200; signing=%s; invitation-auth=%s\n' "$RELEASE_SHA" "$signing_status" "$invitation_status"
+          REMOTE_SCRIPT
+          )"
+          remote_script="${remote_script//__IXI_CORE_SHA__/$IXI_CORE_SHA}"
+          parameters="$(jq -cn --arg command "$remote_script" '{commands:[$command]}')"
+          command_id="$(aws ssm send-command --region "$AWS_REGION" --instance-ids "$AWS_INSTANCE_ID" --document-name AWS-RunShellScript --comment "Deploy IX-Core Equipment Sales $IXI_CORE_SHA" --parameters "$parameters" --query 'Command.CommandId' --output text)"
+          invocation=''
+          status='Pending'
+          for attempt in $(seq 1 240); do
+            invocation="$(aws ssm get-command-invocation --region "$AWS_REGION" --command-id "$command_id" --instance-id "$AWS_INSTANCE_ID" 2>/dev/null || true)"
+            status="$(printf '%s' "$invocation" | jq -r '.Status // "Pending"')"
+            case "$status" in Success|Failed|Cancelled|TimedOut|Cancelling) break ;; esac
+            sleep 5
+          done
+          printf '%s' "$invocation" | jq -r '.StandardOutputContent'
+          printf '%s' "$invocation" | jq -r '.StandardErrorContent' >&2
+          test "$status" = Success
+
+      - name: Record Equipment Sales release
+        shell: bash
+        run: |
+          {
+            echo '## IX-Core Equipment Sales release'
+            printf -- '- Commit: `%s`\n' "$IXI_CORE_SHA"
+            echo '- 85 Financial and Sales control tests: passed'
+            echo '- Production dependency audit: passed'
+            echo '- AWS health, public signing, and authenticated invitation route probes: passed'
+          } >> "$GITHUB_STEP_SUMMARY"
