@@ -29,6 +29,7 @@ import IXIFinancialReportingApp from "./modules/financial-reporting/IXIFinancial
 import IXIAccessPolicyApp from "./modules/access-policy/IXIAccessPolicyApp";
 import { createIXICustomerServiceWorkOrder } from "./modules/customer-service-work-order/IXICustomerServiceWorkOrderAdapter";
 import IXITransactStyles from "./IXITransactStyles";
+import IXITransactHomeTypography from "./IXITransactHomeTypography";
 import { patchIXIAosFinancialDocument } from "../financial-runtime/IXIAosFinancialReadClient";
 
 const clean = (value) => String(value ?? "").trim();
@@ -1339,6 +1340,7 @@ export default function IXITransactApp({
         armedDestination={armedDestination}
         onSendToArmedDestination={onSendToArmedDestination}
       />
+      {!active ? <IXITransactHomeTypography /> : null}
       <IXITransactStyles />
     </div>
   );
