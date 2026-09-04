@@ -34,20 +34,24 @@ function canonicalInvoice(invoice, result) {
 }
 
 function invoiceDescription(record = {}) {
-  return `Equipment Invoice · ${clean(record?.asset?.label) || "Machine"} · ${clean(record?.customer?.name) || "Customer"}`;
+  const kind = record?.dealType === "rental-purchase-option" ? "RPO Invoice" : "Equipment Invoice";
+  return `${kind} · ${clean(record?.asset?.label) || "Machine"} · ${clean(record?.customer?.name) || "Customer"}`;
 }
 
 function invoiceMetadata(record = {}, input = {}, invoice = {}) {
   return {
     ...(invoice?.metadata || {}),
     transactModule: "equipment-sale",
-    invoiceType: "asset-sale",
+    invoiceType: record?.dealType === "rental-purchase-option" ? "rental-purchase-option" : "asset-sale",
     invoiceStatus: "draft",
     directEntry: !clean(invoice?.sourceFinancialDocumentId || invoice?.metadata?.salesOrderId),
     directEntryReason: clean(input.directEntryReason),
     customerPoNumber: clean(input.customerPoNumber),
     administrativeNote: clean(input.memo),
     commercialBreakdown: record?.totals || {},
+    dealType: record?.dealType || "standard-sale",
+    rpo: record?.rpo || {},
+    additionalTerms: record?.additionalTerms || [],
     customer: record?.customer || {},
     asset: record?.asset || {},
     brand: record?.brand || {}
@@ -57,12 +61,12 @@ function invoiceMetadata(record = {}, input = {}, invoice = {}) {
 export async function saveIXIEquipmentSale({ object = {}, context = {}, record = {}, action = "save", signal } = {}) {
   const id = clean(record?.financialBinding?.financialDocumentId);
   if (id) {
-    const response = await patchIXIAosFinancialDocument({ financialDocumentId: id, expectedRevision: Number(record?.financialBinding?.revision), commandId: crypto.randomUUID(), idempotencyKey: `ixi-sales-order:${action}:${crypto.randomUUID()}`, patch: { salesOrder: stored(record), financialState: "committed", attachments: record?.termsDocument?.url ? [{ attachmentId: record.termsDocument.documentId, type: "terms-and-conditions", url: record.termsDocument.url, sha256: record.termsDocument.sha256, pageCount: 2 }] : [] }, metadata: { transactModule: "equipment-sale", action }, signal });
+    const response = await patchIXIAosFinancialDocument({ financialDocumentId: id, expectedRevision: Number(record?.financialBinding?.revision), commandId: crypto.randomUUID(), idempotencyKey: `ixi-sales-order:${action}:${crypto.randomUUID()}`, patch: { salesOrder: stored(record), financialState: "committed", attachments: record?.termsDocument?.url ? [{ attachmentId: record.termsDocument.documentId, type: "terms-and-conditions", url: record.termsDocument.url, sha256: record.termsDocument.sha256, pageCount: 2 }] : [] }, metadata: { transactModule: "equipment-sale", dealType: record?.dealType || "standard-sale", action }, signal });
     return { response, record: canonical(record, response) };
   }
   const references = refs(context, record);
   const commandId = clean(record?.identity?.clientRequestId) || crypto.randomUUID();
-  const response = await createIXIAosObjectFinancialDocument({ object, documentType: "sales-order", commandId, idempotencyKey: `ixi-sales-order:${commandId}`, signal, input: { financialState: "committed", currency: clean(record?.commercial?.currency || "USD"), occurredAt: clean(record?.commercial?.orderDate), dueDate: clean(record?.commercial?.dueDate), description: `Equipment Sales Order · ${clean(record?.customer?.name)} · ${clean(record?.asset?.label)}`, salesOrder: stored(record), references, attachments: record?.termsDocument?.url ? [{ attachmentId: record.termsDocument.documentId, type: "terms-and-conditions", url: record.termsDocument.url, sha256: record.termsDocument.sha256, pageCount: 2 }] : [], sourceFinancialDocumentId: clean(record?.related?.quoteId) }, additionalReferences: references, metadata: { transactModule: "equipment-sale", salesOrderStatus: record.status } });
+  const response = await createIXIAosObjectFinancialDocument({ object, documentType: "sales-order", commandId, idempotencyKey: `ixi-sales-order:${commandId}`, signal, input: { financialState: "committed", currency: clean(record?.commercial?.currency || "USD"), occurredAt: clean(record?.commercial?.orderDate), dueDate: clean(record?.commercial?.dueDate), description: `${record?.dealType === "rental-purchase-option" ? "RPO" : "Equipment"} Sales Order · ${clean(record?.customer?.name)} · ${clean(record?.asset?.label)}`, salesOrder: stored(record), references, attachments: record?.termsDocument?.url ? [{ attachmentId: record.termsDocument.documentId, type: "terms-and-conditions", url: record.termsDocument.url, sha256: record.termsDocument.sha256, pageCount: 2 }] : [], sourceFinancialDocumentId: clean(record?.related?.quoteId) }, additionalReferences: references, metadata: { transactModule: "equipment-sale", dealType: record?.dealType || "standard-sale", salesOrderStatus: record.status } });
   return { response, record: canonical(record, response) };
 }
 

@@ -10,6 +10,7 @@ const context = {
   actor: { passportId: "passport:employee:1", label: "Sales Person" }
 };
 const quote = { identity: { quoteId: "ifd_quote1" }, customer: { name: "Buyer LLC", email: "buyer@example.com" }, asset: { serialNumber: "SN123" }, commercial: { paymentTerms: "Wire before release" }, totals: { subtotal: 100000, tax: 7000, freight: 2500, fees: 500, tradeAllowance: 10000 } };
+const rpoQuote = { ...quote, dealType: "rental-purchase-option", rpo: { startDate: "2026-10-01", firstPaymentDate: "2026-10-01", finalOptionDate: "2027-10-01", termMonths: 12, paymentFrequency: "monthly", paymentCount: 12, initialPayment: 10000, periodicPayment: 6000, purchaseCreditType: "amount", purchaseCreditAmount: 4500, optionPrice: 46000, returnTerms: "Return to seller yard in received condition." }, additionalTerms: [{ termId: "hours", label: "Hour cap", value: "1,500 hours", scope: "rpo", customerFacing: true }] };
 
 test("Equipment Sale inherits Quote and exact Entity terms without accounting duplication", () => {
   const draft = contract.createIXIEquipmentSaleDraft({ context, quote, input: { totals: { deposit: 5000 } } });
@@ -33,4 +34,23 @@ test("Equipment Sale reconciles tax, fees, allowances, deposit, and balance", ()
   const changed = contract.updateIXIEquipmentSale(draft, { ...contract.saleInputFromRecord(draft), subtotal: 85000, tax: 5100, freight: 1200, fees: 300, tradeAllowance: 6000, deposit: 10000 });
   assert.equal(changed.totals.total, 85600);
   assert.equal(changed.totals.balanceDue, 75600);
+});
+
+test("RPO economics and extensible terms flow from Quote to Sales Order without re-entry", () => {
+  const draft = contract.createIXIEquipmentSaleDraft({ context, quote: rpoQuote });
+  assert.equal(draft.dealType, "rental-purchase-option");
+  assert.equal(draft.rpo.startDate, "2026-10-01");
+  assert.equal(draft.rpo.purchaseCreditAmount, 4500);
+  assert.equal(draft.rpo.optionPrice, 46000);
+  assert.equal(draft.additionalTerms[0].label, "Hour cap");
+  assert.equal(contract.getIXIEquipmentSaleReadiness(draft).ready, true);
+});
+
+test("RPO drafts always save but signature readiness identifies missing RPO controls", () => {
+  const draft = contract.createIXIEquipmentSaleDraft({ context, quote: { ...quote, dealType: "rental-purchase-option" } });
+  const readiness = contract.getIXIEquipmentSaleReadiness(draft);
+  assert.equal(readiness.ready, false);
+  assert.ok(readiness.missing.includes("RPO start date"));
+  assert.ok(readiness.missing.includes("RPO payment schedule"));
+  assert.ok(readiness.missing.includes("RPO return terms"));
 });

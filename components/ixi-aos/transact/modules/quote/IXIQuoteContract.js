@@ -6,6 +6,42 @@ const array = value => Array.isArray(value) ? value : [];
 const now = () => new Date().toISOString();
 const today = () => now().slice(0, 10);
 
+export const IXI_DEAL_TYPES = Object.freeze(["standard-sale", "rental-purchase-option"]);
+export const IXI_RPO_FREQUENCIES = Object.freeze(["weekly", "biweekly", "monthly", "quarterly", "custom"]);
+
+function dealType(value) {
+  const normalized = clean(value).toLowerCase();
+  return IXI_DEAL_TYPES.includes(normalized) ? normalized : "standard-sale";
+}
+
+function normalizeRPO(value = {}) {
+  const source = sourceObject(value);
+  const purchaseCreditType = clean(source.purchaseCreditType).toLowerCase() === "percent" ? "percent" : "amount";
+  const paymentFrequency = clean(source.paymentFrequency).toLowerCase();
+  return {
+    startDate: clean(source.startDate), firstPaymentDate: clean(source.firstPaymentDate), finalOptionDate: clean(source.finalOptionDate),
+    termMonths: numeric(source.termMonths), paymentFrequency: IXI_RPO_FREQUENCIES.includes(paymentFrequency) ? paymentFrequency : "monthly", paymentCount: numeric(source.paymentCount),
+    initialPayment: money(source.initialPayment), periodicPayment: money(source.periodicPayment), taxPerPayment: money(source.taxPerPayment), recurringFees: money(source.recurringFees),
+    purchaseCreditType, purchaseCreditAmount: money(source.purchaseCreditAmount), purchaseCreditPercent: numeric(source.purchaseCreditPercent),
+    optionPrice: money(source.optionPrice), currentPayoff: money(source.currentPayoff), earlyBuyoutTerms: clean(source.earlyBuyoutTerms),
+    deliveryTerms: clean(source.deliveryTerms), returnTerms: clean(source.returnTerms), maintenanceResponsibility: clean(source.maintenanceResponsibility),
+    insuranceRequirements: clean(source.insuranceRequirements), usageLimit: clean(source.usageLimit), excessUsageRate: clean(source.excessUsageRate),
+    lateFeeTerms: clean(source.lateFeeTerms), defaultTerms: clean(source.defaultTerms), notes: clean(source.notes)
+  };
+}
+
+function normalizeAdditionalTerms(value = []) {
+  return array(value).map((term, index) => {
+    const source = sourceObject(term);
+    return {
+      termId: clean(source.termId) || `TERM-${index + 1}`,
+      label: clean(source.label), value: clean(source.value),
+      scope: ["transaction", "rpo", "invoice"].includes(clean(source.scope)) ? clean(source.scope) : "transaction",
+      customerFacing: source.customerFacing !== false
+    };
+  }).filter(term => term.label || term.value);
+}
+
 export const IXI_QUOTE_SCHEMA = "ixi-equipment-quote-v1";
 export const IXI_QUOTE_STATUSES = Object.freeze(["draft", "prepared", "sent", "viewed", "accepted", "declined", "expired", "superseded", "converted"]);
 
@@ -111,6 +147,7 @@ export function createIXIQuoteDraft({ context = {}, object = {}, input = {} } = 
       actorLabel: clean(actor.displayName || actor.name || actor.label)
     },
     brand: { ...brandSnapshot(context, object), ...sourceObject(input.brand) },
+    dealType: dealType(input.dealType),
     customer: {
       passportId: clean(input.customerPassportId),
       customerId: clean(input.customerId),
@@ -132,6 +169,8 @@ export function createIXIQuoteDraft({ context = {}, object = {}, input = {} } = 
       tradeDescription: clean(input.tradeDescription)
     },
     totals,
+    rpo: normalizeRPO(input.rpo),
+    additionalTerms: normalizeAdditionalTerms(input.additionalTermsRows),
     presentation: {
       headline: clean(input.headline || "EQUIPMENT QUOTATION"),
       customerMessage: clean(input.customerMessage),
@@ -168,6 +207,7 @@ export function updateIXIQuoteDraft(record = {}, { context = {}, object = {}, in
 
 export function quoteInputFromRecord(record = {}) {
   return {
+    dealType: dealType(record?.dealType),
     customerPassportId: record?.customer?.passportId || "",
     customerId: record?.customer?.customerId || "",
     customerName: record?.customer?.name || "",
@@ -194,6 +234,8 @@ export function quoteInputFromRecord(record = {}) {
     conditionTerms: record?.presentation?.conditionTerms || "",
     warrantyTerms: record?.presentation?.warrantyTerms || "",
     additionalTerms: record?.presentation?.additionalTerms || "",
+    rpo: normalizeRPO(record?.rpo),
+    additionalTermsRows: normalizeAdditionalTerms(record?.additionalTerms),
     internalNotes: record?.presentation?.internalNotes || "",
     status: record?.status || "draft",
     asset: sourceObject(record.asset),
@@ -204,4 +246,4 @@ export function quoteInputFromRecord(record = {}) {
 
 export const IXIQuoteDefaults = Object.freeze({ quoteDate: today(), validThrough: "", paymentTerms: "", depositTerms: "", deliveryTerms: "" });
 
-export default { IXI_QUOTE_SCHEMA, IXI_QUOTE_STATUSES, createIXIQuoteDraft, updateIXIQuoteDraft, quoteInputFromRecord, getIXIQuoteCompleteness };
+export default { IXI_QUOTE_SCHEMA, IXI_QUOTE_STATUSES, IXI_DEAL_TYPES, IXI_RPO_FREQUENCIES, createIXIQuoteDraft, updateIXIQuoteDraft, quoteInputFromRecord, getIXIQuoteCompleteness };
