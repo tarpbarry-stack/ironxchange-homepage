@@ -6,12 +6,7 @@ on:
       commit_sha:
         description: Immutable IX-Core commit SHA
         required: true
-        default: c5d41fccae5f7966be8aa7178e74beb0120ab687
-  push:
-    branches:
-      - main
-    paths:
-      - .github/workflows/deploy-ixi-core-production.yml
+        default: bc339e366cd50ceba6cca6ccf610b3b39685375c
 
 permissions:
   contents: read
@@ -27,7 +22,7 @@ jobs:
     env:
       AWS_REGION: ${{ secrets.AWS_REGION }}
       AWS_INSTANCE_ID: ${{ secrets.AWS_INSTANCE_ID }}
-      IXI_CORE_SHA: ${{ inputs.commit_sha || 'c5d41fccae5f7966be8aa7178e74beb0120ab687' }}
+      IXI_CORE_SHA: ${{ inputs.commit_sha || 'bc339e366cd50ceba6cca6ccf610b3b39685375c' }}
 
     steps:
       - name: Validate immutable release
@@ -71,7 +66,7 @@ jobs:
           BACKUP=$BACKUP_ROOT/pre-__IXI_CORE_SHA__.tgz
           SUCCESS=0
 
-          changed_files='financial/IXIFinancialCommandEngine.js financial/IXIFinancialCommandRoutes.js financial/IXIFinancialGLProjectionEngine.js financial/IXIFinancialPermissionEngine.js financial/IXIFinancialProviderService.js mos/objects/objectService.js mos/routes/mosRouter.js package.json'
+          changed_files='financial/IXIFinancialCommandEngine.js financial/IXIFinancialCommandRoutes.js financial/IXIFinancialGLProjectionEngine.js financial/IXIFinancialPermissionEngine.js financial/IXIFinancialProviderService.js package.json'
           added_files='financial/IXIFinancialGLProjectionEngine.test.js financial/IXIFinancialJournalPostingService.js financial/IXIFinancialJournalPostingService.test.js financial/IXIFinancialPermissionEngine.test.js'
 
           rollback() {
@@ -117,8 +112,6 @@ jobs:
           923d112c8e99007644a36c0a4fd8f8ada6010db68cf319d7fa421360a958eec1  financial/IXIFinancialGLProjectionEngine.js
           dc02cb4c1e210e4ea5dfb6805d89ce061b87a4aca4ad7b3b3dd121d39f53e552  financial/IXIFinancialPermissionEngine.js
           1ab56000c49b78dcd69c5cb5ac88e003c043f0a2515a16bbf2d80ad6545dc81b  financial/IXIFinancialProviderService.js
-          9ecb7fe8524a45550a8922f79ae42360a3522d69a163b9a81aa89c71e71632c4  mos/objects/objectService.js
-          bbdb5427430e459e5acfb283d67b446c2c820ed064c3c203089cd27d9f975303  mos/routes/mosRouter.js
           45b10c3f69222dbcdce4ad659b523700d1d28be31afdf6c86db699fb61b8d0c3  package.json
           CHECKSUMS
           sha256sum -c /tmp/ixi-core-live-baseline.sha256
@@ -136,9 +129,6 @@ jobs:
           node --check financial/IXIFinancialCommandEngine.js
           node --check financial/IXIFinancialCommandRoutes.js
           node --check financial/IXIFinancialJournalPostingService.js
-          node --check mos/objects/objectService.js
-          node --check mos/routes/mosRouter.js
-          node --test mos/tests/objectMutationContract.test.js
           node -e "require('./financial/IXIFinancialCommandEngine'); require('./financial/IXIFinancialCommandRoutes')"
 
           cd "$APP"
