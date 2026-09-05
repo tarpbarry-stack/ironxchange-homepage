@@ -15,7 +15,7 @@ import IXIAosGenericUniversalLayout007 from "./IXIAosGenericUniversalLayout007";
 export default function IXIAosGenericUniversalLayout007C(props) {
   return (
     <div className="ixi-universal-card-007c" data-card-number="007C">
-      <IXIAosGenericUniversalLayout007 {...props} />
+      <IXIAosGenericUniversalLayout007 {...props} showMediaBusinessIdentifier={false} />
 
       <style jsx global>{`
         .ixi-universal-card-007c {
