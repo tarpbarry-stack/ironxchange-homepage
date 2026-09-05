@@ -214,6 +214,29 @@ jobs:
           status="$(printf '%s' "$invocation" | jq -r '.Status')"
           test "$status" = "Success"
 
+      - name: Record deployment diagnostics
+        if: always()
+        shell: bash
+        run: |
+          command_id="${{ steps.deploy.outputs.command_id }}"
+          {
+            echo '## IX-Core deployment diagnostics'
+            if [ -z "$command_id" ]; then
+              echo '- SSM command was not created.'
+            else
+              invocation="$(aws ssm get-command-invocation \
+                --region "$AWS_REGION" \
+                --command-id "$command_id" \
+                --instance-id "$AWS_INSTANCE_ID")"
+              echo "- Status: \`$(printf '%s' "$invocation" | jq -r '.Status')\`"
+              echo '### Output'
+              echo '```text'
+              printf '%s\n' "$invocation" | jq -r '.StandardOutputContent'
+              printf '%s\n' "$invocation" | jq -r '.StandardErrorContent'
+              echo '```'
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
       - name: Record release
         shell: bash
         run: |
