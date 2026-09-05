@@ -30,6 +30,8 @@ export default function IXISortableObject({
 
   reorderBehavior = "normal",
 
+  dataWorkspaceFootprint = null,
+
   className,
   style: externalStyle,
 
@@ -141,7 +143,12 @@ const effectiveTransform =
     effectiveTransform
   ),
 
-    transition,
+    transition: [
+      transition,
+      externalStyle?.transition
+    ]
+      .filter(Boolean)
+      .join(", ") || undefined,
 
     /*
      * Keep existing chassis behavior
@@ -167,6 +174,13 @@ const effectiveTransform =
     ...attributes,
     ...listeners
   };
+
+  const footprint =
+    dataWorkspaceFootprint &&
+    typeof dataWorkspaceFootprint ===
+      "object"
+      ? dataWorkspaceFootprint
+      : null;
 
   return (
     <div
@@ -198,6 +212,26 @@ const effectiveTransform =
         clean(
           containerId
         )
+      }
+
+      data-ixi-card-family={
+        footprint?.cardFamily ||
+        resolvedObjectFamily
+      }
+
+      data-ixi-console-slots={
+        footprint?.consoleSlotCount ||
+        1
+      }
+
+      data-ixi-footprint-width={
+        footprint?.renderedWidth ||
+        undefined
+      }
+
+      data-ixi-footprint-height={
+        footprint?.renderedHeight ||
+        undefined
       }
     >
       {typeof children ===

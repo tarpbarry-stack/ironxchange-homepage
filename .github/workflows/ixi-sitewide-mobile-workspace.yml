@@ -1,0 +1,39 @@
+name: IXI Sitewide Mobile Workspace
+
+on:
+  push:
+    branches:
+      - mobile/sitewide-commercial-v1
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  certify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact branch commit
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install repository dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Verify sitewide mobile workspace contract
+        run: >-
+          node --test
+          tests/ixi-sitewide-mobile-workspace-contract.test.mjs
+          tests/ixi-mobile-board-i-ii-contract.test.mjs
+          tests/ixi-mobile-console-left-contract.test.mjs
+          tests/ixi-mobile-console-right-contract.test.mjs
+          tests/ixi-mobile-console-invariant-contract.test.mjs
+          tests/ixi-card-geometry-contract.test.mjs
+
+      - name: Build production application
+        env:
+          NEXT_PUBLIC_SHARETRIBE_CLIENT_ID: ci-sitewide-mobile-placeholder
+        run: npm run build

@@ -8,6 +8,8 @@ export default function IXISortableMachineCard({
 
   reorderBehavior = "normal",
 
+  dataWorkspaceFootprint = null,
+
   ...props
 }) {
   return (
@@ -26,6 +28,10 @@ reorderBehavior={
       objectFamily={
         objectFamily ||
         "machine"
+      }
+
+      dataWorkspaceFootprint={
+        dataWorkspaceFootprint
       }
 
       dragData={{

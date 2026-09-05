@@ -14,6 +14,12 @@ import {
   getMachineCardFamily
 } from "../ixi-machine-card/getMachineCardFamily";
 
+import {
+  IXI_WORKSPACE_CARD_FAMILIES,
+  getIXIWorkspaceCardFootprint,
+  getIXIWorkspaceConsoleSlotCount
+} from "../../lib/ixiWorkspaceFootprint";
+
 const IXI_INITIAL_BOARD_CARD_COUNT = 24;
 const IXI_BOARD_CARD_BATCH_SIZE = 24;
 
@@ -51,6 +57,8 @@ export default function IXIBoard({
 renderCustomItem,
 
 getCustomItemNativeSize,
+
+getItemReorderBehavior,
 
 consolePanelWidth,
 consolePanelGap,
@@ -111,18 +119,10 @@ function resolveBoardItemFamily(
   item
 ) {
   if (
-    item?.objectFamily
-  ) {
-    return String(
-      item.objectFamily
-    );
-  }
-
-  if (
     item?.objectType ===
     "system-index"
   ) {
-    return "container";
+    return IXI_WORKSPACE_CARD_FAMILIES.AOS;
   }
 
   if (
@@ -132,7 +132,35 @@ function resolveBoardItemFamily(
     return "seller";
   }
 
-  return "machine";
+  if (
+    item?.objectId &&
+    String(
+      item?.objectType || ""
+    )
+      .trim()
+      .toLowerCase() !== "machine"
+  ) {
+    return IXI_WORKSPACE_CARD_FAMILIES.AOS;
+  }
+
+  const explicitFamily =
+    String(
+      item?.objectFamily || ""
+    )
+      .trim()
+      .toLowerCase();
+
+  if (
+    Object.values(
+      IXI_WORKSPACE_CARD_FAMILIES
+    ).includes(explicitFamily)
+  ) {
+    return explicitFamily;
+  }
+
+  return getMachineCardFamily(
+    item
+  );
 }
 
 const sortableItemIds = useMemo(
@@ -269,32 +297,10 @@ const sellerCardProps =
 const cardFamily =
   getMachineCardFamily(item);
 
-const savedConsoleSlots =
-  ixiCardState?.[id]
-    ?.consoleSlots;
-
-const legacyConsoleDepth =
-  1 +
-  (
-    ixiCardState?.[id]
-      ?.consoleLeftOpen === true
-      ? 1
-      : 0
-  ) +
-  (
-    ixiCardState?.[id]
-      ?.consoleRightOpen === true
-      ? 1
-      : 0
-  );
-
 const consoleDepth =
-  Array.isArray(
-    savedConsoleSlots
-  ) &&
-  savedConsoleSlots.length > 0
-    ? savedConsoleSlots.length
-    : legacyConsoleDepth;
+  getIXIWorkspaceConsoleSlotCount(
+    ixiCardState?.[id] || {}
+  );
 
 const customNativeSize =
   typeof getCustomItemNativeSize ===
@@ -315,6 +321,53 @@ const customNativeHeight =
     customNativeSize?.height
   ) || 471;
 
+const hasCustomNativeSize =
+  Boolean(
+    customNativeSize &&
+    Number(
+      customNativeSize?.width
+    ) > 0
+  );
+
+const workspaceCardFamily =
+  objectFamily;
+
+const usesCanonicalAosFootprint =
+  workspaceCardFamily ===
+    IXI_WORKSPACE_CARD_FAMILIES.AOS;
+
+const usesExactCustomFootprint =
+  hasCustomNativeSize &&
+  !usesCanonicalAosFootprint;
+
+const workspaceFootprint =
+  getIXIWorkspaceCardFootprint({
+    cardFamily:
+      workspaceCardFamily,
+    scaleMode:
+      enableCardScaling
+        ? cardScaleMode
+        : "xl",
+    consoleSlotCount:
+      consoleDepth,
+    nativeWidth:
+      usesExactCustomFootprint
+        ? customNativeWidth
+        : undefined,
+    nativeHeight:
+      usesExactCustomFootprint
+        ? customNativeHeight
+        : undefined,
+    nativeWidthIncludesSlots:
+      usesExactCustomFootprint
+  });
+
+const reorderBehavior =
+  typeof getItemReorderBehavior ===
+    "function"
+    ? getItemReorderBehavior(item)
+    : "normal";
+
 return (
  <IXISortableMachineCard
   key={id}
@@ -328,7 +381,11 @@ return (
   }
 
   objectFamily={
-    objectFamily
+    workspaceCardFamily
+  }
+
+  reorderBehavior={
+    reorderBehavior
   }
 
   dragData={{
@@ -351,11 +408,20 @@ return (
 
     style={{
       flex: "0 0 auto",
-      width: "max-content",
+      width:
+        `${workspaceFootprint.renderedWidth}px`,
+      height:
+        `${workspaceFootprint.renderedHeight}px`,
       maxWidth: "none",
       minWidth: 0,
-      alignSelf: "flex-start"
+      alignSelf: "flex-start",
+      transition:
+        "width 180ms ease, height 180ms ease"
     }}
+
+    dataWorkspaceFootprint={
+      workspaceFootprint
+    }
   >
     {({ dragHandleProps }) => {
       const customItem =
