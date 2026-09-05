@@ -194,16 +194,21 @@ function getForwardHeaders(req) {
   const idempotencyKey =
     clean(req.headers["idempotency-key"]);
 
-  const ifMatch =
-    clean(req.headers["if-match"]);
+  const expectedRevision =
+    clean(
+      req.headers[
+        "x-ixi-expected-revision"
+      ]
+    );
 
   if (idempotencyKey) {
     headers["Idempotency-Key"] =
       idempotencyKey;
   }
 
-  if (ifMatch) {
-    headers["If-Match"] = ifMatch;
+  if (expectedRevision) {
+    headers["If-Match"] =
+      expectedRevision;
   }
 
   return headers;

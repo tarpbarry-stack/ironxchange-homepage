@@ -17,7 +17,7 @@ function validMutation(overrides = {}) {
     path: "/objects/object-42",
     headers: {
       "idempotency-key": "aos-save-42",
-      "if-match": "0"
+      "x-ixi-expected-revision": "0"
     },
     body: {
       actorId: "ignored-in-browser",
@@ -66,12 +66,12 @@ test("server accepts a complete idempotent revision-protected mutation", () => {
 
 test("server rejects missing idempotency and conflicting revisions", () => {
   assert.throws(
-    () => assertAosObjectMutationRequest(validMutation({ headers: { "if-match": "0" } })),
+    () => assertAosObjectMutationRequest(validMutation({ headers: { "x-ixi-expected-revision": "0" } })),
     error => error.code === "AOS_OBJECT_IDEMPOTENCY_REQUIRED" && error.status === 428
   );
   assert.throws(
     () => assertAosObjectMutationRequest(validMutation({
-      headers: { "idempotency-key": "aos-save-42", "if-match": "1" }
+      headers: { "idempotency-key": "aos-save-42", "x-ixi-expected-revision": "1" }
     })),
     error => error.code === "AOS_OBJECT_REVISION_MISMATCH" && error.status === 412
   );
@@ -148,6 +148,8 @@ test("AOS Work mounts the production card runtime and canonical save adapter", (
   assert.match(page, /validMosObjectIds\.forEach/u);
   assert.match(page, /IXI_EQUIPMENT_INDEX_OBJECT_ID,\s*\.\.\.validMosObjectIds/u);
   assert.doesNotMatch(page, /IXIMosObjectCard/u);
+  assert.match(read("lib/mos/ixiMosBrowserGatewayClient.js"), /X-IXI-Expected-Revision/u);
+  assert.match(read("pages/api/aos/mos\/\[\.\.\.path\]\.js"), /headers\["If-Match"\]\s*=\s*expectedRevision/u);
   assert.match(runtime, /width:\s*300px/u);
   assert.match(runtime, /height:\s*475px/u);
   assert.match(adapter, /createIXIAosObjectUpdateCommand/u);
