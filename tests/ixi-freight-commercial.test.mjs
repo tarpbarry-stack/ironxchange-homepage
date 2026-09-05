@@ -74,9 +74,10 @@ test("Freight is a native operational TRANSACT tile backed by authenticated IX C
 
 test("Freight detail rows contain long operational values inside the native card", async () => {
   const styles = await read("components/ixi-aos/transact/modules/freight/IXIFreightStyles.jsx");
-  assert.match(styles, /\.fr-body\{[^}]*overflow-x:hidden/u);
-  assert.match(styles, /\.fr-row\{[^}]*grid-template-columns:minmax\(82px,34%\) minmax\(0,1fr\)/u);
-  assert.match(styles, /\.fr-row b\{[^}]*overflow-wrap:anywhere/u);
-  assert.match(styles, /\.fr-kpis\{[^}]*minmax\(0,1fr\) minmax\(0,1fr\)/u);
-  assert.match(styles, /\.fr-invoice div\{[^}]*grid-template-columns:minmax\(0,1fr\) auto/u);
+  assert.match(styles, /\.ixi-freight \.fr-body\{[^}]*overflow-x:hidden/u);
+  assert.match(styles, /\.ixi-freight \.fr-row\{[^}]*grid-template-columns:minmax\(82px,34%\) minmax\(0,1fr\)/u);
+  assert.match(styles, /\.ixi-freight \.fr-row b\{[^}]*overflow-wrap:anywhere/u);
+  assert.match(styles, /\.ixi-freight \.fr-kpis\{[^}]*minmax\(0,1fr\) minmax\(0,1fr\)/u);
+  assert.match(styles, /\.ixi-freight \.fr-invoice div\{[^}]*grid-template-columns:minmax\(0,1fr\) auto/u);
+  assert.doesNotMatch(styles, /(?<!\.ixi-freight )\.fr-(?:head|body|tabs|row|section|grid|field|actions|btn|card|kpi|invoice|error|note|event|foot|empty|check|pill)/u);
 });
