@@ -332,8 +332,8 @@ export default function IXSearchSurfaceMobile({
 
           color: rgba(255,255,255,.86);
 
-          font-size: 13px;
-          font-weight: 850;
+          font-size: 15px;
+          font-weight: 750;
         }
 
         .ix-mobile-search-row input::placeholder,
@@ -366,8 +366,8 @@ export default function IXSearchSurfaceMobile({
           -webkit-appearance: none;
           -moz-appearance: none;
 
-          font-size: 8px;
-          font-weight: 950;
+          font-size: 12px;
+          font-weight: 800;
           letter-spacing: .35px;
           text-transform: uppercase;
         }

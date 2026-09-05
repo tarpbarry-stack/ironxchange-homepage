@@ -239,8 +239,8 @@ export default function IXICardScaleControl({
         .ixi-card-scale-label {
           grid-column: 1 / -1;
           color: rgba(255, 255, 255, .54);
-          font-size: 9px;
-          font-weight: 900;
+          font-size: 11px;
+          font-weight: 850;
           line-height: 1;
           letter-spacing: .12em;
           text-align: center;

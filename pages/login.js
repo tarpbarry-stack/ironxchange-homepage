@@ -102,7 +102,7 @@ window.location.href = next;
     overflow-x: hidden;
     background: #0b0b0b;
     color: #f2f2f2;
-    font-family: Arial, sans-serif;
+    font-family: 'Inter Variable', Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     -webkit-font-smoothing: antialiased;
     text-rendering: geometricPrecision;
   }
@@ -189,10 +189,10 @@ window.location.href = next;
 
     color: rgba(255,255,255,.90);
 
-    font-size: 13px;
-    font-weight: 950;
+    font-size: 22px;
+    font-weight: 850;
 
-    letter-spacing: .75px;
+    letter-spacing: -.25px;
     text-transform: uppercase;
   }
 
@@ -207,8 +207,8 @@ window.location.href = next;
 
     color: rgba(255,255,255,.42);
 
-    font-size: 8.75px;
-    font-weight: 950;
+    font-size: 12px;
+    font-weight: 800;
 
     letter-spacing: .58px;
     text-transform: uppercase;
@@ -229,7 +229,7 @@ window.location.href = next;
 
     padding: 0 12px;
 
-    font-size: 13px;
+    font-size: 15px;
     font-weight: 600;
 
     outline: none;
@@ -277,8 +277,8 @@ window.location.href = next;
 
     padding: 0 14px;
 
-    font-size: 9.5px;
-    font-weight: 950;
+    font-size: 13px;
+    font-weight: 800;
 
     letter-spacing: .6px;
     text-transform: uppercase;
@@ -331,8 +331,8 @@ window.location.href = next;
 
     color: rgba(255,255,255,.42);
 
-    font-size: 10.5px;
-    font-weight: 700;
+    font-size: 12.5px;
+    font-weight: 650;
   }
 
 .forgot-link {
@@ -341,8 +341,8 @@ window.location.href = next;
   color: rgba(255,255,255,.42);
   text-decoration: none;
 
-  font-size: 9px;
-  font-weight: 900;
+  font-size: 12px;
+  font-weight: 750;
 
   letter-spacing: .45px;
   text-transform: uppercase;
@@ -356,8 +356,8 @@ window.location.href = next;
     color: #FFC400;
     text-decoration: none;
 
-    font-size: 9px;
-    font-weight: 950;
+    font-size: 12px;
+    font-weight: 800;
 
     letter-spacing: .58px;
     text-transform: uppercase;

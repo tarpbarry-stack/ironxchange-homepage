@@ -2111,7 +2111,7 @@ async function createListing() {
   overflow-x: hidden;
   background: #0b0b0b;
   color: #d6d6d6;
-  font-family: Arial, sans-serif;
+  font-family: 'Inter Variable', Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   -webkit-font-smoothing: antialiased;
   text-rendering: geometricPrecision;
 }
@@ -2327,7 +2327,7 @@ select {
 
   color: #63DEFF;
 
-  font-size: 9.25px;
+  font-size: 12px;
   font-weight: 950;
   letter-spacing: .75px;
   text-transform: uppercase;
@@ -2411,7 +2411,7 @@ select {
 
   color: rgba(255,255,255,.58);
 
-  font-size: 8.5px;
+  font-size: 12px;
   font-weight: 950;
   letter-spacing: .55px;
   text-transform: uppercase;
@@ -2440,7 +2440,7 @@ select {
           display: block;
           margin-bottom: 3px;
           color: #FFC400;
-          font-size: 8px;
+          font-size: 11px;
           font-weight: 950;
           letter-spacing: .78px;
           text-transform: uppercase;
@@ -2468,7 +2468,7 @@ select {
         .seller-panel p {
           margin: 4px 0 0;
           color: rgba(255,255,255,.42);
-          font-size: 11px;
+          font-size: 13px;
           line-height: 1.35;
         }
 
@@ -2497,7 +2497,7 @@ select {
   box-shadow: 0 1px 0 rgba(255,255,255,.025) inset;
           color: #f2f2f2;
           padding: 0 10px;
-          font-size: 8.5px;
+          font-size: 12px;
           font-weight: 950;
           letter-spacing: .55px;
           text-transform: uppercase;
@@ -2604,7 +2604,7 @@ select {
 
   color: rgba(255,255,255,.46);
 
-  font-size: 9.5px;
+  font-size: 13px;
   font-weight: 850;
   letter-spacing: .32px;
 
@@ -2648,7 +2648,7 @@ select {
 
   color: rgba(255,255,255,.34);
 
-  font-size: 7px;
+  font-size: 11px;
   font-weight: 950;
   letter-spacing: .58px;
   text-transform: uppercase;
@@ -2693,7 +2693,7 @@ select {
 
   color: #FFC400;
 
-  font-size: 8.5px;
+  font-size: 12px;
   font-weight: 950;
   letter-spacing: .58px;
   text-transform: uppercase;
@@ -2818,7 +2818,7 @@ select {
 
   color: #050505;
 
-  font-size: 8px;
+  font-size: 11px;
   font-weight: 950;
   letter-spacing: .35px;
 
@@ -2867,7 +2867,7 @@ select {
           right: 7px;
           z-index: 3;
           color: rgba(255,255,255,.72);
-          font-size: 9px;
+          font-size: 12px;
           font-weight: 950;
         }
 
@@ -2909,7 +2909,7 @@ select {
        .rail-head strong {
   color: rgba(255,255,255,.50);
 
-  font-size: 8.5px;
+  font-size: 12px;
   font-weight: 950;
   letter-spacing: .62px;
   text-transform: uppercase;
@@ -2945,7 +2945,7 @@ select {
 
   padding: 0 8px;
 
-  font-size: 9.5px;
+  font-size: 13px;
   font-weight: 800;
 
   outline: none;
@@ -2991,7 +2991,7 @@ select {
 .listing-placement-label {
   color: rgba(255,255,255,.44);
 
-  font-size: 8px;
+  font-size: 11px;
   font-weight: 950;
   letter-spacing: .62px;
   text-transform: uppercase;
@@ -3048,7 +3048,7 @@ select {
 
   color: #7DEBFF;
 
-  font-size: 7.4px;
+  font-size: 11px;
   font-weight: 950;
   letter-spacing: .72px;
   text-transform: uppercase;
@@ -3061,7 +3061,7 @@ select {
 
   color: rgba(255,255,255,.42);
 
-  font-size: 7px;
+  font-size: 11px;
   font-weight: 900;
   letter-spacing: .32px;
   text-transform: uppercase;
@@ -3101,7 +3101,7 @@ select {
 .post-link-row span {
   color: #00D1FF;
 
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 950;
 
   text-shadow:
@@ -3123,7 +3123,7 @@ select {
 
   padding: 0 8px !important;
 
-  font-size: 8.4px !important;
+  font-size: 11px !important;
   font-weight: 850 !important;
   letter-spacing: .18px;
 
@@ -3148,7 +3148,7 @@ select {
 
   padding: 0 8px !important;
 
-  font-size: 8.4px !important;
+  font-size: 11px !important;
   font-weight: 850 !important;
   letter-spacing: .18px;
 
@@ -3182,7 +3182,7 @@ select {
        .card-nav-row strong {
   color: rgba(255,255,255,.54);
 
-  font-size: 9.5px;
+  font-size: 13px;
   font-weight: 850;
 
   letter-spacing: .18px;
@@ -3216,7 +3216,7 @@ select {
         .card-nav-row strong {
   color: rgba(255,255,255,.54);
 
-  font-size: 9.5px;
+  font-size: 13px;
   font-weight: 850;
 
   letter-spacing: .18px;
@@ -3236,7 +3236,7 @@ select {
 
   color: rgba(255,255,255,.62);
 
-  font-size: 8.5px;
+  font-size: 12px;
   font-weight: 950;
   letter-spacing: .5px;
   text-transform: uppercase;
@@ -3308,7 +3308,7 @@ select {
 }
 
 .preview-meta button i {
-  font-size: 12px;
+  font-size: 14px;
 }
 .preview-meta button:hover {
   color: rgba(255,196,0,.82);
@@ -3374,7 +3374,7 @@ animation: goldBreath 3.8s ease-in-out infinite;
 
   color: rgba(255,255,255,.40);
 
-  font-size: 10.5px;
+  font-size: 13px;
   line-height: 1.35;
 }
 
@@ -3427,7 +3427,7 @@ animation: goldBreath 3.8s ease-in-out infinite;
         .launch-btn strong {
   display: block;
 
-  font-size: 11.5px;
+  font-size: 13px;
   font-weight: 950;
 
   letter-spacing: -.08px;
@@ -3441,7 +3441,7 @@ animation: goldBreath 3.8s ease-in-out infinite;
 
   margin-top: 2px;
 
-  font-size: 10px;
+  font-size: 13px;
   font-weight: 700;
 
   opacity: .84;
@@ -3503,7 +3503,7 @@ animation: goldBreath 3.8s ease-in-out infinite;
 
   color: #f2f2f2;
 
-  font-size: 8.5px;
+  font-size: 12px;
   font-weight: 950;
   letter-spacing: .55px;
   text-transform: uppercase;
@@ -3580,7 +3580,7 @@ animation: goldBreath 3.8s ease-in-out infinite;
         .panel-head span {
   color: #FFC400;
 
-  font-size: 8px;
+  font-size: 11px;
   font-weight: 950;
 
   letter-spacing: .65px;
@@ -3626,7 +3626,7 @@ animation: goldBreath 3.8s ease-in-out infinite;
 
   color: #FFC400;
 
-  font-size: 8px;
+  font-size: 11px;
   font-weight: 950;
   letter-spacing: .65px;
   text-transform: uppercase;
@@ -3689,7 +3689,7 @@ animation: goldBreath 3.8s ease-in-out infinite;
 
   color: rgba(255,255,255,.42);
 
-  font-size: 7px;
+  font-size: 11px;
   font-weight: 950;
   letter-spacing: .62px;
   text-transform: uppercase;
@@ -3725,7 +3725,7 @@ animation: goldBreath 3.8s ease-in-out infinite;
 
   color: rgba(255,255,255,.52);
 
-  font-size: 6.5px;
+  font-size: 11px;
   font-weight: 950;
   letter-spacing: .55px;
   text-transform: uppercase;
@@ -3788,7 +3788,7 @@ animation: goldBreath 3.8s ease-in-out infinite;
 
   color: rgba(255,255,255,.44);
 
-  font-size: 8.5px;
+  font-size: 12px;
   font-weight: 950;
 
   letter-spacing: .62px;
@@ -3875,7 +3875,7 @@ textarea:focus,
 
   text-decoration: none;
 
-  font-size: 9px;
+  font-size: 12px;
   font-weight: 950;
   letter-spacing: .58px;
   text-transform: uppercase;
@@ -3956,7 +3956,7 @@ textarea:focus,
 
   color: #FFC400;
 
-  font-size: 9px;
+  font-size: 12px;
   font-weight: 900;
 
   text-transform: lowercase;
@@ -4031,7 +4031,7 @@ textarea:focus,
 
   color: rgba(255,255,255,.42);
 
-  font-size: 9.5px;
+  font-size: 13px;
   font-weight: 800;
 
   line-height: 1;
@@ -4135,7 +4135,7 @@ textarea:focus,
         .activity-item span {
   color: #f2f2f2;
 
-  font-size: 10px;
+  font-size: 13px;
   font-weight: 950;
 
   letter-spacing: .35px;
@@ -4147,7 +4147,7 @@ textarea:focus,
        .activity-item small {
   color: rgba(255,255,255,.42);
 
-  font-size: 8.5px;
+  font-size: 12px;
   font-weight: 900;
 
   letter-spacing: .36px;
@@ -4202,7 +4202,7 @@ textarea:focus,
 
   color: rgba(255,255,255,.44);
 
-  font-size: 8.5px;
+  font-size: 12px;
   font-weight: 950;
 
   letter-spacing: .62px;

@@ -65,8 +65,8 @@ export default function Footer() {
   }
 
   .footer p {
-    color: rgba(255,255,255,.34);
-    font-size: 11px;
+    color: rgba(255,255,255,.48);
+    font-size: 12px;
     font-weight: 700;
     line-height: 1.45;
     margin: 12px 0 0;
@@ -79,9 +79,9 @@ export default function Footer() {
   }
 
   .foot-cols h4 {
-    font-family: Arial, sans-serif;
-    font-size: 9.5px;
-    font-weight: 950;
+    font-family: 'Inter Variable', Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 11px;
+    font-weight: 850;
     letter-spacing: .72px;
     margin: 0 0 13px;
     color: rgba(255,255,255,.78);
@@ -91,14 +91,14 @@ export default function Footer() {
   .foot-cols a {
     display: block;
 
-    color: rgba(255,255,255,.40);
+    color: rgba(255,255,255,.58);
     text-decoration: none;
 
     margin-bottom: 8px;
 
-    font-size: 11px;
-    font-weight: 700;
-    line-height: 1.2;
+    font-size: 13px;
+    font-weight: 650;
+    line-height: 1.35;
 
     transition:
       color .14s ease,

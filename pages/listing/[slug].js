@@ -524,7 +524,7 @@ if (
           background: #0b0b0b;
           color: #d6d6d6;
           padding: 40px;
-          font-family: Arial, sans-serif;
+          font-family: 'Inter Variable', Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
         }
       `}</style>
     </main>
@@ -546,7 +546,7 @@ if (
           background: #0b0b0b;
           color: #d6d6d6;
           padding: 40px;
-          font-family: Arial, sans-serif;
+          font-family: 'Inter Variable', Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
         }
       `}</style>
     </main>
@@ -1173,7 +1173,7 @@ function cycleSlugOutline(e) {
     overflow-x: hidden;
     background: #0b0b0b;
     color: #d6d6d6;
-    font-family: Arial, sans-serif;
+    font-family: 'Inter Variable', Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     -webkit-font-smoothing: antialiased;
     text-rendering: geometricPrecision;
   }
@@ -1327,7 +1327,7 @@ video {
           padding: 0;
           margin: 0 0 10px;
           color: rgba(255,255,255,.40);
-          font-size: 10px;
+          font-size: 13px;
           font-weight: 900;
           letter-spacing: .65px;
           text-transform: uppercase;
@@ -1800,7 +1800,7 @@ video {
 
   text-decoration: none !important;
 
-  font-size: 9px;
+  font-size: 12px;
   font-weight: 900;
 
   letter-spacing: .62px;
@@ -1824,7 +1824,7 @@ video {
 }
 
         .mini-tool-tab i {
-          font-size: 11px;
+          font-size: 14px;
         }
 
       .saved-star {
@@ -2063,7 +2063,7 @@ video {
         .panel h2 {
           margin: 0 0 14px;
           color: rgba(255,255,255,.86);
-          font-size: 12px;
+          font-size: 14px;
           font-weight: 950;
           letter-spacing: .68px;
           text-transform: uppercase;
@@ -2110,7 +2110,7 @@ video {
 
   color: rgba(255,255,255,.86);
 
-  font-size: 10.5px;
+  font-size: 13px;
   font-weight: 950;
 
   letter-spacing: .72px;
@@ -2152,7 +2152,7 @@ video {
 
   padding: 0 10px;
 
-  font-size: 7.5px;
+  font-size: 11px;
   font-weight: 950;
 
   letter-spacing: .58px;
@@ -2195,7 +2195,7 @@ video {
 
   text-align: center;
 
-  font-size: 10px;
+  font-size: 13px;
 }
 
 .video-panel {
@@ -2262,7 +2262,7 @@ video {
 
   color: rgba(255,255,255,.46);
 
-  font-size: 9px;
+  font-size: 12px;
   font-weight: 900;
 
   letter-spacing: .62px;
@@ -2369,7 +2369,7 @@ min-width: 0;
 
   color: rgba(255,255,255,.86);
 
-  font-size: 11px;
+  font-size: 14px;
   font-weight: 950;
 
   letter-spacing: .72px;
@@ -2395,7 +2395,7 @@ min-width: 0;
        .facts span {
   color: rgba(255,255,255,.34);
 
-  font-size: 9px;
+  font-size: 12px;
   font-weight: 950;
 
   letter-spacing: .62px;
@@ -2407,7 +2407,7 @@ min-width: 0;
 
   color: rgba(255,255,255,.76);
 
-  font-size: 12.5px;
+  font-size: 14px;
   font-weight: 760;
 
   line-height: 1.15;
@@ -2461,7 +2461,7 @@ min-width: 0;
 
   color: #7DEBFF;
 
-  font-size: 8px;
+  font-size: 11px;
   font-weight: 950;
   letter-spacing: .72px;
   text-transform: uppercase;
@@ -2500,7 +2500,7 @@ min-width: 0;
 
   color: rgba(125,235,255,.78);
 
-  font-size: 9px;
+  font-size: 12px;
   font-weight: 850;
   letter-spacing: .08px;
   line-height: 1;
@@ -2560,7 +2560,7 @@ min-width: 0;
 
   color: rgba(255,255,255,.86);
 
-  font-size: 11px;
+  font-size: 14px;
   font-weight: 950;
 
   letter-spacing: .72px;
@@ -2660,7 +2660,7 @@ min-width: 0;
 
   color: rgba(255,255,255,.44);
 
-  font-size: 10px;
+  font-size: 13px;
   font-weight: 900;
 
   letter-spacing: .52px;
@@ -2705,7 +2705,7 @@ min-width: 0;
 
   text-decoration: none;
 
-  font-size: 9px;
+  font-size: 12px;
   font-weight: 950;
 
   letter-spacing: .62px;
@@ -2775,7 +2775,7 @@ min-width: 0;
 
   color: #FFC400;
 
-  font-size: 8.5px;
+  font-size: 11px;
   font-weight: 950;
 
   letter-spacing: .72px;
@@ -3094,11 +3094,11 @@ min-width: 0;
 }
 
 .facts span {
-  font-size: 7.8px;
+  font-size: 11px;
 }
 
 .facts strong {
-  font-size: 10.5px;
+  font-size: 13px;
 }
 
   .highlight-chips {
@@ -3132,7 +3132,7 @@ min-width: 0;
 
   .buyer-launch-stack button {
     min-height: 30px;
-    font-size: 6.5px;
+    font-size: 11px;
   }
 
 .video-box {

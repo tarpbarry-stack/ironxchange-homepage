@@ -176,7 +176,7 @@ export default function PrivacyPage() {
           margin: 0;
           background: #0b0b0b;
           color: #f2f2f2;
-          font-family: Arial, sans-serif;
+          font-family: 'Inter Variable', Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
           -webkit-font-smoothing: antialiased;
           text-rendering: geometricPrecision;
         }
@@ -213,7 +213,7 @@ export default function PrivacyPage() {
 
         span {
           color: #FFC400;
-          font-size: 9px;
+          font-size: 12px;
           font-weight: 950;
           letter-spacing: .72px;
           text-transform: uppercase;
@@ -230,7 +230,7 @@ export default function PrivacyPage() {
 
         .updated {
           color: rgba(255,255,255,.38);
-          font-size: 11px;
+          font-size: 12px;
           font-weight: 900;
           text-transform: uppercase;
           letter-spacing: .45px;
@@ -240,7 +240,7 @@ export default function PrivacyPage() {
         h2 {
           margin: 24px 0 8px;
           color: rgba(255,255,255,.88);
-          font-size: 12px;
+          font-size: 16px;
           font-weight: 950;
           letter-spacing: .62px;
           text-transform: uppercase;
@@ -249,7 +249,7 @@ export default function PrivacyPage() {
         p {
           margin: 0 0 12px;
           color: rgba(255,255,255,.66);
-          font-size: 14px;
+          font-size: 16px;
           line-height: 1.62;
         }
 
