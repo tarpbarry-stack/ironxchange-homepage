@@ -1100,9 +1100,9 @@ return (
 
   color: rgba(0,194,255,.92);
 
-  font-size: 10px;
-  font-weight: 950;
-  letter-spacing: 1.35px;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 1.1px;
 
   text-shadow:
     0 0 10px rgba(0,194,255,.22),
@@ -1114,8 +1114,9 @@ return (
 
           color: rgba(225,225,225,.48);
 
-          font-size: 13px;
-          font-weight: 800;
+          font-size: 15px;
+          line-height: 1.5;
+          font-weight: 750;
           letter-spacing: .25px;
         }
 
@@ -1129,9 +1130,9 @@ return (
           background: rgba(255,255,255,.035);
           color: rgba(235,235,235,.72);
 
-          font-size: 9px;
-          font-weight: 950;
-          letter-spacing: .9px;
+          font-size: 11px;
+          font-weight: 900;
+          letter-spacing: .7px;
 
           cursor: pointer;
         }
@@ -1265,9 +1266,9 @@ user-select: none;
           justify-content: center;
 
           color: rgba(255,255,255,.18);
-          font-size: 10px;
-          font-weight: 950;
-          letter-spacing: 1px;
+          font-size: 12px;
+          font-weight: 900;
+          letter-spacing: .8px;
 
           background: #111;
         }
@@ -1431,9 +1432,9 @@ margin-top: -25px;
   background: rgba(255,255,255,.025);
   color: rgba(255,255,255,.38);
 
-  font-size: 8px;
-  font-weight: 950;
-  letter-spacing: .65px;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: .5px;
 
   cursor: pointer;
 }
@@ -1530,8 +1531,8 @@ margin-top: -25px;
   background: rgba(0,0,0,.72);
   color: rgba(235,235,235,.86);
 
-  font-size: 8px;
-  font-weight: 950;
+  font-size: 10px;
+  font-weight: 900;
   letter-spacing: 0;
 
   box-shadow: 0 0 10px rgba(255,255,255,.08);
@@ -1703,8 +1704,8 @@ margin-top: -25px;
 
   color: rgba(255,255,255,.18);
 
-  font-size: 6.5px;
-  font-weight: 950;
+  font-size: 10px;
+  font-weight: 900;
   letter-spacing: .65px;
   text-transform: uppercase;
 
@@ -1810,9 +1811,9 @@ margin-top: -25px;
   padding: 6px;
 
   color: rgba(255,255,255,.62);
-  font-size: 7px;
-  font-weight: 900;
-  line-height: 1.1;
+  font-size: 11px;
+  font-weight: 850;
+  line-height: 1.25;
 }
 
 :global(.theater-stack-drop-surface) {
