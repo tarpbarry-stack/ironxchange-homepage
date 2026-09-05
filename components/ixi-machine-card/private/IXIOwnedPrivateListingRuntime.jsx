@@ -4,7 +4,7 @@ import PrivateListingCard from "./PrivateListingCard";
 import { registerOwnedPrivateActions, unregisterOwnedPrivateActions } from "./IXIOwnedPrivateActionBridge";
 import IXIOwnedPrivateTransactRuntime from "./IXIOwnedPrivateTransactRuntime";
 import { IXI_MACHINE_MUTATION_COMMANDS } from "../../ixi-object-system/IXIMachineMutationCommandBus";
-import { updateMachineFacts } from "../../ixi-object-system/IXIMachineMutationEngine";
+import { mergeVerifiedMachineFacts, updateMachineFacts } from "../../ixi-object-system/IXIMachineMutationEngine";
 import { getListingId } from "../../../lib/listingFormatters";
 
 const SKINS = [
@@ -156,21 +156,13 @@ export default function IXIOwnedPrivateListingRuntime({ cardContext = "inventory
         context
       });
 
-      const nextListing = result?.listing && typeof result.listing === "object"
-        ? result.listing
-        : {
-            ...runtimeListing,
-            ...after,
-            publicData: {
-              ...publicDataOf(runtimeListing),
-              price: after.price,
-              hours: after.hours,
-              location: after.location,
-              description: after.description,
-              details: after.description,
-              keywords: after.keywords
-            }
-          };
+      // The command returns Sharetribe's raw response envelope. The card owns a
+      // normalized listing, so commit the server-verified facts into that
+      // stable shape rather than replacing it with the transport envelope.
+      const nextListing = mergeVerifiedMachineFacts({
+        listing: runtimeListing,
+        after
+      });
 
       const nextDraft = factsOf(nextListing);
       setRuntimeListing(nextListing);
