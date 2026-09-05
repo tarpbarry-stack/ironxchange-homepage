@@ -3,7 +3,8 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 
 const page = fs.readFileSync("pages/aos/mobile-board.js", "utf8");
-const scaler = fs.readFileSync("components/ixi-mobile/IXIImmutableScaledSurface.jsx", "utf8");
+const scaler = fs.readFileSync("components/ixi-machine-object/IXIScaledCardShell.js", "utf8");
+const geometry = fs.readFileSync("lib/ixiObjectGeometry.js", "utf8");
 
 test("board uses authenticated current-user owned private inventory", () => {
   assert.match(page, /sdk\.currentUser\.show\(\)/);
@@ -22,12 +23,15 @@ test("I and II modes reuse the same production machine card", () => {
 });
 
 test("every machine remains an immutable native 300x475 surface", () => {
-  assert.match(page, /nativeWidth=\{300\}/);
-  assert.match(page, /nativeHeight=\{475\}/);
+  assert.match(page, /IXIScaledCardShell/);
+  assert.match(page, /objectFamily="private"/);
   assert.match(page, /cardContext="inventory"/);
   assert.match(page, /sellerMode/);
-  assert.match(scaler, /ResizeObserver/);
-  assert.match(scaler, /transform: `scale\(\$\{scale\}\)`/);
+  assert.match(geometry, /private:\s*\{\s*nativeWidth:\s*300,\s*nativeHeight:\s*475\s*\}/s);
+  assert.match(scaler, /getIXIObjectFootprint/);
+  assert.match(scaler, /--ixi-object-native-width/);
+  assert.match(scaler, /--ixi-object-native-height/);
+  assert.match(scaler, /transform:\s*scale\(/s);
 });
 
 test("II mode is a two-column board rather than horizontal machine swipe", () => {
