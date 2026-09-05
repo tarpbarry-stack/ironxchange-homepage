@@ -916,9 +916,9 @@ min-height: 365px;
 
   text-decoration: none;
 
-  font-family: 'Montserrat', sans-serif;
-  font-size: 10px;
-  font-weight: 900;
+  font-family: 'Inter Variable', Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 12px;
+  font-weight: 800;
 
   letter-spacing: .55px;
   text-transform: uppercase;
@@ -1043,9 +1043,9 @@ min-height: 365px;
   border: 1px solid #3a2d00;
   border-left: 1px solid #2a2a2a;
 
-  font-family: 'Montserrat', sans-serif;
-  font-weight: 900;
-  font-size: 10px;
+  font-family: 'Inter Variable', Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-weight: 800;
+  font-size: 12px;
 
   cursor: pointer;
 
@@ -1137,9 +1137,9 @@ min-height: 365px;
 .benefits h3 {
   margin: 10px 0 6px;
 
-  font-family: 'Montserrat', sans-serif;
-  font-size: 12px;
-  font-weight: 900;
+  font-family: 'Inter Variable', Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 14px;
+  font-weight: 800;
 
   letter-spacing: .45px;
   color: #f2f2f2;
@@ -1149,8 +1149,8 @@ min-height: 365px;
   color: rgba(255,255,255,.48);
   margin: 0;
 
-  font-size: 12.5px;
-  line-height: 1.35;
+  font-size: 15px;
+  line-height: 1.5;
 }
 
         .benefit-icon {
