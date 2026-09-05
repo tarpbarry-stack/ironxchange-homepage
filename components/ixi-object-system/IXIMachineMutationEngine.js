@@ -51,6 +51,52 @@ export function getUpdatedMachineFactMessages({
   return messages;
 }
 
+export function mergeVerifiedMachineFacts({
+  listing = {},
+  after = {}
+} = {}) {
+  const currentPublicData =
+    listing.publicData ||
+    listing.attributes?.publicData ||
+    {};
+  const nextPublicData = {
+    ...currentPublicData
+  };
+
+  for (const key of ["price", "hours", "location", "keywords"]) {
+    if (Object.prototype.hasOwnProperty.call(after, key)) {
+      nextPublicData[key] = after[key];
+    }
+  }
+
+  if (Object.prototype.hasOwnProperty.call(after, "location")) {
+    nextPublicData.city = after.location;
+  }
+
+  if (Object.prototype.hasOwnProperty.call(after, "description")) {
+    nextPublicData.description = after.description;
+    nextPublicData.details = after.description;
+  }
+
+  const nextListing = {
+    ...listing,
+    ...after,
+    publicData: nextPublicData
+  };
+
+  if (listing.attributes) {
+    nextListing.attributes = {
+      ...listing.attributes,
+      ...(Object.prototype.hasOwnProperty.call(after, "description")
+        ? { description: after.description }
+        : {}),
+      publicData: nextPublicData
+    };
+  }
+
+  return nextListing;
+}
+
 export async function updateMachineFacts({
   commandBus,
   listingId,
