@@ -22,6 +22,17 @@ const commercialEditor = fs.readFileSync(
   "utf8"
 );
 
+const sampleData = fs.readFileSync(
+  new URL("../components/ixi-aos-card-library/IXIAosCardSampleData.js", import.meta.url),
+  "utf8"
+);
+
+test("CT-260904-000008 removes only IRONXCHANGE from Card 004's sample heading", () => {
+  assert.match(sampleData, /const SAMPLE_PERSONNEL_OBJECT[\s\S]*?displayName: "PERSONNEL"/u);
+  assert.doesNotMatch(sampleData, /displayName: "IRONXCHANGE PERSONNEL"/u);
+  assert.match(sampleData, /fields: \{ company: "IRONXCHANGE INC\."/u);
+});
+
 test("CT-260904-000009 removes only Card 004's duplicate adapter ID overlay", () => {
   assert.match(card004, /<IXIAosDataContractCardAdapter \{\.\.\.props\} showBusinessIdentifier=\{false\}>/u);
   assert.match(card004, /includeBusinessIdentifier fixedBusinessIdentifierLabel allowAddFields/u);
