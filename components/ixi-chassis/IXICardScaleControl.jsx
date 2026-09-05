@@ -278,7 +278,7 @@ export default function IXICardScaleControl({
         }
 
         :global([data-ixi-header-tools="true"]) .ixi-card-scale-label {
-          font-size: 9px;
+          font-size: 10px;
           letter-spacing: .10em;
         }
 
@@ -319,7 +319,7 @@ export default function IXICardScaleControl({
           }
 
           :global([data-ixi-header-tools="true"]) .ixi-card-scale-label {
-            font-size: 8px;
+            font-size: 9px;
             letter-spacing: .05em;
           }
         }

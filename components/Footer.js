@@ -80,7 +80,7 @@ export default function Footer() {
 
   .foot-cols h4 {
     font-family: 'Inter Variable', Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 850;
     letter-spacing: .72px;
     margin: 0 0 13px;

@@ -1521,7 +1521,7 @@ toggleSearchSurfaceRevealed
 
         :global(body) {
           margin: 0;
-          font-family: Arial, sans-serif;
+          font-family: 'Inter Variable', Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
           background: #0b0b0b;
           color: #d6d6d6;
         }
