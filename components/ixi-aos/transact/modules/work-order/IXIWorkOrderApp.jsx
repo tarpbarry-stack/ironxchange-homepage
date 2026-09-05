@@ -5,6 +5,10 @@ import {
 } from "react";
 
 import { createIXIWorkOrder } from "./IXIWorkOrderCommands";
+import {
+  amendIXIWorkPerformedDate,
+  validateIXIWorkPerformedDate
+} from "./IXIWorkOrderContract";
 
 import {
   getIXIWorkOrderActuals
@@ -84,6 +88,16 @@ const COPY = {
     high: "HIGH",
     critical: "CRITICAL",
     condition: "MACHINE CONDITION",
+    performedOn: "WORK PERFORMED DATE",
+    performedOnHelp: "Actual date the work was performed",
+    recordedOn: "RECORDED ON",
+    editDate: "EDIT DATE",
+    saveDate: "SAVE DATE",
+    cancel: "CANCEL",
+    changeReason: "REASON FOR CHANGE",
+    changeReasonPlaceholder: "Why is the performed date changing?",
+    dateSaved: "WORK PERFORMED DATE UPDATED",
+    invalidDate: "ENTER A VALID WORK DATE—NOT IN THE FUTURE",
     operable: "OPERABLE",
     limited: "LIMITED",
     down: "DOWN",
@@ -150,6 +164,16 @@ const COPY = {
     high: "ALTA",
     critical: "CRÍTICA",
     condition: "CONDICIÓN DEL EQUIPO",
+    performedOn: "FECHA DEL TRABAJO REALIZADO",
+    performedOnHelp: "Fecha real en que se realizó el trabajo",
+    recordedOn: "REGISTRADO EL",
+    editDate: "EDITAR FECHA",
+    saveDate: "GUARDAR FECHA",
+    cancel: "CANCELAR",
+    changeReason: "MOTIVO DEL CAMBIO",
+    changeReasonPlaceholder: "¿Por qué cambia la fecha del trabajo?",
+    dateSaved: "FECHA DEL TRABAJO ACTUALIZADA",
+    invalidDate: "INGRESE UNA FECHA VÁLIDA, NO FUTURA",
     operable: "OPERABLE",
     limited: "LIMITADA",
     down: "FUERA DE SERVICIO",
@@ -218,6 +242,19 @@ function dateOf(iso = "") {
   return Number.isNaN(date.getTime())
     ? new Date().toISOString().slice(0, 10)
     : date.toISOString().slice(0, 10);
+}
+
+function displayDate(value = "", lang = "en") {
+  const dateOnly = clean(value).slice(0, 10);
+  if (!dateOnly) return "—";
+  const date = new Date(`${dateOnly}T12:00:00.000Z`);
+  if (Number.isNaN(date.getTime())) return "—";
+  return new Intl.DateTimeFormat(lang === "es" ? "es-MX" : "en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    timeZone: "UTC"
+  }).format(date);
 }
 
 function uniqueIds(values = []) {
@@ -316,6 +353,10 @@ export default function IXIWorkOrderApp({
   const [type, setType] = useState(() => workflowIntent?.workflow === "receiving-inspection" ? "inspection" : workflowIntent?.workflow === "make-ready" ? "make-ready" : "repair");
   const [priority, setPriority] = useState("normal");
   const [condition, setCondition] = useState("operable");
+  const [performedOn, setPerformedOn] = useState(() => dateOf(context.launchedAt));
+  const [editingPerformedOn, setEditingPerformedOn] = useState(false);
+  const [performedOnDraft, setPerformedOnDraft] = useState("");
+  const [performedOnReason, setPerformedOnReason] = useState("");
   const [submodule, setSubmodule] = useState("");
   const [timerSession, setTimerSession] = useState(null);
   const [timerTick, setTimerTick] = useState(0);
@@ -362,15 +403,18 @@ export default function IXIWorkOrderApp({
 
   useEffect(() => {
     setWorkOrder(initialWorkOrder || null);
+    setEditingPerformedOn(false);
+    setPerformedOnDraft("");
+    setPerformedOnReason("");
   }, [initialWorkOrder]);
 
   async function emitAction(actionId, nextWorkOrder, payload = {}) {
     try {
-      await onAction?.(actionId, nextWorkOrder, context, payload);
-      return true;
+      const persisted = await onAction?.(actionId, nextWorkOrder, context, payload);
+      return persisted || nextWorkOrder;
     } catch (error) {
       setNotice(clean(error?.message) || "WORK ORDER NOT SAVED");
-      return false;
+      return null;
     }
   }
 
@@ -417,6 +461,7 @@ export default function IXIWorkOrderApp({
           type,
           priority,
           machineCondition: condition,
+          performedOn,
           status: "in-progress",
           assignedTo: [context.actor || {}]
         }
@@ -425,6 +470,43 @@ export default function IXIWorkOrderApp({
       await onCreate?.(draft, context);
     } catch (error) {
       setNotice(clean(error?.message) || "WORK ORDER NOT CREATED");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  function beginPerformedDateEdit() {
+    setPerformedOnDraft(
+      clean(workOrder?.dates?.performedOn) || dateOf(workOrder?.dates?.requestedAt)
+    );
+    setPerformedOnReason("");
+    setEditingPerformedOn(true);
+  }
+
+  async function savePerformedDate() {
+    if (saving) return;
+    const validation = validateIXIWorkPerformedDate(performedOnDraft);
+    if (!validation.ok) {
+      setNotice(t.invalidDate);
+      return;
+    }
+    setSaving(true);
+    try {
+      const next = amendIXIWorkPerformedDate(workOrder, {
+        performedOn: performedOnDraft,
+        reason: performedOnReason,
+        actor: context.actor
+      });
+      const persisted = await emitAction("work-date-amend", next, {
+        amendment: next.amendments?.at(-1) || null
+      });
+      if (!persisted) return;
+      setWorkOrder(persisted);
+      setEditingPerformedOn(false);
+      setPerformedOnReason("");
+      setNotice(t.dateSaved);
+    } catch (error) {
+      setNotice(clean(error?.message) || t.invalidDate);
     } finally {
       setSaving(false);
     }
@@ -1014,6 +1096,18 @@ export default function IXIWorkOrderApp({
           <button className={condition === "down" ? "sel down" : "down"} onClick={() => setCondition("down")}><DownIcon size={15} />{t.down}</button>
         </div>
 
+        <label htmlFor="ixi-work-performed-on">{t.performedOn}</label>
+        <div className="wo-date-entry">
+          <input
+            id="ixi-work-performed-on"
+            type="date"
+            max={dateOf(context.launchedAt)}
+            value={performedOn}
+            onChange={event => setPerformedOn(event.target.value)}
+          />
+          <small>{t.performedOnHelp}</small>
+        </div>
+
         <label>{t.assign}</label>
         <div className="wo-assign">
           <PersonIcon size={16} />
@@ -1054,6 +1148,13 @@ export default function IXIWorkOrderApp({
   const photoMedia = photoRecords.flatMap(record =>
     Array.isArray(record?.photo?.media) ? record.photo.media : []
   );
+  const workPerformedOn =
+    clean(workOrder.dates?.performedOn) || dateOf(workOrder.dates?.requestedAt);
+  const recordedOn = clean(workOrder.audit?.createdAt || workOrder.dates?.requestedAt);
+  const workStatus = clean(workOrder.work?.status).toLowerCase();
+  const performedDateLocked =
+    ["complete", "closed", "canceled"].includes(workStatus) ||
+    workOrder.recordStatus === "closed";
 
   return (
     <div className={`wo-app wo-v13 wo-work ${isPaused ? "paused" : ""}`}>
@@ -1079,6 +1180,39 @@ export default function IXIWorkOrderApp({
         <button onClick={() => act("activity")}>{t.activity}</button>
         <button onClick={() => act("related")}>{t.related}</button>
       </div>
+
+      <section className="wo-business-date-card">
+        {editingPerformedOn ? (
+          <div className="wo-date-edit-form">
+            <label htmlFor="ixi-work-performed-on-edit">{t.performedOn}</label>
+            <input
+              id="ixi-work-performed-on-edit"
+              type="date"
+              max={dateOf()}
+              value={performedOnDraft}
+              onChange={event => setPerformedOnDraft(event.target.value)}
+            />
+            <label htmlFor="ixi-work-performed-reason">{t.changeReason}</label>
+            <input
+              id="ixi-work-performed-reason"
+              type="text"
+              value={performedOnReason}
+              placeholder={t.changeReasonPlaceholder}
+              onChange={event => setPerformedOnReason(event.target.value)}
+            />
+            <div className="wo-date-actions">
+              <button onClick={() => setEditingPerformedOn(false)}>{t.cancel}</button>
+              <button className="primary" onClick={savePerformedDate} disabled={saving || !clean(performedOnReason)}>{t.saveDate}</button>
+            </div>
+          </div>
+        ) : (
+          <div className="wo-date-summary">
+            <div><small>{t.performedOn}</small><strong>{displayDate(workPerformedOn, lang)}</strong></div>
+            <div><small>{t.recordedOn}</small><strong>{displayDate(recordedOn, lang)}</strong></div>
+            {!performedDateLocked ? <button onClick={beginPerformedDateEdit}><EditIcon size={12} />{t.editDate}</button> : null}
+          </div>
+        )}
+      </section>
 
       <section className="wo-description-card">
         <label>{t.description}</label>
@@ -1160,9 +1294,9 @@ export default function IXIWorkOrderApp({
       </div>
 
       <div className="wo-audit">
-        <span>{t.created}: —</span>
+        <span>{t.created}: {displayDate(workOrder.audit?.createdAt, lang)}</span>
         <i>•</i>
-        <span>Updated: —</span>
+        <span>{lang === "es" ? "ACTUALIZADA" : "UPDATED"}: {displayDate(workOrder.audit?.updatedAt, lang)}</span>
         <RefreshIcon size={11} />
       </div>
 

@@ -1297,6 +1297,9 @@ export default function IXITransactApp({
             patch: {
               workOrder: nextWorkOrder,
               financialState: id === "complete" ? "closed" : "incurred",
+              ...(id === "work-date-amend" && nextWorkOrder?.dates?.performedOn
+                ? { occurredAt: `${nextWorkOrder.dates.performedOn}T12:00:00.000Z` }
+                : {}),
               ...(id === "complete"
                 ? { completedAt: new Date().toISOString() }
                 : {}),
@@ -1327,6 +1330,7 @@ export default function IXITransactApp({
           );
           // Service Invoice remains intentionally gated until the sales workflow
           // persists issue, payment, void, and canonical readback end to end.
+          return nextWorkOrder;
         }}
       />
     );
