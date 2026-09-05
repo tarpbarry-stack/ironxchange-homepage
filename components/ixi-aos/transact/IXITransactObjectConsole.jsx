@@ -21,17 +21,32 @@ import {
 } from "../card-runtime/IXIAosCardCommandContext";
 import IXIAosActionNotice from "../card-runtime/modules/IXIAosActionNotice";
 import IXITransactApp from "./IXITransactApp";
-import IXITransactConsolePanel from "./IXITransactConsolePanel";
+import IXITransactRecordIndex from "./IXITransactRecordIndex";
 import { createIXITransactContext } from "./IXITransactContext";
+import IXIMachineWorkspaceDirectory, {
+  MACHINE_WORKSPACE_IDS
+} from "../../ixi-machine-console/IXIMachineWorkspaceDirectory";
 
 const PANEL_WIDTH = 298;
 const PANEL_HEIGHT = 471;
 
-const TRANSACT_CONSOLE_FACES = [
+const MACHINE_CONSOLE_FACES = [
   2,
   3,
   4
 ];
+
+const WORKSPACE_FACE = Object.freeze({
+  [MACHINE_WORKSPACE_IDS.DIRECTORY]: 2,
+  [MACHINE_WORKSPACE_IDS.TRANSACT]: 3,
+  [MACHINE_WORKSPACE_IDS.FINANCIAL]: 4
+});
+
+const FACE_WORKSPACE = Object.freeze({
+  2: MACHINE_WORKSPACE_IDS.DIRECTORY,
+  3: MACHINE_WORKSPACE_IDS.TRANSACT,
+  4: MACHINE_WORKSPACE_IDS.FINANCIAL
+});
 
 function getLifecycleCopy(moduleId = "", payload = {}) {
   const id = String(moduleId || "").trim();
@@ -144,6 +159,16 @@ export default function IXITransactObjectConsole({
     onIxiStateChange
   ]);
 
+  const persistWorkspaceOrder = useCallback((slotId, nextOrder = []) => {
+    if (!stateObjectId || typeof onIxiStateChange !== "function") return null;
+    return onIxiStateChange(stateObjectId, {
+      machineWorkspaceOrderBySlot: {
+        ...(ixiState?.machineWorkspaceOrderBySlot || {}),
+        [slotId]: nextOrder
+      }
+    });
+  }, [stateObjectId, ixiState?.machineWorkspaceOrderBySlot, onIxiStateChange]);
+
   const [slots, setSlots] = useState(() =>
     normalizeConsoleSlots(
       Array.isArray(
@@ -164,7 +189,7 @@ export default function IXITransactObjectConsole({
         maxSlots:
           IXI_CONSOLE_MAX_DEPTH,
         faces:
-          TRANSACT_CONSOLE_FACES
+          MACHINE_CONSOLE_FACES
       }
     )
   );
@@ -184,7 +209,7 @@ export default function IXITransactObjectConsole({
           maxSlots:
             IXI_CONSOLE_MAX_DEPTH,
           faces:
-            TRANSACT_CONSOLE_FACES
+            MACHINE_CONSOLE_FACES
         }
       );
 
@@ -223,7 +248,7 @@ export default function IXITransactObjectConsole({
         maxSlots:
           IXI_CONSOLE_MAX_DEPTH,
         faces:
-          TRANSACT_CONSOLE_FACES,
+          MACHINE_CONSOLE_FACES,
         defaultFace: 2
       })
     );
@@ -236,7 +261,7 @@ export default function IXITransactObjectConsole({
         slots,
         slotId,
         faces:
-          TRANSACT_CONSOLE_FACES,
+          MACHINE_CONSOLE_FACES,
         defaultFace: 2
       })
     );
@@ -261,9 +286,22 @@ export default function IXITransactObjectConsole({
         slots,
         slotId,
         faces:
-          TRANSACT_CONSOLE_FACES,
+          MACHINE_CONSOLE_FACES,
         defaultFace: 2
       })
+    );
+  }
+
+  function openWorkspace(slotId, workspaceId) {
+    const face = WORKSPACE_FACE[workspaceId];
+    if (!face) return;
+    closeConsoleModule(slotId);
+    saveSlots(
+      slots.map(slot =>
+        slot.slotId === slotId
+          ? { ...slot, face }
+          : slot
+      )
     );
   }
 
@@ -355,6 +393,9 @@ export default function IXITransactObjectConsole({
           const consoleModule = !isListing
             ? consoleModules[slot.slotId] || null
             : null;
+          const workspaceId = !isListing
+            ? FACE_WORKSPACE[slot.face] || MACHINE_WORKSPACE_IDS.DIRECTORY
+            : "";
           const slotFinancialRecords = !isListing
             ? recordsForConsoleModule(slot.slotId)
             : financialRecords;
@@ -384,8 +425,8 @@ export default function IXITransactObjectConsole({
                 <IXIObjectCardActuator
                   side="left"
                   variant="tall"
-                  label="Add TRAN$ACT module left"
-                  title="Add TRAN$ACT module left"
+                  label="Add machine workspace left"
+                  title="Add machine workspace left"
                   onClick={() => add("left")}
                 />
               ) : null}
@@ -394,8 +435,8 @@ export default function IXITransactObjectConsole({
                 <IXIObjectCardActuator
                   side="right"
                   variant="tall"
-                  label="Add TRAN$ACT module right"
-                  title="Add TRAN$ACT module right"
+                  label="Add machine workspace right"
+                  title="Add machine workspace right"
                   onClick={() => add("right")}
                 />
               ) : null}
@@ -404,8 +445,8 @@ export default function IXITransactObjectConsole({
                 <IXIObjectCardActuator
                   side={leftOfPrimary ? "right" : "left"}
                   variant="tall"
-                  label="Close TRAN$ACT module"
-                  title="Close TRAN$ACT module"
+                  label="Close machine workspace"
+                  title="Close machine workspace"
                   onClick={() => remove(slot.slotId)}
                 />
               ) : null}
@@ -451,27 +492,54 @@ export default function IXITransactObjectConsole({
                       onClose={() => closeConsoleModule(slot.slotId)}
                       onOpenModule={handleOpenModule}
                     />
-                  ) : (
-                    <IXITransactConsolePanel
-                      context={context}
-                      face={slot.face}
+                  ) : workspaceId === MACHINE_WORKSPACE_IDS.TRANSACT ? (
+                    <IXITransactApp
+                      object={object}
+                      actor={actor}
+                      entity={entity}
+                      activeWorkOrder={activeWorkOrder}
+                      activeTechWorkOrder={activeTechWorkOrder}
                       financialRecords={financialRecords}
+                      onFinancialRecordsChange={onFinancialRecordsChange}
+                      permissions={permissions}
+                      onClose={() =>
+                        openWorkspace(slot.slotId, MACHINE_WORKSPACE_IDS.DIRECTORY)
+                      }
+                      onOpenModule={handleOpenModule}
+                      moduleOrder={ixiState?.transactModuleOrder}
+                      onModuleOrderChange={persistModuleOrder}
+                    />
+                  ) : workspaceId === MACHINE_WORKSPACE_IDS.FINANCIAL ? (
+                    <IXITransactRecordIndex
+                      context={context}
+                      financialRecords={financialRecords}
+                      onClose={() =>
+                        openWorkspace(slot.slotId, MACHINE_WORKSPACE_IDS.DIRECTORY)
+                      }
                       onOpenModule={(item, moduleContext, payload) =>
                         openConsoleModule(slot.slotId, item, payload)
                       }
                     />
+                  ) : (
+                    <IXIMachineWorkspaceDirectory
+                      context={context}
+                      workspaceOrder={
+                        ixiState?.machineWorkspaceOrderBySlot?.[slot.slotId]
+                      }
+                      onWorkspaceOrderChange={nextOrder =>
+                        persistWorkspaceOrder(slot.slotId, nextOrder)
+                      }
+                      onOpenWorkspace={nextWorkspaceId =>
+                        openWorkspace(slot.slotId, nextWorkspaceId)
+                      }
+                    />
                   )}
 
-                  {!consoleModule ? (
                   <button
                     type="button"
                     className="tx-console-face-button"
-                    aria-label={
-                      `Change TRAN$ACT console face ${slot.face === 2 ? "$F1" : slot.face}`
-                    }
-                    title={
-                      `TRAN$ACT ${slot.face === 2 ? "$F1" : `face ${slot.face}`}`
-                    }
+                    aria-label="Change machine workspace"
+                    title="Change machine workspace"
                     onPointerDown={event => {
                       event.preventDefault();
                       event.stopPropagation();
@@ -485,7 +553,6 @@ export default function IXITransactObjectConsole({
                   >
                     <span />
                   </button>
-                  ) : null}
                 </>
               )}
             </section>

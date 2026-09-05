@@ -34,7 +34,7 @@ test("TRANSACT launcher reorders independently and persists stable module ids", 
   assert.match(engine, /seen\.has\(id\)/u);
 
   assert.match(consoleRuntime, /transactModuleOrder/u);
-  assert.match(consoleRuntime, /onIxiStateChange\(objectId/u);
+  assert.match(consoleRuntime, /onIxiStateChange\(\s*stateObjectId/u);
   assert.match(consoleRuntime, /onModuleOrderChange=\{persistModuleOrder\}/u);
 
   assert.match(styles, /\.tx-grid[\s\S]*overflow: hidden/u);
