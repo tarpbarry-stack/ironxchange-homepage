@@ -51,3 +51,21 @@ test("$F1 drills from categories to numbered records and existing apps", () => {
   assert.match(source, /source: "transact-record-index-f1"/);
   assert.match(source, /if \(recordId\) setRecordId\("")/);
 });
+
+test("$F1 opens existing modules inside the selected console slot", () => {
+  const consoleRuntime = read(
+    "components/ixi-aos/transact/IXITransactObjectConsole.jsx"
+  );
+  const app = read(
+    "components/ixi-aos/transact/IXITransactApp.jsx"
+  );
+
+  assert.match(consoleRuntime, /openConsoleModule\(slotId, item, payload = \{\}\)/);
+  assert.match(consoleRuntime, /initialModuleId=\{consoleModule\.moduleId\}/);
+  assert.match(consoleRuntime, /returnToClose/);
+  assert.match(consoleRuntime, /closeConsoleModule\(slot\.slotId\)/);
+  assert.match(consoleRuntime, /recordsForConsoleModule\(slot\.slotId\)/);
+  assert.match(app, /initialModuleId = ""/);
+  assert.match(app, /useState\(\(\) => clean\(initialModuleId\)\)/);
+  assert.match(app, /if \(returnToClose\)/);
+});
