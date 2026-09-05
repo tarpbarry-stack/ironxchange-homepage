@@ -95,9 +95,12 @@ export default function IXIAosGenericContainerLayoutV12({
   const safeIndex = Math.min(activeChildIndex, Math.max(0, items.length - 1));
   const totalLabel = clean(presentation?.totalLabel) || `TOTAL ${getObjectPluralLabel(runtimeObject)}`;
   const analyticTotalLabel = clean(presentation?.analyticTotalLabel) || totalLabel;
+  const analyticPrimaryFieldId = clean(presentation?.analyticPrimaryFieldId);
   const analyticPrimaryMetricLabel = clean(presentation?.analyticPrimaryMetricLabel).toLowerCase();
+  const analyticPrimaryFieldDefinition = getFieldDefinitions(runtimeObject).find(definition => clean(definition?.fieldId) === analyticPrimaryFieldId) || null;
+  const analyticPrimaryFieldValue = analyticPrimaryFieldId ? getObjectFields(runtimeObject)?.[analyticPrimaryFieldId] : undefined;
   const businessIdentifierDefinition = getBusinessIdentifierDefinition(runtimeObject) || createBusinessIdentifierDefinition(runtimeObject, 0);
-  const businessIdentifierLabel = clean(businessIdentifierDefinition?.label) || "ID";
+  const businessIdentifierLabel = clean(presentation?.analyticIdentifierLabel || businessIdentifierDefinition?.label) || "ID";
   const businessIdentifierValue = getBusinessIdentifierValue(runtimeObject) || "—";
   const relationshipsTitle = clean(presentation?.relationshipsTitle) || "RELATIONSHIPS";
   const emptyAggregateTitle = clean(presentation?.summaryTitle) || "SUMMARY";
@@ -117,7 +120,13 @@ export default function IXIAosGenericContainerLayoutV12({
   function renderHero() {
     const entries = heroGroup?.entries || [];
     if (variant === 2) {
-      const primaryEntry = entries.find(entry => clean(entry?.label).toLowerCase() === analyticPrimaryMetricLabel) || entries[0] || null;
+      const aggregateEntry = entries.find(entry => clean(entry?.label).toLowerCase() === analyticPrimaryMetricLabel) || entries[0] || null;
+      const primaryEntry = analyticPrimaryFieldId
+        ? {
+            label: clean(presentation?.analyticPrimaryMetricLabel || analyticPrimaryFieldDefinition?.label) || analyticPrimaryFieldId,
+            value: analyticPrimaryFieldValue ?? "—"
+          }
+        : aggregateEntry;
       const cells = [
         { key: "total", label: analyticTotalLabel, value: items.length },
         ...(primaryEntry ? [{ key: `metric-${primaryEntry.label}`, label: primaryEntry.label, value: primaryEntry.value }] : [{ key: "metric", label: emptyAggregateTitle, value: "—" }]),

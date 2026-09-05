@@ -15,7 +15,9 @@ test("AOS Card 005 owns one three-cell analytic shell with the shared business i
   assert.match(card, /showAnalyticBusinessIdentifier/u);
   assert.match(layout, /gcv12-kpis-three/u);
   assert.match(layout, /getBusinessIdentifierValue\(runtimeObject\)/u);
-  assert.match(layout, /entries\.find\(entry => clean\(entry\?\.label\)\.toLowerCase\(\) === analyticPrimaryMetricLabel\)/u);
+  assert.match(layout, /getObjectFields\(runtimeObject\)\?\.\[analyticPrimaryFieldId\]/u);
   assert.match(samples, /analyticTotalLabel: "PEOPLE"/u);
-  assert.match(samples, /analyticPrimaryMetricLabel: "ACTIVE"/u);
+  assert.match(samples, /analyticPrimaryFieldId: "openJobs"/u);
+  assert.match(samples, /analyticPrimaryMetricLabel: "OPEN JOBS"/u);
+  assert.match(samples, /analyticIdentifierLabel: "ID"/u);
 });

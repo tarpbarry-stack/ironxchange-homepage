@@ -146,7 +146,7 @@ const SAMPLE_PERSONNEL_OBJECT = Object.freeze({
   displayName: "PERSONNEL",
   status: "active",
   capabilities: { canContain: true, canCreate: true, canTransact: true, editable: true, hasConsole: true },
-  presentation: { icon: "♟", totalLabel: "TOTAL PEOPLE", analyticTotalLabel: "PEOPLE", analyticPrimaryMetricLabel: "ACTIVE", summaryTitle: "WORKFORCE SUMMARY", relationshipsTitle: "RELATIONSHIPS & INFRASTRUCTURE" },
+  presentation: { icon: "♟", totalLabel: "TOTAL PEOPLE", analyticTotalLabel: "PEOPLE", analyticPrimaryFieldId: "openJobs", analyticPrimaryMetricLabel: "OPEN JOBS", analyticIdentifierLabel: "ID", summaryTitle: "WORKFORCE SUMMARY", relationshipsTitle: "RELATIONSHIPS & INFRASTRUCTURE" },
   fieldDefinitions: [
     { fieldId: "company", label: "COMPANY", type: "text", presentationRole: "attribute", editable: true },
     { fieldId: "openJobs", label: "OPEN JOBS", type: "number", presentationRole: "attribute", editable: true },
