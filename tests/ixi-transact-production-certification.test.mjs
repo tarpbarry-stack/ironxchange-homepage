@@ -44,6 +44,9 @@ test("Sales Order and Invoice are separate launcher entries with canonical forms
   assert.match(shell, /invoice=\{salesInvoiceSnapshot\}/u);
   assert.match(shell, /initialTab=\{moduleId === "invoice" \? "invoice" : "order"\}/u);
   assert.match(app, /entryMode === "invoice"/u);
+  assert.match(app, /if \(entryMode === "sales-order"\) return initialRecord \|\| base/u);
+  assert.match(app, /signedPackageHash/u);
+  assert.match(app, /invoiceDisplayNumber/u);
   assert.match(app, /className="es-card-form"/u);
   assert.match(app, /CUSTOMER \/ COMPANY/u);
   assert.match(app, /SERIAL \/ VIN/u);
@@ -52,6 +55,8 @@ test("Sales Order and Invoice are separate launcher entries with canonical forms
   assert.match(app, />EXPAND</u);
   assert.doesNotMatch(app, /OPEN WORKSPACE/u);
   assert.match(commands, /documentType:\s*"invoice"/u);
+  assert.match(commands, /documentNumber/u);
+  assert.match(commands, /INV-/u);
   assert.match(commands, /financialState:\s*"draft"/u);
   assert.match(commands, /create-direct-draft-invoice/u);
   assert.match(commands, /expectedRevision/u);

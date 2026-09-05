@@ -3,6 +3,10 @@ import { patchIXIAosFinancialDocument } from "../../../financial-runtime/IXIAosF
 
 const clean = value => String(value ?? "").trim();
 const stored = record => { const { financialBinding: _binding, ...value } = record; return value; };
+const invoiceNumber = value => {
+  const suffix = clean(value).replace(/[^a-z0-9]/gi, "").slice(-8).toUpperCase();
+  return suffix ? `INV-${suffix}` : "";
+};
 
 function refs(context = {}, record = {}) {
   return mergeIXIAosFinancialReferences([
@@ -111,7 +115,7 @@ export async function saveIXIEquipmentInvoice({ object = {}, context = {}, recor
       expectedRevision: Number(invoice?.financialBinding?.revision || 0),
       commandId,
       idempotencyKey: `ixi-equipment-invoice:${commandId}`,
-      patch: { ...commercialPatch, dueDate: clean(input.dueDate || record?.commercial?.dueDate), memo: clean(input.memo), externalReference: clean(input.customerPoNumber), metadata },
+      patch: { ...commercialPatch, documentNumber: clean(invoice?.documentNumber) || invoiceNumber(id), dueDate: clean(input.dueDate || record?.commercial?.dueDate), memo: clean(input.memo), externalReference: clean(input.customerPoNumber), metadata },
       metadata: { transactModule: "equipment-sale", action: linkedSalesOrderId ? "edit-linked-draft-invoice" : "edit-direct-draft-invoice" },
       signal
     });
@@ -120,6 +124,7 @@ export async function saveIXIEquipmentInvoice({ object = {}, context = {}, recor
 
   const references = refs(context, record);
   const commandId = crypto.randomUUID();
+  const documentNumber = invoiceNumber(commandId);
   const response = await createIXIAosObjectFinancialDocument({
     object,
     documentType: "invoice",
@@ -128,6 +133,7 @@ export async function saveIXIEquipmentInvoice({ object = {}, context = {}, recor
     signal,
     input: {
       financialState: "draft",
+      documentNumber,
       currency: clean(record?.commercial?.currency || "USD"),
       occurredAt: clean(record?.commercial?.orderDate),
       dueDate: clean(input.dueDate || record?.commercial?.dueDate),

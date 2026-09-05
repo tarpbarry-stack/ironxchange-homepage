@@ -48,7 +48,8 @@ function saleRecordFromInvoice(base, invoice) {
 function initialSaleRecord({ context, quote, initialRecord, invoice, entryMode }) {
   const base = createIXIEquipmentSaleDraft({ context, quote });
   const directInvoice = entryMode === "invoice" && invoice && !clean(invoice?.sourceFinancialDocumentId || invoice?.metadata?.salesOrderId);
-  return directInvoice ? saleRecordFromInvoice(base, invoice) : initialRecord || saleRecordFromInvoice(base, invoice);
+  if (entryMode === "sales-order") return initialRecord || base;
+  return directInvoice ? saleRecordFromInvoice(base, invoice) : initialRecord || base;
 }
 
 function CardEditor({ invoiceEntry, linkedInvoice, orderLocked, input, patch, patchRpo, setAdditionalTerms, invoiceDraft, setInvoiceDraft }) {
@@ -68,8 +69,17 @@ function CardEditor({ invoiceEntry, linkedInvoice, orderLocked, input, patch, pa
 function CardField({ label, children }) { return <label className="es-card-field"><span>{label}</span>{children}</label>; }
 
 function StageRail({ record, invoice }) {
-  const active = record?.related?.settlementId ? 5 : record?.related?.soldSheetId ? 4 : (invoice?.financialDocumentId || record?.related?.invoiceId) ? 3 : record?.status === "signed-invoice-pending" || record?.status === "signed" ? 2 : 1;
-  return <div className="es-stage-rail">{stages.map((stage, index) => <div key={stage} className={index <= active ? "done" : ""}><i>{index < active ? "✓" : index + 1}</i><span>{stage}</span></div>)}</div>;
+  const savedOrder = Boolean(clean(record?.financialBinding?.financialDocumentId || record?.identity?.salesOrderId));
+  const signed = ["signed-invoice-pending", "signed"].includes(clean(record?.status).toLowerCase()) && Boolean(clean(record?.signing?.signedAt)) && Boolean(clean(record?.signing?.signedPackageHash));
+  const complete = [Boolean(clean(record?.related?.quoteId)), savedOrder, signed, Boolean(clean(invoice?.financialDocumentId || record?.related?.invoiceId)), Boolean(clean(record?.related?.soldSheetId)), Boolean(clean(record?.related?.settlementId))];
+  return <div className="es-stage-rail">{stages.map((stage, index) => <div key={stage} className={complete[index] ? "done" : ""}><i>{complete[index] ? "✓" : index + 1}</i><span>{stage}</span></div>)}</div>;
+}
+
+function invoiceDisplayNumber(invoice = null) {
+  const number = clean(invoice?.documentNumber);
+  if (number) return number;
+  const id = clean(invoice?.financialDocumentId);
+  return id ? `DRAFT INV-${id.slice(-8).toUpperCase()}` : "NEW DIRECT DRAFT";
 }
 
 function OrderDocument({ record }) {
@@ -115,5 +125,5 @@ export default function IXIEquipmentSaleApp({ context = {}, object = {}, quote =
 
   const invoiceEntry = entryMode === "invoice";
   const displayedTotal = invoiceEntry && linkedInvoice && invoiceRecord ? invoiceRecord?.totals?.customerTotal ?? invoiceRecord?.totals?.total : draft?.totals?.total;
-  return <><div className="es-card"><header><button type="button" aria-label="Back to TRAN$ACT apps" onClick={onBack}>‹</button><div><span>IXI TRAN$ACT</span><strong>{invoiceEntry ? "INVOICE" : "SALES ORDER"}</strong></div><i>{invoiceEntry ? clean(invoiceRecord?.financialState || "draft").toUpperCase() : `${readiness.percent}%`}</i></header><StageRail record={record} invoice={invoiceRecord} /><div className="es-card-record"><span>{invoiceEntry ? invoiceRecord?.documentNumber || "NEW DIRECT DRAFT" : record?.identity?.number || "NEW SALES ORDER"}</span><strong>{usd(displayedTotal)}</strong></div>{error ? <div className="es-error">{error}</div> : null}<CardEditor invoiceEntry={invoiceEntry} linkedInvoice={linkedInvoice} orderLocked={orderLocked} input={input} patch={patch} patchRpo={patchRpo} setAdditionalTerms={setAdditionalTerms} invoiceDraft={invoiceDraft} setInvoiceDraft={setInvoiceDraft} /><div className="es-card-actions"><button type="button" onClick={() => { setTab(invoiceEntry ? "invoice" : "order"); setOpen(true); }}>EXPAND</button><button type="button" disabled={busy || (!invoiceEntry && orderLocked)} onClick={() => invoiceEntry ? saveInvoice() : save()}>{busy ? "SAVING…" : invoiceEntry ? invoiceRecord ? "SAVE INVOICE" : "CREATE INVOICE" : "SAVE ORDER"}</button>{invoiceEntry ? null : <button type="button" className="signature" disabled={busy || orderLocked || !readiness.ready} onClick={sendForSignature}>SEND TO SIGN</button>}</div><footer>{invoiceEntry ? linkedInvoice ? `LINKED TO ${record?.identity?.number || "SIGNED SALES ORDER"}` : "DIRECT DRAFT · CANONICAL IX CORE" : orderLocked ? "SIGNED PACKAGE CONTROL ACTIVE" : readiness.ready ? "READY FOR CUSTOMER SIGNATURE" : `${readiness.missing.length} ITEMS TO SIGNATURE READY`}</footer></div>{workspace}<IXIEquipmentSaleStyles /></>;
+  return <><div className="es-card"><header><button type="button" aria-label="Back to TRAN$ACT apps" onClick={onBack}>‹</button><div><span>IXI TRAN$ACT</span><strong>{invoiceEntry ? "INVOICE" : "SALES ORDER"}</strong></div><i>{invoiceEntry ? clean(invoiceRecord?.financialState || "draft").toUpperCase() : `${readiness.percent}%`}</i></header><StageRail record={record} invoice={invoiceRecord} /><div className="es-card-record"><span>{invoiceEntry ? invoiceDisplayNumber(invoiceRecord) : record?.identity?.number || "NEW SALES ORDER"}</span><strong>{usd(displayedTotal)}</strong></div>{error ? <div className="es-error">{error}</div> : null}<CardEditor invoiceEntry={invoiceEntry} linkedInvoice={linkedInvoice} orderLocked={orderLocked} input={input} patch={patch} patchRpo={patchRpo} setAdditionalTerms={setAdditionalTerms} invoiceDraft={invoiceDraft} setInvoiceDraft={setInvoiceDraft} /><div className="es-card-actions"><button type="button" onClick={() => { setTab(invoiceEntry ? "invoice" : "order"); setOpen(true); }}>EXPAND</button><button type="button" disabled={busy || (!invoiceEntry && orderLocked)} onClick={() => invoiceEntry ? saveInvoice() : save()}>{busy ? "SAVING…" : invoiceEntry ? invoiceRecord ? "SAVE INVOICE" : "CREATE INVOICE" : "SAVE ORDER"}</button>{invoiceEntry ? null : <button type="button" className="signature" disabled={busy || orderLocked || !readiness.ready} onClick={sendForSignature}>SEND TO SIGN</button>}</div><footer>{invoiceEntry ? linkedInvoice ? `LINKED TO ${record?.identity?.number || "SIGNED SALES ORDER"}` : "DIRECT DRAFT · CANONICAL IX CORE" : orderLocked ? "SIGNED PACKAGE CONTROL ACTIVE" : readiness.ready ? "READY FOR CUSTOMER SIGNATURE" : `${readiness.missing.length} ITEMS TO SIGNATURE READY`}</footer></div>{workspace}<IXIEquipmentSaleStyles /></>;
 }
