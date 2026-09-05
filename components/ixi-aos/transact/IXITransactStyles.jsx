@@ -125,41 +125,111 @@ export default function IXITransactStyles() {
         gap: 5px;
       }
 
-      .tx-grid button {
+      .tx-app-tile {
+        position: relative;
         height: 57px;
-        padding: 7px;
+        overflow: hidden;
         border: 1px solid #303432;
         border-radius: 6px;
         background: linear-gradient(#151817, #0d100e);
         color: #eee;
         text-align: left;
-        cursor: pointer;
+        user-select: none;
+        will-change: transform;
       }
 
-      .tx-grid button:hover {
-        border-color: rgba(255,196,0,.34);
+      .tx-app-tile:hover,
+      .tx-app-tile.tx-app-tile-overlay {
+        border-color: rgba(255,196,0,.42);
         background: linear-gradient(#171a18, #0e110f);
       }
 
-      .tx-grid button span {
+      .tx-app-drag-surface {
+        position: absolute;
+        inset: 0;
+        z-index: 1;
+        width: 100%;
+        height: 100%;
+        padding: 0;
+        border: 0;
+        border-radius: inherit;
+        background: transparent;
+        color: inherit;
+        cursor: grab;
+        touch-action: manipulation;
+      }
+
+      .tx-app-drag-surface:active {
+        cursor: grabbing;
+      }
+
+      .tx-app-drag-surface:focus-visible {
+        outline: 2px solid #ffc400;
+        outline-offset: -3px;
+      }
+
+      .tx-app-content {
+        position: relative;
+        z-index: 2;
+        height: 100%;
+        padding: 7px;
+        pointer-events: none;
+      }
+
+      .tx-app-group {
         display: block;
         color: #747a76;
         font-size: 5px;
         font-weight: 950;
       }
 
-      .tx-grid button strong {
+      .tx-app-open {
         display: block;
+        max-width: 100%;
         margin-top: 5px;
+        padding: 0;
+        overflow: hidden;
+        border: 0;
+        background: transparent;
+        color: #eee;
+        font: inherit;
         font-size: 8.5px;
         font-weight: 950;
+        line-height: 1.1;
+        text-align: left;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        cursor: pointer;
+        pointer-events: auto;
       }
 
-      .tx-grid button small {
+      .tx-app-open:hover,
+      .tx-app-open:focus-visible {
+        color: #ffc400;
+      }
+
+      .tx-app-open:focus-visible {
+        outline: 1px solid #ffc400;
+        outline-offset: 2px;
+      }
+
+      .tx-app-document {
         display: block;
         margin-top: 3px;
         color: #ffc400;
         font-size: 5px;
+      }
+
+      .tx-app-tile-dragging {
+        opacity: 0;
+      }
+
+      .tx-app-tile-overlay {
+        box-shadow:
+          0 16px 34px rgba(0,0,0,.62),
+          0 0 0 1px rgba(255,196,0,.16);
+        cursor: grabbing;
+        transform: scale(1.025);
       }
 
       .tx-open-work {

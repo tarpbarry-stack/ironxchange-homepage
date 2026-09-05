@@ -12,7 +12,7 @@ test("TRANSACT typography pass is limited to the launcher home state", () => {
   assert.match(app, /!active \? <IXITransactHomeTypography \/>/u);
 
   assert.match(typography, /\.ixi-transact-app\.home-open/u);
-  assert.match(typography, /\.tx-grid button strong/u);
+  assert.match(typography, /\.tx-app-open/u);
   assert.match(typography, /font-family: var\(--ixi-tx-home-font\)/u);
 
   assert.doesNotMatch(typography, /\.module-open/u);

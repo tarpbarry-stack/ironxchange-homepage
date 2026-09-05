@@ -31,6 +31,7 @@ import IXIAccessPolicyApp from "./modules/access-policy/IXIAccessPolicyApp";
 import { createIXICustomerServiceWorkOrder } from "./modules/customer-service-work-order/IXICustomerServiceWorkOrderAdapter";
 import IXITransactStyles from "./IXITransactStyles";
 import IXITransactHomeTypography from "./IXITransactHomeTypography";
+import IXITransactSortableLauncher from "./IXITransactSortableLauncher";
 import { patchIXIAosFinancialDocument } from "../financial-runtime/IXIAosFinancialReadClient";
 
 const clean = (value) => String(value ?? "").trim();
@@ -59,6 +60,8 @@ export default function IXITransactApp({
   onCycleOutline = null,
   armedDestination = "",
   onSendToArmedDestination = null,
+  moduleOrder = [],
+  onModuleOrderChange = null,
 }) {
   const context = useMemo(
     () =>
@@ -1318,15 +1321,12 @@ export default function IXITransactApp({
           </button>
         ) : null}
         <div className="tx-label">CREATE / OPEN</div>
-        <div className="tx-grid">
-          {modules.map((item) => (
-            <button key={item.id} onClick={() => open(item)}>
-              <span>{item.group.toUpperCase()}</span>
-              <strong>{item.label}</strong>
-              <small>{item.documentType}</small>
-            </button>
-          ))}
-        </div>
+        <IXITransactSortableLauncher
+          modules={modules}
+          moduleOrder={moduleOrder}
+          onOpen={open}
+          onOrderChange={onModuleOrderChange}
+        />
       </>
     );
 
