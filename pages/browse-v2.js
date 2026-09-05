@@ -113,6 +113,21 @@ import {
   writeSitewideCardScaleMode
 } from "../components/ixi-chassis/IXIScaleEngine";
 
+const IXI_MOBILE_CARD_DENSITY_KEY =
+  "ixi-mobile-card-density";
+
+function resolveMobileCardScaleMode(density, viewportWidth) {
+  const width = Math.max(320, Number(viewportWidth) || 320);
+
+  if (density === "II") {
+    return width >= 392 ? "compact" : "micro";
+  }
+
+  if (width >= 424) return "focus";
+  if (width >= 364) return "work";
+  return "xl";
+}
+
 export default function BrowseV2() {
   const [listings, setListings] = useState([]);
   const [
@@ -203,6 +218,78 @@ const [
   cardScaleMode,
   setCardScaleMode
 ] = useState("xl");
+
+const [mobileCardDensity, setMobileCardDensity] =
+  useState("I");
+
+const [mobileViewportWidth, setMobileViewportWidth] =
+  useState(0);
+
+const isMobileCardPresentation =
+  mobileViewportWidth > 0 &&
+  mobileViewportWidth <= 850;
+
+const presentedCardScaleMode =
+  isMobileCardPresentation
+    ? resolveMobileCardScaleMode(
+        mobileCardDensity,
+        mobileViewportWidth
+      )
+    : cardScaleMode;
+
+useEffect(() => {
+  function syncMobileViewportWidth() {
+    const visualViewportWidth =
+      Number(window.visualViewport?.width);
+
+    setMobileViewportWidth(
+      Math.max(
+        320,
+        Math.floor(
+          visualViewportWidth ||
+          window.innerWidth ||
+          320
+        )
+      )
+    );
+  }
+
+  const savedDensity =
+    window.sessionStorage.getItem(
+      IXI_MOBILE_CARD_DENSITY_KEY
+    );
+
+  setMobileCardDensity(
+    savedDensity === "II" ? "II" : "I"
+  );
+
+  syncMobileViewportWidth();
+  window.addEventListener("resize", syncMobileViewportWidth);
+  window.visualViewport?.addEventListener(
+    "resize",
+    syncMobileViewportWidth
+  );
+
+  return () => {
+    window.removeEventListener("resize", syncMobileViewportWidth);
+    window.visualViewport?.removeEventListener(
+      "resize",
+      syncMobileViewportWidth
+    );
+  };
+}, []);
+
+function updateMobileCardDensity(nextDensity) {
+  const normalizedDensity =
+    nextDensity === "II" ? "II" : "I";
+
+  setMobileCardDensity(normalizedDensity);
+
+  window.sessionStorage.setItem(
+    IXI_MOBILE_CARD_DENSITY_KEY,
+    normalizedDensity
+  );
+}
 
 useEffect(() => {
   const savedMode = readSitewideCardScaleMode();
@@ -1202,6 +1289,11 @@ function updateCardScaleMode(nextMode) {
       <Head>
         <title>IXI Marketplace | IronXchange</title>
 
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1, viewport-fit=cover"
+        />
+
         <link
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
           rel="stylesheet"
@@ -1318,7 +1410,8 @@ if (armedDestination === "stackBottom") {
     activeDndId={activeDndId}
     savedIds={savedIds}
     ixiCardState={ixiCardState}
-    cardScaleMode={cardScaleMode}
+    cardScaleMode={presentedCardScaleMode}
+    overlayZIndex={1000000}
   >
     <main
       data-marketplace-armed-destination={
@@ -1469,12 +1562,45 @@ if (armedDestination === "stackBottom") {
   sendListingToFront={sendListingToFront}
   sendListingToBack={sendListingToBack}
   sendMachineToArmedDestination={sendMachineToArmedDestination}
-  cardScaleMode={cardScaleMode}
+  cardScaleMode={presentedCardScaleMode}
 />
-              
+
+<nav
+  className="mobile-card-density"
+  aria-label="Marketplace card density"
+>
+  <button
+    type="button"
+    className={mobileCardDensity === "I" ? "active" : ""}
+    aria-pressed={mobileCardDensity === "I"}
+    onClick={() => updateMobileCardDensity("I")}
+  >
+    I
+  </button>
+
+  <button
+    type="button"
+    className={mobileCardDensity === "II" ? "active" : ""}
+    aria-pressed={mobileCardDensity === "II"}
+    onClick={() => updateMobileCardDensity("II")}
+  >
+    II
+  </button>
+</nav>
+
     <IXIBoardSurface
-  scaleMode={cardScaleMode}
+  scaleMode={presentedCardScaleMode}
   centerRows={true}
+  className={
+    isMobileCardPresentation
+      ? `ixi-mobile-current-card-board ixi-mobile-current-card-board-${mobileCardDensity.toLowerCase()}`
+      : ""
+  }
+  data-ixi-mobile-card-density={
+    isMobileCardPresentation
+      ? mobileCardDensity
+      : undefined
+  }
 >
 <IXIBoard
   cardContext="marketplace"
@@ -1500,15 +1626,17 @@ if (armedDestination === "stackBottom") {
   draggingListingId={draggingListingId}
   ghostListingId={ghostListingId}
   enableCardScaling={true}
-  cardScaleMode={cardScaleMode}
+  cardScaleMode={presentedCardScaleMode}
     />
         </IXIBoardSurface>
 
-<IXICardScaleControl
-  value={cardScaleMode}
-  onChange={updateCardScaleMode}
-  surfaceLabel="Marketplace"
-/>
+<div className="desktop-card-scale-control">
+  <IXICardScaleControl
+    value={cardScaleMode}
+    onChange={updateCardScaleMode}
+    surfaceLabel="Marketplace"
+  />
+</div>
 
 {inventoryRequestState.status !==
   "ready" ? (
@@ -3054,9 +3182,14 @@ outline: none;
 .desktop-search-surface {
   display: block;
 }
+
+.mobile-card-density {
+  display: none;
+}
 @media (max-width: 850px) {
   main {
-    padding: 18px 4% 48px;
+    padding: 18px 2px 48px;
+    overflow-x: hidden;
   }
 
   .desktop-search-surface {
@@ -3066,6 +3199,56 @@ outline: none;
 .mobile-search-surface {
   display: block;
 }
+
+  .mobile-card-density {
+    box-sizing: border-box;
+    width: calc(100% - 12px);
+    margin: 0 6px 12px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+  }
+
+  .mobile-card-density button {
+    min-height: 46px;
+    border: 1px solid rgba(255,255,255,.14);
+    border-radius: 9px;
+    background: #111;
+    color: #929792;
+    font: 900 16px/1 'Inter Variable', Inter, sans-serif;
+    letter-spacing: 1px;
+  }
+
+  .mobile-card-density button.active {
+    border-color: rgba(255,196,0,.82);
+    background: #19160b;
+    color: #ffc400;
+    box-shadow: inset 0 0 0 1px rgba(255,196,0,.16);
+  }
+
+  .desktop-card-scale-control {
+    display: none;
+  }
+
+  :global(.ixi-board-surface.ixi-mobile-current-card-board) {
+    box-sizing: border-box;
+    width: 100%;
+    display: grid !important;
+    align-items: start;
+    justify-items: center;
+    overflow: visible;
+    padding: 0;
+  }
+
+  :global(.ixi-mobile-current-card-board-i) {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px 0;
+  }
+
+  :global(.ixi-mobile-current-card-board-ii) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px 4px;
+  }
 
   .workspace-head {
   display: flex;
