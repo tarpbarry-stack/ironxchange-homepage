@@ -49,8 +49,7 @@ function transactObjectFromListing(listing = {}) {
     listing?.objectId ||
     publicData?.objectId ||
     listing?.mosObjectId ||
-    publicData?.mosObjectId ||
-    getListingId(listing)
+    publicData?.mosObjectId
   );
   const entityPassportId = clean(
     listing?.entityPassportId ||
@@ -67,6 +66,7 @@ function transactObjectFromListing(listing = {}) {
     displayName: clean(listing?.title || listing?.attributes?.title) || "EQUIPMENT",
     passportId,
     entityPassportId,
+    sourceReference: clean(getListingId(listing)),
     fields: {
       ...(listing?.fields || {}),
       entityPassportId,

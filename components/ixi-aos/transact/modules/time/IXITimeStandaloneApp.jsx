@@ -280,7 +280,7 @@ export default function IXITimeStandaloneApp({
       const result = await createIXITimeSessionRecord({
         object: {
           passportId: clean(primary.passportId || object.passportId),
-          objectId: clean(primary.objectId || object.objectId || object.id),
+          objectId: clean(primary.objectId || object.objectId || object.mosObjectId),
           objectType: clean(primary.objectType || object.objectType || object.type),
           label: originLabel
         },
@@ -396,7 +396,7 @@ export default function IXITimeStandaloneApp({
       const result = await createIXITimeEntry({
         object: {
           passportId: clean(primary.passportId || object.passportId),
-          objectId: clean(primary.objectId || object.objectId || object.id),
+          objectId: clean(primary.objectId || object.objectId || object.mosObjectId),
           objectType: clean(primary.objectType || object.objectType || object.type),
           label: originLabel
         },
