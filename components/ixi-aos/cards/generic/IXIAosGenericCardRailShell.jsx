@@ -55,6 +55,10 @@ export default function IXIAosGenericCardRailShell({
             width: 298px;
             height: 471px;
           }
+
+          .ixi-generic-card-rail-shell :global(.board-command-rail) {
+            bottom: 0;
+          }
         `}</style>
       </div>
     </IXIAosCardCommandProvider>
