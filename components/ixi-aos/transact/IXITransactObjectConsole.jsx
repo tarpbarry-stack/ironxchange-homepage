@@ -95,8 +95,7 @@ export default function IXITransactObjectConsole({
 }) {
   const objectId = String(
     object?.objectId ||
-    object?.id?.uuid ||
-    object?.id ||
+    object?.mosObjectId ||
     object?.passportId ||
     ""
   ).trim();

@@ -60,7 +60,7 @@ function assetSnapshot(object = {}, context = {}) {
   const primary = sourceObject(context.primary);
   return {
     passportId: clean(primary.passportId || source.passportId),
-    objectId: clean(primary.objectId || source.objectId || source.id),
+    objectId: clean(primary.objectId || source.objectId || source.mosObjectId),
     objectType: clean(primary.objectType || source.objectType || source.type || "machine"),
     label: clean(primary.label || source.displayName || source.title || source.name),
     year: field(source, "year") || field(fields, "year") || field(publicData, "year"),

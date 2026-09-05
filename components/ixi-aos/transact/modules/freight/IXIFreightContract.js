@@ -18,7 +18,7 @@ export function createIXIFreightOrderInput({ context = {}, object = {}, input = 
   return {
     commandId:clean(input.commandId),
     asset:{
-      objectId:clean(context.primary?.objectId || object.objectId || object.id),
+      objectId:clean(context.primary?.objectId || object.objectId || object.mosObjectId),
       passportId:clean(context.primary?.passportId || object.passportId),
       label:clean(context.primary?.label || object.displayName || object.title),
       objectType:clean(context.primary?.objectType || object.objectType || "machine"),
@@ -46,7 +46,7 @@ export function createIXIFreightOrderInput({ context = {}, object = {}, input = 
 
 export function validateIXIFreightOrderInput(payload = {}) {
   const errors = {};
-  if (!clean(payload?.asset?.objectId) || !clean(payload?.asset?.passportId)) errors.asset = "Machine Object and Passport are required.";
+  if (!clean(payload?.asset?.passportId)) errors.asset = "Machine IXI Passport is required.";
   if (!clean(payload?.route?.origin?.label || payload?.route?.origin?.address || payload?.route?.origin?.objectId)) errors.origin = "Origin is required.";
   if (!clean(payload?.route?.destination?.label || payload?.route?.destination?.address || payload?.route?.destination?.objectId)) errors.destination = "Destination is required.";
   if (!IXI_FREIGHT_PURPOSES.includes(clean(payload.purpose))) errors.purpose = "Purpose is invalid.";
