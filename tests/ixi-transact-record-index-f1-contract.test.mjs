@@ -82,6 +82,46 @@ test("$F1 drills from categories to numbered records and existing apps", () => {
   assert.match(source, /if \(recordId\) setRecordId\(""\)/);
 });
 
+test("$F1 routes Tech Work records back to Technology Work", async () => {
+  const routingSource = read(
+    "components/ixi-aos/transact/IXITransactRecordRouting.js"
+  );
+  const routing = await import(
+    `data:text/javascript;base64,${Buffer.from(routingSource).toString("base64")}`
+  );
+
+  assert.equal(
+    routing.resolveIXITransactRecordModuleId({
+      documentType: "work-order",
+      document: {
+        documentNumber: "TECHWO-0DB964",
+        metadata: { transactModule: "tech-work-order" },
+        techWorkOrder: { schema: "ixi-tech-work-order-v1" }
+      },
+      embedded: { schema: "ixi-tech-work-order-v1" },
+      fallbackModuleId: "work-order"
+    }),
+    "technology-work"
+  );
+  assert.equal(
+    routing.resolveIXITransactRecordModuleId({
+      documentType: "work-order",
+      document: { documentNumber: "TECHWO-LEGACY" },
+      fallbackModuleId: "work-order"
+    }),
+    "technology-work"
+  );
+  assert.equal(
+    routing.resolveIXITransactRecordModuleId({
+      documentType: "work-order",
+      document: { documentNumber: "WO-88F3B2E5" },
+      embedded: { schema: "ixi-work-order-v1" },
+      fallbackModuleId: "work-order"
+    }),
+    "work-order"
+  );
+});
+
 test("$F1 opens existing modules inside the selected console slot", () => {
   const consoleRuntime = read(
     "components/ixi-aos/transact/IXITransactObjectConsole.jsx"
