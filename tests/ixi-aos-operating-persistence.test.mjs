@@ -144,6 +144,9 @@ test("AOS Work mounts the production card runtime and canonical save adapter", (
   assert.match(page, /commitMosObjectCommand\(command\)/u);
   assert.match(page, /mergeAosCanonicalObject/u);
   assert.match(page, /entityId !== activeEntityId/u);
+  assert.match(page, /Existing durable AOS objects must remain manageable/u);
+  assert.match(page, /validMosObjectIds\.forEach/u);
+  assert.match(page, /IXI_EQUIPMENT_INDEX_OBJECT_ID,\s*\.\.\.validMosObjectIds/u);
   assert.doesNotMatch(page, /IXIMosObjectCard/u);
   assert.match(runtime, /width:\s*300px/u);
   assert.match(runtime, /height:\s*475px/u);

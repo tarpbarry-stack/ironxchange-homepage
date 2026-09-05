@@ -635,6 +635,13 @@ useEffect(() => {
 const validMosObjectIds =
   (aosObjects || [])
     .filter(object => {
+      const objectId =
+        String(
+          object?.objectId ||
+          object?.id ||
+          ""
+        ).trim();
+
       const objectType =
         String(
           object?.objectType || ""
@@ -643,6 +650,8 @@ const validMosObjectIds =
           .toLowerCase();
 
       return (
+        objectId &&
+        !validSystemIndexIds.includes(objectId) &&
         objectType &&
         objectType !== "system-index" &&
         objectType !== "machine"
@@ -752,6 +761,42 @@ placements:
       }
     );
 
+    /*
+     * Existing durable AOS objects must remain manageable after
+     * the workspace runtime migration. Older saved layouts did
+     * not know about these identities and could otherwise leave
+     * a valid object stranded outside every workspace surface.
+     *
+     * This is presentation recovery only: canonical containment,
+     * ownership, object data, and revision history are untouched.
+     */
+    validMosObjectIds.forEach(
+      objectId => {
+        const alreadyPlaced =
+          Object.values(
+            nextPlacements
+          ).some(ids =>
+            Array.isArray(ids) &&
+            ids
+              .map(String)
+              .includes(objectId)
+          );
+
+        if (!alreadyPlaced) {
+          nextPlacements =
+            moveObjectToWorkspaceSurface({
+              placements:
+                nextPlacements,
+
+              objectId,
+
+              targetSurface:
+                "board"
+            });
+        }
+      }
+    );
+
     const validation =
       validateWorkspacePlacements(
         nextPlacements
@@ -790,7 +835,8 @@ placements:
     ...createEmptyWorkspacePlacements(),
 
     board: [
-      IXI_EQUIPMENT_INDEX_OBJECT_ID
+      IXI_EQUIPMENT_INDEX_OBJECT_ID,
+      ...validMosObjectIds
     ],
 
     indexEquipment:
