@@ -64,14 +64,14 @@ test("every production Console family exposes a bottom face actuator", () => {
   );
 });
 
-test("TRAN$ACT cycles each module independently and persists its face", () => {
+test("machine console cycles each workspace independently and persists its face", () => {
   assert.match(
     sources.transact,
     /cycleConsoleSlotFace\(\{/
   );
   assert.match(
     sources.transact,
-    /slotId,\s*faces:\s*TRANSACT_CONSOLE_FACES/
+    /slotId,\s*faces:\s*MACHINE_CONSOLE_FACES/
   );
   assert.match(
     sources.transact,
