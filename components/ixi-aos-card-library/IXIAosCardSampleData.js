@@ -143,7 +143,7 @@ const SAMPLE_PERSONNEL_OBJECT = Object.freeze({
   objectType: "customer-defined-container",
   singularLabel: "PERSONNEL CONTAINER",
   pluralLabel: "EMPLOYEES",
-  displayName: "IRONXCHANGE PERSONNEL",
+  displayName: "PERSONNEL",
   status: "active",
   capabilities: { canContain: true, canCreate: true, canTransact: true, editable: true, hasConsole: true },
   presentation: { icon: "♟", totalLabel: "TOTAL PEOPLE", summaryTitle: "WORKFORCE SUMMARY", relationshipsTitle: "RELATIONSHIPS & INFRASTRUCTURE" },
@@ -258,66 +258,3 @@ const SAMPLE_VEHICLE_009B = Object.freeze({
   singularLabel: "VEHICLE",
   pluralLabel: "VEHICLES",
   displayName: "2024 FORD F-350 LARIAT",
-  status: "active",
-  capabilities: { canContain: false, canCreate: true, canTransact: true, editable: true, hasConsole: true, hasRail: true, hasRelationships: true },
-  presentation: { relationshipsTitle: "RELATIONSHIPS", sampleUse: "VEHICLE / VIN / MILEAGE" },
-  fieldDefinitions: [
-    { fieldId: "businessIdentifier", label: "UNIT #", type: "text", fieldType: "text", editable: true, presentationOrder: 0, semanticRole: "business-identifier", presentationRole: "business-identifier" },
-    { fieldId: "year", label: "YEAR", type: "integer", fieldType: "integer", editable: true, presentationOrder: 1 },
-    { fieldId: "make", label: "MAKE", type: "text", fieldType: "text", editable: true, presentationOrder: 2 },
-    { fieldId: "model", label: "MODEL", type: "text", fieldType: "text", editable: true, presentationOrder: 3 },
-    { fieldId: "vin", label: "VIN #", type: "text", fieldType: "text", editable: true, presentationOrder: 4 },
-    { fieldId: "miles", label: "MILES", type: "number", fieldType: "number", editable: true, presentationOrder: 5 },
-    { fieldId: "operatingStatus", label: "STATUS", type: "text", fieldType: "text", editable: true, presentationOrder: 6 }
-  ],
-  fields: {
-    businessIdentifier: "TRK-214",
-    year: 2024,
-    make: "FORD",
-    model: "F-350 LARIAT",
-    vin: "1FT8W3BT7REC21418",
-    miles: 38412,
-    operatingStatus: "ACTIVE"
-  },
-  relationships: [
-    { id: "c009b-rel-1", displayLabel: "HOME LOCATION", displayName: "MIDLAND YARD" },
-    { id: "c009b-rel-2", displayLabel: "ASSIGNED TO", displayName: "FIELD OPERATIONS" },
-    { id: "c009b-rel-3", displayLabel: "PRIMARY DRIVER", displayName: "J. CARTER" }
-  ],
-  media: [],
-  metadata: { sampleUse: "VEHICLE / VIN / MILEAGE", nomenclature: { singular: "VEHICLE", plural: "VEHICLES" } }
-});
-
-export function getAosCardSampleData(templateSlug = "") {
-  const slug = String(templateSlug || "").trim();
-
-  if (["location-standard", "location-standard-002", "location-standard-003"].includes(slug)) {
-    return { sampleData: SAMPLE_LOCATION_OBJECT, projection: SAMPLE_LOCATION_PROJECTION, directItems: SAMPLE_LOCATION_ITEMS };
-  }
-
-  if (["personnel-container-004", "personnel-container-005", "personnel-container-006"].includes(slug)) {
-    return { sampleData: SAMPLE_PERSONNEL_OBJECT, projection: SAMPLE_PERSONNEL_PROJECTION, directItems: SAMPLE_PERSONNEL_ITEMS };
-  }
-
-  if (slug === "employee-basic-007") {
-    return { sampleData: SAMPLE_OBJECT_007, projection: null, directItems: [] };
-  }
-
-  if (slug === "aos-card-009b") {
-    return { sampleData: SAMPLE_VEHICLE_009B, projection: null, directItems: [] };
-  }
-
-  return {
-    sampleData: {
-      displayName: "AOS OBJECT",
-      status: "active",
-      value: null,
-      currency: "USD",
-      fields: {},
-      media: [],
-      metadata: {}
-    },
-    projection: null,
-    directItems: []
-  };
-}
