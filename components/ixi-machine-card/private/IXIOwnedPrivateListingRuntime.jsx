@@ -95,7 +95,9 @@ export default function IXIOwnedPrivateListingRuntime({ cardContext = "inventory
   const [draft, setDraft] = useState(() => factsOf(props.listing || {}));
   const draftRef = useRef(factsOf(props.listing || {}));
   const [actionNotice, setActionNotice] = useState(null);
-  const [transactOpen, setTransactOpen] = useState(false);
+  const [transactOpen, setTransactOpen] = useState(
+    () => props.ixiState?.transactOpen === true
+  );
   const [menuOpen, setMenuOpen] = useState(false);
   const [skinId, setSkinId] = useState("v12");
   const [menuNotice, setMenuNotice] = useState("");
@@ -221,6 +223,31 @@ export default function IXIOwnedPrivateListingRuntime({ cardContext = "inventory
 
   const ownerActionBridgeKey = clean(getListingId(runtimeListing));
 
+  function setTransactVisibility(nextOpen) {
+    const open = Boolean(nextOpen);
+
+    setTransactOpen(open);
+
+    if (
+      ownerActionBridgeKey &&
+      typeof props.onIxiStateChange === "function"
+    ) {
+      props.onIxiStateChange(
+        ownerActionBridgeKey,
+        {
+          transactOpen: open,
+          transactConsoleDepth: Math.max(
+            1,
+            Number(
+              props.ixiState?.transactConsoleDepth
+            ) || 1
+          ),
+          transactUpdatedAt: Date.now()
+        }
+      );
+    }
+  }
+
   useEffect(() => {
     if (!ownerActionBridgeKey) return undefined;
 
@@ -228,7 +255,7 @@ export default function IXIOwnedPrivateListingRuntime({ cardContext = "inventory
       add: handleAdd,
       edit: handleEditButton,
       saveDescription,
-      transact: () => !saving && setTransactOpen(true),
+      transact: () => !saving && setTransactVisibility(true),
       actions: () => !saving && setMenuOpen(value => !value),
       editing,
       saving
@@ -244,7 +271,8 @@ export default function IXIOwnedPrivateListingRuntime({ cardContext = "inventory
           object={transactObject}
           ixiState={props.ixiState || {}}
           onIxiStateChange={props.onIxiStateChange}
-          onClose={() => setTransactOpen(false)}
+          layoutObjectId={ownerActionBridgeKey}
+          onClose={() => setTransactVisibility(false)}
           onSendFront={props.onSendFront}
           onSendBack={props.onSendBack}
           armedDestination={props.armedDestination}
@@ -261,7 +289,7 @@ export default function IXIOwnedPrivateListingRuntime({ cardContext = "inventory
       add: handleAdd,
       edit: handleEditButton,
       saveDescription,
-      transact: () => !saving && setTransactOpen(true),
+      transact: () => !saving && setTransactVisibility(true),
       actions: () => !saving && setMenuOpen(value => !value),
       editing,
       saving
@@ -292,7 +320,7 @@ export default function IXIOwnedPrivateListingRuntime({ cardContext = "inventory
         onDescriptionChange={value => patchDraft("description", value)}
         onAddObject={handleAdd}
         onEdit={handleEditButton}
-        onOpenTransact={() => !saving && setTransactOpen(true)}
+        onOpenTransact={() => !saving && setTransactVisibility(true)}
         onOpenActions={() => !saving && setMenuOpen(value => !value)}
       />
 

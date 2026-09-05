@@ -91,6 +91,7 @@ function RuntimeState({ title, detail, onRetry, onClose }) {
 
 export default function IXIOwnedPrivateTransactRuntime({
   object,
+  layoutObjectId = "",
   onClose,
   ixiState = {},
   onIxiStateChange,
@@ -154,6 +155,7 @@ export default function IXIOwnedPrivateTransactRuntime({
   return (
     <IXITransactObjectConsole
       object={hydratedObject}
+      layoutObjectId={layoutObjectId}
       actor={actor}
       entity={entity}
       activeWorkOrder={activeWorkOrder}
