@@ -4,22 +4,42 @@ import test from "node:test";
 
 const read = path => fs.readFileSync(path, "utf8");
 
-test("$F1 maps onto the valid default side-console face", () => {
+test("F$1 is a peer machine workspace, never a TRAN$ACT application", () => {
   const consoleRuntime = read(
     "components/ixi-aos/transact/IXITransactObjectConsole.jsx"
   );
-  const panel = read(
-    "components/ixi-aos/transact/IXITransactConsolePanel.jsx"
+  const directory = read(
+    "components/ixi-machine-console/IXIMachineWorkspaceDirectory.jsx"
   );
 
   assert.match(
     consoleRuntime,
-    /TRANSACT_CONSOLE_FACES\s*=\s*\[\s*1,\s*2,\s*3,\s*4\s*\]/
+    /MACHINE_CONSOLE_FACES\s*=\s*\[\s*2,\s*3,\s*4\s*\]/
   );
-  assert.match(consoleRuntime, /face:\s*1,[\s\S]*defaultFace:\s*1/);
+  assert.match(directory, /TRANSACT:\s*"transact"/);
+  assert.match(directory, /FINANCIAL:\s*"financial-record-index"/);
+  assert.match(directory, /label:\s*"TRAN\$ACT"/);
+  assert.match(directory, /label:\s*"F\$1"/);
+  assert.match(consoleRuntime, /FINANCIAL\]:\s*4/);
+  assert.match(consoleRuntime, /workspaceId === MACHINE_WORKSPACE_IDS\.FINANCIAL/);
   assert.match(consoleRuntime, /financialRecords=\{financialRecords\}/);
-  assert.match(panel, /Number\(face\) === 1/);
-  assert.match(panel, /<IXITransactRecordIndex/);
+});
+
+test("machine workspace tiles reorder and persist independently by console slot", () => {
+  const consoleRuntime = read(
+    "components/ixi-aos/transact/IXITransactObjectConsole.jsx"
+  );
+  const directory = read(
+    "components/ixi-machine-console/IXIMachineWorkspaceDirectory.jsx"
+  );
+
+  assert.match(directory, /DndContext/);
+  assert.match(directory, /SortableContext/);
+  assert.match(directory, /useSortable/);
+  assert.match(directory, /onWorkspaceOrderChange\?\.\(next\)/);
+  assert.match(consoleRuntime, /machineWorkspaceOrderBySlot/);
+  assert.match(consoleRuntime, /\[slotId\]: nextOrder/);
+  assert.match(consoleRuntime, /machineWorkspaceOrderBySlot\?\.\[slot\.slotId\]/);
 });
 
 test("$F1 indexes authoritative records without copying them", () => {
@@ -34,7 +54,8 @@ test("$F1 indexes authoritative records without copying them", () => {
   assert.match(source, /category: mapped\.category/);
   assert.match(source, /recordsForCategory\.length/);
   assert.match(source, /recordsForCategory\.reduce/);
-  assert.match(source, /NO TRAN\$ACT RECORDS/);
+  assert.match(source, /IXI MACHINE · F\$1/);
+  assert.match(source, /NO MACHINE RECORDS/);
 });
 
 test("$F1 drills from categories to numbered records and existing apps", () => {
@@ -48,8 +69,8 @@ test("$F1 drills from categories to numbered records and existing apps", () => {
   assert.match(source, /getIXITransactModule\(moduleId\)/);
   assert.match(source, /financialRecord: target\?\.source/);
   assert.match(source, /financialDocument: target\?\.document/);
-  assert.match(source, /source: "transact-record-index-f1"/);
-  assert.match(source, /if \(recordId\) setRecordId\("")/);
+  assert.match(source, /source: "machine-financial-face-f1"/);
+  assert.match(source, /if \(recordId\) setRecordId\(""\)/);
 });
 
 test("$F1 opens existing modules inside the selected console slot", () => {
