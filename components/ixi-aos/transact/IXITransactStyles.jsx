@@ -23,10 +23,15 @@ export default function IXITransactStyles() {
 
       .ixi-transact-dialog.worksheet-open {
         position: fixed;
-        inset: 16px;
-        width: min(1180px, calc(100vw - 32px));
-        height: min(820px, calc(100dvh - 32px));
-        margin: auto;
+        inset: auto;
+        top: 50%;
+        left: 50%;
+        width: 298px;
+        height: 471px;
+        margin: 0;
+        transform: translate(-50%, -50%)
+          scale(var(--ixi-transact-worksheet-scale, 1));
+        transform-origin: center;
         z-index: 2147483000;
       }
 
@@ -50,12 +55,6 @@ export default function IXITransactStyles() {
         box-shadow:
           0 20px 48px rgba(0,0,0,.58),
           inset 0 1px rgba(255,255,255,.035);
-      }
-
-      .worksheet-open .ixi-transact-app {
-        width: 100%;
-        height: 100%;
-        border-radius: 10px;
       }
 
       .tx-header {
@@ -208,24 +207,6 @@ export default function IXITransactStyles() {
       .module-open .tx-body :where(p, span, strong, b, small, time, dd, dt, td, th) {
         min-width: 0;
         overflow-wrap: anywhere;
-      }
-
-      .worksheet-open .module-open .tx-body > * {
-        height: 100%;
-        min-height: 100%;
-        max-height: none;
-      }
-
-      @media (max-width: 640px) {
-        .ixi-transact-dialog.worksheet-open {
-          inset: 0;
-          width: 100vw;
-          height: 100dvh;
-        }
-
-        .worksheet-open .ixi-transact-app {
-          border-radius: 0;
-        }
       }
 
       .tx-body::-webkit-scrollbar {

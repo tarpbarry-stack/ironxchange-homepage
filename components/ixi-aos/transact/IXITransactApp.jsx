@@ -73,6 +73,7 @@ export default function IXITransactApp({
 }) {
   const dialogRef = useRef(null);
   const [worksheetOpen, setWorksheetOpen] = useState(false);
+  const [worksheetScale, setWorksheetScale] = useState(1);
   const [locale, setLocale] = useState(IXI_TRANSACT_LOCALES.ENGLISH);
 
   useEffect(() => {
@@ -85,6 +86,23 @@ export default function IXITransactApp({
       // Private browsing and storage policies may deny persistence.
     }
   }, []);
+
+  useEffect(() => {
+    if (!worksheetOpen) return undefined;
+
+    const fitWorksheetToViewport = () => {
+      const availableWidth = Math.max(1, globalThis.innerWidth - 32);
+      const availableHeight = Math.max(1, globalThis.innerHeight - 32);
+      setWorksheetScale(
+        Math.min(2, availableWidth / 298, availableHeight / 471),
+      );
+    };
+
+    fitWorksheetToViewport();
+    globalThis.addEventListener?.("resize", fitWorksheetToViewport);
+    return () =>
+      globalThis.removeEventListener?.("resize", fitWorksheetToViewport);
+  }, [worksheetOpen]);
 
   const context = useMemo(
     () =>
@@ -1402,6 +1420,11 @@ export default function IXITransactApp({
       ref={dialogRef}
       open
       className={`ixi-transact-dialog ${worksheetOpen ? "worksheet-open" : "card-open"}`}
+      style={
+        worksheetOpen
+          ? { "--ixi-transact-worksheet-scale": worksheetScale }
+          : undefined
+      }
       onCancel={(event) => {
         if (!worksheetOpen) return;
         event.preventDefault();

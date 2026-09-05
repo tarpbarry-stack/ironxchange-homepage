@@ -4,7 +4,7 @@ import test from "node:test";
 
 const read = path => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 
-test("one shared TRANSACT shell expands every operational module without remounting it", async () => {
+test("one shared TRANSACT shell opens every module as a proportional pop-out without remounting it", async () => {
   const [shell, styles] = await Promise.all([
     read("components/ixi-aos/transact/IXITransactApp.jsx"),
     read("components/ixi-aos/transact/IXITransactStyles.jsx"),
@@ -13,9 +13,14 @@ test("one shared TRANSACT shell expands every operational module without remount
   assert.match(shell, /dialog\.showModal\?\.\(\)/u);
   assert.match(shell, /dialog\.show\?\.\(\)/u);
   assert.match(shell, /data-ixi-transact-presentation/u);
+  assert.match(shell, /availableWidth\s*\/\s*298/u);
+  assert.match(shell, /availableHeight\s*\/\s*471/u);
+  assert.match(shell, /Math\.min\(2,/u);
   assert.match(styles, /\.ixi-transact-dialog\.worksheet-open/u);
-  assert.match(styles, /width:\s*min\(1180px,\s*calc\(100vw - 32px\)\)/u);
-  assert.match(styles, /height:\s*min\(820px,\s*calc\(100dvh - 32px\)\)/u);
+  assert.match(styles, /width:\s*298px/u);
+  assert.match(styles, /height:\s*471px/u);
+  assert.match(styles, /scale\(var\(--ixi-transact-worksheet-scale, 1\)\)/u);
+  assert.doesNotMatch(styles, /width:\s*min\(1180px/u);
   assert.match(styles, /\.module-open \.tx-body > \*\s*\{[^}]*width:\s*100%\s*!important[^}]*min-width:\s*0\s*!important[^}]*max-width:\s*100%\s*!important/u);
   assert.match(styles, /\.module-open \.tx-body > \* \*\s*\{[^}]*min-width:\s*0\s*!important[^}]*max-width:\s*100%\s*!important/u);
   assert.match(styles, /contain:\s*inline-size/u);
