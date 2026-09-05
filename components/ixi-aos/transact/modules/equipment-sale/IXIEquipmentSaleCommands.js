@@ -106,7 +106,7 @@ export async function saveIXIEquipmentInvoice({ object = {}, context = {}, recor
   if (id) {
     if (clean(invoice?.financialState).toLowerCase() !== "draft") throw new Error("An issued Invoice is immutable. Use a credit or replacement control.");
     const commandId = crypto.randomUUID();
-    const commercialPatch = linkedSalesOrderId ? {} : {
+    const commercialPatch = {
       occurredAt: clean(record?.commercial?.orderDate),
       description,
       sourceFinancialDocumentId: sourceSalesOrderId,
