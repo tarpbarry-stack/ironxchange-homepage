@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 
+import IXIHeaderToolPortal from "../ixi-chassis/IXIHeaderToolPortal";
 import IXITicketLauncher from "./IXITicketLauncher";
 
 export default function IXIGlobalTicketLauncher() {
@@ -31,7 +32,8 @@ export default function IXIGlobalTicketLauncher() {
   if (!authorized) return null;
 
   return (
-    <aside className="ixi-global-ticket-launcher" aria-label="IXI Ticket controls">
+    <IXIHeaderToolPortal>
+      <aside className="ixi-global-ticket-launcher" aria-label="IXI Ticket controls">
       <IXITicketLauncher compact />
 
       <style jsx>{`
@@ -48,6 +50,16 @@ export default function IXIGlobalTicketLauncher() {
           backdrop-filter: blur(10px);
         }
 
+        :global([data-ixi-header-tools="true"]) .ixi-global-ticket-launcher {
+          position: static;
+          padding: 0;
+          border: 0;
+          border-radius: 0;
+          background: transparent;
+          box-shadow: none;
+          backdrop-filter: none;
+        }
+
         @media (max-width: 850px) {
           .ixi-global-ticket-launcher {
             right: 10px;
@@ -55,6 +67,7 @@ export default function IXIGlobalTicketLauncher() {
           }
         }
       `}</style>
-    </aside>
+      </aside>
+    </IXIHeaderToolPortal>
   );
 }
