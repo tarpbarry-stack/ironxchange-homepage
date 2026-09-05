@@ -647,6 +647,16 @@ async function saveLocation(e, listing) {
       savingDescription:
       savingDescriptionId === String(listingId),
 
+      onOwnedObjectSaved: nextListing => {
+        setSellerListings(current =>
+          current.map(item =>
+            String(getListingId(item)) === String(listingId)
+              ? nextListing
+              : item
+          )
+        );
+      },
+
       isPaused: listingStatus === "paused",
 
 machineAccess:
