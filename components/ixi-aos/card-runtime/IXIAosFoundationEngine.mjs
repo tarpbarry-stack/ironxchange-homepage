@@ -336,7 +336,11 @@ export function acceptIXIAosCanonicalObject(command = {}, response = {}) {
     throw Object.assign(new Error("IX Core did not return the canonical saved AOS object."), { code: "IXI_AOS_CANONICAL_READBACK_REQUIRED" });
   }
   const revision = getIXIAosObjectRevision(canonical);
-  if (Number(command.expectedRevision) > 0 && revision <= Number(command.expectedRevision)) {
+  if (
+    Number.isInteger(Number(command.expectedRevision)) &&
+    Number(command.expectedRevision) >= 0 &&
+    revision <= Number(command.expectedRevision)
+  ) {
     throw Object.assign(new Error("IX Core returned a stale AOS object revision."), { code: "IXI_AOS_CANONICAL_REVISION_STALE" });
   }
   return synchronizeIXIAosBusinessIdentifier(canonical);

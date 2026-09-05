@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { commitMosObjectCommand } from "../../../../lib/mos/ixiMosClient";
+import { commitMosObjectCommand, fetchMosObject } from "../../../../lib/mos/ixiMosClient";
 import {
   acceptIXIAosCanonicalObject,
   createIXIAosEditSession,
@@ -54,6 +54,7 @@ export default function useIXIAosObjectEditSession({
   const [error, setError] = useState(null);
   const [conflict, setConflict] = useState(null);
   const pendingCommandRef = useRef(null);
+  const conflictDraftRef = useRef(null);
 
   useEffect(() => {
     if (!session && !saving) setRuntimeObject(synchronizeIXIAosBusinessIdentifier(object));
@@ -62,12 +63,14 @@ export default function useIXIAosObjectEditSession({
   const begin = useCallback(() => {
     setError(null);
     setConflict(null);
+    conflictDraftRef.current = null;
     setSession(createIXIAosEditSession(runtimeObject));
   }, [runtimeObject]);
 
   const cancel = useCallback(() => {
     if (saving) return;
     pendingCommandRef.current = null;
+    conflictDraftRef.current = null;
     setError(null);
     setConflict(null);
     setSession(null);
@@ -121,12 +124,15 @@ export default function useIXIAosObjectEditSession({
 
       const canonical = acceptIXIAosCanonicalObject(command, { object: adapterObject });
       pendingCommandRef.current = null;
+      conflictDraftRef.current = null;
       setRuntimeObject(canonical);
       setSession(null);
       return canonical;
     } catch (caught) {
       setError(caught);
       if (isConflict(caught)) {
+        conflictDraftRef.current = draft;
+        setSession(current => current ? { ...current, draft } : current);
         setConflict({
           code: clean(caught?.code) || "AOS_OBJECT_REVISION_CONFLICT",
           message: clean(caught?.message) || "This object changed in another session.",
@@ -140,6 +146,51 @@ export default function useIXIAosObjectEditSession({
     }
   }, [persistenceAdapter, runtimeObject, saving, session]);
 
+  const reloadLatest = useCallback(async () => {
+    const objectId = getIXIAosObjectId(runtimeObject);
+    if (!objectId || saving) return runtimeObject;
+
+    setSaving(true);
+    try {
+      const response = await fetchMosObject(objectId);
+      const canonical = canonicalFromAdapter(response);
+      if (!canonical) {
+        const readbackError = new Error("IX Core did not return the latest AOS object.");
+        readbackError.code = "IXI_AOS_CANONICAL_READBACK_REQUIRED";
+        throw readbackError;
+      }
+
+      const draft = conflictDraftRef.current;
+      const rebased = draft
+        ? synchronizeIXIAosBusinessIdentifier({
+            ...canonical,
+            displayName: draft.displayName,
+            businessIdentifiers: draft.businessIdentifiers,
+            fields: draft.fields,
+            fieldDefinitions: draft.fieldDefinitions,
+            media: draft.media,
+            metadata: draft.metadata
+          })
+        : synchronizeIXIAosBusinessIdentifier(canonical);
+
+      pendingCommandRef.current = null;
+      conflictDraftRef.current = null;
+      setRuntimeObject(synchronizeIXIAosBusinessIdentifier(canonical));
+      setSession({
+        ...createIXIAosEditSession(canonical),
+        draft: rebased
+      });
+      setError(null);
+      setConflict(null);
+      return rebased;
+    } catch (caught) {
+      setError(caught);
+      throw caught;
+    } finally {
+      setSaving(false);
+    }
+  }, [runtimeObject, saving]);
+
   const retry = useCallback(
     proposedObject => save(proposedObject || session?.draft || runtimeObject),
     [runtimeObject, save, session]
@@ -147,6 +198,7 @@ export default function useIXIAosObjectEditSession({
 
   return {
     runtimeObject,
+    editorObject: session?.draft || runtimeObject,
     editing: Boolean(session),
     saving,
     session,
@@ -155,6 +207,7 @@ export default function useIXIAosObjectEditSession({
     begin,
     cancel,
     save,
-    retry
+    retry,
+    reloadLatest
   };
 }

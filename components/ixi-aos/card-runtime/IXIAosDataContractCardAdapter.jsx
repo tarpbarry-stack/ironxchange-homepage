@@ -5,6 +5,16 @@ import {
   buildAosObjectSavePayload,
   ensureBusinessIdentifierDefinition
 } from "./IXIAosObjectDataContract";
+import {
+  createIXIAosEditSession,
+  createIXIAosObjectUpdateCommand
+} from "./IXIAosFoundationEngine.mjs";
+import { runIXIActionNoticeLifecycle } from "../../ixi-object-system/IXIActionNoticeEngine";
+
+function commandId() {
+  if (globalThis.crypto?.randomUUID) return globalThis.crypto.randomUUID();
+  return `ixi-aos-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}
 
 /*
  * Shared adapter for every numbered AOS card.
@@ -58,7 +68,35 @@ export default function IXIAosDataContractCardAdapter({
     };
 
     const contractPayload = buildAosObjectSavePayload(nextObject, nextObject.fieldDefinitions);
-    return props?.onSaveObject?.({ ...payload, ...contractPayload });
+    if (typeof props?.onSaveObject !== "function") return contractPayload.object;
+
+    if (payload?.command) {
+      return props.onSaveObject({ ...payload, ...contractPayload });
+    }
+
+    const command = createIXIAosObjectUpdateCommand({
+      session: createIXIAosEditSession(object),
+      draft: contractPayload.object,
+      commandId: commandId()
+    });
+
+    return runIXIActionNoticeLifecycle({
+      objectId: command.objectId,
+      savingMessage: "SAVING...",
+      successMessage: "SAVED",
+      errorMessage: "NOT SAVED",
+      commandId: command.commandId,
+      source: "aos-card-action",
+      operation: () => props.onSaveObject({
+        ...payload,
+        ...contractPayload,
+        command,
+        commandId: command.commandId,
+        idempotencyKey: command.idempotencyKey,
+        expectedRevision: command.expectedRevision,
+        definitionVersion: command.definitionVersion
+      })
+    });
   }
 
   const contractProps = {

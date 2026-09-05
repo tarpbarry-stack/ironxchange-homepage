@@ -65,6 +65,18 @@ export default function IXIAosCommercialEditorBridge({
     });
   }
 
+  async function reloadLatest() {
+    return runIXIActionNoticeLifecycle({
+      objectId: noticeObjectId,
+      savingMessage: "LOADING LATEST...",
+      successMessage: "LATEST LOADED — REVIEW & SAVE",
+      errorMessage: "LATEST NOT LOADED",
+      commandId: "aos-object-rebase",
+      source: "aos-commercial-editor",
+      operation: () => editSession.reloadLatest()
+    });
+  }
+
   const rendered = typeof children === "function"
     ? children({ object: editSession.runtimeObject })
     : children;
@@ -88,12 +100,13 @@ export default function IXIAosCommercialEditorBridge({
 
         {editSession.editing ? (
           <IXIAosCommercialObjectEditor
-            object={editSession.runtimeObject}
+            object={editSession.editorObject}
             saving={editSession.saving}
             error={editSession.error}
             conflict={editSession.conflict}
             onCancel={editSession.cancel}
             onSave={save}
+            onReloadLatest={reloadLatest}
             mediaEnabled={mediaEnabled}
           />
         ) : null}
