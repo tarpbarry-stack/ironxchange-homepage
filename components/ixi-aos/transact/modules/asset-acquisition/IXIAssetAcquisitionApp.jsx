@@ -127,7 +127,7 @@ const COPY = {
     sourceRef: "REFERENCIA / SUBASTA",
     invoice: "FACTURA DEL VENDEDOR / SUBASTA #",
     invoiceDate: "FECHA DE FACTURA",
-    agreement: "CONTRATO / BILL OF SALE #",
+    agreement: "CONTRATO DE COMPRAVENTA #",
     price: "PRECIO DE COMPRA",
     premium: "PRIMA / CARGO DE SUBASTA",
     tax: "IMPUESTO",
@@ -194,6 +194,115 @@ const COPY = {
   },
 };
 
+const ES_TEXT = Object.freeze({
+  "ASSET": "ACTIVO",
+  "AOS ASSET": "ACTIVO AOS",
+  "NO LOCATION": "SIN UBICACIÓN",
+  "SELECT ASSET": "SELECCIONAR ACTIVO",
+  "OWNERSHIP": "PROPIEDAD",
+  "ALLOCATED": "ASIGNADO",
+  "PAYMENT": "PAGO",
+  "DUE": "PENDIENTE",
+  "PAID / FUNDED": "PAGADO / FINANCIADO",
+  "TITLE": "TÍTULO",
+  "ACQUISITION": "ADQUISICIÓN",
+  "COMPLETE": "COMPLETA",
+  "MAKE-READY OPEN": "PREPARACIÓN ABIERTA",
+  "PURCHASE PRICE": "PRECIO DE COMPRA",
+  "BUYER PREMIUM / FEES": "PRIMA DEL COMPRADOR / CARGOS",
+  "EST": "EST.",
+  "VAR": "VAR.",
+  "LANDED / MAKE-READY ACTUAL": "COSTO REAL ENTREGADO / PREPARADO",
+  "SETTLEMENT": "LIQUIDACIÓN",
+  "INITIAL CAPITAL": "CAPITAL INICIAL",
+  "ORIGINAL OWNERSHIP ONLY. NO LATER CAPITAL OR OWNERSHIP CHANGES.": "SOLO PROPIEDAD ORIGINAL. SIN CAMBIOS POSTERIORES DE CAPITAL O PROPIEDAD.",
+  "CAPITAL CONTRIBUTION": "APORTACIÓN DE CAPITAL",
+  "REIMBURSEMENT": "REEMBOLSO",
+  "DISTRIBUTION": "DISTRIBUCIÓN",
+  "PARTNER BUYOUT": "COMPRA DE PARTICIPACIÓN",
+  "OWNERSHIP TRANSFER": "TRANSFERENCIA DE PROPIEDAD",
+  "OWNERSHIP ADJUSTMENT": "AJUSTE DE PROPIEDAD",
+  "TRANSFER FROM EXISTING OWNER": "TRANSFERIR DE PROPIETARIO EXISTENTE",
+  "SELECT OWNER": "SELECCIONAR PROPIETARIO",
+  "SAVING...": "GUARDANDO...",
+  "CLOSE ACQUISITION / MAKE-READY": "CERRAR ADQUISICIÓN / PREPARACIÓN",
+  "SET THE REAL DATE THIS ASSET BECAME OPERATIONAL / SALE-READY / RENTAL-READY. THIS DATE CLOSES THE ACQUISITION / MAKE-READY CHAPTER.": "INDIQUE LA FECHA REAL EN QUE EL ACTIVO QUEDÓ OPERATIVO, LISTO PARA VENTA O LISTO PARA RENTA. ESTA FECHA CIERRA LA ETAPA DE ADQUISICIÓN / PREPARACIÓN.",
+  "ACQ IS THE OPENING OWNERSHIP/CAPITAL CHAPTER. SOURCE TRANSACTIONS REMAIN CANONICAL AND SETTLEMENT CONSUMES THIS HISTORY LATER.": "ACQ ES LA ETAPA INICIAL DE PROPIEDAD Y CAPITAL. LAS TRANSACCIONES DE ORIGEN CONSERVAN SU AUTORIDAD Y LA LIQUIDACIÓN UTILIZA POSTERIORMENTE ESTE HISTORIAL.",
+  "DIRECT PURCHASE": "COMPRA DIRECTA",
+  "AUCTION": "SUBASTA",
+  "TRADE-IN": "TOMA A CUENTA",
+  "DEALER": "DISTRIBUIDOR",
+  "PRIVATE SELLER": "VENDEDOR PARTICULAR",
+  "ENTITY TRANSFER": "TRANSFERENCIA ENTRE ENTIDADES",
+  "OTHER": "OTRO",
+  "PAYMENT DUE DATE": "FECHA DE VENCIMIENTO",
+  "PURCHASE ECONOMICS": "ECONOMÍA DE COMPRA",
+  "OWNER / PARTNER": "PROPIETARIO / SOCIO",
+  "CONTRIBUTION DATE": "FECHA DE APORTACIÓN",
+  "CONTRIBUTION / WIRE REF": "REFERENCIA DE APORTACIÓN / TRANSFERENCIA",
+  "REMOVE OWNER": "ELIMINAR PROPIETARIO",
+  "LEGAL OWNERSHIP TOTAL": "TOTAL DE PROPIEDAD LEGAL",
+  "SETTLEMENT SHARE TOTAL": "TOTAL DE PARTICIPACIÓN EN LIQUIDACIÓN",
+  "WIRE": "TRANSFERENCIA",
+  "CHECK": "CHEQUE",
+  "CASH": "EFECTIVO",
+  "FINANCING": "FINANCIAMIENTO",
+  "REMOVE PAYMENT": "ELIMINAR PAGO",
+  "AMOUNT PAID / FUNDED": "MONTO PAGADO / FINANCIADO",
+  "BALANCE DUE": "SALDO PENDIENTE",
+  "FUNDING HERE DOCUMENTS THE DEAL. BANK PAYMENTS AND VENDOR BILLS REMAIN SEPARATE TRAN$ACT RECORDS, SO THE OBLIGATION IS NEVER COUNTED TWICE.": "EL FINANCIAMIENTO AQUÍ DOCUMENTA LA OPERACIÓN. LOS PAGOS BANCARIOS Y LAS FACTURAS DEL PROVEEDOR CONSERVAN REGISTROS TRAN$ACT SEPARADOS PARA EVITAR DUPLICAR LA OBLIGACIÓN.",
+  "FINANCED / LENDER INVOLVED": "FINANCIADO / PARTICIPA UN PRESTAMISTA",
+  "LENDER": "PRESTAMISTA",
+  "CATEGORY": "CATEGORÍA",
+  "FREIGHT": "FLETE",
+  "FREIGHT / HAULING": "FLETE / TRANSPORTE",
+  "INSPECTION": "INSPECCIÓN",
+  "INITIAL REPAIRS": "REPARACIONES INICIALES",
+  "INITIAL REPAIRS / MAKE-READY": "REPARACIONES INICIALES / PREPARACIÓN",
+  "INITIAL PARTS": "REFACCIONES INICIALES",
+  "TECHNOLOGY": "TECNOLOGÍA",
+  "CLEANING / DETAIL": "LIMPIEZA / DETALLADO",
+  "ESTIMATED": "ESTIMADO",
+  "LABEL": "ETIQUETA",
+  "YES": "SÍ",
+  "NO": "NO",
+  "PENDING": "PENDIENTE",
+  "RECEIVED": "RECIBIDO",
+  "NOT REQUIRED": "NO REQUERIDO",
+  "ISSUE": "INCIDENCIA",
+  "NONE KNOWN": "NINGUNO CONOCIDO",
+  "DISCLOSED": "DECLARADO",
+  "RELEASE PENDING": "LIBERACIÓN PENDIENTE",
+  "RELEASED": "LIBERADO",
+  "DISPUTED": "EN DISPUTA",
+  "UNKNOWN": "DESCONOCIDO",
+  "TITLE / DOCUMENT #": "TÍTULO / DOCUMENTO #",
+  "CONDITION": "CONDICIÓN",
+  "RUNNING": "OPERATIVO",
+  "NEEDS REPAIR": "REQUIERE REPARACIÓN",
+  "SALVAGE": "SALVAMENTO",
+  "BUYER": "COMPRADOR",
+  "SELLER": "VENDEDOR",
+  "THIRD PARTY": "TERCERO",
+  "+ BILL OF SALE / INVOICE": "+ CONTRATO DE COMPRAVENTA / FACTURA",
+  "+ TITLE / LIEN RELEASE": "+ TÍTULO / LIBERACIÓN DE GRAVAMEN",
+  "+ WIRE / PAYMENT PROOF": "+ COMPROBANTE DE TRANSFERENCIA / PAGO",
+  "+ OTHER DOCUMENT": "+ OTRO DOCUMENTO",
+  "CLEAR SELECTED FILES": "BORRAR ARCHIVOS SELECCIONADOS",
+  "ADVANCED SETTLEMENT TERMS": "TÉRMINOS AVANZADOS DE LIQUIDACIÓN",
+  "SECURE DOCUMENT UPLOAD IS REQUIRED BEFORE SAVE.": "LA CARGA SEGURA DE DOCUMENTOS DEBE FINALIZAR ANTES DE GUARDAR.",
+  "ASSET PASSPORT, ENTITY, ACTOR, SELLER, PURCHASE DATE AND A POSITIVE VALUE ARE REQUIRED.": "SE REQUIEREN EL PASAPORTE DEL ACTIVO, LA ENTIDAD, EL USUARIO, EL VENDEDOR, LA FECHA DE COMPRA Y UN VALOR POSITIVO.",
+  "RECORDING...": "REGISTRANDO...",
+  "ASSET ACQUISITION COULD NOT BE RECORDED.": "NO SE PUDO REGISTRAR LA ADQUISICIÓN DEL ACTIVO.",
+  "OWNERSHIP CHANGE MUST PRESERVE VALID 100% ALLOCATIONS.": "EL CAMBIO DE PROPIEDAD DEBE CONSERVAR ASIGNACIONES VÁLIDAS DEL 100%.",
+  "OWNERSHIP CHANGE COULD NOT BE SAVED.": "NO SE PUDO GUARDAR EL CAMBIO DE PROPIEDAD.",
+  "OWNERSHIP TRANSFER REQUIRES TWO DIFFERENT PARTIES.": "LA TRANSFERENCIA DE PROPIEDAD REQUIERE DOS PARTES DISTINTAS.",
+  "OWNERSHIP TRANSFER COUNTERPARTY MUST BE AN EXISTING OWNER.": "LA CONTRAPARTE DE LA TRANSFERENCIA DEBE SER UN PROPIETARIO EXISTENTE.",
+  "VALID IN-SERVICE DATE IS REQUIRED": "SE REQUIERE UNA FECHA VÁLIDA DE PUESTA EN SERVICIO.",
+  "IN-SERVICE DATE CANNOT BE BEFORE THE PURCHASE DATE.": "LA FECHA DE PUESTA EN SERVICIO NO PUEDE SER ANTERIOR A LA FECHA DE COMPRA.",
+  "THIS RECORD ESTABLISHES THE ASSET'S USER-ENTERED OPENING BASIS. IXI DOES NOT PRICE THE ASSET. ACTUAL FREIGHT, REPAIRS, PARTS, LABOR AND TECHNOLOGY REMAIN CANONICAL TRAN$ACT RECORDS AND PROJECT HERE UNTIL THE IN SERVICE CUTOFF.": "ESTE REGISTRO ESTABLECE LA BASE INICIAL CAPTURADA POR EL USUARIO. IXI NO VALÚA EL ACTIVO. LOS COSTOS REALES DE FLETE, REPARACIONES, REFACCIONES, MANO DE OBRA Y TECNOLOGÍA CONSERVAN SUS REGISTROS TRAN$ACT Y SE REFLEJAN AQUÍ HASTA LA FECHA DE PUESTA EN SERVICIO.",
+});
+
 function Field({ label, children }) {
   return (
     <div className="acq-field">
@@ -211,8 +320,9 @@ export default function IXIAssetAcquisitionApp({ context = {}, object = {}, init
   const entity = context.entity || {};
   const location = context.location || {};
   const actor = context.actor || {};
-  const [lang, setLang] = useState(language === "es" ? "es" : "en");
+  const [lang, setLang] = useState(String(language).toLowerCase().startsWith("es") ? "es" : "en");
   const t = COPY[lang];
+  const tx = (text) => lang === "es" ? (ES_TEXT[String(text).toUpperCase()] || text) : text;
   const [record, setRecord] = useState(initialRecord);
   const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState({});
@@ -363,7 +473,7 @@ export default function IXIAssetAcquisitionApp({ context = {}, object = {}, init
     } catch (error) {
       setErrors({
         ...error?.validation?.errors,
-        save: clean(error?.message) || "Asset Acquisition could not be recorded.",
+        save: tx(clean(error?.message) || "Asset Acquisition could not be recorded."),
       });
     } finally {
       setSaving(false);
@@ -392,7 +502,7 @@ export default function IXIAssetAcquisitionApp({ context = {}, object = {}, init
         context,
       );
     } catch (error) {
-      setErrors({ inService: error.message });
+      setErrors({ inService: tx(error.message) });
     } finally {
       setSaving(false);
     }
@@ -443,7 +553,7 @@ export default function IXIAssetAcquisitionApp({ context = {}, object = {}, init
       );
     } catch (error) {
       setErrors({
-        event: clean(error?.message) || "Ownership change could not be saved.",
+        event: tx(clean(error?.message) || "Ownership change could not be saved."),
       });
     } finally {
       setSaving(false);
@@ -469,7 +579,7 @@ export default function IXIAssetAcquisitionApp({ context = {}, object = {}, init
     const acquisitionClosed = r.makeReady?.status === "closed" && clean(r.makeReady?.inServiceDate);
     const readyCost = direct + actual;
     return (
-      <div className="ixi-acq">
+      <div className="ixi-acq" lang={lang === "es" ? "es-MX" : "en-US"}>
         <div className="acq-top">
           <div>
             <div className="acq-kicker">IXI TRAN$ACT</div>
@@ -477,10 +587,10 @@ export default function IXIAssetAcquisitionApp({ context = {}, object = {}, init
             <div className="acq-id">{r.identity?.number || r.identity?.acquisitionId}</div>
           </div>
           <div className="acq-lang">
-            <button onClick={() => changeLang("en")} className={lang === "en" ? "on" : ""}>
+            <button type="button" onClick={() => changeLang("en")} className={lang === "en" ? "on" : ""} aria-pressed={lang === "en"}>
               ENG
             </button>
-            <button onClick={() => changeLang("es")} className={lang === "es" ? "on" : ""}>
+            <button type="button" onClick={() => changeLang("es")} className={lang === "es" ? "on" : ""} aria-pressed={lang === "es"}>
               ESP
             </button>
           </div>
@@ -488,34 +598,34 @@ export default function IXIAssetAcquisitionApp({ context = {}, object = {}, init
         <div className="acq-context">
           <strong>{r.context?.primaryLabel}</strong>
           <small>
-            {r.context?.primaryObjectType || "ASSET"} · {r.context?.locationLabel || "NO LOCATION"}
+            {tx(r.context?.primaryObjectType || "ASSET")} · {r.context?.locationLabel || tx("NO LOCATION")}
           </small>
         </div>
         <div className="acq-status-grid">
           <div className="acq-status">
-            <span>OWNERSHIP</span>
-            <b className="ok">{r.ownership?.legalOwnershipTotal?.toFixed?.(2) || r.ownership?.legalOwnershipTotal}% ALLOCATED</b>
+            <span>{tx("OWNERSHIP")}</span>
+            <b className="ok">{r.ownership?.legalOwnershipTotal?.toFixed?.(2) || r.ownership?.legalOwnershipTotal}% {tx("ALLOCATED")}</b>
           </div>
           <div className="acq-status">
-            <span>PAYMENT</span>
-            <b className={r.funding?.balanceDue > 0 ? "warn" : "ok"}>{r.funding?.balanceDue > 0 ? `${money(r.funding.balanceDue)} DUE` : "PAID / FUNDED"}</b>
+            <span>{tx("PAYMENT")}</span>
+            <b className={r.funding?.balanceDue > 0 ? "warn" : "ok"}>{r.funding?.balanceDue > 0 ? `${money(r.funding.balanceDue)} ${tx("DUE")}` : tx("PAID / FUNDED")}</b>
           </div>
           <div className="acq-status">
-            <span>TITLE</span>
-            <b className={r.title?.titleStatus === "received" ? "ok" : "warn"}>{clean(r.title?.titleStatus).toUpperCase()}</b>
+            <span>{tx("TITLE")}</span>
+            <b className={r.title?.titleStatus === "received" ? "ok" : "warn"}>{tx(clean(r.title?.titleStatus).replace(/-/g, " ").toUpperCase())}</b>
           </div>
           <div className="acq-status">
-            <span>ACQUISITION</span>
-            <b className={acquisitionClosed ? "ok" : "warn"}>{acquisitionClosed ? `COMPLETE ${r.makeReady.inServiceDate}` : "MAKE-READY OPEN"}</b>
+            <span>{tx("ACQUISITION")}</span>
+            <b className={acquisitionClosed ? "ok" : "warn"}>{acquisitionClosed ? `${tx("COMPLETE")} ${r.makeReady.inServiceDate}` : tx("MAKE-READY OPEN")}</b>
           </div>
         </div>
         <div className="acq-section">{t.deal}</div>
         <div className="acq-money">
-          <span>Purchase Price</span>
+          <span>{tx("PURCHASE PRICE")}</span>
           <b>{money(r.acquisition?.purchasePrice)}</b>
         </div>
         <div className="acq-money">
-          <span>Buyer Premium / Fees</span>
+          <span>{tx("BUYER PREMIUM / FEES")}</span>
           <b>{money((r.acquisition?.buyerPremium || 0) + (r.acquisition?.tax || 0) + (r.acquisition?.titleFees || 0) + (r.acquisition?.brokerFees || 0) + (r.acquisition?.otherAcquisitionFees || 0))}</b>
         </div>
         <div className="acq-total">
@@ -528,17 +638,17 @@ export default function IXIAssetAcquisitionApp({ context = {}, object = {}, init
           return (
             <div className="acq-row" key={item.costId}>
               <div className="acq-row-top">
-                <strong>{item.label || item.category}</strong>
+                <strong>{tx(item.label || clean(item.category).replace(/-/g, " ").toUpperCase())}</strong>
                 <b>{money(found?.actualAmount || 0)}</b>
               </div>
               <small>
-                EST {money(item.estimatedAmount)} · VAR {money((found?.actualAmount || 0) - Number(item.estimatedAmount || 0))}
+                {tx("EST")} {money(item.estimatedAmount)} · {tx("VAR")} {money((found?.actualAmount || 0) - Number(item.estimatedAmount || 0))}
               </small>
             </div>
           );
         })}
         <div className="acq-total">
-          <span>LANDED / MAKE-READY ACTUAL</span>
+          <span>{tx("LANDED / MAKE-READY ACTUAL")}</span>
           <strong>{money(readyCost)}</strong>
         </div>
         <div className="acq-section">{t.owners}</div>
@@ -550,7 +660,7 @@ export default function IXIAssetAcquisitionApp({ context = {}, object = {}, init
                 <b className="yellow">{owner.legalOwnershipPercent}%</b>
               </div>
               <small>
-                SETTLEMENT {owner.settlementSharePercent}% · INITIAL CAPITAL {money(owner.initialContribution)}
+                {tx("SETTLEMENT")} {owner.settlementSharePercent}% · {tx("INITIAL CAPITAL")} {money(owner.initialContribution)}
               </small>
             </div>
           ))}
@@ -563,18 +673,18 @@ export default function IXIAssetAcquisitionApp({ context = {}, object = {}, init
             .map((event) => (
               <div className="acq-row" key={event.eventId}>
                 <div className="acq-row-top">
-                  <strong>{clean(event.type).replace(/-/g, " ").toUpperCase()}</strong>
+                  <strong>{tx(clean(event.type).replace(/-/g, " ").toUpperCase())}</strong>
                   <b>{money(event.amount)}</b>
                 </div>
                 <small>
-                  {event.partyLabel} · OWN {event.ownershipPercentChange >= 0 ? "+" : ""}
+                  {event.partyLabel} · {tx("OWNERSHIP")} {event.ownershipPercentChange >= 0 ? "+" : ""}
                   {event.ownershipPercentChange}% · {event.reference || event.occurredAt}
                 </small>
               </div>
             ))
         ) : (
           <div className="acq-row">
-            <small>Original ownership only. No later capital or ownership changes.</small>
+            <small>{tx("ORIGINAL OWNERSHIP ONLY. NO LATER CAPITAL OR OWNERSHIP CHANGES.")}</small>
           </div>
         )}
         <button className="acq-secondary" onClick={() => setEventOpen((v) => !v)}>
@@ -584,21 +694,21 @@ export default function IXIAssetAcquisitionApp({ context = {}, object = {}, init
           <div className="acq-event-edit">
             <Field label={t.eventType}>
               <select value={eventType} onChange={(e) => setEventType(e.target.value)}>
-                <option value="capital-contribution">CAPITAL CONTRIBUTION</option>
-                <option value="reimbursement">REIMBURSEMENT</option>
-                <option value="distribution">DISTRIBUTION</option>
-                <option value="partner-buyout">PARTNER BUYOUT</option>
-                <option value="ownership-transfer">OWNERSHIP TRANSFER</option>
-                <option value="ownership-adjustment">OWNERSHIP ADJUSTMENT</option>
+                <option value="capital-contribution">{tx("CAPITAL CONTRIBUTION")}</option>
+                <option value="reimbursement">{tx("REIMBURSEMENT")}</option>
+                <option value="distribution">{tx("DISTRIBUTION")}</option>
+                <option value="partner-buyout">{tx("PARTNER BUYOUT")}</option>
+                <option value="ownership-transfer">{tx("OWNERSHIP TRANSFER")}</option>
+                <option value="ownership-adjustment">{tx("OWNERSHIP ADJUSTMENT")}</option>
               </select>
             </Field>
             <Field label={t.eventParty}>
               <Input value={eventParty} onChange={setEventParty} />
             </Field>
             {Number(eventPct) !== 0 || Number(eventSettlePct) !== 0 ? (
-              <Field label="TRANSFER FROM EXISTING OWNER">
+              <Field label={tx("TRANSFER FROM EXISTING OWNER")}>
                 <select value={eventCounterparty} onChange={(e) => setEventCounterparty(e.target.value)}>
-                  <option value="">SELECT OWNER</option>
+                  <option value="">{tx("SELECT OWNER")}</option>
                   {(record.ownership?.owners || []).map((owner) => (
                     <option key={owner.ownerId} value={owner.partyLabel}>
                       {owner.partyLabel}
@@ -622,7 +732,7 @@ export default function IXIAssetAcquisitionApp({ context = {}, object = {}, init
               <Input value={eventRef} onChange={setEventRef} />
             </Field>
             <button className="acq-primary" onClick={saveEvent} disabled={saving}>
-              {saving ? "SAVING..." : t.saveEvent}
+              {saving ? tx("SAVING...") : t.saveEvent}
             </button>
             {errors.event ? <div className="acq-error">{errors.event}</div> : null}
           </div>
@@ -644,23 +754,23 @@ export default function IXIAssetAcquisitionApp({ context = {}, object = {}, init
                 <input type="date" value={inServiceDate} onChange={(e) => setInServiceDate(e.target.value)} />
               </Field>
               <button className="acq-secondary" onClick={putService} disabled={saving}>
-                {saving ? "SAVING..." : t.correctService}
+                {saving ? tx("SAVING...") : t.correctService}
               </button>
               <small>{t.routingNote}</small>
             </>
           ) : (
             <>
               <div className="acq-service-head">
-                <strong>MAKE-READY OPEN</strong>
+                <strong>{tx("MAKE-READY OPEN")}</strong>
                 <b>{money(readyCost)}</b>
               </div>
-              <small>Set the real date this asset became operational / sale-ready / rental-ready. This date closes the Acquisition / Make-Ready chapter.</small>
+              <small>{tx("SET THE REAL DATE THIS ASSET BECAME OPERATIONAL / SALE-READY / RENTAL-READY. THIS DATE CLOSES THE ACQUISITION / MAKE-READY CHAPTER.")}</small>
               <Field label={t.serviceDate}>
                 <input type="date" value={inServiceDate} onChange={(e) => setInServiceDate(e.target.value)} />
               </Field>
               <button className="acq-primary" onClick={putService} disabled={saving}>
-                {saving ? "SAVING..." : t.putService}
-                <small style={{ display: "block", fontSize: 5 }}>CLOSE ACQUISITION / MAKE-READY</small>
+                {saving ? tx("SAVING...") : t.putService}
+                <small style={{ display: "block", fontSize: 5 }}>{tx("CLOSE ACQUISITION / MAKE-READY")}</small>
               </button>
               <small>{t.routingNote}</small>
             </>
@@ -670,45 +780,45 @@ export default function IXIAssetAcquisitionApp({ context = {}, object = {}, init
         <button className="acq-secondary" onClick={() => onBack?.()}>
           {t.back}
         </button>
-        <div className="acq-foot">ACQ is the opening ownership/capital chapter. Source transactions remain canonical and settlement consumes this history later.</div>
+        <div className="acq-foot">{tx("ACQ IS THE OPENING OWNERSHIP/CAPITAL CHAPTER. SOURCE TRANSACTIONS REMAIN CANONICAL AND SETTLEMENT CONSUMES THIS HISTORY LATER.")}</div>
         <IXIAssetAcquisitionStyles />
       </div>
     );
   }
 
   return (
-    <div className="ixi-acq">
+    <div className="ixi-acq" lang={lang === "es" ? "es-MX" : "en-US"}>
       <div className="acq-top">
         <div>
           <div className="acq-kicker">IXI TRAN$ACT</div>
           <div className="acq-title">{t.title}</div>
         </div>
         <div className="acq-lang">
-          <button onClick={() => changeLang("en")} className={lang === "en" ? "on" : ""}>
+          <button type="button" onClick={() => changeLang("en")} className={lang === "en" ? "on" : ""} aria-pressed={lang === "en"}>
             ENG
           </button>
-          <button onClick={() => changeLang("es")} className={lang === "es" ? "on" : ""}>
+          <button type="button" onClick={() => changeLang("es")} className={lang === "es" ? "on" : ""} aria-pressed={lang === "es"}>
             ESP
           </button>
         </div>
       </div>
       <div className="acq-context">
-        <strong>{primary.label || "SELECT ASSET"}</strong>
+        <strong>{primary.label || tx("SELECT ASSET")}</strong>
         <small>
-          {primary.objectType || "AOS ASSET"} · {location.label || "NO LOCATION"}
+          {tx(primary.objectType || "AOS ASSET")} · {location.label || tx("NO LOCATION")}
         </small>
       </div>
       <div className="acq-section">{t.deal}</div>
       <div className="acq-grid2">
         <Field label={t.type}>
           <select value={acquisitionType} onChange={(e) => setAcquisitionType(e.target.value)}>
-            <option value="direct-purchase">DIRECT PURCHASE</option>
-            <option value="auction">AUCTION</option>
-            <option value="trade-in">TRADE-IN</option>
-            <option value="dealer">DEALER</option>
-            <option value="private-seller">PRIVATE SELLER</option>
-            <option value="entity-transfer">ENTITY TRANSFER</option>
-            <option value="other">OTHER</option>
+            <option value="direct-purchase">{tx("DIRECT PURCHASE")}</option>
+            <option value="auction">{tx("AUCTION")}</option>
+            <option value="trade-in">{tx("TRADE-IN")}</option>
+            <option value="dealer">{tx("DEALER")}</option>
+            <option value="private-seller">{tx("PRIVATE SELLER")}</option>
+            <option value="entity-transfer">{tx("ENTITY TRANSFER")}</option>
+            <option value="other">{tx("OTHER")}</option>
           </select>
         </Field>
         <Field label={t.purchaseDate}>
@@ -738,11 +848,11 @@ export default function IXIAssetAcquisitionApp({ context = {}, object = {}, init
         <Field label={t.agreement}>
           <Input value={agreementNumber} onChange={setAgreementNumber} />
         </Field>
-        <Field label="PAYMENT DUE DATE">
+        <Field label={tx("PAYMENT DUE DATE")}>
           <input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
         </Field>
       </div>
-      <div className="acq-section">PURCHASE ECONOMICS</div>
+      <div className="acq-section">{tx("PURCHASE ECONOMICS")}</div>
       <Field label={t.price}>
         <Input value={purchasePrice} onChange={setPurchasePrice} inputMode="decimal" />
       </Field>
@@ -770,7 +880,7 @@ export default function IXIAssetAcquisitionApp({ context = {}, object = {}, init
       <div className="acq-section">{t.owners}</div>
       {owners.map((owner, i) => (
         <div className="acq-owner-edit" key={i}>
-          <Field label="OWNER / PARTNER">
+          <Field label={tx("OWNER / PARTNER")}>
             <Input value={owner.partyLabel} onChange={(v) => updateOwner(i, "partyLabel", v)} />
           </Field>
           <div className="acq-grid2">
@@ -785,16 +895,16 @@ export default function IXIAssetAcquisitionApp({ context = {}, object = {}, init
             <Field label={t.capital}>
               <Input value={owner.initialContribution} onChange={(v) => updateOwner(i, "initialContribution", v)} inputMode="decimal" />
             </Field>
-            <Field label="CONTRIBUTION DATE">
+            <Field label={tx("CONTRIBUTION DATE")}>
               <input type="date" value={owner.contributionDate} onChange={(e) => updateOwner(i, "contributionDate", e.target.value)} />
             </Field>
           </div>
-          <Field label="CONTRIBUTION / WIRE REF">
+          <Field label={tx("CONTRIBUTION / WIRE REF")}>
             <Input value={owner.contributionReference} onChange={(v) => updateOwner(i, "contributionReference", v)} />
           </Field>
           {owners.length > 1 ? (
             <button className="acq-secondary" onClick={() => setOwners((list) => list.filter((_, index) => index !== i))}>
-              REMOVE OWNER
+              {tx("REMOVE OWNER")}
             </button>
           ) : null}
         </div>
@@ -803,11 +913,11 @@ export default function IXIAssetAcquisitionApp({ context = {}, object = {}, init
         {t.addOwner}
       </button>
       <div className="acq-money">
-        <span>LEGAL OWNERSHIP TOTAL</span>
+        <span>{tx("LEGAL OWNERSHIP TOTAL")}</span>
         <b>{preview.ownership.legalOwnershipTotal.toFixed(2)}%</b>
       </div>
       <div className="acq-money">
-        <span>SETTLEMENT SHARE TOTAL</span>
+        <span>{tx("SETTLEMENT SHARE TOTAL")}</span>
         <b>{preview.ownership.settlementShareTotal.toFixed(2)}%</b>
       </div>
       <div className="acq-section">{t.funding}</div>
@@ -824,12 +934,12 @@ export default function IXIAssetAcquisitionApp({ context = {}, object = {}, init
           <div className="acq-grid2">
             <Field label={t.method}>
               <select value={payment.method} onChange={(e) => updatePayment(i, "method", e.target.value)}>
-                <option value="wire">WIRE</option>
+                <option value="wire">{tx("WIRE")}</option>
                 <option value="ach">ACH</option>
-                <option value="check">CHECK</option>
-                <option value="cash">CASH</option>
-                <option value="financing">FINANCING</option>
-                <option value="other">OTHER</option>
+                <option value="check">{tx("CHECK")}</option>
+                <option value="cash">{tx("CASH")}</option>
+                <option value="financing">{tx("FINANCING")}</option>
+                <option value="other">{tx("OTHER")}</option>
               </select>
             </Field>
             <Field label={t.payer}>
@@ -840,7 +950,7 @@ export default function IXIAssetAcquisitionApp({ context = {}, object = {}, init
             <Input value={payment.reference} onChange={(v) => updatePayment(i, "reference", v)} />
           </Field>
           <button className="acq-secondary" onClick={() => setPayments((list) => list.filter((_, index) => index !== i))}>
-            REMOVE PAYMENT
+            {tx("REMOVE PAYMENT")}
           </button>
         </div>
       ))}
@@ -848,21 +958,21 @@ export default function IXIAssetAcquisitionApp({ context = {}, object = {}, init
         {t.addPayment}
       </button>
       <div className="acq-money">
-        <span>AMOUNT PAID / FUNDED</span>
+        <span>{tx("AMOUNT PAID / FUNDED")}</span>
         <b>{money(preview.funding.amountPaid)}</b>
       </div>
       <div className="acq-money">
-        <span>BALANCE DUE</span>
+        <span>{tx("BALANCE DUE")}</span>
         <b>{money(preview.funding.balanceDue)}</b>
       </div>
       <div className="acq-row">
-        <small>Funding here documents the deal. Bank payments and vendor bills remain separate TRAN$ACT records, so the obligation is never counted twice.</small>
+        <small>{tx("FUNDING HERE DOCUMENTS THE DEAL. BANK PAYMENTS AND VENDOR BILLS REMAIN SEPARATE TRAN$ACT RECORDS, SO THE OBLIGATION IS NEVER COUNTED TWICE.")}</small>
       </div>
       <label className="acq-row">
-        <input type="checkbox" checked={financed} onChange={(e) => setFinanced(e.target.checked)} /> FINANCED / LENDER INVOLVED
+        <input type="checkbox" checked={financed} onChange={(e) => setFinanced(e.target.checked)} /> {tx("FINANCED / LENDER INVOLVED")}
       </label>
       {financed ? (
-        <Field label="LENDER">
+        <Field label={tx("LENDER")}>
           <Input value={lenderLabel} onChange={setLenderLabel} />
         </Field>
       ) : null}
@@ -870,23 +980,23 @@ export default function IXIAssetAcquisitionApp({ context = {}, object = {}, init
       {costs.map((cost, i) => (
         <div className="acq-cost-edit" key={i}>
           <div className="acq-grid2">
-            <Field label="CATEGORY">
+            <Field label={tx("CATEGORY")}>
               <select value={cost.category} onChange={(e) => updateCost(i, "category", e.target.value)}>
-                <option value="freight">FREIGHT</option>
-                <option value="inspection">INSPECTION</option>
-                <option value="initial-repairs">INITIAL REPAIRS</option>
-                <option value="parts">INITIAL PARTS</option>
-                <option value="technology">TECHNOLOGY</option>
-                <option value="cleaning-detail">CLEANING / DETAIL</option>
-                <option value="other">OTHER</option>
+                <option value="freight">{tx("FREIGHT")}</option>
+                <option value="inspection">{tx("INSPECTION")}</option>
+                <option value="initial-repairs">{tx("INITIAL REPAIRS")}</option>
+                <option value="parts">{tx("INITIAL PARTS")}</option>
+                <option value="technology">{tx("TECHNOLOGY")}</option>
+                <option value="cleaning-detail">{tx("CLEANING / DETAIL")}</option>
+                <option value="other">{tx("OTHER")}</option>
               </select>
             </Field>
-            <Field label="ESTIMATED">
+            <Field label={tx("ESTIMATED")}>
               <Input value={cost.estimatedAmount} onChange={(v) => updateCost(i, "estimatedAmount", v)} inputMode="decimal" />
             </Field>
           </div>
-          <Field label="LABEL">
-            <Input value={cost.label} onChange={(v) => updateCost(i, "label", v)} />
+          <Field label={tx("LABEL")}>
+            <Input value={lang === "es" && cost.label === "Freight / Hauling" ? "Flete / Transporte" : cost.label} onChange={(v) => updateCost(i, "label", v)} />
           </Field>
         </div>
       ))}
@@ -901,48 +1011,48 @@ export default function IXIAssetAcquisitionApp({ context = {}, object = {}, init
       <div className="acq-grid2">
         <Field label={t.titleRequired}>
           <select value={titleRequired ? "yes" : "no"} onChange={(e) => setTitleRequired(e.target.value === "yes")}>
-            <option value="yes">YES</option>
-            <option value="no">NO</option>
+            <option value="yes">{tx("YES")}</option>
+            <option value="no">{tx("NO")}</option>
           </select>
         </Field>
         <Field label={t.titleStatus}>
           <select value={titleStatus} onChange={(e) => setTitleStatus(e.target.value)}>
-            <option value="pending">PENDING</option>
-            <option value="received">RECEIVED</option>
-            <option value="not-required">NOT REQUIRED</option>
-            <option value="issue">ISSUE</option>
+            <option value="pending">{tx("PENDING")}</option>
+            <option value="received">{tx("RECEIVED")}</option>
+            <option value="not-required">{tx("NOT REQUIRED")}</option>
+            <option value="issue">{tx("ISSUE")}</option>
           </select>
         </Field>
       </div>
       <div className="acq-grid2">
         <Field label={t.lien}>
           <select value={lienStatus} onChange={(e) => setLienStatus(e.target.value)}>
-            <option value="none-known">NONE KNOWN</option>
-            <option value="disclosed">DISCLOSED</option>
-            <option value="release-pending">RELEASE PENDING</option>
-            <option value="released">RELEASED</option>
-            <option value="disputed">DISPUTED</option>
+            <option value="none-known">{tx("NONE KNOWN")}</option>
+            <option value="disclosed">{tx("DISCLOSED")}</option>
+            <option value="release-pending">{tx("RELEASE PENDING")}</option>
+            <option value="released">{tx("RELEASED")}</option>
+            <option value="disputed">{tx("DISPUTED")}</option>
           </select>
         </Field>
         <Field label={t.clearTitle}>
           <select value={clearTitle} onChange={(e) => setClearTitle(e.target.value)}>
-            <option value="yes">YES</option>
-            <option value="no">NO</option>
-            <option value="unknown">UNKNOWN</option>
+            <option value="yes">{tx("YES")}</option>
+            <option value="no">{tx("NO")}</option>
+            <option value="unknown">{tx("UNKNOWN")}</option>
           </select>
         </Field>
       </div>
-      <Field label="TITLE / DOCUMENT #">
+      <Field label={tx("TITLE / DOCUMENT #")}>
         <Input value={titleNumber} onChange={setTitleNumber} />
       </Field>
       <div className="acq-section">{t.condition}</div>
       <div className="acq-grid2">
-        <Field label="CONDITION">
+        <Field label={tx("CONDITION")}>
           <select value={condition} onChange={(e) => setCondition(e.target.value)}>
-            <option value="running">RUNNING</option>
-            <option value="needs-repair">NEEDS REPAIR</option>
-            <option value="salvage">SALVAGE</option>
-            <option value="unknown">UNKNOWN</option>
+            <option value="running">{tx("RUNNING")}</option>
+            <option value="needs-repair">{tx("NEEDS REPAIR")}</option>
+            <option value="salvage">{tx("SALVAGE")}</option>
+            <option value="unknown">{tx("UNKNOWN")}</option>
           </select>
         </Field>
         <Field label={t.hours}>
@@ -964,9 +1074,9 @@ export default function IXIAssetAcquisitionApp({ context = {}, object = {}, init
       <div className="acq-grid2">
         <Field label={t.freightResp}>
           <select value={freightResponsibility} onChange={(e) => setFreightResponsibility(e.target.value)}>
-            <option value="buyer">BUYER</option>
-            <option value="seller">SELLER</option>
-            <option value="third-party">THIRD PARTY</option>
+            <option value="buyer">{tx("BUYER")}</option>
+            <option value="seller">{tx("SELLER")}</option>
+            <option value="third-party">{tx("THIRD PARTY")}</option>
           </select>
         </Field>
         <Field label={t.pickup}>
@@ -981,33 +1091,33 @@ export default function IXIAssetAcquisitionApp({ context = {}, object = {}, init
         <label>
           <input type="file" accept="application/pdf,image/*" multiple hidden onChange={(e) => addDocs(e.target.files)} />
           <button type="button" onClick={(e) => e.currentTarget.parentElement.querySelector("input").click()}>
-            + BILL OF SALE / INVOICE
+            {tx("+ BILL OF SALE / INVOICE")}
           </button>
         </label>
         <label>
           <input type="file" accept="application/pdf,image/*" multiple hidden onChange={(e) => addDocs(e.target.files)} />
           <button type="button" onClick={(e) => e.currentTarget.parentElement.querySelector("input").click()}>
-            + TITLE / LIEN RELEASE
+            {tx("+ TITLE / LIEN RELEASE")}
           </button>
         </label>
         <label>
           <input type="file" accept="application/pdf,image/*" multiple hidden onChange={(e) => addDocs(e.target.files)} />
           <button type="button" onClick={(e) => e.currentTarget.parentElement.querySelector("input").click()}>
-            + WIRE / PAYMENT PROOF
+            {tx("+ WIRE / PAYMENT PROOF")}
           </button>
         </label>
         <label>
           <input type="file" accept="application/pdf,image/*" multiple hidden onChange={(e) => addDocs(e.target.files)} />
           <button type="button" onClick={(e) => e.currentTarget.parentElement.querySelector("input").click()}>
-            + OTHER DOCUMENT
+            {tx("+ OTHER DOCUMENT")}
           </button>
         </label>
       </div>
       {documents.length ? (
         <div className="acq-row">
-          <small>{documents.length} file(s) selected. Secure upload must finish before this acquisition can be recorded.</small>
+          <small>{lang === "es" ? `${documents.length} archivo(s) seleccionado(s). La carga segura debe finalizar antes de registrar esta adquisición.` : `${documents.length} file(s) selected. Secure upload must finish before this acquisition can be recorded.`}</small>
           <button className="acq-secondary" onClick={() => setDocuments([])}>
-            CLEAR SELECTED FILES
+            {tx("CLEAR SELECTED FILES")}
           </button>
         </div>
       ) : null}
@@ -1015,21 +1125,21 @@ export default function IXIAssetAcquisitionApp({ context = {}, object = {}, init
       <label className="acq-row">
         <input type="checkbox" defaultChecked /> {t.returnCapital}
       </label>
-      <Field label="ADVANCED SETTLEMENT TERMS">
+      <Field label={tx("ADVANCED SETTLEMENT TERMS")}>
         <textarea value={settlementNotes} onChange={(e) => setSettlementNotes(e.target.value)} />
       </Field>
       <Field label={t.notes}>
         <textarea value={notes} onChange={(e) => setNotes(e.target.value)} />
       </Field>
-      {Object.keys(errors).length ? <div className="acq-error">{errors.save || (errors.documents && "SECURE DOCUMENT UPLOAD IS REQUIRED BEFORE SAVE.") || (errors.ownership || errors.settlement ? t.ownershipErr : "ASSET PASSPORT, ENTITY, ACTOR, SELLER, PURCHASE DATE AND A POSITIVE VALUE ARE REQUIRED.")}</div> : null}
+      {Object.keys(errors).length ? <div className="acq-error">{errors.save || (errors.documents && tx("SECURE DOCUMENT UPLOAD IS REQUIRED BEFORE SAVE.")) || (errors.ownership || errors.settlement ? t.ownershipErr : tx("ASSET PASSPORT, ENTITY, ACTOR, SELLER, PURCHASE DATE AND A POSITIVE VALUE ARE REQUIRED."))}</div> : null}
       <button className="acq-primary" onClick={save} disabled={saving}>
-        {saving ? "RECORDING..." : t.save}
+        {saving ? tx("RECORDING...") : t.save}
         <small style={{ display: "block", fontSize: 5 }}>{t.saveSub}</small>
       </button>
       <button className="acq-secondary" onClick={() => onBack?.()}>
         {t.back}
       </button>
-      <div className="acq-foot">This record establishes the asset's user-entered opening basis. IXI does not price the asset. Actual freight, repairs, parts, labor and technology remain canonical TRAN$ACT records and project here until the In Service cutoff.</div>
+      <div className="acq-foot">{tx("THIS RECORD ESTABLISHES THE ASSET'S USER-ENTERED OPENING BASIS. IXI DOES NOT PRICE THE ASSET. ACTUAL FREIGHT, REPAIRS, PARTS, LABOR AND TECHNOLOGY REMAIN CANONICAL TRAN$ACT RECORDS AND PROJECT HERE UNTIL THE IN SERVICE CUTOFF.")}</div>
       <IXIAssetAcquisitionStyles />
     </div>
   );

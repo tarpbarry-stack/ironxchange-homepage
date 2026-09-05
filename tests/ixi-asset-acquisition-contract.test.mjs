@@ -73,3 +73,21 @@ test("Asset Acquisition preserves equal card gutters without changing card geome
   );
   assert.match(styles, /\.ixi-acq\{padding:0 8px 12px\}/u);
 });
+
+test("Asset Acquisition provides complete Mexican Spanish UI coverage", async () => {
+  const app = await readFile(
+    new URL("../components/ixi-aos/transact/modules/asset-acquisition/IXIAssetAcquisitionApp.jsx", import.meta.url),
+    "utf8",
+  );
+  assert.match(app, /const ES_TEXT = Object\.freeze/u);
+  assert.match(app, /"MAKE-READY OPEN": "PREPARACIÓN ABIERTA"/u);
+  assert.match(app, /"PAYMENT DUE DATE": "FECHA DE VENCIMIENTO"/u);
+  assert.match(app, /"CLEAR SELECTED FILES": "BORRAR ARCHIVOS SELECCIONADOS"/u);
+  assert.match(app, /lang=\{lang === "es" \? "es-MX" : "en-US"\}/u);
+  assert.match(app, /\{tx\("PURCHASE PRICE"\)\}/u);
+  assert.match(app, /\{tx\("DIRECT PURCHASE"\)\}/u);
+  assert.match(app, /\{tx\("\+ BILL OF SALE \/ INVOICE"\)\}/u);
+  assert.match(app, /save: tx\(clean\(error\?\.message\)/u);
+  assert.doesNotMatch(app, />MAKE-READY OPEN</u);
+  assert.doesNotMatch(app, />REMOVE (?:OWNER|PAYMENT)</u);
+});
