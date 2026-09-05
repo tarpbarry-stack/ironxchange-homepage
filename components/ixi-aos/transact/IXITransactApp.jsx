@@ -428,6 +428,20 @@ export default function IXITransactApp({
     setSaleSnapshot(saleFromFinancial);
   }, [saleFromFinancial]);
   const active = modules.find((item) => item.id === moduleId) || null;
+  const shellReturnLabel = worksheetOpen
+    ? "CARD"
+    : acquisitionWorkflowIntent && ["freight", "work-order"].includes(moduleId)
+      ? "ACQUISITION"
+      : returnToClose
+        ? "RECORDS"
+        : "APPS";
+  const shellReturnTitle = worksheetOpen
+    ? "RETURN TO CARD"
+    : acquisitionWorkflowIntent && ["freight", "work-order"].includes(moduleId)
+      ? "RETURN TO ACQUISITION"
+      : returnToClose
+        ? "RETURN TO RECORDS"
+        : "RETURN TO TRAN$ACT APPS";
   const back = () => {
     if (worksheetOpen) {
       closeWorksheet();
@@ -435,6 +449,11 @@ export default function IXITransactApp({
     }
     if (returnToClose) {
       onClose?.();
+      return;
+    }
+    if (acquisitionWorkflowIntent && ["freight", "work-order"].includes(moduleId)) {
+      setAcquisitionWorkflowIntent(null);
+      setModuleId("asset-acquisition");
       return;
     }
     setModuleId("");
@@ -1425,13 +1444,25 @@ export default function IXITransactApp({
         >
           <header className="tx-header">
             <div className="tx-brand">
-              <span>{t("IXI TRAN$ACT")}</span>
-              {!active ? (
+              {active ? (
+                <button
+                  type="button"
+                  className="tx-shell-return"
+                  onClick={back}
+                  aria-label={t(shellReturnTitle)}
+                  title={t(shellReturnTitle)}
+                  data-ixi-transact-return={shellReturnLabel.toLowerCase()}
+                >
+                  ‹ {t(shellReturnLabel)}
+                </button>
+              ) : (
                 <>
+                  <span>{t("IXI TRAN$ACT")}</span>
                   <strong>{context.primary.label}</strong>
                   <small>{context.primary.objectType || "AOS OBJECT"}</small>
                 </>
-              ) : worksheetOpen ? (
+              )}
+              {active && worksheetOpen ? (
                 <strong className="tx-worksheet-title">
                   {active.label} · {t("WORKSHEET")}
                 </strong>

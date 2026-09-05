@@ -94,6 +94,33 @@ export default function IXITransactStyles() {
         letter-spacing: .065em;
       }
 
+      .tx-shell-return {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 48px;
+        height: 23px;
+        padding: 0 7px;
+        border: 1px solid #3a403c;
+        border-radius: 5px;
+        background: linear-gradient(#111412, #080a09);
+        color: #ffc400;
+        font: inherit;
+        font-size: 7px;
+        font-weight: 950;
+        letter-spacing: .045em;
+        line-height: 1;
+        white-space: nowrap;
+        cursor: pointer;
+      }
+
+      .tx-shell-return:hover,
+      .tx-shell-return:focus-visible {
+        border-color: #ffc400;
+        outline: none;
+        box-shadow: 0 0 0 1px rgba(255, 196, 0, .18);
+      }
+
       .home-open .tx-brand strong {
         display: block;
         margin-top: 3px;
@@ -111,12 +138,24 @@ export default function IXITransactStyles() {
       }
 
       .tx-worksheet-title {
-        display: block;
-        margin-top: 3px;
+        display: inline-block;
+        margin-left: 8px;
         color: #f4f5f4;
         font-size: 12px;
         line-height: 1;
         letter-spacing: .04em;
+      }
+
+      .worksheet-open .tx-brand {
+        display: flex;
+        align-items: center;
+        min-width: 0;
+      }
+
+      .worksheet-open .tx-worksheet-title {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
       }
 
       .tx-close {
