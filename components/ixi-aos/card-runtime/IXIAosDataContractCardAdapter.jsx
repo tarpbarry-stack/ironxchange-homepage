@@ -2,10 +2,7 @@ import IXIAosBusinessIdentifierSlot from "./modules/IXIAosBusinessIdentifierSlot
 import { getAosParentDisplayName } from "./IXIAosParentIdentity";
 import {
   AOS_OBJECT_DATA_CONTRACT_VERSION,
-  BUSINESS_IDENTIFIER_FIELD_ID,
-  BUSINESS_IDENTIFIER_ROLE,
   buildAosObjectSavePayload,
-  createStableCustomFieldDefinition,
   ensureBusinessIdentifierDefinition
 } from "./IXIAosObjectDataContract";
 
@@ -25,26 +22,11 @@ import {
  */
 export default function IXIAosDataContractCardAdapter({
   children,
-  minimumCustomFields = 0,
   showBusinessIdentifier = true,
   ...props
 }) {
   const sourceObject = props?.object || {};
-  let fieldDefinitions = ensureBusinessIdentifierDefinition(sourceObject);
-
-  const isBusinessIdentifier = definition =>
-    definition?.fieldId === BUSINESS_IDENTIFIER_FIELD_ID ||
-    definition?.presentationRole === BUSINESS_IDENTIFIER_ROLE ||
-    definition?.semanticRole === BUSINESS_IDENTIFIER_ROLE;
-
-  let customCount = fieldDefinitions.filter(definition => !isBusinessIdentifier(definition)).length;
-  while (customCount < minimumCustomFields) {
-    fieldDefinitions = [
-      ...fieldDefinitions,
-      createStableCustomFieldDefinition(fieldDefinitions, customCount)
-    ];
-    customCount += 1;
-  }
+  const fieldDefinitions = ensureBusinessIdentifierDefinition(sourceObject);
 
   const object = {
     ...sourceObject,

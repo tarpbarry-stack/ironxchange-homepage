@@ -1,6 +1,9 @@
 import IXIAosCommercialObjectEditor from "./IXIAosCommercialObjectEditor";
+import IXIAosActionNotice from "./IXIAosActionNotice";
+import { IXIAosCardCommandProvider } from "../IXIAosCardCommandContext";
 import { runIXIActionNoticeLifecycle } from "../../../ixi-object-system/IXIActionNoticeEngine";
 import { IXIAosEditorCommandProvider } from "../IXIAosEditorCommandContext";
+import { getBusinessIdentifierValue } from "../IXIAosObjectDataContract";
 import useIXIAosObjectEditSession from "./useIXIAosObjectEditSession";
 
 function clean(value) {
@@ -17,6 +20,14 @@ function objectIdOf(object = {}) {
   );
 }
 
+function noticeTargetIdOf(object = {}) {
+  return objectIdOf(object) ||
+    clean(getBusinessIdentifierValue(object)) ||
+    clean(object?.templateSlug || object?.metadata?.templateSlug) ||
+    clean(object?.displayName || object?.name) ||
+    "ixi-aos-editor-preview";
+}
+
 /*
  * Commercial edit bridge for numbered AOS cards.
  *
@@ -29,7 +40,6 @@ export default function IXIAosCommercialEditorBridge({
   onSaveObject = null,
   persistenceAdapter = onSaveObject,
   mediaEnabled = true,
-  minimumCustomFields = 0,
   faceNumber = 1,
   children
 }) {
@@ -37,15 +47,15 @@ export default function IXIAosCommercialEditorBridge({
     object,
     persistenceAdapter
   });
+  const noticeObjectId = noticeTargetIdOf(editSession.runtimeObject);
 
   async function save(nextObject) {
     if (!nextObject || typeof nextObject !== "object") {
       throw new Error("Commercial editor save requires an object payload.");
     }
 
-    const objectId = objectIdOf(nextObject) || objectIdOf(editSession.runtimeObject);
     return runIXIActionNoticeLifecycle({
-      objectId,
+      objectId: noticeObjectId,
       savingMessage: "SAVING...",
       successMessage: "SAVED",
       errorMessage: "NOT SAVED",
@@ -60,38 +70,44 @@ export default function IXIAosCommercialEditorBridge({
     : children;
 
   return (
-    <div
-      className="ixi-aos-commercial-editor-bridge"
-      data-commercial-editor-bridge
-      data-editor-face={Number(faceNumber) || 1}
+    <IXIAosCardCommandProvider
+      object={editSession.runtimeObject}
+      objectId={noticeObjectId}
     >
-      <IXIAosEditorCommandProvider
-        openEditor={editSession.begin}
-        faceNumber={faceNumber}
+      <div
+        className="ixi-aos-commercial-editor-bridge"
+        data-commercial-editor-bridge
+        data-editor-face={Number(faceNumber) || 1}
       >
-        {rendered}
-      </IXIAosEditorCommandProvider>
+        <IXIAosEditorCommandProvider
+          openEditor={editSession.begin}
+          faceNumber={faceNumber}
+        >
+          {rendered}
+        </IXIAosEditorCommandProvider>
 
-      {editSession.editing ? (
-        <IXIAosCommercialObjectEditor
-          object={editSession.runtimeObject}
-          saving={editSession.saving}
-          error={editSession.error}
-          conflict={editSession.conflict}
-          onCancel={editSession.cancel}
-          onSave={save}
-          mediaEnabled={mediaEnabled}
-          minimumCustomFields={minimumCustomFields}
-        />
-      ) : null}
+        {editSession.editing ? (
+          <IXIAosCommercialObjectEditor
+            object={editSession.runtimeObject}
+            saving={editSession.saving}
+            error={editSession.error}
+            conflict={editSession.conflict}
+            onCancel={editSession.cancel}
+            onSave={save}
+            mediaEnabled={mediaEnabled}
+          />
+        ) : null}
 
-      <style jsx>{`
-        .ixi-aos-commercial-editor-bridge {
-          position: relative;
-          width: 298px;
-          height: 471px;
-        }
-      `}</style>
-    </div>
+        <IXIAosActionNotice variant="field" />
+
+        <style jsx>{`
+          .ixi-aos-commercial-editor-bridge {
+            position: relative;
+            width: 298px;
+            height: 471px;
+          }
+        `}</style>
+      </div>
+    </IXIAosCardCommandProvider>
   );
 }

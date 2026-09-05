@@ -347,7 +347,14 @@ function formatAuctionDate(value = "") {
     return "";
   }
 
-  const date = new Date(raw);
+  const dateOnly = raw.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  const date = dateOnly
+    ? new Date(Date.UTC(
+        Number(dateOnly[1]),
+        Number(dateOnly[2]) - 1,
+        Number(dateOnly[3])
+      ))
+    : new Date(raw);
 
   if (Number.isNaN(date.getTime())) {
     return raw.toUpperCase();
@@ -357,7 +364,8 @@ function formatAuctionDate(value = "") {
     weekday: "long",
     month: "long",
     day: "numeric",
-    year: "numeric"
+    year: "numeric",
+    timeZone: "UTC"
   })
     .format(date)
     .toUpperCase();

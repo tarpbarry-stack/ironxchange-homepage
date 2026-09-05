@@ -95,8 +95,7 @@ export default function IXIAosCommercialObjectEditor({
   conflict = null,
   onCancel = null,
   onSave = null,
-  mediaEnabled = true,
-  minimumCustomFields = 0
+  mediaEnabled = true
 }) {
   const [name, setName] = useState(getObjectDisplayName(object));
   const [definitions, setDefinitions] = useState(() => normalizeDefinitions(object));
@@ -104,24 +103,7 @@ export default function IXIAosCommercialObjectEditor({
   const [media, setMedia] = useState(asArray(object?.media));
 
   useEffect(() => {
-    let nextDefinitions = normalizeDefinitions(object);
-    const used = new Set(nextDefinitions.map(item => item.fieldId));
-    let customCount = nextDefinitions.filter(item => !isBusinessIdentifier(item)).length;
-
-    while (customCount < Number(minimumCustomFields || 0)) {
-      let fieldId = createFieldId(nextDefinitions);
-      while (used.has(fieldId)) fieldId = createFieldId([...nextDefinitions, { fieldId }]);
-      used.add(fieldId);
-      nextDefinitions.push({
-        fieldId,
-        label: `FIELD ${customCount + 1}`,
-        fieldType: "text",
-        type: "text",
-        editable: true,
-        presentationOrder: nextDefinitions.length
-      });
-      customCount += 1;
-    }
+    const nextDefinitions = normalizeDefinitions(object);
 
     const nextDraft = {};
     nextDefinitions.forEach(definition => {
@@ -135,7 +117,7 @@ export default function IXIAosCommercialObjectEditor({
     setDefinitions(nextDefinitions);
     setDraft(nextDraft);
     setMedia(asArray(object?.media));
-  }, [object, minimumCustomFields]);
+  }, [object]);
 
   function addField() {
     setDefinitions(current => {
