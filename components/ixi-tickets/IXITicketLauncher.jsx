@@ -47,7 +47,7 @@ export default function IXITicketLauncher({ compact = false }) {
           color: rgba(255,196,0,.78);
           text-decoration: none;
           font-family: inherit;
-          font-size: 8px;
+          font-size: 10px;
           line-height: 1;
           font-weight: 950;
           letter-spacing: .65px;
@@ -83,7 +83,7 @@ export default function IXITicketLauncher({ compact = false }) {
           border-radius: 7px;
           background: #ffc400;
           color: #050505;
-          font-size: 7px;
+          font-size: 9px;
         }
 
         @media (max-width: 850px) {
