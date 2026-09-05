@@ -429,6 +429,10 @@ export default function IXITransactApp({
   }, [saleFromFinancial]);
   const active = modules.find((item) => item.id === moduleId) || null;
   const back = () => {
+    if (worksheetOpen) {
+      closeWorksheet();
+      return;
+    }
     if (returnToClose) {
       onClose?.();
       return;

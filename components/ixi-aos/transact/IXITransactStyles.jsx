@@ -23,10 +23,11 @@ export default function IXITransactStyles() {
 
       .ixi-transact-dialog.worksheet-open {
         position: fixed;
-        inset: 16px;
-        width: min(1180px, calc(100vw - 32px));
-        height: min(820px, calc(100dvh - 32px));
-        margin: auto;
+        inset: 50% auto auto 50%;
+        width: min(960px, 88vw);
+        height: min(700px, 82dvh);
+        margin: 0;
+        transform: translate(-50%, -50%);
         overflow: hidden;
         border: 1px solid #3b433f;
         border-radius: 2px;
@@ -225,15 +226,6 @@ export default function IXITransactStyles() {
         border-radius: 0 !important;
         background: #090c0a !important;
         box-shadow: none !important;
-      }
-
-      @media (max-width: 640px) {
-        .ixi-transact-dialog.worksheet-open {
-          inset: 0;
-          width: 100vw;
-          height: 100dvh;
-          border: 0;
-        }
       }
 
       .module-open .tx-body > * * {

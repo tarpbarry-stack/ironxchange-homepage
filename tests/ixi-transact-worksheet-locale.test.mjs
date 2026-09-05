@@ -4,10 +4,12 @@ import test from "node:test";
 
 const read = path => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 
-test("one shared TRANSACT shell opens modules as worksheets without card presentation", async () => {
-  const [shell, styles] = await Promise.all([
+test("TRANSACT arrows open bounded worksheets and module close returns to the card", async () => {
+  const [shell, styles, quoteStyles, saleStyles] = await Promise.all([
     read("components/ixi-aos/transact/IXITransactApp.jsx"),
     read("components/ixi-aos/transact/IXITransactStyles.jsx"),
+    read("components/ixi-aos/transact/modules/quote/IXIQuoteStyles.jsx"),
+    read("components/ixi-aos/transact/modules/equipment-sale/IXIEquipmentSaleStyles.jsx"),
   ]);
   assert.match(shell, /<dialog/u);
   assert.match(shell, /dialog\.showModal\?\.\(\)/u);
@@ -18,8 +20,12 @@ test("one shared TRANSACT shell opens modules as worksheets without card present
   assert.match(shell, /\.es-card-actions button:first-child/u);
   assert.doesNotMatch(shell, /className="tx-language"/u);
   assert.match(styles, /\.ixi-transact-dialog\.worksheet-open/u);
-  assert.match(styles, /width:\s*min\(1180px,\s*calc\(100vw - 32px\)\)/u);
-  assert.match(styles, /height:\s*min\(820px,\s*calc\(100dvh - 32px\)\)/u);
+  assert.match(styles, /width:\s*min\(960px,\s*88vw\)/u);
+  assert.match(styles, /height:\s*min\(700px,\s*82dvh\)/u);
+  assert.doesNotMatch(styles, /width:\s*100vw/u);
+  assert.match(shell, /const back = \(\) => \{\s*if \(worksheetOpen\) \{\s*closeWorksheet\(\);\s*return;/u);
+  assert.match(quoteStyles, /\.qt-workspace\{[^}]*width:min\(960px,88vw\)[^}]*height:min\(700px,82dvh\)/u);
+  assert.match(saleStyles, /\.es-workspace\{[^}]*width:min\(960px,88vw\)[^}]*height:min\(700px,82dvh\)/u);
   assert.doesNotMatch(styles, /--ixi-transact-worksheet-scale/u);
   assert.match(styles, /\.worksheet-open \.module-open \.tx-body > \*\s*\{[^}]*border:\s*0\s*!important[^}]*border-radius:\s*0\s*!important[^}]*box-shadow:\s*none\s*!important/u);
   assert.match(shell, /!worksheetOpen\s*\?\s*\(/u);
