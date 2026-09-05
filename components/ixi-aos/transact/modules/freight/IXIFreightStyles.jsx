@@ -38,10 +38,6 @@ export default function IXIFreightStyles(){return <style jsx global>{`
 .ixi-freight .fr-kpi strong{display:block;min-width:0;overflow-wrap:anywhere;font-size:11px;margin-top:2px}
 .ixi-freight .fr-kpi strong.unset{color:#9ca6a0;font-size:8px;line-height:14px}
 .ixi-freight .fr-kpi.warn strong{color:#ffd21a}
-.ixi-freight .fr-row{width:100%;min-width:0;max-width:100%;display:grid;grid-template-columns:minmax(82px,34%) minmax(0,1fr);align-items:start;gap:7px;padding:5px 0;border-bottom:1px solid #202823}
-.ixi-freight .fr-row.total{margin-top:4px;border-top:1px solid #344039}
-.ixi-freight .fr-row span{min-width:0;color:#939d97}
-.ixi-freight .fr-row b{min-width:0;max-width:100%;text-align:right;white-space:normal;overflow-wrap:anywhere;word-break:normal;line-height:1.25}
 .ixi-freight .fr-invoice{min-width:0;max-width:100%;border-left:2px solid #d3aa12;padding:5px 6px;margin:5px 0;background:#101612}
 .ixi-freight .fr-invoice.credit{border-color:#36c77b}
 .ixi-freight .fr-invoice div{min-width:0;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:7px}
