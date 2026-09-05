@@ -16,7 +16,11 @@ test("every operational TRAN$ACT module receives one fixed shell return path", a
   const operational = registry.getIXITransactModules({ objectType: "machine" });
 
   assert.ok(operational.length >= 23);
-  assert.match(app, /\{active \? \(\s*<button\s+type="button"\s+className="tx-shell-return"/s);
+  assert.match(app, /<div className="tx-brand">\s*<span>\{t\("IXI TRAN\$ACT"\)\}<\/span>/s);
+  assert.match(
+    app,
+    /<div className="tx-header-actions">[\s\S]*\{active \? \([\s\S]*className="tx-shell-return"/,
+  );
   assert.match(app, /onClick=\{back\}/);
   assert.match(app, /data-ixi-transact-return=\{shellReturnLabel\.toLowerCase\(\)\}/);
   assert.match(styles, /\.tx-header\s*\{[^}]*position:\s*absolute/s);
@@ -43,6 +47,7 @@ test("shell return and global close remain separate controls", async () => {
   const app = await read("components/ixi-aos/transact/IXITransactApp.jsx");
 
   assert.match(app, /className="tx-shell-return"[\s\S]*onClick=\{back\}/);
+  assert.ok(app.indexOf('className="tx-shell-return"') < app.indexOf('className="tx-expand"'));
   assert.match(app, /className="tx-close"[\s\S]*onClick=\{worksheetOpen \? closeWorksheet : \(\) => onClose\?\.\(\)\}/);
   assert.match(app, /\u00d7/);
 });

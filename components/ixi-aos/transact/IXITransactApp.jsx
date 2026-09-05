@@ -1459,25 +1459,13 @@ export default function IXITransactApp({
         >
           <header className="tx-header">
             <div className="tx-brand">
-              {active ? (
-                <button
-                  type="button"
-                  className="tx-shell-return"
-                  onClick={back}
-                  aria-label={t(shellReturnTitle)}
-                  title={t(shellReturnTitle)}
-                  data-ixi-transact-return={shellReturnLabel.toLowerCase()}
-                >
-                  ‹ {t(shellReturnLabel)}
-                </button>
-              ) : (
+              <span>{t("IXI TRAN$ACT")}</span>
+              {!active ? (
                 <>
-                  <span>{t("IXI TRAN$ACT")}</span>
                   <strong>{context.primary.label}</strong>
                   <small>{context.primary.objectType || "AOS OBJECT"}</small>
                 </>
-              )}
-              {active && worksheetOpen ? (
+              ) : worksheetOpen ? (
                 <strong className="tx-worksheet-title">
                   {active.label} · {t("WORKSHEET")}
                 </strong>
@@ -1485,23 +1473,35 @@ export default function IXITransactApp({
             </div>
             <div className="tx-header-actions">
               {active ? (
-                <button
-                  type="button"
-                  className="tx-expand"
-                  onClick={worksheetOpen ? closeWorksheet : openWorksheet}
-                  aria-label={
-                    worksheetOpen
-                      ? t("RETURN TO CARD")
-                      : t("EXPAND WORKSHEET")
-                  }
-                  title={
-                    worksheetOpen
-                      ? t("RETURN TO CARD")
-                      : t("EXPAND WORKSHEET")
-                  }
-                >
-                  {worksheetOpen ? "↙" : "↗"}
-                </button>
+                <>
+                  <button
+                    type="button"
+                    className="tx-shell-return"
+                    onClick={back}
+                    aria-label={t(shellReturnTitle)}
+                    title={t(shellReturnTitle)}
+                    data-ixi-transact-return={shellReturnLabel.toLowerCase()}
+                  >
+                    ‹ {t(shellReturnLabel)}
+                  </button>
+                  <button
+                    type="button"
+                    className="tx-expand"
+                    onClick={worksheetOpen ? closeWorksheet : openWorksheet}
+                    aria-label={
+                      worksheetOpen
+                        ? t("RETURN TO CARD")
+                        : t("EXPAND WORKSHEET")
+                    }
+                    title={
+                      worksheetOpen
+                        ? t("RETURN TO CARD")
+                        : t("EXPAND WORKSHEET")
+                    }
+                  >
+                    {worksheetOpen ? "↙" : "↗"}
+                  </button>
+                </>
               ) : null}
               <button
                 type="button"
