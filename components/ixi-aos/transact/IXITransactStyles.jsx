@@ -100,7 +100,18 @@ export default function IXITransactStyles() {
 
       .module-open .tx-body {
         top: 31px;
-        padding: 5px 7px 12px;
+        left: -1px;
+        right: -1px;
+        min-width: 0;
+        padding: 0 0 12px;
+        overflow-x: hidden;
+        overflow-y: auto;
+      }
+
+      .module-open .tx-body > * {
+        width: 100%;
+        min-width: 0;
+        max-width: 100%;
       }
 
       .tx-body::-webkit-scrollbar {
