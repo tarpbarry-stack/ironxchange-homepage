@@ -170,6 +170,8 @@ export default function IXITransactObjectConsole({
     )
   );
 
+  const [consoleModules, setConsoleModules] = useState({});
+
   const listingIndex = slots.findIndex(
     slot => slot.type === IXI_CONSOLE_SLOT_TYPES.LISTING
   );
@@ -247,6 +249,13 @@ export default function IXITransactObjectConsole({
     event?.preventDefault?.();
     event?.stopPropagation?.();
 
+    setConsoleModules(current => {
+      if (!current[slotId]) return current;
+      const next = { ...current };
+      delete next[slotId];
+      return next;
+    });
+
     saveSlots(
       cycleConsoleSlotFace({
         slots,
@@ -256,6 +265,46 @@ export default function IXITransactObjectConsole({
         defaultFace: 1
       })
     );
+  }
+
+  function openConsoleModule(slotId, item, payload = {}) {
+    const moduleId = String(item?.id || "").trim();
+    if (!moduleId) return;
+    setConsoleModules(current => ({
+      ...current,
+      [slotId]: {
+        moduleId,
+        financialDocumentId: String(
+          payload?.financialDocumentId ||
+          payload?.financialDocument?.financialDocumentId ||
+          ""
+        ).trim()
+      }
+    }));
+  }
+
+  function closeConsoleModule(slotId) {
+    setConsoleModules(current => {
+      if (!current[slotId]) return current;
+      const next = { ...current };
+      delete next[slotId];
+      return next;
+    });
+  }
+
+  function recordsForConsoleModule(slotId) {
+    const selectedId = String(
+      consoleModules[slotId]?.financialDocumentId || ""
+    ).trim();
+    if (!selectedId) return financialRecords;
+    return [...financialRecords].sort(item => {
+      const left = String(
+        item?.financialDocument?.financialDocumentId ||
+        item?.record?.financialDocument?.financialDocumentId ||
+        ""
+      ).trim();
+      return left === selectedId ? -1 : 0;
+    });
   }
 
   async function handleOpenModule(item, moduleContext, payload = {}) {
@@ -301,6 +350,23 @@ export default function IXITransactObjectConsole({
           const first = index === 0;
           const last = index === slots.length - 1;
           const leftOfPrimary = index < listingIndex;
+          const consoleModule = !isListing
+            ? consoleModules[slot.slotId] || null
+            : null;
+          const slotFinancialRecords = !isListing
+            ? recordsForConsoleModule(slot.slotId)
+            : financialRecords;
+          const selectedDocument = consoleModule?.financialDocumentId
+            ? (
+                slotFinancialRecords[0]?.financialDocument ||
+                slotFinancialRecords[0]?.record?.financialDocument ||
+                null
+              )
+            : null;
+          const slotActiveWorkOrder =
+            selectedDocument?.workOrder || activeWorkOrder;
+          const slotActiveTechWorkOrder =
+            selectedDocument?.techWorkOrder || activeTechWorkOrder;
 
           return (
             <section
@@ -368,13 +434,33 @@ export default function IXITransactObjectConsole({
                 </>
               ) : (
                 <>
-                  <IXITransactConsolePanel
-                    context={context}
-                    face={slot.face}
-                    financialRecords={financialRecords}
-                    onOpenModule={handleOpenModule}
-                  />
+                  {consoleModule ? (
+                    <IXITransactApp
+                      object={object}
+                      initialModuleId={consoleModule.moduleId}
+                      returnToClose
+                      actor={actor}
+                      entity={entity}
+                      activeWorkOrder={slotActiveWorkOrder}
+                      activeTechWorkOrder={slotActiveTechWorkOrder}
+                      financialRecords={slotFinancialRecords}
+                      onFinancialRecordsChange={onFinancialRecordsChange}
+                      permissions={permissions}
+                      onClose={() => closeConsoleModule(slot.slotId)}
+                      onOpenModule={handleOpenModule}
+                    />
+                  ) : (
+                    <IXITransactConsolePanel
+                      context={context}
+                      face={slot.face}
+                      financialRecords={financialRecords}
+                      onOpenModule={(item, moduleContext, payload) =>
+                        openConsoleModule(slot.slotId, item, payload)
+                      }
+                    />
+                  )}
 
+                  {!consoleModule ? (
                   <button
                     type="button"
                     className="tx-console-face-button"
@@ -397,6 +483,7 @@ export default function IXITransactObjectConsole({
                   >
                     <span />
                   </button>
+                  ) : null}
                 </>
               )}
             </section>
