@@ -1,0 +1,154 @@
+name: Deploy IX-Core Ticket deletion
+
+on:
+  workflow_dispatch:
+    inputs:
+      commit_sha:
+        description: Immutable IX-Core commit SHA
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ixi-core-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+      AWS_INSTANCE_ID: ${{ secrets.AWS_INSTANCE_ID }}
+      IXI_CORE_SHA: ${{ inputs.commit_sha }}
+
+    steps:
+      - name: Validate immutable release
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$IXI_CORE_SHA" =~ ^[0-9a-f]{40}$ ]]
+          resolved_sha="$(curl -fsSL \
+            -H 'Accept: application/vnd.github+json' \
+            -H 'X-GitHub-Api-Version: 2022-11-28' \
+            "https://api.github.com/repos/tarpbarry-stack/ixi-core/commits/$IXI_CORE_SHA" | jq -r '.sha')"
+          test "$resolved_sha" = "$IXI_CORE_SHA"
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Deploy guarded Ticket deletion release
+        id: deploy
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          remote_script="$(cat <<'REMOTE_SCRIPT'
+          set -eu
+
+          APP=/var/www/ix-core
+          RELEASE_SHA=__IXI_CORE_SHA__
+          STAGE=/tmp/ixi-core-ticket-delete-__IXI_CORE_SHA__
+          ARCHIVE=/tmp/ixi-core-ticket-delete-__IXI_CORE_SHA__.tgz
+          BACKUP=/var/backups/ixi-core-releases/ticket-delete-pre-__IXI_CORE_SHA__.tgz
+          FILES='tickets/constants.js tickets/routes/ticketRouter.js tickets/services/ticketService.js'
+          SUCCESS=0
+
+          run_pm2() {
+            if [ "$PM2_USER" = root ]; then pm2 "$@"; else sudo -u ubuntu -H pm2 "$@"; fi
+          }
+
+          rollback() {
+            if [ "$SUCCESS" -eq 1 ]; then return; fi
+            echo 'Deployment failed; restoring previous Ticket source.' >&2
+            if [ -f "$BACKUP" ]; then
+              cd "$APP"
+              tar -xzf "$BACKUP"
+              run_pm2 reload IX-Core --update-env || run_pm2 restart IX-Core --update-env || true
+            fi
+          }
+          trap rollback EXIT
+
+          test -d "$APP"
+          test -f "$APP/index.js"
+          if pm2 describe IX-Core >/dev/null 2>&1; then
+            PM2_USER=root
+          elif sudo -u ubuntu -H pm2 describe IX-Core >/dev/null 2>&1; then
+            PM2_USER=ubuntu
+          else
+            echo 'PM2 process IX-Core was not found.' >&2
+            exit 1
+          fi
+
+          rm -rf "$STAGE"
+          mkdir -p "$STAGE" "$(dirname "$BACKUP")"
+          curl -fsSL "https://github.com/tarpbarry-stack/ixi-core/archive/$RELEASE_SHA.tar.gz" -o "$ARCHIVE"
+          tar -xzf "$ARCHIVE" --strip-components=1 -C "$STAGE"
+
+          cd "$STAGE"
+          npm ci --ignore-scripts
+          node --test tickets/ticketDeletion.test.js
+          node --check tickets/constants.js
+          node --check tickets/routes/ticketRouter.js
+          node --check tickets/services/ticketService.js
+          node -e "require('./tickets/routes/ticketRouter')"
+
+          cd "$APP"
+          for file in $FILES; do test -f "$file"; done
+          tar -czf "$BACKUP" $FILES
+          for file in $FILES; do install -D -m 0644 "$STAGE/$file" "$APP/$file"; done
+
+          run_pm2 reload IX-Core --update-env
+          attempt=0
+          until curl -fsS http://127.0.0.1:4100/health >/dev/null; do
+            attempt=$((attempt + 1))
+            if [ "$attempt" -ge 15 ]; then exit 1; fi
+            sleep 2
+          done
+
+          route_status="$(curl -sS -o "$STAGE/delete-route.json" -w '%{http_code}' \
+            -X DELETE -H 'Content-Type: application/json' \
+            -d '{"expectedRevision":1,"reason":"deployment-probe"}' \
+            http://127.0.0.1:4100/tickets/v1/tickets/deployment-probe)"
+          case "$route_status" in 401|403) ;; *) cat "$STAGE/delete-route.json" >&2 || true; exit 1 ;; esac
+
+          SUCCESS=1
+          trap - EXIT
+          rm -rf "$STAGE" "$ARCHIVE"
+          printf 'IX-Core Ticket deletion %s deployed; health=200; protected-route=%s\n' "$RELEASE_SHA" "$route_status"
+          REMOTE_SCRIPT
+          )"
+
+          remote_script="${remote_script//__IXI_CORE_SHA__/$IXI_CORE_SHA}"
+          parameters="$(jq -cn --arg command "$remote_script" '{commands:[$command]}')"
+          command_id="$(aws ssm send-command \
+            --region "$AWS_REGION" \
+            --instance-ids "$AWS_INSTANCE_ID" \
+            --document-name AWS-RunShellScript \
+            --comment "Deploy IX-Core Ticket deletion $IXI_CORE_SHA" \
+            --parameters "$parameters" \
+            --query 'Command.CommandId' \
+            --output text)"
+          echo "command_id=$command_id" >> "$GITHUB_OUTPUT"
+
+          if ! aws ssm wait command-executed --region "$AWS_REGION" --command-id "$command_id" --instance-id "$AWS_INSTANCE_ID"; then true; fi
+          invocation="$(aws ssm get-command-invocation --region "$AWS_REGION" --command-id "$command_id" --instance-id "$AWS_INSTANCE_ID")"
+          printf '%s' "$invocation" | jq -r '.StandardOutputContent'
+          printf '%s' "$invocation" | jq -r '.StandardErrorContent' >&2
+          test "$(printf '%s' "$invocation" | jq -r '.Status')" = "Success"
+
+      - name: Record release
+        shell: bash
+        run: |
+          {
+            echo '## IX-Core Ticket deletion release'
+            echo "- Commit: \`$IXI_CORE_SHA\`"
+            echo "- SSM command: \`${{ steps.deploy.outputs.command_id }}\`"
+            echo '- Health: passed'
+            echo '- Protected DELETE route: passed'
+          } >> "$GITHUB_STEP_SUMMARY"

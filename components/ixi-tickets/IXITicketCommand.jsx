@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 
-import { IXI_TICKET_STATUS } from "../../lib/ixi-tickets/IXITicketContract";
+import { isIXITicketDeletable, IXI_TICKET_STATUS } from "../../lib/ixi-tickets/IXITicketContract";
 import { startRemoteTicket } from "../../lib/ixi-tickets/ixiTicketClient";
 import { useIXITickets } from "./IXITicketProvider";
 import styles from "./IXITicketCommand.module.css";
@@ -51,6 +51,7 @@ export default function IXITicketCommand() {
     popOutTicket,
     approveTicket,
     reopenTicketRemote,
+    deleteTicket,
     refreshRemoteTickets,
     remoteState
   } = useIXITickets();
@@ -65,6 +66,7 @@ export default function IXITicketCommand() {
   const [userScore, setUserScore] = useState("");
   const [actionNotice, setActionNotice] = useState("");
   const [actionBusy, setActionBusy] = useState(false);
+  const [deleteConfirmId, setDeleteConfirmId] = useState("");
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -100,6 +102,7 @@ export default function IXITicketCommand() {
     setVerifyNote(selected?.metadata?.userReview?.note || "");
     setUserScore(selected?.metadata?.userReview?.score ? String(selected.metadata.userReview.score) : "");
     setActionNotice("");
+    setDeleteConfirmId("");
   }, [selected?.ticketId, selected?.revision]);
 
   const counts = useMemo(() => ({
@@ -192,6 +195,23 @@ export default function IXITicketCommand() {
       await refreshRemoteTickets();
     } catch (error) {
       setActionNotice(error.message || "Ticket reopen failed.");
+    } finally {
+      setActionBusy(false);
+    }
+  }
+
+  async function confirmDelete() {
+    if (!selected || actionBusy || deleteConfirmId !== selected.ticketId) return;
+    const displayNumber = selected.displayNumber;
+    setActionBusy(true);
+    setActionNotice("");
+    try {
+      await deleteTicket(selected, "obsolete");
+      setSelectedId("");
+      setDeleteConfirmId("");
+      setActionNotice(`${displayNumber} was deleted. Its deletion audit remains protected in IX-Core.`);
+    } catch (error) {
+      setActionNotice(error.message || "Ticket deletion failed.");
     } finally {
       setActionBusy(false);
     }
@@ -309,10 +329,26 @@ export default function IXITicketCommand() {
                   {ticketLeaseExpired(selected) ? (
                     <button disabled={actionBusy || !Number.isInteger(selected.revision)} onClick={() => startWork(selected, "expired-lease-recovery")}>RECOVER ABANDONED TICKET</button>
                   ) : null}
+                  {isIXITicketDeletable(selected) ? (
+                    <button className={styles.deleteButton} disabled={actionBusy} onClick={() => setDeleteConfirmId(selected.ticketId)}>DELETE TICKET</button>
+                  ) : null}
                   <button onClick={() => openTicket(selected.ticketId, "floating")}>OPEN WORKSHEET</button>
                   <button onClick={() => popOutTicket(selected.ticketId)}>POP OUT ↗</button>
                 </div>
               </div>
+
+              {deleteConfirmId === selected.ticketId ? (
+                <section className={styles.deleteConfirm} role="alertdialog" aria-labelledby="delete-ticket-title" aria-describedby="delete-ticket-description">
+                  <div>
+                    <h3 id="delete-ticket-title">DELETE {selected.displayNumber}?</h3>
+                    <p id="delete-ticket-description">This unworked Ticket will be removed from Ticket Command. This cannot be undone.</p>
+                  </div>
+                  <div>
+                    <button disabled={actionBusy} onClick={() => setDeleteConfirmId("")}>CANCEL</button>
+                    <button className={styles.confirmDeleteButton} disabled={actionBusy} onClick={confirmDelete}>{actionBusy ? "DELETING..." : "CONFIRM DELETE"}</button>
+                  </div>
+                </section>
+              ) : null}
 
               <section className={styles.auditBlock}>
                 <h4>ORIGINAL REQUEST</h4>

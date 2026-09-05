@@ -51,6 +51,7 @@ Target server contract:
 - `GET /tickets/v1/tickets`
 - `GET /tickets/v1/tickets/:ticketId`
 - `PATCH /tickets/v1/tickets/:ticketId`
+- `DELETE /tickets/v1/tickets/:ticketId` (unworked `draft` or `ready-for-chat` only)
 - `POST /tickets/v1/tickets/:ticketId/github/publish`
 - `POST /tickets/v1/tickets/:ticketId/verify`
 - `POST /tickets/v1/tickets/:ticketId/reopen`

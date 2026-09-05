@@ -1,8 +1,9 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/router";
 
-import { createIXITicket, normalizeIXITicket } from "../../lib/ixi-tickets/IXITicketContract";
+import { createIXITicket, isIXITicketDeletable, normalizeIXITicket } from "../../lib/ixi-tickets/IXITicketContract";
 import {
+  deleteLocalTicket,
   getLocalTicket,
   listLocalTickets,
   saveLocalTicket,
@@ -10,6 +11,7 @@ import {
 } from "../../lib/ixi-tickets/ixiTicketDraftStore";
 import { captureBrowserTicketContext } from "../../lib/ixi-tickets/ixiTicketContext";
 import {
+  deleteRemoteTicket,
   extractTicket,
   extractTickets,
   getTicketApiInfo,
@@ -93,7 +95,15 @@ export function IXITicketProvider({ children }) {
           if (!current || revisionOf(ticket) >= revisionOf(current)) byId.set(ticket.ticketId, ticket);
         });
 
-      const remoteTickets = Array.from(byId.values());
+      const deletedTicketIds = new Set(
+        Array.from(byId.values())
+          .filter(ticket => ticket.status === "deleted")
+          .map(ticket => ticket.ticketId)
+      );
+      deletedTicketIds.forEach(deleteLocalTicket);
+
+      const remoteTickets = Array.from(byId.values())
+        .filter(ticket => ticket.status !== "deleted");
       remoteTickets.forEach(persistCanonicalRemote);
 
       const pendingLegacyReady = legacyReady.filter(ticket => !byId.has(ticket.ticketId));
@@ -228,6 +238,23 @@ export function IXITicketProvider({ children }) {
     }));
   }, [acceptRemoteTicket]);
 
+  const deleteTicket = useCallback(async (ticket, reason = "obsolete") => {
+    if (!ticket?.ticketId) throw new Error("Ticket is required for deletion.");
+    if (!isIXITicketDeletable(ticket)) {
+      throw new Error("Only unworked DRAFT or READY FOR CHAT Tickets can be deleted.");
+    }
+
+    if (Number.isInteger(ticket.revision)) {
+      await deleteRemoteTicket(ticket.ticketId, ticket.revision, reason);
+    }
+
+    deleteLocalTicket(ticket.ticketId);
+    setTickets(listLocalTickets());
+    setActiveTicketId(current => current === ticket.ticketId ? "" : current);
+    setOpen(current => activeTicketId === ticket.ticketId ? false : current);
+    return true;
+  }, [activeTicketId]);
+
   const closeWorksheet = useCallback(() => setOpen(false), []);
 
   const popOutTicket = useCallback(ticketId => {
@@ -253,6 +280,7 @@ export function IXITicketProvider({ children }) {
     submitCloseoutRemote,
     approveTicket,
     reopenTicketRemote,
+    deleteTicket,
     closeWorksheet,
     popOutTicket,
     refreshRemoteTickets,
@@ -271,6 +299,7 @@ export function IXITicketProvider({ children }) {
     submitCloseoutRemote,
     approveTicket,
     reopenTicketRemote,
+    deleteTicket,
     closeWorksheet,
     popOutTicket,
     refreshRemoteTickets,
