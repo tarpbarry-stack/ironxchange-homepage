@@ -22,6 +22,7 @@ test("CT-260905-000001 and CT-260905-000002 keep one real IXI rail on Cards 004,
     assert.match(read(path), /IXIAosGenericCardRailShell/u, `${path} must retain the shared functional rail shell`);
   }
   assert.match(railShell, /<IXIObjectRail/u);
+  assert.match(railShell, /\.ixi-generic-card-rail-shell :global\(\.board-command-rail\) \{[\s\S]*?bottom: 0;/u);
   assert.doesNotMatch(containerLayout, /gcv12-bottom-rail/u);
   assert.doesNotMatch(objectLayout, /go007-rail/u);
 });
