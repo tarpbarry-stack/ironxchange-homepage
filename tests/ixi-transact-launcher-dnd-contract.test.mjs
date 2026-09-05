@@ -62,7 +62,7 @@ test("every open TRANSACT module mounts inside the 298px shell", () => {
   );
   assert.match(
     styles,
-    /\.module-open \.tx-body > \*\s*\{[\s\S]*?width:\s*100%;[\s\S]*?min-width:\s*0;[\s\S]*?max-width:\s*100%;/u,
+    /\.module-open \.tx-body > \*\s*\{[\s\S]*?width:\s*100%\s*!important;[\s\S]*?min-width:\s*0\s*!important;[\s\S]*?max-width:\s*100%\s*!important;/u,
   );
 });
 

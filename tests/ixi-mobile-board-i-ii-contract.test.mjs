@@ -4,6 +4,7 @@ import fs from "node:fs";
 
 const page = fs.readFileSync("pages/aos/mobile-board.js", "utf8");
 const scaler = fs.readFileSync("components/ixi-mobile/IXIImmutableScaledSurface.jsx", "utf8");
+const geometry = fs.readFileSync("lib/ixiObjectGeometry.js", "utf8");
 
 test("board uses authenticated current-user owned private inventory", () => {
   assert.match(page, /sdk\.currentUser\.show\(\)/);
@@ -22,8 +23,8 @@ test("I and II modes reuse the same production machine card", () => {
 });
 
 test("every machine remains an immutable native 300x475 surface", () => {
-  assert.match(page, /nativeWidth=\{300\}/);
-  assert.match(page, /nativeHeight=\{475\}/);
+  assert.match(page, /<IXIScaledCardShell[\s\S]*?objectFamily="private"/);
+  assert.match(geometry, /private:\s*\{\s*nativeWidth:\s*300,\s*nativeHeight:\s*475/u);
   assert.match(page, /cardContext="inventory"/);
   assert.match(page, /sellerMode/);
   assert.match(scaler, /ResizeObserver/);

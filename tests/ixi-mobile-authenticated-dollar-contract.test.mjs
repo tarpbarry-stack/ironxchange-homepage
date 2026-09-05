@@ -22,7 +22,7 @@ test("authenticated gate preserves immutable 300x475 owner card", () => {
 });
 
 test("dollar remains the existing owned runtime action", () => {
-  assert.match(ownedRuntime, /onOpenTransact=\{\(\) => !saving && setTransactOpen\(true\)\}/);
+  assert.match(ownedRuntime, /onOpenTransact=\{\(\) => !saving && setTransactVisibility\(true\)\}/);
   assert.match(ownedRuntime, /IXIOwnedPrivateTransactRuntime/);
-  assert.match(ownedRuntime, /onClose=\{\(\) => setTransactOpen\(false\)\}/);
+  assert.match(ownedRuntime, /onClose=\{\(\) => setTransactVisibility\(false\)\}/);
 });

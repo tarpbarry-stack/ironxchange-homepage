@@ -6,7 +6,7 @@ name: Deploy IX-Core Freight
       commit_sha:
         description: Immutable IX-Core commit SHA
         required: true
-        default: 5dd4b09d7fa0720edd494583eda6d63291972b23
+        default: b8efa04f3f8e383e230a8e6c4773bf0bc1612b3e
   push:
     branches: [main]
     paths: [".github/workflows/deploy-ixi-core-freight.yml"]
@@ -25,7 +25,7 @@ jobs:
     env:
       AWS_REGION: ${{ secrets.AWS_REGION }}
       AWS_INSTANCE_ID: ${{ secrets.AWS_INSTANCE_ID }}
-      IXI_CORE_SHA: ${{ inputs.commit_sha || '5dd4b09d7fa0720edd494583eda6d63291972b23' }}
+      IXI_CORE_SHA: ${{ inputs.commit_sha || 'b8efa04f3f8e383e230a8e6c4773bf0bc1612b3e' }}
     steps:
       - name: Validate immutable release
         shell: bash
@@ -53,7 +53,7 @@ jobs:
           STAGE=/tmp/ixi-core-freight-__IXI_CORE_SHA__
           ARCHIVE=/tmp/ixi-core-freight-__IXI_CORE_SHA__.tgz
           BACKUP=/var/backups/ixi-core-releases/freight-pre-__IXI_CORE_SHA__.tgz
-          RUNTIME_FILES='freight/services/freightService.js freight/services/freightEconomics.js'
+          RUNTIME_FILES='freight/services/freightService.js freight/services/freightEconomics.js freight/routes/freightRouter.js freight/storage/freightDynamoStore.js freight/storage/freightEventStore.js'
           DEPLOY_FILES="$RUNTIME_FILES"
           SUCCESS=0
           ROLLBACK_ARMED=0
@@ -87,8 +87,11 @@ jobs:
           done
           if [ "$ALREADY_CURRENT" -ne 1 ]; then
             printf '%s  %s\n' \
-              '6350b10dafd61f88388a793ce565dde9e7beb7bb405ca174628e67054fa34e59' 'freight/services/freightService.js' \
-              '79023d40197a2ac42ce660f1e53efc830d7711ffc79cf7b59b51aa22446d73fd' 'freight/services/freightEconomics.js' \
+              '31068c1f776f68ba4a864d70a5d136148037729ebb880ea604988fc2d95d5418' 'freight/services/freightService.js' \
+              '775ba03f1da5f5523cc692ed71e49388c8d5ad29229deddf465ebb59c1f45a8c' 'freight/services/freightEconomics.js' \
+              '05efbecbc932d0c6add567879c36a91f5ec0d9c0b5cafbf48eee9bc0336cb172' 'freight/routes/freightRouter.js' \
+              '8f045f83ba235d0ce79d9b4bc7e9dd2811df6daf0f70a1737f832aa5ef2f5e95' 'freight/storage/freightDynamoStore.js' \
+              'f328d75f84a1e880b5d9e4268197e9496be2604fbfe1ce7093a7ac0c76abddcd' 'freight/storage/freightEventStore.js' \
               'b84be7d4cb67e774545ae5499b7d74ddc15986ad5b9192f30bbe8e47bdda18b7' 'passport/passportRegistry.js' \
               'a598ea6ac8b72d98f2e0707f636d96a75fc476a4d793b22501d88852d8d61b91' 'mos/provisioning/aosObjectIdentityResolver.js' | sha256sum -c -
           fi
@@ -102,6 +105,7 @@ jobs:
           const resolver=require('./mos/provisioning/aosObjectIdentityResolver');
           const registry=require('./passport/passportRegistry');
           if(typeof service.create!=='function') throw new Error('Freight create service missing.');
+          if(typeof service.amend!=='function') throw new Error('Freight amend service missing.');
           if(typeof resolver.resolveOrProvisionAosObjectForPassport!=='function') throw new Error('Passport resolver missing.');
           if(typeof registry.bindPassportSource!=='function') throw new Error('Passport source binding missing.');
           NODE
@@ -125,21 +129,34 @@ jobs:
           done
           cd "$APP"
           printf '%s  %s\n' \
-            '31068c1f776f68ba4a864d70a5d136148037729ebb880ea604988fc2d95d5418' 'freight/services/freightService.js' \
+            '1754a5ee14a1fa02de17924811b292921fd92f34665729c9a6bef6530d255ea9' 'freight/services/freightService.js' \
             '775ba03f1da5f5523cc692ed71e49388c8d5ad29229deddf465ebb59c1f45a8c' 'freight/services/freightEconomics.js' \
+            'cb5aff2489b48641e493e2239e9a9b527a83c117d0ed0ec7e7c0820f4467073f' 'freight/routes/freightRouter.js' \
+            'ce95fa5f8290ebe41e572b08c893a9692e1d22476306b3051349406a221621ad' 'freight/storage/freightDynamoStore.js' \
+            '21ae52f5fe4a9496b412758ec4e914bdca13a267c0c9e3f07c2a90e0036f536f' 'freight/storage/freightEventStore.js' \
             'b84be7d4cb67e774545ae5499b7d74ddc15986ad5b9192f30bbe8e47bdda18b7' 'passport/passportRegistry.js' \
             'a598ea6ac8b72d98f2e0707f636d96a75fc476a4d793b22501d88852d8d61b91' 'mos/provisioning/aosObjectIdentityResolver.js' | sha256sum -c -
           node - <<'NODE'
+          const service=require('./freight/services/freightService');
           const resolver=require('./mos/provisioning/aosObjectIdentityResolver');
+          if(typeof service.amend!=='function') throw new Error('Live Freight amend service missing.');
           if(typeof resolver.resolveOrProvisionAosObjectForPassport!=='function') throw new Error('Live Passport resolver missing.');
           NODE
+
+          amend_status="$(curl -sS -o "$STAGE/amend-route.json" -w '%{http_code}' \
+            -X POST -H 'Content-Type: application/json' -d '{"expectedRevision":1}' \
+            http://127.0.0.1:4100/freight/v1/orders/deploy-probe/amend)"
+          case "$amend_status" in
+            401|403) ;;
+            *) echo "Protected Freight amend route returned HTTP $amend_status" >&2; exit 1 ;;
+          esac
 
           SUCCESS=1
           ROLLBACK_ARMED=0
           trap - EXIT
           rm -rf "$STAGE"
           rm -f "$ARCHIVE"
-          printf 'IX-Core Freight %s deployed; health=200; passport-resolver=present\n' "$RELEASE_SHA"
+          printf 'IX-Core Freight %s deployed; health=200; amend-route=%s; passport-resolver=present\n' "$RELEASE_SHA" "$amend_status"
           REMOTE_SCRIPT
           )"
           remote_script="${remote_script//__IXI_CORE_SHA__/$IXI_CORE_SHA}"
@@ -163,7 +180,7 @@ jobs:
           {
             echo '## IX-Core Freight release'
             printf -- '- Commit: `%s`\n' "$IXI_CORE_SHA"
-            echo '- 96 Financial, Freight, Passport, and Sales control tests: passed'
+            echo '- Full Financial, Freight, Passport, and Sales control suite: passed'
             echo '- Live source checksum and rollback controls: passed'
-            echo '- AWS IX-Core health and Passport resolver probes: passed'
+            echo '- AWS IX-Core health, protected amendment route, and Passport resolver probes: passed'
           } >> "$GITHUB_STEP_SUMMARY"

@@ -1,6 +1,35 @@
 export default function IXITransactStyles() {
   return (
     <style jsx global>{`
+      .ixi-transact-dialog {
+        position: relative;
+        display: block;
+        width: 298px;
+        max-width: none;
+        height: 471px;
+        max-height: none;
+        margin: 0;
+        padding: 0;
+        overflow: visible;
+        border: 0;
+        background: transparent;
+        color: inherit;
+      }
+
+      .ixi-transact-dialog::backdrop {
+        background: rgba(2, 4, 3, .86);
+        backdrop-filter: blur(8px);
+      }
+
+      .ixi-transact-dialog.worksheet-open {
+        position: fixed;
+        inset: 16px;
+        width: min(1180px, calc(100vw - 32px));
+        height: min(820px, calc(100dvh - 32px));
+        margin: auto;
+        z-index: 2147483000;
+      }
+
       .ixi-transact-app,
       .ixi-transact-app * {
         box-sizing: border-box;
@@ -21,6 +50,12 @@ export default function IXITransactStyles() {
         box-shadow:
           0 20px 48px rgba(0,0,0,.58),
           inset 0 1px rgba(255,255,255,.035);
+      }
+
+      .worksheet-open .ixi-transact-app {
+        width: 100%;
+        height: 100%;
+        border-radius: 10px;
       }
 
       .tx-header {
@@ -85,6 +120,42 @@ export default function IXITransactStyles() {
         height: 23px;
       }
 
+      .tx-header-actions {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+
+      .tx-language,
+      .tx-expand {
+        height: 23px;
+        padding: 0 7px;
+        border: 1px solid #353936;
+        border-radius: 5px;
+        background: linear-gradient(#111312, #080a09);
+        color: #ffc400;
+        font-size: 7px;
+        font-weight: 950;
+        letter-spacing: .04em;
+        cursor: pointer;
+      }
+
+      .tx-expand {
+        width: 23px;
+        padding: 0;
+        font-size: 13px;
+      }
+
+      .tx-language:hover,
+      .tx-language:focus-visible,
+      .tx-expand:hover,
+      .tx-expand:focus-visible,
+      .tx-close:hover,
+      .tx-close:focus-visible {
+        border-color: #ffc400;
+        outline: none;
+      }
+
       .tx-body {
         position: absolute;
         top: 48px;
@@ -109,9 +180,52 @@ export default function IXITransactStyles() {
       }
 
       .module-open .tx-body > * {
-        width: 100%;
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+        box-sizing: border-box;
+        contain: inline-size;
+      }
+
+      .module-open .tx-body > * * {
+        min-width: 0 !important;
+        max-width: 100% !important;
+        box-sizing: border-box;
+      }
+
+      .module-open .tx-body :where(div, section, article, header, footer, main, form, fieldset, label) {
         min-width: 0;
         max-width: 100%;
+        box-sizing: border-box;
+      }
+
+      .module-open .tx-body :where(input, select, textarea, button, table) {
+        min-width: 0;
+        max-width: 100%;
+        box-sizing: border-box;
+      }
+
+      .module-open .tx-body :where(p, span, strong, b, small, time, dd, dt, td, th) {
+        min-width: 0;
+        overflow-wrap: anywhere;
+      }
+
+      .worksheet-open .module-open .tx-body > * {
+        height: 100%;
+        min-height: 100%;
+        max-height: none;
+      }
+
+      @media (max-width: 640px) {
+        .ixi-transact-dialog.worksheet-open {
+          inset: 0;
+          width: 100vw;
+          height: 100dvh;
+        }
+
+        .worksheet-open .ixi-transact-app {
+          border-radius: 0;
+        }
       }
 
       .tx-body::-webkit-scrollbar {

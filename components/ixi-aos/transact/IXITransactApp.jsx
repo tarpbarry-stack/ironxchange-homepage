@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import IXIMachineRail from "../../IXIMachineRail";
 import { createIXITransactContext } from "./IXITransactContext";
@@ -32,6 +32,12 @@ import { createIXICustomerServiceWorkOrder } from "./modules/customer-service-wo
 import IXITransactStyles from "./IXITransactStyles";
 import IXITransactHomeTypography from "./IXITransactHomeTypography";
 import IXITransactSortableLauncher from "./IXITransactSortableLauncher";
+import {
+  IXI_TRANSACT_LOCALES,
+  IXI_TRANSACT_LOCALE_STORAGE_KEY,
+  IXITransactLocaleProvider,
+  translateIXITransact,
+} from "./IXITransactLocale";
 import { patchIXIAosFinancialDocument } from "../financial-runtime/IXIAosFinancialReadClient";
 
 const clean = (value) => String(value ?? "").trim();
@@ -65,6 +71,21 @@ export default function IXITransactApp({
   moduleOrder = null,
   onModuleOrderChange = null,
 }) {
+  const dialogRef = useRef(null);
+  const [worksheetOpen, setWorksheetOpen] = useState(false);
+  const [locale, setLocale] = useState(IXI_TRANSACT_LOCALES.ENGLISH);
+
+  useEffect(() => {
+    try {
+      const saved = globalThis.localStorage?.getItem(
+        IXI_TRANSACT_LOCALE_STORAGE_KEY,
+      );
+      if (Object.values(IXI_TRANSACT_LOCALES).includes(saved)) setLocale(saved);
+    } catch {
+      // Private browsing and storage policies may deny persistence.
+    }
+  }, []);
+
   const context = useMemo(
     () =>
       createIXITransactContext({
@@ -81,8 +102,11 @@ export default function IXITransactApp({
       getIXITransactModules({
         objectType: context.primary.objectType,
         permissions: context.permissions,
-      }),
-    [context],
+      }).map((item) => ({
+        ...item,
+        label: translateIXITransact(locale, item.label),
+      })),
+    [context, locale],
   );
   const [moduleId, setModuleId] = useState(() => clean(initialModuleId));
   const [workOrderSnapshot, setWorkOrderSnapshot] = useState(
@@ -411,6 +435,35 @@ export default function IXITransactApp({
     }
     setModuleId("");
   };
+
+  function selectLocale(nextLocale) {
+    if (!Object.values(IXI_TRANSACT_LOCALES).includes(nextLocale)) return;
+    setLocale(nextLocale);
+    try {
+      globalThis.localStorage?.setItem(
+        IXI_TRANSACT_LOCALE_STORAGE_KEY,
+        nextLocale,
+      );
+    } catch {
+      // The active session still changes language when storage is unavailable.
+    }
+  }
+
+  function openWorksheet() {
+    const dialog = dialogRef.current;
+    if (!dialog || worksheetOpen) return;
+    dialog.close?.();
+    dialog.showModal?.();
+    setWorksheetOpen(true);
+  }
+
+  function closeWorksheet() {
+    const dialog = dialogRef.current;
+    if (!dialog || !worksheetOpen) return;
+    dialog.close?.();
+    dialog.show?.();
+    setWorksheetOpen(false);
+  }
 
   async function open(item) {
     setModuleId(item.id);
@@ -1341,40 +1394,105 @@ export default function IXITransactApp({
       </>
     );
 
+  const spanish = locale === IXI_TRANSACT_LOCALES.SPANISH_MEXICO;
+  const t = (message) => translateIXITransact(locale, message);
+
   return (
-    <div
-      className={`ixi-transact-app ixi-transact-v13 board-color-none board-outline-1 ${active ? "module-open" : "home-open"}`}
+    <dialog
+      ref={dialogRef}
+      open
+      className={`ixi-transact-dialog ${worksheetOpen ? "worksheet-open" : "card-open"}`}
+      onCancel={(event) => {
+        if (!worksheetOpen) return;
+        event.preventDefault();
+        closeWorksheet();
+      }}
+      aria-label={active?.label || "IXI TRAN$ACT"}
     >
-      <header className="tx-header">
-        <div className="tx-brand">
-          <span>IXI TRAN$ACT</span>
-          {!active ? (
-            <>
-              <strong>{context.primary.label}</strong>
-              <small>{context.primary.objectType || "AOS OBJECT"}</small>
-            </>
-          ) : null}
+      <IXITransactLocaleProvider locale={locale}>
+        <div
+          lang={locale}
+          data-ixi-transact-locale={locale}
+          data-ixi-transact-presentation={worksheetOpen ? "worksheet" : "card"}
+          className={`ixi-transact-app ixi-transact-v13 board-color-none board-outline-1 ${active ? "module-open" : "home-open"}`}
+        >
+          <header className="tx-header">
+            <div className="tx-brand">
+              <span>{t("IXI TRAN$ACT")}</span>
+              {!active ? (
+                <>
+                  <strong>{context.primary.label}</strong>
+                  <small>{context.primary.objectType || "AOS OBJECT"}</small>
+                </>
+              ) : null}
+            </div>
+            <div className="tx-header-actions">
+              <button
+                type="button"
+                className="tx-language"
+                onClick={() =>
+                  selectLocale(
+                    spanish
+                      ? IXI_TRANSACT_LOCALES.ENGLISH
+                      : IXI_TRANSACT_LOCALES.SPANISH_MEXICO,
+                  )
+                }
+                aria-label={
+                  spanish
+                    ? t("SWITCH TO ENGLISH")
+                    : t("SWITCH TO MEXICAN SPANISH")
+                }
+                title={spanish ? "English" : "Español (México)"}
+              >
+                {spanish ? "ENG" : "ESP"}
+              </button>
+              {active ? (
+                <button
+                  type="button"
+                  className="tx-expand"
+                  onClick={worksheetOpen ? closeWorksheet : openWorksheet}
+                  aria-label={
+                    worksheetOpen
+                      ? t("RETURN TO CARD")
+                      : t("EXPAND WORKSHEET")
+                  }
+                  title={
+                    worksheetOpen
+                      ? t("RETURN TO CARD")
+                      : t("EXPAND WORKSHEET")
+                  }
+                >
+                  {worksheetOpen ? "↙" : "↗"}
+                </button>
+              ) : null}
+              <button
+                type="button"
+                className="tx-close"
+                onClick={worksheetOpen ? closeWorksheet : () => onClose?.()}
+                aria-label={worksheetOpen ? t("RETURN TO CARD") : t("CLOSE")}
+              >
+                ×
+              </button>
+            </div>
+          </header>
+          <main className="tx-body">{body}</main>
+          <IXIMachineRail
+            listing={object}
+            saved={false}
+            boardColor="none"
+            boardOutline={1}
+            machineFace={0}
+            onSendFront={onSendFront}
+            onSendBack={onSendBack}
+            onCycleColor={onCycleColor}
+            onCycleOutline={onCycleOutline}
+            armedDestination={armedDestination}
+            onSendToArmedDestination={onSendToArmedDestination}
+          />
+          {!active ? <IXITransactHomeTypography /> : null}
+          <IXITransactStyles />
         </div>
-        <button className="tx-close" onClick={() => onClose?.()}>
-          ×
-        </button>
-      </header>
-      <main className="tx-body">{body}</main>
-      <IXIMachineRail
-        listing={object}
-        saved={false}
-        boardColor="none"
-        boardOutline={1}
-        machineFace={0}
-        onSendFront={onSendFront}
-        onSendBack={onSendBack}
-        onCycleColor={onCycleColor}
-        onCycleOutline={onCycleOutline}
-        armedDestination={armedDestination}
-        onSendToArmedDestination={onSendToArmedDestination}
-      />
-      {!active ? <IXITransactHomeTypography /> : null}
-      <IXITransactStyles />
-    </div>
+      </IXITransactLocaleProvider>
+    </dialog>
   );
 }

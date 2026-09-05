@@ -32,6 +32,10 @@ export async function createIXIFreightOrder(input, { signal } = {}) {
   return payload.freightOrder;
 }
 
+export async function amendIXIFreightOrder(freightOrderId, input, { signal } = {}) {
+  return runIXIFreightAction(freightOrderId, "amend", input, { signal });
+}
+
 export async function runIXIFreightAction(freightOrderId, action, body = {}, { signal } = {}) {
   const id = clean(freightOrderId);
   if (!id) throw new Error("Freight Order ID is required.");
@@ -44,4 +48,4 @@ export async function loadIXIFreightEvents(freightOrderId, { signal } = {}) {
   return Array.isArray(payload.events) ? payload.events : [];
 }
 
-export default { loadIXIFreightOrders, createIXIFreightOrder, runIXIFreightAction, loadIXIFreightEvents };
+export default { loadIXIFreightOrders, createIXIFreightOrder, amendIXIFreightOrder, runIXIFreightAction, loadIXIFreightEvents };

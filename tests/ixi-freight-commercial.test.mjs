@@ -80,12 +80,27 @@ test("Freight detail rows contain long operational values inside the native card
   assert.match(styles, /\.ixi-freight \.fr-body\{[^}]*overflow-x:hidden/u);
   assert.match(styles, /\.ixi-freight \.fr-kpis\{[^}]*minmax\(0,1fr\) minmax\(0,1fr\)/u);
   assert.match(styles, /\.ixi-freight \.fr-invoice div\{[^}]*grid-template-columns:minmax\(0,1fr\) auto/u);
+  assert.match(styles, /\.ixi-freight\{width:298px;height:471px;[^}]*overflow:hidden/u);
+  assert.match(styles, /\.ixi-freight \.fr-field input,[^}]*width:100%;min-width:0;max-width:100%/u);
   assert.match(app, /gridTemplateColumns:"96px minmax\(0,1fr\)"/u);
   assert.match(app, /FREIGHT_VALUE_STYLE=\{[^}]*whiteSpace:"normal"[^}]*overflowWrap:"anywhere"[^}]*wordBreak:"break-word"/u);
   assert.match(app, /function FreightDataRow\(/u);
-  assert.match(app, /<FreightDataRow label="PURPOSE"/u);
-  assert.match(app, /\["REQUESTED PICKUP",readableDateTime/u);
-  assert.match(app, /<FreightDataRow label="SCHEMA"/u);
+  assert.match(app, /<FreightDataRow label=\{t\("PURPOSE"\)\}/u);
+  assert.match(app, /\[t\("REQUESTED PICKUP"\),dateTime/u);
+  assert.match(app, /<FreightDataRow label=\{t\("SCHEMA"\)\}/u);
   assert.doesNotMatch(app, /className="fr-row/u);
   assert.doesNotMatch(styles, /\.fr-row/u);
+});
+
+test("Freight amendments use optimistic revision control and never overwrite hidden assignments", async () => {
+  const [app, client] = await Promise.all([
+    read("components/ixi-aos/transact/modules/freight/IXIFreightApp.jsx"),
+    read("components/ixi-aos/transact/modules/freight/IXIFreightClient.js"),
+  ]);
+  assert.match(client, /runIXIFreightAction\(freightOrderId, "amend", input/u);
+  assert.match(app, /expectedRevision:Number\(order\?\.identity\?\.revision\|\|0\)/u);
+  assert.match(app, /changeReason:clean\(draft\.changeReason\)/u);
+  assert.match(app, /canEditOrder=\["draft","requested"\]/u);
+  assert.doesNotMatch(app, /execution:payload\.execution/u);
+  assert.match(app, /scheduledPickupAt:payload\.execution\.scheduledPickupAt/u);
 });
