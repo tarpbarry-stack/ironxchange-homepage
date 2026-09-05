@@ -182,7 +182,7 @@ export default function IXITransactObjectConsole({
           maxSlots:
             IXI_CONSOLE_MAX_DEPTH,
           faces:
-          TRANSACT_CONSOLE_FACES
+            TRANSACT_CONSOLE_FACES
         }
       );
 
