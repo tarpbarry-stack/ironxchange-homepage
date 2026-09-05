@@ -502,8 +502,8 @@ transition:
   -webkit-appearance: none;
   -moz-appearance: none;
 
-  font-size: 8px;
-  font-weight: 950;
+  font-size: 11px;
+  font-weight: 800;
   letter-spacing: .35px;
   text-transform: uppercase;
 }
