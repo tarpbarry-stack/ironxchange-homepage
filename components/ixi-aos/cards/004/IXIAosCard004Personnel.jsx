@@ -4,6 +4,7 @@ import IXIAosV12CardPolish from "../../card-runtime/modules/IXIAosV12CardPolish"
 import IXIAosDataContractCardAdapter from "../../card-runtime/IXIAosDataContractCardAdapter";
 import IXIAosFace1CardRuntime from "../../card-runtime/modules/IXIAosFace1CardRuntime";
 import IXIAosCardHeaderIdentity from "../../card-runtime/modules/IXIAosCardHeaderIdentity";
+import IXIAosCommercialEditorBridge from "../../card-runtime/modules/IXIAosCommercialEditorBridge";
 import {
   BUSINESS_IDENTIFIER_FIELD_ID,
   BUSINESS_IDENTIFIER_ROLE,
@@ -57,4 +58,4 @@ function card004EditableObject(object = {}) {
   };
 }
 
-export default function IXIAosCard004Personnel(props){return <IXIAosDataContractCardAdapter {...props} showBusinessIdentifier={false}>{contractProps=><IXIAosFace1CardRuntime cardNumber={4} object={card004EditableObject(contractProps.object)} onSaveObject={contractProps.onSaveObject} includeBusinessIdentifier fixedBusinessIdentifierLabel allowAddFields>{face1=><IXIAosCardHeaderIdentity object={face1.object}><IXIAosCard004CommercialFace1 object={face1.object} children={contractProps.children} onSaveObject={face1.onSaveObject} childrenRenderer={runtimeObject=><><IXIAosGenericCardRailShell {...contractProps} object={runtimeObject} face={1}><IXIAosGenericContainerLayoutV12 {...contractProps} object={runtimeObject} onSaveObject={face1.onSaveObject} variant={1} stretchRelationships/></IXIAosGenericCardRailShell><IXIAosV12CardPolish/></>}/></IXIAosCardHeaderIdentity>}</IXIAosFace1CardRuntime>}</IXIAosDataContractCardAdapter>}
+export default function IXIAosCard004Personnel(props){return <IXIAosDataContractCardAdapter {...props} showBusinessIdentifier={false}>{contractProps=><IXIAosCommercialEditorBridge object={contractProps.object} onSaveObject={contractProps.onSaveObject} persistenceAdapter={contractProps.hasPersistenceAdapter?contractProps.onSaveObject:null} mediaEnabled={false}>{({object:runtimeObject})=><IXIAosFace1CardRuntime cardNumber={4} object={card004EditableObject(runtimeObject)} onSaveObject={contractProps.onSaveObject} includeBusinessIdentifier fixedBusinessIdentifierLabel allowAddFields>{face1=><IXIAosCardHeaderIdentity object={face1.object}><IXIAosCard004CommercialFace1 object={face1.object} children={contractProps.children} onSaveObject={face1.onSaveObject} childrenRenderer={renderObject=><><IXIAosGenericCardRailShell {...contractProps} object={renderObject} face={1}><IXIAosGenericContainerLayoutV12 {...contractProps} object={renderObject} onSaveObject={face1.onSaveObject} variant={1} stretchRelationships/></IXIAosGenericCardRailShell><IXIAosV12CardPolish/></>}/></IXIAosCardHeaderIdentity>}</IXIAosFace1CardRuntime>}</IXIAosCommercialEditorBridge>}</IXIAosDataContractCardAdapter>}

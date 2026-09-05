@@ -15,8 +15,8 @@ import IXISystemIndexConsole, {
   getSystemIndexConsoleNativeHeight
 } from "../system-index/IXISystemIndexConsole";
 
-import IXIMosObjectCard
-  from "../IXIMosObjectCard";
+import IXIAosOperatingCardRuntime
+  from "../../ixi-aos/card-runtime/IXIAosOperatingCardRuntime";
 
 import {
   getListingId
@@ -192,7 +192,7 @@ export default function IXIAosWorkspaceBoard({
   onSaveContainerPresentation,
 
   onCreateObjectChild,
-  onSaveObjectName,
+  onSaveObject,
   onDeleteObject
 }) {
   return (
@@ -392,7 +392,7 @@ export default function IXIAosWorkspaceBoard({
                   : [];
 
             return (
-              <IXIMosObjectCard
+              <IXIAosOperatingCardRuntime
                 object={item}
                 parentLabel={parentLabel}
                 items={directChildren}
@@ -441,9 +441,9 @@ export default function IXIAosWorkspaceBoard({
                   )
                 }
 
-                onAddChild={onCreateObjectChild}
-                onSaveName={onSaveObjectName}
-                onDelete={onDeleteObject}
+                onAddObject={onCreateObjectChild}
+                onSaveObject={onSaveObject}
+                onDeleteObject={onDeleteObject}
               />
             );
           }

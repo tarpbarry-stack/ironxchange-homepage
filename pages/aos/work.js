@@ -1,5 +1,5 @@
 import Head from "next/head";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import {
   PointerSensor,
@@ -31,11 +31,19 @@ import {
   loadIXIMosEnvironment
 } from "../../lib/mos/loadIXIMosEnvironment";
 
+import {
+  commitMosObjectCommand
+} from "../../lib/mos/ixiMosClient";
+
+import {
+  mergeAosCanonicalObject
+} from "../../lib/mos/mergeAosCanonicalObject.mjs";
+
 import IXISystemIndexCard
   from "../../components/ixi-mos/IXISystemIndexCard";
 
-import IXIMosObjectCard
-  from "../../components/ixi-mos/IXIMosObjectCard";
+import IXIAosOperatingCardRuntime
+  from "../../components/ixi-aos/card-runtime/IXIAosOperatingCardRuntime";
 
 import useIXIMosObjectCreation
   from "../../components/ixi-mos/object-creation/useIXIMosObjectCreation";
@@ -627,6 +635,13 @@ useEffect(() => {
 const validMosObjectIds =
   (aosObjects || [])
     .filter(object => {
+      const objectId =
+        String(
+          object?.objectId ||
+          object?.id ||
+          ""
+        ).trim();
+
       const objectType =
         String(
           object?.objectType || ""
@@ -635,6 +650,8 @@ const validMosObjectIds =
           .toLowerCase();
 
       return (
+        objectId &&
+        !validSystemIndexIds.includes(objectId) &&
         objectType &&
         objectType !== "system-index" &&
         objectType !== "machine"
@@ -744,6 +761,42 @@ placements:
       }
     );
 
+    /*
+     * Existing durable AOS objects must remain manageable after
+     * the workspace runtime migration. Older saved layouts did
+     * not know about these identities and could otherwise leave
+     * a valid object stranded outside every workspace surface.
+     *
+     * This is presentation recovery only: canonical containment,
+     * ownership, object data, and revision history are untouched.
+     */
+    validMosObjectIds.forEach(
+      objectId => {
+        const alreadyPlaced =
+          Object.values(
+            nextPlacements
+          ).some(ids =>
+            Array.isArray(ids) &&
+            ids
+              .map(String)
+              .includes(objectId)
+          );
+
+        if (!alreadyPlaced) {
+          nextPlacements =
+            moveObjectToWorkspaceSurface({
+              placements:
+                nextPlacements,
+
+              objectId,
+
+              targetSurface:
+                "board"
+            });
+        }
+      }
+    );
+
     const validation =
       validateWorkspacePlacements(
         nextPlacements
@@ -782,7 +835,8 @@ placements:
     ...createEmptyWorkspacePlacements(),
 
     board: [
-      IXI_EQUIPMENT_INDEX_OBJECT_ID
+      IXI_EQUIPMENT_INDEX_OBJECT_ID,
+      ...validMosObjectIds
     ],
 
     indexEquipment:
@@ -1165,6 +1219,48 @@ function showAosObjectNotice({
     duration
   });
 }
+
+const saveAosWorkspaceObject = useCallback(async (payload = {}) => {
+  const command = payload?.command;
+  if (!command) {
+    const error = new Error("AOS Work requires a versioned object command.");
+    error.code = "IXI_AOS_COMMAND_REQUIRED";
+    throw error;
+  }
+
+  const result = await commitMosObjectCommand(command);
+  const canonical = result?.object;
+  const objectId = String(canonical?.objectId || "").trim();
+  const entityId = String(canonical?.entityId || "").trim();
+  const activeEntityId = String(aosEntity?.entityId || "").trim();
+
+  if (!objectId) {
+    const error = new Error("IX-Core did not return the canonical saved AOS object.");
+    error.code = "IXI_AOS_CANONICAL_READBACK_REQUIRED";
+    throw error;
+  }
+
+  if (!activeEntityId || entityId !== activeEntityId) {
+    const error = new Error("Saved object does not belong to the active AOS Entity.");
+    error.code = "AOS_BROWSER_ENTITY_MISMATCH";
+    error.status = 403;
+    throw error;
+  }
+
+  const acceptedObject = payload?.object
+    ? mergeAosCanonicalObject(payload.object, canonical)
+    : canonical;
+
+  setAosObjects(current => current.map(existing => {
+    if (String(existing?.objectId || "") !== objectId) return existing;
+    return mergeAosCanonicalObject(existing, canonical);
+  }));
+
+  return {
+    ...result,
+    object: acceptedObject
+  };
+}, [aosEntity?.entityId]);
   
 function cycleMachineFace(listingOrId) {
   const id =
@@ -2106,7 +2202,6 @@ function saveWorkspaceLayout(
 const {
   createRootSystemIndexByName,
   createObjectInContainer,
-  saveMosObjectName,
   deleteMosWorkspaceObject
 } = useIXIMosObjectCreation({
   entityId:
@@ -2836,7 +2931,7 @@ if (
       );
 
   return (
-    <IXIMosObjectCard
+    <IXIAosOperatingCardRuntime
       object={
         object
       }
@@ -2862,10 +2957,6 @@ if (
         }
       }
 
-      ixiCardState={
-        ixiCardState
-      }
-
       /*
        * Overlay is presentation only.
        */
@@ -2873,24 +2964,10 @@ if (
 
       armedDestination=""
 
-      onSendFront={() => {}}
-      onSendBack={() => {}}
-
-      onSendToArmedDestination={
-        () => {}
-      }
-
       onExposeObject={() => {}}
-      onExposeContents={() => {}}
-      onGatherContents={() => {}}
-
-      onAddChild={null}
-      onSaveName={null}
-      onDelete={null}
-
-      workspaceDropPolicy={{
-        enabled: false
-      }}
+      onSaveObject={null}
+      onAddObject={null}
+      onDeleteObject={null}
     />
   );
 }
@@ -3123,12 +3200,12 @@ onReturnContainerChildren={
   returnContainerChildren
 }
 
-onCreateObjectChild={
+  onCreateObjectChild={
   createObjectInsideSystemIndex
 }
 
-  onSaveObjectName={
-    saveMosObjectName
+  onSaveObject={
+    saveAosWorkspaceObject
   }
 
   onDeleteObject={

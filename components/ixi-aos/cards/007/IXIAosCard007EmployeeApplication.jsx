@@ -5,6 +5,7 @@ import IXIAosGenericUniversalLayout007C from "../generic/IXIAosGenericUniversalL
 import IXIAosDataContractCardAdapter from "../../card-runtime/IXIAosDataContractCardAdapter";
 import IXIAosFace1CardRuntime from "../../card-runtime/modules/IXIAosFace1CardRuntime";
 import IXIAosCardHeaderIdentity from "../../card-runtime/modules/IXIAosCardHeaderIdentity";
+import IXIAosCommercialEditorBridge from "../../card-runtime/modules/IXIAosCommercialEditorBridge";
 
 function fieldIdFromLabel(label = "", fallback = "field") {
   const words = String(label || "")
@@ -90,7 +91,8 @@ export default function IXIAosCard007EmployeeApplication(props) {
   return (
     <IXIAosDataContractCardAdapter {...props} object={object} minimumCustomFields={8}>
       {contractProps => (
-        <IXIAosFace1CardRuntime cardNumber={7} object={contractProps.object} onSaveObject={contractProps.onSaveObject}>
+        <IXIAosCommercialEditorBridge object={contractProps.object} onSaveObject={contractProps.onSaveObject} persistenceAdapter={contractProps.hasPersistenceAdapter ? contractProps.onSaveObject : null} mediaEnabled>
+          {({ object: runtimeObject }) => <IXIAosFace1CardRuntime cardNumber={7} object={runtimeObject} onSaveObject={contractProps.onSaveObject}>
           {face1 => {
             let CardLayout = IXIAosGenericUniversalLayout007;
             if (isFaceLabPreview && faceLabVariant === "007B") CardLayout = IXIAosGenericUniversalLayout007B;
@@ -114,7 +116,8 @@ export default function IXIAosCard007EmployeeApplication(props) {
               </IXIAosCardHeaderIdentity>
             );
           }}
-        </IXIAosFace1CardRuntime>
+          </IXIAosFace1CardRuntime>}
+        </IXIAosCommercialEditorBridge>
       )}
     </IXIAosDataContractCardAdapter>
   );

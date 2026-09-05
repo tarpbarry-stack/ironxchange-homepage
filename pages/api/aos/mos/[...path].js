@@ -7,6 +7,10 @@ import {
   resolveIxCoreAosContext
 } from "../../../../lib/server/aos/ixiMosInternalClient";
 
+import {
+  assertAosObjectMutationRequest
+} from "../../../../lib/server/aos/ixiAosObjectMutationPolicy.mjs";
+
 
 const ROUTES = [
   { methods: ["GET"], pattern: /^\/health$/ },
@@ -155,6 +159,9 @@ function sanitizeBody({
     safeObject(body);
 
   delete next.ownerUserId;
+  delete next.entityId;
+  delete next.principalId;
+  delete next.userId;
 
   if (
     path === "/objects/provision" ||
@@ -187,16 +194,21 @@ function getForwardHeaders(req) {
   const idempotencyKey =
     clean(req.headers["idempotency-key"]);
 
-  const ifMatch =
-    clean(req.headers["if-match"]);
+  const expectedRevision =
+    clean(
+      req.headers[
+        "x-ixi-expected-revision"
+      ]
+    );
 
   if (idempotencyKey) {
     headers["Idempotency-Key"] =
       idempotencyKey;
   }
 
-  if (ifMatch) {
-    headers["If-Match"] = ifMatch;
+  if (expectedRevision) {
+    headers["If-Match"] =
+      expectedRevision;
   }
 
   return headers;
@@ -310,6 +322,13 @@ export default async function handler(req, res) {
           context.userId
       });
 
+    assertAosObjectMutationRequest({
+      method,
+      path,
+      body,
+      headers: req.headers
+    });
+
     const payload =
       await requestIxCoreMos({
         path: targetPath,
@@ -329,3 +348,11 @@ export default async function handler(req, res) {
     return sendError(res, error);
   }
 }
+
+export const config = {
+  api: {
+    bodyParser: {
+      sizeLimit: "1mb"
+    }
+  }
+};

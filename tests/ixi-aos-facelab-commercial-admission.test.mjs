@@ -30,28 +30,19 @@ test("commercial admission registry covers the full FaceLab numbered inventory",
 });
 
 test("only source-complete cards are marked ready for runtime QA", () => {
-  assert.match(
-    registry,
-    /"007"[\s\S]*?status:\s*"ready-for-runtime-qa"/u
-  );
-  assert.match(
-    registry,
-    /"009"[\s\S]*?status:\s*"ready-for-runtime-qa"/u
-  );
-
-  const repairCards = [
+  const repairedCards = [
     "001", "002", "003", "004", "005", "006", "008",
-    "010", "011", "012", "013", "014", "015", "016", "017"
+    "007", "009", "010", "011", "012", "013", "014", "015", "016", "017"
   ];
 
-  for (const card of repairCards) {
+  for (const card of repairedCards) {
     const pattern = new RegExp(
-      `\\"${card}\\"[\\s\\S]*?status:\\s*\\"repair-required\\"`
+      `"${card}"[\\s\\S]*?status:\\s*"ready-for-runtime-qa"`
     );
     assert.match(
       registry,
       pattern,
-      `Card ${card} must remain blocked until its commercial editor contract is repaired`
+      `Card ${card} must be admitted to runtime QA after commercial editor adoption`
     );
   }
 
@@ -61,32 +52,31 @@ test("only source-complete cards are marked ready for runtime QA", () => {
   );
 });
 
-test("Card 007 proves dynamic schema editing and media editing at source level", () => {
+test("Card 007 delegates dynamic schema and media editing to the shared editor", () => {
   const source = read(
-    "components/ixi-aos/cards/generic/IXIAosGenericUniversalLayout007.jsx"
+    "components/ixi-aos/cards/007/IXIAosCard007EmployeeApplication.jsx"
   );
+  const editor = read("components/ixi-aos/card-runtime/modules/IXIAosCommercialObjectEditor.jsx");
 
-  assert.match(source, /function addField\(/u);
-  assert.match(source, /function removeField\(/u);
-  assert.match(source, /setDefinitions\(/u);
-  assert.match(source, /definition\.label/u);
-  assert.match(source, /IXIAosPrimaryMediaEditor/u);
-  assert.match(source, /fieldDefinitions:\s*normalizedDefinitions/u);
-  assert.match(source, /metadata:[\s\S]*?fieldDefinitions:\s*normalizedDefinitions/u);
+  assert.match(source, /IXIAosCommercialEditorBridge/u);
+  assert.match(editor, /function addField\(/u);
+  assert.match(editor, /function removeField\(/u);
+  assert.match(editor, /IXIAosPrimaryMediaEditor/u);
+  assert.match(editor, /fieldDefinitions:\s*normalizedDefinitions/u);
 });
 
-test("Card 009 proves protected business ID plus dynamic schema and media editing", () => {
+test("Card 009 delegates protected ID, schema, and media editing to the shared editor", () => {
   const source = read(
-    "components/ixi-aos/cards/generic/IXIAosGenericMediaDominant009.jsx"
+    "components/ixi-aos/cards/009/IXIAosCard009.jsx"
   );
+  const editor = read("components/ixi-aos/card-runtime/modules/IXIAosCommercialObjectEditor.jsx");
 
-  assert.match(source, /function addField\(/u);
-  assert.match(source, /function removeField\(/u);
-  assert.match(source, /isBusinessIdentifier/u);
-  assert.match(source, /disabled=\{isBusinessIdentifier\(definition\)\}/u);
-  assert.match(source, /IXIAosPrimaryMediaEditor/u);
-  assert.match(source, /fieldDefinitions:\s*normalizedDefinitions/u);
-  assert.match(source, /metadata:[\s\S]*?fieldDefinitions:\s*normalizedDefinitions/u);
+  assert.match(source, /IXIAosCommercialEditorBridge/u);
+  assert.match(editor, /function addField\(/u);
+  assert.match(editor, /function removeField\(/u);
+  assert.match(editor, /protectedId/u);
+  assert.match(editor, /IXIAosPrimaryMediaEditor/u);
+  assert.match(editor, /fieldDefinitions:\s*normalizedDefinitions/u);
 });
 
 test("shared numbered-card chassis preserves real parent and customer ID contracts", () => {

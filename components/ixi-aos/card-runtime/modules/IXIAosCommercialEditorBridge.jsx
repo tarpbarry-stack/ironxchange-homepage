@@ -1,7 +1,10 @@
-import { useEffect, useState } from "react";
-
 import IXIAosCommercialObjectEditor from "./IXIAosCommercialObjectEditor";
+import IXIAosActionNotice from "./IXIAosActionNotice";
+import { IXIAosCardCommandProvider } from "../IXIAosCardCommandContext";
 import { runIXIActionNoticeLifecycle } from "../../../ixi-object-system/IXIActionNoticeEngine";
+import { IXIAosEditorCommandProvider } from "../IXIAosEditorCommandContext";
+import { getBusinessIdentifierValue } from "../IXIAosObjectDataContract";
+import useIXIAosObjectEditSession from "./useIXIAosObjectEditSession";
 
 function clean(value) {
   return String(value ?? "").trim();
@@ -17,110 +20,107 @@ function objectIdOf(object = {}) {
   );
 }
 
+function noticeTargetIdOf(object = {}) {
+  return objectIdOf(object) ||
+    clean(getBusinessIdentifierValue(object)) ||
+    clean(object?.templateSlug || object?.metadata?.templateSlug) ||
+    clean(object?.displayName || object?.name) ||
+    "ixi-aos-editor-preview";
+}
+
 /*
  * Commercial edit bridge for numbered AOS cards.
  *
- * The normal card face is untouched. The bridge intercepts only the canonical
- * IXIAosCardHeaderControls EDIT command and opens the shared commercial editor.
+ * The normal card face is untouched. The bridge publishes the canonical EDIT
+ * command through context and opens the shared commercial editor explicitly.
  * It never infers taxonomy or parent meaning and it never substitutes sample data.
  */
 export default function IXIAosCommercialEditorBridge({
   object = {},
   onSaveObject = null,
+  persistenceAdapter = onSaveObject,
   mediaEnabled = true,
-  minimumCustomFields = 0,
+  faceNumber = 1,
   children
 }) {
-  const [runtimeObject, setRuntimeObject] = useState(object);
-  const [editing, setEditing] = useState(false);
-  const [saving, setSaving] = useState(false);
-
-  useEffect(() => {
-    setRuntimeObject(object);
-  }, [object]);
-
-  function captureEdit(event) {
-    const target = event?.target;
-    const button = target?.closest?.("button.header-action.edit");
-    if (!button) return;
-
-    event.preventDefault();
-    event.stopPropagation();
-    setEditing(true);
-  }
+  const editSession = useIXIAosObjectEditSession({
+    object,
+    persistenceAdapter
+  });
+  const noticeObjectId = noticeTargetIdOf(editSession.runtimeObject);
 
   async function save(nextObject) {
     if (!nextObject || typeof nextObject !== "object") {
       throw new Error("Commercial editor save requires an object payload.");
     }
 
-    const objectId = objectIdOf(nextObject) || objectIdOf(runtimeObject);
-    setSaving(true);
+    return runIXIActionNoticeLifecycle({
+      objectId: noticeObjectId,
+      savingMessage: "SAVING...",
+      successMessage: "SAVED",
+      errorMessage: "NOT SAVED",
+      commandId: "aos-object-save",
+      source: "aos-commercial-editor",
+      operation: () => editSession.save(nextObject)
+    });
+  }
 
-    try {
-      await runIXIActionNoticeLifecycle({
-        objectId,
-        savingMessage: "SAVING...",
-        successMessage: "SAVED",
-        errorMessage: "NOT SAVED",
-        commandId: "aos-object-save",
-        source: "aos-commercial-editor",
-        operation: async () => {
-          if (typeof onSaveObject === "function") {
-            await onSaveObject({
-              objectId,
-              object: nextObject,
-              displayName: nextObject.displayName,
-              fields: { ...(nextObject?.fields || {}) },
-              fieldDefinitions: Array.isArray(nextObject?.fieldDefinitions)
-                ? nextObject.fieldDefinitions
-                : [],
-              media: Array.isArray(nextObject?.media) ? nextObject.media : [],
-              metadata: { ...(nextObject?.metadata || {}) }
-            });
-          }
-          return nextObject;
-        }
-      });
-
-      setRuntimeObject(nextObject);
-      setEditing(false);
-      return nextObject;
-    } finally {
-      setSaving(false);
-    }
+  async function reloadLatest() {
+    return runIXIActionNoticeLifecycle({
+      objectId: noticeObjectId,
+      savingMessage: "LOADING LATEST...",
+      successMessage: "LATEST LOADED — REVIEW & SAVE",
+      errorMessage: "LATEST NOT LOADED",
+      commandId: "aos-object-rebase",
+      source: "aos-commercial-editor",
+      operation: () => editSession.reloadLatest()
+    });
   }
 
   const rendered = typeof children === "function"
-    ? children({ object: runtimeObject })
+    ? children({ object: editSession.runtimeObject })
     : children;
 
   return (
-    <div
-      className="ixi-aos-commercial-editor-bridge"
-      data-commercial-editor-bridge
-      onClickCapture={captureEdit}
+    <IXIAosCardCommandProvider
+      object={editSession.runtimeObject}
+      objectId={noticeObjectId}
     >
-      {rendered}
+      <div
+        className="ixi-aos-commercial-editor-bridge"
+        data-commercial-editor-bridge
+        data-editor-face={Number(faceNumber) || 1}
+      >
+        <IXIAosEditorCommandProvider
+          openEditor={editSession.begin}
+          faceNumber={faceNumber}
+        >
+          {rendered}
+        </IXIAosEditorCommandProvider>
 
-      {editing ? (
-        <IXIAosCommercialObjectEditor
-          object={runtimeObject}
-          saving={saving}
-          onCancel={() => setEditing(false)}
-          onSave={save}
-          mediaEnabled={mediaEnabled}
-          minimumCustomFields={minimumCustomFields}
-        />
-      ) : null}
+        {editSession.editing ? (
+          <IXIAosCommercialObjectEditor
+            object={editSession.editorObject}
+            saving={editSession.saving}
+            error={editSession.error}
+            conflict={editSession.conflict}
+            onCancel={editSession.cancel}
+            onSave={save}
+            onReloadLatest={reloadLatest}
+            mediaEnabled={mediaEnabled}
+          />
+        ) : null}
 
-      <style jsx>{`
-        .ixi-aos-commercial-editor-bridge {
-          position: relative;
-          width: 298px;
-          height: 471px;
-        }
-      `}</style>
-    </div>
+        <IXIAosActionNotice variant="field" />
+
+        <style jsx>{`
+          .ixi-aos-commercial-editor-bridge {
+            position: relative;
+            width: 298px;
+            height: 471px;
+          }
+        `}</style>
+      </div>
+    </IXIAosCardCommandProvider>
   );
 }

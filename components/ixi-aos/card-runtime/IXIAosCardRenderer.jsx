@@ -1,7 +1,15 @@
 import {
+  useEffect,
   useMemo,
   useState
 } from "react";
+
+import { commitMosObjectCommand } from "../../../lib/mos/ixiMosClient";
+import {
+  acceptIXIAosCanonicalObject,
+  createIXIAosEditSession,
+  createIXIAosObjectUpdateCommand
+} from "./IXIAosFoundationEngine.mjs";
 
 import IXIAosCardRuntime
   from "./IXIAosCardRuntime";
@@ -103,11 +111,19 @@ export default function IXIAosCardRenderer({
 }) {
   const [savingEdit, setSavingEdit] =
     useState(false);
+  const [canonicalObject, setCanonicalObject] =
+    useState(object);
+
+  useEffect(() => {
+    if (!ixiState?.editing && !savingEdit) {
+      setCanonicalObject(object);
+    }
+  }, [ixiState?.editing, object, savingEdit]);
 
   const objectId =
     String(
-      object?.objectId ||
-      object?.id ||
+      canonicalObject?.objectId ||
+      canonicalObject?.id ||
       ""
     );
 
@@ -116,10 +132,10 @@ export default function IXIAosCardRenderer({
       () =>
         cardDefinition ||
         resolveIXICardDefinition({
-          object,
+          object: canonicalObject,
           template
         }),
-      [object, cardDefinition, template]
+      [canonicalObject, cardDefinition, template]
     );
 
   const capabilities =
@@ -134,13 +150,13 @@ export default function IXIAosCardRenderer({
   const runtimeObject =
     useMemo(
       () => ({
-        ...object,
+        ...canonicalObject,
         fields: {
-          ...safeObject(object?.fields),
+          ...safeObject(canonicalObject?.fields),
           ...draftFields
         }
       }),
-      [object, draftFields]
+      [canonicalObject, draftFields]
     );
 
   function patchEditDraftFields(
@@ -235,7 +251,7 @@ export default function IXIAosCardRenderer({
         editing: true,
         editDraft: {
           fields: {
-            ...safeObject(object?.fields)
+            ...safeObject(canonicalObject?.fields)
           }
         }
       }
@@ -264,37 +280,28 @@ export default function IXIAosCardRenderer({
     setSavingEdit(true);
 
     try {
-      if (
-        typeof onSaveObject ===
-        "function"
-      ) {
-        await onSaveObject({
-          objectId,
-          object: runtimeObject,
-          fields: {
-            ...safeObject(
-              runtimeObject?.fields
-            )
-          }
-        });
-
-        onIxiStateChange?.(
-          objectId,
-          {
-            editing: false,
-            editDraft: null
-          }
-        );
-
-        return;
-      }
-
-      onIxiStateChange?.(
-        objectId,
-        {
-          editing: false
-        }
-      );
+      const session = createIXIAosEditSession(canonicalObject);
+      const command = createIXIAosObjectUpdateCommand({
+        session,
+        draft: runtimeObject,
+        commandId: globalThis.crypto?.randomUUID?.() || `ixi-aos-${Date.now()}`
+      });
+      const response = typeof onSaveObject === "function"
+        ? await onSaveObject({
+            objectId,
+            object: runtimeObject,
+            fields: { ...safeObject(runtimeObject?.fields) },
+            command,
+            commandId: command.commandId,
+            idempotencyKey: command.idempotencyKey,
+            expectedRevision: command.expectedRevision,
+            definitionVersion: command.definitionVersion
+          })
+        : await commitMosObjectCommand(command);
+      const responseObject = response?.object || response?.data?.object || response?.record || response?.data?.record || response;
+      const canonical = acceptIXIAosCanonicalObject(command, { object: responseObject });
+      setCanonicalObject(canonical);
+      onIxiStateChange?.(objectId, { editing: false, editDraft: null });
     } finally {
       setSavingEdit(false);
     }

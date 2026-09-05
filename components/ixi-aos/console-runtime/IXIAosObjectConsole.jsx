@@ -108,6 +108,8 @@ export default function IXIAosObjectConsole({
     "ixi:skin:default",
 
   onCreateFace = null,
+
+  onSaveObject = null,
   
   parentLabel = "",
 
@@ -555,6 +557,10 @@ export default function IXIAosObjectConsole({
 
           onSelectModule={
             onSelectModule
+          }
+
+          onSaveObject={
+            onSaveObject
           }
         />
       </IXIAosSkinRuntime>

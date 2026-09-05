@@ -17,8 +17,8 @@ const face1Runtime = fs.readFileSync(
   "utf8"
 );
 
-const inlineEditor = fs.readFileSync(
-  new URL("../components/ixi-aos/card-runtime/modules/IXIAosInlineFace1Editor.jsx", import.meta.url),
+const commercialEditor = fs.readFileSync(
+  new URL("../components/ixi-aos/card-runtime/modules/IXIAosCommercialObjectEditor.jsx", import.meta.url),
   "utf8"
 );
 
@@ -51,11 +51,12 @@ test("Card 004 Edit keeps ID fixed while its canonical value remains editable", 
   assert.match(card004, /includeBusinessIdentifier fixedBusinessIdentifierLabel allowAddFields/u);
   assert.match(card004, /function card004EditableObject\(object = \{\}\)/u);
   assert.match(card004, /existing \|\| createBusinessIdentifierDefinition\(object, 0\)/u);
-  assert.match(card004, /object=\{card004EditableObject\(contractProps\.object\)\}/u);
-  assert.match(face1Runtime, /fixedBusinessIdentifierLabel=\{fixedBusinessIdentifierLabel\}/u);
-  assert.match(inlineEditor, /<span className="ixi-inline-fixed-label">ID<\/span>/u);
-  assert.match(inlineEditor, /value=\{draft\[definition\.fieldId\] \?\? ""\}/u);
-  assert.match(inlineEditor, /!fixedBusinessId \? <button/u);
-  assert.match(inlineEditor, /label: fixedBusinessIdentifierLabel && isBusinessIdentifier\(definition\)[\s\S]*?\? "ID"/u);
+  assert.match(card004, /object=\{card004EditableObject\(runtimeObject\)\}/u);
+  assert.match(card004, /IXIAosCommercialEditorBridge/u);
+  assert.match(face1Runtime, /if \(fixedBusinessIdentifierLabel\)/u);
+  assert.match(commercialEditor, /<span className="fixed-field-label">ID<\/span>/u);
+  assert.match(commercialEditor, /value=\{draft\[definition\.fieldId\] \?\? ""\}/u);
+  assert.match(commercialEditor, /disabled=\{protectedId/u);
+  assert.match(commercialEditor, /isBusinessIdentifier\(definition\)[\s\S]*?\? "ID"/u);
   assert.match(face1Runtime, /businessIdentifiers: value[\s\S]*?label: "ID", value/u);
 });

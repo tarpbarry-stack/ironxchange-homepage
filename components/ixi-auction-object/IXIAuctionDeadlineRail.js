@@ -22,7 +22,7 @@ function getUserTimezone() {
   }
 }
 
-function formatCloseTime(value) {
+function formatCloseTime(value, timeZone = "UTC") {
   if (!value) return "";
 
   const closeDate = new Date(value);
@@ -43,7 +43,7 @@ function formatCloseTime(value) {
         day: "numeric",
         hour: "numeric",
         minute: "2-digit",
-        timeZone: getUserTimezone(),
+        timeZone,
         timeZoneName: "short"
       }
     ).format(closeDate);
@@ -143,16 +143,18 @@ export default function IXIAuctionDeadlineRail({
   const [
     remainingMs,
     setRemainingMs
-  ] = useState(() => {
-    if (!closeTimestamp) {
-      return null;
-    }
+  ] = useState(null);
 
-    return (
-      closeTimestamp -
-      Date.now()
+  const [
+    displayTimezone,
+    setDisplayTimezone
+  ] = useState("UTC");
+
+  useEffect(() => {
+    setDisplayTimezone(
+      getUserTimezone()
     );
-  });
+  }, []);
 
   useEffect(() => {
     if (!closeTimestamp) {
@@ -184,7 +186,8 @@ export default function IXIAuctionDeadlineRail({
 
   const formattedCloseTime =
     formatCloseTime(
-      scheduledCloseAt
+      scheduledCloseAt,
+      displayTimezone
     );
 
   const formattedCountdown =
