@@ -37,6 +37,7 @@ import {
   documentForIXISalesStage,
   findIXISalesDeal,
   recordForIXISalesStage,
+  salesStageForIXIModule,
 } from "./sales/IXISalesDealEngine";
 import { closeIXISalesDeal } from "./sales/IXISalesDealCommands";
 import IXISalesDealStyles from "./sales/IXISalesDealStyles";
@@ -416,6 +417,7 @@ export default function IXITransactApp({
   const salesDeals = useMemo(() => buildIXISalesDealRegister(salesFinancialRecords), [salesFinancialRecords]);
   const moduleSalesDeals = useMemo(() => dealsForIXISalesModule(salesDeals, moduleId), [salesDeals, moduleId]);
   const selectedSalesDeal = useMemo(() => findIXISalesDeal(salesDeals, salesRoute || {}), [salesDeals, salesRoute]);
+  const activeSalesStageId = clean(salesRoute?.stageId) || salesStageForIXIModule(moduleId);
   const selectedQuoteSnapshot = selectedSalesDeal ? recordForIXISalesStage(selectedSalesDeal, "quote") : null;
   const selectedSalesOrderSnapshot = selectedSalesDeal ? recordForIXISalesStage(selectedSalesDeal, "sales-order") : null;
   const selectedSalesInvoiceSnapshot = selectedSalesDeal ? documentForIXISalesStage(selectedSalesDeal, "invoice") : null;
@@ -984,7 +986,7 @@ export default function IXITransactApp({
   else if (moduleId === "quote")
     body = (
       <div className="ixi-sales-detail">
-      {selectedSalesDeal ? <IXISalesStageRail deal={selectedSalesDeal} onOpenStage={openSalesStage} onStartStage={startSalesStage} /> : null}
+      {selectedSalesDeal ? <IXISalesStageRail deal={selectedSalesDeal} activeStageId={activeSalesStageId} onOpenStage={openSalesStage} onStartStage={startSalesStage} /> : null}
       <IXIQuoteApp
         key={`quote:${salesRoute?.dealId || selectedSalesDeal?.dealId || "new"}:${salesRoute?.documentId || ""}`}
         context={context}
@@ -1016,7 +1018,7 @@ export default function IXITransactApp({
   else if (moduleId === "sales-order" || moduleId === "invoice")
     body = (
       <IXIEquipmentSaleApp
-        key={`${moduleId}:${salesRoute?.dealId || selectedSalesDeal?.dealId || "new"}:${salesRoute?.documentId || ""}`}
+        key={`${activeSalesStageId}:${salesRoute?.dealId || selectedSalesDeal?.dealId || "new"}:${salesRoute?.documentId || ""}`}
         context={context}
         object={object}
         deal={selectedSalesDeal}
@@ -1024,8 +1026,9 @@ export default function IXITransactApp({
         quote={selectedQuoteSnapshot}
         initialRecord={selectedSalesOrderSnapshot}
         invoice={selectedSalesInvoiceSnapshot}
-        initialTab={moduleId === "invoice" ? "invoice" : salesRoute?.stageId === "signed" ? "preview" : "order"}
-        entryMode={moduleId}
+        activeStageId={activeSalesStageId}
+        initialTab={activeSalesStageId === "invoice" ? "invoice" : "order"}
+        entryMode={activeSalesStageId === "invoice" ? "invoice" : "sales-order"}
         onOpenStage={openSalesStage}
         onStartStage={startSalesStage}
         onOpenInvoice={() => {
@@ -1082,7 +1085,7 @@ export default function IXITransactApp({
   else if (moduleId === "sold")
     body = (
       <div className="ixi-sales-detail">
-      {selectedSalesDeal ? <IXISalesStageRail deal={selectedSalesDeal} onOpenStage={openSalesStage} onStartStage={startSalesStage} /> : null}
+      {selectedSalesDeal ? <IXISalesStageRail deal={selectedSalesDeal} activeStageId={activeSalesStageId} onOpenStage={openSalesStage} onStartStage={startSalesStage} /> : null}
       <IXIAssetSaleApp
         key={`sold:${salesRoute?.dealId || selectedSalesDeal?.dealId || "new"}:${salesRoute?.documentId || ""}`}
         context={context}
@@ -1332,7 +1335,7 @@ export default function IXITransactApp({
   else if (moduleId === "settlement")
     body = (
       <div className="ixi-sales-detail">
-      {selectedSalesDeal ? <IXISalesStageRail deal={selectedSalesDeal} onOpenStage={openSalesStage} onStartStage={startSalesStage} /> : null}
+      {selectedSalesDeal ? <IXISalesStageRail deal={selectedSalesDeal} activeStageId={activeSalesStageId} onOpenStage={openSalesStage} onStartStage={startSalesStage} /> : null}
       <IXISettlementApp
         key={`settlement:${salesRoute?.dealId || selectedSalesDeal?.dealId || "new"}:${salesRoute?.documentId || ""}`}
         context={context}

@@ -12,12 +12,15 @@ function canStartStage(deal, stageId) {
   return false;
 }
 
-export function IXISalesStageRail({ deal, onOpenStage, onStartStage }) {
+export function IXISalesStageRail({ deal, activeStageId = "", onOpenStage, onStartStage }) {
   return <><div className="ixi-deal-stage-rail" aria-label={`Sales stages for ${deal?.customer || "customer"}`}>
     {IXI_SALES_STAGES.map(stage => {
       const entry = deal?.stageRecords?.[stage.id];
       const startable = !entry && canStartStage(deal, stage.id);
-      return <button key={stage.id} type="button" className={entry ? "available" : startable ? "startable" : "missing"} disabled={!entry && !startable} onClick={() => entry ? onOpenStage?.(stage, entry, deal) : startable && onStartStage?.(stage, deal)} aria-label={`${entry ? "Open" : startable ? "Start" : "No"} ${stage.label}`}><i>{entry ? "✓" : stage.number}</i><span>{stage.label}</span></button>;
+      const current = Boolean(entry) && deal?.currentStage === stage.id;
+      const selected = activeStageId === stage.id;
+      const state = current ? "current" : entry ? "complete" : startable ? "next" : "locked";
+      return <button key={stage.id} type="button" className={`${state}${selected ? " selected" : ""}`} disabled={!entry && !startable} onClick={() => entry ? onOpenStage?.(stage, entry, deal) : startable && onStartStage?.(stage, deal)} aria-current={selected ? "step" : undefined} aria-label={`${entry ? "Open" : startable ? "Start" : "Unavailable"} step ${stage.number}, ${stage.label}`}><i>{stage.number}</i><span>{stage.label}</span></button>;
     })}
   </div></>;
 }
@@ -32,7 +35,7 @@ export default function IXISalesDealRegister({ deals = [], moduleLabel = "SALES"
     <div className="ixi-sales-register-label">CUSTOMER DEAL THREADS</div>
     <main>{deals.length ? deals.map(deal => {
       const primaryEntry = deal?.stageRecords?.[primaryStage.id];
-      return <article key={deal.dealId} className={deal.terminal ? "terminal" : "active"}><button className="ixi-deal-head" type="button" onClick={() => primaryEntry && onOpenDeal?.(primaryStage, primaryEntry, deal)} aria-label={`Open ${primaryStage.label} for ${deal.customer}`}><div><strong>{deal.customer}</strong><small>{deal.dealId}</small></div><div><b>{money(primaryEntry?.amount ?? deal.amount)}</b><span>OPEN {primaryStage.label} ›</span></div></button><IXISalesStageRail deal={deal} onOpenStage={onOpenStage} onStartStage={onStartStage} /><footer><span>CURRENT · {clean(deal.currentStage).replace(/-/g, " ").toUpperCase()}</span><span>{clean(deal.updatedAt).slice(0, 10) || "NO DATE"}</span>{canCloseIXISalesDeal(deal) ? <button type="button" onClick={() => onCloseDeal?.(deal)}>MARK LOST</button> : null}</footer></article>;
+      return <article key={deal.dealId} className={deal.terminal ? "terminal" : "active"}><button className="ixi-deal-head" type="button" onClick={() => primaryEntry && onOpenDeal?.(primaryStage, primaryEntry, deal)} aria-label={`Open ${primaryStage.label} for ${deal.customer}`}><div><strong>{deal.customer}</strong><small>{deal.dealId}</small></div><div><b>{money(primaryEntry?.amount ?? deal.amount)}</b><span>OPEN {primaryStage.label} ›</span></div></button><IXISalesStageRail deal={deal} activeStageId={primaryStage.id} onOpenStage={onOpenStage} onStartStage={onStartStage} /><footer><span>CURRENT · {clean(deal.currentStage).replace(/-/g, " ").toUpperCase()}</span><span>{clean(deal.updatedAt).slice(0, 10) || "NO DATE"}</span>{canCloseIXISalesDeal(deal) ? <button type="button" onClick={() => onCloseDeal?.(deal)}>MARK LOST</button> : null}</footer></article>;
     }) : <div className="ixi-sales-register-empty"><strong>NO {primaryStage.label} RECORDS</strong><span>Only customer deals with an existing {primaryStage.label.toLowerCase()} appear in this module.</span></div>}</main>
     <button className="ixi-sales-register-new" type="button" onClick={onNewDeal}>+ NEW CUSTOMER DEAL</button>
     {allowDirectInvoice ? <button className="ixi-sales-register-direct" type="button" onClick={onNewDirectInvoice}>+ CONTROLLED DIRECT INVOICE</button> : null}

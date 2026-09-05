@@ -24,12 +24,14 @@ test("unfinished chassis are not exposed as operational TRANSACT applications", 
 });
 
 test("Sales Order and Invoice are separate launcher entries with canonical forms on the native card face", async () => {
-  const [registrySource, shell, app, commands, context] = await Promise.all([
+  const [registrySource, shell, app, commands, context, register, registerStyles] = await Promise.all([
     read("components/ixi-aos/transact/IXITransactModuleRegistry.js"),
     read("components/ixi-aos/transact/IXITransactApp.jsx"),
     read("components/ixi-aos/transact/modules/equipment-sale/IXIEquipmentSaleApp.jsx"),
     read("components/ixi-aos/transact/modules/equipment-sale/IXIEquipmentSaleCommands.js"),
     read("components/ixi-aos/transact/IXITransactContext.js"),
+    read("components/ixi-aos/transact/sales/IXISalesDealRegister.jsx"),
+    read("components/ixi-aos/transact/sales/IXISalesDealStyles.jsx"),
   ]);
   const registry = await import(`data:text/javascript;base64,${Buffer.from(registrySource).toString("base64")}`);
   const visible = registry.getIXITransactModules({ objectType: "machine" });
@@ -42,7 +44,9 @@ test("Sales Order and Invoice are separate launcher entries with canonical forms
   assert.match(shell, /moduleId === "sales-order" \|\| moduleId === "invoice"/u);
   assert.match(shell, /initialRecord=\{selectedSalesOrderSnapshot\}/u);
   assert.match(shell, /invoice=\{selectedSalesInvoiceSnapshot\}/u);
-  assert.match(shell, /initialTab=\{moduleId === "invoice" \? "invoice" : salesRoute\?\.stageId === "signed" \? "preview" : "order"\}/u);
+  assert.match(shell, /activeSalesStageId = clean\(salesRoute\?\.stageId\) \|\| salesStageForIXIModule\(moduleId\)/u);
+  assert.match(shell, /initialTab=\{activeSalesStageId === "invoice" \? "invoice" : "order"\}/u);
+  assert.match(shell, /entryMode=\{activeSalesStageId === "invoice" \? "invoice" : "sales-order"\}/u);
   assert.match(shell, /dealsForIXISalesModule\(salesDeals, moduleId\)/u);
   assert.match(shell, /onOpenDeal=\{openSalesStage\}/u);
   assert.match(shell, /stageId: "invoice"/u);
@@ -58,7 +62,13 @@ test("Sales Order and Invoice are separate launcher entries with canonical forms
   assert.match(app, /OPEN ORIGINAL INVOICE/u);
   assert.match(app, /directInvoiceWithoutOrder/u);
   assert.match(app, /SAVE ORDER/u);
-  assert.match(app, />EXPAND</u);
+  assert.match(app, /REVISE &amp; RESEND/u);
+  assert.match(app, /priorSignedPackageHash/u);
+  assert.match(register, /activeStageId === stage\.id/u);
+  assert.match(register, /current \? "current" : entry \? "complete" : startable \? "next" : "locked"/u);
+  assert.match(registerStyles, /button\.complete,.ixi-deal-stage-rail button\.current/u);
+  assert.match(registerStyles, /button\.next\{border-color:#ffc400/u);
+  assert.match(app, />\s*EXPAND\s*</u);
   assert.doesNotMatch(app, /OPEN WORKSPACE/u);
   assert.match(commands, /documentType:\s*"invoice"/u);
   assert.match(commands, /documentNumber/u);
