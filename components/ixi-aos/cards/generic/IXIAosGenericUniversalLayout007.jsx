@@ -215,10 +215,12 @@ export default function IXIAosGenericUniversalLayout007({
   const image = getPrimaryImage(runtimeObject);
   const businessIdentifier = definitions.find(isBusinessIdentifier) || null;
   const businessIdentifierValue = inputValue(fields?.[businessIdentifier?.fieldId]);
-  const populatedFields = definitions
-    .filter(definition => !showMediaBusinessIdentifier || !isBusinessIdentifier(definition))
+  const visibleDefinitions = showMediaBusinessIdentifier
+    ? definitions.filter(definition => !isBusinessIdentifier(definition))
+    : [businessIdentifier, ...definitions.filter(definition => !isBusinessIdentifier(definition))].filter(Boolean);
+  const populatedFields = visibleDefinitions
     .map(definition => ({ definition, value: inputValue(fields?.[definition.fieldId]) }))
-    .filter(item => clean(item.value));
+    .filter(item => clean(item.value) || isBusinessIdentifier(item.definition));
   const safeIndex = items.length ? Math.min(activeChildIndex, items.length - 1) : 0;
   const detailsTitle = clean(presentation?.detailsTitle) || "DETAILS";
   const relationshipsTitle = clean(presentation?.relationshipsTitle) || "RELATIONSHIPS";
@@ -275,7 +277,7 @@ export default function IXIAosGenericUniversalLayout007({
 
         <section className="u007-section u007-details">
           <div className="u007-section-title">{detailsTitle}</div>
-          <div className="u007-section-scroll">{populatedFields.map(({ definition, value }) => <div className="u007-detail-row" key={definition.fieldId}><span>{definition.label}</span><strong>{value}</strong></div>)}</div>
+          <div className="u007-section-scroll">{populatedFields.map(({ definition, value }) => <div className="u007-detail-row" key={definition.fieldId}><span>{isBusinessIdentifier(definition) ? "ID" : definition.label}</span><strong>{value || "—"}</strong></div>)}</div>
         </section>
 
         <section className="u007-section u007-relationships">
