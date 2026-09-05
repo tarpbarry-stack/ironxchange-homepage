@@ -127,7 +127,7 @@ return (
           overflow-x: hidden;
           background: #0b0b0b;
           color: #f2f2f2;
-          font-family: Arial, sans-serif;
+          font-family: 'Inter Variable', Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
           -webkit-font-smoothing: antialiased;
           text-rendering: geometricPrecision;
         }
@@ -182,7 +182,7 @@ return (
 
           text-decoration: none;
 
-          font-size: 11px;
+          font-size: 13px;
           font-weight: 900;
 
           letter-spacing: .55px;
@@ -275,7 +275,7 @@ return (
 
           color: #FFC400;
 
-          font-size: 9px;
+          font-size: 12px;
           font-weight: 950;
 
           letter-spacing: .72px;
@@ -373,7 +373,7 @@ return (
 
           color: rgba(255,255,255,.42);
 
-          font-size: 8.5px;
+          font-size: 12px;
           font-weight: 950;
 
           letter-spacing: .68px;
@@ -420,7 +420,7 @@ return (
 
           text-decoration: none;
 
-          font-size: 10px;
+          font-size: 12px;
           font-weight: 900;
 
           letter-spacing: .55px;
