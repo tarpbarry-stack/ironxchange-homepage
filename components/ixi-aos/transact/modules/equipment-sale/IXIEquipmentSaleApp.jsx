@@ -9,6 +9,7 @@ import { IXISalesStageRail } from "../../sales/IXISalesDealRegister";
 const clean = value => String(value ?? "").trim();
 const usd = value => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(Number(value || 0));
 const stages = ["QUOTE", "SALES ORDER", "SIGNED", "INVOICE", "SOLD", "SETTLEMENT"];
+const tabForEntry = value => ["invoice", "preview"].includes(value) ? value : "order";
 function Field({ label, children, wide = false }) { return <label className={`es-field ${wide ? "wide" : ""}`}><span>{label}</span>{children}</label>; }
 function Input({ value, onChange, ...rest }) { return <input {...rest} value={value ?? ""} onChange={event => onChange(event.target.value)} />; }
 function Area({ value, onChange, ...rest }) { return <textarea {...rest} value={value ?? ""} onChange={event => onChange(event.target.value)} />; }
@@ -102,7 +103,7 @@ export default function IXIEquipmentSaleApp({ context = {}, object = {}, deal = 
   const [input, setInput] = useState(() => saleInputFromRecord(initialSaleRecord({ context, quote, initialRecord, invoice, entryMode, dealId })));
   const [invoiceRecord, setInvoiceRecord] = useState(invoice);
   const [open, setOpen] = useState(false);
-  const [tab, setTab] = useState(initialTab === "invoice" ? "invoice" : "order");
+  const [tab, setTab] = useState(() => tabForEntry(initialTab));
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [signingUrl, setSigningUrl] = useState("");
@@ -111,7 +112,7 @@ export default function IXIEquipmentSaleApp({ context = {}, object = {}, deal = 
   useEffect(() => setMounted(true), []);
   useEffect(() => { if (initialRecord) { setRecord(initialRecord); setInput(saleInputFromRecord(initialRecord)); } }, [initialRecord]);
   useEffect(() => { setInvoiceRecord(invoice); setInvoiceDraft({ dueDate: clean(invoice?.dueDate).slice(0,10), customerPoNumber: clean(invoice?.externalReference || invoice?.metadata?.customerPoNumber), memo: clean(invoice?.memo || invoice?.metadata?.administrativeNote), directEntryReason: clean(invoice?.metadata?.directEntryReason) }); if (entryMode === "invoice" && invoice && !clean(invoice?.sourceFinancialDocumentId || invoice?.metadata?.salesOrderId)) { const next = saleRecordFromInvoice(createIXIEquipmentSaleDraft({ context, quote, input: { dealId } }), invoice); setRecord(next); setInput(saleInputFromRecord(next)); } }, [context, dealId, entryMode, invoice, quote]);
-  useEffect(() => setTab(initialTab === "invoice" ? "invoice" : "order"), [initialTab]);
+  useEffect(() => setTab(tabForEntry(initialTab)), [initialTab]);
   useEffect(() => { if (!open) return; const prior = document.body.style.overflow; document.body.style.overflow = "hidden"; return () => { document.body.style.overflow = prior; }; }, [open]);
   const draft = useMemo(() => updateIXIEquipmentSale(record, input), [record, input]);
   const readiness = useMemo(() => getIXIEquipmentSaleReadiness(draft), [draft]);

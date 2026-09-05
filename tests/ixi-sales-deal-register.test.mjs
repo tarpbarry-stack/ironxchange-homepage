@@ -44,6 +44,20 @@ test("exact stage readback retains canonical document identity and revision", ()
   assert.equal(order.financialBinding.revision, 7);
 });
 
+test("each sales module register shows only deals with that exact stage", () => {
+  const records = [
+    { financialDocument: { financialDocumentId: "qt-only", documentType: "quote", quote: { identity: { dealId: "DEAL-QUOTE" }, customer: { name: "Quote Only" }, status: "sent", audit: { updatedAt: "2026-09-01" } } } },
+    { financialDocument: { financialDocumentId: "qt-order", documentType: "quote", quote: { identity: { dealId: "DEAL-ORDER" }, customer: { name: "Clements Farm" }, status: "converted", audit: { updatedAt: "2026-09-01" } } } },
+    { financialDocument: { financialDocumentId: "so-clements", documentType: "sales-order", sourceFinancialDocumentId: "qt-order", salesOrder: { identity: { dealId: "DEAL-ORDER" }, customer: { name: "Clements Farm" }, status: "draft", audit: { updatedAt: "2026-09-02" } } } },
+  ];
+  const deals = engine.buildIXISalesDealRegister(records);
+  assert.deepEqual(engine.dealsForIXISalesModule(deals, "quote").map(deal => deal.customer).sort(), ["Clements Farm", "Quote Only"]);
+  assert.deepEqual(engine.dealsForIXISalesModule(deals, "sales-order").map(deal => deal.customer), ["Clements Farm"]);
+  assert.equal(engine.dealsForIXISalesModule(deals, "invoice").length, 0);
+  assert.equal(engine.dealsForIXISalesModule(deals, "sold").length, 0);
+  assert.equal(engine.dealsForIXISalesModule(deals, "settlement").length, 0);
+});
+
 test("a lost opportunity is terminal without creating a sold stage", () => {
   const [deal] = engine.buildIXISalesDealRegister([{ financialDocument: { financialDocumentId: "qt-lost", documentType: "quote", metadata: { dealId: "DEAL-LOST", dealStatus: "lost" }, quote: { identity: { dealId: "DEAL-LOST" }, customer: { name: "Former Buyer" }, status: "declined", audit: { updatedAt: "2026-09-05" } } } }]);
   assert.equal(deal.terminal, true);

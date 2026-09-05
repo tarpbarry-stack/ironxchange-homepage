@@ -33,6 +33,7 @@ import IXISalesDealRegister, { IXISalesStageRail } from "./sales/IXISalesDealReg
 import {
   buildIXISalesDealRegister,
   createIXISalesDealId,
+  dealsForIXISalesModule,
   documentForIXISalesStage,
   findIXISalesDeal,
   recordForIXISalesStage,
@@ -413,6 +414,7 @@ export default function IXITransactApp({
     ? financialRecords
     : object?.assetFinancialTransactions || object?.relatedFinancialRecords || object?.financialRecords || [], [financialRecords, object]);
   const salesDeals = useMemo(() => buildIXISalesDealRegister(salesFinancialRecords), [salesFinancialRecords]);
+  const moduleSalesDeals = useMemo(() => dealsForIXISalesModule(salesDeals, moduleId), [salesDeals, moduleId]);
   const selectedSalesDeal = useMemo(() => findIXISalesDeal(salesDeals, salesRoute || {}), [salesDeals, salesRoute]);
   const selectedQuoteSnapshot = selectedSalesDeal ? recordForIXISalesStage(selectedSalesDeal, "quote") : null;
   const selectedSalesOrderSnapshot = selectedSalesDeal ? recordForIXISalesStage(selectedSalesDeal, "sales-order") : null;
@@ -966,12 +968,14 @@ export default function IXITransactApp({
   else if (SALES_MODULE_IDS.has(moduleId) && !salesRoute?.detail)
     body = (
       <IXISalesDealRegister
-        deals={salesDeals}
+        deals={moduleSalesDeals}
         moduleLabel={active?.label || "SALES"}
+        primaryStageId={moduleId}
         allowDirectInvoice={moduleId === "invoice"}
         onBack={() => setModuleId("")}
         onNewDeal={startSalesDeal}
         onNewDirectInvoice={startDirectInvoice}
+        onOpenDeal={openSalesStage}
         onOpenStage={openSalesStage}
         onStartStage={startSalesStage}
         onCloseDeal={closeSalesDeal}
@@ -1020,7 +1024,7 @@ export default function IXITransactApp({
         quote={selectedQuoteSnapshot}
         initialRecord={selectedSalesOrderSnapshot}
         invoice={selectedSalesInvoiceSnapshot}
-        initialTab={moduleId === "invoice" ? "invoice" : "order"}
+        initialTab={moduleId === "invoice" ? "invoice" : salesRoute?.stageId === "signed" ? "preview" : "order"}
         entryMode={moduleId}
         onOpenStage={openSalesStage}
         onStartStage={startSalesStage}

@@ -42,7 +42,9 @@ test("Sales Order and Invoice are separate launcher entries with canonical forms
   assert.match(shell, /moduleId === "sales-order" \|\| moduleId === "invoice"/u);
   assert.match(shell, /initialRecord=\{selectedSalesOrderSnapshot\}/u);
   assert.match(shell, /invoice=\{selectedSalesInvoiceSnapshot\}/u);
-  assert.match(shell, /initialTab=\{moduleId === "invoice" \? "invoice" : "order"\}/u);
+  assert.match(shell, /initialTab=\{moduleId === "invoice" \? "invoice" : salesRoute\?\.stageId === "signed" \? "preview" : "order"\}/u);
+  assert.match(shell, /dealsForIXISalesModule\(salesDeals, moduleId\)/u);
+  assert.match(shell, /onOpenDeal=\{openSalesStage\}/u);
   assert.match(shell, /stageId: "invoice"/u);
   assert.match(app, /entryMode === "invoice"/u);
   assert.match(app, /if \(entryMode === "sales-order"\) return initialRecord \|\| base/u);

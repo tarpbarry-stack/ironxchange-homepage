@@ -14,6 +14,23 @@ export const IXI_SALES_STAGES = Object.freeze([
 
 export const IXI_DEAL_TERMINAL_STATES = Object.freeze(["won", "sold", "lost", "declined", "expired", "withdrawn", "cancelled", "canceled", "voided", "settled"]);
 
+const IXI_SALES_MODULE_STAGE = Object.freeze({
+  quote: "quote",
+  "sales-order": "sales-order",
+  invoice: "invoice",
+  sold: "sold",
+  settlement: "settlement",
+});
+
+export function salesStageForIXIModule(moduleId = "") {
+  return IXI_SALES_MODULE_STAGE[clean(moduleId)] || "quote";
+}
+
+export function dealsForIXISalesModule(deals = [], moduleId = "") {
+  const stageId = salesStageForIXIModule(moduleId);
+  return array(deals).filter(deal => Boolean(deal?.stageRecords?.[stageId]));
+}
+
 export function createIXISalesDealId() {
   const raw = globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(16).slice(2)}`;
   return `DEAL-${clean(raw).replace(/[^a-z0-9]/gi, "").slice(-12).toUpperCase()}`;
@@ -194,4 +211,4 @@ export function documentForIXISalesStage(deal = null, stageId = "") {
   };
 }
 
-export default { IXI_SALES_STAGES, IXI_DEAL_TERMINAL_STATES, createIXISalesDealId, buildIXISalesDealRegister, findIXISalesDeal, recordForIXISalesStage, documentForIXISalesStage };
+export default { IXI_SALES_STAGES, IXI_DEAL_TERMINAL_STATES, salesStageForIXIModule, dealsForIXISalesModule, createIXISalesDealId, buildIXISalesDealRegister, findIXISalesDeal, recordForIXISalesStage, documentForIXISalesStage };
