@@ -133,6 +133,8 @@ test("Tech Work uses canonical Cost, Activity, Related projections and remains o
   assert.match(app, /financialRecords=\{financialRecords\}/u);
   assert.match(app, /fetch\(`\/api\/passport/u);
   assert.doesNotMatch(app, /action: "edit-tech-work-order"/u);
+  assert.doesNotMatch(app, /local-pending-upload/u);
+  assert.match(app, /onAddPhoto=\{\(\) => setSubmodule\("documents"\)\}/u);
   assert.match(shell, /else if \(moduleId !== "technology-work"\) setTechWorkOrderSnapshot\(null\)/u);
   assert.match(shell, /<IXITechWorkOrderApp[\s\S]*financialRecords=\{financialRecords\}/u);
 });

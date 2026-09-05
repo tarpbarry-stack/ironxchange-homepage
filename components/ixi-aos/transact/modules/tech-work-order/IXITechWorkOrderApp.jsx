@@ -22,7 +22,6 @@ import IXITimeEntryApp from "../time/IXITimeEntryApp";
 import IXIServiceApp from "../service/IXIServiceApp";
 import IXIPurchaseApp from "../purchase/IXIPurchaseApp";
 import IXINoteApp from "../note/IXINoteApp";
-import IXIPhotoApp from "../photo/IXIPhotoApp";
 import IXIWorkOrderDocumentsApp from "../documents/IXIWorkOrderDocumentsApp";
 import { createIXITimeEntry } from "../time/IXITimeEntryCommands";
 import {
@@ -694,60 +693,6 @@ export default function IXITechWorkOrderApp({
     setSubmodule("");
   }
 
-  async function savePhoto(photo) {
-    const id = clean(photo?.identity?.photoId || photo?.identity?.clientRequestId) || `PHOTO-${Date.now()}`;
-    const stored = {
-      ...photo,
-      identity: {
-        ...(photo.identity || {}),
-        photoId: id
-      }
-    };
-    const media = Array.isArray(photo?.photo?.media) ? photo.photo.media : [];
-    const docs = media.map((item, index) => ({
-      documentId: clean(item.mediaId) || `${id}-MEDIA-${index + 1}`,
-      title: clean(photo?.photo?.title || item.fileName) || `Tech photo ${index + 1}`,
-      fileName: clean(item.fileName),
-      type: "photo",
-      relatedType: "photo",
-      relatedId: id,
-      date: photo?.photo?.occurredAt || new Date().toISOString(),
-      addedBy: actorName,
-      previewUrl: item.previewUrl || "",
-      persistenceState: item.status || "local-pending-upload"
-    }));
-
-    const next = {
-      ...record,
-      references: {
-        ...(record.references || {}),
-        photoIds: unique([...(record.references?.photoIds || []), id]),
-        attachmentIds: unique([
-          ...(record.references?.attachmentIds || []),
-          ...docs.map(item => item.documentId)
-        ])
-      },
-      photoProjection: [...(record.photoProjection || []), stored],
-      documentProjection: [
-        ...(record.documentProjection || []),
-        ...docs.filter(doc => !(record.documentProjection || []).some(existing => existing.documentId === doc.documentId))
-      ],
-      activityProjection: [
-        ...(record.activityProjection || []),
-        {
-          activityId: `TECHACT-${Date.now()}`,
-          type: "photo-added",
-          actorLabel: actorName,
-          occurredAt: new Date().toISOString(),
-          note: `${media.length} photo${media.length === 1 ? "" : "s"}`
-        }
-      ]
-    };
-
-    await commit(next, { action: "photo-save", photo: stored, documents: docs });
-    setSubmodule("");
-  }
-
   async function addGeneralDocument(input) {
     const id = clean(input?.documentId || input?.clientRequestId) || `DOC-${Date.now()}`;
     const document = {
@@ -881,9 +826,6 @@ export default function IXITechWorkOrderApp({
   }
   if (record && submodule === "note") {
     return <IXINoteApp context={context} workOrder={record} onCancel={() => setSubmodule("")} onSave={saveNote} />;
-  }
-  if (record && submodule === "photo") {
-    return <IXIPhotoApp context={context} workOrder={record} language={lang} onLanguageChange={setLang} onCancel={() => setSubmodule("")} onSave={savePhoto} />;
   }
   if (record && submodule === "documents") {
     return (
@@ -1120,7 +1062,7 @@ export default function IXITechWorkOrderApp({
               record={record}
               language={lang}
               onAddNote={() => setSubmodule("note")}
-              onAddPhoto={() => setSubmodule("photo")}
+              onAddPhoto={() => setSubmodule("documents")}
               onViewNotes={() => setTab("activity")}
               onViewPhotos={() => setSubmodule("documents")}
             /> : null}
