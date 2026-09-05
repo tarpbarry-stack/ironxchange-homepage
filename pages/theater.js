@@ -1060,7 +1060,7 @@ return (
 
   background: #030303;
   color: #d8d8d8;
-  font-family: Arial, sans-serif;
+  font-family: 'Inter Variable', Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
      main {
   width: 100vw;
