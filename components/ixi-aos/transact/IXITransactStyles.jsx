@@ -186,12 +186,25 @@ export default function IXITransactStyles() {
 
       .module-open .tx-body {
         top: 31px;
-        left: -1px;
-        right: -1px;
+        left: 0;
+        right: 0;
         min-width: 0;
         padding: 0 0 12px;
         overflow-x: hidden;
         overflow-y: auto;
+      }
+
+      /* Every card module receives one authoritative, symmetric content
+         safe area. Module-level styles may control vertical rhythm, but may
+         not move content into either chassis wall. Freight intentionally
+         remains edge-to-edge because its own shell and body own the same
+         9px left/right inset used as the TRAN$ACT spacing reference. */
+      .card-open .module-open .tx-body-safe-area > :not(style) {
+        padding-inline: 8px !important;
+      }
+
+      .card-open .module-open .tx-body-edge-to-edge > :not(style) {
+        padding-inline: 0 !important;
       }
 
       .worksheet-open .module-open .tx-header {

@@ -1492,7 +1492,12 @@ export default function IXITransactApp({
               </button>
             </div>
           </header>
-          <main className="tx-body">{body}</main>
+          <main
+            className={`tx-body ${moduleId === "freight" ? "tx-body-edge-to-edge" : "tx-body-safe-area"}`}
+            data-ixi-transact-module={moduleId || "home"}
+          >
+            {body}
+          </main>
           {!worksheetOpen ? (
             <IXIMachineRail
               listing={object}

@@ -52,13 +52,17 @@ test("open control is isolated from the drag activator", () => {
   assert.match(launcher, /onKeyDown=\{stopDragActivation\}/u);
 });
 
-test("every open TRANSACT module mounts inside the 298px shell", () => {
+test("every open TRANSACT module mounts safely inside the 298px shell", () => {
   const styles = read("components/ixi-aos/transact/IXITransactStyles.jsx");
 
   assert.match(styles, /\.ixi-transact-app\s*\{[\s\S]*?width:\s*298px;[\s\S]*?border:\s*1px solid/u);
   assert.match(
     styles,
-    /\.module-open \.tx-body\s*\{[\s\S]*?left:\s*-1px;[\s\S]*?right:\s*-1px;[\s\S]*?padding:\s*0 0 12px;[\s\S]*?overflow-x:\s*hidden;[\s\S]*?overflow-y:\s*auto;/u,
+    /\.module-open \.tx-body\s*\{[\s\S]*?left:\s*0;[\s\S]*?right:\s*0;[\s\S]*?padding:\s*0 0 12px;[\s\S]*?overflow-x:\s*hidden;[\s\S]*?overflow-y:\s*auto;/u,
+  );
+  assert.match(
+    styles,
+    /\.card-open \.module-open \.tx-body-safe-area > :not\(style\)\s*\{[\s\S]*?padding-inline:\s*8px !important;/u,
   );
   assert.match(
     styles,
