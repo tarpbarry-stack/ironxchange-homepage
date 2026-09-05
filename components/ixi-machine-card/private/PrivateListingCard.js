@@ -1181,12 +1181,12 @@ onMachinePlacementChange ? (
      .title-row {
   display: grid;
   grid-template-columns: minmax(0, 1fr) max-content;
-  align-items: flex-start;
-  gap: 10px;
+  align-items: center;
+  gap: 8px;
 
-  height: 36px;
-  min-height: 36px;
-  max-height: 36px;
+  height: 24px;
+  min-height: 24px;
+  max-height: 24px;
 
   overflow: hidden;
 }
@@ -1198,15 +1198,15 @@ onMachinePlacementChange ? (
           max-width: none;
           color: #f2f2f2;
 
-          font-size: 15.5px;
+          font-size: 15px;
           font-weight: 900;
-          line-height: 1.12;
-          letter-spacing: -0.28px;
+          line-height: 1;
+          letter-spacing: -0.35px;
           text-rendering: geometricPrecision;
-          display: -webkit-box;
--webkit-line-clamp: 2;
--webkit-box-orient: vertical;
-overflow: hidden;
+          display: block;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
         }
 
         .hours-inline {
@@ -1218,14 +1218,15 @@ overflow: hidden;
           line-height: 1;
           white-space: nowrap;
           position: static;
-          width: auto;
-          min-width: max-content;
+          width: 60px;
+          min-width: 60px;
+          max-width: 60px;
           justify-self: end;
           text-align: right;
         }
 
 .hours-input {
-  width: 52px;
+  width: 60px;
   height: 23px;
 
   padding: 0 5px;
@@ -1268,14 +1269,14 @@ overflow: hidden;
   min-height: 42px;
   max-height: 42px;
 
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 88px minmax(0, 1fr);
   align-items: center;
 
    margin-top: 10px;
   padding-top: 4px;
 
-  gap: 10px;
+  gap: 8px;
 }
         .price-row::before {
   content: "";
@@ -1319,19 +1320,17 @@ overflow: hidden;
           font-weight: 850;
           letter-spacing: -0.12px;
           white-space: nowrap;
+          justify-self: start;
         }
 
        .meta {
   position: relative;
   top: 2px;
-          display: flex;
-          align-items: center;
-          gap: 9px;
+          display: block;
           color: #9a9a9a;
-          flex-wrap: nowrap;
-          justify-content: flex-end;
           text-align: right;
-          margin-left: auto;
+          width: 100%;
+          margin-left: 0;
           min-width: 0;
         }
 
@@ -1440,8 +1439,8 @@ overflow: hidden;
 }
 
 .price-input {
-  width: 82px;
-  text-align: right;
+  width: 88px;
+  text-align: left;
 }
 
         .location-input {
@@ -1453,19 +1452,23 @@ overflow: hidden;
         }
 
        .location-row {
-  display: flex;
-  flex-direction: row;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 27px;
   align-items: center;
-
+  width: 100%;
+  min-width: 0;
   gap: 4px;
 }
 .city-input {
-  width: 76px;
+  width: 100%;
+  min-width: 0;
   text-align: right;
 }
 
 .state-input {
   width: 27px;
+  min-width: 27px;
+  max-width: 27px;
   padding-left: 3px;
   padding-right: 3px;
 
@@ -1650,17 +1653,14 @@ overflow: hidden;
             grid-template-columns: 1fr 1fr;
           }
 
-          .price-row {
-            flex-wrap: wrap;
-          }
-
-          .meta {
+          .city-input {
             width: 100%;
           }
 
-                   .location-input {
-            width: 100%;
-            text-align: left;
+          .state-input {
+            width: 27px;
+            min-width: 27px;
+            max-width: 27px;
           }
         }
       `}</style>

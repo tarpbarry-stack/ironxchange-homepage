@@ -99,12 +99,12 @@ export default function IXIImmutableScaledSurface({
          * a second responsive redesign inside the canonical desktop card.
          */
         .ixi-immutable-surface-host .private-listing-card .location-input {
-          width: 72px !important;
           text-align: right !important;
         }
 
         .ixi-immutable-surface-host .private-listing-card .city-input {
-          width: 76px !important;
+          width: 100% !important;
+          min-width: 0 !important;
           text-align: right !important;
         }
 

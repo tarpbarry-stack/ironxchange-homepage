@@ -16,7 +16,7 @@ test("AOS mobile uses one immutable 300x475 coordinate system", () => {
 
 test("inner private card desktop geometry is firewalled from viewport reflow", () => {
   assert.match(scaler, /\.city-input \{/);
-  assert.match(scaler, /width: 76px !important/);
+  assert.match(scaler, /width: 100% !important/);
   assert.match(scaler, /\.state-input \{/);
   assert.match(scaler, /width: 27px !important/);
   assert.match(scaler, /\.price-row \{/);
