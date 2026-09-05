@@ -120,7 +120,11 @@ jobs:
             -X DELETE -H 'Content-Type: application/json' \
             -d '{"expectedRevision":1,"reason":"deployment-probe"}' \
             http://127.0.0.1:4100/tickets/v1/tickets/deployment-probe)"
-          case "$route_status" in 401|403) ;; *) cat "$STAGE/delete-route.json" >&2 || true; exit 1 ;; esac
+          case "$route_status" in
+            401|403) ;;
+            404) jq -e '.error.code == "TICKET_NOT_FOUND"' "$STAGE/delete-route.json" >/dev/null ;;
+            *) cat "$STAGE/delete-route.json" >&2 || true; exit 1 ;;
+          esac
 
           SUCCESS=1
           trap - EXIT
