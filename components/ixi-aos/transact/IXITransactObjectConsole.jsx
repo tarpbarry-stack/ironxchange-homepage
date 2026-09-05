@@ -117,14 +117,25 @@ export default function IXITransactObjectConsole({
   );
 
   const persistModuleOrder = useCallback((nextOrder = []) => {
-    if (!objectId || typeof onIxiStateChange !== "function") {
+    if (
+      !stateObjectId ||
+      typeof onIxiStateChange !==
+        "function"
+    ) {
       return null;
     }
 
-    return onIxiStateChange(objectId, {
-      transactModuleOrder: nextOrder
-    });
-  }, [objectId, onIxiStateChange]);
+    return onIxiStateChange(
+      stateObjectId,
+      {
+        transactModuleOrder:
+          nextOrder
+      }
+    );
+  }, [
+    stateObjectId,
+    onIxiStateChange
+  ]);
 
   const [slots, setSlots] = useState(() =>
     normalizeConsoleSlots(
