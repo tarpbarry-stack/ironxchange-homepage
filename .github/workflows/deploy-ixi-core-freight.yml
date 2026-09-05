@@ -6,7 +6,7 @@ name: Deploy IX-Core Freight
       commit_sha:
         description: Immutable IX-Core commit SHA
         required: true
-        default: bf3114cbc329523206993d3b9a4411de11df03f5
+        default: 1428f376a22da0a5f94acea73c0dcd3b10e74ff1
   push:
     branches: [main]
     paths: [".github/workflows/deploy-ixi-core-freight.yml"]
@@ -25,7 +25,7 @@ jobs:
     env:
       AWS_REGION: ${{ secrets.AWS_REGION }}
       AWS_INSTANCE_ID: ${{ secrets.AWS_INSTANCE_ID }}
-      IXI_CORE_SHA: ${{ inputs.commit_sha || 'bf3114cbc329523206993d3b9a4411de11df03f5' }}
+      IXI_CORE_SHA: ${{ inputs.commit_sha || '1428f376a22da0a5f94acea73c0dcd3b10e74ff1' }}
     steps:
       - name: Validate immutable release
         shell: bash
@@ -53,9 +53,9 @@ jobs:
           STAGE=/tmp/ixi-core-freight-__IXI_CORE_SHA__
           ARCHIVE=/tmp/ixi-core-freight-__IXI_CORE_SHA__.tgz
           BACKUP=/var/backups/ixi-core-releases/freight-pre-__IXI_CORE_SHA__.tgz
-          RUNTIME_FILES='index.js freight/routes/freightAuthenticatedRequest.js'
-          CHECKSUM_FILE='freight/routes/freightAuthenticatedRequest.js'
-          STAGE_FILES='index.js freight/constants.js freight/contracts/freightOrderContract.js freight/routes/freightAuthenticatedRequest.js freight/routes/freightRouter.js freight/services/freightService.js'
+          RUNTIME_FILES='freight/services/freightService.js passport/passportRegistry.js'
+          NEW_FILES='mos/provisioning/aosObjectIdentityResolver.js'
+          DEPLOY_FILES="$RUNTIME_FILES $NEW_FILES"
           SUCCESS=0
           ROLLBACK_ARMED=0
 
@@ -64,6 +64,7 @@ jobs:
             if [ "$SUCCESS" -eq 0 ] && [ "$ROLLBACK_ARMED" -eq 1 ] && [ -f "$BACKUP" ]; then
               echo 'Deployment failed; restoring prior Freight runtime.' >&2
               cd "$APP"
+              rm -f $NEW_FILES
               tar -xzf "$BACKUP"
               run_pm2 reload IX-Core --update-env || run_pm2 restart IX-Core --update-env || true
             fi
@@ -83,26 +84,29 @@ jobs:
 
           cd "$APP"
           ALREADY_CURRENT=1
-          cmp -s "$APP/$CHECKSUM_FILE" "$STAGE/$CHECKSUM_FILE" || ALREADY_CURRENT=0
-          grep -A4 '"/freight/v1"' "$APP/index.js" | grep -q 'ixiInternalFinancialRequest' || ALREADY_CURRENT=0
+          for file in $DEPLOY_FILES; do
+            test -f "$APP/$file" && cmp -s "$APP/$file" "$STAGE/$file" || ALREADY_CURRENT=0
+          done
           if [ "$ALREADY_CURRENT" -ne 1 ]; then
             printf '%s  %s\n' \
-              'bbce203a0381957b728bdb8d7e45756851f7ae8d44a50fb360f5ee614698f2c3' 'freight/routes/freightAuthenticatedRequest.js' | sha256sum -c -
-            grep -q 'ixiInternalFinancialRequest' "$APP/index.js"
-            grep -q '"/financial"' "$APP/index.js"
-            grep -q '"/freight/v1"' "$APP/index.js"
+              '216b3dea4cd6f853fb1bb62598ec77e5877b1af02dabeef04a6613303c1bd4e3' 'freight/services/freightService.js' \
+              '04ad14c0306384f5cc20e423ae85302e1bb742a1df3feec092208af9a4f62efd' 'passport/passportRegistry.js' | sha256sum -c -
+            if [ -e "$APP/$NEW_FILES" ]; then
+              cmp -s "$APP/$NEW_FILES" "$STAGE/$NEW_FILES"
+            fi
           fi
 
           cd "$STAGE"
           npm ci --ignore-scripts --no-audit
           npm test
-          for file in $STAGE_FILES; do node --check "$file"; done
+          for file in $DEPLOY_FILES; do node --check "$file"; done
           node - <<'NODE'
-          const {freightRouter}=require('./freight/routes/freightRouter');
           const service=require('./freight/services/freightService');
-          const paths=freightRouter.stack.map(layer=>layer.route?.path).filter(Boolean);
-          if(!paths.includes('/orders/:freightOrderId/invoice')) throw new Error('Freight invoice route missing.');
-          if(typeof service.attachInvoice!=='function') throw new Error('Freight invoice service missing.');
+          const resolver=require('./mos/provisioning/aosObjectIdentityResolver');
+          const registry=require('./passport/passportRegistry');
+          if(typeof service.create!=='function') throw new Error('Freight create service missing.');
+          if(typeof resolver.resolveOrProvisionAosObjectForPassport!=='function') throw new Error('Passport resolver missing.');
+          if(typeof registry.bindPassportSource!=='function') throw new Error('Passport source binding missing.');
           NODE
 
           if [ "$ALREADY_CURRENT" -ne 1 ]; then
@@ -110,25 +114,9 @@ jobs:
             mkdir -p /var/backups/ixi-core-releases
             tar -czf "$BACKUP" $RUNTIME_FILES
             ROLLBACK_ARMED=1
-            install -D -m 0644 "$STAGE/$CHECKSUM_FILE" "$APP/$CHECKSUM_FILE"
-            node - "$APP/index.js" <<'NODE'
-          const fs=require('fs');
-          const path=process.argv[2];
-          let source=fs.readFileSync(path,'utf8');
-          const internal='ixiInternalFinancialRequest';
-          const routeStart=source.indexOf('"/freight/v1"');
-          if(routeStart<0) throw new Error('Live Freight route mount missing.');
-          const routeWindow=source.slice(routeStart,routeStart+260);
-          if(!routeWindow.includes(internal)){
-            const anchor=/("\/freight\/v1"\s*,\s*)(ixiAuthenticatedFinancialRequest\s*,)/g;
-            const matches=[...source.matchAll(anchor)];
-            if(matches.length!==1) throw new Error('Live Freight authentication mount is ambiguous.');
-            source=source.replace(anchor,'$1ixiInternalFinancialRequest,\n  $2');
-          }
-          const next=`${path}.freight-auth-next`;
-          fs.writeFileSync(next,source,{mode:0o644});
-          fs.renameSync(next,path);
-          NODE
+            for file in $DEPLOY_FILES; do
+              install -D -m 0644 "$STAGE/$file" "$APP/$file"
+            done
             run_pm2 reload IX-Core --update-env
           fi
 
@@ -140,15 +128,20 @@ jobs:
           done
           cd "$APP"
           printf '%s  %s\n' \
-            '2795f89f5a203129756a808f96fbb6c2d374d820a5bc0244abde9e6f30603b9f' 'freight/routes/freightAuthenticatedRequest.js' | sha256sum -c -
-          grep -A4 '"/freight/v1"' "$APP/index.js" | grep -q 'ixiInternalFinancialRequest'
+            '6350b10dafd61f88388a793ce565dde9e7beb7bb405ca174628e67054fa34e59' 'freight/services/freightService.js' \
+            'b84be7d4cb67e774545ae5499b7d74ddc15986ad5b9192f30bbe8e47bdda18b7' 'passport/passportRegistry.js' \
+            'a598ea6ac8b72d98f2e0707f636d96a75fc476a4d793b22501d88852d8d61b91' 'mos/provisioning/aosObjectIdentityResolver.js' | sha256sum -c -
+          node - <<'NODE'
+          const resolver=require('./mos/provisioning/aosObjectIdentityResolver');
+          if(typeof resolver.resolveOrProvisionAosObjectForPassport!=='function') throw new Error('Live Passport resolver missing.');
+          NODE
 
           SUCCESS=1
           ROLLBACK_ARMED=0
           trap - EXIT
           rm -rf "$STAGE"
           rm -f "$ARCHIVE"
-          printf 'IX-Core Freight %s deployed; health=200; invoice-route=present\n' "$RELEASE_SHA"
+          printf 'IX-Core Freight %s deployed; health=200; passport-resolver=present\n' "$RELEASE_SHA"
           REMOTE_SCRIPT
           )"
           remote_script="${remote_script//__IXI_CORE_SHA__/$IXI_CORE_SHA}"
@@ -172,7 +165,7 @@ jobs:
           {
             echo '## IX-Core Freight release'
             printf -- '- Commit: `%s`\n' "$IXI_CORE_SHA"
-            echo '- 90 Financial, Freight, and Sales control tests: passed'
+            echo '- 94 Financial, Freight, Passport, and Sales control tests: passed'
             echo '- Live source checksum and rollback controls: passed'
-            echo '- AWS IX-Core health and Freight invoice-route probes: passed'
+            echo '- AWS IX-Core health and Passport resolver probes: passed'
           } >> "$GITHUB_STEP_SUMMARY"
