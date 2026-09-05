@@ -89,7 +89,12 @@ export default function IXIAosCard007EmployeeApplication(props) {
   const isFaceLabPreview = object?.metadata?.source === "aos-card-catalog-preview" || String(object?.objectId || "").startsWith("preview-universal-007");
 
   return (
-    <IXIAosDataContractCardAdapter {...props} object={object} minimumCustomFields={8}>
+    <IXIAosDataContractCardAdapter
+      {...props}
+      object={object}
+      minimumCustomFields={8}
+      showBusinessIdentifier={isFaceLabPreview && faceLabVariant === "007C"}
+    >
       {contractProps => (
         <IXIAosCommercialEditorBridge object={contractProps.object} onSaveObject={contractProps.onSaveObject} persistenceAdapter={contractProps.hasPersistenceAdapter ? contractProps.onSaveObject : null} mediaEnabled>
           {({ object: runtimeObject }) => <IXIAosFace1CardRuntime cardNumber={7} object={runtimeObject} onSaveObject={contractProps.onSaveObject}>
