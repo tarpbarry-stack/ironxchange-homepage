@@ -10,7 +10,8 @@ import {
   IXI_CONSOLE_SLOT_TYPES,
   normalizeConsoleSlots,
   insertConsoleSlot,
-  removeConsoleSlot
+  removeConsoleSlot,
+  cycleConsoleSlotFace
 } from "../../ixi-chassis/IXIObjectConsoleEngine";
 import {
   runIXIActionNoticeLifecycle
@@ -25,6 +26,12 @@ import { createIXITransactContext } from "./IXITransactContext";
 
 const PANEL_WIDTH = 298;
 const PANEL_HEIGHT = 471;
+
+const TRANSACT_CONSOLE_FACES = [
+  2,
+  3,
+  4
+];
 
 function getLifecycleCopy(moduleId = "", payload = {}) {
   const id = String(moduleId || "").trim();
@@ -156,7 +163,8 @@ export default function IXITransactObjectConsole({
       {
         maxSlots:
           IXI_CONSOLE_MAX_DEPTH,
-        faces: [2]
+        faces:
+          TRANSACT_CONSOLE_FACES
       }
     )
   );
@@ -173,7 +181,8 @@ export default function IXITransactObjectConsole({
         {
           maxSlots:
             IXI_CONSOLE_MAX_DEPTH,
-          faces: [2]
+          faces:
+          TRANSACT_CONSOLE_FACES
         }
       );
 
@@ -211,7 +220,8 @@ export default function IXITransactObjectConsole({
         face: 2,
         maxSlots:
           IXI_CONSOLE_MAX_DEPTH,
-        faces: [2],
+        faces:
+          TRANSACT_CONSOLE_FACES,
         defaultFace: 2
       })
     );
@@ -222,7 +232,26 @@ export default function IXITransactObjectConsole({
       removeConsoleSlot({
         slots,
         slotId,
-        faces: [2],
+        faces:
+          TRANSACT_CONSOLE_FACES,
+        defaultFace: 2
+      })
+    );
+  }
+
+  function cycleFace(
+    slotId,
+    event
+  ) {
+    event?.preventDefault?.();
+    event?.stopPropagation?.();
+
+    saveSlots(
+      cycleConsoleSlotFace({
+        slots,
+        slotId,
+        faces:
+          TRANSACT_CONSOLE_FACES,
         defaultFace: 2
       })
     );
@@ -276,6 +305,11 @@ export default function IXITransactObjectConsole({
             <section
               key={slot.slotId}
               className={`tx-slot ${isListing ? "primary" : "module"}`}
+              data-ixi-transact-console-face={
+                isListing
+                  ? 1
+                  : slot.face
+              }
             >
               {!atCapacity && first ? (
                 <IXIObjectCardActuator
@@ -332,10 +366,36 @@ export default function IXITransactObjectConsole({
                   <IXIAosActionNotice variant="field" />
                 </>
               ) : (
-                <IXITransactConsolePanel
-                  context={context}
-                  onOpenModule={handleOpenModule}
-                />
+                <>
+                  <IXITransactConsolePanel
+                    context={context}
+                    face={slot.face}
+                    onOpenModule={handleOpenModule}
+                  />
+
+                  <button
+                    type="button"
+                    className="tx-console-face-button"
+                    aria-label={
+                      `Change TRAN$ACT console face ${slot.face}`
+                    }
+                    title={
+                      `TRAN$ACT face ${slot.face}`
+                    }
+                    onPointerDown={event => {
+                      event.preventDefault();
+                      event.stopPropagation();
+                    }}
+                    onClick={event =>
+                      cycleFace(
+                        slot.slotId,
+                        event
+                      )
+                    }
+                  >
+                    <span />
+                  </button>
+                </>
               )}
             </section>
           );
@@ -357,6 +417,56 @@ export default function IXITransactObjectConsole({
             width: ${PANEL_WIDTH}px;
             height: ${PANEL_HEIGHT}px;
             overflow: visible;
+          }
+
+          .tx-console-face-button {
+            position: absolute;
+            left: 50%;
+            bottom: 0;
+            width: 36px;
+            height: 7px;
+            transform:
+              translateX(-50%);
+            padding: 0;
+            border: 0;
+            border-radius:
+              3px 3px 1px 1px;
+            background:
+              rgba(255,255,255,.18);
+            cursor: pointer;
+            z-index: 120;
+            pointer-events: auto;
+            box-shadow:
+              inset 0 1px 0
+                rgba(255,255,255,.12),
+              0 1px 3px
+                rgba(0,0,0,.32);
+          }
+
+          .tx-console-face-button span {
+            display: block;
+            width: 20px;
+            height: 2px;
+            margin: 0 auto;
+            border-radius: 2px;
+            background:
+              rgba(255,255,255,.32);
+          }
+
+          .tx-console-face-button:hover,
+          .tx-console-face-button:focus-visible {
+            outline: none;
+            background:
+              rgba(255,196,0,.95);
+            box-shadow:
+              0 0 8px
+                rgba(255,196,0,.38);
+          }
+
+          .tx-console-face-button:hover span,
+          .tx-console-face-button:focus-visible span {
+            background:
+              rgba(0,0,0,.62);
           }
         `}</style>
       </div>
