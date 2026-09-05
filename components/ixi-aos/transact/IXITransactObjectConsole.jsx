@@ -28,6 +28,7 @@ const PANEL_WIDTH = 298;
 const PANEL_HEIGHT = 471;
 
 const TRANSACT_CONSOLE_FACES = [
+  1,
   2,
   3,
   4
@@ -217,12 +218,12 @@ export default function IXITransactObjectConsole({
         type:
           IXI_CONSOLE_SLOT_TYPES
             .MODULE,
-        face: 2,
+        face: 1,
         maxSlots:
           IXI_CONSOLE_MAX_DEPTH,
         faces:
           TRANSACT_CONSOLE_FACES,
-        defaultFace: 2
+        defaultFace: 1
       })
     );
   }
@@ -234,7 +235,7 @@ export default function IXITransactObjectConsole({
         slotId,
         faces:
           TRANSACT_CONSOLE_FACES,
-        defaultFace: 2
+        defaultFace: 1
       })
     );
   }
@@ -252,7 +253,7 @@ export default function IXITransactObjectConsole({
         slotId,
         faces:
           TRANSACT_CONSOLE_FACES,
-        defaultFace: 2
+        defaultFace: 1
       })
     );
   }
@@ -370,6 +371,7 @@ export default function IXITransactObjectConsole({
                   <IXITransactConsolePanel
                     context={context}
                     face={slot.face}
+                    financialRecords={financialRecords}
                     onOpenModule={handleOpenModule}
                   />
 
