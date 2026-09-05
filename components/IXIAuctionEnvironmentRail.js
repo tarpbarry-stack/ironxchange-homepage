@@ -134,8 +134,8 @@ title="IXI Auction Environment"
         .ixi-environment-link {
           color: rgba(255,255,255,.075);
           text-decoration: none;
-          font-size: 9px;
-          font-weight: 950;
+          font-size: 11px;
+          font-weight: 850;
           letter-spacing: .9px;
           text-transform: uppercase;
           white-space: nowrap;
@@ -168,15 +168,15 @@ title="IXI Auction Environment"
         }
 
         .ixi-environment-link.state-available {
-          color: rgba(255,255,255,.24);
+          color: rgba(255,255,255,.42);
         }
 
         .ixi-environment-link.state-locked {
-          color: rgba(255,255,255,.08);
+          color: rgba(255,255,255,.16);
         }
 
         .ixi-environment-rail.mode-med .ixi-environment-link {
-          color: rgba(255,255,255,.24);
+          color: rgba(255,255,255,.42);
         }
 
         .ixi-environment-rail.mode-high .ixi-environment-link {
