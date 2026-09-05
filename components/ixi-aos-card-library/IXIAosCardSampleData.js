@@ -143,7 +143,7 @@ const SAMPLE_PERSONNEL_OBJECT = Object.freeze({
   objectType: "customer-defined-container",
   singularLabel: "PERSONNEL CONTAINER",
   pluralLabel: "EMPLOYEES",
-  displayName: "IRONXCHANGE PERSONNEL",
+  displayName: "PERSONNEL",
   status: "active",
   capabilities: { canContain: true, canCreate: true, canTransact: true, editable: true, hasConsole: true },
   presentation: { icon: "♟", totalLabel: "TOTAL PEOPLE", summaryTitle: "WORKFORCE SUMMARY", relationshipsTitle: "RELATIONSHIPS & INFRASTRUCTURE" },
