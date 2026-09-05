@@ -3,6 +3,10 @@ export default function IXIFreightStyles(){return <style jsx global>{`
 .ixi-freight *{box-sizing:border-box}
 .ixi-freight .fr-head{height:50px;padding:8px 10px;border-bottom:1px solid #26302b;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:8px;background:linear-gradient(180deg,#121714,#090c0a)}
 .ixi-freight .fr-head>div:first-child{min-width:0}
+.ixi-freight .fr-head-actions{display:flex;align-items:center;justify-content:flex-end;gap:6px;min-width:0}
+.ixi-freight .fr-lang{display:flex;align-items:center;gap:2px;color:#65706a;font-size:9px}
+.ixi-freight .fr-lang button{padding:0;border:0;background:transparent;color:#65706a;font:900 9px Inter,Arial;cursor:pointer}
+.ixi-freight .fr-lang button.on{color:#ffd21a}
 .ixi-freight .fr-head strong{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14px;letter-spacing:.02em}
 .ixi-freight .fr-head small,.ixi-freight .fr-muted{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#8e9993;font-size:9px;letter-spacing:.06em;text-transform:uppercase}
 .ixi-freight .fr-status{padding:5px 7px;border:1px solid #78600b;color:#ffd21a;border-radius:4px;font-size:9px;white-space:nowrap}

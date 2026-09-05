@@ -23,15 +23,15 @@ export default function IXITransactStyles() {
 
       .ixi-transact-dialog.worksheet-open {
         position: fixed;
-        inset: auto;
-        top: 50%;
-        left: 50%;
-        width: 298px;
-        height: 471px;
-        margin: 0;
-        transform: translate(-50%, -50%)
-          scale(var(--ixi-transact-worksheet-scale, 1));
-        transform-origin: center;
+        inset: 16px;
+        width: min(1180px, calc(100vw - 32px));
+        height: min(820px, calc(100dvh - 32px));
+        margin: auto;
+        overflow: hidden;
+        border: 1px solid #3b433f;
+        border-radius: 2px;
+        background: #090c0a;
+        box-shadow: 0 32px 100px rgba(0,0,0,.72);
         z-index: 2147483000;
       }
 
@@ -55,6 +55,15 @@ export default function IXITransactStyles() {
         box-shadow:
           0 20px 48px rgba(0,0,0,.58),
           inset 0 1px rgba(255,255,255,.035);
+      }
+
+      .worksheet-open .ixi-transact-app {
+        width: 100%;
+        height: 100%;
+        border: 0;
+        border-radius: 0;
+        background: #090c0a;
+        box-shadow: none;
       }
 
       .tx-header {
@@ -100,6 +109,15 @@ export default function IXITransactStyles() {
         text-transform: uppercase;
       }
 
+      .tx-worksheet-title {
+        display: block;
+        margin-top: 3px;
+        color: #f4f5f4;
+        font-size: 12px;
+        line-height: 1;
+        letter-spacing: .04em;
+      }
+
       .tx-close {
         width: 25px;
         height: 25px;
@@ -125,7 +143,6 @@ export default function IXITransactStyles() {
         gap: 4px;
       }
 
-      .tx-language,
       .tx-expand {
         height: 23px;
         padding: 0 7px;
@@ -145,8 +162,6 @@ export default function IXITransactStyles() {
         font-size: 13px;
       }
 
-      .tx-language:hover,
-      .tx-language:focus-visible,
       .tx-expand:hover,
       .tx-expand:focus-visible,
       .tx-close:hover,
@@ -178,12 +193,47 @@ export default function IXITransactStyles() {
         overflow-y: auto;
       }
 
+      .worksheet-open .module-open .tx-header {
+        height: 44px;
+        padding: 0 16px;
+        background: linear-gradient(180deg, #151916, #0b0e0c);
+      }
+
+      .worksheet-open .module-open .tx-body {
+        top: 44px;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        padding: 0;
+        background: #090c0a;
+      }
+
       .module-open .tx-body > * {
         width: 100% !important;
         min-width: 0 !important;
         max-width: 100% !important;
         box-sizing: border-box;
         contain: inline-size;
+      }
+
+      .worksheet-open .module-open .tx-body > * {
+        width: 100% !important;
+        height: 100% !important;
+        min-height: 100% !important;
+        max-height: none !important;
+        border: 0 !important;
+        border-radius: 0 !important;
+        background: #090c0a !important;
+        box-shadow: none !important;
+      }
+
+      @media (max-width: 640px) {
+        .ixi-transact-dialog.worksheet-open {
+          inset: 0;
+          width: 100vw;
+          height: 100dvh;
+          border: 0;
+        }
       }
 
       .module-open .tx-body > * * {

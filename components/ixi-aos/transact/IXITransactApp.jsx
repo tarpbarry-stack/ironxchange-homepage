@@ -73,7 +73,6 @@ export default function IXITransactApp({
 }) {
   const dialogRef = useRef(null);
   const [worksheetOpen, setWorksheetOpen] = useState(false);
-  const [worksheetScale, setWorksheetScale] = useState(1);
   const [locale, setLocale] = useState(IXI_TRANSACT_LOCALES.ENGLISH);
 
   useEffect(() => {
@@ -86,23 +85,6 @@ export default function IXITransactApp({
       // Private browsing and storage policies may deny persistence.
     }
   }, []);
-
-  useEffect(() => {
-    if (!worksheetOpen) return undefined;
-
-    const fitWorksheetToViewport = () => {
-      const availableWidth = Math.max(1, globalThis.innerWidth - 32);
-      const availableHeight = Math.max(1, globalThis.innerHeight - 32);
-      setWorksheetScale(
-        Math.min(2, availableWidth / 298, availableHeight / 471),
-      );
-    };
-
-    fitWorksheetToViewport();
-    globalThis.addEventListener?.("resize", fitWorksheetToViewport);
-    return () =>
-      globalThis.removeEventListener?.("resize", fitWorksheetToViewport);
-  }, [worksheetOpen]);
 
   const context = useMemo(
     () =>
@@ -470,6 +452,18 @@ export default function IXITransactApp({
   function openWorksheet() {
     const dialog = dialogRef.current;
     if (!dialog || worksheetOpen) return;
+    const nativeWorksheetSelector = {
+      quote: ".qt-card-actions .secondary",
+      "sales-order": ".es-card-actions button:first-child",
+      invoice: ".es-card-actions button:first-child",
+    }[moduleId];
+    const nativeWorksheetButton = nativeWorksheetSelector
+      ? dialog.querySelector(nativeWorksheetSelector)
+      : null;
+    if (nativeWorksheetButton) {
+      nativeWorksheetButton.click();
+      return;
+    }
     dialog.close?.();
     dialog.showModal?.();
     setWorksheetOpen(true);
@@ -1412,7 +1406,6 @@ export default function IXITransactApp({
       </>
     );
 
-  const spanish = locale === IXI_TRANSACT_LOCALES.SPANISH_MEXICO;
   const t = (message) => translateIXITransact(locale, message);
 
   return (
@@ -1420,11 +1413,6 @@ export default function IXITransactApp({
       ref={dialogRef}
       open
       className={`ixi-transact-dialog ${worksheetOpen ? "worksheet-open" : "card-open"}`}
-      style={
-        worksheetOpen
-          ? { "--ixi-transact-worksheet-scale": worksheetScale }
-          : undefined
-      }
       onCancel={(event) => {
         if (!worksheetOpen) return;
         event.preventDefault();
@@ -1432,7 +1420,7 @@ export default function IXITransactApp({
       }}
       aria-label={active?.label || "IXI TRAN$ACT"}
     >
-      <IXITransactLocaleProvider locale={locale}>
+      <IXITransactLocaleProvider locale={locale} onLocaleChange={selectLocale}>
         <div
           lang={locale}
           data-ixi-transact-locale={locale}
@@ -1447,28 +1435,13 @@ export default function IXITransactApp({
                   <strong>{context.primary.label}</strong>
                   <small>{context.primary.objectType || "AOS OBJECT"}</small>
                 </>
+              ) : worksheetOpen ? (
+                <strong className="tx-worksheet-title">
+                  {active.label} · {t("WORKSHEET")}
+                </strong>
               ) : null}
             </div>
             <div className="tx-header-actions">
-              <button
-                type="button"
-                className="tx-language"
-                onClick={() =>
-                  selectLocale(
-                    spanish
-                      ? IXI_TRANSACT_LOCALES.ENGLISH
-                      : IXI_TRANSACT_LOCALES.SPANISH_MEXICO,
-                  )
-                }
-                aria-label={
-                  spanish
-                    ? t("SWITCH TO ENGLISH")
-                    : t("SWITCH TO MEXICAN SPANISH")
-                }
-                title={spanish ? "English" : "Español (México)"}
-              >
-                {spanish ? "ENG" : "ESP"}
-              </button>
               {active ? (
                 <button
                   type="button"
@@ -1499,19 +1472,21 @@ export default function IXITransactApp({
             </div>
           </header>
           <main className="tx-body">{body}</main>
-          <IXIMachineRail
-            listing={object}
-            saved={false}
-            boardColor="none"
-            boardOutline={1}
-            machineFace={0}
-            onSendFront={onSendFront}
-            onSendBack={onSendBack}
-            onCycleColor={onCycleColor}
-            onCycleOutline={onCycleOutline}
-            armedDestination={armedDestination}
-            onSendToArmedDestination={onSendToArmedDestination}
-          />
+          {!worksheetOpen ? (
+            <IXIMachineRail
+              listing={object}
+              saved={false}
+              boardColor="none"
+              boardOutline={1}
+              machineFace={0}
+              onSendFront={onSendFront}
+              onSendBack={onSendBack}
+              onCycleColor={onCycleColor}
+              onCycleOutline={onCycleOutline}
+              armedDestination={armedDestination}
+              onSendToArmedDestination={onSendToArmedDestination}
+            />
+          ) : null}
           {!active ? <IXITransactHomeTypography /> : null}
           <IXITransactStyles />
         </div>

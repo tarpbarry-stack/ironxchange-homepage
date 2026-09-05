@@ -14,6 +14,7 @@ const ES_MX = Object.freeze({
   "CONTINUE": "CONTINUAR",
   "CLOSE": "CERRAR",
   "EXPAND WORKSHEET": "AMPLIAR HOJA DE TRABAJO",
+  "WORKSHEET": "HOJA DE TRABAJO",
   "RETURN TO CARD": "VOLVER A LA TARJETA",
   "SWITCH TO ENGLISH": "CAMBIAR A INGLÉS",
   "SWITCH TO MEXICAN SPANISH": "CAMBIAR A ESPAÑOL DE MÉXICO",
@@ -214,6 +215,7 @@ const ES_MX = Object.freeze({
 const TransactLocaleContext = createContext({
   locale: IXI_TRANSACT_LOCALES.ENGLISH,
   t: (message) => String(message ?? ""),
+  setLocale: () => {},
 });
 
 export function translateIXITransact(locale, message) {
@@ -222,13 +224,14 @@ export function translateIXITransact(locale, message) {
   return ES_MX[source] || source;
 }
 
-export function IXITransactLocaleProvider({ locale, children }) {
+export function IXITransactLocaleProvider({ locale, onLocaleChange = null, children }) {
   const value = useMemo(
     () => ({
       locale,
       t: (message) => translateIXITransact(locale, message),
+      setLocale: (nextLocale) => onLocaleChange?.(nextLocale),
     }),
-    [locale],
+    [locale, onLocaleChange],
   );
 
   return (
