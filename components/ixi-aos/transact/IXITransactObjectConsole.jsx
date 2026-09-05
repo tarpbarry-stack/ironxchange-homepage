@@ -550,9 +550,7 @@ export default function IXITransactObjectConsole({
                         event
                       )
                     }
-                  >
-                    <span />
-                  </button>
+                  />
                 </>
               )}
             </section>
@@ -580,9 +578,10 @@ export default function IXITransactObjectConsole({
           .tx-console-face-button {
             position: absolute;
             left: 50%;
-            bottom: 0;
-            width: 36px;
-            height: 7px;
+            right: auto;
+            bottom: -1px;
+            width: 34px;
+            height: 5px;
             transform:
               translateX(-50%);
             padding: 0;
@@ -601,16 +600,6 @@ export default function IXITransactObjectConsole({
                 rgba(0,0,0,.32);
           }
 
-          .tx-console-face-button span {
-            display: block;
-            width: 20px;
-            height: 2px;
-            margin: 0 auto;
-            border-radius: 2px;
-            background:
-              rgba(255,255,255,.32);
-          }
-
           .tx-console-face-button:hover,
           .tx-console-face-button:focus-visible {
             outline: none;
@@ -619,12 +608,6 @@ export default function IXITransactObjectConsole({
             box-shadow:
               0 0 8px
                 rgba(255,196,0,.38);
-          }
-
-          .tx-console-face-button:hover span,
-          .tx-console-face-button:focus-visible span {
-            background:
-              rgba(0,0,0,.62);
           }
         `}</style>
       </div>
