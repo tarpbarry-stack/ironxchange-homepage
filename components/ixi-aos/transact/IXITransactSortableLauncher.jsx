@@ -70,7 +70,6 @@ function SortableModuleTile({ item, onOpen }) {
     },
   });
 
-
   return (
     <div
       ref={setNodeRef}
