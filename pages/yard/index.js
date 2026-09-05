@@ -2065,7 +2065,7 @@ if (
 
         :global(body) {
           margin: 0;
-          font-family: Arial, sans-serif;
+          font-family: 'Inter Variable', Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
           background: #0b0b0b;
           color: #d6d6d6;
         }
@@ -2109,8 +2109,8 @@ if (
 .yard-copy h1 {
   margin: 0;
   color: #f2f2f2;
-  font-size: 18px;
-  font-weight: 950;
+  font-size: 24px;
+  font-weight: 850;
   line-height: 1;
   letter-spacing: -.35px;
   text-transform: uppercase;
@@ -2120,8 +2120,8 @@ if (
   display: block;
   margin-bottom: 4px;
   color: #FFC400;
-  font-size: 7.5px;
-  font-weight: 950;
+  font-size: 11px;
+  font-weight: 800;
   text-transform: uppercase;
   letter-spacing: .65px;
 }
@@ -2129,9 +2129,9 @@ if (
 .yard-copy p {
   margin: 4px 0 0;
   color: rgba(255,255,255,.42);
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: .12px;
+  font-size: 13px;
+  font-weight: 650;
+  letter-spacing: .08px;
 }
 
 .yard-stats {
@@ -2167,8 +2167,8 @@ if (
  display: inline-block;
   margin-top: 5px;
   color: rgba(255,255,255,.36);
-  font-size: 7.5px;
-  font-weight: 950;
+  font-size: 11px;
+  font-weight: 800;
   text-transform: uppercase;
   letter-spacing: .48px;
 }
