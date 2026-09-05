@@ -53,7 +53,7 @@ function ModuleCopy({ item, openControl = false }) {
   );
 }
 
-function SortableModuleTile({ item, onOpen, activeId }) {
+function SortableModuleTile({ item, onOpen }) {
   const {
     attributes,
     listeners,
@@ -70,17 +70,13 @@ function SortableModuleTile({ item, onOpen, activeId }) {
     },
   });
 
-  const effectiveTransform =
-    activeId && !isDragging
-      ? null
-      : transform;
 
   return (
     <div
       ref={setNodeRef}
       className={`tx-app-tile ${isDragging ? "tx-app-tile-dragging" : ""}`}
       style={{
-        transform: CSS.Transform.toString(effectiveTransform),
+        transform: CSS.Transform.toString(transform),
         transition: isDragging ? "none" : transition,
       }}
       data-ixi-transact-module={item.id}
@@ -115,7 +111,6 @@ export default function IXITransactSortableLauncher({
   const [orderedIds, setOrderedIds] = useState(() =>
     reconcileIXITransactModuleOrder(moduleOrder, moduleIds),
   );
-  const [activeId, setActiveId] = useState("");
 
   useEffect(() => {
     setOrderedIds(
@@ -146,8 +141,6 @@ export default function IXITransactSortableLauncher({
   );
 
   function finishDrag({ active, over }) {
-    setActiveId("");
-
     if (!over || clean(active?.id) === clean(over?.id)) return;
 
     const nextOrder = moveIXITransactModule(
@@ -164,9 +157,7 @@ export default function IXITransactSortableLauncher({
     <DndContext
       sensors={sensors}
       collisionDetection={closestCenter}
-      onDragStart={({ active }) => setActiveId(clean(active?.id))}
       onDragEnd={finishDrag}
-      onDragCancel={() => setActiveId("")}
     >
       <SortableContext
         items={orderedIds}
@@ -181,7 +172,6 @@ export default function IXITransactSortableLauncher({
               key={item.id}
               item={item}
               onOpen={onOpen}
-              activeId={activeId}
             />
           ))}
         </div>
