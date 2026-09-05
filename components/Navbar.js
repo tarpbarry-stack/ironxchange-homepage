@@ -35,6 +35,12 @@ export default function Navbar() {
       </div>
 
       <div className="nav-links">
+        <div
+          className="header-tools"
+          data-ixi-header-tools="true"
+          aria-label="IXI workspace tools"
+        />
+
         <div className="social-mini">
           <a href="https://www.facebook.com/profile.php?id=61589249515383" aria-label="Facebook" target="_blank" rel="noreferrer">
             <i className="fa-brands fa-facebook-f"></i>
@@ -116,9 +122,19 @@ export default function Navbar() {
         .social-mini a:nth-child(5):hover { color: #b86cff !important; text-shadow: 0 0 14px rgba(184,108,255,.26); }
 
         .nav-links {
+          min-width: 0;
           display: flex;
           align-items: center;
           gap: 14px;
+        }
+
+        .header-tools {
+          min-width: 0;
+          min-height: 40px;
+          display: flex;
+          align-items: center;
+          justify-content: flex-end;
+          gap: 6px;
         }
 
         .nav-links a {
@@ -194,10 +210,16 @@ export default function Navbar() {
         }
 
         @media (max-width: 850px) {
-          .nav { height: 60px; }
-          .logo-img { height: 30px; }
+          .nav { height: 60px; padding-inline: 10px; }
+          .logo-img {
+            width: auto;
+            height: 26px;
+            max-width: 120px;
+            object-fit: contain;
+          }
           .social-mini { display: none; }
-          .nav-links { gap: 8px; }
+          .nav-links { gap: 7px; }
+          .header-tools { min-height: 36px; gap: 4px; }
           .nav-links a { font-size: 10px; }
         }
       `}</style>
