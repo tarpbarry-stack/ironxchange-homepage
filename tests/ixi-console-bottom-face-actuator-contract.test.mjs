@@ -90,10 +90,11 @@ test("machine console cycles each workspace independently and persists its face"
 test("TRAN$ACT face actuator remains on the console bottom edge", () => {
   assert.match(
     sources.transact,
-    /\.tx-console-face-button \{[\s\S]*?position: absolute;[\s\S]*?bottom: 0;/
+    /\.tx-console-face-button \{[\s\S]*?position: absolute;[\s\S]*?bottom: -1px;/
   );
   assert.match(
     sources.transact,
-    /width: 36px;[\s\S]*?height: 7px;/
+    /width: 34px;[\s\S]*?height: 5px;/
   );
+  assert.doesNotMatch(sources.transact, /tx-console-face-button span/);
 });
