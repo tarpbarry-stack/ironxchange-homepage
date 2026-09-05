@@ -51,3 +51,15 @@ test("shell return and global close remain separate controls", async () => {
   assert.match(app, /className="tx-close"[\s\S]*onClick=\{worksheetOpen \? closeWorksheet : \(\) => onClose\?\.\(\)\}/);
   assert.match(app, /\u00d7/);
 });
+
+test("Purchase Order and Bill render inside the shared TRAN$ACT header shell", async () => {
+  const [app, purchaseOrderStyles] = await Promise.all([
+    read("components/ixi-aos/transact/IXITransactApp.jsx"),
+    read("components/ixi-aos/transact/modules/purchase-order/IXIPurchaseOrderStyles.jsx"),
+  ]);
+
+  assert.match(app, /if \(moduleId === "bill"\)\s*body = \(/);
+  assert.doesNotMatch(app, /if \(moduleId === "bill"\)\s*return \(/);
+  assert.match(app, /else if \(moduleId === "purchase-order"\)\s*body = \(/);
+  assert.doesNotMatch(purchaseOrderStyles, /:has\(\.ixi-po-card\)[^\n]*> \.tx-header/);
+});

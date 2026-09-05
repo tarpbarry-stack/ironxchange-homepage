@@ -609,8 +609,9 @@ export default function IXITransactApp({
     return canonical;
   }
 
+  let body = null;
   if (moduleId === "bill")
-    return (
+    body = (
       <IXIBillStandaloneApp
         context={context}
         object={object}
@@ -636,9 +637,7 @@ export default function IXITransactApp({
         }}
       />
     );
-
-  let body = null;
-  if (moduleId === "expense")
+  else if (moduleId === "expense")
     body = (
       <IXIExpenseApp
         context={context}

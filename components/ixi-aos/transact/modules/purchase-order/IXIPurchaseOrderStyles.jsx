@@ -159,10 +159,6 @@ export default function IXIPurchaseOrderStyles() {
       .ixi-po-error { margin-top:5px; padding:5px; border:1px solid rgba(255,74,62,.3); border-radius:4px; background:rgba(255,74,62,.045); color:#ff756a; font-size:5.6px; font-weight:900; }
       .ixi-po-empty { padding:14px 6px; color:rgba(255,255,255,.28); font-size:6px; text-align:center; }
 
-      /* When the standalone PO product is open inside TRAN$ACT, it owns the full 298×471 surface. */
-      .ixi-transact-app:has(.ixi-po-card) > .tx-header,
-      .ixi-transact-app:has(.ixi-po-card) > .board-command-rail { display:none!important; }
-      .ixi-transact-app:has(.ixi-po-card) > .tx-body { top:0!important; bottom:0!important; padding:0!important; overflow:hidden!important; }
     `}</style>
   );
 }
