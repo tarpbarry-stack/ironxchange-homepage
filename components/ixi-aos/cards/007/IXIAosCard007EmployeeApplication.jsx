@@ -93,7 +93,7 @@ export default function IXIAosCard007EmployeeApplication(props) {
       {...props}
       object={object}
       minimumCustomFields={8}
-      showBusinessIdentifier={isFaceLabPreview && faceLabVariant === "007C"}
+      showBusinessIdentifier={false}
     >
       {contractProps => (
         <IXIAosCommercialEditorBridge object={contractProps.object} onSaveObject={contractProps.onSaveObject} persistenceAdapter={contractProps.hasPersistenceAdapter ? contractProps.onSaveObject : null} mediaEnabled>
