@@ -52,6 +52,14 @@
 .detailHeader h2 { margin: 5px 0 4px; color: rgba(255,255,255,.92); font-size: 20px; line-height: 1.15; font-weight: 950; }
 .detailHeader p { margin: 0; color: rgba(255,255,255,.50); font-size: 11px; font-weight: 750; letter-spacing: .35px; line-height: 1.45; }
 .detailActions { display: flex; gap: 6px; flex-shrink: 0; }
+.detailActions .deleteButton { border-color: rgba(255,103,95,.46); color: #ff837d; background: rgba(255,103,95,.055); }
+.deleteConfirm { margin-top: 12px; padding: 12px 13px; display: flex; align-items: center; justify-content: space-between; gap: 16px; border: 1px solid rgba(255,103,95,.34); border-radius: 6px; background: rgba(255,103,95,.055); }
+.deleteConfirm h3 { margin: 0; color: #ff837d; font-size: 12px; font-weight: 950; letter-spacing: .55px; }
+.deleteConfirm p { margin: 4px 0 0; color: rgba(255,255,255,.58); font-size: 11px; line-height: 1.4; }
+.deleteConfirm > div:last-child { display: flex; gap: 7px; flex-shrink: 0; }
+.deleteConfirm button { min-height: 32px; padding: 0 11px; border: 1px solid rgba(255,255,255,.14); border-radius: 4px; background: #0d0f12; color: rgba(255,255,255,.65); font-size: 11px; font-weight: 900; letter-spacing: .45px; cursor: pointer; }
+.deleteConfirm .confirmDeleteButton { border-color: rgba(255,103,95,.55); background: rgba(255,103,95,.12); color: #ff837d; }
+.deleteConfirm button:disabled { opacity: .38; cursor: not-allowed; }
 .auditBlock { margin-top: 15px; padding: 13px; border: 1px solid rgba(255,255,255,.075); border-radius: 6px; background: rgba(255,255,255,.018); }
 .auditBlock h4, .blockHeading h4 { margin: 0 0 9px; color: rgba(255,255,255,.56); font-size: 11px; font-weight: 900; letter-spacing: .8px; }
 .originalRequest { padding: 11px; border-left: 2px solid #ffc400; background: #08090b; color: rgba(255,255,255,.82); font-size: 13px; line-height: 1.55; white-space: pre-wrap; }
@@ -101,4 +109,4 @@
 .noSelection p { color: rgba(255,255,255,.52); font-size: 12px; }
 .noSelection button { justify-self: center; min-height: 34px; padding: 0 12px; border: 1px solid rgba(255,196,0,.5); border-radius: 5px; background: rgba(255,196,0,.07); color: #ffc400; font-weight: 900; cursor: pointer; }
 @media (max-width: 1000px) { .workspace { grid-template-columns: 330px 1fr; } .scoreboard { grid-template-columns: repeat(2,1fr); } .filters { grid-template-columns: 1fr 1fr; } .filters input { grid-column: 1 / -1; } .contextGrid { grid-template-columns: repeat(2,1fr); } }
-@media (max-width: 760px) { .command { padding: 10px; } .commandHeader { align-items: flex-start; } .workspace { display: block; } .queue { border-right: 0; border-bottom: 1px solid rgba(255,255,255,.08); } .queueRows { max-height: 270px; } .detail { max-height: none; } .scoreboard { grid-template-columns: 1fr 1fr; } .filters { grid-template-columns: 1fr; } .filters input { grid-column: auto; } .detailHeader { display: block; } .detailActions { margin-top: 10px; } .contextGrid, .closeoutGrid, .closeoutEditorGrid, .deliveryLists { grid-template-columns: 1fr; } }
+@media (max-width: 760px) { .command { padding: 10px; } .commandHeader { align-items: flex-start; } .workspace { display: block; } .queue { border-right: 0; border-bottom: 1px solid rgba(255,255,255,.08); } .queueRows { max-height: 270px; } .detail { max-height: none; } .scoreboard { grid-template-columns: 1fr 1fr; } .filters { grid-template-columns: 1fr; } .filters input { grid-column: auto; } .detailHeader { display: block; } .detailActions { margin-top: 10px; flex-wrap: wrap; } .deleteConfirm { align-items: stretch; flex-direction: column; } .deleteConfirm > div:last-child { justify-content: flex-end; } .contextGrid, .closeoutGrid, .closeoutEditorGrid, .deliveryLists { grid-template-columns: 1fr; } }
