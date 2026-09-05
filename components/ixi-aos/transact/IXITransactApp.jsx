@@ -921,6 +921,7 @@ export default function IXITransactApp({
         invoice={salesInvoiceSnapshot}
         initialTab={moduleId === "invoice" ? "invoice" : "order"}
         entryMode={moduleId}
+        onOpenInvoice={() => setModuleId("invoice")}
         onBack={back}
         onRecordChange={async (record, changePayload, sourceContext) => {
           await onFinancialRecordsChange?.();
