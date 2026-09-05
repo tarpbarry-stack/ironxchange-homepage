@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 
 import { getIXITransactModule } from "./IXITransactModuleRegistry";
 import { resolveIXITransactRecordModuleId } from "./IXITransactRecordRouting";
+import { classifyIXIMachineCostRecord } from "./IXIMachineCostBasisEngine";
 
 const clean = value => String(value ?? "").trim();
 const finite = value =>
@@ -25,6 +26,7 @@ const CATEGORY_ORDER = Object.freeze([
   "rental",
   "service",
   "sales",
+  "receivable",
   "cash",
   "ledger",
   "settlement",
@@ -35,14 +37,15 @@ const CATEGORY_META = Object.freeze({
   work: { label: "WORK ORDERS", moduleId: "work-order" },
   freight: { label: "FREIGHT ORDERS", moduleId: "freight" },
   purchase: { label: "PURCHASE ORDERS", moduleId: "purchase-order" },
-  bill: { label: "BILLS / INVOICES", moduleId: "bill" },
+  bill: { label: "BILLS / PAYABLES", moduleId: "bill" },
   expense: { label: "EXPENSES", moduleId: "expense" },
   time: { label: "TIME", moduleId: "time" },
   material: { label: "PARTS / MATERIAL", moduleId: "material" },
   acquisition: { label: "ACQUISITION", moduleId: "asset-acquisition" },
   rental: { label: "RENTAL", moduleId: "rental-expense" },
   service: { label: "SERVICE", moduleId: "service-quote" },
-  sales: { label: "SALES", moduleId: "sales-order" },
+  sales: { label: "SALES ORDERS", moduleId: "sales-order" },
+  receivable: { label: "CUSTOMER INVOICES", moduleId: "invoice" },
   cash: { label: "COLLECTIONS / PAYMENTS", moduleId: "collections" },
   ledger: { label: "GENERAL LEDGER", moduleId: "general-ledger" },
   settlement: { label: "SETTLEMENT", moduleId: "settlement" },
@@ -56,7 +59,7 @@ const TYPE_META = Object.freeze({
   purchase: { category: "purchase", moduleId: "purchase-order" },
   "purchase-order": { category: "purchase", moduleId: "purchase-order" },
   bill: { category: "bill", moduleId: "bill" },
-  invoice: { category: "bill", moduleId: "invoice" },
+  invoice: { category: "receivable", moduleId: "invoice" },
   expense: { category: "expense", moduleId: "expense" },
   "time-entry": { category: "time", moduleId: "time" },
   "material-usage": { category: "material", moduleId: "material" },
@@ -179,6 +182,15 @@ function numberOf(document = {}, embedded = {}) {
   );
 }
 
+function displayNumberOf(document = {}, embedded = {}, index = 0) {
+  const number = numberOf(document, embedded);
+  const type = clean(document?.documentType || document?.type).toLowerCase();
+  const id = clean(document?.financialDocumentId);
+  if (number && number !== id) return number;
+  if (type === "invoice" && id) return `DRAFT INV-${id.slice(-8).toUpperCase()}`;
+  return number || `RECORD ${index + 1}`;
+}
+
 function statusOf(document = {}, embedded = {}) {
   return clean(
     embedded?.work?.status ||
@@ -293,7 +305,7 @@ export function getIXITransactRecordIndex(records = []) {
           clean(document?.financialDocumentId) ||
           clean(item?.id) ||
           `financial-record-${index + 1}`,
-        number: numberOf(document, embedded) || `RECORD ${index + 1}`,
+        number: displayNumberOf(document, embedded, index),
         documentType,
         category: mapped.category,
         moduleId,
@@ -310,7 +322,11 @@ export function getIXITransactRecordIndex(records = []) {
         document,
         embedded
       };
-      return { ...record, open: isOpenStatus(record.status) };
+      return {
+        ...record,
+        costBasis: classifyIXIMachineCostRecord(record),
+        open: isOpenStatus(record.status)
+      };
     })
     .sort(
       (left, right) =>
@@ -347,7 +363,11 @@ export function getIXITransactRecordIndex(records = []) {
     categories,
     totalCount: normalized.length,
     totalAmount: money(
-      normalized.reduce((sum, record) => sum + record.amount, 0)
+      normalized.reduce(
+        (sum, record) =>
+          sum + (record.costBasis.state === "actual" ? record.costBasis.amount : 0),
+        0
+      )
     )
   };
 }

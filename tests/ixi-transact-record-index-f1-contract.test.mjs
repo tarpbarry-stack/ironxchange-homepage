@@ -55,7 +55,10 @@ test("$F1 indexes authoritative records without copying them", () => {
   assert.match(source, /recordsForCategory\.length/);
   assert.match(source, /recordsForCategory\.reduce/);
   assert.match(source, /totalAmount:\s*money\(/);
-  assert.match(source, /normalized\.reduce\(\(sum, record\) => sum \+ record\.amount, 0\)/);
+  assert.match(source, /record\.costBasis\.state === "actual"/);
+  assert.match(source, /invoice:\s*\{ category: "receivable", moduleId: "invoice" \}/);
+  assert.match(source, /CUSTOMER INVOICES/);
+  assert.match(source, /BILLS \/ PAYABLES/);
   assert.match(source, /TOTAL IN MACHINE/);
   assert.match(source, /formatMoney\(index\.totalAmount\)/);
   assert.match(source, /grid-template-columns:82px minmax\(0,1fr\)/);

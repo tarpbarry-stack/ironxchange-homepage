@@ -63,6 +63,9 @@ test("Freight is a native operational TRANSACT tile backed by authenticated IX C
   assert.match(shell, /moduleId === "freight"/u);
   assert.match(app, /RECORD ACTUAL \+ CREATE BILL/u);
   assert.match(app, /TOTAL ACTUAL COST/u);
+  assert.match(app, /function queueCost\(/u);
+  assert.match(app, /hasActual.*ACTUAL/u);
+  assert.match(app, /COST NOT SET/u);
   assert.match(app, /RECONCILE FREIGHT/u);
   assert.match(commands, /createIXIBill/u);
   assert.match(commands, /acquisitionCost/u);
