@@ -31,9 +31,10 @@ test("Card 007 does not repeat the business identifier in ordinary details", () 
   assert.match(source, /<IXIAosPrimaryMediaEditor media=\{media\} onChange=\{setMedia\} \/>/u);
 });
 
-test("the media ID treatment applies to 007A and 007B without changing split-media 007C", () => {
+test("007A and 007B use the media ID while 007C places ID first in details", () => {
   assert.match(source, /showMediaBusinessIdentifier = true/u);
   assert.match(variantB, /<IXIAosGenericUniversalLayout007 \{\.\.\.props\} \/>/u);
   assert.match(variantC, /showMediaBusinessIdentifier=\{false\}/u);
-  assert.match(card, /showBusinessIdentifier=\{isFaceLabPreview && faceLabVariant === "007C"\}/u);
+  assert.match(card, /showBusinessIdentifier=\{false\}/u);
+  assert.match(source, /\.filter\(definition => !showMediaBusinessIdentifier \|\| !isBusinessIdentifier\(definition\)\)/u);
 });
