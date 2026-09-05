@@ -183,13 +183,13 @@ export function getIXIWorkOrderActivity(workOrder = {}, financialRecords = []) {
     occurredAt: row.date,
     actorLabel: clean(row.source?.timeEntry?.context?.employeeLabel || row.source?.expenseRecord?.context?.employeeLabel)
   }));
-  const workEvents = arr(workOrder.activity).map(event => ({
+  const workEvents = arr(workOrder.activity?.length ? workOrder.activity : workOrder.activityProjection).map(event => ({
     id: clean(event.activityId),
     type: clean(event.type),
-    label: clean(event.label),
-    detail: clean(event.detail),
+    label: clean(event.label || event.type).replaceAll("-", " ").toUpperCase(),
+    detail: clean(event.detail || event.note),
     occurredAt: clean(event.occurredAt),
-    actorLabel: clean(event.actor?.label)
+    actorLabel: clean(event.actor?.label || event.actorLabel)
   }));
   const amendments = arr(workOrder.amendments).map(event => ({
     id: clean(event.amendmentId),

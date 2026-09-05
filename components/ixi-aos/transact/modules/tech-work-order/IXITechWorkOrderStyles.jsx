@@ -69,6 +69,20 @@ export default function IXITechWorkOrderStyles() {
         border-color: rgba(255,196,0,.48);
       }
 
+      .techwo-v13 .techwo-date-input {
+        width: 100%;
+        height: 32px;
+        min-width: 0;
+        margin-bottom: 7px;
+        padding: 0 8px;
+        border: 1px solid rgba(255,255,255,.12);
+        border-radius: 4px;
+        background: #090b0a;
+        color: #f1f3f1;
+        font: 800 7px Arial;
+        color-scheme: dark;
+      }
+
       /* LIVE TECHWO WORK SURFACE --------------------------------------- */
 
       .techwo-v13.wo-work {

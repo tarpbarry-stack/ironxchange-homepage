@@ -428,8 +428,9 @@ export default function IXITransactApp({
     else if (moduleId !== "work-order") setWorkOrderSnapshot(null);
   }, [activeWorkOrder, moduleId]);
   useEffect(() => {
-    setTechWorkOrderSnapshot(activeTechWorkOrder || null);
-  }, [activeTechWorkOrder]);
+    if (activeTechWorkOrder) setTechWorkOrderSnapshot(activeTechWorkOrder);
+    else if (moduleId !== "technology-work") setTechWorkOrderSnapshot(null);
+  }, [activeTechWorkOrder, moduleId]);
   useEffect(() => {
     setCollectionCases(collectionCasesFromFinancial);
   }, [collectionCasesFromFinancial]);
@@ -567,7 +568,7 @@ export default function IXITransactApp({
       idempotencyKey: requestId,
       patch: {
         techWorkOrder: record,
-        financialState: action === "close" ? "closed" : "incurred",
+        financialState: ["complete", "close"].includes(action) ? "closed" : "incurred",
         ...(action === "complete"
           ? {
               completedAt:
@@ -1341,6 +1342,7 @@ export default function IXITransactApp({
       <IXITechWorkOrderApp
         context={context}
         initialTechWorkOrder={techWorkOrderSnapshot || activeTechWorkOrder}
+        financialRecords={financialRecords}
         onBack={back}
         onCreate={async (record, sourceContext, response) => {
           setTechWorkOrderSnapshot(record);

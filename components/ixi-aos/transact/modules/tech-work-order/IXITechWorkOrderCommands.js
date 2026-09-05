@@ -48,7 +48,7 @@ export async function createIXITechWorkOrder({
       amount: 0,
       description: draft.work.description || draft.work.title || "Technology work order",
       financialState: "incurred",
-      occurredAt: draft.dates.requestedAt,
+      occurredAt: `${draft.dates.performedOn}T12:00:00.000Z`,
       workOrderType: "technology",
       priority: draft.work.priority,
       techWorkOrder: draft,
@@ -61,6 +61,7 @@ export async function createIXITechWorkOrder({
       ...metadata,
       transactModule: "tech-work-order",
       techWorkOrderSchema: draft.schema,
+      workPerformedOn: draft.dates.performedOn,
       originatingPassportId: draft.context.primaryPassportId,
       originatingObjectType: draft.context.primaryObjectType,
       clientRequestId: stableId

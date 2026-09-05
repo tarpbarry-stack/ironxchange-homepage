@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 
 import {
   createIXITechWorkOrderDraft,
@@ -6,12 +6,16 @@ import {
 } from "./IXITechWorkOrderContract";
 import { createIXITechWorkOrder } from "./IXITechWorkOrderCommands";
 import {
-  applyIXITechWorkOrderAction,
-  getIXITechWorkOrderActuals
+  applyIXITechWorkOrderAction
 } from "./IXITechWorkOrderEngine";
 import IXITechWorkOrderStyles from "./IXITechWorkOrderStyles";
 import IXITechWorkOrderEvidenceSections from "./IXITechWorkOrderEvidenceSections";
 import IXIWorkOrderStyles from "../work-order/IXIWorkOrderStyles";
+import {
+  IXIWorkOrderActivityView,
+  IXIWorkOrderCostView,
+  IXIWorkOrderRelatedView
+} from "../work-order/IXIWorkOrderTabViews";
 import IXIExpenseApp from "../expense/IXIExpenseApp";
 import IXIMaterialApp from "../material/IXIMaterialApp";
 import IXITimeEntryApp from "../time/IXITimeEntryApp";
@@ -35,13 +39,12 @@ import {
 import {
   WorkOrderIcon,
   LocationIcon,
-  CameraIcon,
-  MicIcon,
   FlagIcon,
   OperableIcon,
   LimitedIcon,
   DownIcon,
   PersonIcon,
+  TeamIcon,
   CreateIcon,
   EditIcon,
   ClockIcon,
@@ -123,7 +126,42 @@ const COPY = {
     rootCause: "ROOT CAUSE / RESOLUTION",
     resolutionPlaceholder: "Describe root cause, repair/change performed, validation, and any follow-up...",
     finish: "COMPLETE TECH WORK",
-    noActivity: "No activity yet."
+    noActivity: "No activity yet.",
+    assigned: "ASSIGNED TECHNICIAN",
+    crew: "CREW / TEAM",
+    editWork: "EDIT TECHNOLOGY WORK",
+    editTechnician: "CHANGE TECHNICIAN",
+    editCrew: "EDIT CREW / TEAM",
+    completeTitle: "COMPLETE TECHNOLOGY WORK",
+    reopenTitle: "REOPEN TECHNOLOGY WORK",
+    backToWork: "BACK TO TECHWO",
+    reason: "CHANGE REASON",
+    passport: "IXI PASSPORT",
+    technicianName: "TECHNICIAN NAME",
+    crewName: "CREW MEMBER NAME",
+    addCrew: "+ ADD CREW MEMBER",
+    remove: "REMOVE",
+    saveChanges: "SAVE CHANGES",
+    cancel: "CANCEL",
+    saving: "SAVING…",
+    workPerformed: "WORK PERFORMED",
+    rootCauseField: "ROOT CAUSE",
+    resolution: "RESOLUTION / CHANGE APPLIED",
+    validation: "VALIDATION PERFORMED",
+    result: "FINAL RESULT",
+    finalImpact: "FINAL SYSTEM IMPACT",
+    recommendations: "RECOMMENDATIONS / FOLLOW-UP",
+    fullyFunctioning: "FULLY FUNCTIONING",
+    functionalNotes: "FUNCTIONAL WITH NOTES",
+    furtherWork: "FURTHER WORK REQUIRED",
+    unresolved: "UNRESOLVED",
+    confirmComplete: "CONFIRM COMPLETION",
+    confirmReopen: "REOPEN TECHWO",
+    saved: "TECHWO SAVED",
+    passportInvalid: "VALID IXI PASSPORT REQUIRED",
+    completionSummary: "COMPLETION RECORD",
+    performedOn: "WORK PERFORMED DATE",
+    recordedOn: "RECORDED ON"
   },
   es: {
     new: "NUEVA ORDEN DE TRABAJO TÉCNICO",
@@ -189,16 +227,44 @@ const COPY = {
     rootCause: "CAUSA RAÍZ / RESOLUCIÓN",
     resolutionPlaceholder: "Describe la causa, reparación/cambio, validación y seguimiento...",
     finish: "TERMINAR TRABAJO TÉCNICO",
-    noActivity: "Sin actividad todavía."
+    noActivity: "Sin actividad todavía.",
+    assigned: "TÉCNICO ASIGNADO",
+    crew: "CUADRILLA / EQUIPO",
+    editWork: "EDITAR TRABAJO TECNOLÓGICO",
+    editTechnician: "CAMBIAR TÉCNICO",
+    editCrew: "EDITAR CUADRILLA / EQUIPO",
+    completeTitle: "TERMINAR TRABAJO TECNOLÓGICO",
+    reopenTitle: "REABRIR TRABAJO TECNOLÓGICO",
+    backToWork: "VOLVER A TECHWO",
+    reason: "MOTIVO DEL CAMBIO",
+    passport: "PASAPORTE IXI",
+    technicianName: "NOMBRE DEL TÉCNICO",
+    crewName: "NOMBRE DEL MIEMBRO",
+    addCrew: "+ AGREGAR MIEMBRO",
+    remove: "QUITAR",
+    saveChanges: "GUARDAR CAMBIOS",
+    cancel: "CANCELAR",
+    saving: "GUARDANDO…",
+    workPerformed: "TRABAJO REALIZADO",
+    rootCauseField: "CAUSA RAÍZ",
+    resolution: "SOLUCIÓN / CAMBIO APLICADO",
+    validation: "VALIDACIÓN REALIZADA",
+    result: "RESULTADO FINAL",
+    finalImpact: "IMPACTO FINAL DEL SISTEMA",
+    recommendations: "RECOMENDACIONES / SEGUIMIENTO",
+    fullyFunctioning: "FUNCIONANDO COMPLETAMENTE",
+    functionalNotes: "FUNCIONAL CON NOTAS",
+    furtherWork: "REQUIERE MÁS TRABAJO",
+    unresolved: "SIN RESOLVER",
+    confirmComplete: "CONFIRMAR FINALIZACIÓN",
+    confirmReopen: "REABRIR TECHWO",
+    saved: "TECHWO GUARDADA",
+    passportInvalid: "SE REQUIERE PASAPORTE IXI VÁLIDO",
+    completionSummary: "REGISTRO DE FINALIZACIÓN",
+    performedOn: "FECHA DEL TRABAJO REALIZADO",
+    recordedOn: "REGISTRADO EL"
   }
 };
-
-function Money({ value = 0 }) {
-  return <>{`$${number(value).toLocaleString(undefined, {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  })}`}</>;
-}
 
 function dateOf(iso = "") {
   const date = iso ? new Date(iso) : new Date();
@@ -210,6 +276,16 @@ function dateOf(iso = "") {
 function timeOf(iso = "") {
   const date = iso ? new Date(iso) : new Date();
   return Number.isNaN(date.getTime()) ? "" : date.toTimeString().slice(0, 5);
+}
+
+function LanguageToggle({ language, onChange }) {
+  return (
+    <div className="wo-lang">
+      <button className={language === "en" ? "on" : ""} onClick={() => onChange("en")}>ENG</button>
+      <i>/</i>
+      <button className={language === "es" ? "on" : ""} onClick={() => onChange("es")}>ESP</button>
+    </div>
+  );
 }
 
 function addReference(record, key, id, financialKey = "", amount = 0) {
@@ -268,6 +344,7 @@ function addDocuments(record, attachments = [], sourceType = "general", sourceId
 export default function IXITechWorkOrderApp({
   context = {},
   initialTechWorkOrder = null,
+  financialRecords = [],
   onBack = null,
   onCreate = null,
   onRecordChange = null
@@ -283,13 +360,14 @@ export default function IXITechWorkOrderApp({
   const [environment, setEnvironment] = useState("production");
   const [systemName, setSystemName] = useState("");
   const [version, setVersion] = useState("");
+  const [performedOn, setPerformedOn] = useState(dateOf());
   const [submodule, setSubmodule] = useState("");
   const [tab, setTab] = useState("work");
   const [timerSession, setTimerSession] = useState(null);
   const [timerTick, setTimerTick] = useState(Date.now());
   const [notice, setNotice] = useState("");
-  const [completionText, setCompletionText] = useState("");
-  const [completionOpen, setCompletionOpen] = useState(false);
+  const [editor, setEditor] = useState("");
+  const [editDraft, setEditDraft] = useState({});
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
@@ -300,11 +378,6 @@ export default function IXITechWorkOrderApp({
     context.actor?.label
   ) || "—";
   const objectLabel = clean(context.primary?.label) || "AOS OBJECT";
-  const actuals = useMemo(
-    () => getIXITechWorkOrderActuals(record || {}),
-    [record]
-  );
-
   function refreshTimer() {
     setTimerSession(getIXIActiveTimeSession(context));
     setTimerTick(Date.now());
@@ -312,6 +385,8 @@ export default function IXITechWorkOrderApp({
 
   useEffect(() => {
     setRecord(initialTechWorkOrder ? normalizeIXITechWorkOrder(initialTechWorkOrder) : null);
+    setEditor("");
+    setEditDraft({});
   }, [initialTechWorkOrder]);
 
   useEffect(() => {
@@ -360,6 +435,7 @@ export default function IXITechWorkOrderApp({
         environment,
         systemName,
         version,
+        performedOn,
         assignedTo: [context.actor || {}],
         status: "in-progress"
       }
@@ -390,6 +466,7 @@ export default function IXITechWorkOrderApp({
           environment: draft.technology.environment,
           systemName: draft.technology.systemName,
           version: draft.technology.version,
+          performedOn: draft.dates.performedOn,
           assignedTo: draft.people.assignedTo,
           status: draft.work.status,
           startedAt: draft.dates.startedAt,
@@ -399,12 +476,11 @@ export default function IXITechWorkOrderApp({
         idempotencyKey: commandId
       });
       const canonical = persisted.draft;
-      setRecord(canonical);
       setTab("work");
       setSubmodule("");
-      setCompletionOpen(false);
-      setNotice(`TECHWO ${canonical.identity.number} CREATED`);
       await onCreate?.(canonical, context, persisted.response);
+      setRecord(canonical);
+      setNotice(`TECHWO ${canonical.identity.number} CREATED`);
     } catch (err) {
       setError(clean(err?.message) || "TECHWO CREATE PERSISTENCE FAILED");
     } finally {
@@ -434,11 +510,99 @@ export default function IXITechWorkOrderApp({
               ? t.completeState
               : action.toUpperCase()
       );
-      if (action === "complete") setCompletionOpen(false);
+      setEditor("");
+      setEditDraft({});
     } catch (err) {
       setError(clean(err?.message) || "TECHWO ACTION FAILED");
     } finally {
       setBusy(false);
+    }
+  }
+
+  function openEditor(nextEditor) {
+    if (nextEditor === "edit") {
+      setEditDraft({
+        description: clean(record?.work?.description),
+        type: clean(record?.work?.type || "incident"),
+        priority: clean(record?.work?.priority || "normal"),
+        impact: clean(record?.work?.impact || "normal"),
+        environment: clean(record?.technology?.environment || "production"),
+        systemName: clean(record?.technology?.systemName),
+        version: clean(record?.technology?.version),
+        performedOn: clean(record?.dates?.performedOn) || dateOf(record?.dates?.requestedAt),
+        reason: ""
+      });
+    } else if (nextEditor === "assign") {
+      const assigned = record?.people?.assignedTo?.[0] || {};
+      setEditDraft({
+        passportId: clean(assigned.passportId || context.actor?.passportId),
+        label: clean(assigned.label || context.actor?.displayName || context.actor?.label),
+        reason: ""
+      });
+    } else if (nextEditor === "crew") {
+      setEditDraft({ crew: [...(record?.people?.crew || [])], passportId: "", label: "", reason: "" });
+    } else if (nextEditor === "complete") {
+      setEditDraft({
+        workPerformed: clean(record?.result?.workPerformed),
+        rootCause: clean(record?.technology?.rootCause),
+        resolution: clean(record?.technology?.resolution),
+        validation: clean(record?.technology?.validation),
+        disposition: clean(record?.result?.disposition || "fully-functioning"),
+        finalImpact: clean(record?.result?.finalImpact || "normal"),
+        recommendations: clean(record?.result?.recommendations)
+      });
+    } else if (nextEditor === "reopen") {
+      setEditDraft({ reason: "" });
+    }
+    setEditor(nextEditor);
+  }
+
+  async function verifyIXIPassport(passportId) {
+    const normalized = clean(passportId).toUpperCase();
+    if (!normalized) throw new Error(t.passportInvalid);
+    const response = await fetch(`/api/passport/${encodeURIComponent(normalized)}`, {
+      method: "GET",
+      credentials: "include",
+      headers: { Accept: "application/json" }
+    });
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok || !payload?.passport) throw new Error(payload?.error || t.passportInvalid);
+    return normalized;
+  }
+
+  async function saveEditor() {
+    try {
+      if (editor === "edit") return lifecycle("update", editDraft);
+      if (editor === "assign") {
+        const passportId = await verifyIXIPassport(editDraft.passportId);
+        return lifecycle("assign", {
+          technician: { passportId, label: clean(editDraft.label) },
+          reason: editDraft.reason
+        });
+      }
+      if (editor === "crew") return lifecycle("crew", { crew: editDraft.crew, reason: editDraft.reason });
+      if (editor === "complete") return lifecycle("complete", editDraft);
+      if (editor === "reopen") return lifecycle("reopen", { reason: editDraft.reason });
+    } catch (err) {
+      setError(clean(err?.message) || "TECHWO NOT SAVED");
+    }
+    return null;
+  }
+
+  async function addCrewMember() {
+    const label = clean(editDraft.label);
+    if (!label || !clean(editDraft.passportId)) {
+      setError("CREW NAME AND IXI PASSPORT ARE REQUIRED");
+      return;
+    }
+    try {
+      const passportId = await verifyIXIPassport(editDraft.passportId);
+      const crew = [...(editDraft.crew || [])];
+      if (!crew.some(person => clean(person.passportId).toUpperCase() === passportId)) crew.push({ passportId, label });
+      setEditDraft({ ...editDraft, crew, passportId: "", label: "" });
+      setError("");
+    } catch (err) {
+      setError(clean(err?.message) || t.passportInvalid);
     }
   }
 
@@ -700,14 +864,6 @@ export default function IXITechWorkOrderApp({
     setNotice(t.timerStarted);
   }
 
-  const Lang = () => (
-    <div className="wo-lang">
-      <button className={lang === "en" ? "on" : ""} onClick={() => setLang("en")}>ENG</button>
-      <i>/</i>
-      <button className={lang === "es" ? "on" : ""} onClick={() => setLang("es")}>ESP</button>
-    </div>
-  );
-
   if (record && submodule === "expense") {
     return <IXIExpenseApp context={context} workOrder={record} language={lang} onLanguageChange={setLang} onCancel={() => setSubmodule("")} onSave={saveExpense} />;
   }
@@ -747,7 +903,7 @@ export default function IXITechWorkOrderApp({
   if (!record) {
     return (
       <div className="wo-app wo-v13 techwo-v13">
-        <Lang />
+        <LanguageToggle language={lang} onChange={setLang} />
         <div className="wo-title">
           <div className="wo-icon"><WorkOrderIcon size={23} /></div>
           <div>
@@ -761,10 +917,8 @@ export default function IXITechWorkOrderApp({
         <div className="wo-location"><LocationIcon size={15} /><b>{objectLabel}</b><span className="locked">{t.locked}</span></div>
         <label>{t.problem}</label>
         <textarea value={description} onChange={event => setDescription(event.target.value)} placeholder={t.placeholder} />
-        <div className="wo-duo">
-          <button onClick={() => setSubmodule("photo")}><CameraIcon size={15} /><b>{t.photo}</b></button>
-          <button onClick={() => setSubmodule("note")}><MicIcon size={15} /><b>{t.voice}</b></button>
-        </div>
+        <label>{t.performedOn}</label>
+        <input className="techwo-date-input" type="date" max={dateOf()} value={performedOn} onChange={event => setPerformedOn(event.target.value)} />
         <label>{t.type}</label>
         <div className="techwo-domain-grid">
           <button className={type === "incident" ? "sel" : ""} onClick={() => setType("incident")}>{t.incident}</button>
@@ -810,11 +964,81 @@ export default function IXITechWorkOrderApp({
   const elapsed = timerSession ? getIXITimeSessionElapsedMs(timerSession, timerTick) : 0;
   const timerLabel = timerSession?.status === "running" ? t.running : timerSession?.status === "paused" ? t.paused : "—";
   const numberLabel = clean(record.identity?.number) || "TECHWO-XXXXXX";
-  const activity = Array.isArray(record.activityProjection) ? record.activityProjection : [];
+  const assignedTechnician = record.people?.assignedTo?.[0] || {};
+  const crew = Array.isArray(record.people?.crew) ? record.people.crew : [];
+
+  if (editor) {
+    const editorTitle = editor === "edit"
+      ? t.editWork
+      : editor === "assign"
+        ? t.editTechnician
+        : editor === "crew"
+          ? t.editCrew
+          : editor === "reopen"
+            ? t.reopenTitle
+            : t.completeTitle;
+    return (
+      <div className="wo-app wo-v13 wo-editor techwo-v13">
+        <LanguageToggle language={lang} onChange={setLang} />
+        {error ? <div className="wo-notice">{error}</div> : null}
+        <div className="wo-editor-head">
+          <button onClick={() => setEditor("")}>‹ {t.backToWork}</button>
+          <strong>{editorTitle}</strong>
+          <small>{numberLabel} · {objectLabel}</small>
+        </div>
+
+        {editor === "edit" ? <div className="wo-editor-form">
+          <label>{t.description}</label><textarea value={editDraft.description || ""} onChange={event => setEditDraft({ ...editDraft, description: event.target.value })} />
+          <div className="wo-form-grid">
+            <div><label>{t.type}</label><select value={editDraft.type || "incident"} onChange={event => setEditDraft({ ...editDraft, type: event.target.value })}><option value="incident">{t.incident}</option><option value="service-request">{t.request}</option><option value="diagnostic">{t.diagnostic}</option><option value="deployment-change">{t.change}</option></select></div>
+            <div><label>{t.priority}</label><select value={editDraft.priority || "normal"} onChange={event => setEditDraft({ ...editDraft, priority: event.target.value })}><option value="normal">{t.normal}</option><option value="high">{t.high}</option><option value="critical">{t.critical}</option></select></div>
+            <div><label>{t.impact}</label><select value={editDraft.impact || "normal"} onChange={event => setEditDraft({ ...editDraft, impact: event.target.value })}><option value="normal">{t.healthy}</option><option value="degraded">{t.degraded}</option><option value="critical">{t.down}</option></select></div>
+            <div><label>{t.environment}</label><select value={editDraft.environment || "production"} onChange={event => setEditDraft({ ...editDraft, environment: event.target.value })}><option value="production">PRODUCTION</option><option value="test">TEST</option><option value="development">DEVELOPMENT</option><option value="field">FIELD</option></select></div>
+            <div><label>{t.system}</label><input value={editDraft.systemName || ""} onChange={event => setEditDraft({ ...editDraft, systemName: event.target.value })} /></div>
+            <div><label>{t.version}</label><input value={editDraft.version || ""} onChange={event => setEditDraft({ ...editDraft, version: event.target.value })} /></div>
+            <div><label>{t.performedOn}</label><input type="date" max={dateOf()} value={editDraft.performedOn || ""} onChange={event => setEditDraft({ ...editDraft, performedOn: event.target.value })} /></div>
+          </div>
+          <label>{t.reason}</label><input value={editDraft.reason || ""} onChange={event => setEditDraft({ ...editDraft, reason: event.target.value })} />
+        </div> : null}
+
+        {editor === "assign" ? <div className="wo-editor-form">
+          <label>{t.technicianName}</label><input value={editDraft.label || ""} onChange={event => setEditDraft({ ...editDraft, label: event.target.value })} />
+          <label>{t.passport}</label><input value={editDraft.passportId || ""} onChange={event => setEditDraft({ ...editDraft, passportId: event.target.value })} autoCapitalize="characters" />
+          <label>{t.reason}</label><input value={editDraft.reason || ""} onChange={event => setEditDraft({ ...editDraft, reason: event.target.value })} />
+        </div> : null}
+
+        {editor === "crew" ? <div className="wo-editor-form">
+          <div className="wo-crew-list">{(editDraft.crew || []).length ? editDraft.crew.map(person => <div key={person.passportId}><span><b>{person.label}</b><small>{person.passportId}</small></span><button onClick={() => setEditDraft({ ...editDraft, crew: editDraft.crew.filter(item => item.passportId !== person.passportId) })}>{t.remove}</button></div>) : <p>—</p>}</div>
+          <label>{t.crewName}</label><input value={editDraft.label || ""} onChange={event => setEditDraft({ ...editDraft, label: event.target.value })} />
+          <label>{t.passport}</label><input value={editDraft.passportId || ""} onChange={event => setEditDraft({ ...editDraft, passportId: event.target.value })} autoCapitalize="characters" />
+          <button className="wo-add-crew" onClick={addCrewMember}>{t.addCrew}</button>
+          <label>{t.reason}</label><input value={editDraft.reason || ""} onChange={event => setEditDraft({ ...editDraft, reason: event.target.value })} />
+        </div> : null}
+
+        {editor === "complete" ? <div className="wo-editor-form">
+          <label>{t.workPerformed}</label><textarea value={editDraft.workPerformed || ""} onChange={event => setEditDraft({ ...editDraft, workPerformed: event.target.value })} />
+          <label>{t.rootCauseField}</label><textarea value={editDraft.rootCause || ""} onChange={event => setEditDraft({ ...editDraft, rootCause: event.target.value })} />
+          <label>{t.resolution}</label><textarea value={editDraft.resolution || ""} onChange={event => setEditDraft({ ...editDraft, resolution: event.target.value })} />
+          <label>{t.validation}</label><textarea value={editDraft.validation || ""} onChange={event => setEditDraft({ ...editDraft, validation: event.target.value })} />
+          <div className="wo-form-grid">
+            <div><label>{t.result}</label><select value={editDraft.disposition || "fully-functioning"} onChange={event => setEditDraft({ ...editDraft, disposition: event.target.value })}><option value="fully-functioning">{t.fullyFunctioning}</option><option value="functional-with-notes">{t.functionalNotes}</option><option value="further-work-required">{t.furtherWork}</option><option value="unresolved">{t.unresolved}</option></select></div>
+            <div><label>{t.finalImpact}</label><select value={editDraft.finalImpact || "normal"} onChange={event => setEditDraft({ ...editDraft, finalImpact: event.target.value })}><option value="normal">{t.healthy}</option><option value="degraded">{t.degraded}</option><option value="critical">{t.down}</option></select></div>
+          </div>
+          <label>{t.recommendations}</label><textarea value={editDraft.recommendations || ""} onChange={event => setEditDraft({ ...editDraft, recommendations: event.target.value })} />
+        </div> : null}
+
+        {editor === "reopen" ? <div className="wo-editor-form"><label>{t.reason}</label><textarea value={editDraft.reason || ""} onChange={event => setEditDraft({ ...editDraft, reason: event.target.value })} /></div> : null}
+
+        <div className="wo-editor-actions"><button onClick={() => setEditor("")}>{t.cancel}</button><button className="primary" onClick={saveEditor} disabled={busy}>{busy ? t.saving : editor === "complete" ? t.confirmComplete : editor === "reopen" ? t.confirmReopen : t.saveChanges}</button></div>
+        <IXIWorkOrderStyles />
+        <IXITechWorkOrderStyles />
+      </div>
+    );
+  }
 
   return (
-    <div className={`wo-app wo-v13 wo-work techwo-v13 ${isPaused ? "paused" : ""}`}>
-      <Lang />
+    <div className={`wo-app wo-v13 wo-work techwo-v13 ${isPaused ? "paused" : ""} ${isComplete ? "completed" : ""}`}>
+      <LanguageToggle language={lang} onChange={setLang} />
       {notice ? <div className="wo-notice">{notice}</div> : null}
       {error ? <div className="wo-notice">{error}</div> : null}
 
@@ -828,7 +1052,7 @@ export default function IXITechWorkOrderApp({
           <h3>{objectLabel}</h3>
           <small>{clean(record.work?.type).toUpperCase()}<i>•</i>{clean(record.technology?.environment).toUpperCase()}<i>•</i>{clean(record.work?.impact).toUpperCase()}</small>
         </div>
-        <button className="wo-edit" onClick={() => onRecordChange?.(record, { action: "edit-tech-work-order" }, context)}><EditIcon size={13} /></button>
+        {!isComplete ? <button className="wo-edit" onClick={() => openEditor("edit")}><EditIcon size={13} /></button> : null}
       </div>
 
       <div className="wo-tabs">
@@ -839,6 +1063,9 @@ export default function IXITechWorkOrderApp({
       </div>
 
       <div className="wo-scroll">
+        {tab === "cost" ? <IXIWorkOrderCostView workOrder={record} financialRecords={financialRecords} language={lang} /> : null}
+        {tab === "activity" ? <IXIWorkOrderActivityView workOrder={record} financialRecords={financialRecords} language={lang} /> : null}
+        {tab === "related" ? <IXIWorkOrderRelatedView workOrder={record} financialRecords={financialRecords} language={lang} /> : null}
         {tab === "work" ? (
           <>
             <div className="techwo-summary">
@@ -847,21 +1074,39 @@ export default function IXITechWorkOrderApp({
               <div><small>{t.version}</small><strong>{clean(record.technology?.version) || "—"}</strong></div>
             </div>
 
+            <section className="wo-business-date-card">
+              <div className="wo-date-summary">
+                <div><small>{t.performedOn}</small><strong>{dateOf(record.dates?.performedOn)}</strong></div>
+                <div><small>{t.recordedOn}</small><strong>{dateOf(record.audit?.createdAt)}</strong></div>
+                {!isComplete ? <button onClick={() => openEditor("edit")}><EditIcon size={12} /></button> : null}
+              </div>
+            </section>
+
             <label>{t.description}</label>
             <div className="wo-description">{clean(record.work?.description) || "—"}</div>
 
             <label>{t.status}</label>
             <div className="wo-status-row">
               <strong>{status.toUpperCase()}</strong>
-              <span>{clean(record.people?.requestedBy?.label) || actorName}</span>
+              <span>{clean(assignedTechnician.label) || "—"}</span>
             </div>
+
+            <section className="wo-person-card">
+              <label>{t.assigned}</label>
+              <div><PersonIcon size={18} /><span><b>{clean(assignedTechnician.label) || "—"}</b><small>{clean(assignedTechnician.passportId) || t.passport}</small></span>{!isComplete ? <button onClick={() => openEditor("assign")}><EditIcon size={13} /></button> : null}</div>
+            </section>
+
+            <section className="wo-person-card">
+              <label>{t.crew}</label>
+              <div><TeamIcon size={18} /><span><b>{crew.length ? crew.map(person => person.label).join(", ") : "—"}</b><small>{crew.length ? `${crew.length} · ${t.crew}` : "—"}</small></span>{!isComplete ? <button onClick={() => openEditor("crew")}><EditIcon size={13} /></button> : null}</div>
+            </section>
 
             <div className="wo-timer">
               <div><ClockIcon size={16} /><span><small>{t.timer}</small><strong>{formatIXITimeDuration(elapsed)}</strong></span></div>
               <b>{timerLabel}</b>
             </div>
 
-            <label>{t.add}</label>
+            {!isComplete ? <><label>{t.add}</label>
             <div className="wo-action-grid">
               <button onClick={() => setSubmodule("time")}><ClockIcon size={17} /><span>{t.time}</span></button>
               <button onClick={() => setSubmodule("material")}><MaterialIcon size={17} /><span>{t.material}</span></button>
@@ -869,16 +1114,16 @@ export default function IXITechWorkOrderApp({
               <button onClick={() => setSubmodule("expense")}><ExpenseIcon size={17} /><span>{t.expense}</span></button>
               <button onClick={() => setSubmodule("purchase")}><PurchaseIcon size={17} /><span>{t.purchase}</span></button>
               <button onClick={() => setSubmodule("documents")}><DocumentIcon size={17} /><span>{t.document}</span></button>
-            </div>
+            </div></> : null}
 
-            <IXITechWorkOrderEvidenceSections
+            {!isComplete ? <IXITechWorkOrderEvidenceSections
               record={record}
               language={lang}
               onAddNote={() => setSubmodule("note")}
               onAddPhoto={() => setSubmodule("photo")}
               onViewNotes={() => setTab("activity")}
               onViewPhotos={() => setSubmodule("documents")}
-            />
+            /> : null}
 
             {!isComplete ? (
               <div className="wo-bottom-actions">
@@ -886,83 +1131,26 @@ export default function IXITechWorkOrderApp({
                   {isPaused ? <RefreshIcon size={15} /> : <PauseIcon size={15} />}
                   <span>{isPaused ? t.resume : t.pause}</span>
                 </button>
-                <button onClick={() => { setCompletionText(clean(record.technology?.resolution)); setCompletionOpen(true); }}>
+                <button onClick={() => openEditor("complete")}>
                   <span>{t.complete}</span>
                 </button>
               </div>
             ) : null}
 
-            {!isComplete && completionOpen ? (
-              <div className="techwo-complete-panel">
-                <label>{t.rootCause}</label>
-                <textarea value={completionText} onChange={event => setCompletionText(event.target.value)} placeholder={t.resolutionPlaceholder} />
-                <button
-                  disabled={busy || !clean(completionText)}
-                  onClick={() => lifecycle("complete", {
-                    disposition: "fully-functioning",
-                    resolution: clean(completionText),
-                    workPerformed: clean(completionText),
-                    validation: "Completed by assigned technician",
-                    finalImpact: "normal"
-                  })}
-                >
-                  {t.finish}
-                </button>
-              </div>
-            ) : null}
-
             {isComplete ? (
-              <button className="techwo-reopen" disabled={busy} onClick={() => lifecycle("reopen", { reason: "Work requires additional attention" })}>
-                {t.reopen}
-              </button>
+              <>
+                <section className="wo-completion-card">
+                  <label>{t.completionSummary}</label>
+                  <strong>{clean(record.result?.workPerformed) || "—"}</strong>
+                  <p>{clean(record.result?.disposition).replaceAll("-", " ").toUpperCase()} · {clean(record.result?.finalImpact).toUpperCase()}</p>
+                  <small>{clean(record.technology?.validation) || "—"}</small>
+                </section>
+                <button className="techwo-reopen" disabled={busy} onClick={() => openEditor("reopen")}>{t.reopen}</button>
+              </>
             ) : null}
           </>
         ) : null}
 
-        {tab === "cost" ? (
-          <>
-            <div className="techwo-summary">
-              <div><small>LABOR</small><strong><Money value={actuals.labor} /></strong></div>
-              <div><small>MATERIAL</small><strong><Money value={actuals.material} /></strong></div>
-              <div><small>SERVICE</small><strong><Money value={actuals.service} /></strong></div>
-              <div><small>OTHER</small><strong><Money value={actuals.other} /></strong></div>
-              <div><small>REQUESTED</small><strong><Money value={actuals.requested} /></strong></div>
-              <div><small>{t.total}</small><strong><Money value={actuals.totalActual} /></strong></div>
-            </div>
-            <div className="wo-description">TECHWO financial activity is sourced from the same canonical Time, Material, Service, Expense and Purchase records used by Work Orders.</div>
-          </>
-        ) : null}
-
-        {tab === "activity" ? (
-          <div className="techwo-activity">
-            {activity.length
-              ? [...activity].reverse().map(item => (
-                  <div className="techwo-activity-row" key={item.activityId}>
-                    <i />
-                    <span>
-                      <strong>{clean(item.type).replaceAll("-", " ").toUpperCase()}</strong>
-                      <small>{clean(item.actorLabel)}{item.note ? ` · ${item.note}` : ""}</small>
-                    </span>
-                    <time>{item.occurredAt ? new Date(item.occurredAt).toLocaleString(lang === "es" ? "es-MX" : "en-US") : ""}</time>
-                  </div>
-                ))
-              : <div className="wo-description">{t.noActivity}</div>}
-          </div>
-        ) : null}
-
-        {tab === "related" ? (
-          <>
-            <div className="techwo-summary">
-              <div><small>OBJECT</small><strong>{objectLabel}</strong></div>
-              <div><small>LOCATION</small><strong>{clean(record.context?.locationLabel) || "—"}</strong></div>
-              <div><small>TECHNICIAN</small><strong>{actorName}</strong></div>
-              <div><small>TIME</small><strong>{record.references?.timeEntryIds?.length || 0}</strong></div>
-              <div><small>DOCUMENTS</small><strong>{record.documentProjection?.length || 0}</strong></div>
-              <div><small>PURCHASES</small><strong>{(record.references?.purchaseRequestIds?.length || 0) + (record.references?.purchaseOrderIds?.length || 0)}</strong></div>
-            </div>
-            <div className="wo-description">TECHWO remains related to the exact AOS object that launched TRAN$ACT. Child records inherit that context; they are not duplicated into a separate accounting system.</div>
-          </>
-        ) : null}
       </div>
 
       <IXIWorkOrderStyles />

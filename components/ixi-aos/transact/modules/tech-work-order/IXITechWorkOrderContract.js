@@ -38,6 +38,12 @@ export function createIXITechWorkOrderDraft({ context = {}, input = {} } = {}) {
   const actor = obj(sourceContext.actor);
   const now = clean(sourceContext.launchedAt) || new Date().toISOString();
   const techWorkOrderId = clean(sourceInput.techWorkOrderId || sourceInput.workOrderId);
+  const performedOn = clean(sourceInput.performedOn) || now.slice(0, 10);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(performedOn) || performedOn > new Date().toISOString().slice(0, 10)) {
+    const error = new Error("Work performed date must be a valid date that is not in the future.");
+    error.code = "IXI_TECH_WORK_DATE_INVALID";
+    throw error;
+  }
 
   return {
     schema: IXI_TECH_WORK_ORDER_SCHEMA,
@@ -89,10 +95,12 @@ export function createIXITechWorkOrderDraft({ context = {}, input = {} } = {}) {
         label: clean(actor.displayName || actor.name || actor.label)
       },
       assignedTo: arr(sourceInput.assignedTo),
+      crew: arr(sourceInput.crew),
       completedBy: null
     },
     dates: {
       requestedAt: clean(sourceInput.requestedAt) || now,
+      performedOn,
       scheduledAt: "",
       startedAt: "",
       completedAt: "",
@@ -148,8 +156,17 @@ export function normalizeIXITechWorkOrder(value = {}) {
     context: { ...base.context, ...obj(source.context) },
     work: { ...base.work, ...obj(source.work) },
     technology: { ...base.technology, ...obj(source.technology) },
-    people: { ...base.people, ...obj(source.people), assignedTo: arr(source.people?.assignedTo) },
-    dates: { ...base.dates, ...obj(source.dates) },
+    people: {
+      ...base.people,
+      ...obj(source.people),
+      assignedTo: arr(source.people?.assignedTo),
+      crew: arr(source.people?.crew)
+    },
+    dates: {
+      ...base.dates,
+      ...obj(source.dates),
+      performedOn: clean(source.dates?.performedOn || source.dates?.requestedAt || source.audit?.createdAt).slice(0, 10) || base.dates.performedOn
+    },
     result: { ...base.result, ...obj(source.result) },
     references: {
       ...base.references,
