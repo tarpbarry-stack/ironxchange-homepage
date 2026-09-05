@@ -6,7 +6,7 @@ name: Deploy IX-Core Freight
       commit_sha:
         description: Immutable IX-Core commit SHA
         required: true
-        default: 1428f376a22da0a5f94acea73c0dcd3b10e74ff1
+        default: 5dd4b09d7fa0720edd494583eda6d63291972b23
   push:
     branches: [main]
     paths: [".github/workflows/deploy-ixi-core-freight.yml"]
@@ -25,7 +25,7 @@ jobs:
     env:
       AWS_REGION: ${{ secrets.AWS_REGION }}
       AWS_INSTANCE_ID: ${{ secrets.AWS_INSTANCE_ID }}
-      IXI_CORE_SHA: ${{ inputs.commit_sha || '1428f376a22da0a5f94acea73c0dcd3b10e74ff1' }}
+      IXI_CORE_SHA: ${{ inputs.commit_sha || '5dd4b09d7fa0720edd494583eda6d63291972b23' }}
     steps:
       - name: Validate immutable release
         shell: bash
@@ -53,9 +53,8 @@ jobs:
           STAGE=/tmp/ixi-core-freight-__IXI_CORE_SHA__
           ARCHIVE=/tmp/ixi-core-freight-__IXI_CORE_SHA__.tgz
           BACKUP=/var/backups/ixi-core-releases/freight-pre-__IXI_CORE_SHA__.tgz
-          RUNTIME_FILES='freight/services/freightService.js passport/passportRegistry.js'
-          NEW_FILES='mos/provisioning/aosObjectIdentityResolver.js'
-          DEPLOY_FILES="$RUNTIME_FILES $NEW_FILES"
+          RUNTIME_FILES='freight/services/freightService.js freight/services/freightEconomics.js'
+          DEPLOY_FILES="$RUNTIME_FILES"
           SUCCESS=0
           ROLLBACK_ARMED=0
 
@@ -64,7 +63,6 @@ jobs:
             if [ "$SUCCESS" -eq 0 ] && [ "$ROLLBACK_ARMED" -eq 1 ] && [ -f "$BACKUP" ]; then
               echo 'Deployment failed; restoring prior Freight runtime.' >&2
               cd "$APP"
-              rm -f $NEW_FILES
               tar -xzf "$BACKUP"
               run_pm2 reload IX-Core --update-env || run_pm2 restart IX-Core --update-env || true
             fi
@@ -89,11 +87,10 @@ jobs:
           done
           if [ "$ALREADY_CURRENT" -ne 1 ]; then
             printf '%s  %s\n' \
-              '216b3dea4cd6f853fb1bb62598ec77e5877b1af02dabeef04a6613303c1bd4e3' 'freight/services/freightService.js' \
-              '04ad14c0306384f5cc20e423ae85302e1bb742a1df3feec092208af9a4f62efd' 'passport/passportRegistry.js' | sha256sum -c -
-            if [ -e "$APP/$NEW_FILES" ]; then
-              cmp -s "$APP/$NEW_FILES" "$STAGE/$NEW_FILES"
-            fi
+              '6350b10dafd61f88388a793ce565dde9e7beb7bb405ca174628e67054fa34e59' 'freight/services/freightService.js' \
+              '79023d40197a2ac42ce660f1e53efc830d7711ffc79cf7b59b51aa22446d73fd' 'freight/services/freightEconomics.js' \
+              'b84be7d4cb67e774545ae5499b7d74ddc15986ad5b9192f30bbe8e47bdda18b7' 'passport/passportRegistry.js' \
+              'a598ea6ac8b72d98f2e0707f636d96a75fc476a4d793b22501d88852d8d61b91' 'mos/provisioning/aosObjectIdentityResolver.js' | sha256sum -c -
           fi
 
           cd "$STAGE"
@@ -128,7 +125,8 @@ jobs:
           done
           cd "$APP"
           printf '%s  %s\n' \
-            '6350b10dafd61f88388a793ce565dde9e7beb7bb405ca174628e67054fa34e59' 'freight/services/freightService.js' \
+            '31068c1f776f68ba4a864d70a5d136148037729ebb880ea604988fc2d95d5418' 'freight/services/freightService.js' \
+            '775ba03f1da5f5523cc692ed71e49388c8d5ad29229deddf465ebb59c1f45a8c' 'freight/services/freightEconomics.js' \
             'b84be7d4cb67e774545ae5499b7d74ddc15986ad5b9192f30bbe8e47bdda18b7' 'passport/passportRegistry.js' \
             'a598ea6ac8b72d98f2e0707f636d96a75fc476a4d793b22501d88852d8d61b91' 'mos/provisioning/aosObjectIdentityResolver.js' | sha256sum -c -
           node - <<'NODE'
@@ -165,7 +163,7 @@ jobs:
           {
             echo '## IX-Core Freight release'
             printf -- '- Commit: `%s`\n' "$IXI_CORE_SHA"
-            echo '- 94 Financial, Freight, Passport, and Sales control tests: passed'
+            echo '- 96 Financial, Freight, Passport, and Sales control tests: passed'
             echo '- Live source checksum and rollback controls: passed'
             echo '- AWS IX-Core health and Passport resolver probes: passed'
           } >> "$GITHUB_STEP_SUMMARY"
