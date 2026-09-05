@@ -1,3 +1,5 @@
+import IXIHeaderToolPortal from "./IXIHeaderToolPortal";
+
 import {
   IXI_CARD_SCALE_LABELS,
   IXI_CARD_SCALE_STEPS,
@@ -26,7 +28,8 @@ export default function IXICardScaleControl({
   }
 
   return (
-    <div
+    <IXIHeaderToolPortal>
+      <div
       className="ixi-card-scale-control"
       role="group"
       aria-label={`${surfaceLabel} card size`}
@@ -246,14 +249,82 @@ export default function IXICardScaleControl({
           text-align: center;
         }
 
+        :global([data-ixi-header-tools="true"]) .ixi-card-scale-control {
+          position: static;
+          right: auto;
+          bottom: auto;
+          z-index: auto;
+          min-width: 184px;
+          min-height: 38px;
+          grid-template-columns: 30px minmax(76px, 1fr) 30px;
+          grid-template-rows: 26px 10px;
+          gap: 0 5px;
+          padding: 3px 5px 2px;
+          border-color: rgba(255, 196, 0, .30);
+          border-radius: 6px;
+          box-shadow: inset 0 1px 0 rgba(255, 255, 255, .045);
+          backdrop-filter: none;
+        }
+
+        :global([data-ixi-header-tools="true"]) .ixi-card-scale-step-button {
+          width: 30px;
+          height: 26px;
+          font-size: 18px;
+        }
+
+        :global([data-ixi-header-tools="true"]) .ixi-card-scale-meter,
+        :global([data-ixi-header-tools="true"]) .ixi-card-scale-bars {
+          height: 24px;
+        }
+
+        :global([data-ixi-header-tools="true"]) .ixi-card-scale-label {
+          font-size: 9px;
+          letter-spacing: .10em;
+        }
+
         @media (max-width: 850px) {
           .ixi-card-scale-control {
             right: 12px;
             bottom: 12px;
             min-width: 210px;
           }
+
+          :global([data-ixi-header-tools="true"]) .ixi-card-scale-control {
+            min-width: 106px;
+            min-height: 36px;
+            grid-template-columns: 26px minmax(42px, 1fr) 26px;
+            grid-template-rows: 24px 9px;
+            gap: 0 2px;
+            padding: 2px 3px 1px;
+          }
+
+          :global([data-ixi-header-tools="true"]) .ixi-card-scale-step-button {
+            width: 26px;
+            height: 24px;
+            font-size: 17px;
+          }
+
+          :global([data-ixi-header-tools="true"]) .ixi-card-scale-meter,
+          :global([data-ixi-header-tools="true"]) .ixi-card-scale-bars {
+            height: 21px;
+          }
+
+          :global([data-ixi-header-tools="true"]) .ixi-card-scale-bars {
+            gap: 2px;
+          }
+
+          :global([data-ixi-header-tools="true"]) .ixi-card-scale-bars i {
+            width: 2px;
+            flex-basis: 2px;
+          }
+
+          :global([data-ixi-header-tools="true"]) .ixi-card-scale-label {
+            font-size: 8px;
+            letter-spacing: .05em;
+          }
         }
       `}</style>
-    </div>
+      </div>
+    </IXIHeaderToolPortal>
   );
 }
