@@ -713,7 +713,7 @@ return (
   margin: 0;
   width: 100%;
   overflow-x: hidden;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Inter Variable', Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   background: #0b0b0b;
   color: #d6d6d6;
 }
@@ -862,7 +862,7 @@ min-height: 365px;
 
         .hero-icons div {
           text-align: center;
-          font-family: 'Montserrat', sans-serif;
+          font-family: 'Inter Variable', Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
           font-weight: 900;
           font-size: 12px;
           line-height: 1.25;
@@ -991,7 +991,7 @@ min-height: 365px;
   color: #e8e8e8;
 
   font-size: 12px;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Inter Variable', Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   font-weight: 650;
 
   outline: none;
@@ -1003,7 +1003,7 @@ min-height: 365px;
 }
 
       select {
-  font-family: 'Montserrat', sans-serif;
+  font-family: 'Inter Variable', Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   font-weight: 850;
   font-size: 10.5px;
 
@@ -1285,7 +1285,7 @@ footer p {
 }
 
 .foot-cols h4 {
-  font-family: 'Montserrat', sans-serif;
+  font-family: 'Inter Variable', Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   font-size: 10.5px;
   font-weight: 900;
   letter-spacing: .65px;
