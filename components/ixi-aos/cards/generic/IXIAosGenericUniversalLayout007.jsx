@@ -5,6 +5,10 @@ import IXIObjectRail from "../../../ixi-object-system/IXIObjectRail";
 import IXIAosCardHeaderControls from "../../card-runtime/modules/IXIAosCardHeaderControls";
 import IXIAosPrimaryMediaEditor from "../../card-runtime/modules/IXIAosPrimaryMediaEditor";
 import {
+  BUSINESS_IDENTIFIER_FIELD_ID,
+  BUSINESS_IDENTIFIER_ROLE
+} from "../../card-runtime/IXIAosObjectDataContract";
+import {
   asArray,
   clean,
   getFieldDefinitions,
@@ -24,6 +28,12 @@ function inputValue(value) {
   if (Array.isArray(value)) return value.join(", ");
   if (value && typeof value === "object") return clean(value?.displayName || value?.label || value?.name || value?.value);
   return String(value ?? "");
+}
+
+function isBusinessIdentifier(definition = {}) {
+  return clean(definition?.fieldId) === BUSINESS_IDENTIFIER_FIELD_ID ||
+    clean(definition?.presentationRole).toLowerCase() === BUSINESS_IDENTIFIER_ROLE ||
+    clean(definition?.semanticRole).toLowerCase() === BUSINESS_IDENTIFIER_ROLE;
 }
 
 function parseValue(definition, rawValue) {
@@ -186,7 +196,7 @@ export default function IXIAosGenericUniversalLayout007({
   onRecall = null, onBoard = null, onReturn = null, onExposeObject = null,
   onSendFront = null, onSendBack = null, onCycleColor = null, onCycleOutline = null,
   onCycleFace = null, onRailSend = null, armedDestination = "", onSendToArmedDestination = null,
-  skinId = "v12", onSkinChange = null
+  skinId = "v12", onSkinChange = null, showMediaBusinessIdentifier = true
 }) {
   const [runtimeObject, setRuntimeObject] = useState(object);
   const [editing, setEditing] = useState(false);
@@ -203,7 +213,12 @@ export default function IXIAosGenericUniversalLayout007({
   const definitions = getFieldDefinitions(runtimeObject);
   const fields = getObjectFields(runtimeObject);
   const image = getPrimaryImage(runtimeObject);
-  const populatedFields = definitions.map(definition => ({ definition, value: inputValue(fields?.[definition.fieldId]) })).filter(item => clean(item.value));
+  const businessIdentifier = definitions.find(isBusinessIdentifier) || null;
+  const businessIdentifierValue = inputValue(fields?.[businessIdentifier?.fieldId]);
+  const populatedFields = definitions
+    .filter(definition => !showMediaBusinessIdentifier || !isBusinessIdentifier(definition))
+    .map(definition => ({ definition, value: inputValue(fields?.[definition.fieldId]) }))
+    .filter(item => clean(item.value));
   const safeIndex = items.length ? Math.min(activeChildIndex, items.length - 1) : 0;
   const detailsTitle = clean(presentation?.detailsTitle) || "DETAILS";
   const relationshipsTitle = clean(presentation?.relationshipsTitle) || "RELATIONSHIPS";
@@ -253,6 +268,7 @@ export default function IXIAosGenericUniversalLayout007({
       <main className="u007-body">
         <section className="u007-media-shell">
           {image ? <img src={image} alt={getObjectDisplayName(runtimeObject)} /> : <div className="u007-media-empty"><b>IXI</b><span>PRIMARY MEDIA</span></div>}
+          {showMediaBusinessIdentifier ? <><div className="u007-media-shade" /><div className="u007-media-id"><span>ID</span><strong>{businessIdentifierValue || "—"}</strong></div></> : null}
           {actions.canEdit ? <button className="u007-media-action" type="button" disabled={saving} onClick={openPhotoPicker}>{image ? "CHANGE PHOTO" : "+ ADD PHOTO"}</button> : null}
           <input ref={mediaInputRef} className="u007-media-input" type="file" accept="image/*" onChange={addPrimaryPhoto} />
         </section>
@@ -278,7 +294,7 @@ export default function IXIAosGenericUniversalLayout007({
         .ixi-universal-card-007{--y:#ffc400;--line:#343a35;--soft:#252a26;position:relative;width:298px;height:471px;overflow:hidden;border:1px solid #454b47;border-radius:13px;background:linear-gradient(180deg,#101310,#080a09);color:#f4f5f4;font-family:Arial,Helvetica,sans-serif;box-shadow:inset 0 1px #ffffff12,0 18px 40px #0008}
         .u007-header{position:absolute;inset:0 0 auto;height:43px;padding:7px 10px;border-bottom:1px solid #303531;background:linear-gradient(180deg,#171a18,#101210);z-index:30}.u007-identity{max-width:188px}.u007-identity>span{display:block;overflow:hidden;color:var(--y);font-size:6px;font-weight:950;letter-spacing:.07em;text-overflow:ellipsis;white-space:nowrap}.u007-identity h2{margin:4px 0 0;overflow:hidden;color:#f6f7f6;font-size:14px;font-weight:950;line-height:1;text-overflow:ellipsis;white-space:nowrap}
         .u007-body{position:absolute;top:43px;left:7px;right:7px;bottom:111px;display:flex;flex-direction:column;gap:5px;min-height:0;padding:5px 0;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#4b514d #0b0e0c}.u007-body::-webkit-scrollbar,.u007-section-scroll::-webkit-scrollbar,.u007-editor-scroll::-webkit-scrollbar{width:5px;height:5px}.u007-body::-webkit-scrollbar-track,.u007-section-scroll::-webkit-scrollbar-track,.u007-editor-scroll::-webkit-scrollbar-track{background:#0b0e0c}.u007-body::-webkit-scrollbar-thumb,.u007-section-scroll::-webkit-scrollbar-thumb,.u007-editor-scroll::-webkit-scrollbar-thumb{background:#4b514d;border:1px solid #171b18;border-radius:999px}
-        .u007-media-shell{position:relative;flex:0 0 112px;width:100%;overflow:hidden;border:1px solid var(--line);border-radius:5px;background:#0b0e0c}.u007-media-shell img{display:block;width:100%;height:100%;object-fit:cover;object-position:center;background:#080b09}.u007-media-empty{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;background:#0d100e;color:#69716c}.u007-media-empty b{color:#7d857f;font-size:21px;font-weight:950}.u007-media-empty span{color:#747c76;font-size:5px;font-weight:900;letter-spacing:.08em}.u007-media-action{position:absolute;right:7px;bottom:7px;height:21px;padding:0 8px;border:1px solid #ffc40066;border-radius:4px;background:#0d100ed9;color:var(--y);font-size:5.5px;font-weight:950;z-index:2}.u007-media-input{display:none}
+        .u007-media-shell{position:relative;flex:0 0 112px;width:100%;overflow:hidden;border:1px solid var(--line);border-radius:5px;background:#0b0e0c}.u007-media-shell img{display:block;width:100%;height:100%;object-fit:cover;object-position:center;background:#080b09}.u007-media-empty{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;background:#0d100e;color:#69716c}.u007-media-empty b{color:#7d857f;font-size:21px;font-weight:950}.u007-media-empty span{color:#747c76;font-size:5px;font-weight:900;letter-spacing:.08em}.u007-media-shade{position:absolute;inset:auto 0 0;height:52px;background:linear-gradient(180deg,transparent,#050706e8);pointer-events:none}.u007-media-id{position:absolute;left:8px;right:86px;bottom:7px;min-width:0;z-index:2}.u007-media-id span{display:block;color:#a2aaa4;font-size:5px;font-weight:900;letter-spacing:.05em}.u007-media-id strong{display:block;margin-top:2px;overflow:hidden;color:#fff;font-size:10px;font-weight:950;text-overflow:ellipsis;white-space:nowrap}.u007-media-action{position:absolute;right:7px;bottom:7px;height:21px;padding:0 8px;border:1px solid #ffc40066;border-radius:4px;background:#0d100ed9;color:var(--y);font-size:5.5px;font-weight:950;z-index:2}.u007-media-input{display:none}
         .u007-section{flex:0 0 112px;min-height:0;overflow:hidden;border:1px solid var(--line);border-radius:5px;background:#101310}.u007-relationships{flex-basis:104px}.u007-section-title{height:20px;display:flex;align-items:center;padding:0 7px;border-bottom:1px solid var(--soft);background:#151916;color:var(--y);font-size:6px;font-weight:950}.u007-section-scroll{height:calc(100% - 20px);overflow-y:auto;scrollbar-width:thin;scrollbar-color:#4b514d #101310}.u007-detail-row{min-height:22px;display:grid;grid-template-columns:minmax(0,92px) 1fr;align-items:center;gap:7px;padding:4px 7px;border-bottom:1px solid #242925}.u007-detail-row:nth-child(even),.u007-relationship-row:nth-child(even){background:#ffffff08}.u007-detail-row span{overflow:hidden;color:#929a95;font-size:5.5px;font-weight:900;text-overflow:ellipsis;white-space:nowrap}.u007-detail-row strong{overflow:hidden;color:#eef1ef;font-size:7.5px;font-weight:900;text-align:right;text-overflow:ellipsis;white-space:nowrap}
         .u007-relationship-row{width:100%;min-height:27px;display:grid;grid-template-columns:1fr 18px;align-items:center;padding:3px 6px 3px 8px;border:0;border-bottom:1px solid #242925;background:transparent;color:#fff;text-align:left}.u007-relationship-row small{display:block;color:#8f9792;font-size:5px;font-weight:900}.u007-relationship-row strong{display:block;margin-top:1px;font-size:7px;font-weight:900}.u007-relationship-row em{display:block;color:#6e7771;font-size:5px;font-style:normal}.u007-relationship-row>b{color:var(--y);font-size:10px;text-align:center}
         .u007-commands{position:absolute;left:7px;right:7px;bottom:78px;height:27px;display:grid;grid-template-columns:repeat(3,1fr);overflow:hidden;border:1px solid var(--line);border-radius:5px;background:#0f120f;z-index:20}.u007-commands button{border:0;border-right:1px solid var(--soft);background:transparent;color:#b9c0bb;font-size:7px;font-weight:900}.u007-commands button:last-child{border-right:0}.u007-commands b{margin-left:3px;font-size:6px}.u007-child-rail{position:absolute;left:0;right:0;bottom:19px;height:55px;overflow:hidden;border-top:1px solid #292e2a;background:#080a09;z-index:18}
