@@ -14,7 +14,7 @@ test("F$1 is a peer machine workspace, never a TRAN$ACT application", () => {
 
   assert.match(
     consoleRuntime,
-    /MACHINE_CONSOLE_FACES\s*=\s*\[\s*2,\s*3,\s*4\s*\]/
+    /MACHINE_CONSOLE_FACES\s*=\s*\[\s*2,\s*3,\s*4,\s*5\s*\]/
   );
   assert.match(directory, /TRANSACT:\s*"transact"/);
   assert.match(directory, /FINANCIAL:\s*"financial-record-index"/);
