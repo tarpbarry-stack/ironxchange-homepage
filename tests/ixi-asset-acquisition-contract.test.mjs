@@ -65,3 +65,11 @@ test("Asset Acquisition refuses browser-only attachment metadata", () => {
   assert.equal(result.valid, false);
   assert.equal(result.errors.documents, "secure-upload-required");
 });
+
+test("Asset Acquisition preserves equal card gutters without changing card geometry", async () => {
+  const styles = await readFile(
+    new URL("../components/ixi-aos/transact/modules/asset-acquisition/IXIAssetAcquisitionStyles.jsx", import.meta.url),
+    "utf8",
+  );
+  assert.match(styles, /\.ixi-acq\{padding:0 8px 12px\}/u);
+});
