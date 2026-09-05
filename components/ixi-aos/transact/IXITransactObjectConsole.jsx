@@ -75,6 +75,7 @@ function getLifecycleCopy(moduleId = "", payload = {}) {
 
 export default function IXITransactObjectConsole({
   object = {},
+  layoutObjectId = "",
   actor = {},
   entity = {},
   activeWorkOrder = null,
@@ -100,6 +101,10 @@ export default function IXITransactObjectConsole({
     ""
   ).trim();
 
+  const stateObjectId =
+    String(layoutObjectId || objectId)
+      .trim();
+
   const context = useMemo(
     () => createIXITransactContext({
       object,
@@ -123,9 +128,23 @@ export default function IXITransactObjectConsole({
 
   const [slots, setSlots] = useState(() =>
     normalizeConsoleSlots(
-      [{ slotId: "listing", type: IXI_CONSOLE_SLOT_TYPES.LISTING, face: 1 }],
+      Array.isArray(
+        ixiState?.transactConsoleSlots
+      ) &&
+      ixiState.transactConsoleSlots.length
+        ? ixiState.transactConsoleSlots
+        : [
+            {
+              slotId: "listing",
+              type:
+                IXI_CONSOLE_SLOT_TYPES
+                  .LISTING,
+              face: 1
+            }
+          ],
       {
-        maxSlots: IXI_CONSOLE_MAX_DEPTH,
+        maxSlots:
+          IXI_CONSOLE_MAX_DEPTH,
         faces: [2]
       }
     )
@@ -136,25 +155,66 @@ export default function IXITransactObjectConsole({
   );
   const atCapacity = slots.length >= IXI_CONSOLE_MAX_DEPTH;
 
+  function saveSlots(nextSlots) {
+    const normalized =
+      normalizeConsoleSlots(
+        nextSlots,
+        {
+          maxSlots:
+            IXI_CONSOLE_MAX_DEPTH,
+          faces: [2]
+        }
+      );
+
+    setSlots(normalized);
+
+    if (
+      stateObjectId &&
+      typeof onIxiStateChange ===
+        "function"
+    ) {
+      onIxiStateChange(
+        stateObjectId,
+        {
+          transactConsoleSlots:
+            normalized,
+          transactConsoleDepth:
+            normalized.length,
+          transactConsoleOpen:
+            normalized.length > 1,
+          transactConsoleUpdatedAt:
+            Date.now()
+        }
+      );
+    }
+  }
+
   function add(side) {
-    setSlots(current => insertConsoleSlot({
-      slots: current,
-      side,
-      type: IXI_CONSOLE_SLOT_TYPES.MODULE,
-      face: 2,
-      maxSlots: IXI_CONSOLE_MAX_DEPTH,
-      faces: [2],
-      defaultFace: 2
-    }));
+    saveSlots(
+      insertConsoleSlot({
+        slots,
+        side,
+        type:
+          IXI_CONSOLE_SLOT_TYPES
+            .MODULE,
+        face: 2,
+        maxSlots:
+          IXI_CONSOLE_MAX_DEPTH,
+        faces: [2],
+        defaultFace: 2
+      })
+    );
   }
 
   function remove(slotId) {
-    setSlots(current => removeConsoleSlot({
-      slots: current,
-      slotId,
-      faces: [2],
-      defaultFace: 2
-    }));
+    saveSlots(
+      removeConsoleSlot({
+        slots,
+        slotId,
+        faces: [2],
+        defaultFace: 2
+      })
+    );
   }
 
   async function handleOpenModule(item, moduleContext, payload = {}) {
