@@ -1,9 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { createIXIAssetAcquisition, recordIXIAssetAcquisitionPackageNormalization, updateIXIAssetAcquisition } from "./IXIAssetAcquisitionCommands";
 import { createIXIAssetAcquisitionDraft, hydrateIXIAssetAcquisitionRecord, validateIXIAssetAcquisition } from "./IXIAssetAcquisitionContract";
-import { amendIXIAssetAcquisition, applyIXIAcquisitionActuals, addIXIOwnershipCapitalEvent, getIXIAcquisitionOperations, normalizeIXIPackageAllocation, putIXIAssetInService } from "./IXIAssetAcquisitionRecordEngine";
+import { amendIXIAssetAcquisition, addIXIOwnershipCapitalEvent, normalizeIXIPackageAllocation } from "./IXIAssetAcquisitionRecordEngine";
 import IXIAssetAcquisitionStyles from "./IXIAssetAcquisitionStyles";
-import { loadIXIFreightOrders } from "../freight/IXIFreightClient";
 
 const clean = (v) => String(v ?? "").trim();
 const money = (v) => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(Number(v || 0));
@@ -79,9 +78,6 @@ const COPY = {
     logistics: "LOGISTICS",
     purchaseLocation: "PURCHASE LOCATION",
     deliver: "DELIVER TO",
-    freightResp: "FREIGHT RESPONSIBILITY",
-    pickup: "PICKUP DATE",
-    expected: "EXPECTED DELIVERY",
     documents: "DOCUMENTS / EVIDENCE",
     settlement: "SETTLEMENT TERMS",
     returnCapital: "RETURN CAPITAL BEFORE PROFIT DISTRIBUTION",
@@ -90,15 +86,6 @@ const COPY = {
     saveSub: "Create authoritative purchase intake record",
     ownershipErr: "Ownership and settlement shares must each total 100%.",
     record: "ACQUISITION RECORD",
-    actuals: "MAKE-READY ACTUALS",
-    inService: "ACQUISITION / MAKE-READY",
-    putService: "PUT ASSET IN SERVICE",
-    serviceDate: "IN SERVICE DATE",
-    complete: "ACQUISITION COMPLETE",
-    completeSub: "Acquisition / Make-Ready closed as of this date.",
-    correctService: "CORRECT IN-SERVICE DATE",
-    readyCost: "ACTUAL READY COST",
-    routingNote: "Costs after this date route to normal Asset Economics. Source TRAN$ACT records are not changed.",
     ownershipHistory: "OWNERSHIP & CAPITAL HISTORY",
     addEvent: "+ OWNERSHIP / CAPITAL CHANGE",
     eventType: "CHANGE TYPE",
@@ -151,9 +138,6 @@ const COPY = {
     logistics: "LOGÍSTICA",
     purchaseLocation: "UBICACIÓN DE COMPRA",
     deliver: "ENTREGAR A",
-    freightResp: "RESPONSABLE DEL FLETE",
-    pickup: "FECHA DE RECOGIDA",
-    expected: "ENTREGA ESPERADA",
     documents: "DOCUMENTOS / EVIDENCIA",
     settlement: "TÉRMINOS DE LIQUIDACIÓN",
     returnCapital: "DEVOLVER CAPITAL ANTES DE DISTRIBUIR GANANCIAS",
@@ -162,15 +146,6 @@ const COPY = {
     saveSub: "Crear registro autoritativo de compra",
     ownershipErr: "Propiedad y participación de liquidación deben sumar 100%.",
     record: "REGISTRO DE ADQUISICIÓN",
-    actuals: "COSTOS REALES DE PREPARACIÓN",
-    inService: "ADQUISICIÓN / PREPARACIÓN",
-    putService: "PONER ACTIVO EN SERVICIO",
-    serviceDate: "FECHA EN SERVICIO",
-    complete: "ADQUISICIÓN COMPLETA",
-    completeSub: "Adquisición / preparación cerrada a partir de esta fecha.",
-    correctService: "CORREGIR FECHA EN SERVICIO",
-    readyCost: "COSTO REAL LISTO",
-    routingNote: "Los costos posteriores a esta fecha pasan a la economía normal del activo. Los registros TRAN$ACT originales no cambian.",
     ownershipHistory: "HISTORIAL DE PROPIEDAD Y CAPITAL",
     addEvent: "+ CAMBIO DE PROPIEDAD / CAPITAL",
     eventType: "TIPO DE CAMBIO",
@@ -202,7 +177,6 @@ const ES_TEXT = Object.freeze({
   "BUYER PREMIUM / FEES": "PRIMA DEL COMPRADOR / CARGOS",
   "EST": "EST.",
   "VAR": "VAR.",
-  "LANDED / MAKE-READY ACTUAL": "COSTO REAL ENTREGADO / PREPARADO",
   "SETTLEMENT": "LIQUIDACIÓN",
   "INITIAL CAPITAL": "CAPITAL INICIAL",
   "ORIGINAL OWNERSHIP ONLY. NO LATER CAPITAL OR OWNERSHIP CHANGES.": "SOLO PROPIEDAD ORIGINAL. SIN CAMBIOS POSTERIORES DE CAPITAL O PROPIEDAD.",
@@ -245,7 +219,6 @@ const ES_TEXT = Object.freeze({
   "LENDER": "PRESTAMISTA",
   "CATEGORY": "CATEGORÍA",
   "FREIGHT": "FLETE",
-  "FREIGHT ACTUAL": "FLETE REAL",
   "FREIGHT / HAULING": "FLETE / TRANSPORTE",
   "INSPECTION": "INSPECCIÓN",
   "INITIAL REPAIRS": "REPARACIONES INICIALES",
@@ -293,7 +266,6 @@ const ES_TEXT = Object.freeze({
   "IN-SERVICE DATE CANNOT BE BEFORE THE PURCHASE DATE.": "LA FECHA DE PUESTA EN SERVICIO NO PUEDE SER ANTERIOR A LA FECHA DE COMPRA.",
   "THIS RECORD ESTABLISHES THE ASSET'S USER-ENTERED OPENING BASIS. IXI DOES NOT PRICE THE ASSET. ACTUAL FREIGHT, REPAIRS, PARTS, LABOR AND TECHNOLOGY REMAIN CANONICAL TRAN$ACT RECORDS AND PROJECT HERE UNTIL THE IN SERVICE CUTOFF.": "ESTE REGISTRO ESTABLECE LA BASE INICIAL CAPTURADA POR EL USUARIO. IXI NO VALÚA EL ACTIVO. LOS COSTOS REALES DE FLETE, REPARACIONES, REFACCIONES, MANO DE OBRA Y TECNOLOGÍA CONSERVAN SUS REGISTROS TRAN$ACT Y SE REFLEJAN AQUÍ HASTA LA FECHA DE PUESTA EN SERVICIO.",
   "+ ADD MACHINE": "+ AGREGAR MÁQUINA",
-  "ACTUAL LANDED COST": "COSTO REAL PUESTO EN DESTINO",
   "ALLOCATION": "ASIGNACIÓN",
   "ALLOCATION METHOD": "MÉTODO DE ASIGNACIÓN",
   "AMEND ACQUISITION": "MODIFICAR ADQUISICIÓN",
@@ -304,8 +276,6 @@ const ES_TEXT = Object.freeze({
   "BASIS AUDIT TRAIL": "HISTORIAL DE AUDITORÍA DE BASE",
   "BROKER / FINDER FEE": "HONORARIO DE CORREDOR",
   "BUYER PREMIUM": "PRIMA DEL COMPRADOR",
-  "CREATE FREIGHT ORDER": "CREAR ORDEN DE FLETE",
-  "CREATE RECEIVING INSPECTION": "CREAR INSPECCIÓN DE RECEPCIÓN",
   "CURRENT ACQUISITION BASIS": "BASE ACTUAL DE ADQUISICIÓN",
   "EFFECTIVE DATE": "FECHA EFECTIVA",
   "FIELD TO CORRECT": "CAMPO A CORREGIR",
@@ -315,10 +285,8 @@ const ES_TEXT = Object.freeze({
   "IXI PASSPORT": "PASAPORTE IXI",
   "LEGACY PLANNING ESTIMATES ARE PRESERVED READ-ONLY IN AUDIT HISTORY AND ARE NOT INCLUDED IN AUTHORITATIVE ACTUALS.": "LAS ESTIMACIONES HISTÓRICAS SE CONSERVAN SOLO PARA LECTURA EN LA AUDITORÍA Y NO SE INCLUYEN EN LOS REALES AUTORITATIVOS.",
   "LEGACY PLAN SNAPSHOT": "INSTANTÁNEA DEL PLAN HISTÓRICO",
-  "LINKED INTAKE WORKFLOWS": "FLUJOS DE RECEPCIÓN VINCULADOS",
   "MACHINE": "MÁQUINA",
   "MAKE-READY": "PREPARACIÓN",
-  "MAKE-READY ACTUAL": "PREPARACIÓN REAL",
   "MANUAL NORMALIZED": "NORMALIZACIÓN MANUAL",
   "NEGOTIATED VALUES": "VALORES NEGOCIADOS",
   "NONRECOVERABLE TAX": "IMPUESTO NO RECUPERABLE",
@@ -326,7 +294,6 @@ const ES_TEXT = Object.freeze({
   "ONLY COSTS ON THE SELLER OR AUCTION PURCHASE DOCUMENT BELONG HERE. SEPARATE FREIGHT, REPAIR, PARTS AND LABOR TRANSACTIONS BELONG IN THEIR OPERATIONAL MODULES.": "SOLO LOS COSTOS DEL DOCUMENTO DE COMPRA DEL VENDEDOR O SUBASTA PERTENECEN AQUÍ. EL FLETE, LAS REPARACIONES, LAS REFACCIONES Y LA MANO DE OBRA SEPARADOS PERTENECEN A SUS MÓDULOS OPERATIVOS.",
   "OPEN FREIGHT": "ABRIR FLETE",
   "OPEN ITEMS": "PARTIDAS ABIERTAS",
-  "OPEN MAKE-READY WORK ORDER": "ABRIR ORDEN DE PREPARACIÓN",
   "ORIGINAL PURCHASE ALLOCATION": "ASIGNACIÓN ORIGINAL DE COMPRA",
   "OTHER PURCHASE-DOCUMENT CHARGES": "OTROS CARGOS DEL DOCUMENTO DE COMPRA",
   "PACKAGE ID": "ID DEL PAQUETE",
@@ -348,6 +315,7 @@ const ES_TEXT = Object.freeze({
   "SOURCE TRANSACTIONS": "TRANSACCIONES DE ORIGEN",
   "TITLE / REGISTRATION FEES": "CARGOS DE TÍTULO / REGISTRO",
   "TRADE ALLOWANCE": "CRÉDITO POR INTERCAMBIO",
+  "THIS RECORD ESTABLISHES THE ASSET'S USER-ENTERED OPENING BASIS. IXI DOES NOT PRICE THE ASSET. ALL OTHER COSTS REMAIN IN THEIR OWN TRAN$ACT MODULES AND APPEAR THROUGH F$1 AND F$2.": "ESTE REGISTRO ESTABLECE LA BASE INICIAL DEL ACTIVO CAPTURADA POR EL USUARIO. IXI NO VALÚA EL ACTIVO. TODOS LOS DEMÁS COSTOS PERMANECEN EN SUS PROPIOS MÓDULOS TRAN$ACT Y APARECEN MEDIANTE F$1 Y F$2.",
 });
 
 function Field({ label, children }) {
@@ -362,7 +330,7 @@ function Input({ value, onChange, ...props }) {
   return <input value={value} onChange={(e) => onChange(e.target.value)} {...props} />;
 }
 
-export default function IXIAssetAcquisitionApp({ context = {}, object = {}, initialRecord = null, relatedTransactions = [], language = "en", onLanguageChange = null, onBack = null, onRecordChange = null, onLaunchWorkflow = null }) {
+export default function IXIAssetAcquisitionApp({ context = {}, object = {}, initialRecord = null, language = "en", onLanguageChange = null, onBack = null, onRecordChange = null }) {
   const primary = context.primary || {};
   const entity = context.entity || {};
   const location = context.location || {};
@@ -371,7 +339,6 @@ export default function IXIAssetAcquisitionApp({ context = {}, object = {}, init
   const t = COPY[lang];
   const tx = (text) => lang === "es" ? (ES_TEXT[String(text).toUpperCase()] || text) : text;
   const [record, setRecord] = useState(initialRecord);
-  const [linkedFreightOrders, setLinkedFreightOrders] = useState([]);
   const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState({});
   const [clientRequestId] = useState(() => globalThis.crypto?.randomUUID?.() || `ACQ-${Date.now()}-${Math.random().toString(16).slice(2)}`);
@@ -414,9 +381,6 @@ export default function IXIAssetAcquisitionApp({ context = {}, object = {}, init
     [knownIssues, setKnownIssues] = useState("");
   const [purchaseLocation, setPurchaseLocation] = useState(""),
     [deliverTo, setDeliverTo] = useState(clean(location.label)),
-    [freightResponsibility, setFreightResponsibility] = useState("buyer"),
-    [pickupDate, setPickupDate] = useState(""),
-    [expectedDeliveryDate, setExpectedDeliveryDate] = useState(""),
     [receivedDate, setReceivedDate] = useState("");
   const [financed, setFinanced] = useState(false),
     [lenderLabel, setLenderLabel] = useState(""),
@@ -425,7 +389,6 @@ export default function IXIAssetAcquisitionApp({ context = {}, object = {}, init
     [settlementNotes, setSettlementNotes] = useState(""),
     [notes, setNotes] = useState("");
   const [documents, setDocuments] = useState([]);
-  const [inServiceDate, setInServiceDate] = useState("");
   const [eventOpen, setEventOpen] = useState(false);
   const [eventType, setEventType] = useState("capital-contribution"),
     [eventParty, setEventParty] = useState(""),
@@ -487,9 +450,6 @@ export default function IXIAssetAcquisitionApp({ context = {}, object = {}, init
       knownIssues,
       purchaseLocation,
       deliverToLabel: deliverTo,
-      freightResponsibility,
-      pickupDate,
-      expectedDeliveryDate,
       receivedDate,
       financed,
       lenderLabel,
@@ -499,34 +459,13 @@ export default function IXIAssetAcquisitionApp({ context = {}, object = {}, init
       settlementTermsNotes: settlementNotes,
       notes,
     }),
-    [clientRequestId, acquisitionType, sellerLabel, sourceLabel, sourceReference, auctionLotNumber, purchaseDate, invoiceNumber, invoiceDate, agreementNumber, dueDate, paymentTerms, purchasePrice, buyerPremium, auctionDocumentFees, tax, titleFees, brokerFees, otherFees, tradeAllowance, sellerCredits, owners, payments, titleRequired, titleStatus, lienStatus, clearTitle, titleNumber, condition, hours, knownIssues, intakeExceptions, purchaseLocation, deliverTo, freightResponsibility, pickupDate, expectedDeliveryDate, receivedDate, financed, lenderLabel, responsibleEmployee, documents, settlementNotes, notes],
+    [clientRequestId, acquisitionType, sellerLabel, sourceLabel, sourceReference, auctionLotNumber, purchaseDate, invoiceNumber, invoiceDate, agreementNumber, dueDate, paymentTerms, purchasePrice, buyerPremium, auctionDocumentFees, tax, titleFees, brokerFees, otherFees, tradeAllowance, sellerCredits, owners, payments, titleRequired, titleStatus, lienStatus, clearTitle, titleNumber, condition, hours, knownIssues, intakeExceptions, purchaseLocation, deliverTo, receivedDate, financed, lenderLabel, responsibleEmployee, documents, settlementNotes, notes],
   );
   const preview = useMemo(() => createIXIAssetAcquisitionDraft({ context, input }), [context, input]);
-  const liveRecord = useMemo(() => (record ? applyIXIAcquisitionActuals(hydrateIXIAssetAcquisitionRecord(record), relatedTransactions) : null), [record, relatedTransactions]);
-  const operations = useMemo(() => (liveRecord ? getIXIAcquisitionOperations(liveRecord, [
-    ...relatedTransactions,
-    ...linkedFreightOrders.map((freightOrder) => ({
-      documentType: "freight",
-      freightOrder,
-      status: freightOrder?.status,
-      references: [{ passportId: liveRecord?.context?.primaryPassportId }],
-    })),
-  ]) : null), [liveRecord, relatedTransactions, linkedFreightOrders]);
+  const liveRecord = useMemo(() => (record ? hydrateIXIAssetAcquisitionRecord(record) : null), [record]);
   useEffect(() => {
     setRecord(initialRecord || null);
   }, [initialRecord]);
-  useEffect(() => {
-    const passportId = clean(liveRecord?.context?.primaryPassportId);
-    if (!passportId) {
-      setLinkedFreightOrders([]);
-      return undefined;
-    }
-    const controller = new AbortController();
-    loadIXIFreightOrders(passportId, { signal: controller.signal }).then(setLinkedFreightOrders).catch((error) => {
-      if (error?.name !== "AbortError") setLinkedFreightOrders([]);
-    });
-    return () => controller.abort();
-  }, [liveRecord?.context?.primaryPassportId]);
   function changeLang(next) {
     setLang(next);
     onLanguageChange?.(next);
@@ -559,7 +498,6 @@ export default function IXIAssetAcquisitionApp({ context = {}, object = {}, init
         metadata: { source: "ixi-transact-asset-acquisition" },
       });
       setRecord(result.record);
-      setInServiceDate(result.record.makeReady?.inServiceDate || "");
       setErrors({});
       await onRecordChange?.(result.record, { action: "create", response: result.response }, context);
     } catch (error) {
@@ -567,34 +505,6 @@ export default function IXIAssetAcquisitionApp({ context = {}, object = {}, init
         ...error?.validation?.errors,
         save: tx(clean(error?.message) || "Asset Acquisition could not be recorded."),
       });
-    } finally {
-      setSaving(false);
-    }
-  }
-  async function putService() {
-    if (!record) return;
-    setSaving(true);
-    try {
-      const wasClosed = record.makeReady?.status === "closed";
-      const candidate = applyIXIAcquisitionActuals(putIXIAssetInService(record, inServiceDate, actor), relatedTransactions);
-      const result = await updateIXIAssetAcquisition({
-        record: candidate,
-        action: wasClosed ? "correct-in-service-date" : "put-in-service",
-      });
-      setRecord(result.record);
-      setErrors({});
-      await onRecordChange?.(
-        result.record,
-        {
-          action: wasClosed ? "correct-in-service-date" : "put-in-service",
-          inServiceDate,
-          previousInServiceDate: record.makeReady?.inServiceDate || "",
-          response: result.response,
-        },
-        context,
-      );
-    } catch (error) {
-      setErrors({ inService: tx(error.message) });
     } finally {
       setSaving(false);
     }
@@ -717,11 +627,6 @@ export default function IXIAssetAcquisitionApp({ context = {}, object = {}, init
     const ownerEvents = r.ownership?.events || [];
     const direct = r.acquisition?.currentAcquisitionBasis ?? r.acquisition?.directAcquisitionCost ?? 0;
     const originalBasis = r.acquisition?.originalAcquisitionBasis ?? direct;
-    const actual = r.makeReady?.actualTotal || 0;
-    const freightActual = (r.makeReady?.actuals || []).filter((item) => clean(item?.category).includes("freight")).reduce((sum, item) => sum + Number(item?.actualAmount || 0), 0);
-    const makeReadyActual = actual - freightActual;
-    const acquisitionClosed = r.makeReady?.status === "closed" && clean(r.makeReady?.inServiceDate);
-    const readyCost = direct + actual;
     return (
       <div className="ixi-acq" lang={lang === "es" ? "es-MX" : "en-US"}>
         <div className="acq-top">
@@ -763,8 +668,6 @@ export default function IXIAssetAcquisitionApp({ context = {}, object = {}, init
             <b className={clean(r.logistics?.receivedDate) ? "ok" : "warn"}>{clean(r.logistics?.receivedDate) ? tx("RECEIVED") : tx("INTAKE OPEN")}</b>
           </div>
         </div>
-        <div className="acq-money"><span>{tx("FREIGHT ACTUAL")}</span><b>{money(freightActual)}</b></div>
-        <div className="acq-money"><span>{tx("MAKE-READY ACTUAL")}</span><b>{money(makeReadyActual)}</b></div>
         <div className="acq-section">{t.deal}</div>
         <div className="acq-money"><span>{tx("ORIGINAL PURCHASE ALLOCATION")}</span><b>{money(originalBasis)}</b></div>
         <div className="acq-money"><span>{tx("PURCHASE AMENDMENTS")}</span><b>{money(r.acquisition?.amendmentTotal)}</b></div>
@@ -843,37 +746,6 @@ export default function IXIAssetAcquisitionApp({ context = {}, object = {}, init
             <small>{item.effectiveDate} · {item.reason} · {item.reference || item.packageReference} · {money(item.basisBefore)} → {money(item.basisAfter)}</small>
           </div>
         ))}
-        <div className="acq-section">{tx("LINKED INTAKE WORKFLOWS")}</div>
-        <div className="acq-status-grid">
-          <div className="acq-status"><span>{tx("FREIGHT")}</span><b className={operations?.freightOrderCount ? "ok" : "warn"}>{tx(clean(operations?.freightStatus || "not-created").replace(/-/g, " ").toUpperCase())}</b></div>
-          <div className="acq-status"><span>{tx("RECEIVING INSPECTION")}</span><b className={operations?.inspectionStatus === "complete" ? "ok" : "warn"}>{tx(clean(operations?.inspectionStatus || "not-created").replace(/-/g, " ").toUpperCase())}</b></div>
-          <div className="acq-status"><span>{tx("MAKE-READY")}</span><b className={operations?.makeReadyOpenCount ? "warn" : "ok"}>{operations?.makeReadyOpenCount || 0} {tx("OPEN ITEMS")}</b></div>
-          <div className="acq-status"><span>{tx("RELATED ACTUALS")}</span><b>{money(actual)}</b></div>
-        </div>
-        <div className="acq-workflow-actions">
-          <button type="button" onClick={() => onLaunchWorkflow?.("freight", { acquisition: r, workflow: "acquisition-inbound", action: operations?.freightOrderCount ? "open" : "new" })}>{operations?.freightOrderCount ? tx("OPEN FREIGHT") : tx("CREATE FREIGHT ORDER")}</button>
-          <button type="button" onClick={() => onLaunchWorkflow?.("work-order", { acquisition: r, workflow: "receiving-inspection" })}>{tx("CREATE RECEIVING INSPECTION")}</button>
-          <button type="button" onClick={() => onLaunchWorkflow?.("work-order", { acquisition: r, workflow: "make-ready" })}>{tx("OPEN MAKE-READY WORK ORDER")}</button>
-        </div>
-        {(r.makeReady?.actuals || []).map((item) => (
-          <div className="acq-row" key={item.category}>
-            <div className="acq-row-top"><strong>{tx(item.label || clean(item.category).replace(/-/g, " ").toUpperCase())}</strong><b>{money(item.actualAmount)}</b></div>
-            <small>{item.records?.length || 0} {tx("SOURCE TRANSACTIONS")}</small>
-          </div>
-        ))}
-        {r.makeReady?.legacyPlanningSnapshot ? (
-          <>
-            <div className="acq-section">{tx("LEGACY PLAN SNAPSHOT")}</div>
-            {(r.makeReady?.estimates || []).map((item) => (
-              <div className="acq-money" key={item.costId}><span>{tx(item.label || clean(item.category).replace(/-/g, " ").toUpperCase())}</span><b>{money(item.estimatedAmount)}</b></div>
-            ))}
-            <div className="acq-row"><small>{tx("LEGACY PLANNING ESTIMATES ARE PRESERVED READ-ONLY IN AUDIT HISTORY AND ARE NOT INCLUDED IN AUTHORITATIVE ACTUALS.")}</small></div>
-          </>
-        ) : null}
-        <div className="acq-total">
-          <span>{tx("ACTUAL LANDED COST")}</span>
-          <strong>{money(readyCost)}</strong>
-        </div>
         <div className="acq-section">{t.owners}</div>
         <div className="acq-list">
           {(r.ownership?.owners || []).map((owner) => (
@@ -960,46 +832,6 @@ export default function IXIAssetAcquisitionApp({ context = {}, object = {}, init
             {errors.event ? <div className="acq-error">{errors.event}</div> : null}
           </div>
         ) : null}
-        <div className="acq-section">{t.inService}</div>
-        <div className={`acq-service ${acquisitionClosed ? "" : "open"}`}>
-          {acquisitionClosed ? (
-            <>
-              <div className="acq-service-head">
-                <strong>✓ {t.complete}</strong>
-                <b>{r.makeReady.inServiceDate}</b>
-              </div>
-              <div className="acq-total">
-                <span>{t.readyCost}</span>
-                <strong>{money(readyCost)}</strong>
-              </div>
-              <small>{t.completeSub}</small>
-              <Field label={t.serviceDate}>
-                <input type="date" value={inServiceDate} onChange={(e) => setInServiceDate(e.target.value)} />
-              </Field>
-              <button className="acq-secondary" onClick={putService} disabled={saving}>
-                {saving ? tx("SAVING...") : t.correctService}
-              </button>
-              <small>{t.routingNote}</small>
-            </>
-          ) : (
-            <>
-              <div className="acq-service-head">
-                <strong>{tx("MAKE-READY OPEN")}</strong>
-                <b>{money(readyCost)}</b>
-              </div>
-              <small>{tx("SET THE REAL DATE THIS ASSET BECAME OPERATIONAL / SALE-READY / RENTAL-READY. THIS DATE CLOSES THE ACQUISITION / MAKE-READY CHAPTER.")}</small>
-              <Field label={t.serviceDate}>
-                <input type="date" value={inServiceDate} onChange={(e) => setInServiceDate(e.target.value)} />
-              </Field>
-              <button className="acq-primary" onClick={putService} disabled={saving}>
-                {saving ? tx("SAVING...") : t.putService}
-                <small style={{ display: "block", fontSize: 5 }}>{tx("CLOSE ACQUISITION / MAKE-READY")}</small>
-              </button>
-              <small>{t.routingNote}</small>
-            </>
-          )}
-          {errors.inService ? <div className="acq-error">{errors.inService}</div> : null}
-        </div>
         <button className="acq-secondary" onClick={() => onBack?.()}>
           {t.back}
         </button>
@@ -1279,21 +1111,6 @@ export default function IXIAssetAcquisitionApp({ context = {}, object = {}, init
         </Field>
       </div>
       <div className="acq-grid2">
-        <Field label={t.freightResp}>
-          <select value={freightResponsibility} onChange={(e) => setFreightResponsibility(e.target.value)}>
-            <option value="buyer">{tx("BUYER")}</option>
-            <option value="seller">{tx("SELLER")}</option>
-            <option value="third-party">{tx("THIRD PARTY")}</option>
-          </select>
-        </Field>
-        <Field label={t.pickup}>
-          <input type="date" value={pickupDate} onChange={(e) => setPickupDate(e.target.value)} />
-        </Field>
-      </div>
-      <Field label={t.expected}>
-        <input type="date" value={expectedDeliveryDate} onChange={(e) => setExpectedDeliveryDate(e.target.value)} />
-      </Field>
-      <div className="acq-grid2">
         <Field label={tx("RECEIVED DATE")}><input type="date" value={receivedDate} onChange={(e) => setReceivedDate(e.target.value)} /></Field>
         <Field label={tx("RESPONSIBLE EMPLOYEE")}><Input value={responsibleEmployee} onChange={setResponsibleEmployee} /></Field>
       </div>
@@ -1350,7 +1167,7 @@ export default function IXIAssetAcquisitionApp({ context = {}, object = {}, init
       <button className="acq-secondary" onClick={() => onBack?.()}>
         {t.back}
       </button>
-      <div className="acq-foot">{tx("THIS RECORD ESTABLISHES THE ASSET'S USER-ENTERED OPENING BASIS. IXI DOES NOT PRICE THE ASSET. ACTUAL FREIGHT, REPAIRS, PARTS, LABOR AND TECHNOLOGY REMAIN CANONICAL TRAN$ACT RECORDS AND PROJECT HERE UNTIL THE IN SERVICE CUTOFF.")}</div>
+      <div className="acq-foot">{tx("THIS RECORD ESTABLISHES THE ASSET'S USER-ENTERED OPENING BASIS. IXI DOES NOT PRICE THE ASSET. ALL OTHER COSTS REMAIN IN THEIR OWN TRAN$ACT MODULES AND APPEAR THROUGH F$1 AND F$2.")}</div>
       <IXIAssetAcquisitionStyles />
     </div>
   );

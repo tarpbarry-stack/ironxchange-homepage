@@ -167,9 +167,9 @@ test("Asset Acquisition provides complete Mexican Spanish UI coverage", async ()
     "utf8",
   );
   assert.match(app, /const ES_TEXT = Object\.freeze/u);
-  assert.match(app, /"MAKE-READY OPEN": "PREPARACIÓN ABIERTA"/u);
   assert.match(app, /"PAYMENT DUE DATE": "FECHA DE VENCIMIENTO"/u);
   assert.match(app, /"CLEAR SELECTED FILES": "BORRAR ARCHIVOS SELECCIONADOS"/u);
+  assert.match(app, /TODOS LOS DEMÁS COSTOS PERMANECEN EN SUS PROPIOS MÓDULOS TRAN\$ACT Y APARECEN MEDIANTE F\$1 Y F\$2/u);
   assert.match(app, /lang=\{lang === "es" \? "es-MX" : "en-US"\}/u);
   assert.match(app, /\{tx\("PURCHASE PRICE"\)\}/u);
   assert.match(app, /\{tx\("DIRECT PURCHASE"\)\}/u);
@@ -179,9 +179,13 @@ test("Asset Acquisition provides complete Mexican Spanish UI coverage", async ()
   assert.doesNotMatch(app, />REMOVE (?:OWNER|PAYMENT)</u);
   assert.doesNotMatch(app, /makeReadyEstimates:\s*costs/u);
   assert.doesNotMatch(app, /\+ ADD ESTIMATED COST/u);
-  assert.match(app, /CREATE FREIGHT ORDER/u);
-  assert.match(app, /CREATE RECEIVING INSPECTION/u);
-  assert.match(app, /OPEN MAKE-READY WORK ORDER/u);
+  assert.doesNotMatch(app, /LINKED INTAKE WORKFLOWS/u);
+  assert.doesNotMatch(app, /CREATE FREIGHT ORDER/u);
+  assert.doesNotMatch(app, /CREATE RECEIVING INSPECTION/u);
+  assert.doesNotMatch(app, /OPEN MAKE-READY WORK ORDER/u);
+  assert.doesNotMatch(app, /FREIGHT ACTUAL/u);
+  assert.doesNotMatch(app, /MAKE-READY ACTUAL/u);
+  assert.doesNotMatch(app, /ACTUAL LANDED COST/u);
   assert.match(app, /SAVE IMMUTABLE AMENDMENT/u);
   assert.match(app, /SAVE ZERO-SUM NORMALIZATION/u);
   const commands = await readFile(

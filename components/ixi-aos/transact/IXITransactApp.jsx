@@ -109,7 +109,6 @@ export default function IXITransactApp({
     [context, locale],
   );
   const [moduleId, setModuleId] = useState(() => clean(initialModuleId));
-  const [acquisitionWorkflowIntent, setAcquisitionWorkflowIntent] = useState(null);
   const [workOrderSnapshot, setWorkOrderSnapshot] = useState(
     activeWorkOrder || null,
   );
@@ -438,11 +437,6 @@ export default function IXITransactApp({
       onClose?.();
       return;
     }
-    if (acquisitionWorkflowIntent && ["freight", "work-order"].includes(moduleId)) {
-      setAcquisitionWorkflowIntent(null);
-      setModuleId("asset-acquisition");
-      return;
-    }
     setModuleId("");
   };
 
@@ -488,16 +482,8 @@ export default function IXITransactApp({
   }
 
   async function open(item) {
-    setAcquisitionWorkflowIntent(null);
     setModuleId(item.id);
     await onOpenModule?.(item, context, {});
-  }
-  async function launchAcquisitionWorkflow(targetModuleId, intent = {}) {
-    const target = modules.find((item) => item.id === targetModuleId);
-    if (!target) return;
-    setAcquisitionWorkflowIntent({ ...intent, returnTo: "asset-acquisition", launchedAt: Date.now() });
-    setModuleId(targetModuleId);
-    await onOpenModule?.(target, context, { ...intent, returnTo: "asset-acquisition" });
   }
   async function change(
     id,
@@ -712,16 +698,7 @@ export default function IXITransactApp({
         context={context}
         object={object}
         initialRecord={acquisitionSnapshot}
-        relatedTransactions={
-          financialRecords.length
-            ? financialRecords
-            : object?.assetFinancialTransactions ||
-              object?.relatedFinancialRecords ||
-              object?.financialRecords ||
-              []
-        }
         onBack={back}
-        onLaunchWorkflow={launchAcquisitionWorkflow}
         onRecordChange={async (record, changePayload, sourceContext) => {
           await onFinancialRecordsChange?.();
           await change(
@@ -742,7 +719,6 @@ export default function IXITransactApp({
       <IXIFreightApp
         context={context}
         object={object}
-        workflowIntent={acquisitionWorkflowIntent}
         onBack={back}
         onFinancialRecordsChange={onFinancialRecordsChange}
         onRecordChange={async (record, changePayload) => {
@@ -1244,8 +1220,7 @@ export default function IXITransactApp({
     body = (
       <IXIWorkOrderApp
         context={context}
-        initialWorkOrder={acquisitionWorkflowIntent ? null : workOrderSnapshot || activeWorkOrder}
-        workflowIntent={acquisitionWorkflowIntent}
+        initialWorkOrder={workOrderSnapshot || activeWorkOrder}
         onBack={back}
         onCreate={async (record, sourceContext) => {
           setWorkOrderSnapshot(record);
