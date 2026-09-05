@@ -1,13 +1,18 @@
 import { createIXIAosObjectFinancialDocument, createIXIAosFinancialObjectReference } from "../../../financial-runtime/IXIAosFinancialRuntimeAdapter";
 import { createIXIBill } from "../bill/IXIBillCommands";
 import { runIXIFreightAction } from "./IXIFreightClient";
-import { invoiceCharges } from "./IXIFreightContract";
+import { freightVariance, invoiceCharges } from "./IXIFreightContract";
 
 const clean = value => String(value ?? "").trim();
 const responseDocument = response => response?.data?.record?.financialDocument || response?.record?.financialDocument || response?.financialDocument || {};
 
 export async function createAndMatchIXIFreightInvoice({ order = {}, input = {}, context = {}, object = {} } = {}) {
-  const { charges, amount } = invoiceCharges(input);
+  const { charges, amount, totalMismatch } = invoiceCharges(input);
+  if (totalMismatch) {
+    const error = new Error("Actual cost total must equal the optional itemized charge breakdown.");
+    error.code = "IXI_FREIGHT_INVOICE_TOTAL_MISMATCH";
+    throw error;
+  }
   if (!clean(input.invoiceNumber) || !/^\d{4}-\d{2}-\d{2}$/.test(clean(input.invoiceDate)) || !(amount > 0)) {
     const error = new Error("Invoice number, invoice date, and positive carrier charges are required.");
     error.code = "IXI_FREIGHT_INVOICE_VALIDATION_FAILED";
@@ -17,6 +22,7 @@ export async function createAndMatchIXIFreightInvoice({ order = {}, input = {}, 
   const orderId = clean(order?.identity?.freightOrderId);
   const carrier = clean(order?.execution?.carrierName);
   const isCredit = clean(input.documentType) === "carrier-credit";
+  const hasExpected = freightVariance(order).hasExpected;
   let financialResponse;
   let financialDocumentId;
 
@@ -44,7 +50,7 @@ export async function createAndMatchIXIFreightInvoice({ order = {}, input = {}, 
         clientRequestId:`${orderId}:${clean(input.invoiceNumber)}`, vendorPassportId:clean(order?.execution?.carrierPassportId), vendorLabel:carrier,
         invoiceNumber:clean(input.invoiceNumber), description:`Freight Order ${orderId} · ${order?.route?.origin?.label||"Origin"} to ${order?.route?.destination?.label||"Destination"}`,
         amount, invoiceDate:clean(input.invoiceDate), dueDate:clean(input.dueDate), category:`freight-${clean(order?.purpose?.type||"other")}`, currency:"USD",
-        purchaseOrderId:orderId, purchaseOrderNumber:orderId, poCommittedAmount:Number(order?.economics?.expectedTotal||0), receivedAmount:amount,
+        ...(hasExpected?{purchaseOrderId:orderId,purchaseOrderNumber:orderId,poCommittedAmount:Number(order?.economics?.expectedTotal||0)}:{}), receivedAmount:amount,
         receivedComplete:order.status==="delivered"||order.status==="billed", notes:clean(input.notes), attachments:[]
       },
       metadata:{

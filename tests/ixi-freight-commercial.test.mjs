@@ -27,6 +27,28 @@ test("Freight invoice reconciliation calculates accessorial total and variance t
   assert.equal(variance.approvalRequired, false);
 });
 
+test("Freight accepts one actual-cost total without inventing an expected-cost variance", () => {
+  const payload = contract.createIXIFreightOrderInput({
+    context,
+    input:{ purpose:"acquisition-inbound", carrierName:"ABC Transport", originLabel:"Fort Worth, TX", destinationLabel:"Wichita Falls, TX" }
+  });
+  const invoice = contract.invoiceCharges({ actualCostTotal:"2750" });
+  const variance = contract.freightVariance({ economics:{ ...payload.economics, actualTotal:invoice.amount } });
+
+  assert.equal(payload.economics.expectedProvided, false);
+  assert.equal(invoice.amount, 2750);
+  assert.equal(invoice.charges.freight, 2750);
+  assert.equal(variance.hasExpected, false);
+  assert.equal(variance.variance, 0);
+  assert.equal(variance.approvalRequired, false);
+});
+
+test("a stated actual total must reconcile to any optional itemized charges", () => {
+  const invoice = contract.invoiceCharges({ actualCostTotal:"2750", freight:"2500", permits:"100" });
+  assert.equal(invoice.totalMismatch, true);
+  assert.equal(invoice.itemizedAmount, 2600);
+});
+
 test("Freight is a native operational TRANSACT tile backed by authenticated IX Core routes", async () => {
   const [registrySource, shell, app, commands, proxy, route, acquisition] = await Promise.all([
     read("components/ixi-aos/transact/IXITransactModuleRegistry.js"), read("components/ixi-aos/transact/IXITransactApp.jsx"),
@@ -39,7 +61,8 @@ test("Freight is a native operational TRANSACT tile backed by authenticated IX C
   assert.equal(freight?.documentType, "freight");
   assert.equal(freight?.readiness, "operational");
   assert.match(shell, /moduleId === "freight"/u);
-  assert.match(app, /CREATE BILL \+ MATCH/u);
+  assert.match(app, /RECORD ACTUAL \+ CREATE BILL/u);
+  assert.match(app, /TOTAL ACTUAL COST/u);
   assert.match(app, /RECONCILE FREIGHT/u);
   assert.match(commands, /createIXIBill/u);
   assert.match(commands, /acquisitionCost/u);

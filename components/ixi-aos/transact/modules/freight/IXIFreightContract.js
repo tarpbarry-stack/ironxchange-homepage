@@ -38,7 +38,8 @@ export function createIXIFreightOrderInput({ context = {}, object = {}, input = 
     },
     economics:{
       quotedAmount:money(input.quotedAmount), agreedAmount:money(input.agreedAmount), permitEstimate:money(input.permitEstimate),
-      escortEstimate:money(input.escortEstimate), fuelSurchargeEstimate:money(input.fuelSurchargeEstimate), otherEstimate:money(input.otherEstimate)
+      escortEstimate:money(input.escortEstimate), fuelSurchargeEstimate:money(input.fuelSurchargeEstimate), otherEstimate:money(input.otherEstimate),
+      expectedProvided:[input.agreedAmount,input.permitEstimate,input.escortEstimate,input.fuelSurchargeEstimate,input.otherEstimate].some(value=>clean(value)!=="")
     },
     metadata:{ payer:clean(input.payer || "company"), customerRebill:Boolean(input.customerRebill), acquisitionCost:clean(input.purpose)==="acquisition-inbound", notes:clean(input.notes) }
   };
@@ -56,19 +57,25 @@ export function validateIXIFreightOrderInput(payload = {}) {
 }
 
 export function invoiceCharges(input = {}) {
-  const charges = {
+  let charges = {
     freight:money(input.freight), permits:money(input.permits), escort:money(input.escort), detention:money(input.detention),
     fuelSurcharge:money(input.fuelSurcharge), other:money(input.other)
   };
-  return { charges, amount:money(Object.values(charges).reduce((sum, value)=>sum+value,0)) };
+  const itemizedAmount = money(Object.values(charges).reduce((sum, value)=>sum+value,0));
+  const totalProvided = clean(input.actualCostTotal)!=="";
+  const statedTotal = money(input.actualCostTotal);
+  const totalMismatch = totalProvided && itemizedAmount>0 && Math.abs(statedTotal-itemizedAmount)>=0.01;
+  if(totalProvided && itemizedAmount===0) charges={...charges,freight:statedTotal};
+  return { charges, amount:totalProvided?statedTotal:itemizedAmount, itemizedAmount, totalProvided, totalMismatch };
 }
 
 export function freightVariance(order = {}) {
   const expected = money(order?.economics?.expectedTotal);
   const actual = money(order?.economics?.actualTotal);
-  const variance = money(actual - expected);
-  const tolerance = Math.max(50, Math.abs(expected) * 0.05);
-  return { expected, actual, variance, tolerance, approvalRequired:Math.abs(variance)>tolerance };
+  const hasExpected = order?.economics?.expectedProvided===true || ["expectedTotal","agreedAmount","permitEstimate","escortEstimate","fuelSurchargeEstimate","otherEstimate"].some(key=>Math.abs(money(order?.economics?.[key]))>=0.005);
+  const variance = hasExpected?money(actual-expected):0;
+  const tolerance = hasExpected?Math.max(50,Math.abs(expected)*0.05):0;
+  return { expected, actual, variance, tolerance, hasExpected, approvalRequired:hasExpected&&Math.abs(variance)>tolerance };
 }
 
 export default { createIXIFreightOrderInput, validateIXIFreightOrderInput, invoiceCharges, freightVariance };
