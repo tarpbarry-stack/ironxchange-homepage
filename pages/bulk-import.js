@@ -934,58 +934,58 @@ export default function BulkImportPage() {
           margin: 0;
           background: #090a0b;
           color: #e5e7eb;
-          font-family: Inter, Arial, sans-serif;
+          font-family: 'Inter Variable', Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
         }
         main { min-height: 100vh; background: radial-gradient(circle at 20% 0, rgba(0,209,255,.055), transparent 28%), #090a0b; }
         .shell { width: min(1680px, 96vw); margin: 0 auto; padding: 38px 0 76px; }
         .hero { display: flex; justify-content: space-between; gap: 24px; align-items: flex-end; margin-bottom: 22px; }
-        .eyebrow { color: #7DEBFF; font-size: 10px; font-weight: 900; letter-spacing: 1.1px; }
+        .eyebrow { color: #7DEBFF; font-size: 12px; font-weight: 900; letter-spacing: 1.1px; }
         h1 { margin: 7px 0 7px; font-size: clamp(38px, 4vw, 62px); line-height: .95; letter-spacing: -2px; }
-        .hero p, .sectionCopy { max-width: 800px; color: rgba(255,255,255,.55); font-size: 13px; line-height: 1.55; }
+        .hero p, .sectionCopy { max-width: 800px; color: rgba(255,255,255,.62); font-size: 15px; line-height: 1.6; }
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
         .panel { margin-top: 14px; padding: 22px; border: 1px solid rgba(255,255,255,.075); border-radius: 14px; background: linear-gradient(180deg, rgba(255,255,255,.035), transparent), #121416; box-shadow: 0 20px 50px rgba(0,0,0,.22); }
-        .panelTitle { display: flex; gap: 9px; align-items: center; color: #f2f4f5; font-size: 11px; font-weight: 950; letter-spacing: .8px; }
+        .panelTitle { display: flex; gap: 9px; align-items: center; color: #f2f4f5; font-size: 13px; font-weight: 950; letter-spacing: .8px; }
         .panelTitle span { color: #7DEBFF; }
         .drop { display: grid; gap: 6px; margin-top: 18px; padding: 28px; border: 1px dashed rgba(125,235,255,.35); border-radius: 12px; background: rgba(0,209,255,.025); cursor: pointer; }
         .drop input { width: 100%; }
         .drop strong { color: #7DEBFF; font-size: 13px; }
         .drop small { color: rgba(255,255,255,.45); line-height: 1.5; }
         .facts { display: grid; gap: 7px; margin-top: 16px; }
-        .facts div { display: grid; grid-template-columns: 80px 1fr; gap: 10px; font-size: 10px; }
+        .facts div { display: grid; grid-template-columns: 88px 1fr; gap: 10px; font-size: 12px; }
         .facts b { color: rgba(255,255,255,.38); }
         .facts span { word-break: break-all; }
         .control { display: grid; gap: 6px; margin-top: 16px; }
-        .control > span { color: rgba(255,255,255,.52); font-size: 9px; font-weight: 900; letter-spacing: .55px; }
+        .control > span { color: rgba(255,255,255,.62); font-size: 11px; font-weight: 900; letter-spacing: .55px; }
         .control.required > span { color: #7DEBFF; }
         select { width: 100%; min-height: 38px; border: 1px solid rgba(255,255,255,.1); border-radius: 8px; padding: 0 10px; background: #0d0f10; color: #e8eaeb; }
         select:disabled { opacity: .55; }
         .definitionInfo { display: grid; gap: 4px; margin-top: 15px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,.06); }
-        .definitionInfo span { color: rgba(255,255,255,.45); font-size: 10px; }
+        .definitionInfo span { color: rgba(255,255,255,.56); font-size: 12px; }
         .mappingGrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
         .scoreboard { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-top: 18px; }
         .scoreboard div { padding: 14px; border: 1px solid rgba(255,255,255,.06); border-radius: 9px; background: #0d0f10; }
         .scoreboard b { display: block; font-size: 24px; }
-        .scoreboard span { color: rgba(255,255,255,.42); font-size: 8px; font-weight: 900; letter-spacing: .5px; }
+        .scoreboard span { color: rgba(255,255,255,.54); font-size: 11px; font-weight: 900; letter-spacing: .5px; }
         .runBar { display: flex; justify-content: space-between; gap: 18px; align-items: center; margin-top: 18px; padding: 16px; border: 1px solid rgba(125,235,255,.13); border-radius: 10px; background: rgba(0,209,255,.025); }
         .runBar > div { display: grid; gap: 4px; }
-        .runBar strong { font-size: 11px; }
-        .runBar span { color: rgba(255,255,255,.46); font-size: 10px; }
+        .runBar strong { font-size: 13px; }
+        .runBar span { color: rgba(255,255,255,.58); font-size: 12px; }
         button { border: 0; cursor: pointer; font-weight: 950; letter-spacing: .45px; }
         button:disabled { opacity: .4; cursor: not-allowed; }
-        .primary { min-height: 38px; padding: 0 16px; border-radius: 999px; background: #7DEBFF; color: #061013; font-size: 9px; white-space: nowrap; }
-        .secondary { min-height: 34px; padding: 0 14px; border: 1px solid rgba(125,235,255,.3); border-radius: 999px; background: transparent; color: #7DEBFF; font-size: 9px; }
-        .notice { margin: 10px 0; padding: 10px 13px; border: 1px solid rgba(125,235,255,.2); border-radius: 8px; background: rgba(0,209,255,.03); color: #b9f5ff; font-size: 11px; }
+        .primary { min-height: 38px; padding: 0 16px; border-radius: 999px; background: #7DEBFF; color: #061013; font-size: 11px; white-space: nowrap; }
+        .secondary { min-height: 34px; padding: 0 14px; border: 1px solid rgba(125,235,255,.3); border-radius: 999px; background: transparent; color: #7DEBFF; font-size: 11px; }
+        .notice { margin: 10px 0; padding: 10px 13px; border: 1px solid rgba(125,235,255,.2); border-radius: 8px; background: rgba(0,209,255,.03); color: #b9f5ff; font-size: 13px; line-height: 1.45; }
         .notice.error { border-color: rgba(255,90,90,.3); background: rgba(255,90,90,.04); color: #ffadad; }
         .tableWrap { overflow: auto; margin-top: 18px; border: 1px solid rgba(255,255,255,.06); border-radius: 9px; }
-        table { width: 100%; min-width: 1100px; border-collapse: collapse; font-size: 9px; }
+        table { width: 100%; min-width: 1100px; border-collapse: collapse; font-size: 11px; }
         th, td { padding: 9px 10px; border-bottom: 1px solid rgba(255,255,255,.05); text-align: left; vertical-align: top; }
-        th { position: sticky; top: 0; background: #101214; color: rgba(255,255,255,.45); font-size: 8px; letter-spacing: .5px; }
+        th { position: sticky; top: 0; background: #101214; color: rgba(255,255,255,.58); font-size: 10px; letter-spacing: .5px; }
         td { color: rgba(255,255,255,.7); }
         .status { display: inline-block; padding: 3px 6px; border-radius: 999px; border: 1px solid rgba(255,255,255,.1); }
         .status.created { color: #9fffc5; border-color: rgba(120,255,170,.25); }
         .status.invalid, .status.failed, .status.failed-retryable { color: #ffadad; border-color: rgba(255,90,90,.25); }
         .status.processing { color: #ffe392; border-color: rgba(255,210,80,.25); }
-        .tableNote { margin-top: 8px; color: rgba(255,255,255,.36); font-size: 9px; }
+        .tableNote { margin-top: 8px; color: rgba(255,255,255,.50); font-size: 11px; }
         @media (max-width: 980px) {
           .grid, .mappingGrid { grid-template-columns: 1fr; }
           .scoreboard { grid-template-columns: repeat(2, 1fr); }
