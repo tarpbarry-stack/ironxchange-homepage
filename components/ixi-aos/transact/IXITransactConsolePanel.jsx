@@ -5,12 +5,12 @@ const clean = value => String(value ?? "").trim();
 
 export default function IXITransactConsolePanel({
   context = {},
-  face = 1,
+  face = 2,
   financialRecords = [],
   onOpenModule = null,
   onOpenWorksheet = null
 }) {
-  if (Number(face) === 1) {
+  if (Number(face) === 2) {
     return (
       <IXITransactRecordIndex
         context={context}

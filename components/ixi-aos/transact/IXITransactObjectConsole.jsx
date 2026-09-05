@@ -28,7 +28,6 @@ const PANEL_WIDTH = 298;
 const PANEL_HEIGHT = 471;
 
 const TRANSACT_CONSOLE_FACES = [
-  1,
   2,
   3,
   4
@@ -220,12 +219,12 @@ export default function IXITransactObjectConsole({
         type:
           IXI_CONSOLE_SLOT_TYPES
             .MODULE,
-        face: 1,
+        face: 2,
         maxSlots:
           IXI_CONSOLE_MAX_DEPTH,
         faces:
           TRANSACT_CONSOLE_FACES,
-        defaultFace: 1
+        defaultFace: 2
       })
     );
   }
@@ -238,7 +237,7 @@ export default function IXITransactObjectConsole({
         slotId,
         faces:
           TRANSACT_CONSOLE_FACES,
-        defaultFace: 1
+        defaultFace: 2
       })
     );
   }
@@ -263,7 +262,7 @@ export default function IXITransactObjectConsole({
         slotId,
         faces:
           TRANSACT_CONSOLE_FACES,
-        defaultFace: 1
+        defaultFace: 2
       })
     );
   }
@@ -468,10 +467,10 @@ export default function IXITransactObjectConsole({
                     type="button"
                     className="tx-console-face-button"
                     aria-label={
-                      `Change TRAN$ACT console face ${slot.face}`
+                      `Change TRAN$ACT console face ${slot.face === 2 ? "$F1" : slot.face}`
                     }
                     title={
-                      `TRAN$ACT face ${slot.face}`
+                      `TRAN$ACT ${slot.face === 2 ? "$F1" : `face ${slot.face}`}`
                     }
                     onPointerDown={event => {
                       event.preventDefault();

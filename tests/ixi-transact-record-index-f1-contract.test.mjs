@@ -4,7 +4,7 @@ import test from "node:test";
 
 const read = path => fs.readFileSync(path, "utf8");
 
-test("$F1 is the default machine TRAN$ACT console face", () => {
+test("$F1 maps onto the valid default side-console face", () => {
   const consoleRuntime = read(
     "components/ixi-aos/transact/IXITransactObjectConsole.jsx"
   );
