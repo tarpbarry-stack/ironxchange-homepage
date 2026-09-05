@@ -154,6 +154,12 @@ export async function createIXIAssetAcquisition({ object = {}, context = {}, inp
 }
 
 export async function updateIXIAssetAcquisition({ record = {}, action = "update", metadata = {}, signal } = {}) {
+  const validation = validateIXIAssetAcquisition(record);
+  if (!validation.valid) {
+    const error = new Error("Asset Acquisition update is incomplete");
+    error.validation = validation;
+    throw error;
+  }
   const financialDocumentId = clean(record?.financialBinding?.financialDocumentId || record?.identity?.financialDocumentId || record?.identity?.acquisitionId);
   const expectedRevision = Number(record?.financialBinding?.revision);
   if (!financialDocumentId || !Number.isInteger(expectedRevision) || expectedRevision < 1) {
@@ -168,6 +174,7 @@ export async function updateIXIAssetAcquisition({ record = {}, action = "update"
     commandId,
     idempotencyKey: `ixi-asset-acquisition:${action}:${commandId}`,
     patch: {
+      amount: Number(record?.acquisition?.currentAcquisitionBasis || record?.acquisition?.directAcquisitionCost || 0),
       assetAcquisition: record,
       acquisition: record.acquisition,
       funding: record.funding,
@@ -177,11 +184,73 @@ export async function updateIXIAssetAcquisition({ record = {}, action = "update"
       logistics: record.logistics,
       makeReady: record.makeReady,
       settlementTerms: record.settlementTerms,
+      control: record.control,
+      packageAllocation: record.packageAllocation,
     },
-    metadata: { ...metadata, transactModule: "asset-acquisition", action },
+    metadata: { ...metadata, transactModule: "asset-acquisition", acquisitionSchema: record.schema, action },
     signal,
   });
   return { record: canonicalize(record, response), response };
 }
 
-export default { createIXIAssetAcquisition, updateIXIAssetAcquisition };
+export async function recordIXIAssetAcquisitionPackageNormalization({ record = {}, context = {}, object = {}, signal } = {}) {
+  const event = record?.adjustments?.at?.(-1);
+  if (clean(event?.type) !== "package-normalization") throw new Error("A validated package normalization event is required.");
+  const refs = [];
+  pushUnique(refs, createIXIAosFinancialObjectReference({ object: context.entity || {}, role: "entity" }));
+  pushUnique(refs, createIXIAosFinancialObjectReference({ object: context.actor || {}, role: "employee" }));
+  for (const allocation of event.allocations || []) {
+    pushUnique(refs, createIXIAosFinancialObjectReference({
+      object: { passportId: allocation.passportId, objectType: "machine", label: allocation.label },
+      role: "asset",
+    }));
+  }
+  const controlResponse = await createIXIAosObjectFinancialDocument({
+    object: context.primary || object,
+    documentType: "adjustment",
+    input: {
+      currency: "USD",
+      amount: 0,
+      occurredAt: `${event.effectiveDate}T12:00:00.000Z`,
+      description: `Package acquisition normalization · ${event.packageId}`,
+      status: "posted",
+      financialState: "posted",
+      packageNormalization: event,
+      references: refs,
+    },
+    additionalReferences: refs,
+    commandId: event.adjustmentId,
+    idempotencyKey: `ixi-acquisition-package-normalization:${event.adjustmentId}`,
+    metadata: {
+      transactModule: "asset-acquisition",
+      action: "package-normalization",
+      packageId: event.packageId,
+      packageReference: event.packageReference,
+      allocationMethod: event.allocationMethod,
+      zeroSum: true,
+      packageNormalization: event,
+    },
+    signal,
+  });
+  const controlDocument = responseRecord(controlResponse)?.financialDocument || controlResponse?.financialDocument || {};
+  const controlDocumentId = clean(controlDocument.financialDocumentId);
+  if (!controlDocumentId) throw new Error("IXI Financial did not return a canonical package normalization control document.");
+  const adjustments = [...(record.adjustments || [])];
+  adjustments[adjustments.length - 1] = { ...event, controlDocumentId };
+  const packageEvents = [...(record?.packageAllocation?.events || [])];
+  if (packageEvents.length) packageEvents[packageEvents.length - 1] = { ...packageEvents.at(-1), controlDocumentId };
+  const candidate = {
+    ...record,
+    adjustments,
+    packageAllocation: { ...(record.packageAllocation || {}), events: packageEvents, controlDocumentId },
+  };
+  const updated = await updateIXIAssetAcquisition({
+    record: candidate,
+    action: "package-normalization",
+    metadata: { packageNormalizationControlDocumentId: controlDocumentId },
+    signal,
+  });
+  return { ...updated, controlResponse, controlDocumentId };
+}
+
+export default { createIXIAssetAcquisition, updateIXIAssetAcquisition, recordIXIAssetAcquisitionPackageNormalization };

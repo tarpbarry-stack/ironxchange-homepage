@@ -7,6 +7,11 @@ const source = await readFile(
   "utf8"
 );
 const contract = await import(`data:text/javascript;base64,${Buffer.from(source).toString("base64")}`);
+const engineSource = await readFile(
+  new URL("../components/ixi-aos/transact/modules/asset-acquisition/IXIAssetAcquisitionRecordEngine.js", import.meta.url),
+  "utf8",
+);
+const engine = await import(`data:text/javascript;base64,${Buffer.from(engineSource).toString("base64")}`);
 
 const context = {
   primary: { passportId: "passport:machine:1", objectId: "machine:1", objectType: "machine", label: "2020 CAT 336" },
@@ -33,10 +38,92 @@ function validInput(overrides = {}) {
 
 test("Asset Acquisition draft keeps user-entered value and calculates direct basis", () => {
   const draft = contract.createIXIAssetAcquisitionDraft({ context, input: validInput() });
-  assert.equal(draft.schema, "ixi-asset-acquisition-v2");
+  assert.equal(draft.schema, "ixi-asset-acquisition-v3");
   assert.equal(draft.acquisition.purchasePrice, 150000);
   assert.equal(draft.acquisition.directAcquisitionCost, 154875);
   assert.equal(contract.validateIXIAssetAcquisition(draft).valid, true);
+});
+
+test("Asset Acquisition basis includes purchase-document charges and subtracts trade/credits", () => {
+  const draft = contract.createIXIAssetAcquisitionDraft({
+    context,
+    input: validInput({
+      auctionDocumentFees: 500,
+      tradeAllowance: 10000,
+      sellerCredits: 875,
+    }),
+  });
+  assert.equal(draft.acquisition.originalAcquisitionBasis, 144500);
+  assert.equal(draft.acquisition.currentAcquisitionBasis, 144500);
+  assert.deepEqual(draft.makeReady.estimates, []);
+});
+
+test("Asset Acquisition amendment preserves original basis and appends immutable evidence", () => {
+  const draft = contract.createIXIAssetAcquisitionDraft({ context, input: validInput() });
+  const amended = engine.amendIXIAssetAcquisition(draft, {
+    field: "buyerPremium",
+    newValue: 2500,
+    effectiveDate: "2026-09-04",
+    reason: "Auction correction",
+    reference: "INV-2026-9-CREDIT",
+  }, context.actor);
+  assert.equal(amended.acquisition.originalAcquisitionBasis, 154875);
+  assert.equal(amended.acquisition.currentAcquisitionBasis, 154375);
+  assert.equal(amended.acquisition.amendmentTotal, -500);
+  assert.equal(amended.adjustments.length, 1);
+  assert.equal(amended.adjustments[0].previousValue, 3000);
+  assert.equal(amended.adjustments[0].newValue, 2500);
+  assert.equal(draft.acquisition.buyerPremium, 3000);
+});
+
+test("Package normalization is zero-sum, Passport-bound, and never rewrites original basis", () => {
+  const draft = contract.createIXIAssetAcquisitionDraft({ context, input: validInput() });
+  const normalized = engine.normalizeIXIPackageAllocation(draft, {
+    packageId: "PKG-100",
+    packageReference: "AUCTION-44",
+    packageTotal: 250000,
+    allocationMethod: "relative-market",
+    effectiveDate: "2026-09-05",
+    reason: "Normalize remaining machines after disposition",
+    allocations: [
+      { passportId: "passport:machine:1", label: "2020 CAT 336", amount: 160000 },
+      { passportId: "passport:machine:2", label: "2019 CAT 320", amount: 90000 },
+    ],
+  }, context.actor);
+  assert.equal(normalized.acquisition.originalAcquisitionBasis, 154875);
+  assert.equal(normalized.acquisition.currentAcquisitionBasis, 160000);
+  assert.equal(normalized.packageAllocation.packageTotal, 250000);
+  assert.equal(normalized.adjustments.at(-1).allocatedTotal, 250000);
+  assert.throws(() => engine.normalizeIXIPackageAllocation(draft, {
+    packageId: "PKG-100", packageReference: "AUCTION-44", packageTotal: 250000,
+    allocationMethod: "manual-normalized", effectiveDate: "2026-09-05", reason: "Bad total",
+    allocations: [
+      { passportId: "passport:machine:1", amount: 160000 },
+      { passportId: "passport:machine:2", amount: 80000 },
+    ],
+  }), /must equal/u);
+});
+
+test("A canonical package control projects the allocation onto every referenced Passport", () => {
+  const siblingContext = { ...context, primary: { ...context.primary, passportId: "passport:machine:2", label: "2019 CAT 320" } };
+  const sibling = contract.createIXIAssetAcquisitionDraft({ context: siblingContext, input: validInput({ purchasePrice: 100000, buyerPremium: 0, tax: 0, titleFees: 0, otherAcquisitionFees: 0 }) });
+  const event = {
+    adjustmentId: "ACQ-NORM-CONTROL-1",
+    type: "package-normalization",
+    packageId: "PKG-100",
+    packageReference: "AUCTION-44",
+    packageTotal: 250000,
+    allocationMethod: "relative-market",
+    occurredAt: "2026-09-05T12:00:00.000Z",
+    allocations: [
+      { passportId: "passport:machine:1", amount: 160000 },
+      { passportId: "passport:machine:2", amount: 90000 },
+    ],
+  };
+  const projected = engine.applyIXIAcquisitionActuals(sibling, [{ documentType: "adjustment", packageNormalization: event }]);
+  assert.equal(projected.acquisition.originalAcquisitionBasis, 100000);
+  assert.equal(projected.acquisition.currentAcquisitionBasis, 90000);
+  assert.equal(projected.adjustments.at(-1).projectedFromControl, true);
 });
 
 test("Asset Acquisition rejects zero value, incomplete financing, and overpayment", () => {
@@ -90,4 +177,18 @@ test("Asset Acquisition provides complete Mexican Spanish UI coverage", async ()
   assert.match(app, /save: tx\(clean\(error\?\.message\)/u);
   assert.doesNotMatch(app, />MAKE-READY OPEN</u);
   assert.doesNotMatch(app, />REMOVE (?:OWNER|PAYMENT)</u);
+  assert.doesNotMatch(app, /makeReadyEstimates:\s*costs/u);
+  assert.doesNotMatch(app, /\+ ADD ESTIMATED COST/u);
+  assert.match(app, /CREATE FREIGHT ORDER/u);
+  assert.match(app, /CREATE RECEIVING INSPECTION/u);
+  assert.match(app, /OPEN MAKE-READY WORK ORDER/u);
+  assert.match(app, /SAVE IMMUTABLE AMENDMENT/u);
+  assert.match(app, /SAVE ZERO-SUM NORMALIZATION/u);
+  const commands = await readFile(
+    new URL("../components/ixi-aos/transact/modules/asset-acquisition/IXIAssetAcquisitionCommands.js", import.meta.url),
+    "utf8",
+  );
+  assert.match(commands, /documentType:\s*"adjustment"/u);
+  assert.match(commands, /packageNormalization:\s*event/u);
+  assert.match(commands, /zeroSum:\s*true/u);
 });

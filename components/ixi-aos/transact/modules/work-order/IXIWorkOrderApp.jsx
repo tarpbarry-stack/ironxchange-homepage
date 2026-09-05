@@ -305,14 +305,15 @@ function addDocumentsToWorkOrder(current = {}, {
 export default function IXIWorkOrderApp({
   context = {},
   initialWorkOrder = null,
+  workflowIntent = null,
   onBack = null,
   onCreate = null,
   onAction = null
 }) {
   const [lang, setLang] = useState("en");
   const [workOrder, setWorkOrder] = useState(initialWorkOrder || null);
-  const [description, setDescription] = useState("");
-  const [type, setType] = useState("repair");
+  const [description, setDescription] = useState(() => workflowIntent?.workflow === "receiving-inspection" ? `Receiving inspection for ${clean(workflowIntent?.acquisition?.context?.primaryLabel)}` : workflowIntent?.workflow === "make-ready" ? `Make-ready for ${clean(workflowIntent?.acquisition?.context?.primaryLabel)}` : "");
+  const [type, setType] = useState(() => workflowIntent?.workflow === "receiving-inspection" ? "inspection" : workflowIntent?.workflow === "make-ready" ? "make-ready" : "repair");
   const [priority, setPriority] = useState("normal");
   const [condition, setCondition] = useState("operable");
   const [submodule, setSubmodule] = useState("");
@@ -401,6 +402,14 @@ export default function IXIWorkOrderApp({
         context,
         commandId: requestId,
         idempotencyKey: requestId,
+        metadata: {
+          acquisitionWorkflow: clean(workflowIntent?.workflow),
+          acquisitionId: clean(workflowIntent?.acquisition?.identity?.acquisitionId),
+          acquisitionNumber: clean(workflowIntent?.acquisition?.identity?.number),
+          acquisitionCost: workflowIntent?.workflow === "make-ready",
+          acquisitionCategory: workflowIntent?.workflow === "make-ready" ? "make-ready" : "inspection",
+          costPhase: "acquisition",
+        },
         input: {
           clientRequestId: requestId,
           title: clean(description).slice(0, 80) || "Work order",

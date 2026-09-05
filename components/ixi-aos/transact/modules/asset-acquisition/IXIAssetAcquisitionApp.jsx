@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
-import { createIXIAssetAcquisition, updateIXIAssetAcquisition } from "./IXIAssetAcquisitionCommands";
-import { createIXIAssetAcquisitionDraft, validateIXIAssetAcquisition } from "./IXIAssetAcquisitionContract";
-import { applyIXIAcquisitionActuals, addIXIOwnershipCapitalEvent, putIXIAssetInService } from "./IXIAssetAcquisitionRecordEngine";
+import { createIXIAssetAcquisition, recordIXIAssetAcquisitionPackageNormalization, updateIXIAssetAcquisition } from "./IXIAssetAcquisitionCommands";
+import { createIXIAssetAcquisitionDraft, hydrateIXIAssetAcquisitionRecord, validateIXIAssetAcquisition } from "./IXIAssetAcquisitionContract";
+import { amendIXIAssetAcquisition, applyIXIAcquisitionActuals, addIXIOwnershipCapitalEvent, getIXIAcquisitionOperations, normalizeIXIPackageAllocation, putIXIAssetInService } from "./IXIAssetAcquisitionRecordEngine";
 import IXIAssetAcquisitionStyles from "./IXIAssetAcquisitionStyles";
+import { loadIXIFreightOrders } from "../freight/IXIFreightClient";
 
 const clean = (v) => String(v ?? "").trim();
 const money = (v) => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(Number(v || 0));
@@ -26,12 +27,7 @@ const emptyOwner = () => ({
   settlementPriority: "pro-rata",
   notes: "",
 });
-const emptyCost = () => ({
-  category: "freight",
-  label: "Freight / Hauling",
-  estimatedAmount: "",
-  notes: "",
-});
+const emptyAllocation = () => ({ passportId: "", label: "", amount: "" });
 const startingValue = (object) => {
   const candidates = [object?.financial?.acquisitionValue, object?.lifecycle?.acquisitionCost, object?.acquisitionCost, object?.assetValue, object?.value];
   for (const candidate of candidates) {
@@ -55,11 +51,11 @@ const COPY = {
     agreement: "BILL OF SALE / AGREEMENT #",
     price: "PURCHASE PRICE",
     premium: "BUYER PREMIUM / AUCTION FEE",
-    tax: "SALES / USE TAX",
+    tax: "NONRECOVERABLE SALES / USE TAX",
     titleFees: "TITLE / REGISTRATION FEES",
     broker: "BROKER / FINDER FEE",
-    otherFees: "OTHER ACQUISITION COST",
-    direct: "DIRECT ACQUISITION COST",
+    otherFees: "OTHER PURCHASE-DOCUMENT CHARGES",
+    direct: "INITIAL ACQUISITION BASIS",
     owners: "OWNERSHIP / PARTNERS",
     addOwner: "+ ADD OWNER / PARTNER",
     legal: "LEGAL OWNERSHIP %",
@@ -72,9 +68,6 @@ const COPY = {
     method: "METHOD",
     payer: "PAID BY",
     reference: "REFERENCE",
-    makeReady: "ACQUISITION / MAKE-READY PLAN",
-    addCost: "+ ADD ESTIMATED COST",
-    projected: "PROJECTED READY COST",
     titleLien: "TITLE / LIEN",
     titleRequired: "TITLE REQUIRED",
     titleStatus: "TITLE STATUS",
@@ -94,7 +87,7 @@ const COPY = {
     returnCapital: "RETURN CAPITAL BEFORE PROFIT DISTRIBUTION",
     notes: "NOTES",
     save: "RECORD ACQUISITION",
-    saveSub: "Create ACQ record + opening asset economics",
+    saveSub: "Create authoritative purchase intake record",
     ownershipErr: "Ownership and settlement shares must each total 100%.",
     record: "ACQUISITION RECORD",
     actuals: "MAKE-READY ACTUALS",
@@ -130,11 +123,11 @@ const COPY = {
     agreement: "CONTRATO DE COMPRAVENTA #",
     price: "PRECIO DE COMPRA",
     premium: "PRIMA / CARGO DE SUBASTA",
-    tax: "IMPUESTO",
+    tax: "IMPUESTO DE VENTA / USO NO RECUPERABLE",
     titleFees: "CARGOS DE TÍTULO / REGISTRO",
     broker: "CARGO DE CORREDOR",
-    otherFees: "OTRO COSTO DE ADQUISICIÓN",
-    direct: "COSTO DIRECTO DE ADQUISICIÓN",
+    otherFees: "OTROS CARGOS DEL DOCUMENTO DE COMPRA",
+    direct: "BASE INICIAL DE ADQUISICIÓN",
     owners: "PROPIEDAD / SOCIOS",
     addOwner: "+ AGREGAR SOCIO",
     legal: "PROPIEDAD LEGAL %",
@@ -147,9 +140,6 @@ const COPY = {
     method: "MÉTODO",
     payer: "PAGADO POR",
     reference: "REFERENCIA",
-    makeReady: "PLAN DE ADQUISICIÓN / PREPARACIÓN",
-    addCost: "+ AGREGAR COSTO ESTIMADO",
-    projected: "COSTO PROYECTADO LISTO",
     titleLien: "TÍTULO / GRAVAMEN",
     titleRequired: "REQUIERE TÍTULO",
     titleStatus: "ESTADO DEL TÍTULO",
@@ -169,7 +159,7 @@ const COPY = {
     returnCapital: "DEVOLVER CAPITAL ANTES DE DISTRIBUIR GANANCIAS",
     notes: "NOTAS",
     save: "REGISTRAR ADQUISICIÓN",
-    saveSub: "Crear ACQ + economía inicial",
+    saveSub: "Crear registro autoritativo de compra",
     ownershipErr: "Propiedad y participación de liquidación deben sumar 100%.",
     record: "REGISTRO DE ADQUISICIÓN",
     actuals: "COSTOS REALES DE PREPARACIÓN",
@@ -255,6 +245,7 @@ const ES_TEXT = Object.freeze({
   "LENDER": "PRESTAMISTA",
   "CATEGORY": "CATEGORÍA",
   "FREIGHT": "FLETE",
+  "FREIGHT ACTUAL": "FLETE REAL",
   "FREIGHT / HAULING": "FLETE / TRANSPORTE",
   "INSPECTION": "INSPECCIÓN",
   "INITIAL REPAIRS": "REPARACIONES INICIALES",
@@ -301,6 +292,62 @@ const ES_TEXT = Object.freeze({
   "VALID IN-SERVICE DATE IS REQUIRED": "SE REQUIERE UNA FECHA VÁLIDA DE PUESTA EN SERVICIO.",
   "IN-SERVICE DATE CANNOT BE BEFORE THE PURCHASE DATE.": "LA FECHA DE PUESTA EN SERVICIO NO PUEDE SER ANTERIOR A LA FECHA DE COMPRA.",
   "THIS RECORD ESTABLISHES THE ASSET'S USER-ENTERED OPENING BASIS. IXI DOES NOT PRICE THE ASSET. ACTUAL FREIGHT, REPAIRS, PARTS, LABOR AND TECHNOLOGY REMAIN CANONICAL TRAN$ACT RECORDS AND PROJECT HERE UNTIL THE IN SERVICE CUTOFF.": "ESTE REGISTRO ESTABLECE LA BASE INICIAL CAPTURADA POR EL USUARIO. IXI NO VALÚA EL ACTIVO. LOS COSTOS REALES DE FLETE, REPARACIONES, REFACCIONES, MANO DE OBRA Y TECNOLOGÍA CONSERVAN SUS REGISTROS TRAN$ACT Y SE REFLEJAN AQUÍ HASTA LA FECHA DE PUESTA EN SERVICIO.",
+  "+ ADD MACHINE": "+ AGREGAR MÁQUINA",
+  "ACTUAL LANDED COST": "COSTO REAL PUESTO EN DESTINO",
+  "ALLOCATION": "ASIGNACIÓN",
+  "ALLOCATION METHOD": "MÉTODO DE ASIGNACIÓN",
+  "AMEND ACQUISITION": "MODIFICAR ADQUISICIÓN",
+  "APPRAISAL": "AVALÚO",
+  "AUCTION / DOCUMENT FEES": "CARGOS DE SUBASTA / DOCUMENTOS",
+  "AUCTION LOT / SOURCE ITEM #": "LOTE DE SUBASTA / ARTÍCULO DE ORIGEN #",
+  "AUTHORITATIVE PACKAGE TOTAL": "TOTAL AUTORITATIVO DEL PAQUETE",
+  "BASIS AUDIT TRAIL": "HISTORIAL DE AUDITORÍA DE BASE",
+  "BROKER / FINDER FEE": "HONORARIO DE CORREDOR",
+  "BUYER PREMIUM": "PRIMA DEL COMPRADOR",
+  "CREATE FREIGHT ORDER": "CREAR ORDEN DE FLETE",
+  "CREATE RECEIVING INSPECTION": "CREAR INSPECCIÓN DE RECEPCIÓN",
+  "CURRENT ACQUISITION BASIS": "BASE ACTUAL DE ADQUISICIÓN",
+  "EFFECTIVE DATE": "FECHA EFECTIVA",
+  "FIELD TO CORRECT": "CAMPO A CORREGIR",
+  "INTAKE EXCEPTIONS / UNDISCLOSED PROBLEMS": "EXCEPCIONES DE RECEPCIÓN / PROBLEMAS NO REVELADOS",
+  "INTAKE OPEN": "RECEPCIÓN ABIERTA",
+  "INVOICE / DOCUMENT / APPROVAL REF": "REF. DE FACTURA / DOCUMENTO / APROBACIÓN",
+  "IXI PASSPORT": "PASAPORTE IXI",
+  "LEGACY PLANNING ESTIMATES ARE PRESERVED READ-ONLY IN AUDIT HISTORY AND ARE NOT INCLUDED IN AUTHORITATIVE ACTUALS.": "LAS ESTIMACIONES HISTÓRICAS SE CONSERVAN SOLO PARA LECTURA EN LA AUDITORÍA Y NO SE INCLUYEN EN LOS REALES AUTORITATIVOS.",
+  "LEGACY PLAN SNAPSHOT": "INSTANTÁNEA DEL PLAN HISTÓRICO",
+  "LINKED INTAKE WORKFLOWS": "FLUJOS DE RECEPCIÓN VINCULADOS",
+  "MACHINE": "MÁQUINA",
+  "MAKE-READY": "PREPARACIÓN",
+  "MAKE-READY ACTUAL": "PREPARACIÓN REAL",
+  "MANUAL NORMALIZED": "NORMALIZACIÓN MANUAL",
+  "NEGOTIATED VALUES": "VALORES NEGOCIADOS",
+  "NONRECOVERABLE TAX": "IMPUESTO NO RECUPERABLE",
+  "NORMALIZE PACKAGE COST": "NORMALIZAR COSTO DEL PAQUETE",
+  "ONLY COSTS ON THE SELLER OR AUCTION PURCHASE DOCUMENT BELONG HERE. SEPARATE FREIGHT, REPAIR, PARTS AND LABOR TRANSACTIONS BELONG IN THEIR OPERATIONAL MODULES.": "SOLO LOS COSTOS DEL DOCUMENTO DE COMPRA DEL VENDEDOR O SUBASTA PERTENECEN AQUÍ. EL FLETE, LAS REPARACIONES, LAS REFACCIONES Y LA MANO DE OBRA SEPARADOS PERTENECEN A SUS MÓDULOS OPERATIVOS.",
+  "OPEN FREIGHT": "ABRIR FLETE",
+  "OPEN ITEMS": "PARTIDAS ABIERTAS",
+  "OPEN MAKE-READY WORK ORDER": "ABRIR ORDEN DE PREPARACIÓN",
+  "ORIGINAL PURCHASE ALLOCATION": "ASIGNACIÓN ORIGINAL DE COMPRA",
+  "OTHER PURCHASE-DOCUMENT CHARGES": "OTROS CARGOS DEL DOCUMENTO DE COMPRA",
+  "PACKAGE ID": "ID DEL PAQUETE",
+  "PACKAGE NORMALIZATION": "NORMALIZACIÓN DEL PAQUETE",
+  "PAYMENT TERMS": "TÉRMINOS DE PAGO",
+  "PERCENTAGE": "PORCENTAJE",
+  "PURCHASE AMENDMENTS": "MODIFICACIONES DE COMPRA",
+  "PURCHASE DOCUMENT REF": "REF. DEL DOCUMENTO DE COMPRA",
+  "REASON": "MOTIVO",
+  "RECEIVED DATE": "FECHA DE RECEPCIÓN",
+  "RECEIVING INSPECTION": "INSPECCIÓN DE RECEPCIÓN",
+  "RELATED ACTUALS": "REALES RELACIONADOS",
+  "RELATIVE MARKET VALUE": "VALOR RELATIVO DE MERCADO",
+  "RESPONSIBLE EMPLOYEE": "EMPLEADO RESPONSABLE",
+  "REVISED VALUE": "VALOR REVISADO",
+  "SAVE IMMUTABLE AMENDMENT": "GUARDAR MODIFICACIÓN INMUTABLE",
+  "SAVE ZERO-SUM NORMALIZATION": "GUARDAR NORMALIZACIÓN DE SUMA CERO",
+  "SELLER CREDIT / DISCOUNT": "CRÉDITO / DESCUENTO DEL VENDEDOR",
+  "SOURCE TRANSACTIONS": "TRANSACCIONES DE ORIGEN",
+  "TITLE / REGISTRATION FEES": "CARGOS DE TÍTULO / REGISTRO",
+  "TRADE ALLOWANCE": "CRÉDITO POR INTERCAMBIO",
 });
 
 function Field({ label, children }) {
@@ -315,7 +362,7 @@ function Input({ value, onChange, ...props }) {
   return <input value={value} onChange={(e) => onChange(e.target.value)} {...props} />;
 }
 
-export default function IXIAssetAcquisitionApp({ context = {}, object = {}, initialRecord = null, relatedTransactions = [], language = "en", onLanguageChange = null, onBack = null, onRecordChange = null }) {
+export default function IXIAssetAcquisitionApp({ context = {}, object = {}, initialRecord = null, relatedTransactions = [], language = "en", onLanguageChange = null, onBack = null, onRecordChange = null, onLaunchWorkflow = null }) {
   const primary = context.primary || {};
   const entity = context.entity || {};
   const location = context.location || {};
@@ -324,6 +371,7 @@ export default function IXIAssetAcquisitionApp({ context = {}, object = {}, init
   const t = COPY[lang];
   const tx = (text) => lang === "es" ? (ES_TEXT[String(text).toUpperCase()] || text) : text;
   const [record, setRecord] = useState(initialRecord);
+  const [linkedFreightOrders, setLinkedFreightOrders] = useState([]);
   const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState({});
   const [clientRequestId] = useState(() => globalThis.crypto?.randomUUID?.() || `ACQ-${Date.now()}-${Math.random().toString(16).slice(2)}`);
@@ -331,17 +379,22 @@ export default function IXIAssetAcquisitionApp({ context = {}, object = {}, init
     [sellerLabel, setSellerLabel] = useState(""),
     [sourceLabel, setSourceLabel] = useState(""),
     [sourceReference, setSourceReference] = useState(""),
+    [auctionLotNumber, setAuctionLotNumber] = useState(""),
     [purchaseDate, setPurchaseDate] = useState(today()),
     [invoiceNumber, setInvoiceNumber] = useState(""),
     [invoiceDate, setInvoiceDate] = useState(today()),
     [agreementNumber, setAgreementNumber] = useState(""),
-    [dueDate, setDueDate] = useState("");
+    [dueDate, setDueDate] = useState(""),
+    [paymentTerms, setPaymentTerms] = useState("");
   const [purchasePrice, setPurchasePrice] = useState(() => startingValue(object)),
     [buyerPremium, setBuyerPremium] = useState(""),
+    [auctionDocumentFees, setAuctionDocumentFees] = useState(""),
     [tax, setTax] = useState(""),
     [titleFees, setTitleFees] = useState(""),
     [brokerFees, setBrokerFees] = useState(""),
-    [otherFees, setOtherFees] = useState("");
+    [otherFees, setOtherFees] = useState(""),
+    [tradeAllowance, setTradeAllowance] = useState(""),
+    [sellerCredits, setSellerCredits] = useState("");
   const [owners, setOwners] = useState([
     {
       ...emptyOwner(),
@@ -351,14 +404,6 @@ export default function IXIAssetAcquisitionApp({ context = {}, object = {}, init
     },
   ]);
   const [payments, setPayments] = useState([]);
-  const [costs, setCosts] = useState([
-    emptyCost(),
-    {
-      ...emptyCost(),
-      category: "initial-repairs",
-      label: "Initial Repairs / Make-Ready",
-    },
-  ]);
   const [titleRequired, setTitleRequired] = useState(true),
     [titleStatus, setTitleStatus] = useState("pending"),
     [lienStatus, setLienStatus] = useState("none-known"),
@@ -371,9 +416,12 @@ export default function IXIAssetAcquisitionApp({ context = {}, object = {}, init
     [deliverTo, setDeliverTo] = useState(clean(location.label)),
     [freightResponsibility, setFreightResponsibility] = useState("buyer"),
     [pickupDate, setPickupDate] = useState(""),
-    [expectedDeliveryDate, setExpectedDeliveryDate] = useState("");
+    [expectedDeliveryDate, setExpectedDeliveryDate] = useState(""),
+    [receivedDate, setReceivedDate] = useState("");
   const [financed, setFinanced] = useState(false),
     [lenderLabel, setLenderLabel] = useState(""),
+    [responsibleEmployee, setResponsibleEmployee] = useState(clean(actor.displayName || actor.name || actor.label)),
+    [intakeExceptions, setIntakeExceptions] = useState(""),
     [settlementNotes, setSettlementNotes] = useState(""),
     [notes, setNotes] = useState("");
   const [documents, setDocuments] = useState([]);
@@ -386,6 +434,20 @@ export default function IXIAssetAcquisitionApp({ context = {}, object = {}, init
     [eventPct, setEventPct] = useState(""),
     [eventSettlePct, setEventSettlePct] = useState(""),
     [eventRef, setEventRef] = useState("");
+  const [amendmentOpen, setAmendmentOpen] = useState(false),
+    [amendmentField, setAmendmentField] = useState("purchasePrice"),
+    [amendmentValue, setAmendmentValue] = useState(""),
+    [amendmentDate, setAmendmentDate] = useState(today()),
+    [amendmentReason, setAmendmentReason] = useState(""),
+    [amendmentReference, setAmendmentReference] = useState("");
+  const [packageOpen, setPackageOpen] = useState(false),
+    [packageId, setPackageId] = useState(""),
+    [packageReference, setPackageReference] = useState(""),
+    [packageTotal, setPackageTotal] = useState(""),
+    [allocationMethod, setAllocationMethod] = useState("negotiated-values"),
+    [normalizationDate, setNormalizationDate] = useState(today()),
+    [normalizationReason, setNormalizationReason] = useState(""),
+    [allocations, setAllocations] = useState(() => [{ passportId: clean(primary.passportId), label: clean(primary.label), amount: "" }, emptyAllocation()]);
 
   const input = useMemo(
     () => ({
@@ -393,22 +455,28 @@ export default function IXIAssetAcquisitionApp({ context = {}, object = {}, init
       acquisitionType,
       sellerLabel,
       sourceLabel,
+      sourceChannel: sourceLabel,
       sourceReference,
+      auctionLotNumber,
       purchaseDate,
       invoiceNumber,
       invoiceDate,
       invoiceAmount: purchasePrice,
       agreementNumber,
       dueDate,
+      paymentTerms,
       purchasePrice,
       buyerPremium,
+      auctionDocumentFees,
+      nonrecoverableTax: tax,
       tax,
       titleFees,
       brokerFees,
       otherAcquisitionFees: otherFees,
+      tradeAllowance,
+      sellerCredits,
       owners,
       payments,
-      makeReadyEstimates: costs,
       titleRequired,
       titleStatus,
       lienStatus,
@@ -422,19 +490,43 @@ export default function IXIAssetAcquisitionApp({ context = {}, object = {}, init
       freightResponsibility,
       pickupDate,
       expectedDeliveryDate,
+      receivedDate,
       financed,
       lenderLabel,
+      responsibleEmployeeLabel: responsibleEmployee,
+      intakeExceptions,
       documents,
       settlementTermsNotes: settlementNotes,
       notes,
     }),
-    [clientRequestId, acquisitionType, sellerLabel, sourceLabel, sourceReference, purchaseDate, invoiceNumber, invoiceDate, agreementNumber, dueDate, purchasePrice, buyerPremium, tax, titleFees, brokerFees, otherFees, owners, payments, costs, titleRequired, titleStatus, lienStatus, clearTitle, titleNumber, condition, hours, knownIssues, purchaseLocation, deliverTo, freightResponsibility, pickupDate, expectedDeliveryDate, financed, lenderLabel, documents, settlementNotes, notes],
+    [clientRequestId, acquisitionType, sellerLabel, sourceLabel, sourceReference, auctionLotNumber, purchaseDate, invoiceNumber, invoiceDate, agreementNumber, dueDate, paymentTerms, purchasePrice, buyerPremium, auctionDocumentFees, tax, titleFees, brokerFees, otherFees, tradeAllowance, sellerCredits, owners, payments, titleRequired, titleStatus, lienStatus, clearTitle, titleNumber, condition, hours, knownIssues, intakeExceptions, purchaseLocation, deliverTo, freightResponsibility, pickupDate, expectedDeliveryDate, receivedDate, financed, lenderLabel, responsibleEmployee, documents, settlementNotes, notes],
   );
   const preview = useMemo(() => createIXIAssetAcquisitionDraft({ context, input }), [context, input]);
-  const liveRecord = useMemo(() => (record ? applyIXIAcquisitionActuals(record, relatedTransactions) : null), [record, relatedTransactions]);
+  const liveRecord = useMemo(() => (record ? applyIXIAcquisitionActuals(hydrateIXIAssetAcquisitionRecord(record), relatedTransactions) : null), [record, relatedTransactions]);
+  const operations = useMemo(() => (liveRecord ? getIXIAcquisitionOperations(liveRecord, [
+    ...relatedTransactions,
+    ...linkedFreightOrders.map((freightOrder) => ({
+      documentType: "freight",
+      freightOrder,
+      status: freightOrder?.status,
+      references: [{ passportId: liveRecord?.context?.primaryPassportId }],
+    })),
+  ]) : null), [liveRecord, relatedTransactions, linkedFreightOrders]);
   useEffect(() => {
     setRecord(initialRecord || null);
   }, [initialRecord]);
+  useEffect(() => {
+    const passportId = clean(liveRecord?.context?.primaryPassportId);
+    if (!passportId) {
+      setLinkedFreightOrders([]);
+      return undefined;
+    }
+    const controller = new AbortController();
+    loadIXIFreightOrders(passportId, { signal: controller.signal }).then(setLinkedFreightOrders).catch((error) => {
+      if (error?.name !== "AbortError") setLinkedFreightOrders([]);
+    });
+    return () => controller.abort();
+  }, [liveRecord?.context?.primaryPassportId]);
   function changeLang(next) {
     setLang(next);
     onLanguageChange?.(next);
@@ -445,8 +537,8 @@ export default function IXIAssetAcquisitionApp({ context = {}, object = {}, init
   function updatePayment(i, key, value) {
     setPayments((list) => list.map((item, index) => (index === i ? { ...item, [key]: value } : item)));
   }
-  function updateCost(i, key, value) {
-    setCosts((list) => list.map((item, index) => (index === i ? { ...item, [key]: value } : item)));
+  function updateAllocation(i, key, value) {
+    setAllocations((list) => list.map((item, index) => (index === i ? { ...item, [key]: value } : item)));
   }
   async function save() {
     const check = validateIXIAssetAcquisition(preview);
@@ -559,6 +651,55 @@ export default function IXIAssetAcquisitionApp({ context = {}, object = {}, init
       setSaving(false);
     }
   }
+  async function saveAmendment() {
+    if (!record || saving) return;
+    setSaving(true);
+    try {
+      const candidate = amendIXIAssetAcquisition(hydrateIXIAssetAcquisitionRecord(record), {
+        field: amendmentField,
+        newValue: amendmentValue,
+        effectiveDate: amendmentDate,
+        reason: amendmentReason,
+        reference: amendmentReference,
+      }, actor);
+      const result = await updateIXIAssetAcquisition({ record: candidate, action: "acquisition-amendment" });
+      setRecord(result.record);
+      setAmendmentOpen(false);
+      setAmendmentValue("");
+      setAmendmentReason("");
+      setAmendmentReference("");
+      setErrors({});
+      await onRecordChange?.(result.record, { action: "acquisition-amendment", adjustment: result.record.adjustments?.at(-1), response: result.response }, context);
+    } catch (error) {
+      setErrors({ amendment: tx(clean(error?.message) || "Acquisition amendment could not be saved.") });
+    } finally {
+      setSaving(false);
+    }
+  }
+  async function savePackageNormalization() {
+    if (!record || saving) return;
+    setSaving(true);
+    try {
+      const candidate = normalizeIXIPackageAllocation(hydrateIXIAssetAcquisitionRecord(record), {
+        packageId,
+        packageReference,
+        packageTotal,
+        allocationMethod,
+        effectiveDate: normalizationDate,
+        reason: normalizationReason,
+        allocations,
+      }, actor);
+      const result = await recordIXIAssetAcquisitionPackageNormalization({ record: candidate, context, object });
+      setRecord(result.record);
+      setPackageOpen(false);
+      setErrors({});
+      await onRecordChange?.(result.record, { action: "package-normalization", adjustment: result.record.adjustments?.at(-1), response: result.response }, context);
+    } catch (error) {
+      setErrors({ package: tx(clean(error?.message) || "Package normalization could not be saved.") });
+    } finally {
+      setSaving(false);
+    }
+  }
   function addDocs(files) {
     const next = Array.from(files || []).map((file, index) => ({
       documentId: `ACQ-DOC-${Date.now()}-${index}`,
@@ -574,8 +715,11 @@ export default function IXIAssetAcquisitionApp({ context = {}, object = {}, init
   if (liveRecord) {
     const r = liveRecord;
     const ownerEvents = r.ownership?.events || [];
-    const direct = r.acquisition?.directAcquisitionCost || 0;
+    const direct = r.acquisition?.currentAcquisitionBasis ?? r.acquisition?.directAcquisitionCost ?? 0;
+    const originalBasis = r.acquisition?.originalAcquisitionBasis ?? direct;
     const actual = r.makeReady?.actualTotal || 0;
+    const freightActual = (r.makeReady?.actuals || []).filter((item) => clean(item?.category).includes("freight")).reduce((sum, item) => sum + Number(item?.actualAmount || 0), 0);
+    const makeReadyActual = actual - freightActual;
     const acquisitionClosed = r.makeReady?.status === "closed" && clean(r.makeReady?.inServiceDate);
     const readyCost = direct + actual;
     return (
@@ -616,39 +760,118 @@ export default function IXIAssetAcquisitionApp({ context = {}, object = {}, init
           </div>
           <div className="acq-status">
             <span>{tx("ACQUISITION")}</span>
-            <b className={acquisitionClosed ? "ok" : "warn"}>{acquisitionClosed ? `${tx("COMPLETE")} ${r.makeReady.inServiceDate}` : tx("MAKE-READY OPEN")}</b>
+            <b className={clean(r.logistics?.receivedDate) ? "ok" : "warn"}>{clean(r.logistics?.receivedDate) ? tx("RECEIVED") : tx("INTAKE OPEN")}</b>
           </div>
         </div>
+        <div className="acq-money"><span>{tx("FREIGHT ACTUAL")}</span><b>{money(freightActual)}</b></div>
+        <div className="acq-money"><span>{tx("MAKE-READY ACTUAL")}</span><b>{money(makeReadyActual)}</b></div>
         <div className="acq-section">{t.deal}</div>
-        <div className="acq-money">
-          <span>{tx("PURCHASE PRICE")}</span>
-          <b>{money(r.acquisition?.purchasePrice)}</b>
-        </div>
-        <div className="acq-money">
-          <span>{tx("BUYER PREMIUM / FEES")}</span>
-          <b>{money((r.acquisition?.buyerPremium || 0) + (r.acquisition?.tax || 0) + (r.acquisition?.titleFees || 0) + (r.acquisition?.brokerFees || 0) + (r.acquisition?.otherAcquisitionFees || 0))}</b>
-        </div>
+        <div className="acq-money"><span>{tx("ORIGINAL PURCHASE ALLOCATION")}</span><b>{money(originalBasis)}</b></div>
+        <div className="acq-money"><span>{tx("PURCHASE AMENDMENTS")}</span><b>{money(r.acquisition?.amendmentTotal)}</b></div>
+        <div className="acq-money"><span>{tx("PACKAGE NORMALIZATION")}</span><b>{money(r.acquisition?.packageNormalizationTotal)}</b></div>
         <div className="acq-total">
-          <span>{t.direct}</span>
+          <span>{tx("CURRENT ACQUISITION BASIS")}</span>
           <strong>{money(direct)}</strong>
         </div>
-        <div className="acq-section">{t.actuals}</div>
-        {(r.makeReady?.estimates || []).map((item) => {
-          const found = (r.makeReady?.actuals || []).find((a) => a.category === item.category);
-          return (
-            <div className="acq-row" key={item.costId}>
-              <div className="acq-row-top">
-                <strong>{tx(item.label || clean(item.category).replace(/-/g, " ").toUpperCase())}</strong>
-                <b>{money(found?.actualAmount || 0)}</b>
-              </div>
-              <small>
-                {tx("EST")} {money(item.estimatedAmount)} · {tx("VAR")} {money((found?.actualAmount || 0) - Number(item.estimatedAmount || 0))}
-              </small>
+        <div className="acq-inline-actions">
+          <button type="button" onClick={() => setAmendmentOpen((value) => !value)}>{tx("AMEND ACQUISITION")}</button>
+          <button type="button" onClick={() => setPackageOpen((value) => !value)}>{tx("NORMALIZE PACKAGE COST")}</button>
+        </div>
+        {amendmentOpen ? (
+          <div className="acq-event-edit">
+            <Field label={tx("FIELD TO CORRECT")}>
+              <select value={amendmentField} onChange={(event) => setAmendmentField(event.target.value)}>
+                <option value="purchasePrice">{tx("PURCHASE PRICE")}</option>
+                <option value="buyerPremium">{tx("BUYER PREMIUM")}</option>
+                <option value="auctionDocumentFees">{tx("AUCTION / DOCUMENT FEES")}</option>
+                <option value="nonrecoverableTax">{tx("NONRECOVERABLE TAX")}</option>
+                <option value="titleFees">{tx("TITLE / REGISTRATION FEES")}</option>
+                <option value="brokerFees">{tx("BROKER / FINDER FEE")}</option>
+                <option value="otherAcquisitionFees">{tx("OTHER PURCHASE-DOCUMENT CHARGES")}</option>
+                <option value="tradeAllowance">{tx("TRADE ALLOWANCE")}</option>
+                <option value="sellerCredits">{tx("SELLER CREDIT / DISCOUNT")}</option>
+              </select>
+            </Field>
+            <div className="acq-grid2">
+              <Field label={tx("REVISED VALUE")}><Input value={amendmentValue} onChange={setAmendmentValue} inputMode="decimal" /></Field>
+              <Field label={tx("EFFECTIVE DATE")}><input type="date" value={amendmentDate} onChange={(event) => setAmendmentDate(event.target.value)} /></Field>
             </div>
-          );
-        })}
+            <Field label={tx("REASON")}><Input value={amendmentReason} onChange={setAmendmentReason} /></Field>
+            <Field label={tx("INVOICE / DOCUMENT / APPROVAL REF")}><Input value={amendmentReference} onChange={setAmendmentReference} /></Field>
+            <button className="acq-primary" type="button" onClick={saveAmendment} disabled={saving}>{saving ? tx("SAVING...") : tx("SAVE IMMUTABLE AMENDMENT")}</button>
+            {errors.amendment ? <div className="acq-error">{errors.amendment}</div> : null}
+          </div>
+        ) : null}
+        {packageOpen ? (
+          <div className="acq-event-edit">
+            <div className="acq-grid2">
+              <Field label={tx("PACKAGE ID")}><Input value={packageId} onChange={setPackageId} /></Field>
+              <Field label={tx("PURCHASE DOCUMENT REF")}><Input value={packageReference} onChange={setPackageReference} /></Field>
+              <Field label={tx("AUTHORITATIVE PACKAGE TOTAL")}><Input value={packageTotal} onChange={setPackageTotal} inputMode="decimal" /></Field>
+              <Field label={tx("ALLOCATION METHOD")}>
+                <select value={allocationMethod} onChange={(event) => setAllocationMethod(event.target.value)}>
+                  <option value="negotiated-values">{tx("NEGOTIATED VALUES")}</option>
+                  <option value="relative-market">{tx("RELATIVE MARKET VALUE")}</option>
+                  <option value="appraisal">{tx("APPRAISAL")}</option>
+                  <option value="percentage">{tx("PERCENTAGE")}</option>
+                  <option value="manual-normalized">{tx("MANUAL NORMALIZED")}</option>
+                </select>
+              </Field>
+            </div>
+            {allocations.map((allocation, index) => (
+              <div className="acq-allocation" key={`${index}-${allocation.passportId}`}>
+                <Field label={tx("IXI PASSPORT")}><Input value={allocation.passportId} onChange={(value) => updateAllocation(index, "passportId", value)} /></Field>
+                <div className="acq-grid2">
+                  <Field label={tx("MACHINE")}><Input value={allocation.label} onChange={(value) => updateAllocation(index, "label", value)} /></Field>
+                  <Field label={tx("ALLOCATION")}><Input value={allocation.amount} onChange={(value) => updateAllocation(index, "amount", value)} inputMode="decimal" /></Field>
+                </div>
+              </div>
+            ))}
+            <button className="acq-secondary" type="button" onClick={() => setAllocations((list) => [...list, emptyAllocation()])}>{tx("+ ADD MACHINE")}</button>
+            <div className="acq-grid2">
+              <Field label={tx("EFFECTIVE DATE")}><input type="date" value={normalizationDate} onChange={(event) => setNormalizationDate(event.target.value)} /></Field>
+              <Field label={tx("REASON")}><Input value={normalizationReason} onChange={setNormalizationReason} /></Field>
+            </div>
+            <button className="acq-primary" type="button" onClick={savePackageNormalization} disabled={saving}>{saving ? tx("SAVING...") : tx("SAVE ZERO-SUM NORMALIZATION")}</button>
+            {errors.package ? <div className="acq-error">{errors.package}</div> : null}
+          </div>
+        ) : null}
+        {(r.adjustments || []).length ? <div className="acq-section">{tx("BASIS AUDIT TRAIL")}</div> : null}
+        {(r.adjustments || []).slice().reverse().map((item) => (
+          <div className="acq-row" key={item.adjustmentId}>
+            <div className="acq-row-top"><strong>{tx(clean(item.type).replace(/-/g, " ").toUpperCase())}</strong><b className={Number(item.basisDelta) < 0 ? "" : "yellow"}>{money(item.basisDelta)}</b></div>
+            <small>{item.effectiveDate} · {item.reason} · {item.reference || item.packageReference} · {money(item.basisBefore)} → {money(item.basisAfter)}</small>
+          </div>
+        ))}
+        <div className="acq-section">{tx("LINKED INTAKE WORKFLOWS")}</div>
+        <div className="acq-status-grid">
+          <div className="acq-status"><span>{tx("FREIGHT")}</span><b className={operations?.freightOrderCount ? "ok" : "warn"}>{tx(clean(operations?.freightStatus || "not-created").replace(/-/g, " ").toUpperCase())}</b></div>
+          <div className="acq-status"><span>{tx("RECEIVING INSPECTION")}</span><b className={operations?.inspectionStatus === "complete" ? "ok" : "warn"}>{tx(clean(operations?.inspectionStatus || "not-created").replace(/-/g, " ").toUpperCase())}</b></div>
+          <div className="acq-status"><span>{tx("MAKE-READY")}</span><b className={operations?.makeReadyOpenCount ? "warn" : "ok"}>{operations?.makeReadyOpenCount || 0} {tx("OPEN ITEMS")}</b></div>
+          <div className="acq-status"><span>{tx("RELATED ACTUALS")}</span><b>{money(actual)}</b></div>
+        </div>
+        <div className="acq-workflow-actions">
+          <button type="button" onClick={() => onLaunchWorkflow?.("freight", { acquisition: r, workflow: "acquisition-inbound", action: operations?.freightOrderCount ? "open" : "new" })}>{operations?.freightOrderCount ? tx("OPEN FREIGHT") : tx("CREATE FREIGHT ORDER")}</button>
+          <button type="button" onClick={() => onLaunchWorkflow?.("work-order", { acquisition: r, workflow: "receiving-inspection" })}>{tx("CREATE RECEIVING INSPECTION")}</button>
+          <button type="button" onClick={() => onLaunchWorkflow?.("work-order", { acquisition: r, workflow: "make-ready" })}>{tx("OPEN MAKE-READY WORK ORDER")}</button>
+        </div>
+        {(r.makeReady?.actuals || []).map((item) => (
+          <div className="acq-row" key={item.category}>
+            <div className="acq-row-top"><strong>{tx(item.label || clean(item.category).replace(/-/g, " ").toUpperCase())}</strong><b>{money(item.actualAmount)}</b></div>
+            <small>{item.records?.length || 0} {tx("SOURCE TRANSACTIONS")}</small>
+          </div>
+        ))}
+        {r.makeReady?.legacyPlanningSnapshot ? (
+          <>
+            <div className="acq-section">{tx("LEGACY PLAN SNAPSHOT")}</div>
+            {(r.makeReady?.estimates || []).map((item) => (
+              <div className="acq-money" key={item.costId}><span>{tx(item.label || clean(item.category).replace(/-/g, " ").toUpperCase())}</span><b>{money(item.estimatedAmount)}</b></div>
+            ))}
+            <div className="acq-row"><small>{tx("LEGACY PLANNING ESTIMATES ARE PRESERVED READ-ONLY IN AUDIT HISTORY AND ARE NOT INCLUDED IN AUTHORITATIVE ACTUALS.")}</small></div>
+          </>
+        ) : null}
         <div className="acq-total">
-          <span>{tx("LANDED / MAKE-READY ACTUAL")}</span>
+          <span>{tx("ACTUAL LANDED COST")}</span>
           <strong>{money(readyCost)}</strong>
         </div>
         <div className="acq-section">{t.owners}</div>
@@ -836,6 +1059,9 @@ export default function IXIAssetAcquisitionApp({ context = {}, object = {}, init
           <Input value={sourceReference} onChange={setSourceReference} />
         </Field>
       </div>
+      <Field label={tx("AUCTION LOT / SOURCE ITEM #")}>
+        <Input value={auctionLotNumber} onChange={setAuctionLotNumber} />
+      </Field>
       <div className="acq-grid2">
         <Field label={t.invoice}>
           <Input value={invoiceNumber} onChange={setInvoiceNumber} />
@@ -852,6 +1078,7 @@ export default function IXIAssetAcquisitionApp({ context = {}, object = {}, init
           <input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
         </Field>
       </div>
+      <Field label={tx("PAYMENT TERMS")}><Input value={paymentTerms} onChange={setPaymentTerms} /></Field>
       <div className="acq-section">{tx("PURCHASE ECONOMICS")}</div>
       <Field label={t.price}>
         <Input value={purchasePrice} onChange={setPurchasePrice} inputMode="decimal" />
@@ -859,6 +1086,9 @@ export default function IXIAssetAcquisitionApp({ context = {}, object = {}, init
       <div className="acq-grid2">
         <Field label={t.premium}>
           <Input value={buyerPremium} onChange={setBuyerPremium} inputMode="decimal" />
+        </Field>
+        <Field label={tx("AUCTION / DOCUMENT FEES")}>
+          <Input value={auctionDocumentFees} onChange={setAuctionDocumentFees} inputMode="decimal" />
         </Field>
         <Field label={t.tax}>
           <Input value={tax} onChange={setTax} inputMode="decimal" />
@@ -873,6 +1103,11 @@ export default function IXIAssetAcquisitionApp({ context = {}, object = {}, init
       <Field label={t.otherFees}>
         <Input value={otherFees} onChange={setOtherFees} inputMode="decimal" />
       </Field>
+      <div className="acq-grid2">
+        <Field label={tx("TRADE ALLOWANCE")}><Input value={tradeAllowance} onChange={setTradeAllowance} inputMode="decimal" /></Field>
+        <Field label={tx("SELLER CREDIT / DISCOUNT")}><Input value={sellerCredits} onChange={setSellerCredits} inputMode="decimal" /></Field>
+      </div>
+      <div className="acq-row"><small>{tx("ONLY COSTS ON THE SELLER OR AUCTION PURCHASE DOCUMENT BELONG HERE. SEPARATE FREIGHT, REPAIR, PARTS AND LABOR TRANSACTIONS BELONG IN THEIR OPERATIONAL MODULES.")}</small></div>
       <div className="acq-total">
         <span>{t.direct}</span>
         <strong>{money(preview.acquisition.directAcquisitionCost)}</strong>
@@ -976,37 +1211,6 @@ export default function IXIAssetAcquisitionApp({ context = {}, object = {}, init
           <Input value={lenderLabel} onChange={setLenderLabel} />
         </Field>
       ) : null}
-      <div className="acq-section">{t.makeReady}</div>
-      {costs.map((cost, i) => (
-        <div className="acq-cost-edit" key={i}>
-          <div className="acq-grid2">
-            <Field label={tx("CATEGORY")}>
-              <select value={cost.category} onChange={(e) => updateCost(i, "category", e.target.value)}>
-                <option value="freight">{tx("FREIGHT")}</option>
-                <option value="inspection">{tx("INSPECTION")}</option>
-                <option value="initial-repairs">{tx("INITIAL REPAIRS")}</option>
-                <option value="parts">{tx("INITIAL PARTS")}</option>
-                <option value="technology">{tx("TECHNOLOGY")}</option>
-                <option value="cleaning-detail">{tx("CLEANING / DETAIL")}</option>
-                <option value="other">{tx("OTHER")}</option>
-              </select>
-            </Field>
-            <Field label={tx("ESTIMATED")}>
-              <Input value={cost.estimatedAmount} onChange={(v) => updateCost(i, "estimatedAmount", v)} inputMode="decimal" />
-            </Field>
-          </div>
-          <Field label={tx("LABEL")}>
-            <Input value={lang === "es" && cost.label === "Freight / Hauling" ? "Flete / Transporte" : cost.label} onChange={(v) => updateCost(i, "label", v)} />
-          </Field>
-        </div>
-      ))}
-      <button className="acq-secondary" onClick={() => setCosts((list) => [...list, emptyCost()])}>
-        {t.addCost}
-      </button>
-      <div className="acq-total">
-        <span>{t.projected}</span>
-        <strong>{money(preview.acquisition.projectedReadyCost)}</strong>
-      </div>
       <div className="acq-section">{t.titleLien}</div>
       <div className="acq-grid2">
         <Field label={t.titleRequired}>
@@ -1062,6 +1266,9 @@ export default function IXIAssetAcquisitionApp({ context = {}, object = {}, init
       <Field label={t.issues}>
         <textarea value={knownIssues} onChange={(e) => setKnownIssues(e.target.value)} />
       </Field>
+      <Field label={tx("INTAKE EXCEPTIONS / UNDISCLOSED PROBLEMS")}>
+        <textarea value={intakeExceptions} onChange={(e) => setIntakeExceptions(e.target.value)} />
+      </Field>
       <div className="acq-section">{t.logistics}</div>
       <div className="acq-grid2">
         <Field label={t.purchaseLocation}>
@@ -1086,6 +1293,10 @@ export default function IXIAssetAcquisitionApp({ context = {}, object = {}, init
       <Field label={t.expected}>
         <input type="date" value={expectedDeliveryDate} onChange={(e) => setExpectedDeliveryDate(e.target.value)} />
       </Field>
+      <div className="acq-grid2">
+        <Field label={tx("RECEIVED DATE")}><input type="date" value={receivedDate} onChange={(e) => setReceivedDate(e.target.value)} /></Field>
+        <Field label={tx("RESPONSIBLE EMPLOYEE")}><Input value={responsibleEmployee} onChange={setResponsibleEmployee} /></Field>
+      </div>
       <div className="acq-section">{t.documents}</div>
       <div className="acq-docs">
         <label>

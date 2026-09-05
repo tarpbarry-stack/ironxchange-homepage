@@ -63,6 +63,8 @@ test("$F1 indexes authoritative records without copying them", () => {
   assert.doesNotMatch(source, /<span>OPEN<\/span>/);
   assert.match(source, /IXI MACHINE · F\$1/);
   assert.match(source, /NO MACHINE RECORDS/);
+  assert.match(source, /packageAllocationByPassport/u);
+  assert.match(source, /documentType === "asset-acquisition"/u);
 });
 
 test("$F1 drills from categories to numbered records and existing apps", () => {

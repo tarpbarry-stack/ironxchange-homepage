@@ -253,7 +253,22 @@ function isOpenStatus(status = "") {
 }
 
 export function getIXITransactRecordIndex(records = []) {
-  const normalized = (Array.isArray(records) ? records : [])
+  const sourceRecords = Array.isArray(records) ? records : [];
+  const packageAllocationByPassport = new Map();
+  for (const item of sourceRecords) {
+    const document = financialDocumentOf(item);
+    const event = document?.packageNormalization || document?.metadata?.packageNormalization;
+    if (clean(event?.type) !== "package-normalization") continue;
+    const occurredAt = clean(event?.occurredAt || document?.occurredAt);
+    for (const allocation of Array.isArray(event?.allocations) ? event.allocations : []) {
+      const passportId = clean(allocation?.passportId);
+      const current = packageAllocationByPassport.get(passportId);
+      if (passportId && (!current || occurredAt >= current.occurredAt)) {
+        packageAllocationByPassport.set(passportId, { amount: money(allocation?.amount), occurredAt });
+      }
+    }
+  }
+  const normalized = sourceRecords
     .map((item, index) => {
       const document = financialDocumentOf(item);
       const embedded = embeddedRecordOf(document);
@@ -275,7 +290,9 @@ export function getIXITransactRecordIndex(records = []) {
         category: mapped.category,
         moduleId: mapped.moduleId,
         status: statusOf(document, embedded),
-        amount: amountOf(document, embedded),
+        amount: documentType === "asset-acquisition" && packageAllocationByPassport.has(clean(embedded?.context?.primaryPassportId))
+          ? packageAllocationByPassport.get(clean(embedded?.context?.primaryPassportId)).amount
+          : amountOf(document, embedded),
         title: titleOf(document, embedded),
         occurredAt,
         revision: Number(

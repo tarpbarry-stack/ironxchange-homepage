@@ -12,6 +12,7 @@ const commandId=prefix=>`${prefix}-${globalThis.crypto?.randomUUID?.()||`${Date.
 const purposeLabel=value=>clean(value).replace(/-/g," ").toUpperCase();
 const readableDateTime=(value,locale="en-US")=>{const raw=clean(value);if(!raw)return "—";const parsed=new Date(raw);return Number.isNaN(parsed.getTime())?raw:parsed.toLocaleString(locale,{month:"2-digit",day:"2-digit",year:"numeric",hour:"numeric",minute:"2-digit"})};
 const editableDateTime=value=>clean(value).slice(0,16);
+const acquisitionDateTime=value=>{const date=clean(value);return date&&!date.includes("T")?`${date}T10:00`:editableDateTime(date)};
 const FREIGHT_ROW_STYLE={width:"100%",minWidth:0,maxWidth:"100%",display:"grid",gridTemplateColumns:"96px minmax(0,1fr)",alignItems:"start",columnGap:"8px",padding:"5px 0",borderBottom:"1px solid #202823"};
 const FREIGHT_ROW_TOTAL_STYLE={marginTop:"4px",borderTop:"1px solid #344039"};
 const FREIGHT_LABEL_STYLE={minWidth:0,color:"#939d97"};
@@ -19,10 +20,10 @@ const FREIGHT_VALUE_STYLE={display:"block",minWidth:0,maxWidth:"100%",textAlign:
 
 function FreightDataRow({label,value,total=false}){const text=clean(value)||"—";return <div className={`ixi-freight-data-row${total?" total":""}`} data-freight-row={label} style={total?{...FREIGHT_ROW_STYLE,...FREIGHT_ROW_TOTAL_STYLE}:FREIGHT_ROW_STYLE}><span style={FREIGHT_LABEL_STYLE}>{label}</span><b title={text} style={FREIGHT_VALUE_STYLE}>{text}</b></div>}
 
-function blankOrder(context={}){return{
+function blankOrder(context={},workflowIntent=null){const acquisition=workflowIntent?.acquisition||{};return{
   commandId:commandId("FRT"),purpose:"acquisition-inbound",mode:"external-carrier",carrierName:"",carrierPassportId:"",payer:"company",customerRebill:false,
-  originObjectId:"",originLabel:clean(context.location?.label),originAddress:"",destinationObjectId:"",destinationLabel:"",destinationAddress:"",routeMiles:"",weight:"",
-  requestedPickupAt:"",scheduledPickupAt:"",expectedDeliveryAt:"",quotedAmount:"",agreedAmount:"",permitEstimate:"",escortEstimate:"",fuelSurchargeEstimate:"",otherEstimate:"",notes:""
+  originObjectId:"",originLabel:clean(acquisition?.logistics?.purchaseLocation||context.location?.label),originAddress:"",destinationObjectId:clean(acquisition?.logistics?.deliverToPassportId),destinationLabel:clean(acquisition?.logistics?.deliverToLabel),destinationAddress:"",routeMiles:"",weight:"",
+  requestedPickupAt:acquisitionDateTime(acquisition?.logistics?.pickupDate),scheduledPickupAt:"",expectedDeliveryAt:acquisitionDateTime(acquisition?.logistics?.expectedDeliveryDate),quotedAmount:"",agreedAmount:"",permitEstimate:"",escortEstimate:"",fuelSurchargeEstimate:"",otherEstimate:"",notes:clean(acquisition?.identity?.number?`Acquisition ${acquisition.identity.number}`:"")
 }}
 function draftFromOrder(order={}){return{
   commandId:commandId("FRT-AMEND"),purpose:clean(order?.purpose?.type||"other"),mode:clean(order?.execution?.mode||"external-carrier"),carrierName:clean(order?.execution?.carrierName),carrierPassportId:clean(order?.execution?.carrierPassportId),payer:clean(order?.metadata?.payer||"company"),customerRebill:Boolean(order?.metadata?.customerRebill),
@@ -32,15 +33,15 @@ function draftFromOrder(order={}){return{
 function blankInvoice(){return{documentType:"carrier-invoice",invoiceNumber:"",invoiceDate:today(),dueDate:"",actualCostTotal:"",freight:"",permits:"",escort:"",detention:"",fuelSurcharge:"",other:"",documentReference:"",notes:"",sourceBillDocumentId:""}}
 const ACTION_LABEL={request:"REQUEST FREIGHT",award:"AWARD LOAD",dispatch:"DISPATCH",pickup:"PICKED UP",deliver:"DELIVERED"};
 
-export default function IXIFreightApp({context={},object={},onBack=null,onRecordChange=null,onFinancialRecordsChange=null}){
+export default function IXIFreightApp({context={},object={},workflowIntent=null,onBack=null,onRecordChange=null,onFinancialRecordsChange=null}){
   const {locale,t,setLocale}=useIXITransactLocale();
   const label=value=>t(purposeLabel(value));
   const errorMessage=(err,fallback)=>t(clean(err?.message)||fallback);
   const money=value=>usd(value,locale);
   const dateTime=value=>readableDateTime(value,locale);
   const passportId=clean(context.primary?.passportId||object.passportId);
-  const [orders,setOrders]=useState([]),[selectedId,setSelectedId]=useState(""),[mode,setMode]=useState("queue"),[tab,setTab]=useState("order");
-  const [draft,setDraft]=useState(()=>blankOrder(context)),[invoice,setInvoice]=useState(blankInvoice),[events,setEvents]=useState([]);
+  const [orders,setOrders]=useState([]),[selectedId,setSelectedId]=useState(""),[mode,setMode]=useState(workflowIntent?.action==="new"?"new":"queue"),[tab,setTab]=useState("order");
+  const [draft,setDraft]=useState(()=>blankOrder(context,workflowIntent)),[invoice,setInvoice]=useState(blankInvoice),[events,setEvents]=useState([]);
   const [busy,setBusy]=useState(false),[loading,setLoading]=useState(true),[error,setError]=useState(""),[errors,setErrors]=useState({}),[varianceApproved,setVarianceApproved]=useState(false),[varianceNote,setVarianceNote]=useState("");
   const order=useMemo(()=>orders.find(item=>clean(item?.identity?.freightOrderId)===selectedId)||null,[orders,selectedId]);
   const variance=freightVariance(order||{}),nextAction=IXI_FREIGHT_ACTION_BY_STATUS[clean(order?.status)],invoiceTotal=invoiceCharges(invoice).amount;
