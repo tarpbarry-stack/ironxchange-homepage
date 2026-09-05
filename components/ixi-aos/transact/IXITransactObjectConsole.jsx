@@ -1,4 +1,5 @@
 import {
+  useCallback,
   useMemo,
   useState
 } from "react";
@@ -92,7 +93,13 @@ export default function IXITransactObjectConsole({
   armedDestination = "",
   onSendToArmedDestination = null
 }) {
-  const objectId = String(object?.objectId || object?.id || "").trim();
+  const objectId = String(
+    object?.objectId ||
+    object?.id?.uuid ||
+    object?.id ||
+    object?.passportId ||
+    ""
+  ).trim();
 
   const context = useMemo(
     () => createIXITransactContext({
@@ -104,6 +111,16 @@ export default function IXITransactObjectConsole({
     }),
     [object, actor, entity, activeWorkOrder, permissions]
   );
+
+  const persistModuleOrder = useCallback((nextOrder = []) => {
+    if (!objectId || typeof onIxiStateChange !== "function") {
+      return null;
+    }
+
+    return onIxiStateChange(objectId, {
+      transactModuleOrder: nextOrder
+    });
+  }, [objectId, onIxiStateChange]);
 
   const [slots, setSlots] = useState(() =>
     normalizeConsoleSlots(
@@ -239,6 +256,8 @@ export default function IXITransactObjectConsole({
                     onCycleOutline={onCycleOutline}
                     armedDestination={armedDestination}
                     onSendToArmedDestination={onSendToArmedDestination}
+                    moduleOrder={ixiState?.transactModuleOrder}
+                    onModuleOrderChange={persistModuleOrder}
                   />
                   <IXIAosActionNotice variant="field" />
                 </>

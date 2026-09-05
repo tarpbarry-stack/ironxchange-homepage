@@ -44,25 +44,28 @@ export default function IXITransactHomeTypography() {
         gap: 6px;
       }
 
-      .ixi-transact-app.home-open .tx-grid button {
+      .ixi-transact-app.home-open .tx-app-tile {
         height: 64px;
+      }
+
+      .ixi-transact-app.home-open .tx-app-content {
         padding: 8px;
       }
 
-      .ixi-transact-app.home-open .tx-grid button span {
+      .ixi-transact-app.home-open .tx-app-group {
         font-size: 8.5px;
         line-height: 10px;
         letter-spacing: .035em;
       }
 
-      .ixi-transact-app.home-open .tx-grid button strong {
+      .ixi-transact-app.home-open .tx-app-open {
         margin-top: 4px;
         font-size: 11px;
         line-height: 13px;
         letter-spacing: -.015em;
       }
 
-      .ixi-transact-app.home-open .tx-grid button small {
+      .ixi-transact-app.home-open .tx-app-document {
         margin-top: 3px;
         font-size: 8px;
         line-height: 10px;
