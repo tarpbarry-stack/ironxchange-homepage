@@ -21,6 +21,20 @@ import IXITimeEntryApp from "../time/IXITimeEntryApp";
 import IXIServiceApp from "../service/IXIServiceApp";
 import IXIPurchaseApp from "../purchase/IXIPurchaseApp";
 import IXIWorkOrderDocumentsApp from "../documents/IXIWorkOrderDocumentsApp";
+import IXINoteApp from "../note/IXINoteApp";
+import {
+  IXIWorkOrderActivityView,
+  IXIWorkOrderCostView,
+  IXIWorkOrderRelatedView
+} from "./IXIWorkOrderTabViews";
+import {
+  addIXIWorkOrderNote,
+  assignIXIWorkOrderTechnician,
+  changeIXIWorkOrderStatus,
+  completeIXIWorkOrderRecord,
+  updateIXIWorkOrderCrew,
+  updateIXIWorkOrderDetails
+} from "./IXIWorkOrderRecordEngine";
 
 import {
   createIXITimeEntry
@@ -143,7 +157,31 @@ const COPY = {
     timeRecorded: "TIME RECORDED",
     workResumed: "WORK RESUMED",
     timerStarted: "TIMER STARTED",
-    timerPaused: "TIMER PAUSED"
+    timerPaused: "TIMER PAUSED",
+    saveChanges: "SAVE CHANGES",
+    reason: "REASON FOR CHANGE",
+    passport: "IXI PASSPORT",
+    technicianName: "TECHNICIAN NAME",
+    crewName: "CREW MEMBER NAME",
+    addCrew: "ADD CREW MEMBER",
+    remove: "REMOVE",
+    editWork: "EDIT WORK ORDER",
+    editTechnician: "ASSIGN TECHNICIAN",
+    editCrew: "EDIT CREW",
+    completeTitle: "COMPLETE WORK ORDER",
+    workPerformed: "WORK PERFORMED",
+    result: "RESULT",
+    finalCondition: "FINAL MACHINE CONDITION",
+    recommendations: "RECOMMENDATIONS",
+    fullyFunctioning: "FULLY FUNCTIONING",
+    functionalNotes: "FUNCTIONAL WITH NOTES",
+    furtherWork: "FURTHER WORK REQUIRED",
+    unresolved: "UNRESOLVED",
+    confirmComplete: "CONFIRM COMPLETION",
+    backToWork: "BACK TO WORK",
+    saved: "WORK ORDER UPDATED",
+    passportInvalid: "IXI PASSPORT COULD NOT BE VERIFIED",
+    completionSummary: "COMPLETION RECORD"
   },
   es: {
     new: "NUEVA ORDEN DE TRABAJO",
@@ -219,7 +257,31 @@ const COPY = {
     timeRecorded: "TIEMPO REGISTRADO",
     workResumed: "TRABAJO REANUDADO",
     timerStarted: "TEMPORIZADOR INICIADO",
-    timerPaused: "TEMPORIZADOR PAUSADO"
+    timerPaused: "TEMPORIZADOR PAUSADO",
+    saveChanges: "GUARDAR CAMBIOS",
+    reason: "MOTIVO DEL CAMBIO",
+    passport: "PASAPORTE IXI",
+    technicianName: "NOMBRE DEL TÉCNICO",
+    crewName: "NOMBRE DEL MIEMBRO",
+    addCrew: "AGREGAR MIEMBRO",
+    remove: "QUITAR",
+    editWork: "EDITAR ORDEN DE TRABAJO",
+    editTechnician: "ASIGNAR TÉCNICO",
+    editCrew: "EDITAR CUADRILLA",
+    completeTitle: "TERMINAR ORDEN DE TRABAJO",
+    workPerformed: "TRABAJO REALIZADO",
+    result: "RESULTADO",
+    finalCondition: "CONDICIÓN FINAL DEL EQUIPO",
+    recommendations: "RECOMENDACIONES",
+    fullyFunctioning: "FUNCIONA COMPLETAMENTE",
+    functionalNotes: "FUNCIONA CON OBSERVACIONES",
+    furtherWork: "REQUIERE MÁS TRABAJO",
+    unresolved: "NO RESUELTO",
+    confirmComplete: "CONFIRMAR TERMINACIÓN",
+    backToWork: "VOLVER AL TRABAJO",
+    saved: "ORDEN DE TRABAJO ACTUALIZADA",
+    passportInvalid: "NO SE PUDO VERIFICAR EL PASAPORTE IXI",
+    completionSummary: "REGISTRO DE TERMINACIÓN"
   }
 };
 
@@ -259,6 +321,16 @@ function displayDate(value = "", lang = "en") {
 
 function uniqueIds(values = []) {
   return [...new Set((Array.isArray(values) ? values : []).map(clean).filter(Boolean))];
+}
+
+function LanguageToggle({ language, onChange }) {
+  return (
+    <div className="wo-lang">
+      <button type="button" className={language === "en" ? "on" : ""} onClick={() => onChange("en")}>ENG</button>
+      <i>/</i>
+      <button type="button" className={language === "es" ? "on" : ""} onClick={() => onChange("es")}>ESP</button>
+    </div>
+  );
 }
 
 function addReferenceToWorkOrder(current = {}, {
@@ -342,6 +414,7 @@ function addDocumentsToWorkOrder(current = {}, {
 export default function IXIWorkOrderApp({
   context = {},
   initialWorkOrder = null,
+  financialRecords = [],
   workflowIntent = null,
   onBack = null,
   onCreate = null,
@@ -358,10 +431,13 @@ export default function IXIWorkOrderApp({
   const [performedOnDraft, setPerformedOnDraft] = useState("");
   const [performedOnReason, setPerformedOnReason] = useState("");
   const [submodule, setSubmodule] = useState("");
+  const [activeTab, setActiveTab] = useState("work");
   const [timerSession, setTimerSession] = useState(null);
   const [timerTick, setTimerTick] = useState(0);
   const [notice, setNotice] = useState("");
   const [saving, setSaving] = useState(false);
+  const [editor, setEditor] = useState("");
+  const [editDraft, setEditDraft] = useState({});
 
   const t = COPY[lang];
   const actuals = useMemo(
@@ -406,6 +482,9 @@ export default function IXIWorkOrderApp({
     setEditingPerformedOn(false);
     setPerformedOnDraft("");
     setPerformedOnReason("");
+    setActiveTab("work");
+    setEditor("");
+    setEditDraft({});
   }, [initialWorkOrder]);
 
   async function emitAction(actionId, nextWorkOrder, payload = {}) {
@@ -425,13 +504,138 @@ export default function IXIWorkOrderApp({
       "time",
       "service",
       "purchase-order",
-      "documents"
+      "documents",
+      "note"
     ].includes(actionId)) {
       setSubmodule(actionId);
       return;
     }
+    if (actionId === "voice") {
+      setSubmodule("note");
+      return;
+    }
+    if (actionId === "photo") {
+      setSubmodule("documents");
+      return;
+    }
+    if (["work", "cost", "activity", "related"].includes(actionId)) {
+      setActiveTab(actionId);
+      return;
+    }
+    if (["edit-work-order", "assign", "crew", "complete"].includes(actionId)) {
+      openEditor(actionId);
+      return;
+    }
+    setNotice("ACTION NOT AVAILABLE");
+  }
 
-    emitAction(actionId, workOrder);
+  function openEditor(nextEditor) {
+    if (nextEditor === "edit-work-order") {
+      setEditDraft({
+        title: clean(workOrder?.work?.title),
+        description: clean(workOrder?.work?.description),
+        type: clean(workOrder?.work?.type || "repair"),
+        priority: clean(workOrder?.work?.priority || "normal"),
+        machineCondition: clean(workOrder?.work?.machineCondition || "operable"),
+        reason: ""
+      });
+    } else if (nextEditor === "assign") {
+      const assigned = workOrder?.people?.assignedTo?.[0] || {};
+      setEditDraft({
+        passportId: clean(assigned.passportId || context.actor?.passportId),
+        label: clean(assigned.label || context.actor?.label),
+        reason: ""
+      });
+    } else if (nextEditor === "crew") {
+      setEditDraft({ crew: [...(workOrder?.people?.crew || [])], passportId: "", label: "", reason: "" });
+    } else if (nextEditor === "complete") {
+      setEditDraft({ workPerformed: "", disposition: "fully-functioning", finalMachineCondition: "operable", recommendations: "" });
+    }
+    setEditor(nextEditor);
+  }
+
+  async function persistWorkOrder(actionId, next, payload = {}) {
+    if (saving) return null;
+    const previous = workOrder;
+    setSaving(true);
+    setNotice("");
+    try {
+      const persisted = await emitAction(actionId, next, payload);
+      if (!persisted) return null;
+      setWorkOrder(persisted);
+      setEditor("");
+      setEditDraft({});
+      setNotice(t.saved);
+      return persisted;
+    } catch (error) {
+      setWorkOrder(previous);
+      setNotice(clean(error?.message) || "WORK ORDER NOT SAVED");
+      return null;
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function verifyIXIPassport(passportId) {
+    const normalized = clean(passportId).toUpperCase();
+    if (!normalized) throw new Error(t.passportInvalid);
+    const response = await fetch(`/api/passport/${encodeURIComponent(normalized)}`, {
+      method: "GET",
+      credentials: "include",
+      headers: { Accept: "application/json" }
+    });
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok || !payload?.passport) {
+      throw new Error(payload?.error || t.passportInvalid);
+    }
+    return normalized;
+  }
+
+  async function saveEditor() {
+    try {
+      if (editor === "edit-work-order") {
+        return persistWorkOrder("work-details-update", updateIXIWorkOrderDetails(workOrder, { ...editDraft, actor: context.actor }));
+      }
+      if (editor === "assign") {
+        const passportId = await verifyIXIPassport(editDraft.passportId);
+        return persistWorkOrder("work-technician-assign", assignIXIWorkOrderTechnician(workOrder, {
+          technician: { passportId, label: editDraft.label },
+          reason: editDraft.reason,
+          actor: context.actor
+        }));
+      }
+      if (editor === "crew") {
+        return persistWorkOrder("work-crew-update", updateIXIWorkOrderCrew(workOrder, {
+          crew: editDraft.crew,
+          reason: editDraft.reason,
+          actor: context.actor
+        }));
+      }
+      if (editor === "complete") {
+        return persistWorkOrder("complete", completeIXIWorkOrderRecord(workOrder, { ...editDraft, actor: context.actor }));
+      }
+    } catch (error) {
+      setNotice(clean(error?.message) || "WORK ORDER NOT SAVED");
+    }
+    return null;
+  }
+
+  async function addCrewMember() {
+    let passportId = clean(editDraft.passportId).toUpperCase();
+    const label = clean(editDraft.label);
+    if (!passportId || !label) {
+      setNotice("CREW NAME AND IXI PASSPORT ARE REQUIRED");
+      return;
+    }
+    try {
+      passportId = await verifyIXIPassport(passportId);
+    } catch (error) {
+      setNotice(clean(error?.message) || t.passportInvalid);
+      return;
+    }
+    const crew = [...(editDraft.crew || [])];
+    if (!crew.some(person => clean(person.passportId) === passportId)) crew.push({ passportId, label });
+    setEditDraft({ ...editDraft, crew, passportId: "", label: "" });
   }
 
   async function create() {
@@ -466,8 +670,8 @@ export default function IXIWorkOrderApp({
           assignedTo: [context.actor || {}]
         }
       });
-      setWorkOrder(draft);
       await onCreate?.(draft, context);
+      setWorkOrder(draft);
     } catch (error) {
       setNotice(clean(error?.message) || "WORK ORDER NOT CREATED");
     } finally {
@@ -512,7 +716,7 @@ export default function IXIWorkOrderApp({
     }
   }
 
-  function saveExpense(draft, input, response) {
+  async function saveExpense(draft, input, response) {
     const id =
       clean(draft?.identity?.expenseId) ||
       clean(draft?.identity?.clientRequestId) ||
@@ -533,8 +737,7 @@ export default function IXIWorkOrderApp({
       actorName
     });
 
-    setWorkOrder(next);
-    emitAction("expense-save", next, {
+    const persisted = await emitAction("expense-save", next, {
       expense: {
         ...draft,
         identity: {
@@ -544,10 +747,23 @@ export default function IXIWorkOrderApp({
       },
       response
     });
-    setSubmodule("");
+    if (persisted) {
+      setWorkOrder(persisted);
+      setSubmodule("");
+    }
   }
 
-  function saveMaterial(draft, input, response) {
+  async function saveNote(draft, input, response) {
+    const next = addIXIWorkOrderNote(workOrder, draft, { actor: context.actor });
+    const persisted = await persistWorkOrder("work-note-add", next, {
+      note: draft,
+      input,
+      response
+    });
+    if (persisted) setSubmodule("");
+  }
+
+  async function saveMaterial(draft, input, response) {
     const id =
       clean(draft?.identity?.materialUsageId);
 
@@ -570,8 +786,7 @@ export default function IXIWorkOrderApp({
       actorName
     });
 
-    setWorkOrder(next);
-    emitAction("material-save", next, {
+    const persisted = await emitAction("material-save", next, {
       material: {
         ...draft,
         identity: {
@@ -581,10 +796,13 @@ export default function IXIWorkOrderApp({
       },
       response
     });
-    setSubmodule("");
+    if (persisted) {
+      setWorkOrder(persisted);
+      setSubmodule("");
+    }
   }
 
-  function saveTime(draft, input, response) {
+  async function saveTime(draft, input, response) {
     const id =
       clean(draft?.identity?.timeEntryId) ||
       clean(draft?.identity?.clientRequestId) ||
@@ -603,8 +821,7 @@ export default function IXIWorkOrderApp({
       actorName
     });
 
-    setWorkOrder(next);
-    emitAction("time-save", next, {
+    const persisted = await emitAction("time-save", next, {
       timeEntry: {
         ...draft,
         identity: {
@@ -614,10 +831,13 @@ export default function IXIWorkOrderApp({
       },
       response
     });
-    setSubmodule("");
+    if (persisted) {
+      setWorkOrder(persisted);
+      setSubmodule("");
+    }
   }
 
-  function saveService(draft, input, response) {
+  async function saveService(draft, input, response) {
     const id =
       clean(draft?.identity?.serviceRecordId) ||
       clean(draft?.identity?.clientRequestId) ||
@@ -638,8 +858,7 @@ export default function IXIWorkOrderApp({
       actorName
     });
 
-    setWorkOrder(next);
-    emitAction("service-save", next, {
+    const persisted = await emitAction("service-save", next, {
       service: {
         ...draft,
         identity: {
@@ -649,10 +868,13 @@ export default function IXIWorkOrderApp({
       },
       response
     });
-    setSubmodule("");
+    if (persisted) {
+      setWorkOrder(persisted);
+      setSubmodule("");
+    }
   }
 
-  function savePurchase(draft, input, response) {
+  async function savePurchase(draft, input, response) {
     const requestType =
       clean(draft?.purchase?.requestType) === "purchase-order"
         ? "purchase-order"
@@ -683,8 +905,7 @@ export default function IXIWorkOrderApp({
       actorName
     });
 
-    setWorkOrder(next);
-    emitAction("purchase-save", next, {
+    const persisted = await emitAction("purchase-save", next, {
       purchase: {
         ...draft,
         identity: {
@@ -695,7 +916,10 @@ export default function IXIWorkOrderApp({
       response,
       requestType
     });
-    setSubmodule("");
+    if (persisted) {
+      setWorkOrder(persisted);
+      setSubmodule("");
+    }
   }
 
   async function addGeneralDocument(input) {
@@ -876,13 +1100,7 @@ export default function IXIWorkOrderApp({
     }
 
     const base = recorded?.workOrder || workOrder || {};
-    const next = {
-      ...base,
-      work: {
-        ...(base.work || {}),
-        status: "paused"
-      }
-    };
+    const next = changeIXIWorkOrderStatus(base, { status: "paused", actor: context.actor });
 
     const previous = workOrder;
     setWorkOrder(next);
@@ -920,13 +1138,7 @@ export default function IXIWorkOrderApp({
       });
     }
 
-    const next = {
-      ...(workOrder || {}),
-      work: {
-        ...(workOrder?.work || {}),
-        status: "in-progress"
-      }
-    };
+    const next = changeIXIWorkOrderStatus(workOrder, { status: "in-progress", actor: context.actor });
 
     const previous = workOrder;
     setWorkOrder(next);
@@ -957,14 +1169,6 @@ export default function IXIWorkOrderApp({
       session: getIXIActiveTimeSession(context)
     });
   }
-
-  const Lang = () => (
-    <div className="wo-lang">
-      <button className={lang === "en" ? "on" : ""} onClick={() => setLang("en")}>ENG</button>
-      <i>/</i>
-      <button className={lang === "es" ? "on" : ""} onClick={() => setLang("es")}>ESP</button>
-    </div>
-  );
 
   if (workOrder && submodule === "expense") {
     return (
@@ -1047,10 +1251,23 @@ export default function IXIWorkOrderApp({
     );
   }
 
+  if (workOrder && submodule === "note") {
+    return (
+      <IXINoteApp
+        context={context}
+        workOrder={workOrder}
+        language={lang}
+        onLanguageChange={setLang}
+        onCancel={() => setSubmodule("")}
+        onSave={saveNote}
+      />
+    );
+  }
+
   if (!workOrder) {
     return (
       <div className="wo-app wo-v13">
-        <Lang />
+        <LanguageToggle language={lang} onChange={setLang} />
 
         <div className="wo-title">
           <div className="wo-icon"><WorkOrderIcon size={23} /></div>
@@ -1068,11 +1285,6 @@ export default function IXIWorkOrderApp({
 
         <label>{t.problem}</label>
         <textarea value={description} onChange={event => setDescription(event.target.value)} placeholder={t.placeholder} />
-
-        <div className="wo-duo">
-          <button onClick={() => act("photo")}><CameraIcon size={15} /><b>{t.photo}</b></button>
-          <button onClick={() => act("voice")}><MicIcon size={15} /><b>{t.voice}</b></button>
-        </div>
 
         <label>{t.type}</label>
         <div className="wo-four">
@@ -1155,10 +1367,61 @@ export default function IXIWorkOrderApp({
   const performedDateLocked =
     ["complete", "closed", "canceled"].includes(workStatus) ||
     workOrder.recordStatus === "closed";
+  const assignedTechnician = workOrder.people?.assignedTo?.[0] || {};
+  const crew = Array.isArray(workOrder.people?.crew) ? workOrder.people.crew : [];
+  const isComplete = performedDateLocked && ["complete", "completed", "closed"].includes(workStatus);
+
+  if (editor) {
+    return (
+      <div className="wo-app wo-v13 wo-editor">
+        <LanguageToggle language={lang} onChange={setLang} />
+        {notice ? <div className="wo-notice">{notice}</div> : null}
+        <div className="wo-editor-head">
+          <button onClick={() => setEditor("")}>‹ {t.backToWork}</button>
+          <strong>{editor === "edit-work-order" ? t.editWork : editor === "assign" ? t.editTechnician : editor === "crew" ? t.editCrew : t.completeTitle}</strong>
+          <small>{number} · {label}</small>
+        </div>
+
+        {editor === "edit-work-order" ? <div className="wo-editor-form">
+          <label>{t.description}</label><textarea value={editDraft.description || ""} onChange={event => setEditDraft({ ...editDraft, description: event.target.value })} />
+          <div className="wo-form-grid">
+            <div><label>{t.type}</label><select value={editDraft.type || "repair"} onChange={event => setEditDraft({ ...editDraft, type: event.target.value })}><option value="repair">{t.repair}</option><option value="pm">{t.pm}</option><option value="inspection">{t.inspection}</option><option value="make-ready">{t.makeReady}</option></select></div>
+            <div><label>{t.priority}</label><select value={editDraft.priority || "normal"} onChange={event => setEditDraft({ ...editDraft, priority: event.target.value })}><option value="normal">{t.normal}</option><option value="high">{t.high}</option><option value="critical">{t.critical}</option></select></div>
+            <div><label>{t.condition}</label><select value={editDraft.machineCondition || "operable"} onChange={event => setEditDraft({ ...editDraft, machineCondition: event.target.value })}><option value="operable">{t.operable}</option><option value="limited">{t.limited}</option><option value="down">{t.down}</option></select></div>
+          </div>
+          <label>{t.reason}</label><input value={editDraft.reason || ""} onChange={event => setEditDraft({ ...editDraft, reason: event.target.value })} />
+        </div> : null}
+
+        {editor === "assign" ? <div className="wo-editor-form">
+          <label>{t.technicianName}</label><input value={editDraft.label || ""} onChange={event => setEditDraft({ ...editDraft, label: event.target.value })} />
+          <label>{t.passport}</label><input value={editDraft.passportId || ""} onChange={event => setEditDraft({ ...editDraft, passportId: event.target.value })} autoCapitalize="characters" />
+          <label>{t.reason}</label><input value={editDraft.reason || ""} onChange={event => setEditDraft({ ...editDraft, reason: event.target.value })} />
+        </div> : null}
+
+        {editor === "crew" ? <div className="wo-editor-form">
+          <div className="wo-crew-list">{(editDraft.crew || []).length ? editDraft.crew.map(person => <div key={person.passportId}><span><b>{person.label}</b><small>{person.passportId}</small></span><button onClick={() => setEditDraft({ ...editDraft, crew: editDraft.crew.filter(item => item.passportId !== person.passportId) })}>{t.remove}</button></div>) : <p>—</p>}</div>
+          <label>{t.crewName}</label><input value={editDraft.label || ""} onChange={event => setEditDraft({ ...editDraft, label: event.target.value })} />
+          <label>{t.passport}</label><input value={editDraft.passportId || ""} onChange={event => setEditDraft({ ...editDraft, passportId: event.target.value })} autoCapitalize="characters" />
+          <button className="wo-add-crew" onClick={addCrewMember}>{t.addCrew}</button>
+          <label>{t.reason}</label><input value={editDraft.reason || ""} onChange={event => setEditDraft({ ...editDraft, reason: event.target.value })} />
+        </div> : null}
+
+        {editor === "complete" ? <div className="wo-editor-form">
+          <label>{t.workPerformed}</label><textarea value={editDraft.workPerformed || ""} onChange={event => setEditDraft({ ...editDraft, workPerformed: event.target.value })} />
+          <label>{t.result}</label><select value={editDraft.disposition || "fully-functioning"} onChange={event => setEditDraft({ ...editDraft, disposition: event.target.value })}><option value="fully-functioning">{t.fullyFunctioning}</option><option value="functional-with-notes">{t.functionalNotes}</option><option value="further-work-required">{t.furtherWork}</option><option value="unresolved">{t.unresolved}</option></select>
+          <label>{t.finalCondition}</label><select value={editDraft.finalMachineCondition || "operable"} onChange={event => setEditDraft({ ...editDraft, finalMachineCondition: event.target.value })}><option value="operable">{t.operable}</option><option value="limited">{t.limited}</option><option value="down">{t.down}</option></select>
+          <label>{t.recommendations}</label><textarea value={editDraft.recommendations || ""} onChange={event => setEditDraft({ ...editDraft, recommendations: event.target.value })} />
+        </div> : null}
+
+        <div className="wo-editor-actions"><button onClick={() => setEditor("")}>{t.cancel}</button><button className="primary" onClick={saveEditor} disabled={saving}>{saving ? "SAVING…" : editor === "complete" ? t.confirmComplete : t.saveChanges}</button></div>
+        <IXIWorkOrderStyles />
+      </div>
+    );
+  }
 
   return (
-    <div className={`wo-app wo-v13 wo-work ${isPaused ? "paused" : ""}`}>
-      <Lang />
+    <div className={`wo-app wo-v13 wo-work ${isPaused ? "paused" : ""} ${isComplete ? "completed" : ""}`}>
+      <LanguageToggle language={lang} onChange={setLang} />
       {notice ? <div className="wo-notice">{notice}</div> : null}
 
       <div className="wo-work-identity">
@@ -1166,21 +1429,25 @@ export default function IXIWorkOrderApp({
         <div className="wo-work-copy">
           <div className="wo-number-row">
             <strong>{number}</strong>
-            <span>{isPaused ? t.paused : t.inProgress}</span>
+            <span>{workStatus.replaceAll("-", " ").toUpperCase()}</span>
           </div>
           <h3>{label}</h3>
-          <small>{t.repair}<i>•</i>{t.normal}<i>•</i>{t.operable}</small>
+          <small>{clean(workOrder.work?.type).replaceAll("-", " ").toUpperCase()}<i>•</i>{clean(workOrder.work?.priority).toUpperCase()}<i>•</i>{clean(workOrder.work?.machineCondition).toUpperCase()}</small>
         </div>
-        <button className="wo-edit" onClick={() => act("edit-work-order")}><EditIcon size={13} /></button>
+        {!performedDateLocked ? <button className="wo-edit" onClick={() => act("edit-work-order")}><EditIcon size={13} /></button> : null}
       </div>
 
       <div className="wo-tabs">
-        <button className="active">{t.work}</button>
-        <button onClick={() => act("cost")}>{t.cost}</button>
-        <button onClick={() => act("activity")}>{t.activity}</button>
-        <button onClick={() => act("related")}>{t.related}</button>
+        <button className={activeTab === "work" ? "active" : ""} onClick={() => act("work")}>{t.work}</button>
+        <button className={activeTab === "cost" ? "active" : ""} onClick={() => act("cost")}>{t.cost}</button>
+        <button className={activeTab === "activity" ? "active" : ""} onClick={() => act("activity")}>{t.activity}</button>
+        <button className={activeTab === "related" ? "active" : ""} onClick={() => act("related")}>{t.related}</button>
       </div>
 
+      {activeTab === "cost" ? <IXIWorkOrderCostView workOrder={workOrder} financialRecords={financialRecords} language={lang} /> : null}
+      {activeTab === "activity" ? <IXIWorkOrderActivityView workOrder={workOrder} financialRecords={financialRecords} language={lang} /> : null}
+      {activeTab === "related" ? <IXIWorkOrderRelatedView workOrder={workOrder} financialRecords={financialRecords} language={lang} /> : null}
+      {activeTab === "work" ? <>
       <section className="wo-business-date-card">
         {editingPerformedOn ? (
           <div className="wo-date-edit-form">
@@ -1228,19 +1495,26 @@ export default function IXIWorkOrderApp({
 
       <section className="wo-person-card">
         <label>{t.assigned}</label>
-        <div><PersonIcon size={18} /><span><b>{actorName}</b><small>{t.technician}</small></span><button onClick={() => act("assign")}><EditIcon size={13} /></button></div>
+        <div><PersonIcon size={18} /><span><b>{clean(assignedTechnician.label) || "—"}</b><small>{clean(assignedTechnician.passportId) || t.technician}</small></span>{!performedDateLocked ? <button onClick={() => act("assign")}><EditIcon size={13} /></button> : null}</div>
       </section>
 
       <section className="wo-person-card">
         <label>{t.crew}</label>
-        <div><TeamIcon size={18} /><span><b>—</b><small>—</small></span><button onClick={() => act("crew")}><EditIcon size={13} /></button></div>
+        <div><TeamIcon size={18} /><span><b>{crew.length ? crew.map(person => person.label).join(", ") : "—"}</b><small>{crew.length ? `${crew.length} ${t.crew}` : "—"}</small></span>{!performedDateLocked ? <button onClick={() => act("crew")}><EditIcon size={13} /></button> : null}</div>
       </section>
 
       <section className="wo-status-card">
         <label>{t.status}</label>
-        <div className="wo-status-line"><span className="done" /><span className={!isPaused ? "active" : "done"} /><span className={isPaused ? "active" : ""} /><span /></div>
+        <div className="wo-status-line"><span className="done" /><span className={isComplete || isPaused ? "done" : "active"} /><span className={isComplete ? "done" : isPaused ? "active" : ""} /><span className={isComplete ? "active" : ""} /></div>
         <div className="wo-status-labels"><b>{t.created}</b><b>{t.inProgress}</b><b>{t.hold}</b><b>{t.completed}</b></div>
       </section>
+
+      {isComplete ? <section className="wo-completion-card">
+        <label>{t.completionSummary}</label>
+        <strong>{clean(workOrder.result?.workPerformed) || "—"}</strong>
+        <p>{clean(workOrder.result?.disposition).replaceAll("-", " ").toUpperCase()} · {clean(workOrder.result?.finalMachineCondition).toUpperCase()}</p>
+        {clean(workOrder.result?.recommendations) ? <small>{workOrder.result.recommendations}</small> : null}
+      </section> : null}
 
       <section className="wo-timer-card">
         <label>{t.timer}</label>
@@ -1250,7 +1524,7 @@ export default function IXIWorkOrderApp({
         <div>{t.totalWo}<b>{(recordedMs / 3600000).toFixed(2)} hr</b><i>|</i><b><Money value={actuals.totalActual} /></b></div>
       </section>
 
-      <section className="wo-add-card">
+      {!performedDateLocked ? <section className="wo-add-card">
         <label>{t.add}</label>
         <div className="wo-six">
           <button onClick={() => act("time")}><ClockIcon size={18} />{t.time}</button>
@@ -1260,16 +1534,16 @@ export default function IXIWorkOrderApp({
           <button onClick={() => act("purchase-order")}><PurchaseIcon size={18} />{t.purchase}</button>
           <button onClick={() => act("documents")}><DocumentIcon size={18} />{t.document}</button>
         </div>
-      </section>
+      </section> : null}
 
       <section className="wo-note-card">
-        <div className="head">{t.notes}<button>{t.viewAll}</button></div>
-        <div className="empty-note">—</div>
-        <button className="wide" onClick={() => act("note")}>{t.addNote}</button>
+        <div className="head">{t.notes}<button onClick={() => setActiveTab("related")}>{t.viewAll}</button></div>
+        <div className="empty-note">{workOrder.noteProjection?.at(-1)?.note?.body || "—"}</div>
+        {!performedDateLocked ? <button className="wide" onClick={() => act("note")}>{t.addNote}</button> : null}
       </section>
 
       <section className="wo-photos-card">
-        <div className="head">{t.photos} ({photoMedia.length})<button>{t.viewAll}</button></div>
+        <div className="head">{t.photos} ({photoMedia.length})<button onClick={() => setActiveTab("related")}>{t.viewAll}</button></div>
         <div className="thumb-row">
           {photoMedia.slice(0, 3).map((item, index) => (
             <i
@@ -1285,13 +1559,14 @@ export default function IXIWorkOrderApp({
             <i key={`empty-${index}`} />
           ))}
         </div>
-        <button className="wide" onClick={() => act("photo")}>{t.addPhoto}</button>
+        {!performedDateLocked ? <button className="wide" onClick={() => act("photo")}>{t.addPhoto}</button> : null}
       </section>
 
-      <div className="wo-bottom">
+      {!performedDateLocked ? <div className="wo-bottom">
         <button onClick={isPaused ? handleResumeWork : handlePauseWork}><PauseIcon size={16} />{isPaused ? t.resume : t.pause}</button>
         <button className="finish" onClick={() => act("complete")}><OperableIcon size={16} />{t.complete}</button>
-      </div>
+      </div> : null}
+      </> : null}
 
       <div className="wo-audit">
         <span>{t.created}: {displayDate(workOrder.audit?.createdAt, lang)}</span>

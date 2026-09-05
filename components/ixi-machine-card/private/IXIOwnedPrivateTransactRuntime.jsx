@@ -101,25 +101,28 @@ export default function IXIOwnedPrivateTransactRuntime({
   onSendToArmedDestination
 }) {
   const passportId = clean(object?.passportId);
-  const [state, setState] = useState({ loading: true, error: "", access: null, records: [] });
+  const [state, setState] = useState({ loading: true, refreshing: false, error: "", access: null, records: [] });
 
   const refresh = useCallback(async signal => {
     if (!passportId) {
-      setState({ loading: false, error: "THIS OBJECT NEEDS AN IXI PASSPORT BEFORE IT CAN TRANSACT.", access: null, records: [] });
+      setState({ loading: false, refreshing: false, error: "THIS OBJECT NEEDS AN IXI PASSPORT BEFORE IT CAN TRANSACT.", access: null, records: [] });
       return;
     }
-    setState(current => ({ ...current, loading: true, error: "" }));
+    setState(current => current.access
+      ? { ...current, refreshing: true, error: "" }
+      : { ...current, loading: true, refreshing: false, error: "" });
     try {
       const [access, records] = await Promise.all([
         loadIXIAosFinancialAccessContext({ signal }),
         loadIXIAosPassportFinancialDocuments({ passportId, signal })
       ]);
-      setState({ loading: false, error: "", access, records });
+      setState({ loading: false, refreshing: false, error: "", access, records });
     } catch (error) {
       if (error?.name === "AbortError") return;
       setState(current => ({
         ...current,
         loading: false,
+        refreshing: false,
         error: clean(error?.message) || "TRAN$ACT COULD NOT LOAD."
       }));
     }
@@ -148,7 +151,7 @@ export default function IXIOwnedPrivateTransactRuntime({
   if (state.loading) {
     return <RuntimeState title="OPENING TRAN$ACT" detail="VERIFYING AUTHORITY · LOADING PASSPORT RECORDS" />;
   }
-  if (state.error) {
+  if (state.error && !state.access) {
     return <RuntimeState title="TRAN$ACT NOT OPEN" detail={state.error} onRetry={() => refresh()} onClose={onClose} />;
   }
 

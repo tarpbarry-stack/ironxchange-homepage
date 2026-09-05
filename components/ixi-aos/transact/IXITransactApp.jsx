@@ -424,8 +424,9 @@ export default function IXITransactApp({
     setModuleId(clean(initialModuleId));
   }, [initialModuleId]);
   useEffect(() => {
-    setWorkOrderSnapshot(activeWorkOrder || null);
-  }, [activeWorkOrder]);
+    if (activeWorkOrder) setWorkOrderSnapshot(activeWorkOrder);
+    else if (moduleId !== "work-order") setWorkOrderSnapshot(null);
+  }, [activeWorkOrder, moduleId]);
   useEffect(() => {
     setTechWorkOrderSnapshot(activeTechWorkOrder || null);
   }, [activeTechWorkOrder]);
@@ -1254,6 +1255,7 @@ export default function IXITransactApp({
       <IXIWorkOrderApp
         context={context}
         initialWorkOrder={workOrderSnapshot || activeWorkOrder}
+        financialRecords={financialRecords}
         onBack={back}
         onCreate={async (record, sourceContext) => {
           setWorkOrderSnapshot(record);

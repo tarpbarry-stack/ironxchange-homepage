@@ -9,6 +9,13 @@ async function importSource(path) {
   return import(`data:text/javascript;base64,${Buffer.from(source).toString("base64")}`);
 }
 
+async function importSourceWithDependency(path, dependencyPath, importPattern) {
+  const dependency = read(dependencyPath);
+  const dependencyUrl = `data:text/javascript;base64,${Buffer.from(dependency).toString("base64")}`;
+  const source = read(path).replace(importPattern, `from "${dependencyUrl}"`);
+  return import(`data:text/javascript;base64,${Buffer.from(source).toString("base64")}`);
+}
+
 test("both private machine surfaces use the Passport-backed TRAN$ACT runtime", () => {
   const face1 = read("components/ixi-machine-card/private/IXIOwnedPrivateListingRuntime.jsx");
   const face2 = read("components/ixi-machine-object/IXISellerMachineObjectFace2.js");
@@ -145,4 +152,97 @@ test("closing a TRANSACT surface clears any shared transient action notice", () 
   assert.match(provider, /externalUpdateRef/u);
   assert.match(provider, /currentNotice\?\.message/u);
   assert.match(provider, /updateExternalState\(currentObjectId, \{ actionNotice: null \}\)/u);
+});
+
+test("Work Order operating changes are reasoned, attributable, and immutable after close", async () => {
+  const contractPath = "components/ixi-aos/transact/modules/work-order/IXIWorkOrderContract.js";
+  const engine = await importSourceWithDependency(
+    "components/ixi-aos/transact/modules/work-order/IXIWorkOrderRecordEngine.js",
+    contractPath,
+    /from "\.\/IXIWorkOrderContract"/u
+  );
+  const { createIXIWorkOrderDraft } = await importSource(contractPath);
+  const original = createIXIWorkOrderDraft({
+    context: {
+      launchedAt: "2026-09-05T10:00:00.000Z",
+      actor: { passportId: "IXIMANAGER", displayName: "Shop Manager" }
+    },
+    input: { description: "Replace filters", status: "in-progress" }
+  });
+
+  assert.throws(
+    () => engine.assignIXIWorkOrderTechnician(original, {
+      technician: { passportId: "IXITECH", label: "Technician" }
+    }),
+    error => error.code === "IXI_WORK_ORDER_REASON_REQUIRED"
+  );
+
+  const assigned = engine.assignIXIWorkOrderTechnician(original, {
+    technician: { passportId: "IXITECH", label: "Technician" },
+    reason: "Assigned by shop lead",
+    actor: { passportId: "IXIMANAGER", displayName: "Shop Manager" },
+    occurredAt: "2026-09-05T10:05:00.000Z"
+  });
+  assert.equal(assigned.people.assignedTo[0].passportId, "IXITECH");
+  assert.equal(assigned.activity.at(-1).type, "work-order-technician-assigned");
+  assert.equal(assigned.activity.at(-1).actor.passportId, "IXIMANAGER");
+
+  const completed = engine.completeIXIWorkOrderRecord(assigned, {
+    workPerformed: "Replaced engine and hydraulic filters",
+    disposition: "fully-functioning",
+    finalMachineCondition: "operable",
+    recommendations: "Recheck at next service interval",
+    actor: { passportId: "IXITECH", displayName: "Technician" },
+    occurredAt: "2026-09-05T12:00:00.000Z"
+  });
+  assert.equal(completed.recordStatus, "closed");
+  assert.equal(completed.result.workPerformed, "Replaced engine and hydraulic filters");
+  assert.equal(completed.people.completedBy.passportId, "IXITECH");
+  assert.throws(
+    () => engine.updateIXIWorkOrderDetails(completed, { reason: "Overwrite" }),
+    error => error.code === "IXI_WORK_ORDER_LOCKED"
+  );
+});
+
+test("Cost, Activity, and Related projections are scoped to the Work Order", async () => {
+  const projection = await importSource(
+    "components/ixi-aos/transact/modules/work-order/IXIWorkOrderProjectionEngine.js"
+  );
+  const workOrder = {
+    identity: { workOrderId: "FD-WO-1", number: "WO-100" },
+    financial: { estimated: 900, requested: 100 },
+    activity: [{ activityId: "EV-1", label: "WORK ORDER CREATED", occurredAt: "2026-09-05T10:00:00.000Z" }],
+    noteProjection: [{ identity: { noteId: "NOTE-1" }, note: { body: "Filter replaced" } }],
+    documentProjection: [],
+    photoProjection: []
+  };
+  const records = [
+    { financialDocument: { financialDocumentId: "MAT-1", documentType: "material-usage", amount: 250, description: "Filters", sourceFinancialDocumentId: "FD-WO-1", occurredAt: "2026-09-05T11:00:00.000Z" } },
+    { financialDocument: { financialDocumentId: "EXP-1", documentType: "expense", amount: 75, description: "Shop supplies", metadata: { workOrderNumber: "WO-100" }, occurredAt: "2026-09-05T11:30:00.000Z" } },
+    { financialDocument: { financialDocumentId: "OTHER-1", documentType: "expense", amount: 999, metadata: { workOrderId: "FD-OTHER" } } }
+  ];
+
+  const cost = projection.getIXIWorkOrderCostProjection(workOrder, records);
+  assert.equal(cost.actual, 325);
+  assert.equal(cost.totals.materials, 250);
+  assert.equal(cost.totals.expenses, 75);
+  assert.equal(cost.rows.length, 2);
+  assert.equal(projection.getIXIWorkOrderActivity(workOrder, records).length, 3);
+  assert.equal(projection.getIXIWorkOrderRelationships(workOrder, records).notes.length, 1);
+});
+
+test("Work Order UI has real operating tabs and preserves the record during refresh", () => {
+  const app = read("components/ixi-aos/transact/modules/work-order/IXIWorkOrderApp.jsx");
+  const shell = read("components/ixi-aos/transact/IXITransactApp.jsx");
+  const runtime = read("components/ixi-machine-card/private/IXIOwnedPrivateTransactRuntime.jsx");
+
+  assert.match(app, /IXIWorkOrderCostView/u);
+  assert.match(app, /IXIWorkOrderActivityView/u);
+  assert.match(app, /IXIWorkOrderRelatedView/u);
+  assert.match(app, /assignIXIWorkOrderTechnician/u);
+  assert.match(app, /completeIXIWorkOrderRecord/u);
+  assert.match(app, /verifyIXIPassport/u);
+  assert.doesNotMatch(app, /emitAction\(actionId, workOrder\)/u);
+  assert.match(shell, /financialRecords=\{financialRecords\}/u);
+  assert.match(runtime, /current\.access[\s\S]*refreshing: true/u);
 });

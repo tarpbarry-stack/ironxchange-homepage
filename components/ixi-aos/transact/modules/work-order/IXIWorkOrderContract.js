@@ -131,6 +131,7 @@ export function createIXIWorkOrderDraft({ context = {}, input = {} } = {}) {
         label: clean(actor.displayName || actor.name || actor.label)
       },
       assignedTo: arr(sourceInput.assignedTo),
+      crew: arr(sourceInput.crew),
       completedBy: null
     },
     dates: {
@@ -178,7 +179,23 @@ export function createIXIWorkOrderDraft({ context = {}, input = {} } = {}) {
       createdAt: now,
       updatedAt: now
     },
-    amendments: []
+    amendments: [],
+    activity: [{
+      activityId: clean(globalThis.crypto?.randomUUID?.()) || `WOEV-${now}`,
+      type: "work-order-created",
+      label: "WORK ORDER CREATED",
+      detail: clean(sourceInput.description).slice(0, 160),
+      occurredAt: now,
+      actor: {
+        passportId: clean(actor.passportId),
+        employeeId: clean(actor.employeeId),
+        userId: clean(actor.userId || actor.id),
+        label: clean(actor.displayName || actor.name || actor.label)
+      }
+    }],
+    noteProjection: [],
+    photoProjection: [],
+    documentProjection: []
   };
 }
 
@@ -263,7 +280,8 @@ export function normalizeIXIWorkOrder(value = {}) {
     people: {
       ...base.people,
       ...obj(source.people),
-      assignedTo: arr(source.people?.assignedTo)
+      assignedTo: arr(source.people?.assignedTo),
+      crew: arr(source.people?.crew)
     },
     dates: {
       ...base.dates,
@@ -299,7 +317,11 @@ export function normalizeIXIWorkOrder(value = {}) {
       ...base.audit,
       ...obj(source.audit)
     },
-    amendments: arr(source.amendments)
+    amendments: arr(source.amendments),
+    activity: arr(source.activity),
+    noteProjection: arr(source.noteProjection),
+    photoProjection: arr(source.photoProjection),
+    documentProjection: arr(source.documentProjection)
   };
 }
 
