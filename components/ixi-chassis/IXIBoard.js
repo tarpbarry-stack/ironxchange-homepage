@@ -14,6 +14,10 @@ import {
   getMachineCardFamily
 } from "../ixi-machine-card/getMachineCardFamily";
 
+import {
+  getIXIScalePreset
+} from "../../lib/ixiObjectGeometry";
+
 const IXI_INITIAL_BOARD_CARD_COUNT = 24;
 const IXI_BOARD_CARD_BATCH_SIZE = 24;
 
@@ -296,6 +300,40 @@ const consoleDepth =
     ? savedConsoleSlots.length
     : legacyConsoleDepth;
 
+const transactConsoleDepth =
+  ixiCardState?.[id]
+    ?.transactOpen === true
+    ? Math.max(
+        1,
+        Math.floor(
+          Number(
+            ixiCardState?.[id]
+              ?.transactConsoleDepth
+          ) || 1
+        )
+      )
+    : 1;
+
+const scalePreset =
+  getIXIScalePreset(
+    cardScaleMode
+  );
+
+const transactFootprintWidth =
+  transactConsoleDepth > 1
+    ? (
+        transactConsoleDepth *
+        298 *
+        scalePreset.scale
+      )
+    : null;
+
+const effectiveConsoleDepth =
+  Math.max(
+    consoleDepth,
+    transactConsoleDepth
+  );
+
 const customNativeSize =
   typeof getCustomItemNativeSize ===
     "function"
@@ -344,14 +382,17 @@ return (
         ? "ixi-seller-object-sortable-card"
         : ""
     } ${
-      consoleDepth > 1
+      effectiveConsoleDepth > 1
         ? "ixi-console-expanded"
         : ""
     }`}
 
     style={{
       flex: "0 0 auto",
-      width: "max-content",
+      width:
+        transactFootprintWidth
+          ? `${transactFootprintWidth}px`
+          : "max-content",
       maxWidth: "none",
       minWidth: 0,
       alignSelf: "flex-start"
