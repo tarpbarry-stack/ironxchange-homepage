@@ -231,6 +231,7 @@ export default function IXITransactObjectConsole({
   }
 
   function remove(slotId) {
+    closeConsoleModule(slotId);
     saveSlots(
       removeConsoleSlot({
         slots,
@@ -297,13 +298,15 @@ export default function IXITransactObjectConsole({
       consoleModules[slotId]?.financialDocumentId || ""
     ).trim();
     if (!selectedId) return financialRecords;
-    return [...financialRecords].sort(item => {
-      const left = String(
+    return [...financialRecords].sort((leftItem, rightItem) => {
+      const idOf = item => String(
         item?.financialDocument?.financialDocumentId ||
         item?.record?.financialDocument?.financialDocumentId ||
         ""
       ).trim();
-      return left === selectedId ? -1 : 0;
+      if (idOf(leftItem) === selectedId) return -1;
+      if (idOf(rightItem) === selectedId) return 1;
+      return 0;
     });
   }
 
