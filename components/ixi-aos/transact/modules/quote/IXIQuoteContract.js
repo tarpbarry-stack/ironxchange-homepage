@@ -131,6 +131,7 @@ export function createIXIQuoteDraft({ context = {}, object = {}, input = {} } = 
   return {
     schema: IXI_QUOTE_SCHEMA,
     identity: {
+      dealId: clean(input.dealId),
       quoteId: clean(input.quoteId),
       financialDocumentId: clean(input.financialDocumentId),
       number: clean(input.number),
@@ -207,6 +208,7 @@ export function updateIXIQuoteDraft(record = {}, { context = {}, object = {}, in
 
 export function quoteInputFromRecord(record = {}) {
   return {
+    dealId: record?.identity?.dealId || "",
     dealType: dealType(record?.dealType),
     customerPassportId: record?.customer?.passportId || "",
     customerId: record?.customer?.customerId || "",

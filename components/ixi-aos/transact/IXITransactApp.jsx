@@ -29,6 +29,16 @@ import IXITreasuryApp from "./modules/treasury/IXITreasuryApp";
 import IXIGeneralLedgerApp from "./modules/general-ledger/IXIGeneralLedgerApp";
 import IXIFinancialReportingApp from "./modules/financial-reporting/IXIFinancialReportingApp";
 import IXIAccessPolicyApp from "./modules/access-policy/IXIAccessPolicyApp";
+import IXISalesDealRegister, { IXISalesStageRail } from "./sales/IXISalesDealRegister";
+import {
+  buildIXISalesDealRegister,
+  createIXISalesDealId,
+  documentForIXISalesStage,
+  findIXISalesDeal,
+  recordForIXISalesStage,
+} from "./sales/IXISalesDealEngine";
+import { closeIXISalesDeal } from "./sales/IXISalesDealCommands";
+import IXISalesDealStyles from "./sales/IXISalesDealStyles";
 import { createIXICustomerServiceWorkOrder } from "./modules/customer-service-work-order/IXICustomerServiceWorkOrderAdapter";
 import IXITransactStyles from "./IXITransactStyles";
 import IXITransactHomeTypography from "./IXITransactHomeTypography";
@@ -49,6 +59,7 @@ const financialDocumentOf = (item) => {
 };
 const financialRevisionOf = (item) =>
   Number(item?.server?.revision || item?.record?.server?.revision || 1);
+const SALES_MODULE_IDS = new Set(["quote", "sales-order", "invoice", "sold", "settlement"]);
 
 export default function IXITransactApp({
   object = {},
@@ -119,6 +130,9 @@ export default function IXITransactApp({
     [context, locale],
   );
   const [moduleId, setModuleId] = useState(() => clean(initialModuleId));
+  const [salesRoute, setSalesRoute] = useState(() => clean(selectedFinancialDocumentId)
+    ? { documentId: clean(selectedFinancialDocumentId), dealId: "", stageId: clean(initialModuleId), detail: true }
+    : null);
   const [acquisitionWorkflowIntent, setAcquisitionWorkflowIntent] = useState(null);
   const [workOrderSnapshot, setWorkOrderSnapshot] = useState(
     activeWorkOrder || null,
@@ -395,6 +409,16 @@ export default function IXITransactApp({
       )
     )[0] || null;
   }, [object, financialRecords, salesOrderSnapshot]);
+  const salesFinancialRecords = useMemo(() => financialRecords.length
+    ? financialRecords
+    : object?.assetFinancialTransactions || object?.relatedFinancialRecords || object?.financialRecords || [], [financialRecords, object]);
+  const salesDeals = useMemo(() => buildIXISalesDealRegister(salesFinancialRecords), [salesFinancialRecords]);
+  const selectedSalesDeal = useMemo(() => findIXISalesDeal(salesDeals, salesRoute || {}), [salesDeals, salesRoute]);
+  const selectedQuoteSnapshot = selectedSalesDeal ? recordForIXISalesStage(selectedSalesDeal, "quote") : null;
+  const selectedSalesOrderSnapshot = selectedSalesDeal ? recordForIXISalesStage(selectedSalesDeal, "sales-order") : null;
+  const selectedSalesInvoiceSnapshot = selectedSalesDeal ? documentForIXISalesStage(selectedSalesDeal, "invoice") : null;
+  const selectedSaleSnapshot = selectedSalesDeal ? recordForIXISalesStage(selectedSalesDeal, "sold") : null;
+  const selectedSettlementSnapshot = selectedSalesDeal ? recordForIXISalesStage(selectedSalesDeal, "settlement") : null;
   const billRecords = useMemo(() => {
     const candidates = financialRecords.length
       ? financialRecords
@@ -423,6 +447,14 @@ export default function IXITransactApp({
   useEffect(() => {
     setModuleId(clean(initialModuleId));
   }, [initialModuleId]);
+  useEffect(() => {
+    const documentId = clean(selectedFinancialDocumentId);
+    if (documentId && SALES_MODULE_IDS.has(clean(initialModuleId))) {
+      setSalesRoute({ documentId, dealId: "", stageId: clean(initialModuleId), detail: true });
+    } else if (!documentId && SALES_MODULE_IDS.has(clean(initialModuleId))) {
+      setSalesRoute(null);
+    }
+  }, [initialModuleId, selectedFinancialDocumentId]);
   useEffect(() => {
     if (activeWorkOrder) setWorkOrderSnapshot(activeWorkOrder);
     else if (moduleId !== "work-order") setWorkOrderSnapshot(null);
@@ -462,6 +494,10 @@ export default function IXITransactApp({
     }
     if (returnToClose) {
       onClose?.();
+      return;
+    }
+    if (SALES_MODULE_IDS.has(moduleId) && salesRoute?.detail) {
+      setSalesRoute(null);
       return;
     }
     if (acquisitionWorkflowIntent && ["freight", "work-order"].includes(moduleId)) {
@@ -514,8 +550,47 @@ export default function IXITransactApp({
   }
 
   async function open(item) {
+    if (SALES_MODULE_IDS.has(item.id)) setSalesRoute(null);
     setModuleId(item.id);
     await onOpenModule?.(item, context, {});
+  }
+
+  function openSalesStage(stage, entry, deal) {
+    setSalesRoute({ dealId: deal.dealId, documentId: entry.documentId, stageId: stage.id, detail: true });
+    setModuleId(stage.moduleId);
+  }
+
+  function startSalesStage(stage, deal) {
+    const winningDeal = salesDeals.find(candidate => candidate.stageRecords?.sold && candidate.dealId !== deal.dealId);
+    if (stage.id === "sold" && winningDeal) {
+      globalThis.alert?.(`This Passport is already SOLD to ${winningDeal.customer}. Reverse or correct that controlled sale before recording another winner.`);
+      return;
+    }
+    setSalesRoute({ dealId: deal.dealId, documentId: "", stageId: stage.id, detail: true, create: true });
+    setModuleId(stage.moduleId);
+  }
+
+  function startSalesDeal() {
+    const dealId = createIXISalesDealId();
+    setSalesRoute({ dealId, documentId: "", stageId: "quote", detail: true, create: true });
+    setModuleId("quote");
+  }
+
+  function startDirectInvoice() {
+    const dealId = createIXISalesDealId();
+    setSalesRoute({ dealId, documentId: "", stageId: "invoice", detail: true, create: true, directEntry: true });
+    setModuleId("invoice");
+  }
+
+  async function closeSalesDeal(deal) {
+    if (!globalThis.confirm?.(`Mark the ${deal.customer} deal as lost? The machine and other customer deals stay active.`)) return;
+    try {
+      await closeIXISalesDeal(deal);
+      await onFinancialRecordsChange?.();
+      setSalesRoute(null);
+    } catch (error) {
+      globalThis.alert?.(clean(error?.message) || "The deal could not be closed. No record was changed.");
+    }
   }
   async function change(
     id,
@@ -888,13 +963,35 @@ export default function IXITransactApp({
         }}
       />
     );
+  else if (SALES_MODULE_IDS.has(moduleId) && !salesRoute?.detail)
+    body = (
+      <IXISalesDealRegister
+        deals={salesDeals}
+        moduleLabel={active?.label || "SALES"}
+        allowDirectInvoice={moduleId === "invoice"}
+        onBack={() => setModuleId("")}
+        onNewDeal={startSalesDeal}
+        onNewDirectInvoice={startDirectInvoice}
+        onOpenStage={openSalesStage}
+        onStartStage={startSalesStage}
+        onCloseDeal={closeSalesDeal}
+      />
+    );
   else if (moduleId === "quote")
     body = (
+      <div className="ixi-sales-detail">
+      {selectedSalesDeal ? <IXISalesStageRail deal={selectedSalesDeal} onOpenStage={openSalesStage} onStartStage={startSalesStage} /> : null}
       <IXIQuoteApp
+        key={`quote:${salesRoute?.dealId || selectedSalesDeal?.dealId || "new"}:${salesRoute?.documentId || ""}`}
         context={context}
         object={object}
-        initialRecord={quoteSnapshot}
+        dealId={salesRoute?.dealId || selectedSalesDeal?.dealId || ""}
+        initialRecord={selectedQuoteSnapshot}
         onBack={back}
+        onAdvance={(quote) => {
+          setSalesRoute({ dealId: quote?.identity?.dealId || selectedSalesDeal?.dealId, documentId: "", stageId: "sales-order", detail: true, create: true });
+          setModuleId("sales-order");
+        }}
         onRecordChange={async (record, changePayload, sourceContext) => {
           await onFinancialRecordsChange?.();
           await change(
@@ -910,18 +1007,28 @@ export default function IXITransactApp({
           );
         }}
       />
+      </div>
     );
   else if (moduleId === "sales-order" || moduleId === "invoice")
     body = (
       <IXIEquipmentSaleApp
+        key={`${moduleId}:${salesRoute?.dealId || selectedSalesDeal?.dealId || "new"}:${salesRoute?.documentId || ""}`}
         context={context}
         object={object}
-        quote={quoteSnapshot}
-        initialRecord={salesOrderSnapshot}
-        invoice={salesInvoiceSnapshot}
+        deal={selectedSalesDeal}
+        dealId={salesRoute?.dealId || selectedSalesDeal?.dealId || ""}
+        quote={selectedQuoteSnapshot}
+        initialRecord={selectedSalesOrderSnapshot}
+        invoice={selectedSalesInvoiceSnapshot}
         initialTab={moduleId === "invoice" ? "invoice" : "order"}
         entryMode={moduleId}
-        onOpenInvoice={() => setModuleId("invoice")}
+        onOpenStage={openSalesStage}
+        onStartStage={startSalesStage}
+        onOpenInvoice={() => {
+          const entry = selectedSalesDeal?.stageRecords?.invoice;
+          setSalesRoute(current => ({ ...(current || {}), dealId: selectedSalesDeal?.dealId || current?.dealId, documentId: entry?.documentId || "", stageId: "invoice", detail: true }));
+          setModuleId("invoice");
+        }}
         onBack={back}
         onRecordChange={async (record, changePayload, sourceContext) => {
           await onFinancialRecordsChange?.();
@@ -935,8 +1042,8 @@ export default function IXITransactApp({
             changePayload,
             sourceContext || context,
             {
-              invoice: changePayload?.invoice || salesInvoiceSnapshot,
-              quote: quoteSnapshot,
+              invoice: changePayload?.invoice || selectedSalesInvoiceSnapshot,
+              quote: selectedQuoteSnapshot,
             },
           );
         }}
@@ -970,10 +1077,15 @@ export default function IXITransactApp({
     );
   else if (moduleId === "sold")
     body = (
+      <div className="ixi-sales-detail">
+      {selectedSalesDeal ? <IXISalesStageRail deal={selectedSalesDeal} onOpenStage={openSalesStage} onStartStage={startSalesStage} /> : null}
       <IXIAssetSaleApp
+        key={`sold:${salesRoute?.dealId || selectedSalesDeal?.dealId || "new"}:${salesRoute?.documentId || ""}`}
         context={context}
         object={object}
-        initialRecord={saleSnapshot}
+        dealId={salesRoute?.dealId || selectedSalesDeal?.dealId || ""}
+        sourceInvoice={selectedSalesInvoiceSnapshot}
+        initialRecord={selectedSaleSnapshot}
         onBack={back}
         onRecordChange={async (record, changePayload, sourceContext) => {
           setSaleSnapshot(record);
@@ -995,6 +1107,7 @@ export default function IXITransactApp({
           );
         }}
       />
+      </div>
     );
   else if (moduleId === "collections")
     body = (
@@ -1214,10 +1327,14 @@ export default function IXITransactApp({
     );
   else if (moduleId === "settlement")
     body = (
+      <div className="ixi-sales-detail">
+      {selectedSalesDeal ? <IXISalesStageRail deal={selectedSalesDeal} onOpenStage={openSalesStage} onStartStage={startSalesStage} /> : null}
       <IXISettlementApp
+        key={`settlement:${salesRoute?.dealId || selectedSalesDeal?.dealId || "new"}:${salesRoute?.documentId || ""}`}
         context={context}
         object={object}
-        sale={saleSnapshot || object.assetSale || object.saleRecord || null}
+        dealId={salesRoute?.dealId || selectedSalesDeal?.dealId || ""}
+        sale={selectedSaleSnapshot || null}
         acquisition={
           object.assetAcquisition || object.acquisitionRecord || null
         }
@@ -1228,7 +1345,7 @@ export default function IXITransactApp({
           object?.financialRecords ||
           []
         }
-        initialRecord={settlementSnapshot}
+        initialRecord={selectedSettlementSnapshot}
         onBack={back}
         onRecordChange={async (record, changePayload, sourceContext) => {
           setSettlementSnapshot(record);
@@ -1251,6 +1368,7 @@ export default function IXITransactApp({
           );
         }}
       />
+      </div>
     );
   else if (moduleId === "work-order")
     body = (
@@ -1544,6 +1662,7 @@ export default function IXITransactApp({
           ) : null}
           {!active ? <IXITransactHomeTypography /> : null}
           <IXITransactStyles />
+          <IXISalesDealStyles />
         </div>
       </IXITransactLocaleProvider>
     </dialog>

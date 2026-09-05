@@ -43,12 +43,15 @@ function invoiceDescription(record = {}) {
 }
 
 function invoiceMetadata(record = {}, input = {}, invoice = {}) {
+  const salesOrderId = clean(invoice?.sourceFinancialDocumentId || invoice?.metadata?.salesOrderId || record?.financialBinding?.financialDocumentId || record?.identity?.salesOrderId);
   return {
     ...(invoice?.metadata || {}),
     transactModule: "equipment-sale",
+    dealId: clean(record?.identity?.dealId),
     invoiceType: record?.dealType === "rental-purchase-option" ? "rental-purchase-option" : "asset-sale",
     invoiceStatus: "draft",
-    directEntry: !clean(invoice?.sourceFinancialDocumentId || invoice?.metadata?.salesOrderId),
+    salesOrderId,
+    directEntry: !salesOrderId,
     directEntryReason: clean(input.directEntryReason),
     customerPoNumber: clean(input.customerPoNumber),
     administrativeNote: clean(input.memo),
@@ -65,12 +68,12 @@ function invoiceMetadata(record = {}, input = {}, invoice = {}) {
 export async function saveIXIEquipmentSale({ object = {}, context = {}, record = {}, action = "save", signal } = {}) {
   const id = clean(record?.financialBinding?.financialDocumentId);
   if (id) {
-    const response = await patchIXIAosFinancialDocument({ financialDocumentId: id, expectedRevision: Number(record?.financialBinding?.revision), commandId: crypto.randomUUID(), idempotencyKey: `ixi-sales-order:${action}:${crypto.randomUUID()}`, patch: { salesOrder: stored(record), financialState: "committed", attachments: record?.termsDocument?.url ? [{ attachmentId: record.termsDocument.documentId, type: "terms-and-conditions", url: record.termsDocument.url, sha256: record.termsDocument.sha256, pageCount: 2 }] : [] }, metadata: { transactModule: "equipment-sale", dealType: record?.dealType || "standard-sale", action }, signal });
+    const response = await patchIXIAosFinancialDocument({ financialDocumentId: id, expectedRevision: Number(record?.financialBinding?.revision), commandId: crypto.randomUUID(), idempotencyKey: `ixi-sales-order:${action}:${crypto.randomUUID()}`, patch: { salesOrder: stored(record), financialState: "committed", attachments: record?.termsDocument?.url ? [{ attachmentId: record.termsDocument.documentId, type: "terms-and-conditions", url: record.termsDocument.url, sha256: record.termsDocument.sha256, pageCount: 2 }] : [] }, metadata: { transactModule: "equipment-sale", dealId: clean(record?.identity?.dealId), dealType: record?.dealType || "standard-sale", action }, signal });
     return { response, record: canonical(record, response) };
   }
   const references = refs(context, record);
   const commandId = clean(record?.identity?.clientRequestId) || crypto.randomUUID();
-  const response = await createIXIAosObjectFinancialDocument({ object, documentType: "sales-order", commandId, idempotencyKey: `ixi-sales-order:${commandId}`, signal, input: { financialState: "committed", currency: clean(record?.commercial?.currency || "USD"), occurredAt: clean(record?.commercial?.orderDate), dueDate: clean(record?.commercial?.dueDate), description: `${record?.dealType === "rental-purchase-option" ? "RPO" : "Equipment"} Sales Order · ${clean(record?.customer?.name)} · ${clean(record?.asset?.label)}`, salesOrder: stored(record), references, attachments: record?.termsDocument?.url ? [{ attachmentId: record.termsDocument.documentId, type: "terms-and-conditions", url: record.termsDocument.url, sha256: record.termsDocument.sha256, pageCount: 2 }] : [], sourceFinancialDocumentId: clean(record?.related?.quoteId) }, additionalReferences: references, metadata: { transactModule: "equipment-sale", dealType: record?.dealType || "standard-sale", salesOrderStatus: record.status } });
+  const response = await createIXIAosObjectFinancialDocument({ object, documentType: "sales-order", commandId, idempotencyKey: `ixi-sales-order:${commandId}`, signal, input: { financialState: "committed", currency: clean(record?.commercial?.currency || "USD"), occurredAt: clean(record?.commercial?.orderDate), dueDate: clean(record?.commercial?.dueDate), description: `${record?.dealType === "rental-purchase-option" ? "RPO" : "Equipment"} Sales Order · ${clean(record?.customer?.name)} · ${clean(record?.asset?.label)}`, salesOrder: stored(record), references, attachments: record?.termsDocument?.url ? [{ attachmentId: record.termsDocument.documentId, type: "terms-and-conditions", url: record.termsDocument.url, sha256: record.termsDocument.sha256, pageCount: 2 }] : [], sourceFinancialDocumentId: clean(record?.related?.quoteId) }, additionalReferences: references, metadata: { transactModule: "equipment-sale", dealId: clean(record?.identity?.dealId), dealType: record?.dealType || "standard-sale", salesOrderStatus: record.status } });
   return { response, record: canonical(record, response) };
 }
 
@@ -98,6 +101,7 @@ export async function saveIXIEquipmentInvoice({ object = {}, context = {}, recor
   const amount = Number(record?.totals?.total || 0);
   const description = invoiceDescription(record);
   const metadata = invoiceMetadata(record, input, invoice || {});
+  const sourceSalesOrderId = clean(linkedSalesOrderId || record?.financialBinding?.financialDocumentId || record?.identity?.salesOrderId);
 
   if (id) {
     if (clean(invoice?.financialState).toLowerCase() !== "draft") throw new Error("An issued Invoice is immutable. Use a credit or replacement control.");
@@ -105,6 +109,7 @@ export async function saveIXIEquipmentInvoice({ object = {}, context = {}, recor
     const commercialPatch = linkedSalesOrderId ? {} : {
       occurredAt: clean(record?.commercial?.orderDate),
       description,
+      sourceFinancialDocumentId: sourceSalesOrderId,
       paymentTerms: clean(record?.commercial?.paymentTerms),
       references: refs(context, record),
       lines: [{ ...(invoice?.lines?.[0] || {}), description, quantity: 1, rate: amount, amount, currency: clean(record?.commercial?.currency || "USD"), references: refs(context, record) }],
@@ -138,6 +143,7 @@ export async function saveIXIEquipmentInvoice({ object = {}, context = {}, recor
       occurredAt: clean(record?.commercial?.orderDate),
       dueDate: clean(input.dueDate || record?.commercial?.dueDate),
       description,
+      sourceFinancialDocumentId: sourceSalesOrderId,
       memo: clean(input.memo),
       externalReference: clean(input.customerPoNumber),
       amount,
@@ -151,7 +157,7 @@ export async function saveIXIEquipmentInvoice({ object = {}, context = {}, recor
       metadata
     },
     additionalReferences: references,
-    metadata: { transactModule: "equipment-sale", action: "create-direct-draft-invoice" }
+    metadata: { transactModule: "equipment-sale", dealId: clean(record?.identity?.dealId), action: sourceSalesOrderId ? "create-linked-draft-invoice" : "create-direct-draft-invoice" }
   });
   return { response, invoice: canonicalInvoice(null, response) };
 }
