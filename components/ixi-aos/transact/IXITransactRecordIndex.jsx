@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 
 import { getIXITransactModule } from "./IXITransactModuleRegistry";
+import { resolveIXITransactRecordModuleId } from "./IXITransactRecordRouting";
 
 const clean = value => String(value ?? "").trim();
 const finite = value =>
@@ -280,6 +281,12 @@ export function getIXITransactRecordIndex(records = []) {
         category: "other",
         moduleId: clean(document?.metadata?.transactModule)
       };
+      const moduleId = resolveIXITransactRecordModuleId({
+        documentType,
+        document,
+        embedded,
+        fallbackModuleId: mapped.moduleId
+      });
       const occurredAt = dateOf(item, document, embedded);
       const record = {
         id:
@@ -289,7 +296,7 @@ export function getIXITransactRecordIndex(records = []) {
         number: numberOf(document, embedded) || `RECORD ${index + 1}`,
         documentType,
         category: mapped.category,
-        moduleId: mapped.moduleId,
+        moduleId,
         status: statusOf(document, embedded),
         amount: documentType === "asset-acquisition" && packageAllocationByPassport.has(clean(embedded?.context?.primaryPassportId))
           ? packageAllocationByPassport.get(clean(embedded?.context?.primaryPassportId)).amount
