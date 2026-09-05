@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from "react";
 
 import {
   DndContext,
-  DragOverlay,
   KeyboardSensor,
   MouseSensor,
   TouchSensor,
@@ -54,7 +53,7 @@ function ModuleCopy({ item, openControl = false }) {
   );
 }
 
-function SortableModuleTile({ item, onOpen }) {
+function SortableModuleTile({ item, onOpen, activeId }) {
   const {
     attributes,
     listeners,
@@ -71,13 +70,18 @@ function SortableModuleTile({ item, onOpen }) {
     },
   });
 
+  const effectiveTransform =
+    activeId && !isDragging
+      ? null
+      : transform;
+
   return (
     <div
       ref={setNodeRef}
       className={`tx-app-tile ${isDragging ? "tx-app-tile-dragging" : ""}`}
       style={{
-        transform: CSS.Transform.toString(transform),
-        transition,
+        transform: CSS.Transform.toString(effectiveTransform),
+        transition: isDragging ? "none" : transition,
       }}
       data-ixi-transact-module={item.id}
     >
@@ -126,8 +130,6 @@ export default function IXITransactSortableLauncher({
   const orderedModules = orderedIds
     .map(id => modulesById.get(id))
     .filter(Boolean);
-  const activeModule = modulesById.get(activeId) || null;
-
   const sensors = useSensors(
     useSensor(MouseSensor, {
       activationConstraint: { distance: 6 },
@@ -179,24 +181,11 @@ export default function IXITransactSortableLauncher({
               key={item.id}
               item={item}
               onOpen={onOpen}
+              activeId={activeId}
             />
           ))}
         </div>
       </SortableContext>
-
-      <DragOverlay
-        dropAnimation={{
-          duration: 170,
-          easing: "cubic-bezier(.2,.8,.2,1)",
-        }}
-        zIndex={12000}
-      >
-        {activeModule ? (
-          <div className="tx-app-tile tx-app-tile-overlay">
-            <ModuleCopy item={activeModule} />
-          </div>
-        ) : null}
-      </DragOverlay>
     </DndContext>
   );
 }

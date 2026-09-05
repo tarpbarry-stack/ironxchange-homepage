@@ -120,9 +120,12 @@ export default function IXITransactStyles() {
       }
 
       .tx-grid {
+        position: relative;
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 5px;
+        overflow: hidden;
+        isolation: isolate;
       }
 
       .tx-app-tile {
@@ -135,11 +138,12 @@ export default function IXITransactStyles() {
         color: #eee;
         text-align: left;
         user-select: none;
+        isolation: isolate;
+        contain: layout paint;
         will-change: transform;
       }
 
-      .tx-app-tile:hover,
-      .tx-app-tile.tx-app-tile-overlay {
+      .tx-app-tile:hover {
         border-color: rgba(255,196,0,.42);
         background: linear-gradient(#171a18, #0e110f);
       }
@@ -221,15 +225,17 @@ export default function IXITransactStyles() {
       }
 
       .tx-app-tile-dragging {
-        opacity: 0;
+        z-index: 20;
+        opacity: 1;
+        border-color: rgba(255,196,0,.72);
+        box-shadow:
+          0 14px 30px rgba(0,0,0,.68),
+          0 0 0 1px rgba(255,196,0,.2);
+        cursor: grabbing;
       }
 
-      .tx-app-tile-overlay {
-        box-shadow:
-          0 16px 34px rgba(0,0,0,.62),
-          0 0 0 1px rgba(255,196,0,.16);
+      .tx-app-tile-dragging .tx-app-drag-surface {
         cursor: grabbing;
-        transform: scale(1.025);
       }
 
       .tx-open-work {

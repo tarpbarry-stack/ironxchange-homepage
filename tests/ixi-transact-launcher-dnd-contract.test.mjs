@@ -9,6 +9,7 @@ test("TRANSACT launcher reorders independently and persists stable module ids", 
   const launcher = read("components/ixi-aos/transact/IXITransactSortableLauncher.jsx");
   const engine = read("components/ixi-aos/transact/IXITransactModuleOrder.js");
   const consoleRuntime = read("components/ixi-aos/transact/IXITransactObjectConsole.jsx");
+  const styles = read("components/ixi-aos/transact/IXITransactStyles.jsx");
 
   assert.match(app, /IXITransactSortableLauncher/u);
   assert.doesNotMatch(app, /modules\.map\(\(item\) => \(\s*<button/u);
@@ -16,6 +17,9 @@ test("TRANSACT launcher reorders independently and persists stable module ids", 
   assert.match(launcher, /<DndContext/u);
   assert.match(launcher, /<SortableContext/u);
   assert.match(launcher, /rectSortingStrategy/u);
+  assert.match(launcher, /effectiveTransform/u);
+  assert.match(launcher, /activeId && !isDragging/u);
+  assert.doesNotMatch(launcher, /<DragOverlay/u);
   assert.match(launcher, /MouseSensor/u);
   assert.match(launcher, /TouchSensor/u);
   assert.match(launcher, /KeyboardSensor/u);
@@ -33,6 +37,10 @@ test("TRANSACT launcher reorders independently and persists stable module ids", 
   assert.match(consoleRuntime, /transactModuleOrder/u);
   assert.match(consoleRuntime, /onIxiStateChange\(objectId/u);
   assert.match(consoleRuntime, /onModuleOrderChange=\{persistModuleOrder\}/u);
+
+  assert.match(styles, /\.tx-grid[\s\S]*overflow: hidden/u);
+  assert.match(styles, /\.tx-app-tile[\s\S]*contain: layout paint/u);
+  assert.match(styles, /\.tx-app-tile-dragging[\s\S]*opacity: 1/u);
 });
 
 test("open control is isolated from the drag activator", () => {
