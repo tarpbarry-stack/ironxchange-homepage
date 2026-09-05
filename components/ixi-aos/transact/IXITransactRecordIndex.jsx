@@ -329,7 +329,8 @@ export default function IXITransactRecordIndex({
   context = {},
   financialRecords = [],
   onOpenModule = null,
-  onOpenWorksheet = null
+  onOpenWorksheet = null,
+  onClose = null
 }) {
   const index = useMemo(
     () => getIXITransactRecordIndex(financialRecords),
@@ -353,6 +354,11 @@ export default function IXITransactRecordIndex({
     else setCategoryId("");
   }
 
+  function navigateBack() {
+    if (categoryId) goBack();
+    else onClose?.();
+  }
+
   function openRecord(target, presentation = "console") {
     const moduleId =
       clean(target?.moduleId) ||
@@ -369,7 +375,7 @@ export default function IXITransactRecordIndex({
       financialDocument: target?.document,
       financialDocumentId: target?.id,
       presentation,
-      source: "transact-record-index-f1"
+      source: "machine-financial-face-f1"
     };
     if (presentation === "worksheet" && onOpenWorksheet) {
       onOpenWorksheet(module, context, payload);
@@ -382,14 +388,14 @@ export default function IXITransactRecordIndex({
     <div className="tx-record-index">
       <header className="txri-header">
         <div>
-          <span>IXI TRAN$ACT · $F1</span>
+          <span>IXI MACHINE · F$1</span>
           <strong>
             {record ? record.number : category ? category.label : "RECORD INDEX"}
           </strong>
           <small>{clean(context?.primary?.label) || "AOS OBJECT"}</small>
         </div>
-        {category ? (
-          <button type="button" onClick={goBack} aria-label="Back">
+        {category || onClose ? (
+          <button type="button" onClick={navigateBack} aria-label="Back">
             ‹
           </button>
         ) : null}
@@ -428,7 +434,7 @@ export default function IXITransactRecordIndex({
               </div>
             ) : (
               <div className="txri-empty">
-                <strong>NO TRAN$ACT RECORDS</strong>
+                <strong>NO MACHINE RECORDS</strong>
                 <span>
                   Records created for this machine will appear here automatically.
                 </span>
