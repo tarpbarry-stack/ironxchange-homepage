@@ -575,10 +575,10 @@ export default function IXIAosScoreboard({
               255,
               255,
               255,
-              .38
+              .52
             );
 
-          font-size: 9px;
+          font-size: 11px;
           font-weight: 800;
 
           letter-spacing: .22px;
@@ -617,10 +617,10 @@ export default function IXIAosScoreboard({
               255,
               255,
               255,
-              .32
+              .48
             );
 
-          font-size: 7px;
+          font-size: 11px;
           font-weight: 950;
 
           letter-spacing: .58px;
@@ -695,7 +695,7 @@ export default function IXIAosScoreboard({
               .72
             );
 
-          font-size: 10px;
+          font-size: 11px;
 
           cursor: pointer;
         }
