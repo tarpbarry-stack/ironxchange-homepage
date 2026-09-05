@@ -44,3 +44,27 @@ test("open control is isolated from the drag activator", () => {
   assert.match(launcher, /onTouchStart=\{stopDragActivation\}/u);
   assert.match(launcher, /onKeyDown=\{stopDragActivation\}/u);
 });
+
+
+test("module order reconciliation removes stale ids and appends new modules", async () => {
+  const source = read("components/ixi-aos/transact/IXITransactModuleOrder.js");
+  const encoded = Buffer.from(source, "utf8").toString("base64");
+  const engine = await import(`data:text/javascript;base64,${encoded}`);
+
+  assert.deepEqual(
+    engine.reconcileIXITransactModuleOrder(
+      ["expense", "missing", "expense", "work-order"],
+      ["work-order", "expense", "time"],
+    ),
+    ["expense", "work-order", "time"],
+  );
+
+  assert.deepEqual(
+    engine.moveIXITransactModule(
+      ["work-order", "expense", "time"],
+      "time",
+      "work-order",
+    ),
+    ["time", "work-order", "expense"],
+  );
+});
