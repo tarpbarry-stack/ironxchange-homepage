@@ -1,0 +1,225 @@
+name: Deploy IX-Core AOS objects production
+
+on:
+  workflow_dispatch:
+    inputs:
+      commit_sha:
+        description: Immutable IX-Core commit SHA
+        required: true
+        default: c5d41fccae5f7966be8aa7178e74beb0120ab687
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/deploy-ixi-core-aos-objects-production.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ixi-core-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+      AWS_INSTANCE_ID: ${{ secrets.AWS_INSTANCE_ID }}
+      IXI_CORE_SHA: ${{ inputs.commit_sha || 'c5d41fccae5f7966be8aa7178e74beb0120ab687' }}
+
+    steps:
+      - name: Validate immutable release
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! [[ "$IXI_CORE_SHA" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "IXI_CORE_SHA must be a full Git commit SHA" >&2
+            exit 1
+          fi
+
+          release_url="https://api.github.com/repos/tarpbarry-stack/ixi-core/commits/$IXI_CORE_SHA"
+          resolved_sha="$(curl -fsSL \
+            -H 'Accept: application/vnd.github+json' \
+            -H 'X-GitHub-Api-Version: 2022-11-28' \
+            "$release_url" | jq -r '.sha')"
+
+          test "$resolved_sha" = "$IXI_CORE_SHA"
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Deploy guarded AOS object runtime
+        id: deploy
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          remote_script="$(cat <<'REMOTE_SCRIPT'
+          set -eu
+
+          APP=/var/www/ix-core
+          RELEASE_SHA=__IXI_CORE_SHA__
+          STAGE=/tmp/ixi-core-aos-release-__IXI_CORE_SHA__
+          ARCHIVE=/tmp/ixi-core-aos-release-__IXI_CORE_SHA__.tgz
+          BACKUP_ROOT=/var/backups/ixi-core-releases
+          BACKUP=$BACKUP_ROOT/pre-aos-__IXI_CORE_SHA__.tgz
+          MANAGED_FILES='mos/objects/objectService.js mos/routes/mosRouter.js'
+          SUCCESS=0
+
+          run_pm2() {
+            if [ "$PM2_USER" = root ]; then
+              pm2 "$@"
+            else
+              sudo -u ubuntu -H pm2 "$@"
+            fi
+          }
+
+          rollback() {
+            if [ "$SUCCESS" -eq 1 ]; then
+              return
+            fi
+
+            if [ -f "$BACKUP" ]; then
+              echo 'Deployment failed after backup; restoring the previous AOS object runtime.' >&2
+              cd "$APP"
+              tar -xzf "$BACKUP"
+              run_pm2 reload IX-Core --update-env || run_pm2 restart IX-Core --update-env || true
+            fi
+          }
+
+          verify_managed_file() {
+            file="$1"
+            baseline_sha="$2"
+            release_sha="$3"
+            actual_sha="$(sha256sum "$APP/$file" | awk '{print $1}')"
+
+            if [ "$actual_sha" != "$baseline_sha" ] && [ "$actual_sha" != "$release_sha" ]; then
+              echo "$file has unrecognized live drift: $actual_sha" >&2
+              exit 1
+            fi
+
+            echo "$file baseline accepted: $actual_sha"
+          }
+
+          test -d "$APP"
+          test -f "$APP/index.js"
+
+          if pm2 describe IX-Core >/dev/null 2>&1; then
+            PM2_USER=root
+          elif sudo -u ubuntu -H pm2 describe IX-Core >/dev/null 2>&1; then
+            PM2_USER=ubuntu
+          else
+            echo 'PM2 process IX-Core was not found.' >&2
+            exit 1
+          fi
+
+          trap rollback EXIT
+
+          verify_managed_file \
+            mos/objects/objectService.js \
+            9ecb7fe8524a45550a8922f79ae42360a3522d69a163b9a81aa89c71e71632c4 \
+            8f2d8a98ff269005d2dcd04bd65786f8a191f1c4f365f0a272e68f5dce2b9cb8
+          verify_managed_file \
+            mos/routes/mosRouter.js \
+            bbdb5427430e459e5acfb283d67b446c2c820ed064c3c203089cd27d9f975303 \
+            b583bb6e385740935db7a94ddf005f54834694df245dd848d1b6e952edde3d40
+
+          rm -rf "$STAGE"
+          mkdir -p "$STAGE" "$BACKUP_ROOT"
+          curl -fsSL \
+            "https://github.com/tarpbarry-stack/ixi-core/archive/$RELEASE_SHA.tar.gz" \
+            -o "$ARCHIVE"
+          tar -xzf "$ARCHIVE" --strip-components=1 -C "$STAGE"
+
+          cd "$STAGE"
+          npm ci --ignore-scripts
+          npm test
+          node --test mos/tests/objectMutationContract.test.js
+          node --check mos/objects/objectService.js
+          node --check mos/routes/mosRouter.js
+
+          cd "$APP"
+          tar -czf "$BACKUP" $MANAGED_FILES
+
+          for file in $MANAGED_FILES; do
+            install -D -m 0644 "$STAGE/$file" "$APP/$file"
+          done
+
+          run_pm2 reload IX-Core --update-env
+
+          attempt=0
+          until curl -fsS http://127.0.0.1:4100/health >/dev/null; do
+            attempt=$((attempt + 1))
+            if [ "$attempt" -ge 15 ]; then
+              echo 'IX-Core failed its post-reload health check.' >&2
+              exit 1
+            fi
+            sleep 2
+          done
+
+          SUCCESS=1
+          trap - EXIT
+          rm -rf "$STAGE" "$ARCHIVE"
+          printf 'IX-Core AOS object runtime %s deployed; health=200\n' "$RELEASE_SHA"
+          REMOTE_SCRIPT
+          )"
+
+          remote_script="${remote_script//__IXI_CORE_SHA__/$IXI_CORE_SHA}"
+          parameters="$(jq -cn --arg command "$remote_script" '{commands:[$command]}')"
+          command_id="$(aws ssm send-command \
+            --region "$AWS_REGION" \
+            --instance-ids "$AWS_INSTANCE_ID" \
+            --document-name AWS-RunShellScript \
+            --comment "Deploy immutable IX-Core AOS object runtime $IXI_CORE_SHA" \
+            --parameters "$parameters" \
+            --query 'Command.CommandId' \
+            --output text)"
+
+          echo "command_id=$command_id" >> "$GITHUB_OUTPUT"
+
+          if ! aws ssm wait command-executed \
+            --region "$AWS_REGION" \
+            --command-id "$command_id" \
+            --instance-id "$AWS_INSTANCE_ID"; then
+            true
+          fi
+
+          invocation="$(aws ssm get-command-invocation \
+            --region "$AWS_REGION" \
+            --command-id "$command_id" \
+            --instance-id "$AWS_INSTANCE_ID")"
+
+          printf '%s' "$invocation" | jq -r '.StandardOutputContent'
+          printf '%s' "$invocation" | jq -r '.StandardErrorContent' >&2
+
+          status="$(printf '%s' "$invocation" | jq -r '.Status')"
+          test "$status" = "Success"
+
+      - name: Record deployment diagnostics
+        if: always()
+        shell: bash
+        run: |
+          command_id="${{ steps.deploy.outputs.command_id }}"
+          {
+            echo '## IX-Core AOS object deployment'
+            if [ -z "$command_id" ]; then
+              echo '- SSM command was not created.'
+            else
+              invocation="$(aws ssm get-command-invocation \
+                --region "$AWS_REGION" \
+                --command-id "$command_id" \
+                --instance-id "$AWS_INSTANCE_ID")"
+              echo "- Status: \`$(printf '%s' "$invocation" | jq -r '.Status')\`"
+              echo '### Output'
+              echo '```text'
+              printf '%s\n' "$invocation" | jq -r '.StandardOutputContent'
+              printf '%s\n' "$invocation" | jq -r '.StandardErrorContent'
+              echo '```'
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
