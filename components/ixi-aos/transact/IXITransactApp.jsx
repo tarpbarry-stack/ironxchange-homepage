@@ -119,6 +119,7 @@ export default function IXITransactApp({
     [context, locale],
   );
   const [moduleId, setModuleId] = useState(() => clean(initialModuleId));
+  const [acquisitionWorkflowIntent, setAcquisitionWorkflowIntent] = useState(null);
   const [workOrderSnapshot, setWorkOrderSnapshot] = useState(
     activeWorkOrder || null,
   );

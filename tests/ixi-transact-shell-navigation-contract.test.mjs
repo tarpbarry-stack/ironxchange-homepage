@@ -26,6 +26,10 @@ test("every operational TRAN$ACT module receives one fixed shell return path", a
 test("shell return destinations preserve worksheet, Acquisition, record, and App Screen hierarchy", async () => {
   const app = await read("components/ixi-aos/transact/IXITransactApp.jsx");
 
+  assert.match(
+    app,
+    /const \[acquisitionWorkflowIntent, setAcquisitionWorkflowIntent\] = useState\(null\);/,
+  );
   assert.match(app, /worksheetOpen\s*\? "CARD"/);
   assert.match(app, /\["freight", "work-order"\]\.includes\(moduleId\)[\s\S]*\? "ACQUISITION"/);
   assert.match(app, /returnToClose[\s\S]*\? "RECORDS"/);
