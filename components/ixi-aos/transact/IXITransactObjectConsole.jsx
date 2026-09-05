@@ -23,6 +23,7 @@ import IXIAosActionNotice from "../card-runtime/modules/IXIAosActionNotice";
 import IXITransactApp from "./IXITransactApp";
 import IXITransactRecordIndex from "./IXITransactRecordIndex";
 import IXIMachineCostBasis from "./IXIMachineCostBasis";
+import IXIMachinePricing from "../../ixi-machine-pricing/IXIMachinePricing";
 import { createIXITransactContext } from "./IXITransactContext";
 import IXIMachineWorkspaceDirectory, {
   MACHINE_WORKSPACE_IDS
@@ -35,21 +36,24 @@ const MACHINE_CONSOLE_FACES = [
   2,
   3,
   4,
-  5
+  5,
+  6
 ];
 
 const WORKSPACE_FACE = Object.freeze({
   [MACHINE_WORKSPACE_IDS.DIRECTORY]: 2,
   [MACHINE_WORKSPACE_IDS.TRANSACT]: 3,
   [MACHINE_WORKSPACE_IDS.FINANCIAL]: 4,
-  [MACHINE_WORKSPACE_IDS.COST_BASIS]: 5
+  [MACHINE_WORKSPACE_IDS.COST_BASIS]: 5,
+  [MACHINE_WORKSPACE_IDS.PRICING]: 6
 });
 
 const FACE_WORKSPACE = Object.freeze({
   2: MACHINE_WORKSPACE_IDS.DIRECTORY,
   3: MACHINE_WORKSPACE_IDS.TRANSACT,
   4: MACHINE_WORKSPACE_IDS.FINANCIAL,
-  5: MACHINE_WORKSPACE_IDS.COST_BASIS
+  5: MACHINE_WORKSPACE_IDS.COST_BASIS,
+  6: MACHINE_WORKSPACE_IDS.PRICING
 });
 
 function getLifecycleCopy(moduleId = "", payload = {}) {
@@ -534,6 +538,22 @@ export default function IXITransactObjectConsole({
                       }
                       onOpenModule={(item, moduleContext, payload) =>
                         openConsoleModule(slot.slotId, item, payload)
+                      }
+                    />
+                  ) : workspaceId === MACHINE_WORKSPACE_IDS.PRICING ? (
+                    <IXIMachinePricing
+                      context={context}
+                      object={object}
+                      financialRecords={financialRecords}
+                      pricingFile={ixiState?.machinePricingFile}
+                      onPricingFileChange={nextFile => {
+                        if (!stateObjectId || typeof onIxiStateChange !== "function") return null;
+                        return onIxiStateChange(stateObjectId, {
+                          machinePricingFile: nextFile
+                        });
+                      }}
+                      onClose={() =>
+                        openWorkspace(slot.slotId, MACHINE_WORKSPACE_IDS.DIRECTORY)
                       }
                     />
                   ) : (

@@ -24,6 +24,7 @@ export const MACHINE_WORKSPACE_IDS = Object.freeze({
   TRANSACT: "transact",
   FINANCIAL: "financial-record-index",
   COST_BASIS: "machine-cost-basis",
+  PRICING: "machine-pricing",
 });
 
 export const MACHINE_WORKSPACES = Object.freeze([
@@ -44,6 +45,12 @@ export const MACHINE_WORKSPACES = Object.freeze([
     eyebrow: "MACHINE FACE",
     label: "F$2",
     description: "COST BASIS",
+  },
+  {
+    id: MACHINE_WORKSPACE_IDS.PRICING,
+    eyebrow: "MACHINE FACE",
+    label: "F$3",
+    description: "PRICING",
   },
 ]);
 
