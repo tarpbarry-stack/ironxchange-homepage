@@ -1,10 +1,11 @@
 import { patchIXIAosFinancialDocument } from "../../financial-runtime/IXIAosFinancialReadClient";
 
 const clean = value => String(value ?? "").trim();
+const controllingEntry = deal => deal?.stageRecords?.invoice || deal?.stageRecords?.signed || deal?.stageRecords?.["sales-order"] || deal?.stageRecords?.quote || null;
 
 export function canCloseIXISalesDeal(deal = null) {
   if (!deal || deal.terminal || deal.stageRecords?.sold || deal.stageRecords?.settlement) return false;
-  const entry = deal.records?.[0];
+  const entry = controllingEntry(deal);
   if (!entry) return false;
   if (clean(entry.document?.documentType) !== "invoice") return true;
   return clean(entry.document?.financialState || "draft").toLowerCase() === "draft";
@@ -12,7 +13,7 @@ export function canCloseIXISalesDeal(deal = null) {
 
 export async function closeIXISalesDeal(deal, { reason = "Customer opportunity closed", signal } = {}) {
   if (!canCloseIXISalesDeal(deal)) throw new Error("This deal is financially locked and cannot be marked lost. Use the applicable void, credit, or settlement control.");
-  const entry = deal.records[0];
+  const entry = controllingEntry(deal);
   const document = entry.document || {};
   const documentType = clean(document.documentType);
   const at = new Date().toISOString();
