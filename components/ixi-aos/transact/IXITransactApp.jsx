@@ -45,6 +45,8 @@ const financialRevisionOf = (item) =>
 
 export default function IXITransactApp({
   object = {},
+  initialModuleId = "",
+  returnToClose = false,
   actor = {},
   entity = {},
   activeWorkOrder = null,
@@ -82,7 +84,7 @@ export default function IXITransactApp({
       }),
     [context],
   );
-  const [moduleId, setModuleId] = useState("");
+  const [moduleId, setModuleId] = useState(() => clean(initialModuleId));
   const [workOrderSnapshot, setWorkOrderSnapshot] = useState(
     activeWorkOrder || null,
   );
@@ -384,6 +386,9 @@ export default function IXITransactApp({
   }, [object, financialRecords]);
 
   useEffect(() => {
+    setModuleId(clean(initialModuleId));
+  }, [initialModuleId]);
+  useEffect(() => {
     setWorkOrderSnapshot(activeWorkOrder || null);
   }, [activeWorkOrder]);
   useEffect(() => {
@@ -399,7 +404,13 @@ export default function IXITransactApp({
     setSaleSnapshot(saleFromFinancial);
   }, [saleFromFinancial]);
   const active = modules.find((item) => item.id === moduleId) || null;
-  const back = () => setModuleId("");
+  const back = () => {
+    if (returnToClose) {
+      onClose?.();
+      return;
+    }
+    setModuleId("");
+  };
 
   async function open(item) {
     setModuleId(item.id);
