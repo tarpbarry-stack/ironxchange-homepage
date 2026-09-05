@@ -387,6 +387,7 @@ function reopenSignedTerms(record = {}) {
 function CardEditor({
   invoiceEntry,
   linkedInvoice,
+  invoiceLocked,
   orderLocked,
   input,
   patch,
@@ -395,19 +396,19 @@ function CardEditor({
   invoiceDraft,
   setInvoiceDraft,
 }) {
-  const commercialLocked = invoiceEntry ? linkedInvoice : orderLocked;
+  const commercialLocked = invoiceEntry ? invoiceLocked : orderLocked;
   return (
     <div className="es-card-form">
       {commercialLocked ? (
         <div className="es-card-lock">
           <b>
             {invoiceEntry
-              ? "SIGNED ORDER VALUES LOCKED"
+              ? "ISSUED INVOICE LOCKED"
               : "SIGNATURE PACKAGE LOCKED"}
           </b>
           <span>
             {invoiceEntry
-              ? "Invoice administration remains editable."
+              ? "Use the downstream credit or replacement control to make a correction."
               : "Create a superseding revision to change commercial terms."}
           </span>
         </div>
@@ -1020,6 +1021,7 @@ export default function IXIEquipmentSaleApp({
         invoiceRecord?.metadata?.salesOrderId,
     ),
   );
+  const invoiceLocked = Boolean(invoiceRecord) && clean(invoiceRecord?.financialState).toLowerCase() !== "draft";
   const hasSavedOrder = Boolean(
     clean(
       initialRecord?.financialBinding?.financialDocumentId ||
@@ -1165,12 +1167,13 @@ export default function IXIEquipmentSaleApp({
                     ) : null}
                     <p className="es-control-note">
                       {linkedInvoice
-                        ? "Commercial values are inherited from the signed package. Invoice administration remains editable."
+                        ? "This draft Invoice is linked to the signed package and remains editable until it is issued."
                         : "This is a controlled direct-entry draft. Complete the record now; issue controls remain downstream."}
                     </p>
                     <CardEditor
                       invoiceEntry
                       linkedInvoice={linkedInvoice}
+                      invoiceLocked={invoiceLocked}
                       orderLocked={false}
                       input={input}
                       patch={patch}
@@ -1459,6 +1462,7 @@ export default function IXIEquipmentSaleApp({
         <CardEditor
           invoiceEntry={invoiceEntry}
           linkedInvoice={linkedInvoice}
+          invoiceLocked={invoiceLocked}
           orderLocked={orderLocked}
           input={input}
           patch={patch}

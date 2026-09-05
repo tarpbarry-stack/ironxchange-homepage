@@ -64,6 +64,9 @@ test("Sales Order and Invoice are separate launcher entries with canonical forms
   assert.match(app, /SAVE ORDER/u);
   assert.match(app, /REVISE &amp; RESEND/u);
   assert.match(app, /priorSignedPackageHash/u);
+  assert.match(app, /const commercialLocked = invoiceEntry \? invoiceLocked : orderLocked/u);
+  assert.match(commands, /const commercialPatch = \{/u);
+  assert.doesNotMatch(commands, /const commercialPatch = linkedSalesOrderId \? \{\} :/u);
   assert.match(register, /activeStageId === stage\.id/u);
   assert.match(register, /current \? "current" : entry \? "complete" : startable \? "next" : "locked"/u);
   assert.match(registerStyles, /button\.complete,.ixi-deal-stage-rail button\.current/u);
