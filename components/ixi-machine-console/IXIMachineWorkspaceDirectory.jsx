@@ -23,6 +23,7 @@ export const MACHINE_WORKSPACE_IDS = Object.freeze({
   DIRECTORY: "machine-workspace",
   TRANSACT: "transact",
   FINANCIAL: "financial-record-index",
+  COST_BASIS: "machine-cost-basis",
 });
 
 export const MACHINE_WORKSPACES = Object.freeze([
@@ -37,6 +38,12 @@ export const MACHINE_WORKSPACES = Object.freeze([
     eyebrow: "MACHINE FACE",
     label: "F$1",
     description: "FINANCIAL RECORDS",
+  },
+  {
+    id: MACHINE_WORKSPACE_IDS.COST_BASIS,
+    eyebrow: "MACHINE FACE",
+    label: "F$2",
+    description: "COST BASIS",
   },
 ]);
 

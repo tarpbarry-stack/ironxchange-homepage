@@ -22,6 +22,7 @@ import {
 import IXIAosActionNotice from "../card-runtime/modules/IXIAosActionNotice";
 import IXITransactApp from "./IXITransactApp";
 import IXITransactRecordIndex from "./IXITransactRecordIndex";
+import IXIMachineCostBasis from "./IXIMachineCostBasis";
 import { createIXITransactContext } from "./IXITransactContext";
 import IXIMachineWorkspaceDirectory, {
   MACHINE_WORKSPACE_IDS
@@ -33,19 +34,22 @@ const PANEL_HEIGHT = 471;
 const MACHINE_CONSOLE_FACES = [
   2,
   3,
-  4
+  4,
+  5
 ];
 
 const WORKSPACE_FACE = Object.freeze({
   [MACHINE_WORKSPACE_IDS.DIRECTORY]: 2,
   [MACHINE_WORKSPACE_IDS.TRANSACT]: 3,
-  [MACHINE_WORKSPACE_IDS.FINANCIAL]: 4
+  [MACHINE_WORKSPACE_IDS.FINANCIAL]: 4,
+  [MACHINE_WORKSPACE_IDS.COST_BASIS]: 5
 });
 
 const FACE_WORKSPACE = Object.freeze({
   2: MACHINE_WORKSPACE_IDS.DIRECTORY,
   3: MACHINE_WORKSPACE_IDS.TRANSACT,
-  4: MACHINE_WORKSPACE_IDS.FINANCIAL
+  4: MACHINE_WORKSPACE_IDS.FINANCIAL,
+  5: MACHINE_WORKSPACE_IDS.COST_BASIS
 });
 
 function getLifecycleCopy(moduleId = "", payload = {}) {
@@ -511,6 +515,17 @@ export default function IXITransactObjectConsole({
                     />
                   ) : workspaceId === MACHINE_WORKSPACE_IDS.FINANCIAL ? (
                     <IXITransactRecordIndex
+                      context={context}
+                      financialRecords={financialRecords}
+                      onClose={() =>
+                        openWorkspace(slot.slotId, MACHINE_WORKSPACE_IDS.DIRECTORY)
+                      }
+                      onOpenModule={(item, moduleContext, payload) =>
+                        openConsoleModule(slot.slotId, item, payload)
+                      }
+                    />
+                  ) : workspaceId === MACHINE_WORKSPACE_IDS.COST_BASIS ? (
+                    <IXIMachineCostBasis
                       context={context}
                       financialRecords={financialRecords}
                       onClose={() =>
