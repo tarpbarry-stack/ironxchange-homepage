@@ -18,7 +18,7 @@ function normalizeCurrency(value) {
   return clean(value || "USD").toUpperCase();
 }
 
-export const IXI_EXPENSE_SCHEMA = "ixi-expense-v2";
+export const IXI_EXPENSE_SCHEMA = "ixi-expense-v3";
 
 export const IXI_EXPENSE_PAYMENT_METHODS = Object.freeze([
   "company-card",
@@ -89,11 +89,18 @@ export function createIXIExpenseDraft({
       amount,
       currency,
       category: clean(input.category),
+      costPurpose: clean(input.costPurpose || "other"),
       expenseDate: clean(input.expenseDate),
       paymentMethod,
       referenceNumber: clean(input.referenceNumber),
       notes: clean(input.notes),
       receiptRequired: Boolean(input.receiptRequired)
+    },
+    accounting: {
+      category: clean(input.category),
+      costPurpose: clean(input.costPurpose || "other"),
+      glAccountCode: clean(input.glAccountCode),
+      glAccountName: clean(input.glAccountName)
     },
     reimbursement: {
       required: employeePaid,
@@ -135,6 +142,10 @@ export function validateIXIExpense(expense = {}) {
 
   if (!clean(details.category)) {
     errors.category = "Category is required";
+  }
+
+  if (!clean(details.costPurpose)) {
+    errors.costPurpose = "Cost purpose is required";
   }
 
   if (!validDateOnly(details.expenseDate)) {

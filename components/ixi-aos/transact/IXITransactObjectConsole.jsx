@@ -485,6 +485,7 @@ export default function IXITransactObjectConsole({
                     <IXITransactApp
                       object={object}
                       initialModuleId={consoleModule.moduleId}
+                      selectedFinancialDocumentId={consoleModule.financialDocumentId}
                       returnToClose
                       actor={actor}
                       entity={entity}

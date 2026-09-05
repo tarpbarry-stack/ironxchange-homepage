@@ -6,6 +6,7 @@ import { getIXITransactModules } from "./IXITransactModuleRegistry";
 import IXIWorkOrderApp from "./modules/work-order/IXIWorkOrderApp";
 import IXITechWorkOrderApp from "./modules/tech-work-order/IXITechWorkOrderApp";
 import IXIExpenseApp from "./modules/expense/IXIExpenseApp";
+import { findIXIExpenseRecord } from "./modules/expense/IXIExpenseRecordEngine";
 import IXIPurchaseOrderApp from "./modules/purchase-order/IXIPurchaseOrderApp";
 import { hydrateIXIPurchaseOrderRecord } from "./modules/purchase-order/IXIPurchaseOrderRecordEngine";
 import IXIBillStandaloneApp from "./modules/bill/IXIBillStandaloneApp";
@@ -52,6 +53,7 @@ const financialRevisionOf = (item) =>
 export default function IXITransactApp({
   object = {},
   initialModuleId = "",
+  selectedFinancialDocumentId = "",
   returnToClose = false,
   actor = {},
   entity = {},
@@ -74,6 +76,14 @@ export default function IXITransactApp({
   const dialogRef = useRef(null);
   const [worksheetOpen, setWorksheetOpen] = useState(false);
   const [locale, setLocale] = useState(IXI_TRANSACT_LOCALES.ENGLISH);
+
+  const expenseSnapshot = useMemo(() => {
+    if (!clean(selectedFinancialDocumentId)) return null;
+    const records = financialRecords.length
+      ? financialRecords
+      : object?.assetFinancialTransactions || object?.relatedFinancialRecords || object?.financialRecords || [];
+    return findIXIExpenseRecord(records, selectedFinancialDocumentId);
+  }, [financialRecords, object, selectedFinancialDocumentId]);
 
   useEffect(() => {
     try {
@@ -631,7 +641,11 @@ export default function IXITransactApp({
     body = (
       <IXIExpenseApp
         context={context}
+        object={object}
         workOrder={workOrderSnapshot}
+        initialRecord={expenseSnapshot}
+        selectedFinancialDocumentId={selectedFinancialDocumentId}
+        expensePolicy={entity?.expensePolicy || entity?.accountingPolicy?.expense || object?.expensePolicy || object?.fields?.expensePolicy || null}
         onCancel={back}
         onSave={async (record, input, response) => {
           await onOpenModule?.(

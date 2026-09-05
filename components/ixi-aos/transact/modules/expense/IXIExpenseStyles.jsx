@@ -88,6 +88,24 @@ export default function IXIExpenseStyles() {
         margin-bottom: 7px;
       }
 
+      .ex-mode-banner {
+        margin: 0 0 7px;
+        padding: 6px 8px;
+        border: 1px solid rgba(255,196,0,.35);
+        border-radius: 4px;
+        background: rgba(255,196,0,.055);
+        color: #ffc400;
+        font-size: 6px;
+        font-weight: 950;
+        letter-spacing: .45px;
+      }
+
+      .ex-mode-banner.correction {
+        border-color: rgba(255,104,86,.38);
+        background: rgba(255,104,86,.05);
+        color: #ff8a78;
+      }
+
       .ex-context-row div {
         min-width: 0;
         height: 34px;
@@ -234,6 +252,22 @@ export default function IXIExpenseStyles() {
         color: #ffc400;
         font-size: 6px;
         font-weight: 950;
+      }
+
+      .ex-check {
+        min-height: 31px;
+        display: flex !important;
+        align-items: center;
+        gap: 7px;
+        padding: 7px 8px;
+        border: 1px solid rgba(255,104,86,.3);
+        border-radius: 4px;
+        background: rgba(255,104,86,.04);
+        color: #ff8a78 !important;
+      }
+
+      .ex-check input {
+        accent-color: #ffc400;
       }
 
       .ex-two {
@@ -474,6 +508,183 @@ export default function IXIExpenseStyles() {
         border-left: 1px solid #454a46;
         vertical-align: middle;
       }
+
+      .ex-record-alert {
+        margin: 36px 4px 10px;
+        padding: 14px;
+        border: 1px solid rgba(255,104,86,.4);
+        border-radius: 5px;
+        color: #ff9a8b;
+        font-size: 8px;
+        line-height: 1.5;
+      }
+
+      .ex-back {
+        width: calc(100% - 8px);
+        height: 38px;
+        margin: 0 4px;
+        border: 1px solid #4b514c;
+        border-radius: 4px;
+        background: #101311;
+        color: #eef0ee;
+        font-size: 8px;
+        font-weight: 950;
+      }
+
+      .ex-record-id {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        padding: 9px;
+        border: 1px solid #343a35;
+        border-radius: 5px 5px 0 0;
+        background: #0d100e;
+      }
+
+      .ex-record-id div {
+        min-width: 0;
+      }
+
+      .ex-record-id small,
+      .ex-record-amount small,
+      .ex-record-grid small {
+        display: block;
+        color: #8d948f;
+        font-size: 5.5px;
+        font-weight: 950;
+      }
+
+      .ex-record-id strong {
+        display: block;
+        overflow: hidden;
+        margin-top: 3px;
+        color: #fff;
+        font-size: 9px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .ex-record-id > span {
+        flex: none;
+        padding: 5px 6px;
+        border: 1px solid #3c443d;
+        border-radius: 4px;
+        font-size: 5px;
+        font-weight: 950;
+      }
+
+      .ex-record-id > span.open { color: #6bd057; border-color: rgba(107,208,87,.4); }
+      .ex-record-id > span.locked { color: #ffc400; border-color: rgba(255,196,0,.4); }
+
+      .ex-record-amount {
+        padding: 11px 9px;
+        border: 1px solid #836b00;
+        border-top: 0;
+        background: rgba(255,196,0,.045);
+      }
+
+      .ex-record-amount strong {
+        display: block;
+        margin-top: 2px;
+        color: #fff;
+        font-size: 22px;
+        line-height: 1;
+      }
+
+      .ex-record-grid {
+        display: grid;
+        grid-template-columns: minmax(0,1fr) minmax(0,1fr);
+        margin-top: 7px;
+        border-top: 1px solid #2d332f;
+        border-left: 1px solid #2d332f;
+      }
+
+      .ex-record-grid > div {
+        min-width: 0;
+        min-height: 43px;
+        padding: 7px;
+        border-right: 1px solid #2d332f;
+        border-bottom: 1px solid #2d332f;
+      }
+
+      .ex-record-grid > div.wide { grid-column: 1 / -1; }
+
+      .ex-record-grid b {
+        display: block;
+        overflow-wrap: anywhere;
+        margin-top: 4px;
+        color: #eef0ee;
+        font-size: 7.5px;
+        line-height: 1.3;
+      }
+
+      .ex-section-title {
+        margin-top: 10px;
+        padding: 0 1px 5px;
+        border-bottom: 1px solid #333934;
+        color: #ffc400;
+        font-size: 7px;
+        font-weight: 950;
+        letter-spacing: .6px;
+      }
+
+      .ex-audit > div {
+        padding: 7px 2px;
+        border-bottom: 1px solid #272d29;
+      }
+
+      .ex-audit strong,
+      .ex-audit span,
+      .ex-audit small {
+        display: block;
+        overflow-wrap: anywhere;
+      }
+
+      .ex-audit strong { color: #eef0ee; font-size: 7px; }
+      .ex-audit span { margin-top: 3px; color: #929994; font-size: 5.5px; }
+      .ex-audit small { margin-top: 3px; color: #b5bab6; font-size: 5.5px; line-height: 1.35; }
+      .ex-audit .empty { color: #858c87; font-size: 6.5px; }
+
+      .ex-record-files {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+        padding: 7px 0 2px;
+      }
+
+      .ex-record-files a,
+      .ex-record-files span {
+        max-width: 100%;
+        overflow: hidden;
+        padding: 5px 7px;
+        border: 1px solid #373d38;
+        border-radius: 4px;
+        color: #cbd0cc;
+        font-size: 6px;
+        text-decoration: none;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .ex-record-actions {
+        display: grid;
+        gap: 5px;
+        margin-top: 9px;
+      }
+
+      .ex-record-actions button {
+        min-height: 36px;
+        border: 1px solid #444a45;
+        border-radius: 4px;
+        background: #0e110f;
+        color: #e4e6e4;
+        font-size: 7px;
+        font-weight: 950;
+      }
+
+      .ex-record-actions .primary { border-color: #ffc400; background: #ffc400; color: #111; }
+      .ex-record-actions .danger { border-color: rgba(255,104,86,.55); color: #ff8c7a; }
     `}</style>
   );
 }

@@ -275,7 +275,8 @@ export function getIXITransactRecordIndex(records = []) {
       const documentType = clean(
         document?.documentType || document?.type || "record"
       ).toLowerCase();
-      const mapped = TYPE_META[documentType] || {
+      const expenseCorrection = documentType === "adjustment" && document?.metadata?.expenseCorrection === true;
+      const mapped = (expenseCorrection ? TYPE_META.expense : TYPE_META[documentType]) || {
         category: "other",
         moduleId: clean(document?.metadata?.transactModule)
       };

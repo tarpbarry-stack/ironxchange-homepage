@@ -66,7 +66,8 @@ function recordText(record = {}, metadata = {}) {
     metadata?.acquisitionCategory,
     metadata?.costCategory,
     metadata?.costPhase,
-    metadata?.expenseCategory
+    metadata?.expenseCategory,
+    metadata?.expenseCostPurpose
   ].map(lower).join(" ");
 }
 
