@@ -1,6 +1,11 @@
 name: Deploy IX-Core Ticket deletion
 
 on:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/deploy-ixi-core-ticket-delete.yml
   workflow_dispatch:
     inputs:
       commit_sha:
@@ -21,7 +26,7 @@ jobs:
     env:
       AWS_REGION: ${{ secrets.AWS_REGION }}
       AWS_INSTANCE_ID: ${{ secrets.AWS_INSTANCE_ID }}
-      IXI_CORE_SHA: ${{ inputs.commit_sha }}
+      IXI_CORE_SHA: ${{ inputs.commit_sha || '8b62d6a035c2efb7e80457dd53d5c769016abf65' }}
 
     steps:
       - name: Validate immutable release
