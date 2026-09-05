@@ -1,11 +1,26 @@
 import { getIXITransactModules } from "./IXITransactModuleRegistry";
+import IXITransactRecordIndex from "./IXITransactRecordIndex";
 
 const clean = value => String(value ?? "").trim();
 
 export default function IXITransactConsolePanel({
   context = {},
-  onOpenModule = null
+  face = 1,
+  financialRecords = [],
+  onOpenModule = null,
+  onOpenWorksheet = null
 }) {
+  if (Number(face) === 1) {
+    return (
+      <IXITransactRecordIndex
+        context={context}
+        financialRecords={financialRecords}
+        onOpenModule={onOpenModule}
+        onOpenWorksheet={onOpenWorksheet}
+      />
+    );
+  }
+
   const objectType = clean(context?.primary?.objectType);
   const modules = getIXITransactModules({
     objectType,
