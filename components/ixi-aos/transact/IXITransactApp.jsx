@@ -60,7 +60,7 @@ export default function IXITransactApp({
   onCycleOutline = null,
   armedDestination = "",
   onSendToArmedDestination = null,
-  moduleOrder = [],
+  moduleOrder = null,
   onModuleOrderChange = null,
 }) {
   const context = useMemo(

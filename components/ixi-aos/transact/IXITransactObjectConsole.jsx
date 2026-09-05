@@ -256,7 +256,7 @@ export default function IXITransactObjectConsole({
                     onCycleOutline={onCycleOutline}
                     armedDestination={armedDestination}
                     onSendToArmedDestination={onSendToArmedDestination}
-                    moduleOrder={ixiState?.transactModuleOrder || []}
+                    moduleOrder={ixiState?.transactModuleOrder}
                     onModuleOrderChange={persistModuleOrder}
                   />
                   <IXIAosActionNotice variant="field" />

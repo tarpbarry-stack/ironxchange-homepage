@@ -96,7 +96,7 @@ function SortableModuleTile({ item, onOpen }) {
 
 export default function IXITransactSortableLauncher({
   modules = [],
-  moduleOrder = [],
+  moduleOrder = null,
   onOpen = null,
   onOrderChange = null,
 }) {
@@ -105,6 +105,9 @@ export default function IXITransactSortableLauncher({
     [modules],
   );
   const moduleKey = moduleIds.join("|");
+  const savedOrderKey = Array.isArray(moduleOrder)
+    ? moduleOrder.map(clean).join("|")
+    : "";
   const [orderedIds, setOrderedIds] = useState(() =>
     reconcileIXITransactModuleOrder(moduleOrder, moduleIds),
   );
@@ -114,7 +117,7 @@ export default function IXITransactSortableLauncher({
     setOrderedIds(
       reconcileIXITransactModuleOrder(moduleOrder, moduleIds),
     );
-  }, [moduleOrder, moduleKey]);
+  }, [savedOrderKey, moduleKey]);
 
   const modulesById = useMemo(
     () => new Map(modules.map(item => [clean(item?.id), item])),
