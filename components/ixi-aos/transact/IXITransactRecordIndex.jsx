@@ -321,7 +321,9 @@ export function getIXITransactRecordIndex(records = []) {
     records: normalized,
     categories,
     totalCount: normalized.length,
-    openCount: normalized.filter(record => record.open).length
+    totalAmount: money(
+      normalized.reduce((sum, record) => sum + record.amount, 0)
+    )
   };
 }
 
@@ -405,13 +407,13 @@ export default function IXITransactRecordIndex({
         {!category ? (
           <>
             <section className="txri-summary">
-              <div>
-                <span>ALL RECORDS</span>
+              <div className="txri-record-kpi">
+                <span>RECORDS</span>
                 <strong>{index.totalCount}</strong>
               </div>
-              <div>
-                <span>OPEN</span>
-                <strong>{index.openCount}</strong>
+              <div className="txri-total-kpi">
+                <span>TOTAL IN MACHINE</span>
+                <strong>{formatMoney(index.totalAmount)}</strong>
               </div>
             </section>
 
@@ -520,10 +522,15 @@ export default function IXITransactRecordIndex({
         .txri-header small{display:block;max-width:244px;margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#858b88;font-size:7px;font-weight:800;text-transform:uppercase}
         .txri-header button{width:30px;height:30px;margin:-1px -1px 0 6px;border:1px solid rgba(255,255,255,.14);border-radius:7px;background:#111313;color:#ffc400;font-size:21px;font-weight:900;cursor:pointer}
         .txri-body{position:absolute;inset:61px 0 9px;overflow-x:hidden;overflow-y:auto;padding:9px;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.18) transparent}
-        .txri-summary{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:8px}
-        .txri-summary div{height:50px;padding:8px 10px;border:1px solid rgba(255,255,255,.09);border-radius:7px;background:#101313;display:flex;align-items:center;justify-content:space-between}
+        .txri-summary{display:grid;grid-template-columns:82px minmax(0,1fr);gap:7px;margin-bottom:8px}
+        .txri-summary div{height:56px;padding:8px 10px;border:1px solid rgba(255,255,255,.09);border-radius:7px;background:#101313;display:flex;flex-direction:column;align-items:flex-start;justify-content:center}
         .txri-summary span{color:#969c99;font-size:8px;font-weight:900;letter-spacing:.045em}
-        .txri-summary strong{color:#ffc400;font-size:20px;line-height:1;font-weight:950}
+        .txri-summary strong{margin-top:5px;color:#ffc400;font-size:18px;line-height:1;font-weight:950}
+        .txri-summary .txri-record-kpi{align-items:center;padding-inline:7px}
+        .txri-summary .txri-record-kpi strong{font-size:20px}
+        .txri-summary .txri-total-kpi{border-color:rgba(255,196,0,.68);background:linear-gradient(135deg,rgba(255,196,0,.11),rgba(255,196,0,.025) 62%),#101313;box-shadow:inset 0 0 0 1px rgba(255,196,0,.08),0 0 14px rgba(255,196,0,.06)}
+        .txri-summary .txri-total-kpi span{color:#ffc400}
+        .txri-summary .txri-total-kpi strong{width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#f4f4f4;font-size:19px}
         .txri-categories{display:flex;flex-direction:column;border:1px solid rgba(255,255,255,.09);border-radius:8px;overflow:hidden}
         .txri-categories button{position:relative;min-height:43px;padding:7px 23px 7px 10px;border:0;border-bottom:1px solid rgba(255,255,255,.07);background:#0e1110;color:#f1f1f1;display:grid;grid-template-columns:minmax(0,1fr) 28px 64px;align-items:center;text-align:left;cursor:pointer}
         .txri-categories button:last-child{border-bottom:0}

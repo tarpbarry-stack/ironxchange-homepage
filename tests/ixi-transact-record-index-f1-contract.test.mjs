@@ -54,6 +54,13 @@ test("$F1 indexes authoritative records without copying them", () => {
   assert.match(source, /category: mapped\.category/);
   assert.match(source, /recordsForCategory\.length/);
   assert.match(source, /recordsForCategory\.reduce/);
+  assert.match(source, /totalAmount:\s*money\(/);
+  assert.match(source, /normalized\.reduce\(\(sum, record\) => sum \+ record\.amount, 0\)/);
+  assert.match(source, /TOTAL IN MACHINE/);
+  assert.match(source, /formatMoney\(index\.totalAmount\)/);
+  assert.match(source, /grid-template-columns:82px minmax\(0,1fr\)/);
+  assert.match(source, /txri-total-kpi\{border-color:rgba\(255,196,0,\.68\)/);
+  assert.doesNotMatch(source, /<span>OPEN<\/span>/);
   assert.match(source, /IXI MACHINE · F\$1/);
   assert.match(source, /NO MACHINE RECORDS/);
 });
