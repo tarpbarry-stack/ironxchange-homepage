@@ -154,7 +154,7 @@ function QuoteEditor({ input, patch, patchRpo, setAdditionalTerms }) {
   </div>;
 }
 
-export default function IXIQuoteApp({ context = {}, object = {}, initialRecord = null, onBack = null, onRecordChange = null }) {
+export default function IXIQuoteApp({ context = {}, object = {}, dealId = "", initialRecord = null, onBack = null, onAdvance = null, onRecordChange = null }) {
   const [mounted, setMounted] = useState(false);
   const [record, setRecord] = useState(initialRecord);
   const [input, setInput] = useState(() => initialRecord ? quoteInputFromRecord(initialRecord) : { ...EMPTY });
@@ -165,7 +165,10 @@ export default function IXIQuoteApp({ context = {}, object = {}, initialRecord =
   const [savedMessage, setSavedMessage] = useState("");
 
   useEffect(() => { setMounted(true); }, []);
-  useEffect(() => { if (initialRecord) { setRecord(initialRecord); setInput(quoteInputFromRecord(initialRecord)); } }, [initialRecord]);
+  useEffect(() => {
+    setRecord(initialRecord || null);
+    setInput(initialRecord ? quoteInputFromRecord(initialRecord) : { ...EMPTY, dealId });
+  }, [dealId, initialRecord]);
   useEffect(() => {
     if (!worksheetOpen) return undefined;
     const previous = document.body.style.overflow;
@@ -173,7 +176,7 @@ export default function IXIQuoteApp({ context = {}, object = {}, initialRecord =
     return () => { document.body.style.overflow = previous; };
   }, [worksheetOpen]);
 
-  const draft = useMemo(() => record ? updateIXIQuoteDraft(record, { context, object, input }) : createIXIQuoteDraft({ context, object, input }), [record, context, object, input]);
+  const draft = useMemo(() => record ? updateIXIQuoteDraft(record, { context, object, input }) : createIXIQuoteDraft({ context, object, input: { ...input, dealId } }), [record, context, object, input, dealId]);
   const completeness = useMemo(() => getIXIQuoteCompleteness(draft), [draft]);
   const patch = (key, value) => { setInput(current => ({ ...current, [key]: value })); setSavedMessage(""); };
   const patchRpo = (key, value) => { setInput(current => ({ ...current, rpo: { ...(current.rpo || {}), [key]: value } })); setSavedMessage(""); };
@@ -239,7 +242,7 @@ export default function IXIQuoteApp({ context = {}, object = {}, initialRecord =
       <div className="qt-card-meter"><div><i style={{ width: `${completeness.percent}%` }} /></div><span>{completeness.percent}% FORMAL COMPLETENESS</span></div>
       {error ? <div className="qt-card-error">{error}</div> : null}
       {savedMessage ? <div className="qt-card-saved">{savedMessage}</div> : null}
-      <div className="qt-card-actions"><button className="secondary" onClick={() => setWorksheetOpen(true)}>OPEN WORKSHEET</button><button className="primary" disabled={busy} onClick={() => save()}>{busy ? "SAVING…" : record ? "SAVE" : "CREATE"}</button></div>
+      <div className="qt-card-actions"><button className="secondary" onClick={() => setWorksheetOpen(true)}>OPEN WORKSHEET</button><button className="primary" disabled={busy} onClick={() => save()}>{busy ? "SAVING…" : record ? "SAVE" : "CREATE"}</button>{record?.financialBinding?.financialDocumentId ? <button className="primary" disabled={busy} onClick={() => onAdvance?.(record)}>CREATE SALES ORDER</button> : null}</div>
       <div className="qt-card-foot">SAVE ANYTIME · COMPLETE AS NEEDED · {draft.identity?.number || "NEW QUOTE"}</div>
     </div>
     {worksheet}

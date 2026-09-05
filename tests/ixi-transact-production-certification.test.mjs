@@ -40,10 +40,10 @@ test("Sales Order and Invoice are separate launcher entries with canonical forms
   assert.ok(invoiceIndex > orderIndex);
   assert.match(shell, /import IXIEquipmentSaleApp/u);
   assert.match(shell, /moduleId === "sales-order" \|\| moduleId === "invoice"/u);
-  assert.match(shell, /initialRecord=\{salesOrderSnapshot\}/u);
-  assert.match(shell, /invoice=\{salesInvoiceSnapshot\}/u);
+  assert.match(shell, /initialRecord=\{selectedSalesOrderSnapshot\}/u);
+  assert.match(shell, /invoice=\{selectedSalesInvoiceSnapshot\}/u);
   assert.match(shell, /initialTab=\{moduleId === "invoice" \? "invoice" : "order"\}/u);
-  assert.match(shell, /onOpenInvoice=\{\(\) => setModuleId\("invoice"\)\}/u);
+  assert.match(shell, /stageId: "invoice"/u);
   assert.match(app, /entryMode === "invoice"/u);
   assert.match(app, /if \(entryMode === "sales-order"\) return initialRecord \|\| base/u);
   assert.match(app, /signedPackageHash/u);
@@ -70,7 +70,9 @@ test("Sales Order and Invoice are separate launcher entries with canonical forms
   assert.match(app, /RENTAL PURCHASE OPTION/u);
   assert.match(app, /AMOUNT APPLIED \/ PAYMENT/u);
   assert.match(app, /ADDITIONAL TERMS/u);
-  assert.match(shell, /changePayload\?\.invoice \|\| salesInvoiceSnapshot/u);
+  assert.match(shell, /changePayload\?\.invoice \|\| selectedSalesInvoiceSnapshot/u);
+  assert.match(shell, /IXISalesDealRegister/u);
+  assert.match(shell, /findIXISalesDeal/u);
   assert.match(context, /salesTermsDocument/u);
 });
 
@@ -92,7 +94,8 @@ test("equipment Quote is a canonical AWS-backed application with a full branded 
   assert.match(app, /SAVE IS ALWAYS AVAILABLE/u);
   assert.match(app, /RENTAL PURCHASE OPTION TERMS/u);
   assert.match(app, /ADDITIONAL TRANSACTION TERMS/u);
-  assert.match(shell, /initialRecord=\{quoteSnapshot\}/u);
+  assert.match(shell, /initialRecord=\{selectedQuoteSnapshot\}/u);
+  assert.match(shell, /dealId=\{salesRoute/u);
 });
 
 test("Purchase Order lifecycle persists with revision control and canonical readback", async () => {

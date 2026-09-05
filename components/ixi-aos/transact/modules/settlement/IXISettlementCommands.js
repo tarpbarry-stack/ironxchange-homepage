@@ -134,6 +134,7 @@ export async function createIXISettlement({
           metadata: {
             ...metadata,
             transactModule: "settlement",
+            dealId: clean(draft?.identity?.dealId),
             recordSchema: draft.schema,
             saleId: draft.references.saleId,
             saleNumber: draft.references.saleNumber,
@@ -184,7 +185,7 @@ export async function updateIXISettlement({
     commandId,
     idempotencyKey: `ixi-settlement:${action}:${commandId}`,
     patch: { assetSettlement: record, status: clean(record.status) },
-    metadata: { ...metadata, transactModule: "settlement", action },
+    metadata: { ...metadata, transactModule: "settlement", dealId: clean(record?.identity?.dealId), action },
     signal,
   });
   const stored = storedRecord(response);

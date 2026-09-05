@@ -38,7 +38,7 @@ export function createIXIEquipmentSaleDraft({ context = {}, quote = null, input 
   const configuredTerms = object(context?.entity?.salesTermsDocument);
   return {
     schema: IXI_EQUIPMENT_SALE_SCHEMA,
-    identity: { salesOrderId: "", financialDocumentId: "", number: "", revision: 1, clientRequestId: globalThis.crypto?.randomUUID?.() || `SO-${Date.now()}` },
+    identity: { dealId: clean(input.dealId || source?.identity?.dealId), salesOrderId: "", financialDocumentId: "", number: "", revision: 1, clientRequestId: globalThis.crypto?.randomUUID?.() || `SO-${Date.now()}` },
     context: { primaryPassportId: clean(context?.primary?.passportId), primaryObjectId: clean(context?.primary?.objectId), primaryObjectType: clean(context?.primary?.objectType), entityPassportId: clean(context?.entity?.passportId), actorPassportId: clean(context?.actor?.passportId), actorId: clean(context?.actor?.employeeId || context?.actor?.userId), actorLabel: clean(context?.actor?.label) },
     brand: { ...object(source.brand), companyName: clean(source?.brand?.companyName || context?.entity?.companyName), legalName: clean(source?.brand?.legalName || context?.entity?.legalName), logoUrl: clean(source?.brand?.logoUrl || context?.entity?.logoUrl), accentColor: clean(source?.brand?.accentColor || context?.entity?.accentColor || "#ffc400"), phone: clean(source?.brand?.phone || context?.entity?.phone), email: clean(source?.brand?.email || context?.entity?.email), address: clean(source?.brand?.address || context?.entity?.address) },
     dealType: dealType(input.dealType || source.dealType),

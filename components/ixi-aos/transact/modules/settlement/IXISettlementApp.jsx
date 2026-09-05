@@ -47,6 +47,7 @@ function Input({ value, onChange, ...p }) {
 export default function IXISettlementApp({
   context = {},
   object = {},
+  dealId = "",
   sale = null,
   acquisition = null,
   financialRecords = [],
@@ -202,6 +203,7 @@ export default function IXISettlementApp({
         projection,
         waterfall,
         input: {
+          dealId,
           reviewedBy,
           approvalNote,
           liabilities,

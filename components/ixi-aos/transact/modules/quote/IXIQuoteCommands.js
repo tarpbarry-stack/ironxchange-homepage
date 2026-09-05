@@ -71,7 +71,7 @@ export async function createIXIQuote({ object = {}, context = {}, record = {}, s
           attachments: Array.isArray(record.documents) ? record.documents : []
         },
         additionalReferences: refs,
-        metadata: { transactModule: "quote", quoteSchema: record.schema, quoteRevision: record?.identity?.revision, quoteStatus: record.status, customerLabel: clean(record?.customer?.name) }
+        metadata: { transactModule: "quote", dealId: clean(record?.identity?.dealId), quoteSchema: record.schema, quoteRevision: record?.identity?.revision, quoteStatus: record.status, customerLabel: clean(record?.customer?.name) }
       });
       return { response, record: canonicalize(record, response) };
     }
@@ -98,7 +98,7 @@ export async function updateIXIQuote({ record = {}, action = "save", signal } = 
       accountingTreatment: { classification: "equipment-sales-offer", economicEvent: false, createsRevenueCommitment: false, createsBilledRevenue: false, createsReceivable: false, createsCashEvent: false, salesOrderCreated: false },
       attachments: Array.isArray(record.documents) ? record.documents : []
     },
-    metadata: { transactModule: "quote", action, quoteStatus: record.status, quoteRevision: record?.identity?.revision },
+    metadata: { transactModule: "quote", dealId: clean(record?.identity?.dealId), action, quoteStatus: record.status, quoteRevision: record?.identity?.revision },
     signal
   });
   return { response, record: canonicalize(record, response) };
