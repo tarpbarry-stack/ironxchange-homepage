@@ -258,24 +258,7 @@ onDoubleClick={(e) => {
 
         @media (max-width: 850px) {
           .ixi-environment-rail {
-            overflow-x: auto;
-            overflow-y: hidden;
-            justify-content: flex-start;
-            gap: 22px;
-            padding-bottom: 6px;
-            scrollbar-width: none;
-            -ms-overflow-style: none;
-          }
-
-          .ixi-environment-rail::-webkit-scrollbar {
             display: none;
-          }
-
-          .ixi-power-switch {
-            position: sticky;
-            right: 0;
-            bottom: auto;
-            flex: 0 0 18px;
           }
         }
       `}</style>
