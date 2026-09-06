@@ -1520,6 +1520,11 @@ const listingPayload = {
 
         workflowStatus,
 
+        ownershipRole: "non-owner",
+        ownershipStatus: "reference",
+        machineOrigin: "url-import",
+        sourceUrl: importUrl,
+
         /*
          * NEW MACHINE PLACEMENT DATA
          */

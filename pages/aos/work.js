@@ -81,6 +81,10 @@ import {
   hydrateIXIListingCollection
 } from "../../lib/listings/hydrateIXIListingMedia";
 
+import {
+  filterAosOwnedMachines
+} from "../../lib/listings/IXIAosOwnedInventoryPolicy.mjs";
+
 import { captureIXEvent } from "../../lib/posthog";
 
 import IXIDragEngine from "../../components/ixi-chassis/IXIDragEngine";
@@ -376,7 +380,7 @@ setSavedIds(
 );
 
 const res = await fetch(
-  `/api/account-listings?authorId=${encodeURIComponent(String(userId))}`
+  `/api/account-listings?scope=aos-owned&authorId=${encodeURIComponent(String(userId))}`
 );
 
 const data = await res.json();
@@ -423,7 +427,7 @@ console.log(
 
 if (Array.isArray(data)) {
   const hydratedListings =
-  await hydrateIXIListingCollection(data);
+  await hydrateIXIListingCollection(filterAosOwnedMachines(data));
 
 const firstHydratedIXIListing =
   hydratedListings.find(item =>

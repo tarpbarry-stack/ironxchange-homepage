@@ -8,7 +8,16 @@ import {
   normalizeSharetribeListings
 } from "../../lib/listings/normalizeSharetribeListings";
 
+import {
+  filterAosOwnedMachines
+} from "../../lib/listings/IXIAosOwnedInventoryPolicy.mjs";
+
 export default async function handler(req, res) {
+  res.setHeader(
+    "Cache-Control",
+    "private, no-store, max-age=0, must-revalidate"
+  );
+
   try {
     const { authorId } = req.query;
 
@@ -28,8 +37,13 @@ export default async function handler(req, res) {
         rawInventory
       );
 
+    const requestedInventory =
+      req.query.scope === "aos-owned"
+        ? filterAosOwnedMachines(normalizedListings)
+        : normalizedListings;
+
     const activeInventory =
-      normalizedListings
+      requestedInventory
         .filter(item => {
           return (
             item.listingStatus !== "deleted" &&
