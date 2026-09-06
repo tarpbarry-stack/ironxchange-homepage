@@ -176,8 +176,9 @@ export default function IXISalesDealStyles() {
         cursor: pointer;
       }
       .ixi-deal-stage-rail button.available-action {
-        color: #8a8f8b;
+        color: #ffc400;
         background: #0b0e0c;
+        box-shadow: inset 0 0 0 1px #5f5216;
         cursor: pointer;
       }
       .ixi-deal-stage-rail button.next {

@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import {
+  attestIXIEquipmentSaleSigned,
   createIXIEquipmentSaleSigningInvitation,
+  ensureIXIEquipmentSaleInvoice,
   issueIXIEquipmentInvoice,
   saveIXIEquipmentInvoice,
   saveIXIEquipmentSale,
@@ -56,6 +58,89 @@ function Area({ value, onChange, ...rest }) {
       value={value ?? ""}
       onChange={(event) => onChange(event.target.value)}
     />
+  );
+}
+
+function ManualSignatureControl({ value, onChange, onSubmit, busy, signed }) {
+  if (signed)
+    return (
+      <section className="es-manual-signature complete">
+        <strong>✓ SIGNED DOCUMENTS ON FILE</strong>
+        <span>
+          {value.signerName || "CUSTOMER"} ·{" "}
+          {value.signerDate || "DATE RECORDED"}
+        </span>
+        <small>
+          {clean(value.receivedVia || "recorded").toUpperCase()} · AUDIT
+          EVIDENCE RETAINED
+        </small>
+      </section>
+    );
+  return (
+    <section className="es-manual-signature">
+      <strong>MANUAL SIGNATURE CONTROL</strong>
+      <p>
+        Use when the signed Sales Order and Terms were returned outside IXI.
+      </p>
+      <label>
+        <span>SIGNER NAME</span>
+        <Input
+          value={value.signerName}
+          onChange={(next) => onChange("signerName", next)}
+        />
+      </label>
+      <div>
+        <label>
+          <span>SIGNED DATE</span>
+          <Input
+            type="date"
+            value={value.signerDate}
+            onChange={(next) => onChange("signerDate", next)}
+          />
+        </label>
+        <label>
+          <span>RECEIVED VIA</span>
+          <select
+            value={value.receivedVia}
+            onChange={(event) => onChange("receivedVia", event.target.value)}
+          >
+            <option value="email">EMAIL</option>
+            <option value="paper">PAPER</option>
+            <option value="other">OTHER</option>
+          </select>
+        </label>
+      </div>
+      <label>
+        <span>REFERENCE / NOTE</span>
+        <Input
+          value={value.externalReference}
+          onChange={(next) => onChange("externalReference", next)}
+          placeholder="Email subject, file, or paper location"
+        />
+      </label>
+      <label className="es-manual-attestation">
+        <input
+          type="checkbox"
+          checked={value.attestation === true}
+          onChange={(event) => onChange("attestation", event.target.checked)}
+        />
+        <span>
+          I confirm the customer-signed Sales Order and Terms are on file.
+        </span>
+      </label>
+      <button
+        type="button"
+        disabled={
+          busy ||
+          !value.attestation ||
+          clean(value.signerName).length < 2 ||
+          !value.signerDate
+        }
+        onClick={onSubmit}
+      >
+        {busy ? "RECORDING…" : "MARK SIGNED"}
+      </button>
+    </section>
   );
 }
 
@@ -839,6 +924,16 @@ export default function IXIEquipmentSaleApp({
     memo: clean(invoice?.memo || invoice?.metadata?.administrativeNote),
     directEntryReason: clean(invoice?.metadata?.directEntryReason),
   }));
+  const [manualSignature, setManualSignature] = useState(() => ({
+    signerName: clean(
+      initialRecord?.customer?.contactName || initialRecord?.customer?.name,
+    ),
+    signerTitle: "",
+    signerDate: new Date().toISOString().slice(0, 10),
+    receivedVia: "email",
+    externalReference: "",
+    attestation: false,
+  }));
   useEffect(() => setMounted(true), []);
   useEffect(() => {
     if (initialRecord) {
@@ -912,11 +1007,25 @@ export default function IXIEquipmentSaleApp({
         record: workingRecord,
         action: effectiveAction,
       });
+      let savedRecord = result.record;
+      let ensuredInvoice = invoiceRecord;
+      if (entryMode === "sales-order" && !invoiceRecord) {
+        const ensured = await ensureIXIEquipmentSaleInvoice(result.record);
+        savedRecord = hydrateIXIEquipmentSaleRecord({
+          context,
+          record: ensured.order,
+        });
+        ensuredInvoice = ensured.invoice;
+        setInvoiceRecord(ensured.invoice);
+      }
       if (
         wasNew &&
         invoiceRecord &&
         clean(invoiceRecord.financialState).toLowerCase() === "draft" &&
-        !clean(invoiceRecord.sourceFinancialDocumentId || invoiceRecord.metadata?.salesOrderId)
+        !clean(
+          invoiceRecord.sourceFinancialDocumentId ||
+            invoiceRecord.metadata?.salesOrderId,
+        )
       ) {
         const linked = await saveIXIEquipmentInvoice({
           object,
@@ -951,14 +1060,18 @@ export default function IXIEquipmentSaleApp({
         });
       }
       setRevisionOpen(false);
-      setRecord(result.record);
-      setInput(saleInputFromRecord(result.record));
+      setRecord(savedRecord);
+      setInput(saleInputFromRecord(savedRecord));
       await onRecordChange?.(
-        result.record,
-        { action: effectiveAction, response: result.response },
+        savedRecord,
+        {
+          action: effectiveAction,
+          response: result.response,
+          invoice: ensuredInvoice,
+        },
         context,
       );
-      return result.record;
+      return savedRecord;
     } catch (caught) {
       setError(clean(caught?.message) || "Sales Order could not be saved.");
       return null;
@@ -1003,6 +1116,43 @@ export default function IXIEquipmentSaleApp({
       );
     } catch (caught) {
       setError(clean(caught?.message));
+    } finally {
+      setBusy(false);
+    }
+  }
+  async function markSignedOutsideIXI() {
+    setBusy(true);
+    setError("");
+    try {
+      const result = await attestIXIEquipmentSaleSigned(draft, {
+        ...manualSignature,
+        existingInvoiceId: clean(
+          invoiceRecord?.financialDocumentId ||
+            invoiceRecord?.financialBinding?.financialDocumentId,
+        ),
+      });
+      const signedRecord = hydrateIXIEquipmentSaleRecord({
+        context,
+        record: result.order,
+      });
+      setRecord(signedRecord);
+      setInput(saleInputFromRecord(signedRecord));
+      if (result.invoice) setInvoiceRecord(result.invoice);
+      await onRecordChange?.(
+        signedRecord,
+        {
+          action: "manual-signature-attestation",
+          response: result.response,
+          invoice: result.invoice,
+        },
+        context,
+      );
+      return signedRecord;
+    } catch (caught) {
+      setError(
+        clean(caught?.message) || "Manual signature could not be recorded.",
+      );
+      return null;
     } finally {
       setBusy(false);
     }
@@ -1054,7 +1204,11 @@ export default function IXIEquipmentSaleApp({
       setInvoiceRecord(issued.invoice);
       await onRecordChange?.(
         record,
-        { action: "issue-invoice", response: issued.response, invoice: issued.invoice },
+        {
+          action: "issue-invoice",
+          response: issued.response,
+          invoice: issued.invoice,
+        },
         context,
       );
       return issued.invoice;
@@ -1072,7 +1226,9 @@ export default function IXIEquipmentSaleApp({
         invoiceRecord?.metadata?.salesOrderId,
     ),
   );
-  const invoiceLocked = Boolean(invoiceRecord) && clean(invoiceRecord?.financialState).toLowerCase() !== "draft";
+  const invoiceLocked =
+    Boolean(invoiceRecord) &&
+    clean(invoiceRecord?.financialState).toLowerCase() !== "draft";
   const hasSavedOrder = Boolean(
     clean(
       initialRecord?.financialBinding?.financialDocumentId ||
@@ -1091,6 +1247,10 @@ export default function IXIEquipmentSaleApp({
     "signed-invoice-pending",
     "signed",
   ].includes(clean(record?.status).toLowerCase());
+  const signatureCompleted = Boolean(
+    clean(record?.signing?.signedAt) &&
+    clean(record?.signing?.signedPackageHash),
+  );
   const orderLocked = signedOrder && !revisionOpen;
   const activeLabel =
     activeStageId === "signed"
@@ -1149,7 +1309,12 @@ export default function IXIEquipmentSaleApp({
                   {busy ? "WORKING…" : "SAVE"}
                 </button>
                 {tab === "invoice" && !invoiceLocked ? (
-                  <button type="button" className="issue" disabled={busy} onClick={issueInvoice}>
+                  <button
+                    type="button"
+                    className="issue"
+                    disabled={busy}
+                    onClick={issueInvoice}
+                  >
                     ISSUE INVOICE
                   </button>
                 ) : null}
@@ -1333,9 +1498,9 @@ export default function IXIEquipmentSaleApp({
                           key={key}
                           label={key.replace(/([A-Z])/g, " $1").toUpperCase()}
                         >
-                              <Input
-                                disabled={orderLocked}
-                                inputMode="decimal"
+                          <Input
+                            disabled={orderLocked}
+                            inputMode="decimal"
                             value={input[key]}
                             onChange={(v) => patch(key, v)}
                           />
@@ -1516,6 +1681,32 @@ export default function IXIEquipmentSaleApp({
         </div>
         {error ? <div className="es-error">{error}</div> : null}
         {revisionControl}
+        {activeStageId === "signed" ? (
+          <ManualSignatureControl
+            value={
+              signatureCompleted
+                ? {
+                    ...manualSignature,
+                    signerName: clean(
+                      record?.signing?.signerName || manualSignature.signerName,
+                    ),
+                    signerDate: clean(
+                      record?.signing?.signerDate || record?.signing?.signedAt,
+                    ).slice(0, 10),
+                    receivedVia: clean(
+                      record?.signing?.receivedVia || "electronic",
+                    ),
+                  }
+                : manualSignature
+            }
+            onChange={(key, value) =>
+              setManualSignature((current) => ({ ...current, [key]: value }))
+            }
+            onSubmit={markSignedOutsideIXI}
+            busy={busy}
+            signed={signatureCompleted}
+          />
+        ) : null}
         <CardEditor
           invoiceEntry={invoiceEntry}
           linkedInvoice={linkedInvoice}
@@ -1552,7 +1743,12 @@ export default function IXIEquipmentSaleApp({
                 : "SAVE ORDER"}
           </button>
           {invoiceEntry && !invoiceLocked ? (
-            <button type="button" className="issue" disabled={busy} onClick={issueInvoice}>
+            <button
+              type="button"
+              className="issue"
+              disabled={busy}
+              onClick={issueInvoice}
+            >
               ISSUE INVOICE
             </button>
           ) : null}

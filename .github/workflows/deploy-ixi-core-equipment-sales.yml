@@ -6,7 +6,7 @@ name: Deploy IX-Core Equipment Sales
       commit_sha:
         description: Immutable IX-Core commit SHA
         required: true
-        default: 037bd6a715a98c37f2be10b4f7e00c7efd8530bf
+        default: 578c7d8c15e4bf26b696c461eb386874027968b7
   push:
     branches: [main]
     paths: [".github/workflows/deploy-ixi-core-equipment-sales.yml"]
@@ -25,7 +25,7 @@ jobs:
     env:
       AWS_REGION: ${{ secrets.AWS_REGION }}
       AWS_INSTANCE_ID: ${{ secrets.AWS_INSTANCE_ID }}
-      IXI_CORE_SHA: ${{ inputs.commit_sha || '037bd6a715a98c37f2be10b4f7e00c7efd8530bf' }}
+      IXI_CORE_SHA: ${{ inputs.commit_sha || '578c7d8c15e4bf26b696c461eb386874027968b7' }}
     steps:
       - name: Validate immutable release
         shell: bash
