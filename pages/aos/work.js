@@ -439,6 +439,38 @@ setListings(hydratedListings);
 useEffect(() => {
   let cancelled = false;
 
+  async function loadAosIdentity() {
+    try {
+      const SharetribeSdk =
+        await import("sharetribe-flex-sdk");
+
+      const aosSdk =
+        SharetribeSdk.createInstance({
+          clientId:
+            process.env
+              .NEXT_PUBLIC_SHARETRIBE_CLIENT_ID
+        });
+
+      const currentUserResponse =
+        await aosSdk.currentUser.show({
+          include: ["profileImage"]
+        });
+
+      if (cancelled) return;
+
+      setAosCurrentUser({
+        ...currentUserResponse.data.data,
+        included:
+          currentUserResponse.data.included || []
+      });
+    } catch (error) {
+      console.error(
+        "IXI AOS IDENTITY LOAD FAILED:",
+        error
+      );
+    }
+  }
+
   async function loadAosScoreboardEnvironment() {
     try {
      const environment =
@@ -474,36 +506,6 @@ setSystemIndexes(
     ? environment.systemIndexes
     : []
 );
-      
-      const SharetribeSdk =
-        await import(
-          "sharetribe-flex-sdk"
-        );
-
-      const aosSdk =
-        SharetribeSdk.createInstance({
-          clientId:
-            process.env
-              .NEXT_PUBLIC_SHARETRIBE_CLIENT_ID
-        });
-
-      const currentUserResponse =
-        await aosSdk.currentUser.show({
-          include: ["profileImage"]
-        });
-
-      if (cancelled) {
-        return;
-      }
-
-      setAosCurrentUser({
-        ...currentUserResponse.data.data,
-
-        included:
-          currentUserResponse
-            .data
-            .included || []
-      });
     } catch (error) {
       console.error(
         "IXI AOS WORK SCOREBOARD LOAD FAILED:",
@@ -512,6 +514,7 @@ setSystemIndexes(
     }
   }
 
+  loadAosIdentity();
   loadAosScoreboardEnvironment();
 
   return () => {

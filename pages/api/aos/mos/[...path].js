@@ -218,6 +218,18 @@ function sendError(res, error) {
   const status =
     Number(error?.status || 500);
 
+  console.error("AOS_BROWSER_GATEWAY_ERROR", {
+    status,
+    code:
+      error?.code ||
+      "AOS_BROWSER_GATEWAY_FAILED",
+    message:
+      error?.message ||
+      "AOS browser gateway request failed.",
+    details:
+      error?.details || null
+  });
+
   return res.status(
     Number.isFinite(status)
       ? status
