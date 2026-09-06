@@ -26,6 +26,8 @@ test("shared commercial editor supports customer-defined schema changes", () => 
   assert.match(editor, /value=\{definition\.label\}/u);
   assert.match(editor, /\+ ADD FIELD/u);
   assert.match(editor, /fieldType:\s*event\.target\.value/u);
+  assert.match(editor, /persistedEditableIds/u);
+  assert.match(editor, /delete nextFields\[fieldId\]/u);
 });
 
 test("shared commercial editor preserves typed values and durable field definitions", () => {

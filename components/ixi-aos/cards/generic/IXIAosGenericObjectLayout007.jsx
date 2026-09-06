@@ -4,6 +4,10 @@ import IXIAosCardHeaderControls from "../../card-runtime/modules/IXIAosCardHeade
 import IXIAosPrimaryMediaEditor from "../../card-runtime/modules/IXIAosPrimaryMediaEditor";
 import { persistIXIAosMediaDraft } from "../../../../lib/media/ixiMediaClient";
 import {
+  BUSINESS_IDENTIFIER_FIELD_ID,
+  BUSINESS_IDENTIFIER_ROLE
+} from "../../card-runtime/IXIAosObjectDataContract";
+import {
   asArray,
   clean,
   getFieldDefinitions,
@@ -55,8 +59,16 @@ function parseValue(definition, raw) {
   return raw;
 }
 
+function isBusinessIdentifier(definition = {}) {
+  return clean(definition?.fieldId) === BUSINESS_IDENTIFIER_FIELD_ID ||
+    clean(definition?.presentationRole).toLowerCase() === BUSINESS_IDENTIFIER_ROLE ||
+    clean(definition?.semanticRole).toLowerCase() === BUSINESS_IDENTIFIER_ROLE;
+}
+
 function choosePresentationFields(object = {}) {
-  const definitions = getFieldDefinitions(object);
+  const definitions = getFieldDefinitions(object).filter(definition =>
+    !isBusinessIdentifier(definition)
+  );
   const takeRole = role => getFieldsByRole(object, role)[0] || null;
   const used = new Set();
   const use = definition => {
@@ -79,17 +91,15 @@ function choosePresentationFields(object = {}) {
   );
   attributeDefinitions.forEach(use);
 
-  const fallback = definitions.filter(definition => !used.has(definition.fieldId));
-  const next = () => use(fallback.shift() || null);
-
   return {
-    subtitle: subtitle || next(),
-    identifier: identifier || next(),
-    group: group || next(),
-    location: location || next(),
-    contactPrimary: contactPrimary || next(),
-    contactSecondary: contactSecondary || next(),
-    attributes: attributeDefinitions.length ? attributeDefinitions : fallback.slice(0, 1)
+    subtitle,
+    identifier,
+    group,
+    location,
+    contactPrimary,
+    contactSecondary,
+    attributes: attributeDefinitions,
+    details: definitions.filter(definition => !used.has(definition.fieldId))
   };
 }
 
@@ -246,6 +256,7 @@ export default function IXIAosGenericObjectLayout007({
             {presentationFields.identifier ? <div className="go007-fact"><small>{presentationFields.identifier.label}</small><strong>{fieldValueText(runtimeObject, presentationFields.identifier)}</strong></div> : null}
             {presentationFields.group ? <div className="go007-fact"><small>{presentationFields.group.label}</small><strong>{fieldValueText(runtimeObject, presentationFields.group)}</strong></div> : null}
             {presentationFields.location ? <div className="go007-fact"><small>{presentationFields.location.label}</small><strong>{fieldValueText(runtimeObject, presentationFields.location)}</strong></div> : null}
+            {presentationFields.details.map(definition => <div className="go007-fact" key={definition.fieldId}><small>{definition.label}</small><strong>{fieldValueText(runtimeObject, definition)}</strong></div>)}
           </div>
         </section>
 

@@ -185,11 +185,17 @@ export default function IXIAosCommercialObjectEditor({
       .filter(definition => definition.fieldId);
 
     const retainedIds = new Set(normalizedDefinitions.map(definition => definition.fieldId));
+    const persistedEditableIds = new Set(
+      normalizeDefinitions(object)
+        .filter(definition => !isBusinessIdentifier(definition))
+        .map(definition => definition.fieldId)
+    );
     const nextFields = { ...getObjectFields(object) };
 
     Object.keys(nextFields).forEach(fieldId => {
-      const wasEditableSchemaField = definitions.some(definition => definition.fieldId === fieldId);
-      if (wasEditableSchemaField && !retainedIds.has(fieldId)) delete nextFields[fieldId];
+      if (persistedEditableIds.has(fieldId) && !retainedIds.has(fieldId)) {
+        delete nextFields[fieldId];
+      }
     });
 
     normalizedDefinitions.forEach(definition => {
