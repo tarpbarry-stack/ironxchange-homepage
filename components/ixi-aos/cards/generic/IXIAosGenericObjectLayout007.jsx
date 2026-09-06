@@ -172,7 +172,8 @@ export default function IXIAosGenericObjectLayout007({
   onRecords = null,
   skinId = "v12",
   onSkinChange = null,
-  showHeaderDisplayName = false
+  showHeaderDisplayName = false,
+  cardNumber = 7
 }) {
   const [runtimeObject, setRuntimeObject] = useState(object);
   const [editing, setEditing] = useState(false);
@@ -211,7 +212,11 @@ export default function IXIAosGenericObjectLayout007({
   }
 
   return (
-    <article className="ixi-generic-object-007" data-card-number="007" data-card-skin={skinId}>
+    <article
+      className="ixi-generic-object-007"
+      data-card-number={String(cardNumber).padStart(3, "0")}
+      data-card-skin={skinId}
+    >
       <header className="go007-header">
         <div className={`go007-header-copy ${showHeaderDisplayName ? "has-display-name" : ""}`.trim()}>
           <span>{objectLabel}</span>

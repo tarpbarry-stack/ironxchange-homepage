@@ -39,7 +39,11 @@ test("identity precedence does not change non-Person cards", () => {
 
 test("runtime binds Card 008 to the current Profile card", () => {
   const runtime = read("components/ixi-aos/card-runtime/IXIAosOperatingCardRuntime.jsx");
+  const profile = read("components/ixi-aos/cards/008/IXIAosCard008Profile.jsx");
+  const objectLayout = read("components/ixi-aos/cards/generic/IXIAosGenericObjectLayout007.jsx");
   assert.match(runtime, /8:\s*IXIAosCard008Profile/);
+  assert.match(profile, /cardNumber=\{8\}/);
+  assert.match(objectLayout, /data-card-number=\{String\(cardNumber\)\.padStart\(3, "0"\)\}/);
 });
 
 test("Person transactional capabilities drive the object toolbar with explicit denial precedence", () => {
