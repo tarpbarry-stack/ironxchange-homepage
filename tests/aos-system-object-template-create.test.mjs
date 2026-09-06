@@ -11,7 +11,7 @@ import {
 
 function templates() {
   return Array.from(
-    { length: 17 },
+    { length: 19 },
     (_, index) => ({
       templateNumber: index + 1,
       templateSlug:
@@ -23,7 +23,7 @@ function templates() {
 }
 
 
-test("system object picker exposes exactly cards 001 through 017", () => {
+test("system object picker exposes exactly cards 001 through 019", () => {
   const source = [
     ...templates().reverse(),
     {
@@ -39,10 +39,10 @@ test("system object picker exposes exactly cards 001 through 017", () => {
   const selected =
     getSelectableAosSystemTemplates(source);
 
-  assert.equal(selected.length, 17);
+  assert.equal(selected.length, 19);
   assert.deepEqual(
     selected.map(item => item.templateNumber),
-    Array.from({ length: 17 }, (_, index) => index + 1)
+    Array.from({ length: 19 }, (_, index) => index + 1)
   );
   assert.equal(isCompleteAosSystemTemplateSet(selected), true);
   assert.equal(formatAosCardNumber(7), "007");
@@ -52,7 +52,7 @@ test("system object picker exposes exactly cards 001 through 017", () => {
 test("an incomplete card library is rejected", () => {
   assert.equal(
     isCompleteAosSystemTemplateSet(
-      templates().slice(0, 16)
+      templates().slice(0, 18)
     ),
     false
   );
@@ -108,7 +108,7 @@ test("AOS Work routes scoreboard plus through template selection and draft provi
 });
 
 
-test("every AOS card plus opens the same 001-017 selector for a child", async () => {
+test("every AOS card plus opens the same 001-019 selector for a child", async () => {
   const [page, creationHook, picker] = await Promise.all([
     readFile(
       new URL("../pages/aos/work.js", import.meta.url),
@@ -179,6 +179,29 @@ test("every AOS card plus opens the same 001-017 selector for a child", async ()
   assert.match(picker, /parentObject = null/u);
   assert.match(picker, /SELECT CHILD CONTAINER CARD/u);
   assert.match(picker, /parentLabel=\{parentName\}/u);
+});
+
+
+test("Cards 018 and 019 are selectable creation layouts with safe draft cancellation", async () => {
+  const [equipmentCard, locationsCard, contract] = await Promise.all([
+    readFile(
+      new URL("../components/ixi-aos/cards/018/IXIAosCard018.jsx", import.meta.url),
+      "utf8"
+    ),
+    readFile(
+      new URL("../components/ixi-aos/cards/019/IXIAosCard019.jsx", import.meta.url),
+      "utf8"
+    ),
+    readFile(
+      new URL("../lib/mos/ixiAosSystemObjectTemplateContract.mjs", import.meta.url),
+      "utf8"
+    )
+  ]);
+
+  assert.match(contract, /IXI_AOS_CARD_NUMBER_MAX = 19/u);
+  assert.match(equipmentCard, /isCreationDraft/u);
+  assert.match(equipmentCard, /onDeleteObject\(object\)/u);
+  assert.match(locationsCard, /IXIAosCard018/u);
 });
 
 

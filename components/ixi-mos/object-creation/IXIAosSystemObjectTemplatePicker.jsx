@@ -17,6 +17,7 @@ import {
 } from "../../ixi-aos-card-library/IXIAosCardSampleData";
 
 import {
+  IXI_AOS_CARD_NUMBER_MAX,
   formatAosCardNumber,
   getAosTemplateNumber,
   getSelectableAosSystemTemplates,
@@ -88,7 +89,7 @@ export default function IXIAosSystemObjectTemplatePicker({
 
         if (!isCompleteAosSystemTemplateSet(selectable)) {
           throw new Error(
-            `AOS Card Library returned ${selectable.length} of 17 required layouts.`
+            `AOS Card Library returned ${selectable.length} of ${IXI_AOS_CARD_NUMBER_MAX} required layouts.`
           );
         }
 
@@ -299,7 +300,7 @@ export default function IXIAosSystemObjectTemplatePicker({
           <div className="aos-create-directory">
             <div className="aos-create-directory-title">
               <span>CARD LIBRARY</span>
-              <strong>{templates.length}/17</strong>
+              <strong>{templates.length}/{IXI_AOS_CARD_NUMBER_MAX}</strong>
             </div>
 
             <div className="aos-create-grid">

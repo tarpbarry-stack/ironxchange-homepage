@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import IXISystemIndexCard from "../../../ixi-mos/IXISystemIndexCard";
 import IXIObjectRail from "../../../ixi-object-system/IXIObjectRail";
@@ -47,10 +47,34 @@ export default function IXIAosCard018({
   defaultDisplayName = "EQUIPMENT",
   editHeading = "EDIT EQUIPMENT INDEX"
 }) {
-  const [editing, setEditing] = useState(false);
+  const objectId = clean(object?.objectId || object?.id?.uuid || object?.id);
+  const isCreationDraft =
+    clean(object?.status).toLowerCase() === "draft" &&
+    object?.metadata?.draftOnly === true &&
+    clean(object?.metadata?.creationState).toLowerCase() === "naming";
+  const [editing, setEditing] = useState(isCreationDraft);
   const [draftName, setDraftName] = useState(clean(object?.displayName));
   const items = Array.isArray(children) && children.length ? children : (Array.isArray(objects) ? objects : []);
-  const objectId = clean(object?.objectId || object?.id?.uuid || object?.id);
+
+  useEffect(() => {
+    setDraftName(clean(object?.displayName));
+
+    if (isCreationDraft) {
+      setEditing(true);
+    }
+  }, [objectId, isCreationDraft, object?.displayName]);
+
+  function cancelEditing(event) {
+    event?.preventDefault?.();
+    event?.stopPropagation?.();
+
+    if (isCreationDraft && typeof onDeleteObject === "function") {
+      onDeleteObject(object);
+      return;
+    }
+
+    setEditing(false);
+  }
 
   async function saveName(event) {
     event?.preventDefault?.();
@@ -130,7 +154,7 @@ export default function IXIAosCard018({
         <form className="c018-editor" onSubmit={saveName} onPointerDown={event => event.stopPropagation()}>
           <header>
             <div><small>CARD {String(cardDefinition.cardNumber).padStart(3, "0")} · FACE 1</small><strong>{editHeading}</strong></div>
-            <nav><button type="button" onClick={() => setEditing(false)}>CANCEL</button><button type="submit">SAVE</button></nav>
+            <nav><button type="button" onClick={cancelEditing}>CANCEL</button><button type="submit">SAVE</button></nav>
           </header>
           <main>
             <label><span>INDEX NAME</span><input autoFocus value={draftName} onChange={event => setDraftName(event.target.value)} /></label>
