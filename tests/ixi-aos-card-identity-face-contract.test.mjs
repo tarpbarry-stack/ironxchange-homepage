@@ -30,3 +30,17 @@ test("FaceLab previews expose the same Face 2 contract for cards 004 through 017
   assert.match(preview, /IXIAosCardIdentityFace cardNumber=\{cardNumber\}/u);
   assert.match(preview, /onCycleFace=\{\(\) => update\(object\.objectId, \{ face: 2 \}\)\}/u);
 });
+
+test("Face 2 permanently deletes the real AOS object only after explicit confirmation", () => {
+  const identity = read("components/ixi-aos/card-runtime/IXIAosCardIdentityFace.jsx");
+  const creation = read("components/ixi-mos/object-creation/useIXIMosObjectCreation.js");
+  const controls = read("components/ixi-aos/card-runtime/modules/IXIAosCardHeaderControls.jsx");
+
+  assert.match(identity, /PERMANENT · NO RECOVERY/u);
+  assert.match(identity, /await onDeleteObject\(object\)/u);
+  assert.match(identity, /deleteArmed \? "DELETE FOREVER" : "DELETE CARD"/u);
+  assert.match(creation, /await deleteMosObject\(\{[\s\S]*objectId/u);
+  assert.match(creation, /removeWorkspaceObjectId\([\s\S]*workspacePlacements,[\s\S]*objectId/u);
+  assert.match(creation, /OBJECT PERMANENTLY DELETED/u);
+  assert.match(controls, /onDelete\(runtimeObject\)/u);
+});

@@ -41,6 +41,7 @@ export default function IXIAosCardHeaderControls({
   const effective = hasRuntimeObject ? getObjectActionCapabilities(runtimeObject) : null;
   const [menuOpen, setMenuOpen] = useState(false);
   const [localSkinId, setLocalSkinId] = useState("v12");
+  const [deleteArmed, setDeleteArmed] = useState(false);
 
   const resolvedOnTransact = typeof onTransact === "function"
     ? onTransact
@@ -105,7 +106,20 @@ export default function IXIAosCardHeaderControls({
             </div>
             {showConsole ? <button type="button" onClick={event => { stop(event); setMenuOpen(false); onOpenConsole(); }}>OPEN CONSOLE</button> : null}
             {showHide ? <button type="button" onClick={event => { stop(event); setMenuOpen(false); onHide(); }}>HIDE</button> : null}
-            {showDelete ? <button type="button" className="danger" onClick={event => { stop(event); setMenuOpen(false); onDelete(); }}>DELETE</button> : null}
+            {showDelete ? (
+              <button type="button" className="danger" onClick={event => {
+                stop(event);
+                if (!deleteArmed) {
+                  setDeleteArmed(true);
+                  return;
+                }
+                setMenuOpen(false);
+                setDeleteArmed(false);
+                onDelete(runtimeObject);
+              }}>
+                {deleteArmed ? "DELETE FOREVER · NO RECOVERY" : "DELETE"}
+              </button>
+            ) : null}
           </div>
         ) : null}
       </div>

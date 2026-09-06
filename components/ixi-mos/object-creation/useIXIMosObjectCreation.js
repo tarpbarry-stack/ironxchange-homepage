@@ -1093,6 +1093,17 @@ export default function useIXIMosObjectCreation({
         userId || null
     });
 
+    setAosObjects?.(current =>
+      (Array.isArray(current)
+        ? current
+        : []
+      ).filter(
+        item =>
+          getMosObjectId(item) !==
+          objectId
+      )
+    );
+
     const nextPlacements =
       removeWorkspaceObjectId(
         workspacePlacements,
@@ -1103,15 +1114,35 @@ export default function useIXIMosObjectCreation({
       nextPlacements
     );
 
-    await saveWorkspaceLayout?.(
-      nextPlacements
-    );
+    const cleanupResults =
+      await Promise.allSettled([
+        Promise.resolve(
+          saveWorkspaceLayout?.(
+            nextPlacements
+          )
+        ),
+        Promise.resolve(
+          reloadMosEnvironment()
+        )
+      ]);
 
-    await reloadMosEnvironment();
+    onObjectNotice?.({
+      objectId,
+      message:
+        "OBJECT PERMANENTLY DELETED",
+      tone:
+        "success"
+    });
 
     return {
       deleted: true,
-      objectId
+      objectId,
+      workspaceCleanupComplete:
+        cleanupResults.every(
+          result =>
+            result.status ===
+            "fulfilled"
+        )
     };
   }
 
