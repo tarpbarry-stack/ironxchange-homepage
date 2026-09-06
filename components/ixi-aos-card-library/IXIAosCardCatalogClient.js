@@ -216,6 +216,26 @@ function withLocalCardDrafts(templates = []) {
     });
   }
 
+  if (!source.some(template => Number(template?.templateNumber || template?.metadata?.cardNumber) === 18)) {
+    source.push({
+      templateNumber: 18,
+      templateSlug: "aos-card-018",
+      label: "Card 018 · Equipment Index",
+      librarySection: "AOS CONTAINER LAYOUTS",
+      baseObjectType: "customer-defined-container",
+      version: 12,
+      fieldSchema: [],
+      capabilities: genericContainerCapabilities({}),
+      metadata: {
+        localCardDraft: true,
+        cardNumber: "018",
+        visualLanguage: "v12",
+        renderer: "system-index-equipment-container",
+        sampleUse: "EQUIPMENT COLLECTION / VISUAL INDEX"
+      }
+    });
+  }
+
   return source.sort((a, b) => Number(a?.templateNumber || 999) - Number(b?.templateNumber || 999));
 }
 

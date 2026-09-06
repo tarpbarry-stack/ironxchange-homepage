@@ -17,6 +17,7 @@ import IXIAosCard014 from "../ixi-aos/cards/014/IXIAosCard014";
 import IXIAosCard015 from "../ixi-aos/cards/015/IXIAosCard015";
 import IXIAosCard016 from "../ixi-aos/cards/016/IXIAosCard016";
 import IXIAosCard017 from "../ixi-aos/cards/017/IXIAosCard017";
+import IXIAosCard018 from "../ixi-aos/cards/018/IXIAosCard018";
 import IXIAosCardIdentityFace from "../ixi-aos/card-runtime/IXIAosCardIdentityFace";
 import { adaptAosCardTemplate } from "../ixi-aos/card-runtime/IXIAosCardTemplateAdapter";
 import IXIFaceLabScaledCard from "../ixi-face-studio/IXIFaceLabScaledCard";
@@ -285,6 +286,40 @@ function card017Items() {
   ];
 }
 
+function card018Sample() {
+  return {
+    objectId: "preview-card-018", entityId: "aos-card-preview-entity", objectType: "customer-defined-container",
+    singularLabel: "EQUIPMENT", pluralLabel: "EQUIPMENT", displayName: "EQUIPMENT", status: "active",
+    capabilities: { canContain: true, canCreate: true, canTransact: true, editable: true, hasConsole: true, hasRail: true, hasRelationships: true },
+    presentation: { directChildrenLabel: "CHILDREN", sampleUse: "EQUIPMENT COLLECTION / VISUAL INDEX" },
+    fields: {}, fieldDefinitions: [], relationships: [], media: [],
+    metadata: { sampleUse: "EQUIPMENT COLLECTION / VISUAL INDEX", nomenclature: { singular: "EQUIPMENT", plural: "EQUIPMENT" } }
+  };
+}
+
+function card018Items() {
+  const machines = [
+    ["2017 DEERE 544K II", "/images/2021-deere-750l.jpg", "4,500 HRS", "SOLD 2-4-2026", 2283800],
+    ["2019 KOMATSU WA500", "/images/2023-komatsu-wa475-10.jpg", "6,212 HRS", "AVAILABLE", 485000],
+    ["2019 DEERE 844K III", "/images/2020-deere-872gp.jpg", "7,105 HRS", "AVAILABLE", 395000],
+    ["2019 KOMATSU WA470", "/images/2023-komatsu-wa475-10.jpg", "5,884 HRS", "AVAILABLE", 310000]
+  ];
+  return Array.from({ length: 23 }, (_, index) => {
+    const machine = machines[index % machines.length];
+    return {
+      objectId: `c018-machine-${index + 1}`,
+      objectType: "machine",
+      singularLabel: "EQUIPMENT",
+      displayName: machine[0],
+      value: index === 0 ? machine[4] : 0,
+      presentation: { primaryDescriptor: machine[2], secondaryDescriptor: machine[3] },
+      fields: { primaryMeter: machine[2], operatingStatus: machine[3], askingPrice: index === 0 ? machine[4] : 0 },
+      publicData: { hours: machine[2], status: machine[3], price: index === 0 ? machine[4] : 0, imageUrls: [machine[1]] },
+      images: [machine[1]], media: [], fieldDefinitions: [], relationships: [], metadata: {}
+    };
+  });
+}
+
 function previewObject(template = {}, sample = {}) {
   const cardNumber = resolveCatalogCardNumber(template);
   const hasSampleFields = Object.keys(safeObject(sample?.fields)).length > 0;
@@ -299,6 +334,7 @@ function previewObject(template = {}, sample = {}) {
     else if (cardNumber === 15) resolvedSample = card015Sample();
     else if (cardNumber === 16) resolvedSample = card016Sample();
     else if (cardNumber === 17) resolvedSample = card017Sample();
+    else if (cardNumber === 18) resolvedSample = card018Sample();
   }
   const sampleFields = safeObject(resolvedSample?.fields);
   const templateFieldSchema = Array.isArray(template?.fieldSchema) ? template.fieldSchema : [];
@@ -356,6 +392,7 @@ function getInitialPreviewItems(template = {}, directItems = []) {
   const cardNumber = resolveCatalogCardNumber(template);
   if (cardNumber === 7) return getUniversal007PreviewItems();
   if (cardNumber === 17) return card017Items();
+  if (cardNumber === 18) return card018Items();
   return [];
 }
 
@@ -412,7 +449,7 @@ export default function IXIAosCardCatalogPreview({ template = null, sampleData =
   const cardNumber = resolveCatalogCardNumber(template);
   const catalogParentLabel = clean(parentLabel) || clean(template?.librarySection) || "AOS";
   const ContainerCard = cardNumber === 4 ? IXIAosCard004Personnel : cardNumber === 5 ? IXIAosCard005Personnel : cardNumber === 6 ? IXIAosCard006Personnel : null;
-  const numberedObjectCards = { 7: IXIAosCard007EmployeeApplication, 8: IXIAosCard008Profile, 9: IXIAosCard009, 10: IXIAosCard010, 11: IXIAosCard011, 12: IXIAosCard012, 13: IXIAosCard013, 14: IXIAosCard014, 15: IXIAosCard015, 16: IXIAosCard016, 17: IXIAosCard017 };
+  const numberedObjectCards = { 7: IXIAosCard007EmployeeApplication, 8: IXIAosCard008Profile, 9: IXIAosCard009, 10: IXIAosCard010, 11: IXIAosCard011, 12: IXIAosCard012, 13: IXIAosCard013, 14: IXIAosCard014, 15: IXIAosCard015, 16: IXIAosCard016, 17: IXIAosCard017, 18: IXIAosCard018 };
   const renderNumberedPreview = Card => Number(current?.face || 1) === 2
     ? <IXIAosCardIdentityFace cardNumber={cardNumber} object={object} ixiState={current} onCycleFace={() => update(object.objectId, { face: 1 })} />
     : <Card object={object} children={previewItems} projection={projection} parentLabel={catalogParentLabel} ixiState={current} onIxiStateChange={update} onCycleFace={() => update(object.objectId, { face: 2 })} onSaveObject={savePreview} onAddObject={addPreviewChild} onOpenTransact={() => setTransactOpen(true)} skinId="v12" />;
