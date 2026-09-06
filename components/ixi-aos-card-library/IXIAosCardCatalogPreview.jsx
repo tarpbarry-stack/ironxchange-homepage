@@ -17,6 +17,7 @@ import IXIAosCard014 from "../ixi-aos/cards/014/IXIAosCard014";
 import IXIAosCard015 from "../ixi-aos/cards/015/IXIAosCard015";
 import IXIAosCard016 from "../ixi-aos/cards/016/IXIAosCard016";
 import IXIAosCard017 from "../ixi-aos/cards/017/IXIAosCard017";
+import IXIAosCardIdentityFace from "../ixi-aos/card-runtime/IXIAosCardIdentityFace";
 import { adaptAosCardTemplate } from "../ixi-aos/card-runtime/IXIAosCardTemplateAdapter";
 import IXIFaceLabScaledCard from "../ixi-face-studio/IXIFaceLabScaledCard";
 import { getUniversal007PreviewItems } from "./IXIAosUniversal007PreviewData";
@@ -412,18 +413,21 @@ export default function IXIAosCardCatalogPreview({ template = null, sampleData =
   const catalogParentLabel = clean(parentLabel) || clean(template?.librarySection) || "AOS";
   const ContainerCard = cardNumber === 4 ? IXIAosCard004Personnel : cardNumber === 5 ? IXIAosCard005Personnel : cardNumber === 6 ? IXIAosCard006Personnel : null;
   const numberedObjectCards = { 7: IXIAosCard007EmployeeApplication, 8: IXIAosCard008Profile, 9: IXIAosCard009, 10: IXIAosCard010, 11: IXIAosCard011, 12: IXIAosCard012, 13: IXIAosCard013, 14: IXIAosCard014, 15: IXIAosCard015, 16: IXIAosCard016, 17: IXIAosCard017 };
+  const renderNumberedPreview = Card => Number(current?.face || 1) === 2
+    ? <IXIAosCardIdentityFace cardNumber={cardNumber} object={object} ixiState={current} onCycleFace={() => update(object.objectId, { face: 1 })} />
+    : <Card object={object} children={previewItems} projection={projection} parentLabel={catalogParentLabel} ixiState={current} onIxiStateChange={update} onCycleFace={() => update(object.objectId, { face: 2 })} onSaveObject={savePreview} onAddObject={addPreviewChild} onOpenTransact={() => setTransactOpen(true)} skinId="v12" />;
 
   if (transactOpen) {
     return <IXIFaceLabScaledCard objectFamily="private" surfaceLabel="Face Lab AOS Cards"><IXITransactObjectConsole object={object} ixiState={current} onIxiStateChange={update} onClose={() => setTransactOpen(false)} /></IXIFaceLabScaledCard>;
   }
 
   if (ContainerCard) {
-    return <IXIFaceLabScaledCard objectFamily="private" surfaceLabel="Face Lab AOS Cards"><ContainerCard object={object} children={previewItems} ixiState={current} onIxiStateChange={update} onSaveObject={savePreview} onAddObject={addPreviewChild} onOpenTransact={() => setTransactOpen(true)} skinId="v12" /></IXIFaceLabScaledCard>;
+    return <IXIFaceLabScaledCard objectFamily="private" surfaceLabel="Face Lab AOS Cards">{renderNumberedPreview(ContainerCard)}</IXIFaceLabScaledCard>;
   }
 
   const NumberedObjectCard = numberedObjectCards[cardNumber];
   if (NumberedObjectCard) {
-    return <IXIFaceLabScaledCard objectFamily="private" surfaceLabel="Face Lab AOS Cards"><NumberedObjectCard object={object} children={previewItems} projection={projection} parentLabel={catalogParentLabel} ixiState={current} onIxiStateChange={update} onSaveObject={savePreview} onAddObject={addPreviewChild} onOpenTransact={() => setTransactOpen(true)} skinId="v12" /></IXIFaceLabScaledCard>;
+    return <IXIFaceLabScaledCard objectFamily="private" surfaceLabel="Face Lab AOS Cards">{renderNumberedPreview(NumberedObjectCard)}</IXIFaceLabScaledCard>;
   }
 
   if ([1,2,3].includes(cardNumber)) {

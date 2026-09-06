@@ -1,6 +1,7 @@
 import dynamic from "next/dynamic";
 
 import { resolveIXIAosOperatingCardNumber } from "./IXIAosOperatingCardResolver.mjs";
+import IXIAosCardIdentityFace from "./IXIAosCardIdentityFace";
 
 function CardLoading() {
   return <div className="ixi-aos-operating-card-loading" aria-label="Loading AOS card" />;
@@ -60,11 +61,23 @@ export default function IXIAosOperatingCardRuntime({
   onReturn = null,
   onExposeObject = null,
   onOpenTransact = null,
+  onSendFront = null,
+  onSendBack = null,
+  onCycleColor = null,
+  onCycleOutline = null,
+  onRailSend = null,
+  armedDestination = "",
+  onSendToArmedDestination = null,
   dragHandleProps = null
 }) {
   const cardNumber = resolveIXIAosOperatingCardNumber(object);
   const objectId = clean(object?.objectId || object?.id?.uuid || object?.id);
   const children = Array.isArray(items) ? items : [];
+  const currentFace = Math.max(1, Number(ixiState?.face) || 1);
+  const setFace = face => {
+    if (objectId) onIxiStateChange?.(objectId, { face });
+  };
+  const cycleFace = () => setFace(currentFace === 1 ? 2 : 1);
   const shared = {
     object,
     projection,
@@ -82,6 +95,14 @@ export default function IXIAosOperatingCardRuntime({
     onReturn,
     onExposeObject,
     onOpenTransact,
+    onCycleFace: cycleFace,
+    onSendFront,
+    onSendBack,
+    onCycleColor,
+    onCycleOutline,
+    onRailSend,
+    armedDestination,
+    onSendToArmedDestination,
     skinId: "v12"
   };
 
@@ -91,7 +112,7 @@ export default function IXIAosOperatingCardRuntime({
       <IXIAosLocationObjectConsole
         {...shared}
         cardNumber={cardNumber}
-        primaryFace={Math.min(5, Math.max(1, Number(ixiState?.face) || 1))}
+        primaryFace={Math.min(5, currentFace)}
         onPrimaryFaceChange={face => {
           if (objectId) onIxiStateChange?.(objectId, { face });
         }}
@@ -99,7 +120,9 @@ export default function IXIAosOperatingCardRuntime({
     );
   } else {
     const Card = NUMBERED_CARDS[cardNumber] || IXIAosCard007EmployeeApplication;
-    rendered = <Card {...shared} />;
+    rendered = currentFace === 2
+      ? <IXIAosCardIdentityFace cardNumber={cardNumber} {...shared} />
+      : <Card {...shared} />;
   }
 
   return (

@@ -26,9 +26,9 @@ import {
 import IXIAosCard001Location from "../cards/001/IXIAosCard001Location";
 import IXIAosCard002Location from "../cards/002/IXIAosCard002Location";
 import IXIAosCard003Location from "../cards/003/IXIAosCard003Location";
-import IXIAosLocationFace2Operations from "../cards/location/IXIAosLocationFace2Operations";
 import IXIAosLocationFace3Financial from "../cards/location/IXIAosLocationFace3Financial";
 import IXIAosGenericConfiguredFaceV12 from "../cards/generic/IXIAosGenericConfiguredFaceV12";
+import IXIAosCardIdentityFace from "../card-runtime/IXIAosCardIdentityFace";
 
 const PANEL_WIDTH = 298;
 const PANEL_HEIGHT = 471;
@@ -56,7 +56,7 @@ function getConfiguredFace(object = {}, faceNumber = 2) {
 }
 
 function getFaceLabel(object = {}, faceNumber = 2) {
-  if (Number(faceNumber) === 2) return "OPERATIONS";
+  if (Number(faceNumber) === 2) return "CARD ID";
   if (Number(faceNumber) === 3) return "FINANCIAL";
   const config = getConfiguredFace(object, faceNumber);
   return clean(config?.shortLabel || config?.title || config?.label) || `FACE ${faceNumber}`;
@@ -86,6 +86,13 @@ export default function IXIAosLocationObjectConsole({
   primaryFace = 1,
   onPrimaryFaceChange = null,
   onOpenTransact = null,
+  onSendFront = null,
+  onSendBack = null,
+  onCycleColor = null,
+  onCycleOutline = null,
+  onRailSend = null,
+  armedDestination = "",
+  onSendToArmedDestination = null,
   financialSnapshot = {},
   maintenanceSnapshot = {}
 }) {
@@ -171,7 +178,15 @@ export default function IXIAosLocationObjectConsole({
     onBoard,
     onReturn,
     onExposeObject,
-    onOpenTransact
+    onOpenTransact,
+    onSendFront,
+    onSendBack,
+    onCycleColor,
+    onCycleOutline,
+    onRailSend,
+    armedDestination,
+    onSendToArmedDestination,
+    onCycleFace: () => onPrimaryFaceChange?.(Number(primaryFace) === 1 ? 2 : 1)
   };
 
   function renderFace(faceNumber) {
@@ -195,7 +210,13 @@ export default function IXIAosLocationObjectConsole({
           let secondaryFace = null;
 
           if (resolved === 2) {
-            secondaryFace = <IXIAosLocationFace2Operations {...secondaryShared} skinId="v12" />;
+            secondaryFace = (
+              <IXIAosCardIdentityFace
+                cardNumber={cardNumber}
+                {...secondaryShared}
+                onCycleFace={() => onPrimaryFaceChange?.(1)}
+              />
+            );
           } else if (resolved === 3) {
             secondaryFace = (
               <IXIAosLocationFace3Financial
