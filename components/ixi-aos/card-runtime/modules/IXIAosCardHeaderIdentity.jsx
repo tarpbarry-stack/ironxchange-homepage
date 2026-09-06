@@ -1,3 +1,5 @@
+import IXIAosCommercialCardTypography from "./IXIAosCommercialCardTypography";
+
 function clean(value) {
   return String(value || "").trim();
 }
@@ -25,9 +27,10 @@ export default function IXIAosCardHeaderIdentity({ object = {}, children = null,
     <div className={`ixi-aos-header-identity-shell ${className}`.trim()}>
       {children}
       <span className="ixi-aos-header-ixi-number">IXI - {ixiNumberFor(object)}</span>
+      <IXIAosCommercialCardTypography />
       <style jsx>{`
         .ixi-aos-header-identity-shell{position:relative;width:298px;height:471px}
-        .ixi-aos-header-ixi-number{position:absolute;top:7px;right:9px;z-index:190;color:#858c87;font-family:Arial,Helvetica,sans-serif;font-size:6px;font-weight:950;line-height:1;letter-spacing:.08em;white-space:nowrap;pointer-events:none}
+        .ixi-aos-header-ixi-number{position:absolute;top:7px;right:9px;z-index:190;color:#858c87;font-family:inherit;font-size:7px;font-weight:850;line-height:1;letter-spacing:.06em;white-space:nowrap;pointer-events:none}
         :global(.ixi-aos-header-identity-shell .ixi-aos-card-header-controls){top:17px!important}
       `}</style>
     </div>
