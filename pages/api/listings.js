@@ -592,7 +592,7 @@ keywords: Array.isArray(publicData.keywords)
     // of rebuilding the full Sharetribe projection for every visitor.
     res.setHeader(
       "Cache-Control",
-      "public, s-maxage=60, stale-while-revalidate=300"
+      "public, s-maxage=60, stale-while-revalidate=86400"
     );
 
     res.status(200).json(listings);
