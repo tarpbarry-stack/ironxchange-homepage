@@ -1,0 +1,239 @@
+name: Deploy IX-Core commercial onboarding production
+
+on:
+  workflow_dispatch:
+    inputs:
+      commit_sha:
+        description: Immutable IX-Core commit SHA
+        required: true
+        default: 438d99a1b342c53544024ae54460657c9442af09
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/deploy-ixi-core-commercial-onboarding-production.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ixi-core-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+      AWS_INSTANCE_ID: ${{ secrets.AWS_INSTANCE_ID }}
+      IXI_CORE_SHA: ${{ inputs.commit_sha || '438d99a1b342c53544024ae54460657c9442af09' }}
+
+    steps:
+      - name: Validate immutable release
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! [[ "$IXI_CORE_SHA" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "IXI_CORE_SHA must be a full Git commit SHA" >&2
+            exit 1
+          fi
+
+          release_url="https://api.github.com/repos/tarpbarry-stack/ixi-core/commits/$IXI_CORE_SHA"
+          resolved_sha="$(curl -fsSL \
+            -H 'Accept: application/vnd.github+json' \
+            -H 'X-GitHub-Api-Version: 2022-11-28' \
+            "$release_url" | jq -r '.sha')"
+
+          test "$resolved_sha" = "$IXI_CORE_SHA"
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Deploy guarded commercial onboarding runtime
+        id: deploy
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          remote_script="$(cat <<'REMOTE_SCRIPT'
+          set -eu
+
+          APP=/var/www/ix-core
+          RELEASE_SHA=__IXI_CORE_SHA__
+          STAGE=/tmp/ixi-core-onboarding-release-__IXI_CORE_SHA__
+          ARCHIVE=/tmp/ixi-core-onboarding-release-__IXI_CORE_SHA__.tgz
+          BACKUP_ROOT=/var/backups/ixi-core-releases
+          BACKUP=$BACKUP_ROOT/pre-onboarding-__IXI_CORE_SHA__.tgz
+          MANAGED_EXISTING='identity/IXIPassportIdentityBridge.js mos/accounts/aosAccountService.js mos/provisioning/aosObjectPassportService.js mos/provisioning/aosObjectProvisioningService.js mos/provisioning/aosObjectProvisioningValidator.js mos/routes/mosRouter.js mos/security/internalTenantBoundaryService.js'
+          MANAGED_ADDED='mos/onboarding/aosCommercialOnboardingService.js mos/onboarding/sharetribeMachineProvisioningService.js'
+          SUCCESS=0
+
+          run_pm2() {
+            if [ "$PM2_USER" = root ]; then
+              pm2 "$@"
+            else
+              sudo -u ubuntu -H pm2 "$@"
+            fi
+          }
+
+          rollback() {
+            if [ "$SUCCESS" -eq 1 ]; then
+              return
+            fi
+
+            if [ -f "$BACKUP" ]; then
+              echo 'Deployment failed after backup; restoring the previous commercial onboarding runtime.' >&2
+              cd "$APP"
+              rm -f $MANAGED_ADDED
+              tar -xzf "$BACKUP"
+              run_pm2 reload IX-Core --update-env || run_pm2 restart IX-Core --update-env || true
+            fi
+          }
+
+          verify_managed_file() {
+            file="$1"
+            baseline_sha="$2"
+            release_sha="$3"
+            actual_sha="$(sha256sum "$APP/$file" | awk '{print $1}')"
+
+            if [ "$actual_sha" != "$baseline_sha" ] && [ "$actual_sha" != "$release_sha" ]; then
+              echo "$file has unrecognized live drift: $actual_sha" >&2
+              exit 1
+            fi
+
+            echo "$file baseline accepted: $actual_sha"
+          }
+
+          test -d "$APP"
+          test -f "$APP/index.js"
+
+          if pm2 describe IX-Core >/dev/null 2>&1; then
+            PM2_USER=root
+          elif sudo -u ubuntu -H pm2 describe IX-Core >/dev/null 2>&1; then
+            PM2_USER=ubuntu
+          else
+            echo 'PM2 process IX-Core was not found.' >&2
+            exit 1
+          fi
+
+          trap rollback EXIT
+
+          verify_managed_file identity/IXIPassportIdentityBridge.js 12bc7cc2a3ea27e186fa0b238a63d02718973461042c9f9306dafd174f2aeeea 4ef853160482fc593df06a4517d0a92465ec5df896a255d03af77d1379915f82
+          verify_managed_file mos/accounts/aosAccountService.js c30397c207bf469881ca8cde70ec3612fd612bfecf20346106e0cfaf4f078023 cdc69ae7632eb197d738bb441723a11ae1295be42cd318d2c49fe7d0503e3237
+          verify_managed_file mos/provisioning/aosObjectPassportService.js 750d4594d4dec4977841536df5cc10e3927da11d3756e2edbcec47f2075ace7b d839c61b164574a94ed23fd4d960c08caaffb99ddfa9bfe6eab516c0fcdf0893
+          verify_managed_file mos/provisioning/aosObjectProvisioningService.js 9d0565ab55587cd15b525b4a47cdbdb31c1c5b28fb96dd42badd39effcd1e254 edbab67e4319a4ee53bc20cb3b535b4a3aaf441cbd35cd6ad93d5d5c703e184b
+          verify_managed_file mos/provisioning/aosObjectProvisioningValidator.js 984c43ceab764bc1b9b5cc9c59e1dd80950b50756427a577bc7e836925df92f3 85ba5da1f05fcc9ff9c3da6f764eb96291ab304e7ec1cfa028270850c649710d
+          verify_managed_file mos/routes/mosRouter.js b583bb6e385740935db7a94ddf005f54834694df245dd848d1b6e952edde3d40 c5bf7c92376e74463deb0740a1435a61b0cf560d9e2c08c4b814dd8519068211
+          verify_managed_file mos/security/internalTenantBoundaryService.js 4aa19fd6a9f55914a7f4629723c05141244e2672394e518ef6ebfd4500765c08 1ff93b3233f37670effc6c3ae45048202e4a1e840d03bdbb1229780271ea551a
+
+          rm -rf "$STAGE"
+          mkdir -p "$STAGE" "$BACKUP_ROOT"
+          curl -fsSL \
+            "https://github.com/tarpbarry-stack/ixi-core/archive/$RELEASE_SHA.tar.gz" \
+            -o "$ARCHIVE"
+          tar -xzf "$ARCHIVE" --strip-components=1 -C "$STAGE"
+
+          cd "$STAGE"
+          npm ci --ignore-scripts
+          npm test
+          node --test mos/tests/commercialOnboarding.test.js mos/tests/sharetribeMachineProvisioning.test.js
+          node --check mos/onboarding/aosCommercialOnboardingService.js
+          node --check mos/onboarding/sharetribeMachineProvisioningService.js
+          node --check mos/routes/mosRouter.js
+
+          cd "$APP"
+          tar -czf "$BACKUP" $MANAGED_EXISTING
+
+          for file in $MANAGED_EXISTING $MANAGED_ADDED; do
+            install -D -m 0644 "$STAGE/$file" "$APP/$file"
+          done
+
+          run_pm2 reload IX-Core --update-env
+
+          attempt=0
+          until curl -fsS http://127.0.0.1:4100/health >/dev/null; do
+            attempt=$((attempt + 1))
+            if [ "$attempt" -ge 15 ]; then
+              echo 'IX-Core failed its post-reload health check.' >&2
+              exit 1
+            fi
+            sleep 2
+          done
+
+          route_status="$(curl -sS -o "$STAGE/bootstrap-route.json" -w '%{http_code}' \
+            -X POST -H 'Content-Type: application/json' -d '{}' \
+            http://127.0.0.1:4100/mos/v1/aos/onboarding/bootstrap)"
+          case "$route_status" in
+            400|401|403) ;;
+            *)
+              echo "Protected onboarding bootstrap route returned unexpected HTTP $route_status" >&2
+              cat "$STAGE/bootstrap-route.json" >&2 || true
+              exit 1
+              ;;
+          esac
+
+          SUCCESS=1
+          trap - EXIT
+          rm -rf "$STAGE" "$ARCHIVE"
+          printf 'IX-Core commercial onboarding runtime %s deployed; health=200; bootstrap-route=%s\n' "$RELEASE_SHA" "$route_status"
+          REMOTE_SCRIPT
+          )"
+
+          remote_script="${remote_script//__IXI_CORE_SHA__/$IXI_CORE_SHA}"
+          parameters="$(jq -cn --arg command "$remote_script" '{commands:[$command]}')"
+          command_id="$(aws ssm send-command \
+            --region "$AWS_REGION" \
+            --instance-ids "$AWS_INSTANCE_ID" \
+            --document-name AWS-RunShellScript \
+            --comment "Deploy immutable IX-Core commercial onboarding runtime $IXI_CORE_SHA" \
+            --parameters "$parameters" \
+            --query 'Command.CommandId' \
+            --output text)"
+
+          echo "command_id=$command_id" >> "$GITHUB_OUTPUT"
+
+          if ! aws ssm wait command-executed \
+            --region "$AWS_REGION" \
+            --command-id "$command_id" \
+            --instance-id "$AWS_INSTANCE_ID"; then
+            true
+          fi
+
+          invocation="$(aws ssm get-command-invocation \
+            --region "$AWS_REGION" \
+            --command-id "$command_id" \
+            --instance-id "$AWS_INSTANCE_ID")"
+
+          printf '%s' "$invocation" | jq -r '.StandardOutputContent'
+          printf '%s' "$invocation" | jq -r '.StandardErrorContent' >&2
+
+          status="$(printf '%s' "$invocation" | jq -r '.Status')"
+          test "$status" = "Success"
+
+      - name: Record deployment diagnostics
+        if: always()
+        shell: bash
+        run: |
+          command_id="${{ steps.deploy.outputs.command_id }}"
+          {
+            echo '## IX-Core commercial onboarding deployment'
+            if [ -z "$command_id" ]; then
+              echo '- SSM command was not created.'
+            else
+              invocation="$(aws ssm get-command-invocation \
+                --region "$AWS_REGION" \
+                --command-id "$command_id" \
+                --instance-id "$AWS_INSTANCE_ID")"
+              echo "- Status: \`$(printf '%s' "$invocation" | jq -r '.Status')\`"
+              echo '### Output'
+              echo '```text'
+              printf '%s\n' "$invocation" | jq -r '.StandardOutputContent'
+              printf '%s\n' "$invocation" | jq -r '.StandardErrorContent'
+              echo '```'
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
