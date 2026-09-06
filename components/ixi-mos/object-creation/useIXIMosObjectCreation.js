@@ -551,6 +551,115 @@ export default function useIXIMosObjectCreation({
   }
 
 
+  /* =========================================================
+     CHILD CUSTOMER CONTAINER DRAFT
+
+     Card + uses the same 001-017 presentation selector as the
+     scoreboard. The clicked card supplies hierarchy only; the
+     selected template supplies the new child's card contract.
+     SAVE remains the only Passport/provisioning transition.
+     ========================================================= */
+  function createChildContainerDraft({
+    container,
+    template = {},
+    fields = {},
+    metadata = {}
+  } = {}) {
+    const destinationContainerId =
+      getMosObjectId(container);
+
+    if (!destinationContainerId) {
+      throw new Error(
+        "Destination container is missing objectId."
+      );
+    }
+
+    if (
+      container?.capabilities?.canContain !==
+      true
+    ) {
+      throw new Error(
+        "Destination object is not a container."
+      );
+    }
+
+    const sourceTemplate =
+      safeObject(template);
+
+    const templateNumber =
+      getAosTemplateNumber(
+        sourceTemplate
+      );
+
+    const cardTemplateSlug =
+      clean(sourceTemplate?.templateSlug);
+
+    if (
+      !templateNumber ||
+      !cardTemplateSlug
+    ) {
+      throw new Error(
+        "Choose an AOS Card from 001 through 017."
+      );
+    }
+
+    return createClientOnlyDraft({
+      container,
+      definitionId:
+        clean(sourceTemplate?.definitionId) || null,
+      definitionKey:
+        clean(sourceTemplate?.definitionKey) || null,
+      objectType:
+        "container",
+      cardTemplateSlug,
+      cardTemplateVersion:
+        sourceTemplate?.version ?? null,
+      fields: {
+        ...safeObject(fields)
+      },
+      fieldDefinitions:
+        safeArray(sourceTemplate?.fieldSchema)
+          .map((definition, index) => ({
+            ...safeObject(definition),
+            fieldId:
+              clean(
+                definition?.fieldId ||
+                definition?.field
+              ) || `field-${index + 1}`,
+            label:
+              clean(definition?.label) ||
+              `FIELD ${index + 1}`
+          })),
+      metadata: {
+        ...safeObject(metadata),
+        cardNumber:
+          String(templateNumber).padStart(3, "0"),
+        templateSlug:
+          cardTemplateSlug,
+        templateLabel:
+          clean(sourceTemplate?.label),
+        customerDefined:
+          true,
+        createdFrom:
+          "aos-container-plus",
+        createdInsideContainerId:
+          destinationContainerId,
+        parentObjectId:
+          destinationContainerId,
+        parentDisplayName:
+          getAosHierarchyDisplayName(
+            container
+          ),
+        creationState:
+          "naming",
+        persistenceState:
+          "client-only"
+      },
+      exposeToBoard: true
+    });
+  }
+
+
   async function placeProvisionedObject({
     objectId,
     destinationContainerId,
@@ -1287,6 +1396,7 @@ export default function useIXIMosObjectCreation({
     exposeObjectToBoard,
     createRootSystemIndexByName,
     createRootContainerDraft,
+    createChildContainerDraft,
     createObjectInContainer,
     saveMosObjectName,
     deleteMosWorkspaceObject

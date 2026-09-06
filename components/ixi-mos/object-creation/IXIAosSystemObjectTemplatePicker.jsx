@@ -23,6 +23,10 @@ import {
   isCompleteAosSystemTemplateSet
 } from "../../../lib/mos/ixiAosSystemObjectTemplateContract.mjs";
 
+import {
+  getAosHierarchyDisplayName
+} from "../../../lib/mos/ixiAosHierarchyContract.mjs";
+
 
 function clean(value) {
   return String(value ?? "").trim();
@@ -32,6 +36,7 @@ function clean(value) {
 export default function IXIAosSystemObjectTemplatePicker({
   open = false,
   entityId = null,
+  parentObject = null,
   onClose = null,
   onCreate = null
 }) {
@@ -235,6 +240,14 @@ export default function IXIAosSystemObjectTemplatePicker({
   const number =
     getAosTemplateNumber(selectedTemplate);
 
+  const parentName =
+    getAosHierarchyDisplayName(
+      parentObject || {}
+    );
+
+  const creatingChild =
+    Boolean(parentObject);
+
 
   return (
     <div
@@ -254,9 +267,21 @@ export default function IXIAosSystemObjectTemplatePicker({
       >
         <header className="aos-create-header">
           <div>
-            <span>IXI AOS · CREATE</span>
-            <h2 id="aos-create-title">SELECT SYSTEM CONTAINER CARD</h2>
-            <p id="aos-create-description">Choose the operating layout. You will name and define the container on the card before it receives a Passport.</p>
+            <span>
+              {creatingChild
+                ? "IXI AOS · CREATE CHILD"
+                : "IXI AOS · CREATE"}
+            </span>
+            <h2 id="aos-create-title">
+              {creatingChild
+                ? "SELECT CHILD CONTAINER CARD"
+                : "SELECT SYSTEM CONTAINER CARD"}
+            </h2>
+            <p id="aos-create-description">
+              {creatingChild
+                ? `Choose the operating layout inside ${parentName}. You will name and define the child on the card before it receives a Passport.`
+                : "Choose the operating layout. You will name and define the container on the card before it receives a Passport."}
+            </p>
           </div>
 
           <button
@@ -321,6 +346,7 @@ export default function IXIAosSystemObjectTemplatePicker({
                   sampleData={sample?.sampleData || {}}
                   projection={sample?.projection || null}
                   directItems={sample?.directItems || []}
+                  parentLabel={parentName}
                   previewScaleMode="work"
                   showScaleControl={false}
                   onAddChild={() => {}}

@@ -87,7 +87,7 @@ test("AOS Work routes scoreboard plus through template selection and draft provi
   );
 
   assert.match(page, /IXIAosSystemObjectTemplatePicker/u);
-  assert.match(page, /onAdd=\{\s*\(\) => setSystemObjectPickerOpen\(true\)/u);
+  assert.match(page, /onAdd=\{\s*\(\) => openSystemObjectTemplatePicker\(\)/u);
   assert.match(page, /isAosDraftId\(objectId\)/u);
   assert.match(page, /saveMosObjectName\(\{/u);
   assert.doesNotMatch(
@@ -105,6 +105,76 @@ test("AOS Work routes scoreboard plus through template selection and draft provi
     /parentDisplayName:\s*IXI_AOS_SYSTEM_INDEX_LABEL/u
   );
   assert.match(creationHook, /provisionPermanentObject\(\{/u);
+});
+
+
+test("every AOS card plus opens the same 001-017 selector for a child", async () => {
+  const [page, creationHook, picker] = await Promise.all([
+    readFile(
+      new URL("../pages/aos/work.js", import.meta.url),
+      "utf8"
+    ),
+    readFile(
+      new URL(
+        "../components/ixi-mos/object-creation/useIXIMosObjectCreation.js",
+        import.meta.url
+      ),
+      "utf8"
+    ),
+    readFile(
+      new URL(
+        "../components/ixi-mos/object-creation/IXIAosSystemObjectTemplatePicker.jsx",
+        import.meta.url
+      ),
+      "utf8"
+    )
+  ]);
+
+  assert.match(
+    page,
+    /function openChildContainerTemplatePicker\(\s*parentObject\s*\)[\s\S]*?openSystemObjectTemplatePicker\(\s*parentObject\s*\)/u
+  );
+  assert.match(
+    page,
+    /onAddObject=\{\s*openChildContainerTemplatePicker\s*\}/u
+  );
+  assert.match(
+    page,
+    /onCreateObjectChild=\{\s*openChildContainerTemplatePicker\s*\}/u
+  );
+  assert.match(
+    page,
+    /parentObject=\{systemObjectPickerParent\}/u
+  );
+  assert.match(
+    page,
+    /onCreate=\{createSelectedContainerTemplate\}/u
+  );
+  assert.doesNotMatch(
+    page,
+    /displayName:\s*"NEW OBJECT"/u
+  );
+
+  assert.match(
+    creationHook,
+    /function createChildContainerDraft/u
+  );
+  assert.match(
+    creationHook,
+    /createdInsideContainerId:\s*destinationContainerId/u
+  );
+  assert.match(
+    creationHook,
+    /parentObjectId:\s*destinationContainerId/u
+  );
+  assert.match(
+    creationHook,
+    /createChildContainerDraft,/u
+  );
+
+  assert.match(picker, /parentObject = null/u);
+  assert.match(picker, /SELECT CHILD CONTAINER CARD/u);
+  assert.match(picker, /parentLabel=\{parentName\}/u);
 });
 
 

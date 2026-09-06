@@ -196,6 +196,9 @@ const [aosCurrentUser, setAosCurrentUser] =
 
 const [systemObjectPickerOpen, setSystemObjectPickerOpen] =
   useState(false);
+
+const [systemObjectPickerParent, setSystemObjectPickerParent] =
+  useState(null);
   
   const [savedIds, setSavedIds] = useState([]);
   const [sdk, setSdk] = useState(null);
@@ -2372,7 +2375,7 @@ function saveWorkspaceLayout(
 
 const {
   createRootContainerDraft,
-  createObjectInContainer,
+  createChildContainerDraft,
   saveMosObjectName,
   deleteMosWorkspaceObject
 } = useIXIMosObjectCreation({
@@ -2444,9 +2447,79 @@ async function createRootContainerFromTemplate(
     actionNotice: null
   });
 
-  setSystemObjectPickerOpen(false);
+  closeSystemObjectTemplatePicker();
 
   return result;
+}
+
+
+async function createChildContainerFromTemplate(
+  template
+) {
+  const parentObject =
+    systemObjectPickerParent;
+
+  if (!parentObject) {
+    throw new Error(
+      "Select the parent AOS card again."
+    );
+  }
+
+  const result =
+    createChildContainerDraft({
+      container:
+        parentObject,
+      template
+    });
+
+  const draftId =
+    String(result?.objectId || "").trim();
+
+  if (!draftId) {
+    throw new Error(
+      "AOS did not return the new child draft identity."
+    );
+  }
+
+  updateIxiCardState(draftId, {
+    color: "none",
+    outline: 1,
+    face: 1,
+    actionNotice: null
+  });
+
+  closeSystemObjectTemplatePicker();
+
+  return result;
+}
+
+
+function openSystemObjectTemplatePicker(
+  parentObject = null
+) {
+  setSystemObjectPickerParent(
+    parentObject || null
+  );
+  setSystemObjectPickerOpen(true);
+}
+
+
+function closeSystemObjectTemplatePicker() {
+  setSystemObjectPickerOpen(false);
+  setSystemObjectPickerParent(null);
+}
+
+
+function createSelectedContainerTemplate(
+  template
+) {
+  return systemObjectPickerParent
+    ? createChildContainerFromTemplate(
+        template
+      )
+    : createRootContainerFromTemplate(
+        template
+      );
 }
 
 
@@ -2493,66 +2566,13 @@ const saveAosWorkspaceObjectOrDraft =
   ]);
 
 
-/*
- * TEMPORARY.
- *
- * This browser-prompt workflow will be
- * removed when IXILocationCreateCard
- * is connected.
- *
- * The important change now is that
- * persistence/containment no longer
- * lives in work.js.
- */
-async function createObjectInsideSystemIndex(
+/* Card + selects presentation before opening a contained draft. */
+function openChildContainerTemplatePicker(
   parentObject
 ) {
-  try {
-    await createObjectInContainer({
-      container:
-        parentObject,
-
-      /*
-       * GENERIC AOS OBJECT
-       *
-       * The customer supplies meaning
-       * through the name and structure.
-       */
-      objectType:
-        "generic",
-
-      displayName:
-        "NEW OBJECT",
-
-      metadata: {
-        creationState:
-          "naming",
-
-        createdFrom:
-          "aos-container-plus",
-
-        parentDisplayName:
-          String(
-            parentObject?.displayName ||
-            parentObject?.label ||
-            ""
-          ).trim()
-      },
-
-      exposeToBoard:
-        true
-    });
-  } catch (error) {
-    console.error(
-      "AOS OBJECT CREATE FAILED:",
-      error
-    );
-
-    window.alert(
-      error?.message ||
-      "Could not create object."
-    );
-  }
+  openSystemObjectTemplatePicker(
+    parentObject
+  );
 }
 
 return (
@@ -3265,7 +3285,7 @@ return null;
   ownedListings={workspaceListings}
   aosObjects={aosObjects}
   onAdd={
-  () => setSystemObjectPickerOpen(true)
+  () => openSystemObjectTemplatePicker()
 }
   onMore={() => {
     console.log(
@@ -3277,8 +3297,9 @@ return null;
 <IXIAosSystemObjectTemplatePicker
   open={systemObjectPickerOpen}
   entityId={aosEntity?.entityId || null}
-  onClose={() => setSystemObjectPickerOpen(false)}
-  onCreate={createRootContainerFromTemplate}
+  parentObject={systemObjectPickerParent}
+  onClose={closeSystemObjectTemplatePicker}
+  onCreate={createSelectedContainerTemplate}
 />
 
 <IXIChassis>
@@ -3456,7 +3477,7 @@ getWorkspaceObjectById={
   }
 
     onAddObject={
-    createObjectInsideSystemIndex
+    openChildContainerTemplatePicker
   }
 
 onExposeContainerChildren={
@@ -3472,7 +3493,7 @@ onReturnContainerChildren={
 }
 
   onCreateObjectChild={
-  createObjectInsideSystemIndex
+  openChildContainerTemplatePicker
 }
 
   onSaveObject={
