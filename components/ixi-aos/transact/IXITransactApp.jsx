@@ -14,6 +14,7 @@ import { hydrateIXIBillRecord } from "./modules/bill/IXIBillContract";
 import IXITimeStandaloneApp from "./modules/time/IXITimeStandaloneApp";
 import IXIMaterialStandaloneApp from "./modules/material/IXIMaterialStandaloneApp";
 import IXIAssetAcquisitionApp from "./modules/asset-acquisition/IXIAssetAcquisitionApp";
+import IXIOwnershipCapitalApp from "./modules/ownership-capital/IXIOwnershipCapitalApp";
 import IXIFreightApp from "./modules/freight/IXIFreightApp";
 import IXIRentalExpenseApp from "./modules/rental-expense/IXIRentalExpenseApp";
 import IXIRentalIncomeApp from "./modules/rental-income/IXIRentalIncomeApp";
@@ -29,7 +30,9 @@ import IXITreasuryApp from "./modules/treasury/IXITreasuryApp";
 import IXIGeneralLedgerApp from "./modules/general-ledger/IXIGeneralLedgerApp";
 import IXIFinancialReportingApp from "./modules/financial-reporting/IXIFinancialReportingApp";
 import IXIAccessPolicyApp from "./modules/access-policy/IXIAccessPolicyApp";
-import IXISalesDealRegister, { IXISalesStageRail } from "./sales/IXISalesDealRegister";
+import IXISalesDealRegister, {
+  IXISalesStageRail,
+} from "./sales/IXISalesDealRegister";
 import {
   buildIXISalesDealRegister,
   createIXISalesDealId,
@@ -54,27 +57,59 @@ import {
   IXITransactLocaleProvider,
   translateIXITransact,
 } from "./IXITransactLocale";
-import { loadIXIAosFinancialDocument, patchIXIAosFinancialDocument } from "../financial-runtime/IXIAosFinancialReadClient";
+import {
+  loadIXIAosFinancialDocument,
+  patchIXIAosFinancialDocument,
+} from "../financial-runtime/IXIAosFinancialReadClient";
 
 const clean = (value) => String(value ?? "").trim();
 const financialDocumentOf = (item) => {
   const record = item?.record || item || {};
-  const document = record?.financialDocument || record?.document?.financialDocument || record?.document || record;
-  return { ...document, metadata: { ...(record?.metadata || {}), ...(document?.metadata || {}) } };
+  const document =
+    record?.financialDocument ||
+    record?.document?.financialDocument ||
+    record?.document ||
+    record;
+  return {
+    ...document,
+    metadata: { ...(record?.metadata || {}), ...(document?.metadata || {}) },
+  };
 };
 const financialRevisionOf = (item) =>
   Number(item?.server?.revision || item?.record?.server?.revision || 1);
-const SALES_MODULE_IDS = new Set(["quote", "sales-order", "invoice", "sold", "settlement"]);
-const SALES_DOCUMENT_TYPES = new Set(["quote", "sales-order", "invoice", "settlement"]);
-const financialDocumentIdOf = item => clean(financialDocumentOf(item)?.financialDocumentId || item?.id);
-const linkedSalesDocumentIds = item => {
+const SALES_MODULE_IDS = new Set([
+  "quote",
+  "sales-order",
+  "invoice",
+  "sold",
+  "settlement",
+]);
+const SALES_DOCUMENT_TYPES = new Set([
+  "quote",
+  "sales-order",
+  "invoice",
+  "settlement",
+]);
+const financialDocumentIdOf = (item) =>
+  clean(financialDocumentOf(item)?.financialDocumentId || item?.id);
+const linkedSalesDocumentIds = (item) => {
   const document = financialDocumentOf(item);
-  if (!SALES_DOCUMENT_TYPES.has(clean(document?.documentType).toLowerCase())) return [];
-  const embedded = document?.quote || document?.salesOrder || document?.assetSettlement || document?.metadata?.assetSaleRecord || {};
+  if (!SALES_DOCUMENT_TYPES.has(clean(document?.documentType).toLowerCase()))
+    return [];
+  const embedded =
+    document?.quote ||
+    document?.salesOrder ||
+    document?.assetSettlement ||
+    document?.metadata?.assetSaleRecord ||
+    {};
   return [
     document.sourceFinancialDocumentId,
-    ...(Array.isArray(document.relatedFinancialDocumentIds) ? document.relatedFinancialDocumentIds : []),
-    ...(Array.isArray(document.relationships) ? document.relationships.map(link => link?.financialDocumentId) : []),
+    ...(Array.isArray(document.relatedFinancialDocumentIds)
+      ? document.relatedFinancialDocumentIds
+      : []),
+    ...(Array.isArray(document.relationships)
+      ? document.relationships.map((link) => link?.financialDocumentId)
+      : []),
     document?.metadata?.quoteId,
     document?.metadata?.salesOrderId,
     document?.metadata?.invoiceId,
@@ -85,7 +120,9 @@ const linkedSalesDocumentIds = item => {
     embedded?.related?.settlementId,
     embedded?.references?.saleId,
     embedded?.identity?.financialInvoiceId,
-  ].map(clean).filter(Boolean);
+  ]
+    .map(clean)
+    .filter(Boolean);
 };
 
 export default function IXITransactApp({
@@ -119,7 +156,10 @@ export default function IXITransactApp({
     if (!clean(selectedFinancialDocumentId)) return null;
     const records = financialRecords.length
       ? financialRecords
-      : object?.assetFinancialTransactions || object?.relatedFinancialRecords || object?.financialRecords || [];
+      : object?.assetFinancialTransactions ||
+        object?.relatedFinancialRecords ||
+        object?.financialRecords ||
+        [];
     return findIXIExpenseRecord(records, selectedFinancialDocumentId);
   }, [financialRecords, object, selectedFinancialDocumentId]);
 
@@ -157,9 +197,16 @@ export default function IXITransactApp({
     [context, locale],
   );
   const [moduleId, setModuleId] = useState(() => clean(initialModuleId));
-  const [salesRoute, setSalesRoute] = useState(() => clean(selectedFinancialDocumentId)
-    ? { documentId: clean(selectedFinancialDocumentId), dealId: "", stageId: clean(initialModuleId), detail: true }
-    : null);
+  const [salesRoute, setSalesRoute] = useState(() =>
+    clean(selectedFinancialDocumentId)
+      ? {
+          documentId: clean(selectedFinancialDocumentId),
+          dealId: "",
+          stageId: clean(initialModuleId),
+          detail: true,
+        }
+      : null,
+  );
   const [salesLineageRecords, setSalesLineageRecords] = useState([]);
   const attemptedSalesLineageIds = useRef(new Set());
   const [acquisitionWorkflowIntent, setAcquisitionWorkflowIntent] = useState(null);
@@ -247,12 +294,23 @@ export default function IXITransactApp({
     for (const item of records) {
       const document = financialDocumentOf(item);
       const stored = document?.metadata?.assetSaleRecord;
-      if (document.documentType === "invoice" && document?.metadata?.assetSale === true && stored) {
+      if (
+        document.documentType === "invoice" &&
+        document?.metadata?.assetSale === true &&
+        stored
+      ) {
         return {
           ...stored,
-          identity: { ...stored.identity, saleId: document.financialDocumentId, financialInvoiceId: document.financialDocumentId },
+          identity: {
+            ...stored.identity,
+            saleId: document.financialDocumentId,
+            financialInvoiceId: document.financialDocumentId,
+          },
           status: "sold",
-          financialBinding: { financialDocumentId: document.financialDocumentId, revision: financialRevisionOf(item) },
+          financialBinding: {
+            financialDocumentId: document.financialDocumentId,
+            revision: financialRevisionOf(item),
+          },
         };
       }
     }
@@ -358,89 +416,125 @@ export default function IXITransactApp({
     return null;
   }, [object, financialRecords]);
   const quoteSnapshot = useMemo(() => {
-    if (object.quote || object.quoteRecord) return object.quote || object.quoteRecord;
+    if (object.quote || object.quoteRecord)
+      return object.quote || object.quoteRecord;
     const records = financialRecords.length
       ? financialRecords
-      : object?.assetFinancialTransactions || object?.relatedFinancialRecords || object?.financialRecords || [];
-    const durable = records.map((item) => {
-      const document = financialDocumentOf(item);
-      if (document?.documentType !== "quote" || !document?.quote) return null;
-      return {
-        ...document.quote,
-        financialBinding: {
-          financialDocumentId: document.financialDocumentId,
-          revision: financialRevisionOf(item),
-          financialLineId: clean(document?.lines?.[0]?.financialLineId),
-          line: document?.lines?.[0] || null
-        }
-      };
-    }).filter(Boolean);
-    return durable.sort((left, right) => String(right?.audit?.updatedAt || "").localeCompare(String(left?.audit?.updatedAt || "")))[0] || null;
+      : object?.assetFinancialTransactions ||
+        object?.relatedFinancialRecords ||
+        object?.financialRecords ||
+        [];
+    const durable = records
+      .map((item) => {
+        const document = financialDocumentOf(item);
+        if (document?.documentType !== "quote" || !document?.quote) return null;
+        return {
+          ...document.quote,
+          financialBinding: {
+            financialDocumentId: document.financialDocumentId,
+            revision: financialRevisionOf(item),
+            financialLineId: clean(document?.lines?.[0]?.financialLineId),
+            line: document?.lines?.[0] || null,
+          },
+        };
+      })
+      .filter(Boolean);
+    return (
+      durable.sort((left, right) =>
+        String(right?.audit?.updatedAt || "").localeCompare(
+          String(left?.audit?.updatedAt || ""),
+        ),
+      )[0] || null
+    );
   }, [object, financialRecords]);
   const salesOrderSnapshot = useMemo(() => {
     if (object.salesOrder || object.salesOrderRecord)
       return object.salesOrder || object.salesOrderRecord;
     const records = financialRecords.length
       ? financialRecords
-      : object?.assetFinancialTransactions || object?.relatedFinancialRecords || object?.financialRecords || [];
-    const durable = records.map((item) => {
-      const document = financialDocumentOf(item);
-      if (document?.documentType !== "sales-order" || !document?.salesOrder) return null;
-      return {
-        ...document.salesOrder,
-        financialBinding: {
-          financialDocumentId: document.financialDocumentId,
-          revision: financialRevisionOf(item),
-          financialLineId: clean(document?.lines?.[0]?.financialLineId),
-          line: document?.lines?.[0] || null,
-        },
-      };
-    }).filter(Boolean);
-    return durable.sort((left, right) =>
-      String(right?.audit?.updatedAt || "").localeCompare(String(left?.audit?.updatedAt || ""))
-    )[0] || null;
+      : object?.assetFinancialTransactions ||
+        object?.relatedFinancialRecords ||
+        object?.financialRecords ||
+        [];
+    const durable = records
+      .map((item) => {
+        const document = financialDocumentOf(item);
+        if (document?.documentType !== "sales-order" || !document?.salesOrder)
+          return null;
+        return {
+          ...document.salesOrder,
+          financialBinding: {
+            financialDocumentId: document.financialDocumentId,
+            revision: financialRevisionOf(item),
+            financialLineId: clean(document?.lines?.[0]?.financialLineId),
+            line: document?.lines?.[0] || null,
+          },
+        };
+      })
+      .filter(Boolean);
+    return (
+      durable.sort((left, right) =>
+        String(right?.audit?.updatedAt || "").localeCompare(
+          String(left?.audit?.updatedAt || ""),
+        ),
+      )[0] || null
+    );
   }, [object, financialRecords]);
   const salesInvoiceSnapshot = useMemo(() => {
     if (object.salesInvoice || object.salesInvoiceRecord)
       return object.salesInvoice || object.salesInvoiceRecord;
     const records = financialRecords.length
       ? financialRecords
-      : object?.assetFinancialTransactions || object?.relatedFinancialRecords || object?.financialRecords || [];
+      : object?.assetFinancialTransactions ||
+        object?.relatedFinancialRecords ||
+        object?.financialRecords ||
+        [];
     const salesOrderId = clean(
       salesOrderSnapshot?.financialBinding?.financialDocumentId ||
         salesOrderSnapshot?.identity?.salesOrderId,
     );
-    const durable = records.map((item) => {
-      const document = financialDocumentOf(item);
-      if (document?.documentType !== "invoice") return null;
-      const metadata = document?.metadata || {};
-      const belongsToEquipmentSale =
-        clean(metadata.transactModule) === "equipment-sale" ||
-        clean(metadata.invoiceType) === "asset-sale" ||
-        (salesOrderId &&
-          [document?.sourceFinancialDocumentId, metadata.salesOrderId]
-            .map(clean)
-            .includes(salesOrderId));
-      if (!belongsToEquipmentSale) return null;
-      return {
-        ...document,
-        financialBinding: {
-          financialDocumentId: document.financialDocumentId,
-          revision: financialRevisionOf(item),
-          financialLineId: clean(document?.lines?.[0]?.financialLineId),
-          line: document?.lines?.[0] || null,
-        },
-      };
-    }).filter(Boolean);
-    return durable.sort((left, right) =>
-      String(right?.updatedAt || right?.occurredAt || "").localeCompare(
-        String(left?.updatedAt || left?.occurredAt || ""),
-      )
-    )[0] || null;
+    const durable = records
+      .map((item) => {
+        const document = financialDocumentOf(item);
+        if (document?.documentType !== "invoice") return null;
+        const metadata = document?.metadata || {};
+        const belongsToEquipmentSale =
+          clean(metadata.transactModule) === "equipment-sale" ||
+          clean(metadata.invoiceType) === "asset-sale" ||
+          (salesOrderId &&
+            [document?.sourceFinancialDocumentId, metadata.salesOrderId]
+              .map(clean)
+              .includes(salesOrderId));
+        if (!belongsToEquipmentSale) return null;
+        return {
+          ...document,
+          financialBinding: {
+            financialDocumentId: document.financialDocumentId,
+            revision: financialRevisionOf(item),
+            financialLineId: clean(document?.lines?.[0]?.financialLineId),
+            line: document?.lines?.[0] || null,
+          },
+        };
+      })
+      .filter(Boolean);
+    return (
+      durable.sort((left, right) =>
+        String(right?.updatedAt || right?.occurredAt || "").localeCompare(
+          String(left?.updatedAt || left?.occurredAt || ""),
+        ),
+      )[0] || null
+    );
   }, [object, financialRecords, salesOrderSnapshot]);
-  const baseSalesFinancialRecords = useMemo(() => financialRecords.length
-    ? financialRecords
-    : object?.assetFinancialTransactions || object?.relatedFinancialRecords || object?.financialRecords || [], [financialRecords, object]);
+  const baseSalesFinancialRecords = useMemo(
+    () =>
+      financialRecords.length
+        ? financialRecords
+        : object?.assetFinancialTransactions ||
+          object?.relatedFinancialRecords ||
+          object?.financialRecords ||
+          [],
+    [financialRecords, object],
+  );
   const salesFinancialRecords = useMemo(
     () =>
       includeIXISalesSnapshots(
@@ -460,30 +554,52 @@ export default function IXITransactApp({
   }, [context.primary.passportId]);
   useEffect(() => {
     if (!SALES_MODULE_IDS.has(moduleId)) return undefined;
-    const existing = new Set(salesFinancialRecords.map(financialDocumentIdOf).filter(Boolean));
-    const missing = [...new Set(salesFinancialRecords.flatMap(linkedSalesDocumentIds))]
-      .filter(id => !existing.has(id) && !attemptedSalesLineageIds.current.has(id));
+    const existing = new Set(
+      salesFinancialRecords.map(financialDocumentIdOf).filter(Boolean),
+    );
+    const missing = [
+      ...new Set(salesFinancialRecords.flatMap(linkedSalesDocumentIds)),
+    ].filter(
+      (id) => !existing.has(id) && !attemptedSalesLineageIds.current.has(id),
+    );
     if (!missing.length) return undefined;
-    missing.forEach(id => attemptedSalesLineageIds.current.add(id));
+    missing.forEach((id) => attemptedSalesLineageIds.current.add(id));
     const controller = new AbortController();
-    Promise.all(missing.map(financialDocumentId =>
-      loadIXIAosFinancialDocument({ financialDocumentId, signal: controller.signal }).catch(() => null)
-    )).then(records => {
+    Promise.all(
+      missing.map((financialDocumentId) =>
+        loadIXIAosFinancialDocument({
+          financialDocumentId,
+          signal: controller.signal,
+        }).catch(() => null),
+      ),
+    ).then((records) => {
       if (controller.signal.aborted) return;
       const loaded = records.filter(Boolean);
-      if (loaded.length) setSalesLineageRecords(current => [...current, ...loaded]);
+      if (loaded.length)
+        setSalesLineageRecords((current) => [...current, ...loaded]);
     });
     return () => controller.abort();
   }, [moduleId, salesFinancialRecords]);
-  const salesDeals = useMemo(() => buildIXISalesDealRegister(salesFinancialRecords), [salesFinancialRecords]);
-  const moduleSalesDeals = useMemo(() => dealsForIXISalesModule(salesDeals, moduleId), [salesDeals, moduleId]);
-  const selectedSalesDeal = useMemo(() => findIXISalesDeal(salesDeals, salesRoute || {}), [salesDeals, salesRoute]);
+  const salesDeals = useMemo(
+    () => buildIXISalesDealRegister(salesFinancialRecords),
+    [salesFinancialRecords],
+  );
+  const moduleSalesDeals = useMemo(
+    () => dealsForIXISalesModule(salesDeals, moduleId),
+    [salesDeals, moduleId],
+  );
+  const selectedSalesDeal = useMemo(
+    () => findIXISalesDeal(salesDeals, salesRoute || {}),
+    [salesDeals, salesRoute],
+  );
   const activeSalesStageId = salesRoute?.detail
     ? clean(salesRoute.stageId) || salesStageForIXIModule(moduleId)
     : salesStageForIXIModule(moduleId);
   const selectedQuoteSnapshot = selectedSalesDeal
     ? recordForIXISalesStage(selectedSalesDeal, "quote") ||
-      (activeSalesStageId === "quote" ? quoteDraftForIXISalesDeal(selectedSalesDeal) : null)
+      (activeSalesStageId === "quote"
+        ? quoteDraftForIXISalesDeal(selectedSalesDeal)
+        : null)
     : null;
   const selectedSalesOrderSnapshot = selectedSalesDeal
     ? recordForIXISalesStage(selectedSalesDeal, "sales-order") ||
@@ -491,9 +607,15 @@ export default function IXITransactApp({
         ? salesOrderDraftForIXISalesDeal(selectedSalesDeal)
         : null)
     : null;
-  const selectedSalesInvoiceSnapshot = selectedSalesDeal ? documentForIXISalesStage(selectedSalesDeal, "invoice") : null;
-  const selectedSaleSnapshot = selectedSalesDeal ? recordForIXISalesStage(selectedSalesDeal, "sold") : null;
-  const selectedSettlementSnapshot = selectedSalesDeal ? recordForIXISalesStage(selectedSalesDeal, "settlement") : null;
+  const selectedSalesInvoiceSnapshot = selectedSalesDeal
+    ? documentForIXISalesStage(selectedSalesDeal, "invoice")
+    : null;
+  const selectedSaleSnapshot = selectedSalesDeal
+    ? recordForIXISalesStage(selectedSalesDeal, "sold")
+    : null;
+  const selectedSettlementSnapshot = selectedSalesDeal
+    ? recordForIXISalesStage(selectedSalesDeal, "settlement")
+    : null;
   const billRecords = useMemo(() => {
     const candidates = financialRecords.length
       ? financialRecords
@@ -513,10 +635,16 @@ export default function IXITransactApp({
         object?.relatedFinancialRecords ||
         object?.financialRecords ||
         [];
-    const records = candidates.map(hydrateIXIPurchaseOrderRecord).filter(Boolean);
-    return records.sort((left, right) =>
-      String(right?.updatedAt || "").localeCompare(String(left?.updatedAt || ""))
-    )[0] || null;
+    const records = candidates
+      .map(hydrateIXIPurchaseOrderRecord)
+      .filter(Boolean);
+    return (
+      records.sort((left, right) =>
+        String(right?.updatedAt || "").localeCompare(
+          String(left?.updatedAt || ""),
+        ),
+      )[0] || null
+    );
   }, [object, financialRecords]);
 
   useEffect(() => {
@@ -525,7 +653,12 @@ export default function IXITransactApp({
   useEffect(() => {
     const documentId = clean(selectedFinancialDocumentId);
     if (documentId && SALES_MODULE_IDS.has(clean(initialModuleId))) {
-      setSalesRoute({ documentId, dealId: "", stageId: clean(initialModuleId), detail: true });
+      setSalesRoute({
+        documentId,
+        dealId: "",
+        stageId: clean(initialModuleId),
+        detail: true,
+      });
     } else if (!documentId && SALES_MODULE_IDS.has(clean(initialModuleId))) {
       setSalesRoute(null);
     }
@@ -575,7 +708,10 @@ export default function IXITransactApp({
       setSalesRoute(null);
       return;
     }
-    if (acquisitionWorkflowIntent && ["freight", "work-order"].includes(moduleId)) {
+    if (
+      acquisitionWorkflowIntent &&
+      ["freight", "work-order"].includes(moduleId)
+    ) {
       setAcquisitionWorkflowIntent(null);
       setModuleId("asset-acquisition");
       return;
@@ -638,40 +774,77 @@ export default function IXITransactApp({
   }
 
   function openSalesStage(stage, entry, deal) {
-    setSalesRoute({ dealId: deal.dealId, documentId: entry.documentId, stageId: stage.id, detail: true });
+    setSalesRoute({
+      dealId: deal.dealId,
+      documentId: entry.documentId,
+      stageId: stage.id,
+      detail: true,
+    });
     setModuleId(stage.moduleId);
   }
 
   function startSalesStage(stage, deal) {
-    const winningDeal = salesDeals.find(candidate => candidate.stageRecords?.sold && candidate.dealId !== deal.dealId);
+    const winningDeal = salesDeals.find(
+      (candidate) =>
+        candidate.stageRecords?.sold && candidate.dealId !== deal.dealId,
+    );
     if (stage.id === "sold" && winningDeal) {
-      globalThis.alert?.(`This Passport is already SOLD to ${winningDeal.customer}. Reverse or correct that controlled sale before recording another winner.`);
+      globalThis.alert?.(
+        `This Passport is already SOLD to ${winningDeal.customer}. Reverse or correct that controlled sale before recording another winner.`,
+      );
       return;
     }
-    setSalesRoute({ dealId: deal.dealId, documentId: "", stageId: stage.id, detail: true, create: true });
+    setSalesRoute({
+      dealId: deal.dealId,
+      documentId: "",
+      stageId: stage.id,
+      detail: true,
+      create: true,
+    });
     setModuleId(stage.moduleId);
   }
 
   function startSalesDeal() {
     const dealId = createIXISalesDealId();
-    setSalesRoute({ dealId, documentId: "", stageId: "quote", detail: true, create: true });
+    setSalesRoute({
+      dealId,
+      documentId: "",
+      stageId: "quote",
+      detail: true,
+      create: true,
+    });
     setModuleId("quote");
   }
 
   function startDirectInvoice() {
     const dealId = createIXISalesDealId();
-    setSalesRoute({ dealId, documentId: "", stageId: "invoice", detail: true, create: true, directEntry: true });
+    setSalesRoute({
+      dealId,
+      documentId: "",
+      stageId: "invoice",
+      detail: true,
+      create: true,
+      directEntry: true,
+    });
     setModuleId("invoice");
   }
 
   async function closeSalesDeal(deal) {
-    if (!globalThis.confirm?.(`Mark the ${deal.customer} deal as lost? The machine and other customer deals stay active.`)) return;
+    if (
+      !globalThis.confirm?.(
+        `Mark the ${deal.customer} deal as lost? The machine and other customer deals stay active.`,
+      )
+    )
+      return;
     try {
       await closeIXISalesDeal(deal);
       await onFinancialRecordsChange?.();
       setSalesRoute(null);
     } catch (error) {
-      globalThis.alert?.(clean(error?.message) || "The deal could not be closed. No record was changed.");
+      globalThis.alert?.(
+        clean(error?.message) ||
+          "The deal could not be closed. No record was changed.",
+      );
     }
   }
   async function change(
@@ -804,7 +977,13 @@ export default function IXITransactApp({
         workOrder={workOrderSnapshot}
         initialRecord={expenseSnapshot}
         selectedFinancialDocumentId={selectedFinancialDocumentId}
-        expensePolicy={entity?.expensePolicy || entity?.accountingPolicy?.expense || object?.expensePolicy || object?.fields?.expensePolicy || null}
+        expensePolicy={
+          entity?.expensePolicy ||
+          entity?.accountingPolicy?.expense ||
+          object?.expensePolicy ||
+          object?.fields?.expensePolicy ||
+          null
+        }
         onCancel={back}
         onSave={async (record, input, response) => {
           await onOpenModule?.(
@@ -817,7 +996,8 @@ export default function IXITransactApp({
             context,
             { expense: record, input, response },
           );
-          await onFinancialRecordsChange?.(); back();
+          await onFinancialRecordsChange?.();
+          back();
         }}
       />
     );
@@ -896,6 +1076,27 @@ export default function IXITransactApp({
           await change(
             "asset-acquisition",
             "ASSET ACQUISITION UPDATE",
+            "asset",
+            "asset-acquisition",
+            "assetAcquisition",
+            record,
+            changePayload,
+            sourceContext || context,
+          );
+        }}
+      />
+    );
+  else if (moduleId === "ownership-capital")
+    body = (
+      <IXIOwnershipCapitalApp
+        context={context}
+        initialRecord={acquisitionSnapshot}
+        onBack={back}
+        onRecordChange={async (record, changePayload, sourceContext) => {
+          await onFinancialRecordsChange?.();
+          await change(
+            "asset-acquisition",
+            "OWNERSHIP & CAPITAL UPDATE",
             "asset",
             "asset-acquisition",
             "assetAcquisition",
@@ -1064,33 +1265,50 @@ export default function IXITransactApp({
   else if (moduleId === "quote")
     body = (
       <div className="ixi-sales-detail">
-      {selectedSalesDeal ? <IXISalesStageRail deal={selectedSalesDeal} activeStageId={activeSalesStageId} onOpenStage={openSalesStage} onStartStage={startSalesStage} /> : null}
-      <IXIQuoteApp
-        key={`quote:${salesRoute?.dealId || selectedSalesDeal?.dealId || "new"}:${salesRoute?.documentId || ""}`}
-        context={context}
-        object={object}
-        dealId={salesRoute?.dealId || selectedSalesDeal?.dealId || ""}
-        initialRecord={selectedQuoteSnapshot}
-        onBack={back}
-        onAdvance={(quote) => {
-          setSalesRoute({ dealId: quote?.identity?.dealId || selectedSalesDeal?.dealId, documentId: "", stageId: "sales-order", detail: true, create: true });
-          setModuleId("sales-order");
-        }}
-        onRecordChange={async (record, changePayload, sourceContext) => {
-          await onFinancialRecordsChange?.();
-          await change(
-            "quote",
-            "QUOTE UPDATE",
-            "sell",
-            "quote",
-            "quote",
-            record,
-            changePayload,
-            sourceContext || context,
-            { customer: record?.customer || null, asset: record?.asset || null, totals: record?.totals || null }
-          );
-        }}
-      />
+        {selectedSalesDeal ? (
+          <IXISalesStageRail
+            deal={selectedSalesDeal}
+            activeStageId={activeSalesStageId}
+            onOpenStage={openSalesStage}
+            onStartStage={startSalesStage}
+          />
+        ) : null}
+        <IXIQuoteApp
+          key={`quote:${salesRoute?.dealId || selectedSalesDeal?.dealId || "new"}:${salesRoute?.documentId || ""}`}
+          context={context}
+          object={object}
+          dealId={salesRoute?.dealId || selectedSalesDeal?.dealId || ""}
+          initialRecord={selectedQuoteSnapshot}
+          onBack={back}
+          onAdvance={(quote) => {
+            setSalesRoute({
+              dealId: quote?.identity?.dealId || selectedSalesDeal?.dealId,
+              documentId: "",
+              stageId: "sales-order",
+              detail: true,
+              create: true,
+            });
+            setModuleId("sales-order");
+          }}
+          onRecordChange={async (record, changePayload, sourceContext) => {
+            await onFinancialRecordsChange?.();
+            await change(
+              "quote",
+              "QUOTE UPDATE",
+              "sell",
+              "quote",
+              "quote",
+              record,
+              changePayload,
+              sourceContext || context,
+              {
+                customer: record?.customer || null,
+                asset: record?.asset || null,
+                totals: record?.totals || null,
+              },
+            );
+          }}
+        />
       </div>
     );
   else if (moduleId === "sales-order" || moduleId === "invoice")
@@ -1111,7 +1329,13 @@ export default function IXITransactApp({
         onStartStage={startSalesStage}
         onOpenInvoice={() => {
           const entry = selectedSalesDeal?.stageRecords?.invoice;
-          setSalesRoute(current => ({ ...(current || {}), dealId: selectedSalesDeal?.dealId || current?.dealId, documentId: entry?.documentId || "", stageId: "invoice", detail: true }));
+          setSalesRoute((current) => ({
+            ...(current || {}),
+            dealId: selectedSalesDeal?.dealId || current?.dealId,
+            documentId: entry?.documentId || "",
+            stageId: "invoice",
+            detail: true,
+          }));
           setModuleId("invoice");
         }}
         onBack={back}
@@ -1163,37 +1387,45 @@ export default function IXITransactApp({
   else if (moduleId === "sold")
     body = (
       <div className="ixi-sales-detail">
-      {selectedSalesDeal ? <IXISalesStageRail deal={selectedSalesDeal} activeStageId={activeSalesStageId} onOpenStage={openSalesStage} onStartStage={startSalesStage} /> : null}
-      <IXIAssetSaleApp
-        key={`sold:${salesRoute?.dealId || selectedSalesDeal?.dealId || "new"}:${salesRoute?.documentId || ""}`}
-        context={context}
-        object={object}
-        dealId={salesRoute?.dealId || selectedSalesDeal?.dealId || ""}
-        sourceInvoice={selectedSalesInvoiceSnapshot}
-        financialRecords={salesFinancialRecords}
-        initialRecord={selectedSaleSnapshot}
-        onBack={back}
-        onRecordChange={async (record, changePayload, sourceContext) => {
-          if (changePayload?.action === "record-sold") setSaleSnapshot(record);
-          await onFinancialRecordsChange?.();
-          await change(
-            "sold",
-            "SOLD UPDATE",
-            "sell",
-            changePayload?.action === "record-buyer-payment"
-              ? "payment"
-              : "invoice",
-            "assetSale",
-            record,
-            changePayload,
-            sourceContext || context,
-            {
-              passportState: record?.passportState || null,
-              collection: record?.collection || null,
-            },
-          );
-        }}
-      />
+        {selectedSalesDeal ? (
+          <IXISalesStageRail
+            deal={selectedSalesDeal}
+            activeStageId={activeSalesStageId}
+            onOpenStage={openSalesStage}
+            onStartStage={startSalesStage}
+          />
+        ) : null}
+        <IXIAssetSaleApp
+          key={`sold:${salesRoute?.dealId || selectedSalesDeal?.dealId || "new"}:${salesRoute?.documentId || ""}`}
+          context={context}
+          object={object}
+          dealId={salesRoute?.dealId || selectedSalesDeal?.dealId || ""}
+          sourceInvoice={selectedSalesInvoiceSnapshot}
+          financialRecords={salesFinancialRecords}
+          initialRecord={selectedSaleSnapshot}
+          onBack={back}
+          onRecordChange={async (record, changePayload, sourceContext) => {
+            if (changePayload?.action === "record-sold")
+              setSaleSnapshot(record);
+            await onFinancialRecordsChange?.();
+            await change(
+              "sold",
+              "SOLD UPDATE",
+              "sell",
+              changePayload?.action === "record-buyer-payment"
+                ? "payment"
+                : "invoice",
+              "assetSale",
+              record,
+              changePayload,
+              sourceContext || context,
+              {
+                passportState: record?.passportState || null,
+                collection: record?.collection || null,
+              },
+            );
+          }}
+        />
       </div>
     );
   else if (moduleId === "collections")
@@ -1202,12 +1434,13 @@ export default function IXITransactApp({
         context={context}
         object={object}
         financialRecords={
-          financialRecords.length ? financialRecords :
-          object?.receivableFinancialRecords ||
-          object?.assetFinancialTransactions ||
-          object?.relatedFinancialRecords ||
-          object?.financialRecords ||
-          []
+          financialRecords.length
+            ? financialRecords
+            : object?.receivableFinancialRecords ||
+              object?.assetFinancialTransactions ||
+              object?.relatedFinancialRecords ||
+              object?.financialRecords ||
+              []
         }
         initialCases={collectionCases}
         onBack={back}
@@ -1415,46 +1648,54 @@ export default function IXITransactApp({
   else if (moduleId === "settlement")
     body = (
       <div className="ixi-sales-detail">
-      {selectedSalesDeal ? <IXISalesStageRail deal={selectedSalesDeal} activeStageId={activeSalesStageId} onOpenStage={openSalesStage} onStartStage={startSalesStage} /> : null}
-      <IXISettlementApp
-        key={`settlement:${salesRoute?.dealId || selectedSalesDeal?.dealId || "new"}:${salesRoute?.documentId || ""}`}
-        context={context}
-        object={object}
-        dealId={salesRoute?.dealId || selectedSalesDeal?.dealId || ""}
-        sale={selectedSaleSnapshot || null}
-        acquisition={
-          object.assetAcquisition || object.acquisitionRecord || null
-        }
-        financialRecords={
-          financialRecords.length ? financialRecords :
-          object?.assetFinancialTransactions ||
-          object?.relatedFinancialRecords ||
-          object?.financialRecords ||
-          []
-        }
-        initialRecord={selectedSettlementSnapshot}
-        onBack={back}
-        onRecordChange={async (record, changePayload, sourceContext) => {
-          setSettlementSnapshot(record);
-          await change(
-            "settlement",
-            "SETTLEMENT UPDATE",
-            "settle",
-            changePayload?.action === "owner-payment"
-              ? "payment"
-              : "settlement",
-            "assetSettlement",
-            record,
-            changePayload,
-            sourceContext || context,
-            {
-              sale: saleSnapshot,
-              waterfall: record?.waterfall || null,
-              paymentStatus: record?.paymentStatus || null,
-            },
-          );
-        }}
-      />
+        {selectedSalesDeal ? (
+          <IXISalesStageRail
+            deal={selectedSalesDeal}
+            activeStageId={activeSalesStageId}
+            onOpenStage={openSalesStage}
+            onStartStage={startSalesStage}
+          />
+        ) : null}
+        <IXISettlementApp
+          key={`settlement:${salesRoute?.dealId || selectedSalesDeal?.dealId || "new"}:${salesRoute?.documentId || ""}`}
+          context={context}
+          object={object}
+          dealId={salesRoute?.dealId || selectedSalesDeal?.dealId || ""}
+          sale={selectedSaleSnapshot || null}
+          acquisition={
+            object.assetAcquisition || object.acquisitionRecord || null
+          }
+          financialRecords={
+            financialRecords.length
+              ? financialRecords
+              : object?.assetFinancialTransactions ||
+                object?.relatedFinancialRecords ||
+                object?.financialRecords ||
+                []
+          }
+          initialRecord={selectedSettlementSnapshot}
+          onBack={back}
+          onRecordChange={async (record, changePayload, sourceContext) => {
+            setSettlementSnapshot(record);
+            await change(
+              "settlement",
+              "SETTLEMENT UPDATE",
+              "settle",
+              changePayload?.action === "owner-payment"
+                ? "payment"
+                : "settlement",
+              "assetSettlement",
+              record,
+              changePayload,
+              sourceContext || context,
+              {
+                sale: saleSnapshot,
+                waterfall: record?.waterfall || null,
+                paymentStatus: record?.paymentStatus || null,
+              },
+            );
+          }}
+        />
       </div>
     );
   else if (moduleId === "work-order")
@@ -1507,7 +1748,9 @@ export default function IXITransactApp({
               workOrder: nextWorkOrder,
               financialState: id === "complete" ? "closed" : "incurred",
               ...(id === "work-date-amend" && nextWorkOrder?.dates?.performedOn
-                ? { occurredAt: `${nextWorkOrder.dates.performedOn}T12:00:00.000Z` }
+                ? {
+                    occurredAt: `${nextWorkOrder.dates.performedOn}T12:00:00.000Z`,
+                  }
                 : {}),
               ...(id === "complete"
                 ? { completedAt: new Date().toISOString() }

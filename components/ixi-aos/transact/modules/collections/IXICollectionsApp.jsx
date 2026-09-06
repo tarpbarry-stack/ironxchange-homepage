@@ -5,6 +5,8 @@ import {
   updateIXICollectionCaseCommand,
   recordIXICollectionPayment,
   recordIXICollectionCredit,
+  recordIXIUnappliedCustomerDeposit,
+  applyIXICustomerDeposit,
 } from "./IXICollectionsCommands";
 import {
   logIXICollectionContact,
@@ -21,6 +23,12 @@ const money = (value) =>
     Number(value || 0),
   );
 const today = () => new Date().toISOString().slice(0, 10);
+const financialDocumentOf = (item) =>
+  item?.record?.financialDocument ||
+  item?.financialDocument ||
+  item?.document?.financialDocument ||
+  item ||
+  {};
 
 function Field({ label, children }) {
   return (
@@ -69,6 +77,11 @@ export default function IXICollectionsApp({
   const [paymentReference, setPaymentReference] = useState("");
   const [creditAmount, setCreditAmount] = useState("");
   const [creditReason, setCreditReason] = useState("");
+  const [depositCustomer, setDepositCustomer] = useState("");
+  const [depositAmount, setDepositAmount] = useState("");
+  const [depositMethod, setDepositMethod] = useState("wire");
+  const [depositReference, setDepositReference] = useState("");
+  const [depositAccount, setDepositAccount] = useState("");
 
   useEffect(() => {
     setCases(Array.isArray(initialCases) ? initialCases : []);
@@ -91,6 +104,24 @@ export default function IXICollectionsApp({
         (item) => clean(item.receivable?.invoiceId) === selected.invoiceId,
       ) || null
     : null;
+  const unappliedDeposits = useMemo(
+    () =>
+      financialRecords.filter((item) => {
+        const document = financialDocumentOf(item);
+        return (
+          document?.metadata?.customerDeposit === true &&
+          ["unapplied", "partially-applied"].includes(
+            clean(document?.metadata?.depositStatus),
+          ) &&
+          Number(
+            document?.metadata?.unappliedAmount ??
+              document?.amount ??
+              document?.totals?.total,
+          ) > 0
+        );
+      }),
+    [financialRecords],
+  );
   const copy =
     language === "es"
       ? {
@@ -106,6 +137,8 @@ export default function IXICollectionsApp({
           dispute: "DISPUTA",
           payment: "REGISTRAR PAGO",
           credit: "CRÉDITO / CASTIGO",
+          deposit: "DEPÓSITO DE CLIENTE SIN APLICAR",
+          deposits: "FONDOS SIN APLICAR",
         }
       : {
           title: "COLLECTIONS / A/R",
@@ -120,7 +153,68 @@ export default function IXICollectionsApp({
           dispute: "DISPUTE",
           payment: "RECORD PAYMENT",
           credit: "CREDIT / WRITE-OFF",
+          deposit: "UNAPPLIED CUSTOMER DEPOSIT",
+          deposits: "UNAPPLIED FUNDS",
         };
+
+  async function recordDeposit() {
+    setBusy(true);
+    setError("");
+    try {
+      const response = await recordIXIUnappliedCustomerDeposit({
+        object,
+        context,
+        input: {
+          customerLabel: depositCustomer,
+          amount: depositAmount,
+          method: depositMethod,
+          reference: depositReference,
+          cashAccountLabel: depositAccount,
+          date: today(),
+        },
+      });
+      await notify(financialDocumentOf(response), {
+        action: "record-unapplied-customer-deposit",
+        response,
+      });
+      setDepositAmount("");
+      setDepositReference("");
+    } catch (cause) {
+      setError(cause?.message || "Customer deposit could not be recorded");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function applyDeposit(deposit) {
+    setBusy(true);
+    setError("");
+    try {
+      const document = financialDocumentOf(deposit);
+      const response = await applyIXICustomerDeposit({
+        object,
+        context,
+        deposit,
+        receivable: selected,
+        amount: Math.min(
+          Number(
+            document?.metadata?.unappliedAmount ??
+              document?.amount ??
+              document?.totals?.total,
+          ),
+          Number(selected?.balance || 0),
+        ),
+      });
+      await notify(financialDocumentOf(response.application), {
+        action: "apply-customer-deposit",
+        response,
+      });
+    } catch (cause) {
+      setError(cause?.message || "Customer deposit could not be applied");
+    } finally {
+      setBusy(false);
+    }
+  }
 
   async function notify(record, change) {
     await onRecordChange?.(record, change, context);
@@ -351,6 +445,70 @@ export default function IXICollectionsApp({
             </strong>
           </div>
         </div>
+        {error ? <div className="coll-error">{error}</div> : null}
+        <div className="coll-section">{copy.deposit}</div>
+        <div className="coll-grid2">
+          <Field label={language === "es" ? "CLIENTE" : "CUSTOMER"}>
+            <Input value={depositCustomer} onChange={setDepositCustomer} />
+          </Field>
+          <Field label={language === "es" ? "MONTO" : "AMOUNT"}>
+            <Input
+              inputMode="decimal"
+              value={depositAmount}
+              onChange={setDepositAmount}
+            />
+          </Field>
+        </div>
+        <div className="coll-grid2">
+          <Field label={language === "es" ? "MÉTODO" : "METHOD"}>
+            <select
+              value={depositMethod}
+              onChange={(event) => setDepositMethod(event.target.value)}
+            >
+              <option value="wire">WIRE</option>
+              <option value="ach">ACH</option>
+              <option value="check">CHECK</option>
+              <option value="cash">CASH</option>
+              <option value="card">CARD</option>
+            </select>
+          </Field>
+          <Field
+            label={language === "es" ? "CUENTA RECEPTORA" : "RECEIVING ACCOUNT"}
+          >
+            <Input value={depositAccount} onChange={setDepositAccount} />
+          </Field>
+        </div>
+        <Field label={language === "es" ? "REFERENCIA" : "REFERENCE"}>
+          <Input value={depositReference} onChange={setDepositReference} />
+        </Field>
+        <button
+          className="coll-primary"
+          disabled={busy}
+          onClick={recordDeposit}
+        >
+          {busy ? "POSTING…" : copy.deposit}
+        </button>
+        <div className="coll-section">{copy.deposits}</div>
+        {unappliedDeposits.map((item) => {
+          const document = financialDocumentOf(item);
+          return (
+            <div className="coll-row" key={document.financialDocumentId}>
+              <div className="coll-head">
+                <strong>{document.metadata?.customerLabel}</strong>
+                <b>
+                  {money(
+                    document.metadata?.unappliedAmount ??
+                      document.amount ??
+                      document.totals?.total,
+                  )}
+                </b>
+              </div>
+              <small>
+                {document.transactionReference} · {document.paymentMethod}
+              </small>
+            </div>
+          );
+        })}
         <div className="coll-section">{copy.open}</div>
         {projection.receivables
           .filter((item) => item.balance > 0)
@@ -447,6 +605,38 @@ export default function IXICollectionsApp({
         </small>
       </div>
       {error ? <div className="coll-error">{error}</div> : null}
+      {unappliedDeposits.length ? (
+        <>
+          <div className="coll-section">{copy.deposits}</div>
+          {unappliedDeposits.map((item) => {
+            const document = financialDocumentOf(item);
+            const amount = Number(
+              document.metadata?.unappliedAmount ??
+                document.amount ??
+                document.totals?.total,
+            );
+            return (
+              <button
+                className="coll-row click"
+                disabled={busy}
+                key={document.financialDocumentId}
+                onClick={() => applyDeposit(item)}
+              >
+                <div className="coll-head">
+                  <strong>{document.metadata?.customerLabel}</strong>
+                  <b>{money(Math.min(amount, selected.balance))}</b>
+                </div>
+                <small>
+                  {language === "es"
+                    ? "APLICAR A ESTA FACTURA"
+                    : "APPLY TO THIS INVOICE"}{" "}
+                  · {document.transactionReference}
+                </small>
+              </button>
+            );
+          })}
+        </>
+      ) : null}
       {!collectionCase ? (
         <>
           <div className="coll-callout">

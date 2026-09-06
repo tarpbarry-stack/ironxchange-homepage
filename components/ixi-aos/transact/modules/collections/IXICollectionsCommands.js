@@ -269,7 +269,12 @@ export async function recordIXICollectionPayment({
       transactionReference: clean(input.reference),
       occurredAt: clean(input.date) || new Date().toISOString(),
       sourceFinancialDocumentId: clean(receivable.invoiceId),
-      metadata: { ...metadata, transactModule: "collections", arPayment: true, collectionId: collection.identity?.collectionId },
+      metadata: {
+        ...metadata,
+        transactModule: "collections",
+        arPayment: true,
+        collectionId: collection.identity?.collectionId,
+      },
       references,
     },
     additionalReferences: references,
@@ -286,6 +291,174 @@ export async function recordIXICollectionPayment({
     headers,
     signal,
   });
+}
+
+export async function recordIXIUnappliedCustomerDeposit({
+  object = {},
+  context = {},
+  input = {},
+  metadata = {},
+  apiBaseUrl = "",
+  headers = {},
+  signal,
+} = {}) {
+  const amount = money(input.amount);
+  if (!(amount > 0))
+    throw new Error("Deposit amount must be greater than zero");
+  if (!clean(input.customerLabel)) throw new Error("Customer is required");
+  if (!clean(input.reference)) throw new Error("Deposit reference is required");
+  const commandId =
+    clean(input.clientRequestId) || `CUSTOMER-DEPOSIT-${Date.now()}`;
+  const receivable = {
+    customerPassportId: clean(input.customerPassportId),
+    customerId: clean(input.customerId),
+    customerLabel: clean(input.customerLabel),
+  };
+  const references = buildReferences({ object, context, receivable });
+  return createIXIAosObjectFinancialDocument({
+    object,
+    documentType: "payment",
+    input: {
+      currency: clean(input.currency || "USD"),
+      amount,
+      description: `Unapplied customer deposit · ${input.customerLabel}`,
+      financialState: "paid",
+      paymentDirection: "inflow",
+      paymentMethod: clean(input.method || "wire"),
+      transactionReference: clean(input.reference),
+      bankReference: clean(input.bankReference),
+      occurredAt: clean(input.date) || new Date().toISOString(),
+      payerPassportId: clean(input.customerPassportId),
+      metadata: {
+        ...metadata,
+        transactModule: "collections",
+        customerDeposit: true,
+        depositStatus: "unapplied",
+        customerLabel: clean(input.customerLabel),
+        customerId: clean(input.customerId),
+        cashAccountId: clean(input.cashAccountId),
+        cashAccountLabel: clean(input.cashAccountLabel),
+        unappliedAmount: amount,
+      },
+      references,
+    },
+    additionalReferences: references,
+    commandId,
+    idempotencyKey: `ixi-customer-deposit:${commandId}`,
+    metadata: {
+      ...metadata,
+      transactModule: "collections",
+      customerDeposit: true,
+      depositStatus: "unapplied",
+      customerLabel: clean(input.customerLabel),
+      customerId: clean(input.customerId),
+      cashAccountId: clean(input.cashAccountId),
+      cashAccountLabel: clean(input.cashAccountLabel),
+      unappliedAmount: amount,
+    },
+    apiBaseUrl,
+    headers,
+    signal,
+  });
+}
+
+export async function applyIXICustomerDeposit({
+  object = {},
+  context = {},
+  deposit = {},
+  receivable = {},
+  amount = 0,
+  signal,
+} = {}) {
+  const document =
+    deposit?.record?.financialDocument || deposit?.financialDocument || deposit;
+  const financialDocumentId = clean(document.financialDocumentId);
+  const expectedRevision = Number(
+    deposit?.record?.server?.revision ||
+      deposit?.server?.revision ||
+      document?.server?.revision,
+  );
+  const depositAmount = money(document.amount || document.totals?.total);
+  const currentUnapplied = money(
+    document?.metadata?.unappliedAmount ?? depositAmount,
+  );
+  const appliedAmount = money(amount || currentUnapplied);
+  if (!financialDocumentId || !Number.isInteger(expectedRevision))
+    throw new Error("Deposit is not bound to a current IXI Financial revision");
+  if (!clean(receivable.invoiceId)) throw new Error("Invoice is required");
+  if (!(appliedAmount > 0))
+    throw new Error("Deposit application must be greater than zero");
+  if (appliedAmount > currentUnapplied + 0.005)
+    throw new Error("Deposit application exceeds the unapplied balance");
+  if (appliedAmount > money(receivable.balance) + 0.005)
+    throw new Error("Deposit application exceeds the open invoice balance");
+  const commandId =
+    globalThis.crypto?.randomUUID?.() || `DEPOSIT-APPLY-${Date.now()}`;
+  const references = buildReferences({ object, context, receivable });
+  const application = await createIXIAosObjectFinancialDocument({
+    object,
+    documentType: "credit",
+    input: {
+      currency: clean(document.currency || receivable.currency || "USD"),
+      amount: appliedAmount,
+      description: `Customer deposit applied · ${document.metadata?.customerLabel || receivable.customerLabel} · ${receivable.invoiceNumber || receivable.invoiceId}`,
+      financialState: "incurred",
+      direction: "out",
+      reasonCode: "customer-deposit-application",
+      sourceFinancialDocumentId: clean(receivable.invoiceId),
+      metadata: {
+        transactModule: "collections",
+        customerDepositApplication: true,
+        originalDepositId: financialDocumentId,
+        appliedInvoiceId: clean(receivable.invoiceId),
+      },
+      references,
+    },
+    additionalReferences: references,
+    commandId,
+    idempotencyKey: `ixi-customer-deposit-application:${financialDocumentId}:${receivable.invoiceId}`,
+    metadata: {
+      transactModule: "collections",
+      customerDepositApplication: true,
+      originalDepositId: financialDocumentId,
+      appliedInvoiceId: clean(receivable.invoiceId),
+    },
+    signal,
+  });
+  const applicationId = documentIdOf(application) || commandId;
+  const remainingUnapplied = money(currentUnapplied - appliedAmount);
+  const updatedDeposit = await patchIXIAosFinancialDocument({
+    financialDocumentId,
+    expectedRevision,
+    commandId: `${commandId}:deposit`,
+    idempotencyKey: `ixi-customer-deposit-apply:${financialDocumentId}:${receivable.invoiceId}`,
+    patch: {
+      metadata: {
+        ...(document.metadata || {}),
+        customerDeposit: true,
+        depositStatus:
+          remainingUnapplied <= 0.005 ? "applied" : "partially-applied",
+        appliedInvoiceId: clean(receivable.invoiceId),
+        appliedAmount,
+        unappliedAmount: remainingUnapplied,
+        applicationHistory: [
+          ...(document.metadata?.applicationHistory || []),
+          {
+            applicationId,
+            invoiceId: clean(receivable.invoiceId),
+            amount: appliedAmount,
+            appliedAt: new Date().toISOString(),
+          },
+        ],
+      },
+    },
+    metadata: {
+      transactModule: "collections",
+      action: "apply-customer-deposit",
+    },
+    signal,
+  });
+  return { application, updatedDeposit };
 }
 
 export async function recordIXICollectionCredit({
@@ -325,7 +498,13 @@ export async function recordIXICollectionCredit({
       financialState: "incurred",
       reasonCode: clean(input.reason),
       sourceFinancialDocumentId: clean(receivable.invoiceId),
-      metadata: { ...metadata, transactModule: "collections", arCredit: true, writeOff: Boolean(input.writeOff), collectionId: collection.identity?.collectionId },
+      metadata: {
+        ...metadata,
+        transactModule: "collections",
+        arCredit: true,
+        writeOff: Boolean(input.writeOff),
+        collectionId: collection.identity?.collectionId,
+      },
       references,
     },
     additionalReferences: references,
@@ -349,5 +528,7 @@ export default {
   createIXICollectionCaseCommand,
   updateIXICollectionCaseCommand,
   recordIXICollectionPayment,
+  recordIXIUnappliedCustomerDeposit,
+  applyIXICustomerDeposit,
   recordIXICollectionCredit,
 };

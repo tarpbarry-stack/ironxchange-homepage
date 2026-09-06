@@ -1,14 +1,237 @@
-const clean=v=>String(v??"").trim();
-const num=v=>Number.isFinite(Number(v))?Number(v):0;
-const money=v=>Math.round(num(v)*100)/100;
-const arr=v=>Array.isArray(v)?v:[];
-export const IXI_GL_SCHEMA="ixi-general-ledger-v1";
-export const IXI_GL_RULE_VERSION="gl-rules-v1";
-export const IXI_GL_DEFAULT_ACCOUNTS=Object.freeze([
-{code:"1010",name:"Operating Checking",type:"asset",control:"cash"},{code:"1020",name:"Payroll Checking",type:"asset",control:"cash"},{code:"1050",name:"Petty Cash",type:"asset",control:"cash"},{code:"1100",name:"Accounts Receivable",type:"asset",control:"ar"},{code:"1200",name:"Inventory",type:"asset",control:"inventory"},{code:"1510",name:"Equipment Acquisition Basis",type:"asset",control:"fixed-asset"},{code:"1520",name:"Capitalized Improvements",type:"asset",control:"fixed-asset"},{code:"1600",name:"Accumulated Depreciation",type:"contra-asset",control:"fixed-asset"},{code:"2000",name:"Accounts Payable",type:"liability",control:"ap"},{code:"2100",name:"Credit Cards Payable",type:"liability",control:"credit-card"},{code:"2200",name:"Loans Payable",type:"liability",control:"debt"},{code:"3000",name:"Equity",type:"equity",control:"equity"},{code:"4100",name:"Equipment Sales",type:"revenue",control:"revenue"},{code:"4200",name:"Rental Revenue",type:"revenue",control:"revenue"},{code:"4300",name:"Service Revenue",type:"revenue",control:"revenue"},{code:"5100",name:"Cost of Equipment Sold",type:"expense",control:"cogs"},{code:"6110",name:"Repairs & Maintenance",type:"expense",control:"expense"},{code:"6200",name:"Fuel",type:"expense",control:"expense"},{code:"6300",name:"Freight",type:"expense",control:"expense"},{code:"6400",name:"Technology",type:"expense",control:"expense"},{code:"6900",name:"Other Operating Expense",type:"expense",control:"expense"},{code:"6990",name:"Unclassified / Review",type:"expense",control:"suspense"}
+const clean = (v) => String(v ?? "").trim();
+const num = (v) => (Number.isFinite(Number(v)) ? Number(v) : 0);
+const money = (v) => Math.round(num(v) * 100) / 100;
+const arr = (v) => (Array.isArray(v) ? v : []);
+export const IXI_GL_SCHEMA = "ixi-general-ledger-v1";
+export const IXI_GL_RULE_VERSION = "gl-rules-v1";
+export const IXI_GL_DEFAULT_ACCOUNTS = Object.freeze([
+  { code: "1010", name: "Operating Checking", type: "asset", control: "cash" },
+  { code: "1020", name: "Payroll Checking", type: "asset", control: "cash" },
+  { code: "1050", name: "Petty Cash", type: "asset", control: "cash" },
+  { code: "1100", name: "Accounts Receivable", type: "asset", control: "ar" },
+  { code: "1200", name: "Inventory", type: "asset", control: "inventory" },
+  {
+    code: "1510",
+    name: "Equipment Acquisition Basis",
+    type: "asset",
+    control: "fixed-asset",
+  },
+  {
+    code: "1520",
+    name: "Capitalized Improvements",
+    type: "asset",
+    control: "fixed-asset",
+  },
+  {
+    code: "1600",
+    name: "Accumulated Depreciation",
+    type: "contra-asset",
+    control: "fixed-asset",
+  },
+  { code: "2000", name: "Accounts Payable", type: "liability", control: "ap" },
+  {
+    code: "2100",
+    name: "Credit Cards Payable",
+    type: "liability",
+    control: "credit-card",
+  },
+  { code: "2200", name: "Loans Payable", type: "liability", control: "debt" },
+  {
+    code: "2300",
+    name: "Unapplied Customer Deposits",
+    type: "liability",
+    control: "customer-deposits",
+  },
+  { code: "3000", name: "Equity", type: "equity", control: "equity" },
+  {
+    code: "4100",
+    name: "Equipment Sales",
+    type: "revenue",
+    control: "revenue",
+  },
+  { code: "4200", name: "Rental Revenue", type: "revenue", control: "revenue" },
+  {
+    code: "4300",
+    name: "Service Revenue",
+    type: "revenue",
+    control: "revenue",
+  },
+  {
+    code: "5100",
+    name: "Cost of Equipment Sold",
+    type: "expense",
+    control: "cogs",
+  },
+  {
+    code: "6110",
+    name: "Repairs & Maintenance",
+    type: "expense",
+    control: "expense",
+  },
+  { code: "6200", name: "Fuel", type: "expense", control: "expense" },
+  { code: "6300", name: "Freight", type: "expense", control: "expense" },
+  { code: "6400", name: "Technology", type: "expense", control: "expense" },
+  {
+    code: "6900",
+    name: "Other Operating Expense",
+    type: "expense",
+    control: "expense",
+  },
+  {
+    code: "6990",
+    name: "Unclassified / Review",
+    type: "expense",
+    control: "suspense",
+  },
 ]);
-export function createIXIGLChart({entityPassportId="",accounts=[]}={}){const source=arr(accounts).length?accounts:IXI_GL_DEFAULT_ACCOUNTS;return{schema:IXI_GL_SCHEMA,entityPassportId:clean(entityPassportId),version:1,accounts:source.map((a,i)=>({accountId:clean(a.accountId)||`GLA-${clean(a.code)||i+1}`,code:clean(a.code),name:clean(a.name),type:clean(a.type),control:clean(a.control),active:a.active!==false,system:Boolean(a.system)}))};}
-export function createIXIJournalEntry({sourceDocument={},period="",entityPassportId="",description="",lines=[],dimensions={},ruleId="",ruleVersion=IXI_GL_RULE_VERSION,actor={}}={}){const normalized=arr(lines).map((l,i)=>({lineId:clean(l.lineId)||`JL-${i+1}`,accountCode:clean(l.accountCode),accountName:clean(l.accountName),debit:money(l.debit),credit:money(l.credit),memo:clean(l.memo),dimensions:{...(dimensions||{}),...(l.dimensions||{})}}));const debits=money(normalized.reduce((s,l)=>s+l.debit,0)),credits=money(normalized.reduce((s,l)=>s+l.credit,0)),balanced=Math.abs(debits-credits)<0.005,stamp=Date.now();return{schema:"ixi-journal-entry-v1",identity:{journalEntryId:`JE-${stamp}`,number:`JE-${String(stamp).slice(-6)}`},source:{financialDocumentId:clean(sourceDocument.financialDocumentId||sourceDocument.documentId||sourceDocument.id),documentType:clean(sourceDocument.documentType||sourceDocument.type),documentNumber:clean(sourceDocument.documentNumber||sourceDocument.number||sourceDocument.input?.documentNumber),sourceHash:clean(sourceDocument.sourceHash)},period:clean(period),entityPassportId:clean(entityPassportId),description:clean(description),posting:{ruleId:clean(ruleId),ruleVersion:clean(ruleVersion),status:balanced?"ready":"exception",postedAt:"",reversedBy:""},lines:normalized,totals:{debits,credits,difference:money(debits-credits),balanced},dimensions:{...(dimensions||{})},audit:{createdAt:new Date().toISOString(),createdBy:clean(actor.passportId||actor.employeeId||actor.userId||actor.id),createdByLabel:clean(actor.displayName||actor.name||actor.label),updatedAt:new Date().toISOString()},activity:[]};}
-export function validateIXIJournalEntry(record={}){const errors={};if(!clean(record.period))errors.period="required";if(!clean(record.entityPassportId))errors.entity="required";if(!arr(record.lines).length)errors.lines="required";if(!record.totals?.balanced)errors.balance="debits-and-credits-must-balance";arr(record.lines).forEach((l,i)=>{if(!clean(l.accountCode))errors[`line-${i+1}`]="account-required";if(!(num(l.debit)>0||num(l.credit)>0))errors[`amount-${i+1}`]="amount-required";if(num(l.debit)>0&&num(l.credit)>0)errors[`side-${i+1}`]="one-side-only";});return{valid:Object.keys(errors).length===0,errors};}
-export function createIXIAccountingPeriod({period="",entityPassportId="",actor={}}={}){const p=clean(period),stamp=Date.now();return{schema:"ixi-accounting-period-v1",identity:{periodId:`PER-${p||stamp}`,number:p},entityPassportId:clean(entityPassportId),period:p,status:"open",controls:{journalsBalanced:false,unposted:0,postingExceptions:0,arDifference:0,apDifference:0,cashDifference:0,banksReconciled:false,readyToClose:false},close:{closedAt:"",closedBy:"",closedByLabel:"",trialBalanceSnapshot:[],ruleVersion:IXI_GL_RULE_VERSION},audit:{createdAt:new Date().toISOString(),createdBy:clean(actor.passportId||actor.employeeId||actor.id),createdByLabel:clean(actor.displayName||actor.name||actor.label),updatedAt:new Date().toISOString()}};}
-export default{IXI_GL_SCHEMA,IXI_GL_RULE_VERSION,IXI_GL_DEFAULT_ACCOUNTS,createIXIGLChart,createIXIJournalEntry,validateIXIJournalEntry,createIXIAccountingPeriod};
+export function createIXIGLChart({
+  entityPassportId = "",
+  accounts = [],
+} = {}) {
+  const source = arr(accounts).length ? accounts : IXI_GL_DEFAULT_ACCOUNTS;
+  return {
+    schema: IXI_GL_SCHEMA,
+    entityPassportId: clean(entityPassportId),
+    version: 1,
+    accounts: source.map((a, i) => ({
+      accountId: clean(a.accountId) || `GLA-${clean(a.code) || i + 1}`,
+      code: clean(a.code),
+      name: clean(a.name),
+      type: clean(a.type),
+      control: clean(a.control),
+      active: a.active !== false,
+      system: Boolean(a.system),
+    })),
+  };
+}
+export function createIXIJournalEntry({
+  sourceDocument = {},
+  period = "",
+  entityPassportId = "",
+  description = "",
+  lines = [],
+  dimensions = {},
+  ruleId = "",
+  ruleVersion = IXI_GL_RULE_VERSION,
+  actor = {},
+} = {}) {
+  const normalized = arr(lines).map((l, i) => ({
+    lineId: clean(l.lineId) || `JL-${i + 1}`,
+    accountCode: clean(l.accountCode),
+    accountName: clean(l.accountName),
+    debit: money(l.debit),
+    credit: money(l.credit),
+    memo: clean(l.memo),
+    dimensions: { ...(dimensions || {}), ...(l.dimensions || {}) },
+  }));
+  const debits = money(normalized.reduce((s, l) => s + l.debit, 0)),
+    credits = money(normalized.reduce((s, l) => s + l.credit, 0)),
+    balanced = Math.abs(debits - credits) < 0.005,
+    stamp = Date.now();
+  return {
+    schema: "ixi-journal-entry-v1",
+    identity: {
+      journalEntryId: `JE-${stamp}`,
+      number: `JE-${String(stamp).slice(-6)}`,
+    },
+    source: {
+      financialDocumentId: clean(
+        sourceDocument.financialDocumentId ||
+          sourceDocument.documentId ||
+          sourceDocument.id,
+      ),
+      documentType: clean(sourceDocument.documentType || sourceDocument.type),
+      documentNumber: clean(
+        sourceDocument.documentNumber ||
+          sourceDocument.number ||
+          sourceDocument.input?.documentNumber,
+      ),
+      sourceHash: clean(sourceDocument.sourceHash),
+    },
+    period: clean(period),
+    entityPassportId: clean(entityPassportId),
+    description: clean(description),
+    posting: {
+      ruleId: clean(ruleId),
+      ruleVersion: clean(ruleVersion),
+      status: balanced ? "ready" : "exception",
+      postedAt: "",
+      reversedBy: "",
+    },
+    lines: normalized,
+    totals: { debits, credits, difference: money(debits - credits), balanced },
+    dimensions: { ...(dimensions || {}) },
+    audit: {
+      createdAt: new Date().toISOString(),
+      createdBy: clean(
+        actor.passportId || actor.employeeId || actor.userId || actor.id,
+      ),
+      createdByLabel: clean(actor.displayName || actor.name || actor.label),
+      updatedAt: new Date().toISOString(),
+    },
+    activity: [],
+  };
+}
+export function validateIXIJournalEntry(record = {}) {
+  const errors = {};
+  if (!clean(record.period)) errors.period = "required";
+  if (!clean(record.entityPassportId)) errors.entity = "required";
+  if (!arr(record.lines).length) errors.lines = "required";
+  if (!record.totals?.balanced)
+    errors.balance = "debits-and-credits-must-balance";
+  arr(record.lines).forEach((l, i) => {
+    if (!clean(l.accountCode)) errors[`line-${i + 1}`] = "account-required";
+    if (!(num(l.debit) > 0 || num(l.credit) > 0))
+      errors[`amount-${i + 1}`] = "amount-required";
+    if (num(l.debit) > 0 && num(l.credit) > 0)
+      errors[`side-${i + 1}`] = "one-side-only";
+  });
+  return { valid: Object.keys(errors).length === 0, errors };
+}
+export function createIXIAccountingPeriod({
+  period = "",
+  entityPassportId = "",
+  actor = {},
+} = {}) {
+  const p = clean(period),
+    stamp = Date.now();
+  return {
+    schema: "ixi-accounting-period-v1",
+    identity: { periodId: `PER-${p || stamp}`, number: p },
+    entityPassportId: clean(entityPassportId),
+    period: p,
+    status: "open",
+    controls: {
+      journalsBalanced: false,
+      unposted: 0,
+      postingExceptions: 0,
+      arDifference: 0,
+      apDifference: 0,
+      cashDifference: 0,
+      banksReconciled: false,
+      readyToClose: false,
+    },
+    close: {
+      closedAt: "",
+      closedBy: "",
+      closedByLabel: "",
+      trialBalanceSnapshot: [],
+      ruleVersion: IXI_GL_RULE_VERSION,
+    },
+    audit: {
+      createdAt: new Date().toISOString(),
+      createdBy: clean(actor.passportId || actor.employeeId || actor.id),
+      createdByLabel: clean(actor.displayName || actor.name || actor.label),
+      updatedAt: new Date().toISOString(),
+    },
+  };
+}
+export default {
+  IXI_GL_SCHEMA,
+  IXI_GL_RULE_VERSION,
+  IXI_GL_DEFAULT_ACCOUNTS,
+  createIXIGLChart,
+  createIXIJournalEntry,
+  validateIXIJournalEntry,
+  createIXIAccountingPeriod,
+};

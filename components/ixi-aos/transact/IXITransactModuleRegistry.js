@@ -1,51 +1,276 @@
 export const IXI_TRANSACT_MODULES = Object.freeze([
-  Object.freeze({ id: "work-order", label: "WORK ORDER", group: "work", documentType: "work-order", readiness: "operational" }),
-  Object.freeze({ id: "expense", label: "EXPENSE", group: "spend", documentType: "expense", readiness: "operational" }),
-  Object.freeze({ id: "technology-work", label: "TECH WORK ORDER", group: "work", documentType: "work-order", specializedWorkOrder: true, readiness: "operational" }),
-  Object.freeze({ id: "time", label: "TIME", group: "work", documentType: "time-entry", readiness: "operational" }),
-  Object.freeze({ id: "material", label: "PART / MATERIAL", group: "work", documentType: "material-usage", readiness: "operational" }),
-  Object.freeze({ id: "asset-acquisition", label: "ASSET ACQUISITION", group: "asset", documentType: "asset-acquisition", readiness: "operational" }),
-  Object.freeze({ id: "freight", label: "FREIGHT", group: "move", documentType: "freight", readiness: "operational" }),
-  Object.freeze({ id: "rental-expense", label: "RENTAL EXPENSE", group: "rent", documentType: "rental-expense", readiness: "operational" }),
-  Object.freeze({ id: "rental-income", label: "RENTAL INCOME", group: "rent", documentType: "rental-income", readiness: "operational" }),
-  Object.freeze({ id: "service-quote", label: "SERVICE QUOTE", group: "sell", documentType: "service-quote", readiness: "operational" }),
-  Object.freeze({ id: "service-invoice", label: "SERVICE INVOICE", group: "sell", documentType: "invoice", readiness: "sales-build", available: false }),
-  Object.freeze({ id: "sold", label: "SOLD", group: "sell", documentType: "invoice", readiness: "operational" }),
-  Object.freeze({ id: "collections", label: "COLLECTIONS / A/R", group: "collect", documentType: "collection", readiness: "operational" }),
-  Object.freeze({ id: "payables", label: "PAYABLES / A/P", group: "pay", documentType: "bill", readiness: "operational" }),
-  Object.freeze({ id: "treasury", label: "CASH / TREASURY", group: "cash", documentType: "payment", readiness: "operational" }),
-  Object.freeze({ id: "general-ledger", label: "GENERAL LEDGER / CLOSE", group: "account", documentType: "journal-entry", readiness: "operational" }),
-  Object.freeze({ id: "financial-reporting", label: "FINANCIAL REPORTING", group: "report", documentType: "financial-report", readiness: "operational", readOnly: true }),
-  Object.freeze({ id: "bill", label: "BILL / INVOICE", group: "spend", documentType: "bill", readiness: "operational" }),
-  Object.freeze({ id: "receipt", label: "RECEIPT", group: "spend", documentType: "receipt", readiness: "planned", available: false }),
-  Object.freeze({ id: "purchase-order", label: "PURCHASE ORDER", group: "buy", documentType: "purchase-order", readiness: "operational" }),
-  Object.freeze({ id: "quote", label: "QUOTE", group: "sell", documentType: "quote", readiness: "operational" }),
-  Object.freeze({ id: "sales-order", label: "SALES ORDER", group: "sell", documentType: "sales-order", readiness: "operational" }),
-  Object.freeze({ id: "invoice", label: "INVOICE", group: "sell", documentType: "invoice", readiness: "operational" }),
-  Object.freeze({ id: "settlement", label: "SETTLEMENT", group: "settle", documentType: "settlement", readiness: "operational" }),
-  Object.freeze({ id: "access-policy", label: "ACCESS / POLICY", group: "security", documentType: "authority-policy", enterpriseSecurity: true, readiness: "operational" })
+  Object.freeze({
+    id: "work-order",
+    label: "WORK ORDER",
+    group: "work",
+    documentType: "work-order",
+    readiness: "operational",
+  }),
+  Object.freeze({
+    id: "expense",
+    label: "EXPENSE",
+    group: "spend",
+    documentType: "expense",
+    readiness: "operational",
+  }),
+  Object.freeze({
+    id: "technology-work",
+    label: "TECH WORK ORDER",
+    group: "work",
+    documentType: "work-order",
+    specializedWorkOrder: true,
+    readiness: "operational",
+  }),
+  Object.freeze({
+    id: "time",
+    label: "TIME",
+    group: "work",
+    documentType: "time-entry",
+    readiness: "operational",
+  }),
+  Object.freeze({
+    id: "material",
+    label: "PART / MATERIAL",
+    group: "work",
+    documentType: "material-usage",
+    readiness: "operational",
+  }),
+  Object.freeze({
+    id: "asset-acquisition",
+    label: "ASSET ACQUISITION",
+    group: "asset",
+    documentType: "asset-acquisition",
+    readiness: "operational",
+  }),
+  Object.freeze({
+    id: "ownership-capital",
+    label: "OWNERSHIP & CAPITAL",
+    group: "asset",
+    documentType: "asset-acquisition",
+    readiness: "operational",
+  }),
+  Object.freeze({
+    id: "freight",
+    label: "FREIGHT",
+    group: "move",
+    documentType: "freight",
+    readiness: "operational",
+  }),
+  Object.freeze({
+    id: "rental-expense",
+    label: "RENTAL EXPENSE",
+    group: "rent",
+    documentType: "rental-expense",
+    readiness: "operational",
+  }),
+  Object.freeze({
+    id: "rental-income",
+    label: "RENTAL INCOME",
+    group: "rent",
+    documentType: "rental-income",
+    readiness: "operational",
+  }),
+  Object.freeze({
+    id: "service-quote",
+    label: "SERVICE QUOTE",
+    group: "sell",
+    documentType: "service-quote",
+    readiness: "operational",
+  }),
+  Object.freeze({
+    id: "service-invoice",
+    label: "SERVICE INVOICE",
+    group: "sell",
+    documentType: "invoice",
+    readiness: "sales-build",
+    available: false,
+  }),
+  Object.freeze({
+    id: "sold",
+    label: "SOLD",
+    group: "sell",
+    documentType: "invoice",
+    readiness: "operational",
+  }),
+  Object.freeze({
+    id: "collections",
+    label: "COLLECTIONS / A/R",
+    group: "collect",
+    documentType: "collection",
+    readiness: "operational",
+  }),
+  Object.freeze({
+    id: "payables",
+    label: "PAYABLES / A/P",
+    group: "pay",
+    documentType: "bill",
+    readiness: "operational",
+  }),
+  Object.freeze({
+    id: "treasury",
+    label: "CASH / TREASURY",
+    group: "cash",
+    documentType: "payment",
+    readiness: "operational",
+  }),
+  Object.freeze({
+    id: "general-ledger",
+    label: "GENERAL LEDGER / CLOSE",
+    group: "account",
+    documentType: "journal-entry",
+    readiness: "operational",
+  }),
+  Object.freeze({
+    id: "financial-reporting",
+    label: "FINANCIAL REPORTING",
+    group: "report",
+    documentType: "financial-report",
+    readiness: "operational",
+    readOnly: true,
+  }),
+  Object.freeze({
+    id: "bill",
+    label: "BILL / INVOICE",
+    group: "spend",
+    documentType: "bill",
+    readiness: "operational",
+  }),
+  Object.freeze({
+    id: "receipt",
+    label: "RECEIPT",
+    group: "spend",
+    documentType: "receipt",
+    readiness: "planned",
+    available: false,
+  }),
+  Object.freeze({
+    id: "purchase-order",
+    label: "PURCHASE ORDER",
+    group: "buy",
+    documentType: "purchase-order",
+    readiness: "operational",
+  }),
+  Object.freeze({
+    id: "quote",
+    label: "QUOTE",
+    group: "sell",
+    documentType: "quote",
+    readiness: "operational",
+  }),
+  Object.freeze({
+    id: "sales-order",
+    label: "SALES ORDER",
+    group: "sell",
+    documentType: "sales-order",
+    readiness: "operational",
+  }),
+  Object.freeze({
+    id: "invoice",
+    label: "INVOICE",
+    group: "sell",
+    documentType: "invoice",
+    readiness: "operational",
+  }),
+  Object.freeze({
+    id: "settlement",
+    label: "SETTLEMENT",
+    group: "settle",
+    documentType: "settlement",
+    readiness: "operational",
+  }),
+  Object.freeze({
+    id: "access-policy",
+    label: "ACCESS / POLICY",
+    group: "security",
+    documentType: "authority-policy",
+    enterpriseSecurity: true,
+    readiness: "operational",
+  }),
 ]);
 
-const MACHINE_ORDER = Object.freeze(["work-order","expense","technology-work","time","material","asset-acquisition","freight","rental-expense","rental-income","service-quote","service-invoice","purchase-order","receipt","bill","payables","treasury","general-ledger","financial-reporting","quote","sales-order","invoice","sold","collections","settlement","access-policy"]);
-const LOCATION_ORDER = Object.freeze(["work-order","expense","purchase-order","freight","bill","payables","treasury","general-ledger","financial-reporting","receipt","technology-work","time","material","asset-acquisition","rental-expense","rental-income","service-quote","service-invoice","quote","sales-order","invoice","sold","collections","settlement","access-policy"]);
+const MACHINE_ORDER = Object.freeze([
+  "work-order",
+  "expense",
+  "technology-work",
+  "time",
+  "material",
+  "asset-acquisition",
+  "ownership-capital",
+  "freight",
+  "rental-expense",
+  "rental-income",
+  "service-quote",
+  "service-invoice",
+  "purchase-order",
+  "receipt",
+  "bill",
+  "payables",
+  "treasury",
+  "general-ledger",
+  "financial-reporting",
+  "quote",
+  "sales-order",
+  "invoice",
+  "sold",
+  "collections",
+  "settlement",
+  "access-policy",
+]);
+const LOCATION_ORDER = Object.freeze([
+  "work-order",
+  "expense",
+  "purchase-order",
+  "freight",
+  "bill",
+  "payables",
+  "treasury",
+  "general-ledger",
+  "financial-reporting",
+  "receipt",
+  "technology-work",
+  "time",
+  "material",
+  "asset-acquisition",
+  "rental-expense",
+  "rental-income",
+  "service-quote",
+  "service-invoice",
+  "quote",
+  "sales-order",
+  "invoice",
+  "sold",
+  "collections",
+  "settlement",
+  "access-policy",
+]);
 
 function sortByOrder(items, order) {
   const rank = new Map(order.map((id, index) => [id, index]));
-  return [...items].sort((left, right) => (rank.has(left.id) ? rank.get(left.id) : 999) - (rank.has(right.id) ? rank.get(right.id) : 999));
+  return [...items].sort(
+    (left, right) =>
+      (rank.has(left.id) ? rank.get(left.id) : 999) -
+      (rank.has(right.id) ? rank.get(right.id) : 999),
+  );
 }
 
 function deniedModuleIds(permissions = []) {
   return new Set(
     (Array.isArray(permissions) ? permissions : [])
-      .map(value => String(value || "").trim())
-      .filter(value => value.startsWith("deny:"))
-      .map(value => value.slice(5))
-      .filter(Boolean)
+      .map((value) => String(value || "").trim())
+      .filter((value) => value.startsWith("deny:"))
+      .map((value) => value.slice(5))
+      .filter(Boolean),
   );
 }
 
-export function getIXITransactModules({ objectType = "", permissions = [], includeUnavailable = false } = {}) {
-  const type = String(objectType || "").trim().toLowerCase();
+export function getIXITransactModules({
+  objectType = "",
+  permissions = [],
+  includeUnavailable = false,
+} = {}) {
+  const type = String(objectType || "")
+    .trim()
+    .toLowerCase();
   const denied = deniedModuleIds(permissions);
   let preferred = IXI_TRANSACT_MODULES;
 
@@ -55,18 +280,20 @@ export function getIXITransactModules({ objectType = "", permissions = [], inclu
     preferred = sortByOrder(IXI_TRANSACT_MODULES, LOCATION_ORDER);
   }
 
-  return preferred.filter(item =>
-    !denied.has(item.id) &&
-    (includeUnavailable || (item.available !== false && item.readiness === "operational"))
+  return preferred.filter(
+    (item) =>
+      !denied.has(item.id) &&
+      (includeUnavailable ||
+        (item.available !== false && item.readiness === "operational")),
   );
 }
 
 export function getIXITransactModule(moduleId = "") {
   const id = String(moduleId || "").trim();
-  return IXI_TRANSACT_MODULES.find(item => item.id === id) || null;
+  return IXI_TRANSACT_MODULES.find((item) => item.id === id) || null;
 }
 
 export default {
   getIXITransactModules,
-  getIXITransactModule
+  getIXITransactModule,
 };

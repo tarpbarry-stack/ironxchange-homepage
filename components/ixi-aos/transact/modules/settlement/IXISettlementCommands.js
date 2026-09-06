@@ -63,6 +63,24 @@ function refsFor(context = {}, record = {}, object = {}) {
       passportId: o.partyPassportId,
       externalId: o.ownerId,
     });
+  for (const row of [
+    ...(record.commissions || []),
+    ...(record.disbursements || []),
+    ...(record.liabilities || []),
+  ]) {
+    const passportId = clean(row.recipientPassportId || row.payeePassportId);
+    const label = clean(row.recipientLabel || row.payeeLabel || row.label);
+    if (passportId || label)
+      push(refs, {
+        role: "settlement-recipient",
+        label,
+        objectType: "entity",
+        passportId,
+        externalId: clean(
+          row.recipientId || row.payeeId || row.commissionId || row.rowId,
+        ),
+      });
+  }
   return refs;
 }
 export async function createIXISettlement({
@@ -185,7 +203,12 @@ export async function updateIXISettlement({
     commandId,
     idempotencyKey: `ixi-settlement:${action}:${commandId}`,
     patch: { assetSettlement: record, status: clean(record.status) },
-    metadata: { ...metadata, transactModule: "settlement", dealId: clean(record?.identity?.dealId), action },
+    metadata: {
+      ...metadata,
+      transactModule: "settlement",
+      dealId: clean(record?.identity?.dealId),
+      action,
+    },
     signal,
   });
   const stored = storedRecord(response);
@@ -223,6 +246,187 @@ export function approveIXISettlement(record = {}, actor = {}, note = "") {
     audit: { ...record.audit, updatedAt: at },
   };
 }
+
+export function reopenIXISettlement(record = {}, actor = {}, reason = "") {
+  if (!clean(reason)) throw new Error("A correction reason is required");
+  const at = new Date().toISOString();
+  return {
+    ...record,
+    version: Number(record.version || 1) + 1,
+    status: "reopened",
+    paymentStatus: clean(record.paymentStatus || "unpaid"),
+    correction: {
+      reopenedAt: at,
+      reopenedBy: clean(actor.displayName || actor.name || actor.label),
+      reopenedById: clean(actor.passportId || actor.employeeId || actor.userId),
+      reason: clean(reason),
+      supersedesVersion: Number(record.version || 1),
+    },
+    activity: [
+      ...(record.activity || []),
+      {
+        eventId: `STL-REOPEN-${Date.now()}`,
+        type: "settlement-reopened",
+        occurredAt: at,
+        actorLabel: clean(actor.displayName || actor.name || actor.label),
+        reason: clean(reason),
+      },
+    ],
+    audit: { ...record.audit, updatedAt: at },
+  };
+}
+
+export async function recordIXISettlementRecipientPayment({
+  object = {},
+  context = {},
+  settlement = {},
+  recipient = {},
+  input = {},
+  metadata = {},
+  apiBaseUrl = "",
+  headers = {},
+  signal,
+} = {}) {
+  if (!["approved", "partially-paid"].includes(clean(settlement.status)))
+    throw new Error("Settlement must be approved before payment");
+  const amount = Math.round(Number(input.amount || 0) * 100) / 100;
+  const balanceDue = Number(
+    recipient.balanceDue ??
+      recipient.finalDue ??
+      recipient.amount ??
+      recipient.finalAmount ??
+      0,
+  );
+  if (!(amount > 0))
+    throw new Error("Payment amount must be greater than zero");
+  if (amount > balanceDue + 0.005)
+    throw new Error("Payment exceeds the recipient balance");
+  if (!clean(input.reference)) throw new Error("Payment reference is required");
+  const recipientId = clean(
+    recipient.ownerId ||
+      recipient.commissionId ||
+      recipient.disbursementId ||
+      recipient.liabilityId ||
+      recipient.rowId,
+  );
+  const recipientLabel = clean(
+    recipient.label || recipient.recipientLabel || recipient.payeeLabel,
+  );
+  const recipientPassportId = clean(
+    recipient.partyPassportId ||
+      recipient.recipientPassportId ||
+      recipient.payeePassportId,
+  );
+  const recipientType = clean(
+    input.recipientType ||
+      recipient.recipientType ||
+      (recipient.ownerId
+        ? "owner"
+        : recipient.commissionId
+          ? "commission"
+          : recipient.liabilityId
+            ? "payoff"
+            : "third-party"),
+  );
+  if (!recipientId || !recipientLabel)
+    throw new Error("Settlement payment recipient is required");
+  const commandId = clean(input.clientRequestId) || `STL-PAY-${Date.now()}`;
+  const statementSnapshot = {
+    schema: "ixi-settlement-payment-statement-v1",
+    statementNumber: `${clean(settlement.identity?.number || settlement.identity?.settlementId)}-${recipientId}`,
+    settlementId: clean(settlement.identity?.settlementId),
+    settlementNumber: clean(settlement.identity?.number),
+    recipientId,
+    recipientType,
+    recipientLabel,
+    amount,
+    currency: "USD",
+    paymentDate: clean(input.date),
+    paymentMethod: clean(input.method || "wire"),
+    paymentReference: clean(input.reference),
+    assetLabel: clean(settlement.context?.assetLabel),
+    saleNumber: clean(settlement.references?.saleNumber),
+    generatedAt: new Date().toISOString(),
+  };
+  const refs = refsFor(context, settlement, object);
+  push(refs, {
+    role: "payee",
+    label: recipientLabel,
+    objectType: "entity",
+    passportId: recipientPassportId,
+    externalId: recipientId,
+  });
+  const response = await createIXIAosObjectFinancialDocument({
+    object,
+    documentType: "payment",
+    input: {
+      currency: "USD",
+      amount,
+      description: `Settlement payment · ${settlement.identity?.number} · ${recipientLabel}`,
+      financialState: "paid",
+      paymentDirection: "outflow",
+      paymentMethod: clean(input.method || "wire"),
+      transactionReference: clean(input.reference),
+      bankReference: clean(input.bankReference),
+      checkNumber: clean(input.checkNumber),
+      occurredAt: clean(input.date),
+      payeePassportId: recipientPassportId,
+      payerPassportId: clean(
+        input.payerPassportId || context.entity?.passportId,
+      ),
+      sourceFinancialDocumentId: clean(
+        settlement?.financialBinding?.financialDocumentId ||
+          settlement.identity?.financialDocumentId ||
+          settlement.identity?.settlementId,
+      ),
+      metadata: {
+        ...metadata,
+        transactModule: "settlement",
+        settlementRecipientPayment: true,
+        settlementOwnerPayment: recipientType === "owner",
+        settlementId: settlement.identity?.settlementId,
+        recipientId,
+        recipientType,
+        ownerId: recipientType === "owner" ? recipientId : "",
+        statementSnapshot,
+      },
+      references: refs,
+    },
+    additionalReferences: refs,
+    commandId,
+    idempotencyKey: `ixi-settlement-recipient-payment:${commandId}`,
+    metadata: {
+      ...metadata,
+      transactModule: "settlement",
+      settlementRecipientPayment: true,
+      settlementOwnerPayment: recipientType === "owner",
+      settlementId: settlement.identity?.settlementId,
+      recipientId,
+      recipientType,
+      ownerId: recipientType === "owner" ? recipientId : "",
+      statementSnapshot,
+    },
+    apiBaseUrl,
+    headers,
+    signal,
+  });
+  return {
+    response,
+    payment: {
+      paymentId: documentIdOf(response) || commandId,
+      recipientId,
+      recipientLabel,
+      recipientType,
+      date: clean(input.date),
+      amount,
+      method: clean(input.method || "wire"),
+      reference: clean(input.reference),
+      bankReference: clean(input.bankReference),
+      checkNumber: clean(input.checkNumber),
+      recordedAt: new Date().toISOString(),
+    },
+  };
+}
 export async function recordIXISettlementOwnerPayment({
   object = {},
   context = {},
@@ -234,78 +438,23 @@ export async function recordIXISettlementOwnerPayment({
   headers = {},
   signal,
 } = {}) {
-  if (
-    settlement.status !== "approved" &&
-    settlement.status !== "partially-paid"
-  )
-    throw new Error("Settlement must be approved before owner payment");
-  const amount = Math.round(Number(input.amount || 0) * 100) / 100;
-  if (!(amount > 0))
-    throw new Error("Owner payment amount must be greater than zero");
-  if (amount > Number(owner.balanceDue || 0) + 0.005)
-    throw new Error("Owner payment exceeds settlement balance");
-  if (!clean(input.reference))
-    throw new Error("Owner payment reference is required");
-  const commandId = clean(input.clientRequestId) || `STL-PAY-${Date.now()}`,
-    refs = refsFor(context, settlement, object);
-  push(refs, {
-    role: "owner",
-    label: owner.label,
-    objectType: "entity",
-    passportId: owner.partyPassportId,
-    externalId: owner.ownerId,
-  });
-  const response = await createIXIAosObjectFinancialDocument({
+  return recordIXISettlementRecipientPayment({
     object,
-    documentType: "payment",
-    input: {
-      currency: "USD",
-      amount,
-      description: `Settlement payout · ${settlement.identity?.number} · ${owner.label}`,
-      financialState: "paid",
-      paymentDirection: "outflow",
-      paymentMethod: clean(input.method || "wire"),
-      transactionReference: clean(input.reference),
-      occurredAt: clean(input.date),
-      sourceFinancialDocumentId: clean(
-        settlement?.financialBinding?.financialDocumentId ||
-          settlement.identity?.financialDocumentId ||
-          settlement.identity?.settlementId,
-      ),
-      metadata: { ...metadata, transactModule: "settlement", settlementOwnerPayment: true, settlementId: settlement.identity?.settlementId, ownerId: owner.ownerId },
-      references: refs,
-    },
-    additionalReferences: refs,
-    commandId,
-    idempotencyKey: `ixi-settlement-owner-payment:${commandId}`,
-    metadata: {
-      ...metadata,
-      transactModule: "settlement",
-      settlementOwnerPayment: true,
-      settlementId: settlement.identity?.settlementId,
-      ownerId: owner.ownerId,
-    },
+    context,
+    settlement,
+    recipient: owner,
+    input: { ...input, recipientType: "owner" },
+    metadata: { ...metadata, settlementOwnerPayment: true },
     apiBaseUrl,
     headers,
     signal,
   });
-  return {
-    response,
-    payment: {
-      paymentId: documentIdOf(response) || commandId,
-      ownerId: owner.ownerId,
-      ownerLabel: owner.label,
-      date: clean(input.date),
-      amount,
-      method: clean(input.method || "wire"),
-      reference: clean(input.reference),
-      recordedAt: new Date().toISOString(),
-    },
-  };
 }
 export default {
   createIXISettlement,
   updateIXISettlement,
   approveIXISettlement,
+  reopenIXISettlement,
+  recordIXISettlementRecipientPayment,
   recordIXISettlementOwnerPayment,
 };

@@ -387,6 +387,147 @@ function AdditionalTermsEditor({
   );
 }
 
+function CommissionEditor({
+  rows = [],
+  onChange,
+  disabled = false,
+  compact = false,
+}) {
+  const update = (index, key, value) =>
+    onChange(
+      rows.map((row, current) =>
+        current === index ? { ...row, [key]: value } : row,
+      ),
+    );
+  return (
+    <section className={`es-additional ${compact ? "compact" : ""}`}>
+      <div className="es-section-head">
+        <div>
+          <h3>INTERNAL COMPENSATION</h3>
+          <small>NOT SHOWN ON CUSTOMER DOCUMENTS</small>
+        </div>
+        <button
+          disabled={disabled}
+          type="button"
+          onClick={() =>
+            onChange([
+              ...rows,
+              {
+                commissionId:
+                  globalThis.crypto?.randomUUID?.() || `COM-${Date.now()}`,
+                recipientLabel: "",
+                recipientPassportId: "",
+                commissionType: "salesperson",
+                calculationMethod: "fixed",
+                ratePercent: "",
+                fixedAmount: "",
+                targetAmount: "",
+                adjustmentAmount: "",
+                economicTreatment: "machine-selling-expense",
+                status: "proposed",
+                conditions: "",
+                reference: "",
+                included: true,
+                internalOnly: true,
+              },
+            ])
+          }
+        >
+          + ADD
+        </button>
+      </div>
+      {rows.map((row, index) => (
+        <div className="es-term-row" key={row.commissionId || index}>
+          <Input
+            disabled={disabled}
+            value={row.recipientLabel}
+            onChange={(value) => update(index, "recipientLabel", value)}
+            placeholder="Salesperson, broker, referral or company"
+          />
+          <select
+            disabled={disabled}
+            value={row.commissionType || "salesperson"}
+            onChange={(event) =>
+              update(index, "commissionType", event.target.value)
+            }
+          >
+            <option value="salesperson">SALESPERSON</option>
+            <option value="broker">BROKER</option>
+            <option value="referral">REFERRAL</option>
+            <option value="bounty">MACHINE BOUNTY</option>
+            <option value="bonus">BONUS</option>
+            <option value="management">MANAGEMENT</option>
+            <option value="other">OTHER</option>
+          </select>
+          <select
+            disabled={disabled}
+            value={row.calculationMethod || "fixed"}
+            onChange={(event) =>
+              update(index, "calculationMethod", event.target.value)
+            }
+          >
+            <option value="fixed">FIXED</option>
+            <option value="sale-price">% SALE PRICE</option>
+            <option value="gross-profit">% GROSS PROFIT</option>
+            <option value="net-profit">% NET PROFIT</option>
+            <option value="above-target">% ABOVE TARGET</option>
+            <option value="manual">MANUAL</option>
+          </select>
+          <Input
+            disabled={disabled}
+            inputMode="decimal"
+            value={
+              row.calculationMethod === "fixed" ||
+              row.calculationMethod === "manual"
+                ? row.fixedAmount
+                : row.ratePercent
+            }
+            onChange={(value) =>
+              update(
+                index,
+                row.calculationMethod === "fixed" ||
+                  row.calculationMethod === "manual"
+                  ? "fixedAmount"
+                  : "ratePercent",
+                value,
+              )
+            }
+            placeholder={
+              row.calculationMethod === "fixed" ||
+              row.calculationMethod === "manual"
+                ? "Amount"
+                : "Rate %"
+            }
+          />
+          <Input
+            disabled={disabled}
+            inputMode="decimal"
+            value={row.targetAmount}
+            onChange={(value) => update(index, "targetAmount", value)}
+            placeholder="Target / hurdle (optional)"
+          />
+          <Input
+            disabled={disabled}
+            value={row.conditions}
+            onChange={(value) => update(index, "conditions", value)}
+            placeholder="Earned conditions / notes"
+          />
+          <button
+            disabled={disabled}
+            type="button"
+            aria-label="Remove commission"
+            onClick={() =>
+              onChange(rows.filter((_, current) => current !== index))
+            }
+          >
+            ×
+          </button>
+        </div>
+      ))}
+    </section>
+  );
+}
+
 function saleRecordFromInvoice(base, invoice) {
   if (!invoice) return base;
   const metadata = invoice?.metadata || {};
@@ -674,6 +815,14 @@ function CardEditor({
         onChange={setAdditionalTerms}
         disabled={commercialLocked}
       />
+      {!invoiceEntry ? (
+        <CommissionEditor
+          compact
+          rows={input.commissions}
+          onChange={(rows) => patch("commissions", rows)}
+          disabled={commercialLocked}
+        />
+      ) : null}
     </div>
   );
 }
@@ -1426,6 +1575,11 @@ export default function IXIEquipmentSaleApp({
                   <AdditionalTermsEditor
                     terms={input.additionalTerms}
                     onChange={setAdditionalTerms}
+                    disabled={orderLocked}
+                  />
+                  <CommissionEditor
+                    rows={input.commissions}
+                    onChange={(rows) => patch("commissions", rows)}
                     disabled={orderLocked}
                   />
                   <section>

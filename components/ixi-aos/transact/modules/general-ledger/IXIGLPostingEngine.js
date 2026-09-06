@@ -1,36 +1,628 @@
-import{createIXIJournalEntry,IXI_GL_RULE_VERSION}from"./IXIGeneralLedgerContract";
-const clean=v=>String(v??"").trim();const num=v=>Number.isFinite(Number(v))?Number(v):0;const money=v=>Math.round(num(v)*100)/100;const arr=v=>Array.isArray(v)?v:[];
-function source(r={}){return r.input||r.financialDocument?.input||r.document?.input||r.financialDocument||r.document?.financialDocument||r.document||r;}
-function docType(r={}){return clean(r.documentType||r.type||r.financialDocument?.documentType||r.document?.documentType||r.metadata?.documentType).toLowerCase();}
-function docId(r={}){const s=source(r);return clean(s.financialDocumentId||s.documentId||s.id||r.financialDocumentId||r.documentId||r.id||r.financialDocument?.financialDocumentId||r.document?.financialDocumentId||r.identity?.billDocumentId||r.identity?.invoiceId||r.identity?.serviceInvoiceId||r.identity?.saleId);}
-function docNumber(r={}){const s=source(r);return clean(s.documentNumber||s.invoiceNumber||r.documentNumber||r.identity?.number||r.identity?.billNumber||r.metadata?.saleNumber||docId(r));}
-function amount(r={}){const s=source(r);return money(s.totals?.total??s.totals?.subtotal??s.amount??s.total??s.subtotal??r.amount??r.financialDocument?.amount);}
-function refs(r={}){return arr(source(r).references||r.references||r.financialDocument?.references);}
-function ref(r={},role=""){return refs(r).find(x=>clean(x.role).toLowerCase()===role)||null;}
-function hasRef(r={},roles=[]){const wanted=new Set(arr(roles).map(x=>clean(x).toLowerCase()));return refs(r).some(x=>wanted.has(clean(x.role).toLowerCase()));}
-function dimensions(r={}){return{entityPassportId:clean(ref(r,"entity")?.passportId),locationPassportId:clean(ref(r,"location")?.passportId),assetPassportId:clean(ref(r,"asset")?.passportId),customerPassportId:clean(ref(r,"customer")?.passportId),vendorPassportId:clean(ref(r,"vendor")?.passportId),workOrderId:clean(ref(r,"work-order")?.externalId),purchaseOrderId:clean(ref(r,"purchase-order")?.externalId)};}
-function periodOf(r={}){const s=source(r),raw=clean(s.documentDate||s.invoiceDate||s.effectiveDate||s.occurredAt||r.createdAt||r.audit?.createdAt);if(/^\d{4}-\d{2}/.test(raw))return raw.slice(0,7);const d=new Date(raw||Date.now());return Number.isNaN(d.getTime())?"":`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`;}
-function category(r={}){return clean(source(r).category||r.category||r.metadata?.category).toLowerCase();}
-function accountName(chart={},code=""){return chart.accounts?.find(a=>a.code===code)?.name||code;}
-function line(chart,code,side,value,memo="",dims={}){return{accountCode:code,accountName:accountName(chart,code),debit:side==="debit"?money(value):0,credit:side==="credit"?money(value):0,memo,dimensions:dims};}
-function expenseAccount(r={}){const c=category(r);if(c.includes("fuel"))return"6200";if(c.includes("freight")||c.includes("transport"))return"6300";if(c.includes("tech"))return"6400";if(c.includes("repair")||c.includes("service")||c.includes("maintenance")||c.includes("part"))return"6110";return"6900";}
-function invoiceKind(r={}){const s=source(r);return clean(s.invoiceType||r.metadata?.invoiceType||r.metadata?.transactModule).toLowerCase();}
-function assetCostBasis(r={}){const s=source(r),metadata={...(r.metadata||{}),...(s.metadata||{})};return money(s.assetSale?.assetCostBasis??metadata.assetCostBasis);}
-function revenueAccount(r={}){const kind=invoiceKind(r);if(kind.includes("service"))return"4300";if(kind.includes("rental"))return"4200";return"4100";}
-function cashAccount(r={}){const s=source(r),id=clean(s.accountId||r.metadata?.accountId);if(id&&clean(s.accountName).toLowerCase().includes("payroll"))return"1020";if(id&&clean(s.accountName).toLowerCase().includes("petty"))return"1050";return"1010";}
-function relatedInvoice(r={}){const s=source(r);return clean(s.sourceFinancialDocumentId||s.relatedInvoiceId||s.invoiceId||r.metadata?.invoiceId||r.metadata?.relatedInvoiceId)||hasRef(r,["invoice","receivable"]);}
-function relatedBill(r={}){const s=source(r);return clean(s.relatedBillId||s.billId||r.metadata?.billDocumentId||r.metadata?.relatedBillId)||hasRef(r,["bill","payable"]);}
-function settlementPayment(r={}){const s=source(r),module=clean(r.metadata?.transactModule).toLowerCase();return Boolean(s.relatedSettlementId||r.metadata?.settlementId||module.includes("settlement")||hasRef(r,["owner","partner","settlement"]));}
-function matchedCustomRule(record={},rules=[]){const type=docType(record),cat=category(record);return arr(rules).filter(r=>r.active!==false).sort((a,b)=>num(b.priority)-num(a.priority)).find(r=>(!clean(r.documentType)||clean(r.documentType).toLowerCase()===type)&&(!clean(r.categoryContains)||cat.includes(clean(r.categoryContains).toLowerCase())))||null;}
-export function classifyIXIFinancialDocument({record={},chart={},rules=[],actor={}}={}){const type=docType(record),amt=amount(record),s=source(record),dims=dimensions(record),period=periodOf(record),entityPassportId=clean(dims.entityPassportId||chart.entityPassportId),custom=matchedCustomRule(record,rules);if(!docId(record))return{status:"exception",reason:"missing-source-document-id",source:record};if(!(amt>0)&&type!=="work-order"&&type!=="purchase-order"&&type!=="quote")return{status:"exception",reason:"missing-positive-amount",source:record};if(custom){const lines=[line(chart,custom.debitAccount,"debit",amt,custom.memo||docNumber(record),dims),line(chart,custom.creditAccount,"credit",amt,custom.memo||docNumber(record),dims)];return{status:"ready",ruleId:clean(custom.ruleId||"custom"),journal:createIXIJournalEntry({sourceDocument:{documentId:docId(record),documentType:type,documentNumber:docNumber(record)},period,entityPassportId,description:clean(custom.description||`${type} ${docNumber(record)}`),lines,dimensions:dims,ruleId:clean(custom.ruleId||"custom"),ruleVersion:clean(custom.version||IXI_GL_RULE_VERSION),actor})};}
- let ruleId="",lines=[];
- if(type==="invoice"){const kind=invoiceKind(record),assetSale=kind.includes("asset-sale")||kind==="sale";if(!assetSale&&!kind.includes("service")&&!kind.includes("rental")&&!kind.includes("invoice"))return{status:"exception",reason:"invoice-revenue-mapping-required",source:record};const basis=assetCostBasis(record);if(assetSale&&!(basis>0))return{status:"exception",reason:"asset-sale-cost-basis-required",source:record};ruleId=assetSale?"asset-sale-invoice-receivable-and-basis-release":"invoice-receivable";lines=[line(chart,"1100","debit",amt,docNumber(record),dims),line(chart,revenueAccount(record),"credit",amt,docNumber(record),dims),...(assetSale?[line(chart,"5100","debit",basis,docNumber(record),dims),line(chart,"1510","credit",basis,docNumber(record),dims)]:[])];}
- else if(type==="bill"){ruleId="bill-payable";const cap=Boolean(s.capitalizable||record.metadata?.capitalizable||record.metadata?.acquisitionPeriod);lines=[line(chart,cap?"1510":expenseAccount(record),"debit",amt,docNumber(record),dims),line(chart,"2000","credit",amt,docNumber(record),dims)];}
- else if(type==="expense"){ruleId="expense-paid";const paidWith=clean(s.paymentMethod||s.paidWith||record.metadata?.paymentMethod).toLowerCase(),credit=paidWith.includes("card")?"2100":paidWith.includes("my-money")||paidWith.includes("employee")?"2000":cashAccount(record);lines=[line(chart,expenseAccount(record),"debit",amt,docNumber(record),dims),line(chart,credit,"credit",amt,docNumber(record),dims)];}
- else if(type==="payment"){const dir=clean(s.paymentDirection||s.direction||s.financialState).toLowerCase(),cls=clean(s.transactionClass||record.metadata?.transactionClass).toLowerCase();if(cls==="account-transfer"){ruleId="treasury-transfer";lines=[line(chart,clean(s.toAccountName).toLowerCase().includes("payroll")?"1020":"1010","debit",amt,docNumber(record),dims),line(chart,clean(s.fromAccountName).toLowerCase().includes("payroll")?"1020":"1010","credit",amt,docNumber(record),dims)];}else if(cls==="opening-balance"){ruleId="treasury-opening";lines=[line(chart,cashAccount(record),"debit",amt,docNumber(record),dims),line(chart,"3000","credit",amt,docNumber(record),dims)];}else if(cls==="cash-adjustment"){ruleId="treasury-adjustment";const inbound=dir==="in"||dir==="inflow"||dir==="received";lines=inbound?[line(chart,cashAccount(record),"debit",amt,docNumber(record),dims),line(chart,"3000","credit",amt,docNumber(record),dims)]:[line(chart,"6900","debit",amt,docNumber(record),dims),line(chart,cashAccount(record),"credit",amt,docNumber(record),dims)];}else if(dir==="in"||dir==="inflow"||dir==="received"){if(!relatedInvoice(record))return{status:"exception",reason:"incoming-payment-missing-receivable-linkage",source:record};ruleId="payment-received";lines=[line(chart,cashAccount(record),"debit",amt,docNumber(record),dims),line(chart,"1100","credit",amt,docNumber(record),dims)];}else if(dir==="out"||dir==="outflow"||dir==="paid"){if(relatedBill(record)){ruleId="payment-paid";lines=[line(chart,"2000","debit",amt,docNumber(record),dims),line(chart,cashAccount(record),"credit",amt,docNumber(record),dims)];}else if(settlementPayment(record)){ruleId="settlement-owner-payment";lines=[line(chart,"3000","debit",amt,docNumber(record),dims),line(chart,cashAccount(record),"credit",amt,docNumber(record),dims)];}else return{status:"exception",reason:"outgoing-payment-missing-payable-or-settlement-linkage",source:record};}else return{status:"exception",reason:"payment-direction-required",source:record};}
- else if(type==="credit"){const dir=clean(s.direction||record.direction).toLowerCase();if(dir==="in"){if(!relatedBill(record))return{status:"exception",reason:"vendor-credit-missing-bill-linkage",source:record};ruleId="vendor-credit";lines=[line(chart,"2000","debit",amt,docNumber(record),dims),line(chart,expenseAccount(record),"credit",amt,docNumber(record),dims)];}else{if(!relatedInvoice(record))return{status:"exception",reason:"customer-credit-missing-invoice-linkage",source:record};ruleId="customer-credit";lines=[line(chart,revenueAccount(record),"debit",amt,docNumber(record),dims),line(chart,"1100","credit",amt,docNumber(record),dims)];}}
- else if(["purchase-order","quote","work-order","time-entry","collection","payables-control","settlement"].includes(type))return{status:"non-posting",reason:"operational-or-memo-document",source:record};
- else return{status:"exception",reason:`no-posting-rule:${type||"unknown"}`,source:record};
- const journal=createIXIJournalEntry({sourceDocument:{documentId:docId(record),documentType:type,documentNumber:docNumber(record)},period,entityPassportId,description:`${type.toUpperCase()} · ${docNumber(record)}`,lines,dimensions:dims,ruleId,ruleVersion:IXI_GL_RULE_VERSION,actor});return{status:journal.totals.balanced?"ready":"exception",reason:journal.totals.balanced?"":"unbalanced",ruleId,journal,source:record};}
-export function buildIXIGLPostingProjection({financialRecords=[],chart={},rules=[],postedJournals=[],actor={}}={}){const postedSourceIds=new Set(arr(postedJournals).filter(j=>j.posting?.status==="posted"&&!j.posting?.reversedBy).map(j=>clean(j.source?.financialDocumentId)).filter(Boolean)),results=arr(financialRecords).map(r=>classifyIXIFinancialDocument({record:r,chart,rules,actor})),ready=results.filter(x=>x.status==="ready"&&!postedSourceIds.has(clean(x.journal?.source?.financialDocumentId))),exceptions=results.filter(x=>x.status==="exception"),nonPosting=results.filter(x=>x.status==="non-posting"),alreadyPosted=results.filter(x=>x.journal&&postedSourceIds.has(clean(x.journal.source.financialDocumentId)));return{ready,exceptions,nonPosting,alreadyPosted,counts:{total:results.length,ready:ready.length,exceptions:exceptions.length,nonPosting:nonPosting.length,posted:alreadyPosted.length}};}
-export default{classifyIXIFinancialDocument,buildIXIGLPostingProjection};
+import {
+  createIXIJournalEntry,
+  IXI_GL_RULE_VERSION,
+} from "./IXIGeneralLedgerContract.js";
+const clean = (v) => String(v ?? "").trim();
+const num = (v) => (Number.isFinite(Number(v)) ? Number(v) : 0);
+const money = (v) => Math.round(num(v) * 100) / 100;
+const arr = (v) => (Array.isArray(v) ? v : []);
+function source(r = {}) {
+  return (
+    r.input ||
+    r.financialDocument?.input ||
+    r.document?.input ||
+    r.financialDocument ||
+    r.document?.financialDocument ||
+    r.document ||
+    r
+  );
+}
+function docType(r = {}) {
+  return clean(
+    r.documentType ||
+      r.type ||
+      r.financialDocument?.documentType ||
+      r.document?.documentType ||
+      r.metadata?.documentType,
+  ).toLowerCase();
+}
+function docId(r = {}) {
+  const s = source(r);
+  return clean(
+    s.financialDocumentId ||
+      s.documentId ||
+      s.id ||
+      r.financialDocumentId ||
+      r.documentId ||
+      r.id ||
+      r.financialDocument?.financialDocumentId ||
+      r.document?.financialDocumentId ||
+      r.identity?.billDocumentId ||
+      r.identity?.invoiceId ||
+      r.identity?.serviceInvoiceId ||
+      r.identity?.saleId,
+  );
+}
+function docNumber(r = {}) {
+  const s = source(r);
+  return clean(
+    s.documentNumber ||
+      s.invoiceNumber ||
+      r.documentNumber ||
+      r.identity?.number ||
+      r.identity?.billNumber ||
+      r.metadata?.saleNumber ||
+      docId(r),
+  );
+}
+function amount(r = {}) {
+  const s = source(r);
+  return money(
+    s.totals?.total ??
+      s.totals?.subtotal ??
+      s.amount ??
+      s.total ??
+      s.subtotal ??
+      r.amount ??
+      r.financialDocument?.amount,
+  );
+}
+function refs(r = {}) {
+  return arr(
+    source(r).references || r.references || r.financialDocument?.references,
+  );
+}
+function ref(r = {}, role = "") {
+  return refs(r).find((x) => clean(x.role).toLowerCase() === role) || null;
+}
+function hasRef(r = {}, roles = []) {
+  const wanted = new Set(arr(roles).map((x) => clean(x).toLowerCase()));
+  return refs(r).some((x) => wanted.has(clean(x.role).toLowerCase()));
+}
+function dimensions(r = {}) {
+  return {
+    entityPassportId: clean(ref(r, "entity")?.passportId),
+    locationPassportId: clean(ref(r, "location")?.passportId),
+    assetPassportId: clean(ref(r, "asset")?.passportId),
+    customerPassportId: clean(ref(r, "customer")?.passportId),
+    vendorPassportId: clean(ref(r, "vendor")?.passportId),
+    workOrderId: clean(ref(r, "work-order")?.externalId),
+    purchaseOrderId: clean(ref(r, "purchase-order")?.externalId),
+  };
+}
+function periodOf(r = {}) {
+  const s = source(r),
+    raw = clean(
+      s.documentDate ||
+        s.invoiceDate ||
+        s.effectiveDate ||
+        s.occurredAt ||
+        r.createdAt ||
+        r.audit?.createdAt,
+    );
+  if (/^\d{4}-\d{2}/.test(raw)) return raw.slice(0, 7);
+  const d = new Date(raw || Date.now());
+  return Number.isNaN(d.getTime())
+    ? ""
+    : `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+}
+function category(r = {}) {
+  return clean(
+    source(r).category || r.category || r.metadata?.category,
+  ).toLowerCase();
+}
+function accountName(chart = {}, code = "") {
+  return chart.accounts?.find((a) => a.code === code)?.name || code;
+}
+function line(chart, code, side, value, memo = "", dims = {}) {
+  return {
+    accountCode: code,
+    accountName: accountName(chart, code),
+    debit: side === "debit" ? money(value) : 0,
+    credit: side === "credit" ? money(value) : 0,
+    memo,
+    dimensions: dims,
+  };
+}
+function expenseAccount(r = {}) {
+  const c = category(r);
+  if (c.includes("fuel")) return "6200";
+  if (c.includes("freight") || c.includes("transport")) return "6300";
+  if (c.includes("tech")) return "6400";
+  if (
+    c.includes("repair") ||
+    c.includes("service") ||
+    c.includes("maintenance") ||
+    c.includes("part")
+  )
+    return "6110";
+  return "6900";
+}
+function invoiceKind(r = {}) {
+  const s = source(r);
+  return clean(
+    s.invoiceType || r.metadata?.invoiceType || r.metadata?.transactModule,
+  ).toLowerCase();
+}
+function assetCostBasis(r = {}) {
+  const s = source(r),
+    metadata = { ...(r.metadata || {}), ...(s.metadata || {}) };
+  return money(s.assetSale?.assetCostBasis ?? metadata.assetCostBasis);
+}
+function revenueAccount(r = {}) {
+  const kind = invoiceKind(r);
+  if (kind.includes("service")) return "4300";
+  if (kind.includes("rental")) return "4200";
+  return "4100";
+}
+function cashAccount(r = {}) {
+  const s = source(r),
+    id = clean(s.accountId || r.metadata?.accountId);
+  if (id && clean(s.accountName).toLowerCase().includes("payroll"))
+    return "1020";
+  if (id && clean(s.accountName).toLowerCase().includes("petty")) return "1050";
+  return "1010";
+}
+function relatedInvoice(r = {}) {
+  const s = source(r);
+  return (
+    clean(
+      s.sourceFinancialDocumentId ||
+        s.relatedInvoiceId ||
+        s.invoiceId ||
+        r.metadata?.invoiceId ||
+        r.metadata?.relatedInvoiceId,
+    ) || hasRef(r, ["invoice", "receivable"])
+  );
+}
+function relatedBill(r = {}) {
+  const s = source(r);
+  return (
+    clean(
+      s.relatedBillId ||
+        s.billId ||
+        r.metadata?.billDocumentId ||
+        r.metadata?.relatedBillId,
+    ) || hasRef(r, ["bill", "payable"])
+  );
+}
+function settlementPayment(r = {}) {
+  const s = source(r),
+    module = clean(r.metadata?.transactModule).toLowerCase();
+  return Boolean(
+    s.relatedSettlementId ||
+    r.metadata?.settlementId ||
+    module.includes("settlement") ||
+    hasRef(r, ["owner", "partner", "settlement"]),
+  );
+}
+function matchedCustomRule(record = {}, rules = []) {
+  const type = docType(record),
+    cat = category(record);
+  return (
+    arr(rules)
+      .filter((r) => r.active !== false)
+      .sort((a, b) => num(b.priority) - num(a.priority))
+      .find(
+        (r) =>
+          (!clean(r.documentType) ||
+            clean(r.documentType).toLowerCase() === type) &&
+          (!clean(r.categoryContains) ||
+            cat.includes(clean(r.categoryContains).toLowerCase())),
+      ) || null
+  );
+}
+export function classifyIXIFinancialDocument({
+  record = {},
+  chart = {},
+  rules = [],
+  actor = {},
+} = {}) {
+  const type = docType(record),
+    amt = amount(record),
+    s = source(record),
+    dims = dimensions(record),
+    period = periodOf(record),
+    entityPassportId = clean(dims.entityPassportId || chart.entityPassportId),
+    custom = matchedCustomRule(record, rules);
+  if (!docId(record))
+    return {
+      status: "exception",
+      reason: "missing-source-document-id",
+      source: record,
+    };
+  if (
+    !(amt > 0) &&
+    type !== "work-order" &&
+    type !== "purchase-order" &&
+    type !== "quote"
+  )
+    return {
+      status: "exception",
+      reason: "missing-positive-amount",
+      source: record,
+    };
+  if (custom) {
+    const lines = [
+      line(
+        chart,
+        custom.debitAccount,
+        "debit",
+        amt,
+        custom.memo || docNumber(record),
+        dims,
+      ),
+      line(
+        chart,
+        custom.creditAccount,
+        "credit",
+        amt,
+        custom.memo || docNumber(record),
+        dims,
+      ),
+    ];
+    return {
+      status: "ready",
+      ruleId: clean(custom.ruleId || "custom"),
+      journal: createIXIJournalEntry({
+        sourceDocument: {
+          documentId: docId(record),
+          documentType: type,
+          documentNumber: docNumber(record),
+        },
+        period,
+        entityPassportId,
+        description: clean(
+          custom.description || `${type} ${docNumber(record)}`,
+        ),
+        lines,
+        dimensions: dims,
+        ruleId: clean(custom.ruleId || "custom"),
+        ruleVersion: clean(custom.version || IXI_GL_RULE_VERSION),
+        actor,
+      }),
+    };
+  }
+  let ruleId = "",
+    lines = [];
+  if (type === "invoice") {
+    const kind = invoiceKind(record),
+      assetSale = kind.includes("asset-sale") || kind === "sale";
+    if (
+      !assetSale &&
+      !kind.includes("service") &&
+      !kind.includes("rental") &&
+      !kind.includes("invoice")
+    )
+      return {
+        status: "exception",
+        reason: "invoice-revenue-mapping-required",
+        source: record,
+      };
+    const basis = assetCostBasis(record);
+    if (assetSale && !(basis > 0))
+      return {
+        status: "exception",
+        reason: "asset-sale-cost-basis-required",
+        source: record,
+      };
+    ruleId = assetSale
+      ? "asset-sale-invoice-receivable-and-basis-release"
+      : "invoice-receivable";
+    lines = [
+      line(chart,"1100","debit",amt,docNumber(record),dims),
+      line(chart,revenueAccount(record),"credit",amt,docNumber(record),dims),
+      ...(assetSale
+        ? [
+            line(chart,"5100","debit",basis,docNumber(record),dims),
+            line(chart,"1510","credit",basis,docNumber(record),dims),
+          ]
+        : []),
+    ];
+  } else if (type === "bill") {
+    ruleId = "bill-payable";
+    const cap = Boolean(
+      s.capitalizable ||
+      record.metadata?.capitalizable ||
+      record.metadata?.acquisitionPeriod,
+    );
+    lines = [
+      line(
+        chart,
+        cap ? "1510" : expenseAccount(record),
+        "debit",
+        amt,
+        docNumber(record),
+        dims,
+      ),
+      line(chart, "2000", "credit", amt, docNumber(record), dims),
+    ];
+  } else if (type === "expense") {
+    ruleId = "expense-paid";
+    const paidWith = clean(
+        s.paymentMethod || s.paidWith || record.metadata?.paymentMethod,
+      ).toLowerCase(),
+      credit = paidWith.includes("card")
+        ? "2100"
+        : paidWith.includes("my-money") || paidWith.includes("employee")
+          ? "2000"
+          : cashAccount(record);
+    lines = [
+      line(
+        chart,
+        expenseAccount(record),
+        "debit",
+        amt,
+        docNumber(record),
+        dims,
+      ),
+      line(chart, credit, "credit", amt, docNumber(record), dims),
+    ];
+  } else if (type === "payment") {
+    const dir = clean(s.paymentDirection||s.direction||s.financialState).toLowerCase(),
+      cls = clean(
+        s.transactionClass || record.metadata?.transactionClass,
+      ).toLowerCase();
+    if (cls === "account-transfer") {
+      ruleId = "treasury-transfer";
+      lines = [
+        line(
+          chart,
+          clean(s.toAccountName).toLowerCase().includes("payroll")
+            ? "1020"
+            : "1010",
+          "debit",
+          amt,
+          docNumber(record),
+          dims,
+        ),
+        line(
+          chart,
+          clean(s.fromAccountName).toLowerCase().includes("payroll")
+            ? "1020"
+            : "1010",
+          "credit",
+          amt,
+          docNumber(record),
+          dims,
+        ),
+      ];
+    } else if (cls === "opening-balance") {
+      ruleId = "treasury-opening";
+      lines = [
+        line(chart, cashAccount(record), "debit", amt, docNumber(record), dims),
+        line(chart, "3000", "credit", amt, docNumber(record), dims),
+      ];
+    } else if (cls === "cash-adjustment") {
+      ruleId = "treasury-adjustment";
+      const inbound = dir === "in" || dir === "inflow" || dir === "received";
+      lines = inbound
+        ? [
+            line(
+              chart,
+              cashAccount(record),
+              "debit",
+              amt,
+              docNumber(record),
+              dims,
+            ),
+            line(chart, "3000", "credit", amt, docNumber(record), dims),
+          ]
+        : [
+            line(chart, "6900", "debit", amt, docNumber(record), dims),
+            line(
+              chart,
+              cashAccount(record),
+              "credit",
+              amt,
+              docNumber(record),
+              dims,
+            ),
+          ];
+    } else if (dir === "in" || dir === "inflow" || dir === "received") {
+      const customerDeposit =
+        s.metadata?.customerDeposit === true ||
+        record.metadata?.customerDeposit === true;
+      if (customerDeposit && !relatedInvoice(record)) {
+        ruleId = "unapplied-customer-deposit";
+        lines = [
+          line(
+            chart,
+            cashAccount(record),
+            "debit",
+            amt,
+            docNumber(record),
+            dims,
+          ),
+          line(chart, "2300", "credit", amt, docNumber(record), dims),
+        ];
+      } else if (!relatedInvoice(record))
+        return {
+          status: "exception",
+          reason: "incoming-payment-missing-receivable-linkage",
+          source: record,
+        };
+      else {
+        ruleId="payment-received";
+        lines = [
+          line(chart,cashAccount(record),"debit",amt,docNumber(record),dims),
+          line(chart,"1100","credit",amt,docNumber(record),dims),
+        ];
+      }
+    } else if (dir === "out" || dir === "outflow" || dir === "paid") {
+      if (relatedBill(record)) {
+        ruleId = "payment-paid";
+        lines = [
+          line(chart, "2000", "debit", amt, docNumber(record), dims),
+          line(
+            chart,
+            cashAccount(record),
+            "credit",
+            amt,
+            docNumber(record),
+            dims,
+          ),
+        ];
+      } else if (settlementPayment(record)) {
+        ruleId = "settlement-owner-payment";
+        lines = [
+          line(chart, "3000", "debit", amt, docNumber(record), dims),
+          line(
+            chart,
+            cashAccount(record),
+            "credit",
+            amt,
+            docNumber(record),
+            dims,
+          ),
+        ];
+      } else
+        return {
+          status: "exception",
+          reason: "outgoing-payment-missing-payable-or-settlement-linkage",
+          source: record,
+        };
+    } else
+      return {
+        status: "exception",
+        reason: "payment-direction-required",
+        source: record,
+      };
+  } else if (type === "credit") {
+    const dir = clean(s.direction || record.direction).toLowerCase();
+    const depositApplication =
+      s.metadata?.customerDepositApplication === true ||
+      record.metadata?.customerDepositApplication === true;
+    if (depositApplication) {
+      ruleId = "customer-deposit-application";
+      lines = [
+        line(chart, "2300", "debit", amt, docNumber(record), dims),
+        line(chart, "1100", "credit", amt, docNumber(record), dims),
+      ];
+    } else if (dir === "in") {
+      if (!relatedBill(record))
+        return {
+          status: "exception",
+          reason: "vendor-credit-missing-bill-linkage",
+          source: record,
+        };
+      ruleId = "vendor-credit";
+      lines = [
+        line(chart, "2000", "debit", amt, docNumber(record), dims),
+        line(
+          chart,
+          expenseAccount(record),
+          "credit",
+          amt,
+          docNumber(record),
+          dims,
+        ),
+      ];
+    } else {
+      if (!relatedInvoice(record))
+        return {
+          status: "exception",
+          reason: "customer-credit-missing-invoice-linkage",
+          source: record,
+        };
+      ruleId = "customer-credit";
+      lines = [
+        line(
+          chart,
+          revenueAccount(record),
+          "debit",
+          amt,
+          docNumber(record),
+          dims,
+        ),
+        line(chart, "1100", "credit", amt, docNumber(record), dims),
+      ];
+    }
+  } else if (
+    [
+      "purchase-order",
+      "quote",
+      "work-order",
+      "time-entry",
+      "collection",
+      "payables-control",
+      "settlement",
+    ].includes(type)
+  )
+    return {
+      status: "non-posting",
+      reason: "operational-or-memo-document",
+      source: record,
+    };
+  else
+    return {
+      status: "exception",
+      reason: `no-posting-rule:${type || "unknown"}`,
+      source: record,
+    };
+  const journal = createIXIJournalEntry({
+    sourceDocument: {
+      documentId: docId(record),
+      documentType: type,
+      documentNumber: docNumber(record),
+    },
+    period,
+    entityPassportId,
+    description: `${type.toUpperCase()} · ${docNumber(record)}`,
+    lines,
+    dimensions: dims,
+    ruleId,
+    ruleVersion: IXI_GL_RULE_VERSION,
+    actor,
+  });
+  return {
+    status: journal.totals.balanced ? "ready" : "exception",
+    reason: journal.totals.balanced ? "" : "unbalanced",
+    ruleId,
+    journal,
+    source: record,
+  };
+}
+export function buildIXIGLPostingProjection({
+  financialRecords = [],
+  chart = {},
+  rules = [],
+  postedJournals = [],
+  actor = {},
+} = {}) {
+  const postedSourceIds = new Set(
+      arr(postedJournals)
+        .filter((j) => j.posting?.status === "posted" && !j.posting?.reversedBy)
+        .map((j) => clean(j.source?.financialDocumentId))
+        .filter(Boolean),
+    ),
+    results = arr(financialRecords).map((r) =>
+      classifyIXIFinancialDocument({ record: r, chart, rules, actor }),
+    ),
+    ready = results.filter(
+      (x) =>
+        x.status === "ready" &&
+        !postedSourceIds.has(clean(x.journal?.source?.financialDocumentId)),
+    ),
+    exceptions = results.filter((x) => x.status === "exception"),
+    nonPosting = results.filter((x) => x.status === "non-posting"),
+    alreadyPosted = results.filter(
+      (x) =>
+        x.journal &&
+        postedSourceIds.has(clean(x.journal.source.financialDocumentId)),
+    );
+  return {
+    ready,
+    exceptions,
+    nonPosting,
+    alreadyPosted,
+    counts: {
+      total: results.length,
+      ready: ready.length,
+      exceptions: exceptions.length,
+      nonPosting: nonPosting.length,
+      posted: alreadyPosted.length,
+    },
+  };
+}
+export default { classifyIXIFinancialDocument, buildIXIGLPostingProjection };
