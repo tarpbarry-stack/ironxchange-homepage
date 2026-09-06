@@ -28,6 +28,16 @@ test("shared commercial editor supports customer-defined schema changes", () => 
   assert.match(editor, /fieldType:\s*event\.target\.value/u);
   assert.match(editor, /persistedEditableIds/u);
   assert.match(editor, /delete nextFields\[fieldId\]/u);
+  assert.match(editor, /recoveredFromPersistedFields:\s*true/u);
+  assert.match(editor, /function clearAllFields\(/u);
+  assert.match(editor, /CLEAR ALL FIELDS/u);
+});
+
+test("shared commercial editor recovers orphaned server fields so they can be deleted", () => {
+  assert.match(editor, /Object\.keys\(getObjectFields\(object\)\)/u);
+  assert.match(editor, /!declaredIds\.has\(clean\(fieldId\)\)/u);
+  assert.match(editor, /return \[\.\.\.declared, \.\.\.orphaned\]/u);
+  assert.match(editor, /persistedEditableIds/u);
 });
 
 test("shared commercial editor preserves typed values and durable field definitions", () => {

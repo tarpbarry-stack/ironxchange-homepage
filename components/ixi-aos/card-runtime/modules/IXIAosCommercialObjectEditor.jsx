@@ -63,7 +63,7 @@ function createFieldId(definitions = []) {
 }
 
 function normalizeDefinitions(object = {}) {
-  return ensureBusinessIdentifierDefinition(object).map((definition, index) => ({
+  const declared = ensureBusinessIdentifierDefinition(object).map((definition, index) => ({
     ...definition,
     fieldId: clean(definition?.fieldId),
     label: clean(definition?.label || definition?.displayLabel) || `FIELD ${index + 1}`,
@@ -72,6 +72,21 @@ function normalizeDefinitions(object = {}) {
     editable: definition?.editable !== false,
     presentationOrder: index
   })).filter(definition => definition.fieldId);
+
+  const declaredIds = new Set(declared.map(definition => definition.fieldId));
+  const orphaned = Object.keys(getObjectFields(object))
+    .filter(fieldId => clean(fieldId) && !declaredIds.has(clean(fieldId)))
+    .map((fieldId, index) => ({
+      fieldId: clean(fieldId),
+      label: clean(fieldId),
+      fieldType: "text",
+      type: "text",
+      editable: true,
+      presentationOrder: declared.length + index,
+      recoveredFromPersistedFields: true
+    }));
+
+  return [...declared, ...orphaned];
 }
 
 /*
@@ -165,6 +180,12 @@ export default function IXIAosCommercialObjectEditor({
         ? { ...definition, ...patch }
         : definition
     ));
+  }
+
+  function clearAllFields() {
+    const businessDefinition = definitions.find(isBusinessIdentifier) || null;
+    setDefinitions(businessDefinition ? [{ ...businessDefinition, presentationOrder: 0 }] : []);
+    setDraft(businessDefinition ? { [businessDefinition.fieldId]: "" } : {});
   }
 
   async function save() {
@@ -323,12 +344,20 @@ export default function IXIAosCommercialObjectEditor({
             );
           })}
 
-          <button className="add-field" type="button" onClick={addField}>+ ADD FIELD</button>
+          <div className="field-actions">
+            <button className="add-field" type="button" onClick={addField}>+ ADD FIELD</button>
+            <button className="clear-fields" type="button" onClick={clearAllFields}>CLEAR ALL FIELDS</button>
+          </div>
         </section>
       </main>
 
       <style jsx global>{`
         .ixi-aos-commercial-editor,.ixi-aos-commercial-editor *{box-sizing:border-box}.ixi-aos-commercial-editor{position:absolute;inset:0;z-index:260;overflow:hidden;border:1px solid #454b47;border-radius:13px;background:linear-gradient(180deg,#101310,#080a09);color:#eef1ef;font-family:Arial,Helvetica,sans-serif;box-shadow:inset 0 1px #ffffff12,0 18px 40px #0008}.ixi-aos-commercial-editor>header{height:43px;display:flex;align-items:center;justify-content:space-between;padding:0 9px;border-bottom:1px solid #303531;background:#151815}.ixi-aos-commercial-editor>header small{display:block;color:#ffc400;font-size:5px;font-weight:950}.ixi-aos-commercial-editor>header strong{display:block;margin-top:3px;font-size:10px}.ixi-aos-commercial-editor>header nav{display:flex;gap:4px}.ixi-aos-commercial-editor button,.ixi-aos-commercial-editor select{height:24px;border:1px solid #3a403b;border-radius:4px;background:#111411;color:#dce0dd;font-size:6px;font-weight:950}.ixi-aos-commercial-editor>header button{padding:0 9px}.ixi-aos-commercial-editor>header button:first-child{border-color:#ffc40066;color:#ffc400}.ixi-aos-commercial-editor button:disabled,.ixi-aos-commercial-editor select:disabled{opacity:.42;cursor:not-allowed}.ixi-aos-commercial-editor>main{position:absolute;top:43px;left:0;right:0;bottom:0;padding:8px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#4b514d transparent}.ixi-aos-commercial-editor .editor-notice{display:flex;flex-direction:column;gap:3px;padding:7px;border:1px solid #a73a3a;border-radius:5px;background:#2a1111;color:#f5d7d7}.ixi-aos-commercial-editor .editor-notice.conflict{border-color:#ffc40066;background:#ffc4000d;color:#ffe89a}.ixi-aos-commercial-editor .editor-notice strong{font-size:6px;letter-spacing:.05em}.ixi-aos-commercial-editor .editor-notice span{font-size:6px;line-height:1.35}.ixi-aos-commercial-editor .editor-notice button{width:100%;margin-top:3px;border-color:#ffc40066;color:#ffc400}.ixi-aos-commercial-editor section{margin-top:8px}.ixi-aos-commercial-editor h4{height:20px;margin:0;display:flex;align-items:center;color:#ffc400;font-size:6px;font-weight:950;letter-spacing:.06em}.ixi-aos-commercial-editor .identity-field{display:block;padding:7px;border:1px solid #2b302c;border-radius:5px;background:#101310}.ixi-aos-commercial-editor label>span{display:block;margin-bottom:4px;color:#8d958f;font-size:5px;font-weight:900}.ixi-aos-commercial-editor input{width:100%;height:26px;padding:0 7px;border:1px solid #343a35;border-radius:4px;background:#090b0a;color:#edf0ee;font-size:7px;font-weight:850;outline:none}.ixi-aos-commercial-editor .fixed-field-label{height:26px;display:flex;align-items:center;padding:0 7px;border:1px solid #5e552d;border-radius:4px;background:#12140f;color:#ffc400;font-size:7px;font-weight:950}.ixi-aos-commercial-editor .field-columns,.ixi-aos-commercial-editor .field-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr) 62px 26px;gap:4px}.ixi-aos-commercial-editor .field-columns{padding:0 4px 4px;color:#68716b;font-size:4.7px;font-weight:900}.ixi-aos-commercial-editor .field-row{margin-bottom:4px}.ixi-aos-commercial-editor .field-row select{width:100%;padding:0 4px}.ixi-aos-commercial-editor .field-row button{width:26px;padding:0}.ixi-aos-commercial-editor .field-row.business-id{padding:4px;border:1px solid #ffc40033;border-radius:5px;background:#ffc40008}.ixi-aos-commercial-editor .add-field{width:100%;margin-top:4px;border-color:#ffc40044;color:#ffc400;background:#111411}
+      `}</style>
+      <style jsx>{`
+        .field-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin-top: 4px; }
+        .field-actions button { width: 100%; margin-top: 0; }
+        .clear-fields { border-color: #a34b4b66; color: #dc8c8c; background: #111411; }
       `}</style>
     </div>
   );
