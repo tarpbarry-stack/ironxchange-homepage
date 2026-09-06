@@ -6,7 +6,7 @@ name: Deploy IX-Core Equipment Sales
       commit_sha:
         description: Immutable IX-Core commit SHA
         required: true
-        default: 42a93131979b4ef4aa85646f892a6efda73a991c
+        default: 037bd6a715a98c37f2be10b4f7e00c7efd8530bf
   push:
     branches: [main]
     paths: [".github/workflows/deploy-ixi-core-equipment-sales.yml"]
@@ -25,7 +25,7 @@ jobs:
     env:
       AWS_REGION: ${{ secrets.AWS_REGION }}
       AWS_INSTANCE_ID: ${{ secrets.AWS_INSTANCE_ID }}
-      IXI_CORE_SHA: ${{ inputs.commit_sha || '42a93131979b4ef4aa85646f892a6efda73a991c' }}
+      IXI_CORE_SHA: ${{ inputs.commit_sha || '037bd6a715a98c37f2be10b4f7e00c7efd8530bf' }}
     steps:
       - name: Validate immutable release
         shell: bash
@@ -55,7 +55,7 @@ jobs:
           BACKUP=/var/backups/ixi-core-releases/equipment-sales-pre-__IXI_CORE_SHA__.tgz
           BASELINE_EXISTING='financial/IXIFinancialCommandEngine.js financial/IXIFinancialCommandRoutes.js financial/IXIFinancialDocumentFactoryRegistry.js financial/IXIFinancialRoutes.js financial/IXIFinancialValidationBridge.js'
           EXISTING="$BASELINE_EXISTING index.js"
-          NEW='financial/IXIFinancialSalesOrderFactory.js sales/IXISalesSigningRoutes.js sales/IXISalesSigningService.js sales/IXISalesSigningToken.js'
+          NEW='financial/IXIFinancialSalesOrderFactory.js financial/IXIFinancialSalesCloseoutControl.js financial/IXIFinancialAttachmentService.js sales/IXISalesSigningRoutes.js sales/IXISalesSigningService.js sales/IXISalesSigningToken.js'
           CHANGED="$BASELINE_EXISTING $NEW"
           SUCCESS=0
           ROLLBACK_ARMED=0
@@ -184,7 +184,7 @@ jobs:
           {
             echo '## IX-Core Equipment Sales release'
             printf -- '- Commit: `%s`\n' "$IXI_CORE_SHA"
-            echo '- 85 Financial and Sales control tests: passed'
+            echo '- Financial, Sales, evidence, and closeout control tests: passed'
             echo '- Production dependency audit: passed'
             echo '- AWS health, public signing, and authenticated invitation route probes: passed'
           } >> "$GITHUB_STEP_SUMMARY"
