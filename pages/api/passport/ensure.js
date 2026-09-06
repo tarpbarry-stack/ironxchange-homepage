@@ -1,7 +1,7 @@
 // /pages/api/passport/ensure.js
 
-const IX_CORE_BASE_URL =
-  process.env.IX_CORE_BASE_URL || "http://3.131.46.49:4100";
+import machineProvisioningHandler
+  from "../ixi/onboarding/machine";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -11,22 +11,19 @@ export default async function handler(req, res) {
     });
   }
 
-  try {
-    const response = await fetch(`${IX_CORE_BASE_URL}/passport/ensure`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(req.body || {})
-    });
+  const sourceType = String(req.body?.sourceType || "").trim();
+  const sourceId = String(req.body?.sourceId || "").trim();
 
-    const payload = await response.json();
-
-    return res.status(response.status).json(payload);
-  } catch (error) {
-    return res.status(500).json({
+  if (sourceType !== "sharetribe-listing" || !sourceId) {
+    return res.status(400).json({
       ok: false,
-      error: error.message
+      error: {
+        code: "IXI_CANONICAL_MACHINE_SOURCE_REQUIRED",
+        message: "Passport creation requires an owned Sharetribe machine listing."
+      }
     });
   }
+
+  req.body = { listingId: sourceId };
+  return machineProvisioningHandler(req, res);
 }
