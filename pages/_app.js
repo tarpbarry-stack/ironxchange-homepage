@@ -5,6 +5,7 @@ import { initPostHog, captureIXEvent } from "../lib/posthog";
 import { IXITicketProvider } from "../components/ixi-tickets/IXITicketProvider";
 import IXIGlobalTicketLauncher from "../components/ixi-tickets/IXIGlobalTicketLauncher";
 import IXIMarketplaceFaceTypography from "../components/ixi-marketplace/IXIMarketplaceFaceTypography";
+import IXIMobileShell from "../components/ixi-mobile/IXIMobileShell";
 
 export default function App({ Component, pageProps }) {
   const router = useRouter();
@@ -43,6 +44,11 @@ export default function App({ Component, pageProps }) {
   return (
     <IXITicketProvider>
       <Head>
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1, viewport-fit=cover"
+        />
+        <meta name="theme-color" content="#050505" />
         <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
         <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
         <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48x48.png" />
@@ -51,6 +57,7 @@ export default function App({ Component, pageProps }) {
 
       <IXIMarketplaceFaceTypography />
       <Component {...pageProps} />
+      <IXIMobileShell />
       <IXIGlobalTicketLauncher />
     </IXITicketProvider>
   );
