@@ -170,18 +170,27 @@ export default function IXISalesDealStyles() {
         background: #0b0e0c;
         color: #737874;
       }
-      .ixi-deal-stage-rail button.available {
+      .ixi-deal-stage-rail button.completed {
+        background: #ffc400;
+        color: #070907;
+        cursor: pointer;
+      }
+      .ixi-deal-stage-rail button.available-action {
+        color: #8a8f8b;
+        background: #0b0e0c;
+        cursor: pointer;
+      }
+      .ixi-deal-stage-rail button.next {
         color: #ffc400;
+        background: #0b0e0c;
+        box-shadow: inset 0 0 0 1px #ffc400;
         cursor: pointer;
       }
-      .ixi-deal-stage-rail button.startable {
-        color: #fff;
-        background: #2b2507;
-        box-shadow: inset 0 -2px #ffc400;
-        cursor: pointer;
+      .ixi-deal-stage-rail button.completed.selected {
+        box-shadow: inset 0 -3px #fff;
       }
-      .ixi-deal-stage-rail button.selected {
-        box-shadow: inset 0 -2px #ffc400;
+      .ixi-deal-stage-rail button.unavailable.selected {
+        box-shadow: inset 0 -2px #666;
       }
       .ixi-deal-stage-rail button:focus-visible {
         outline: 2px solid #ffc400;
