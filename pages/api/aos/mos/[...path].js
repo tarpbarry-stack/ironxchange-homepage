@@ -28,6 +28,11 @@ const ROUTES = [
   { methods: ["POST"], pattern: /^\/objects\/provision\/[^/]+\/recover$/ },
   { methods: ["GET", "PATCH", "DELETE"], pattern: /^\/objects\/[^/]+$/ },
 
+  { methods: ["POST"], pattern: /^\/relationships$/ },
+  { methods: ["POST"], pattern: /^\/relationships\/[^/]+\/end$/ },
+  { methods: ["GET"], pattern: /^\/objects\/[^/]+\/relationships$/ },
+  { methods: ["GET"], pattern: /^\/objects\/[^/]+\/relationship-graph$/ },
+
   { methods: ["GET"], pattern: /^\/containers\/[^/]+$/ },
   { methods: ["POST"], pattern: /^\/containers\/[^/]+\/place$/ },
   { methods: ["POST"], pattern: /^\/objects\/[^/]+\/remove-from-container$/ },
@@ -177,6 +182,8 @@ function sanitizeBody({
     /^\/objects\/provision\/[^/]+\/recover$/.test(path) ||
     /^\/entities\/[^/]+\/object-definitions(?:\/[^/]+)?$/.test(path) ||
     /^\/objects\/[^/]+$/.test(path) ||
+    path === "/relationships" ||
+    /^\/relationships\/[^/]+\/end$/.test(path) ||
     /^\/containers\/[^/]+\/place$/.test(path) ||
     /^\/objects\/[^/]+\/remove-from-container$/.test(path) ||
     /^\/movements\//.test(path) ||

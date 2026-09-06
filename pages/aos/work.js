@@ -54,6 +54,13 @@ import useIXIAosWorkspaceRegistry
 import useIXIEquipmentWorkspace
   from "../../components/ixi-mos/equipment/useIXIEquipmentWorkspace";
 
+import IXIRelationshipDropDialog
+  from "../../components/ixi-mos/relationships/IXIRelationshipDropDialog";
+
+import {
+  createMosRelationship
+} from "../../lib/mos/ixiMosBrowserGatewayClient";
+
 import IXIAosWorkspaceBoard
   from "../../components/ixi-mos/workspace/IXIAosWorkspaceBoard";
 
@@ -163,6 +170,9 @@ export default function IXIAosWorkPage() {
 const [aosObjects, setAosObjects] =
   useState([]);
 
+const [aosRelationships, setAosRelationships] =
+  useState([]);
+
 const [systemIndexes, setSystemIndexes] =
   useState([]);
 
@@ -263,6 +273,9 @@ const POCKET_TARGETS = [
   const hasAppliedRemoteLayoutRef = useRef(false);
   
   const [activeDndId, setActiveDndId] = useState("");
+  const [pendingRelationship, setPendingRelationship] = useState(null);
+  const [relationshipBusy, setRelationshipBusy] = useState(false);
+  const [relationshipError, setRelationshipError] = useState("");
   const {
   getSellerListingCardProps
 } = useIXISellerMachineOps({
@@ -496,6 +509,12 @@ if (cancelled) {
           environment?.objects
         )
           ? environment.objects
+          : []
+      );
+
+      setAosRelationships(
+        Array.isArray(environment?.relationships)
+          ? environment.relationships
           : []
       );
 
@@ -1147,6 +1166,9 @@ const equipmentIndex =
 
   aosObjects,
 
+  relationships:
+    aosRelationships,
+
   workspaceSystemIndexes,
 
   equipmentWorkspaceIndex,
@@ -1173,6 +1195,114 @@ const equipmentIndex =
       ?.get(id) ||
     null
   );
+}
+
+function getCanonicalMosObjectForWorkspaceId(workspaceObjectId) {
+  const id = String(workspaceObjectId || "").trim();
+  if (!id) return null;
+
+  return (aosObjects || []).find(object => {
+    if (String(object?.objectId || "").trim() === id) return true;
+
+    if (String(object?.metadata?.sourceListingId || "").trim() === id) {
+      return true;
+    }
+
+    return (Array.isArray(object?.identities) ? object.identities : []).some(identity =>
+      String(identity?.sourceType || "").trim() === "sharetribe-listing" &&
+      String(identity?.sourceId || "").trim() === id
+    );
+  }) || null;
+}
+
+function cancelPendingRelationship() {
+  if (relationshipBusy) return;
+  setPendingRelationship(null);
+  setRelationshipError("");
+}
+
+async function confirmPendingRelationship(relationshipName) {
+  if (!pendingRelationship || relationshipBusy) return;
+
+  setRelationshipBusy(true);
+  setRelationshipError("");
+
+  try {
+    const response = await createMosRelationship({
+      sourceObjectId: pendingRelationship.sourceObjectId,
+      targetObjectId: pendingRelationship.targetObjectId,
+      relationshipType: relationshipName,
+      metadata: {
+        createdFrom: "aos-work-drop",
+        sourceWorkspaceObjectId: pendingRelationship.sourceWorkspaceObjectId,
+        targetWorkspaceObjectId: pendingRelationship.targetWorkspaceObjectId
+      }
+    });
+
+    const relationship = response?.relationship;
+    if (!relationship?.relationshipId) {
+      const error = new Error("IX Core did not confirm the canonical relationship.");
+      error.code = "IXI_AOS_RELATIONSHIP_READBACK_REQUIRED";
+      throw error;
+    }
+
+    setWorkspacePlacements(pendingRelationship.nextPlacements);
+    await saveWorkspaceLayout(pendingRelationship.nextPlacements);
+
+    const displayRelationship = {
+      id: relationship.relationshipId,
+      relationshipId: relationship.relationshipId,
+      label: relationship.relationshipLabel || relationship.relationshipType,
+      relationshipType: relationship.relationshipType,
+      sourceObjectId: relationship.sourceObjectId,
+      targetObjectId: relationship.targetObjectId,
+      displayName: pendingRelationship.targetLabel,
+      targetDisplayName: pendingRelationship.targetLabel,
+      status: relationship.status,
+      revision: relationship.revision
+    };
+
+    setAosObjects(current => current.map(object => {
+      const objectId = String(object?.objectId || "");
+      if (objectId !== relationship.sourceObjectId && objectId !== relationship.targetObjectId) {
+        return object;
+      }
+
+      const relationships = Array.isArray(object?.relationships)
+        ? object.relationships.filter(item =>
+            String(item?.relationshipId || item?.id || "") !== relationship.relationshipId
+          )
+        : [];
+
+      return {
+        ...object,
+        relationships: [...relationships, displayRelationship]
+      };
+    }));
+
+    setAosRelationships(current => [
+      ...(current || []).filter(item =>
+        String(item?.relationshipId || "") !== relationship.relationshipId
+      ),
+      relationship
+    ]);
+
+    showAosObjectNotice({
+      objectId: pendingRelationship.sourceWorkspaceObjectId,
+      message: `RELATIONSHIP CREATED · ${relationship.relationshipLabel || relationship.relationshipType}`,
+      tone: "success",
+      duration: 2400
+    });
+
+    setPendingRelationship(null);
+  } catch (error) {
+    console.error("AOS RELATIONSHIP CREATE FAILED:", error);
+    setRelationshipError(
+      error?.message || "IX Core could not create this relationship. Nothing was moved."
+    );
+  } finally {
+    setRelationshipBusy(false);
+  }
 }
 
   function updateIxiCardState(listingId, patch) {
@@ -1413,21 +1543,39 @@ function getDirectContainerChildIds(
     .filter(Boolean);
 }
 
-  /*
-   * MOS CONTAINERS
-   *
-   * Only direct canonical children.
-   *
-   * Example:
-   *
-   * LOCATIONS
-   *   -> Wichita Falls
-   *   -> Dallas
-   *
-   * WF SHOP does NOT come out here
-   * if WF SHOP belongs to Wichita Falls.
-   */
-  return (
+  const objectsById = new Map(
+    (aosObjects || []).map(object => [
+      String(object?.objectId || "").trim(),
+      object
+    ])
+  );
+  const workspaceIdForObject = object => {
+    const sourceListingId = String(object?.metadata?.sourceListingId || "").trim();
+    const listingIdentity = (Array.isArray(object?.identities) ? object.identities : [])
+      .find(identity =>
+        String(identity?.sourceType || "").trim() === "sharetribe-listing"
+      );
+
+    return sourceListingId || String(listingIdentity?.sourceId || "").trim() ||
+      String(object?.objectId || object?.id || "").trim();
+  };
+  const relatedIds = (aosRelationships || []).flatMap(relationship => {
+    if (String(relationship?.status || "active").toLowerCase() !== "active") return [];
+
+    const sourceId = String(relationship?.sourceObjectId || "").trim();
+    const targetId = String(relationship?.targetObjectId || "").trim();
+    const relatedObjectId = sourceId === containerId
+      ? targetId
+      : targetId === containerId
+        ? sourceId
+        : "";
+    const relatedObject = objectsById.get(relatedObjectId);
+
+    return relatedObject ? [workspaceIdForObject(relatedObject)] : [];
+  });
+
+  /* Legacy single-parent containment remains visible during migration. */
+  const legacyChildIds = (
     aosObjects || []
   )
     .filter(object =>
@@ -1444,6 +1592,8 @@ function getDirectContainerChildIds(
       )
     )
     .filter(Boolean);
+
+  return [...new Set([...relatedIds, ...legacyChildIds].filter(Boolean))];
 }
 
 
@@ -2357,6 +2507,14 @@ return (
         />
       </Head>
 
+      <IXIRelationshipDropDialog
+        pending={pendingRelationship}
+        busy={relationshipBusy}
+        error={relationshipError}
+        onCancel={cancelPendingRelationship}
+        onConfirm={confirmPendingRelationship}
+      />
+
             <Navbar />
 
    
@@ -2642,7 +2800,7 @@ if (
   dropAccepted &&
   dropTargetSurface
 ) {
-  nextPlacements =
+  const candidatePlacements =
     moveObjectToWorkspaceSurface({
       placements:
         workspacePlacements,
@@ -2653,6 +2811,53 @@ if (
       targetSurface:
         dropTargetSurface
     });
+
+  const targetWorkspaceObjectId = String(
+    overData.targetObjectId || ""
+  ).trim();
+  const sourceObject = getCanonicalMosObjectForWorkspaceId(dragId);
+  const targetObject = getCanonicalMosObjectForWorkspaceId(targetWorkspaceObjectId);
+
+  if (!sourceObject || !targetObject) {
+    showAosObjectNotice({
+      objectId: dragId,
+      message: "RELATIONSHIP NOT CREATED · BOTH OBJECTS REQUIRE IXI PASSPORTS",
+      tone: "error",
+      duration: 3200
+    });
+
+    setActiveDndId(null);
+    clearMachineDragState?.();
+    return;
+  }
+
+  const sourceWorkspaceObject = getAosWorkspaceObjectById(dragId);
+  const targetWorkspaceObject = getAosWorkspaceObjectById(targetWorkspaceObjectId);
+
+  setRelationshipError("");
+  setPendingRelationship({
+    sourceObjectId: sourceObject.objectId,
+    targetObjectId: targetObject.objectId,
+    sourceWorkspaceObjectId: dragId,
+    targetWorkspaceObjectId,
+    sourceLabel: String(
+      sourceWorkspaceObject?.displayName ||
+      sourceWorkspaceObject?.title ||
+      sourceObject.displayName ||
+      dragId
+    ).trim(),
+    targetLabel: String(
+      targetWorkspaceObject?.displayName ||
+      targetWorkspaceObject?.label ||
+      targetObject.displayName ||
+      targetWorkspaceObjectId
+    ).trim(),
+    nextPlacements: candidatePlacements
+  });
+
+  setActiveDndId(null);
+  clearMachineDragState?.();
+  return;
 }
 
 /*

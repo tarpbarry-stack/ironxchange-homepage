@@ -88,9 +88,44 @@ function buildDirectChildrenMap(
 }
 
 
+function buildRelatedObjectsMap(
+  aosObjects = [],
+  relationships = []
+) {
+  const objectsById = new Map(
+    (aosObjects || [])
+      .filter(isActiveMosObject)
+      .map(object => [getMosObjectId(object), object])
+      .filter(([objectId]) => Boolean(objectId))
+  );
+  const relatedByObject = new Map();
+
+  (relationships || [])
+    .filter(relationship =>
+      String(relationship?.status || "active").toLowerCase() === "active"
+    )
+    .forEach(relationship => {
+      const sourceId = cleanId(relationship?.sourceObjectId);
+      const targetId = cleanId(relationship?.targetObjectId);
+      const sourceObject = objectsById.get(sourceId);
+      const targetObject = objectsById.get(targetId);
+
+      if (!sourceObject || !targetObject || sourceId === targetId) return;
+      if (!relatedByObject.has(sourceId)) relatedByObject.set(sourceId, []);
+      if (!relatedByObject.has(targetId)) relatedByObject.set(targetId, []);
+
+      relatedByObject.get(sourceId).push(targetObject);
+      relatedByObject.get(targetId).push(sourceObject);
+    });
+
+  return relatedByObject;
+}
+
+
 export default function useIXIAosWorkspaceRegistry({
   workspaceListings = [],
   aosObjects = [],
+  relationships = [],
   workspaceSystemIndexes = [],
   equipmentWorkspaceIndex = null,
 
@@ -137,6 +172,12 @@ export default function useIXIAosWorkspaceRegistry({
       [aosObjects]
     );
 
+  const relatedObjectsByObject =
+    useMemo(
+      () => buildRelatedObjectsMap(aosObjects, relationships),
+      [aosObjects, relationships]
+    );
+
 
   /* =========================================================
      UNIVERSAL AOS WORKSPACE OBJECT REGISTRY
@@ -148,9 +189,9 @@ export default function useIXIAosWorkspaceRegistry({
      - IXI system adapters resolve from the central adapter registry.
      - System Index presentation comes from assembled index records.
 
-     Canonical MOS child membership comes ONLY from
-     directContainerId. The registry hydrates `items` as a
-     runtime convenience; it does not create another truth.
+     User-defined relationships are symmetric for recall: either
+     endpoint can recall the other. Legacy directContainerId children
+     remain visible during migration but are not the new authority.
      ========================================================= */
   const objectRegistry =
     useMemo(() => {
@@ -182,10 +223,10 @@ export default function useIXIAosWorkspaceRegistry({
             {
               ...object,
 
-              items:
-                directChildrenByParent
-                  .get(objectId) ||
-                []
+              items: Array.from(new Map([
+                ...(directChildrenByParent.get(objectId) || []),
+                ...(relatedObjectsByObject.get(objectId) || [])
+              ].map(item => [getMosObjectId(item), item])).values())
             }
           );
         });
@@ -252,7 +293,8 @@ export default function useIXIAosWorkspaceRegistry({
       workspaceSystemIndexes,
       equipmentWorkspaceIndex,
       systemIndexIds,
-      directChildrenByParent
+      directChildrenByParent,
+      relatedObjectsByObject
     ]);
 
 
