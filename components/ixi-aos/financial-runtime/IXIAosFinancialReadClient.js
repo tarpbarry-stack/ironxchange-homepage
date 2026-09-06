@@ -50,6 +50,17 @@ export async function loadIXIAosPassportFinancialDocuments({ passportId, signal 
   return Array.isArray(payload?.data?.documents) ? payload.data.documents : [];
 }
 
+export async function loadIXIAosFinancialDocument({ financialDocumentId, signal } = {}) {
+  const id = clean(financialDocumentId);
+  if (!id) throw new Error("Financial document ID is required.");
+  const payload = await request(
+    `/api/ixi/financial/documents/${encodeURIComponent(id)}`,
+    { method: "GET", signal },
+    "The linked financial record could not be loaded."
+  );
+  return payload?.data?.record || payload?.data || null;
+}
+
 export async function patchIXIAosFinancialDocument({
   financialDocumentId,
   patch,
