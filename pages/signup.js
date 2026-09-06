@@ -1,6 +1,10 @@
 import Head from "next/head";
 import { useState } from "react";
 
+import {
+  ensureCommercialOnboarding
+} from "../lib/onboarding/ixiCommercialOnboardingClient";
+
 const BRAND_YELLOW = "#FFC400";
 
 export default function SignupPage() {
@@ -84,8 +88,10 @@ const [error, setError] = useState("");
         password
       });
 
+      await ensureCommercialOnboarding();
+
       const params = new URLSearchParams(window.location.search);
-      const next = params.get("next") || "/account";
+      const next = params.get("next") || "/aos?welcome=1";
 
       window.location.href = next;
     } catch (err) {

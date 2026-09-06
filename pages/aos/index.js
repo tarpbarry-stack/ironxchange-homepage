@@ -17,9 +17,16 @@ import IXIEntityObjectFace1
 import IXIMachineRail
   from "../../components/IXIMachineRail";
 
+import IXIAosCardRenderer
+  from "../../components/ixi-aos/card-runtime/IXIAosCardRenderer";
+
 import {
   loadIXIMosEnvironment
 } from "../../lib/mos/loadIXIMosEnvironment";
+
+import {
+  backfillOwnedMachines
+} from "../../lib/onboarding/ixiCommercialOnboardingClient";
 
 
 /* =========================================
@@ -229,6 +236,15 @@ const [entityBoardOutline, setEntityBoardOutline] =
         setLoading(true);
         setError("");
 
+        try {
+          await backfillOwnedMachines();
+        } catch (backfillError) {
+          console.error(
+            "IXI AOS machine backfill failed:",
+            backfillError
+          );
+        }
+
         const environment =
           await loadIXIMosEnvironment({
             includeObjects: true
@@ -411,6 +427,16 @@ const hydratedCurrentUser = {
       ?.profile
       ?.displayName ||
     "IXI ENTITY";
+
+  const ownerPeople = useMemo(
+    () => aosObjects.filter(object =>
+      ["person", "employee"].includes(
+        normalizeObjectType(object)
+      ) &&
+      object?.metadata?.onboarding?.relationship === "owner"
+    ),
+    [aosObjects]
+  );
 
 
  const officeLocation =
@@ -828,6 +854,20 @@ aosEntity ? (
     onSendToArmedDestination={() => {}}
   />
 </div>
+
+  {ownerPeople.map(person => (
+    <div
+      key={person.objectId}
+      className="aos-person-card"
+      data-person-object-id={person.objectId}
+    >
+      <IXIAosCardRenderer
+        object={person}
+        objects={aosObjects}
+        parentLabel={entityName}
+      />
+    </div>
+  ))}
   </div>
 ) : null}
         </section>
@@ -1158,13 +1198,22 @@ aosEntity ? (
         }
 
 
-        .aos-entity-face-mount {
+.aos-entity-face-mount {
   width: 100%;
 
   display: flex;
 
   justify-content: center;
   align-items: flex-start;
+
+  gap: 28px;
+  flex-wrap: wrap;
+}
+
+.aos-person-card {
+  width: 300px;
+  min-width: 300px;
+  height: 475px;
 }
 
 .aos-entity-card {

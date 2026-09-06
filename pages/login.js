@@ -1,6 +1,11 @@
 import Head from "next/head";
 import { useState } from "react";
 
+import {
+  ensureCommercialOnboarding,
+  backfillOwnedMachines
+} from "../lib/onboarding/ixiCommercialOnboardingClient";
+
 const BRAND_YELLOW = "#FFC400";
 const STAGING = "https://staging.ironxchange.com";
 
@@ -31,6 +36,14 @@ async function handleLogin(e) {
     });
 
     console.log("LOGIN SUCCESS:", result);
+
+    await ensureCommercialOnboarding();
+
+    try {
+      await backfillOwnedMachines();
+    } catch (backfillError) {
+      console.error("IXI MACHINE BACKFILL ERROR:", backfillError);
+    }
 
    const params = new URLSearchParams(window.location.search);
 
