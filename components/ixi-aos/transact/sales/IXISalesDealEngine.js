@@ -28,7 +28,11 @@ export function salesStageForIXIModule(moduleId = "") {
 
 export function dealsForIXISalesModule(deals = [], moduleId = "") {
   const stageId = salesStageForIXIModule(moduleId);
-  return array(deals).filter(deal => Boolean(deal?.stageRecords?.[stageId]));
+  const requestedIndex = IXI_SALES_STAGES.findIndex(stage => stage.id === stageId);
+  return array(deals).filter(deal => {
+    const reachedIndex = IXI_SALES_STAGES.findIndex(stage => stage.id === deal?.currentStage);
+    return reachedIndex >= requestedIndex;
+  });
 }
 
 export function createIXISalesDealId() {
@@ -305,4 +309,47 @@ export function quoteDraftForIXISalesDeal(deal = null) {
   };
 }
 
-export default { IXI_SALES_STAGES, IXI_DEAL_TERMINAL_STATES, salesStageForIXIModule, dealsForIXISalesModule, createIXISalesDealId, buildIXISalesDealRegister, findIXISalesDeal, recordForIXISalesStage, documentForIXISalesStage, quoteDraftForIXISalesDeal };
+export function salesOrderDraftForIXISalesDeal(deal = null) {
+  if (!deal || deal.stageRecords?.["sales-order"]) return null;
+  const source = deal.stageRecords?.invoice || deal.stageRecords?.sold;
+  if (!source) return null;
+  const document = object(source.document);
+  const metadata = object(document.metadata);
+  const commercial = object(metadata.commercial || metadata.commercialBreakdown);
+  const totals = object(metadata.commercialBreakdown || document.totals);
+  const customerTotal = money(totals.customerTotal ?? totals.total ?? document.amount);
+  const deposit = money(totals.deposit);
+  return {
+    identity: { dealId: deal.dealId },
+    context: {},
+    brand: object(metadata.brand),
+    dealType: clean(metadata.dealType || "standard-sale"),
+    customer: object(metadata.customer),
+    asset: object(metadata.asset),
+    commercial: {
+      orderDate: clean(document.occurredAt).slice(0, 10),
+      dueDate: clean(document.dueDate).slice(0, 10),
+      currency: clean(document.currency || "USD"),
+      paymentTerms: clean(document.paymentTerms),
+      deliveryTerms: clean(commercial.deliveryTerms),
+    },
+    totals: {
+      subtotal: money(totals.subtotal ?? document.amount ?? customerTotal),
+      tax: money(totals.tax),
+      freight: money(totals.freight),
+      fees: money(totals.fees),
+      tradeAllowance: money(totals.tradeAllowance),
+      deposit,
+      total: customerTotal,
+      balanceDue: money(totals.balanceDue ?? customerTotal - deposit),
+    },
+    rpo: object(metadata.rpo),
+    additionalTerms: array(metadata.additionalTerms),
+    related: { invoiceId: source.documentId },
+    status: "draft",
+    lineage: { materializedFromInvoiceId: source.documentId },
+    audit: { createdAt: source.updatedAt, updatedAt: source.updatedAt },
+  };
+}
+
+export default { IXI_SALES_STAGES, IXI_DEAL_TERMINAL_STATES, salesStageForIXIModule, dealsForIXISalesModule, createIXISalesDealId, buildIXISalesDealRegister, findIXISalesDeal, recordForIXISalesStage, documentForIXISalesStage, quoteDraftForIXISalesDeal, salesOrderDraftForIXISalesDeal };
