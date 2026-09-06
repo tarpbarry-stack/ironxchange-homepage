@@ -42,8 +42,39 @@ export default function useIXIEquipmentWorkspace({
         machineContainers
       });
 
+    /*
+     * Equipment OUT is an open operation, not a request to resume a
+     * previously persisted face. Always present the current Inventory
+     * card on Face 1 when it reaches the AOS board. Otherwise an old
+     * Face 2 preference makes the machine appear as the legacy
+     * LAUNCH / VIEW / PAUSE / DELETE control surface.
+     */
+    const faceOneState = {
+      ...(result.nextIxiCardState || {}),
+      [machineId]: {
+        ...(result.nextIxiCardState?.[machineId] || {}),
+        face: 1
+      }
+    };
+
+    const faceOneResult = {
+      ...result,
+      nextIxiCardState: faceOneState,
+      patchesToPersist: (result.patchesToPersist || []).map(entry =>
+        String(entry?.listingId || "") === machineId
+          ? {
+              ...entry,
+              patch: {
+                ...(entry.patch || {}),
+                face: 1
+              }
+            }
+          : entry
+      )
+    };
+
     executeIXITransaction?.(
-      result
+      faceOneResult
     );
   }
 
