@@ -1521,6 +1521,16 @@ const listingPayload = {
         workflowStatus,
 
         /*
+         * URL imports are research/reference objects until an explicit
+         * acquisition disposition promotes the machine to owned inventory.
+         */
+        ownershipRole: "non-owner",
+        ownershipStatus: "reference",
+        machineOrigin: "url-import",
+        sourceType: "url-import",
+        sourceUrl: importUrl,
+
+        /*
          * NEW MACHINE PLACEMENT DATA
          */
        machineAccess:
