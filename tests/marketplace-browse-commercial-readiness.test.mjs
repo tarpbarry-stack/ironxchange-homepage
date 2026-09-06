@@ -118,6 +118,11 @@ test("Park Brake is persisted and guards mechanical commands without pointer blo
     "workspace controls must update locally before identity-gated persistence"
   );
   assert.match(controls, /onClick=\{onToggleParkBrake\}/u);
+  assert.match(
+    controls,
+    /\.ixi-park-brake\s*\{[\s\S]*?top:\s*0;/u,
+    "Park Brake must remain in its own row instead of overlapping thumb size"
+  );
   assert.doesNotMatch(page, /parkBrake[\s\S]{0,100}pointer-events:\s*none/u);
 });
 

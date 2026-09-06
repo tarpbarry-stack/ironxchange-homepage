@@ -449,7 +449,9 @@ export default function IXIRelationshipControls({
 
         .ixi-park-brake {
           position: relative;
-          top: 13px;
+          /* Keep the brake in its own indicator row. Moving it down placed its
+             real pointer target directly beneath the thumb-size control. */
+          top: 0;
           right: 10px;          
           border: 0;
           background: transparent;
