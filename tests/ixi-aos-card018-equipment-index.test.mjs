@@ -21,6 +21,18 @@ test("Card 018 is a V12 Equipment Index backed by the canonical System Index car
   assert.match(card, /IXIAosCardHeaderControls/);
   assert.match(card, /IXIObjectRail/);
   assert.match(card, /system-index-card>\.board-command-rail/);
+  assert.match(card, /<span>SYSTEM INDEX<\/span>/);
+});
+
+test("AOS Work renders the canonical Equipment System Index through Card 018", async () => {
+  const board = await read("components/ixi-mos/workspace/IXIAosWorkspaceBoard.jsx");
+  assert.match(board, /IXIAosCard018/);
+  assert.match(board, /systemAdapter\?\.adapterId ===\s*"ixi-owned-equipment"/);
+  assert.match(board, /singularLabel:\s*"SYSTEM INDEX"/);
+  assert.match(board, /displayName:\s*"EQUIPMENT"/);
+  assert.match(board, /cardTemplateSlug:\s*"aos-card-018"/);
+  assert.match(board, /children=\{item\?\.items \|\| \[\]\}/);
+  assert.match(board, /onExposeObject=\{exposeObject\}/);
 });
 
 test("Card 018 is registered in FaceLab, runtime resolution, and operating-card delivery", async () => {
