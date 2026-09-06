@@ -75,7 +75,9 @@ test("Sales Order and Invoice are separate launcher entries with canonical forms
   assert.match(stagePresentation, /state: "next"/u);
   assert.match(stagePresentation, /state: "available-action"/u);
   assert.match(stagePresentation, /state: "unavailable"/u);
-  assert.match(register, /entry \? "✓" : stage\.number/u);
+  assert.match(register, /completed \? "✓" : stage\.number/u);
+  assert.match(stagePresentation, /isIXISalesStageCompleted/u);
+  assert.match(stagePresentation, /signedPackageHash/u);
   assert.match(registerStyles, /button\.completed/u);
   assert.match(registerStyles, /button\.next/u);
   assert.match(registerStyles, /button\.available-action/u);
