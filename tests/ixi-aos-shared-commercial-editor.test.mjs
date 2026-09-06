@@ -40,7 +40,8 @@ test("shared commercial editor preserves typed values and durable field definiti
 test("shared commercial editor includes the common media contract", () => {
   assert.match(editor, /IXIAosPrimaryMediaEditor/u);
   assert.match(editor, /mediaEnabled/u);
-  assert.match(editor, /media:\s*mediaEnabled\s*\?\s*media/u);
+  assert.match(editor, /persistIXIAosMediaDraft/u);
+  assert.match(editor, /media:\s*canonicalMedia/u);
 });
 
 test("shared commercial editor remains presentation-only and noun agnostic", () => {

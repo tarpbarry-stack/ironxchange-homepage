@@ -20,7 +20,11 @@ test("numbered FaceLab cards receive their canonical catalog parent", () => {
   );
   assert.match(
     preview,
-    /<NumberedObjectCard[\s\S]*?parentLabel=\{catalogParentLabel\}/u
+    /const renderNumberedPreview = Card[\s\S]*?<Card[\s\S]*?parentLabel=\{catalogParentLabel\}/u
+  );
+  assert.match(
+    preview,
+    /renderNumberedPreview\(NumberedObjectCard\)/u
   );
 });
 

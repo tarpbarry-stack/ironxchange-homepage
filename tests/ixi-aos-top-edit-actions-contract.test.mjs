@@ -14,7 +14,7 @@ const runtime = read("components/ixi-aos/card-runtime/modules/IXIAosFace1CardRun
 test("Cards 001-017 use the commercial editor header actions", () => {
   assert.match(donor, /\.gov-inline-edit-actions\{position:absolute;top:8px;right:8px/u);
   assert.match(editor, /<nav>/u);
-  assert.match(editor, /disabled=\{saving\} onClick=\{save\}>SAVE<\/button>/u);
+  assert.match(editor, /disabled=\{saving \|\| Boolean\(mediaStatus\)\} onClick=\{save\}>SAVE<\/button>/u);
   assert.match(editor, />CANCEL<\/button>/u);
 });
 

@@ -14,6 +14,7 @@ import {
   getObjectFields,
   getObjectLabel
 } from "../IXIAosSemanticObjectPresentation";
+import { persistIXIAosMediaDraft } from "../../../../lib/media/ixiMediaClient";
 
 function inputValue(value) {
   if (Array.isArray(value)) return value.join(", ");
@@ -102,6 +103,8 @@ export default function IXIAosCommercialObjectEditor({
   const [definitions, setDefinitions] = useState(() => normalizeDefinitions(object));
   const [draft, setDraft] = useState({});
   const [media, setMedia] = useState(asArray(object?.media));
+  const [mediaStatus, setMediaStatus] = useState("");
+  const [mediaError, setMediaError] = useState("");
 
   useEffect(() => {
     const nextDefinitions = normalizeDefinitions(object);
@@ -118,6 +121,8 @@ export default function IXIAosCommercialObjectEditor({
     setDefinitions(nextDefinitions);
     setDraft(nextDraft);
     setMedia(asArray(object?.media));
+    setMediaStatus("");
+    setMediaError("");
   }, [object]);
 
   function addField() {
@@ -163,6 +168,8 @@ export default function IXIAosCommercialObjectEditor({
   }
 
   async function save() {
+    if (saving || mediaStatus) return;
+    setMediaError("");
     const normalizedDefinitions = definitions
       .map((definition, index) => ({
         ...definition,
@@ -189,17 +196,28 @@ export default function IXIAosCommercialObjectEditor({
       nextFields[definition.fieldId] = parseValue(definition, draft[definition.fieldId]);
     });
 
-    await onSave?.({
-      ...object,
-      displayName: clean(name) || getObjectDisplayName(object),
-      fields: nextFields,
-      fieldDefinitions: normalizedDefinitions,
-      media: mediaEnabled ? media : asArray(object?.media),
-      metadata: {
-        ...(object?.metadata || {}),
-        fieldDefinitions: normalizedDefinitions
-      }
-    });
+    try {
+      const canonicalMedia = mediaEnabled
+        ? await persistIXIAosMediaDraft({ object, media, onProgress: setMediaStatus })
+        : asArray(object?.media);
+
+      await onSave?.({
+        ...object,
+        displayName: clean(name) || getObjectDisplayName(object),
+        fields: nextFields,
+        fieldDefinitions: normalizedDefinitions,
+        media: canonicalMedia,
+        metadata: {
+          ...(object?.metadata || {}),
+          fieldDefinitions: normalizedDefinitions
+        }
+      });
+      setMedia(canonicalMedia);
+      setMediaStatus("");
+    } catch (caught) {
+      setMediaStatus("");
+      setMediaError(clean(caught?.message) || "The photo was not saved.");
+    }
   }
 
   return (
@@ -210,8 +228,8 @@ export default function IXIAosCommercialObjectEditor({
           <strong>EDIT OBJECT</strong>
         </div>
         <nav>
-          <button type="button" disabled={saving} onClick={save}>SAVE</button>
-          <button type="button" disabled={saving} onClick={onCancel}>CANCEL</button>
+          <button type="button" disabled={saving || Boolean(mediaStatus)} onClick={save}>SAVE</button>
+          <button type="button" disabled={saving || Boolean(mediaStatus)} onClick={onCancel}>CANCEL</button>
         </nav>
       </header>
 
@@ -229,7 +247,13 @@ export default function IXIAosCommercialObjectEditor({
         ) : null}
 
         {mediaEnabled ? (
-          <IXIAosPrimaryMediaEditor media={media} onChange={setMedia} />
+          <IXIAosPrimaryMediaEditor
+            media={media}
+            onChange={setMedia}
+            status={mediaStatus}
+            error={mediaError}
+            disabled={saving || Boolean(mediaStatus)}
+          />
         ) : null}
 
         <section>

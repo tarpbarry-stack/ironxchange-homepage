@@ -28,7 +28,7 @@ test("Card 007 places the canonical business ID at the lower-left of primary med
 test("Card 007 does not repeat the business identifier in ordinary details", () => {
   assert.match(source, /showMediaBusinessIdentifier\s+\? definitions\.filter\(definition => !isBusinessIdentifier\(definition\)\)/u);
   assert.match(source, /className="u007-media-action"/u);
-  assert.match(source, /<IXIAosPrimaryMediaEditor media=\{media\} onChange=\{setMedia\} \/>/u);
+  assert.match(source, /<IXIAosPrimaryMediaEditor[\s\S]*?media=\{media\}[\s\S]*?onChange=\{setMedia\}/u);
 });
 
 test("007A and 007B use the media ID while 007C places ID first in details", () => {

@@ -3,6 +3,8 @@ import { useEffect, useRef, useState } from "react";
 import IXIObjectRail from "../../../ixi-object-system/IXIObjectRail";
 import IXIAosCardHeaderControls from "../../card-runtime/modules/IXIAosCardHeaderControls";
 import IXIAosPrimaryMediaEditor from "../../card-runtime/modules/IXIAosPrimaryMediaEditor";
+import { persistIXIAosMediaDraft } from "../../../../lib/media/ixiMediaClient";
+import { IXI_AOS_MEDIA_ACCEPT } from "../../../../lib/media/ixiAosMediaContract.mjs";
 import {
   BUSINESS_IDENTIFIER_FIELD_ID,
   BUSINESS_IDENTIFIER_ROLE
@@ -89,26 +91,13 @@ function editableDefinitionsFor(object = {}) {
   }));
 }
 
-function fileToMedia(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve({
-      url: String(reader.result || ""),
-      name: clean(file?.name),
-      type: clean(file?.type),
-      size: Number(file?.size || 0),
-      source: "object-media-upload"
-    });
-    reader.onerror = () => reject(reader.error || new Error("Could not read image."));
-    reader.readAsDataURL(file);
-  });
-}
-
 function Card009Editor({ object, saving, onCancel, onSave }) {
   const [name, setName] = useState(getObjectDisplayName(object));
   const [definitions, setDefinitions] = useState(() => editableDefinitionsFor(object));
   const [draft, setDraft] = useState({});
   const [media, setMedia] = useState(asArray(object?.media));
+  const [mediaStatus, setMediaStatus] = useState("");
+  const [mediaError, setMediaError] = useState("");
 
   useEffect(() => {
     const nextDefinitions = editableDefinitionsFor(object);
@@ -120,6 +109,8 @@ function Card009Editor({ object, saving, onCancel, onSave }) {
     setDefinitions(nextDefinitions);
     setDraft(nextDraft);
     setMedia(asArray(object?.media));
+    setMediaStatus("");
+    setMediaError("");
   }, [object]);
 
   function addField() {
@@ -145,6 +136,7 @@ function Card009Editor({ object, saving, onCancel, onSave }) {
   }
 
   async function save() {
+    if (saving || mediaStatus) return;
     const normalizedDefinitions = definitions
       .map((definition, index) => ({
         ...definition,
@@ -162,17 +154,26 @@ function Card009Editor({ object, saving, onCancel, onSave }) {
       nextFields[definition.fieldId] = parseValue(definition, draft[definition.fieldId]);
     });
 
-    await onSave?.({
-      ...object,
-      displayName: clean(name) || getObjectDisplayName(object),
-      fields: nextFields,
-      fieldDefinitions: normalizedDefinitions,
-      media,
-      metadata: {
-        ...(object?.metadata || {}),
-        fieldDefinitions: normalizedDefinitions
-      }
-    });
+    try {
+      setMediaError("");
+      const canonicalMedia = await persistIXIAosMediaDraft({ object, media, onProgress: setMediaStatus });
+      await onSave?.({
+        ...object,
+        displayName: clean(name) || getObjectDisplayName(object),
+        fields: nextFields,
+        fieldDefinitions: normalizedDefinitions,
+        media: canonicalMedia,
+        metadata: {
+          ...(object?.metadata || {}),
+          fieldDefinitions: normalizedDefinitions
+        }
+      });
+      setMedia(canonicalMedia);
+      setMediaStatus("");
+    } catch (caught) {
+      setMediaStatus("");
+      setMediaError(clean(caught?.message) || "The photo was not saved.");
+    }
   }
 
   return (
@@ -180,12 +181,12 @@ function Card009Editor({ object, saving, onCancel, onSave }) {
       <div className="c009-editor-head">
         <div><small>{getObjectLabel(object)}</small><strong>EDIT OBJECT</strong></div>
         <nav>
-          <button type="button" disabled={saving} onClick={save}>SAVE</button>
-          <button type="button" disabled={saving} onClick={onCancel}>CANCEL</button>
+          <button type="button" disabled={saving || Boolean(mediaStatus)} onClick={save}>SAVE</button>
+          <button type="button" disabled={saving || Boolean(mediaStatus)} onClick={onCancel}>CANCEL</button>
         </nav>
       </div>
       <div className="c009-editor-scroll">
-        <IXIAosPrimaryMediaEditor media={media} onChange={setMedia} />
+        <IXIAosPrimaryMediaEditor media={media} onChange={setMedia} status={mediaStatus} error={mediaError} disabled={saving || Boolean(mediaStatus)} />
         <section>
           <div className="c009-editor-title">IDENTITY</div>
           <label><span>OBJECT NAME</span><input value={name} onChange={event => setName(event.target.value)} /></label>
@@ -249,6 +250,8 @@ export default function IXIAosGenericMediaDominant009({
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const mediaInputRef = useRef(null);
+  const [mediaStatus, setMediaStatus] = useState("");
+  const [mediaError, setMediaError] = useState("");
 
   useEffect(() => setRuntimeObject(object), [object]);
 
@@ -290,10 +293,21 @@ export default function IXIAosGenericMediaDominant009({
 
   async function addPrimaryPhoto(event) {
     const file = event?.target?.files?.[0];
-    if (!file || !file.type?.startsWith("image/")) return;
-    const photo = await fileToMedia(file);
-    await save({ ...runtimeObject, media: [photo, ...asArray(runtimeObject?.media).slice(1)] });
     event.target.value = "";
+    if (!file || saving || mediaStatus) return;
+    try {
+      setMediaError("");
+      const media = await persistIXIAosMediaDraft({
+        object: runtimeObject,
+        media: [{ file, pendingUpload: true }],
+        onProgress: setMediaStatus
+      });
+      await save({ ...runtimeObject, media });
+      setMediaStatus("");
+    } catch (caught) {
+      setMediaStatus("");
+      setMediaError(clean(caught?.message) || "PHOTO UPLOAD FAILED");
+    }
   }
 
   function command(event, callback) {
@@ -333,13 +347,14 @@ export default function IXIAosGenericMediaDominant009({
           <div className="c009-media-shade" />
           <div className="c009-media-id"><span>ID</span><strong>{businessIdentifierValue || "—"}</strong></div>
           {actions.canEdit ? (
-            <button className="c009-photo-action" type="button" disabled={saving} onClick={event => {
+            <button className="c009-photo-action" type="button" disabled={saving || Boolean(mediaStatus)} onClick={event => {
               event.preventDefault();
               event.stopPropagation();
               mediaInputRef.current?.click();
-            }}>{image ? "CHANGE PHOTO" : "+ ADD PHOTO"}</button>
+            }}>{mediaStatus || (image ? "CHANGE PHOTO" : "+ ADD PHOTO")}</button>
           ) : null}
-          <input ref={mediaInputRef} className="c009-file-input" type="file" accept="image/*" onChange={addPrimaryPhoto} />
+          <input ref={mediaInputRef} className="c009-file-input" type="file" accept={IXI_AOS_MEDIA_ACCEPT} onChange={addPrimaryPhoto} />
+          {mediaError ? <span className="c009-media-error" role="alert">{mediaError}</span> : null}
         </section>
 
         <section className="c009-detail-strip">
@@ -391,7 +406,7 @@ export default function IXIAosGenericMediaDominant009({
         .c009-header{position:absolute;inset:0 0 auto;height:48px;padding:7px 10px;border-bottom:1px solid #303531;background:linear-gradient(180deg,#181b19,#101210);z-index:30}
         .c009-identity{max-width:188px}.c009-identity>span{display:block;overflow:hidden;color:var(--y);font-size:6px;font-weight:950;letter-spacing:.08em;text-overflow:ellipsis;white-space:nowrap}.c009-identity h2{margin:3px 0 0;overflow:hidden;color:#f7f8f7;font-size:13px;font-weight:950;line-height:1;text-overflow:ellipsis;white-space:nowrap}.c009-identity small{display:block;margin-top:4px;overflow:hidden;color:#6f7771;font-size:4.8px;font-weight:900;letter-spacing:.06em;text-overflow:ellipsis;white-space:nowrap}
         .c009-body{position:absolute;top:48px;left:7px;right:7px;bottom:51px;display:flex;flex-direction:column;gap:5px;padding:5px 0;overflow:hidden}
-        .c009-media{position:relative;flex:0 0 172px;overflow:hidden;border:1px solid var(--line);border-radius:6px;background:#0a0c0b;box-shadow:inset 0 1px #ffffff0c}.c009-media img{width:100%;height:100%;display:block;object-fit:cover}.c009-media-empty{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:#666d68;background:linear-gradient(135deg,#101310,#090b0a)}.c009-media-empty b{font-size:24px}.c009-media-empty span{font-size:5px;font-weight:900;letter-spacing:.08em}.c009-media-shade{position:absolute;inset:auto 0 0;height:52px;background:linear-gradient(180deg,transparent,#050706e8);pointer-events:none}.c009-media-id{position:absolute;left:8px;right:86px;bottom:7px;min-width:0}.c009-media-id span{display:block;color:#a2aaa4;font-size:5px;font-weight:900;letter-spacing:.05em}.c009-media-id strong{display:block;margin-top:2px;overflow:hidden;color:#fff;font-size:10px;font-weight:950;text-overflow:ellipsis;white-space:nowrap}.c009-photo-action{position:absolute;right:7px;bottom:7px;height:21px;padding:0 7px;border:1px solid #ffffff1a;border-radius:4px;background:#0b0e0cdd;color:var(--y);font-size:5.5px;font-weight:950;letter-spacing:.04em}.c009-file-input{display:none}
+        .c009-media{position:relative;flex:0 0 172px;overflow:hidden;border:1px solid var(--line);border-radius:6px;background:#0a0c0b;box-shadow:inset 0 1px #ffffff0c}.c009-media img{width:100%;height:100%;display:block;object-fit:cover}.c009-media-empty{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:#666d68;background:linear-gradient(135deg,#101310,#090b0a)}.c009-media-empty b{font-size:24px}.c009-media-empty span{font-size:5px;font-weight:900;letter-spacing:.08em}.c009-media-shade{position:absolute;inset:auto 0 0;height:52px;background:linear-gradient(180deg,transparent,#050706e8);pointer-events:none}.c009-media-id{position:absolute;left:8px;right:86px;bottom:7px;min-width:0}.c009-media-id span{display:block;color:#a2aaa4;font-size:5px;font-weight:900;letter-spacing:.05em}.c009-media-id strong{display:block;margin-top:2px;overflow:hidden;color:#fff;font-size:10px;font-weight:950;text-overflow:ellipsis;white-space:nowrap}.c009-photo-action{position:absolute;right:7px;bottom:7px;height:21px;max-width:112px;overflow:hidden;padding:0 7px;border:1px solid #ffffff1a;border-radius:4px;background:#0b0e0cdd;color:var(--y);font-size:5.5px;font-weight:950;letter-spacing:.04em;text-overflow:ellipsis;white-space:nowrap}.c009-photo-action:disabled{cursor:wait;opacity:.65}.c009-file-input{display:none}.c009-media-error{position:absolute;left:7px;right:7px;top:7px;z-index:4;padding:4px 6px;border:1px solid #ff6b6b66;border-radius:4px;background:#160909e8;color:#ff8b8b;font-size:5px;font-weight:900}
         .c009-detail-strip{flex:0 0 39px;display:grid;grid-template-columns:minmax(0,1.7fr) minmax(0,.65fr) minmax(0,.8fr);gap:4px}.c009-detail{min-width:0;padding:6px 7px;border:1px solid #2d322e;border-radius:5px;background:#0f120f}.c009-detail span{display:block;overflow:hidden;color:#78807a;font-size:4.5px;font-weight:900;text-overflow:ellipsis;white-space:nowrap}.c009-detail strong{display:block;margin-top:3px;overflow:hidden;color:#dce0dd;font-size:8px;font-weight:900;text-overflow:ellipsis;white-space:nowrap}
         .c009-relations{min-height:0;flex:1;overflow:hidden;border:1px solid var(--line);border-radius:5px;background:#0e110f}.c009-section-title{height:18px;display:flex;align-items:center;padding:0 7px;border-bottom:1px solid var(--soft);background:#141714;color:var(--y);font-size:5.5px;font-weight:950;letter-spacing:.05em}.c009-rel-scroll{height:calc(100% - 18px);overflow-y:auto;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.24) transparent}.c009-rel-scroll::-webkit-scrollbar,.c009-editor-scroll::-webkit-scrollbar{width:3px}.c009-rel-scroll::-webkit-scrollbar-track,.c009-editor-scroll::-webkit-scrollbar-track{background:transparent}.c009-rel-scroll::-webkit-scrollbar-thumb,.c009-editor-scroll::-webkit-scrollbar-thumb{border-radius:999px;background:rgba(255,255,255,.22)}.c009-rel-scroll::-webkit-scrollbar-thumb:hover,.c009-editor-scroll::-webkit-scrollbar-thumb:hover{background:rgba(255,196,0,.48)}.c009-rel-scroll button{width:100%;height:26px;display:flex;align-items:center;justify-content:space-between;padding:0 7px;border:0;border-bottom:1px solid #222723;background:transparent;color:#e8ebe8;text-align:left}.c009-rel-scroll button span{min-width:0}.c009-rel-scroll small{display:block;color:#7f8781;font-size:4.5px;font-weight:900}.c009-rel-scroll strong{display:block;margin-top:2px;overflow:hidden;font-size:6.5px;font-weight:900;text-overflow:ellipsis;white-space:nowrap}.c009-rel-scroll button>b{color:var(--y);font-size:10px}.c009-empty{height:100%;display:flex;align-items:center;justify-content:center;color:#59605b;font-size:5px;font-weight:900}
         .c009-commands{position:absolute;left:7px;right:7px;bottom:23px;height:28px;display:grid;grid-template-columns:repeat(3,1fr);gap:4px;padding:3px 0}.c009-commands button{border:1px solid #2c312d;border-radius:4px;background:linear-gradient(180deg,#131613,#0d100e);color:#8b938d;font-size:7px;font-weight:900}.c009-commands button b{margin-left:3px;color:#d7dbd8;font-size:5.5px;letter-spacing:.04em}

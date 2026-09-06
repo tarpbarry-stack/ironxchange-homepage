@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 
 import IXIAosCardHeaderControls from "../../card-runtime/modules/IXIAosCardHeaderControls";
+import IXIAosPrimaryMediaEditor from "../../card-runtime/modules/IXIAosPrimaryMediaEditor";
+import { persistIXIAosMediaDraft } from "../../../../lib/media/ixiMediaClient";
 import {
   asArray,
   clean,
@@ -96,6 +98,8 @@ function GenericEditor({ object, saving, onCancel, onSave }) {
   const [name, setName] = useState(getObjectDisplayName(object));
   const [draft, setDraft] = useState({});
   const [media, setMedia] = useState(asArray(object?.media));
+  const [mediaStatus, setMediaStatus] = useState("");
+  const [mediaError, setMediaError] = useState("");
 
   useEffect(() => {
     setName(getObjectDisplayName(object));
@@ -105,58 +109,41 @@ function GenericEditor({ object, saving, onCancel, onSave }) {
     });
     setDraft(output);
     setMedia(asArray(object?.media));
+    setMediaStatus("");
+    setMediaError("");
   }, [object]);
 
-  const previewImage = useMemo(() => {
-    for (const item of media) {
-      const url = typeof item === "string" ? clean(item) : clean(item?.url || item?.src || item?.imageUrl);
-      if (url) return url;
-    }
-    return "";
-  }, [media]);
-
-  function addPhoto(event) {
-    const file = event?.target?.files?.[0];
-    if (!file || !file.type?.startsWith("image/")) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      const photo = {
-        url: String(reader.result || ""),
-        name: clean(file.name),
-        type: clean(file.type),
-        size: Number(file.size || 0),
-        source: "object-media-upload"
-      };
-      setMedia(current => [photo, ...current]);
-    };
-    reader.readAsDataURL(file);
-    event.target.value = "";
-  }
-
   async function save() {
+    if (saving || mediaStatus) return;
     const nextFields = { ...getObjectFields(object) };
     definitions.forEach(definition => {
       nextFields[definition.fieldId] = parseValue(definition, draft[definition.fieldId]);
     });
-    await onSave?.({
-      ...object,
-      displayName: clean(name) || getObjectDisplayName(object),
-      fields: nextFields,
-      media
-    });
+    try {
+      setMediaError("");
+      const canonicalMedia = await persistIXIAosMediaDraft({ object, media, onProgress: setMediaStatus });
+      await onSave?.({
+        ...object,
+        displayName: clean(name) || getObjectDisplayName(object),
+        fields: nextFields,
+        media: canonicalMedia
+      });
+      setMedia(canonicalMedia);
+      setMediaStatus("");
+    } catch (caught) {
+      setMediaStatus("");
+      setMediaError(clean(caught?.message) || "The photo was not saved.");
+    }
   }
 
   return (
     <div className="go007-editor" onPointerDown={event => event.stopPropagation()}>
       <div className="go007-editor-head">
         <div><small>{getObjectLabel(object)}</small><strong>EDIT OBJECT</strong></div>
-        <nav><button type="button" disabled={saving} onClick={save}>SAVE</button><button type="button" disabled={saving} onClick={onCancel}>CANCEL</button></nav>
+        <nav><button type="button" disabled={saving || Boolean(mediaStatus)} onClick={save}>SAVE</button><button type="button" disabled={saving || Boolean(mediaStatus)} onClick={onCancel}>CANCEL</button></nav>
       </div>
       <div className="go007-editor-scroll">
-        <section className="go007-media-editor">
-          <div className="go007-media-preview">{previewImage ? <img src={previewImage} alt="Object" /> : <span>NO PHOTO</span>}</div>
-          <div className="go007-media-actions"><strong>PRIMARY IMAGE</strong><p>Upload or replace the image used by this card.</p><label>CHANGE PHOTO<input type="file" accept="image/*" onChange={addPhoto}/></label>{previewImage ? <button type="button" onClick={() => setMedia([])}>REMOVE</button> : null}</div>
-        </section>
+        <IXIAosPrimaryMediaEditor media={media} onChange={setMedia} status={mediaStatus} error={mediaError} disabled={saving || Boolean(mediaStatus)} />
         <section>
           <div className="go007-editor-section-title">IDENTITY</div>
           <label><span>DISPLAY NAME</span><input value={name} onChange={event => setName(event.target.value)} /></label>

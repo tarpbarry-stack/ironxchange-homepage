@@ -1,5 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 
+import {
+  IXI_AOS_MEDIA_ACCEPT,
+  validateIXIAosMediaFile
+} from "../../../../lib/media/ixiAosMediaContract.mjs";
+
 function clean(value) {
   return String(value || "").trim();
 }
@@ -36,7 +41,9 @@ export default function IXIAosPrimaryMediaPanel({
   object = {},
   moduleDefinition = {},
   editing = false,
-  onAddPhoto = null
+  onAddPhoto = null,
+  status = "",
+  error = ""
 }) {
   const height = Math.max(
     54,
@@ -45,12 +52,22 @@ export default function IXIAosPrimaryMediaPanel({
 
   const images = useMemo(() => getMediaUrls(object), [object]);
   const [photoIndex, setPhotoIndex] = useState(0);
+  const [selectionError, setSelectionError] = useState("");
 
   useEffect(() => {
     setPhotoIndex(current =>
       images.length ? Math.min(current, images.length - 1) : 0
     );
   }, [images.length]);
+
+  useEffect(() => () => {
+    const media = Array.isArray(object?.media) ? object.media : [];
+    media.forEach(item => {
+      if (item?.pendingUpload && String(item?.url || "").startsWith("blob:")) {
+        URL.revokeObjectURL(item.url);
+      }
+    });
+  }, [object]);
 
   const imageUrl = images[photoIndex] || "";
 
@@ -66,21 +83,23 @@ export default function IXIAosPrimaryMediaPanel({
 
   function handleFile(event) {
     const file = event?.target?.files?.[0];
-    if (!file || !file.type?.startsWith("image/")) return;
-
-    const reader = new FileReader();
-    reader.onload = () => {
+    event.target.value = "";
+    if (!file) return;
+    try {
+      const validated = validateIXIAosMediaFile(file);
       onAddPhoto?.({
         file,
-        url: String(reader.result || ""),
+        url: URL.createObjectURL(file),
         name: file.name,
-        type: file.type,
-        size: file.size
+        type: validated.contentType,
+        size: validated.sizeBytes,
+        pendingUpload: true
       });
       setPhotoIndex(0);
-    };
-    reader.readAsDataURL(file);
-    event.target.value = "";
+      setSelectionError("");
+    } catch (caught) {
+      setSelectionError(clean(caught?.message) || "PHOTO NOT ACCEPTED");
+    }
   }
 
   return (
@@ -130,8 +149,13 @@ export default function IXIAosPrimaryMediaPanel({
           onPointerDown={event => event.stopPropagation()}
         >
           + PHOTO
-          <input type="file" accept="image/*" onChange={handleFile} />
+          <input type="file" accept={IXI_AOS_MEDIA_ACCEPT} onChange={handleFile} />
         </label>
+      ) : null}
+      {clean(error) || selectionError || clean(status) ? (
+        <span className={`media-status ${clean(error) || selectionError ? "error" : ""}`} role={clean(error) || selectionError ? "alert" : "status"}>
+          {clean(error) || selectionError || clean(status)}
+        </span>
       ) : null}
 
       <style jsx>{`
@@ -164,6 +188,8 @@ export default function IXIAosPrimaryMediaPanel({
           font-weight: 950;
           letter-spacing: .08em;
         }
+
+        .media-status{position:absolute;left:7px;right:7px;top:7px;z-index:8;overflow:hidden;padding:4px 6px;border:1px solid rgba(0,194,255,.35);border-radius:4px;background:rgba(3,18,24,.92);color:#00c2ff;font-size:5px;font-weight:950;text-overflow:ellipsis;white-space:nowrap}.media-status.error{border-color:rgba(255,107,107,.45);background:rgba(24,7,7,.94);color:#ff8b8b;white-space:normal}
 
         .card-photo-nav {
           position: absolute;

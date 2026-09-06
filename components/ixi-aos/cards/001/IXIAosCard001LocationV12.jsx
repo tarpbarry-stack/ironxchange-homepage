@@ -7,6 +7,7 @@ import IXIAosInlineAddress from "../../card-runtime/modules/IXIAosInlineAddress"
 import IXIAosInlineMetricStrip from "../../card-runtime/modules/IXIAosInlineMetricStrip";
 import IXIAosRelationshipInfrastructurePanel from "../../card-runtime/modules/IXIAosRelationshipInfrastructurePanel";
 import IXIAosCardHeaderControls from "../../card-runtime/modules/IXIAosCardHeaderControls";
+import { persistIXIAosMediaDraft } from "../../../../lib/media/ixiMediaClient";
 
 const NATIVE_WIDTH = 298;
 const NATIVE_HEIGHT = 471;
@@ -105,6 +106,8 @@ export default function IXIAosCard001Location({
   const [mediaDraft, setMediaDraft] = useState(() =>
     Array.isArray(object?.media) ? object.media : []
   );
+  const [mediaStatus, setMediaStatus] = useState("");
+  const [mediaError, setMediaError] = useState("");
 
   const editDraft = safeObject(ixiState?.editDraft);
   const draftFields = safeObject(editDraft?.fields);
@@ -163,7 +166,9 @@ export default function IXIAosCard001Location({
         name: clean(photo?.name),
         type: clean(photo?.type),
         size: Number(photo?.size || 0),
-        source: "user-upload"
+        source: "user-upload",
+        pendingUpload: photo?.pendingUpload === true,
+        file: photo?.file || null
       },
       ...current
     ]);
@@ -184,14 +189,21 @@ export default function IXIAosCard001Location({
     if (!objectId || saving) return;
     setSaving(true);
     try {
+      setMediaError("");
+      const canonicalMedia = await persistIXIAosMediaDraft({ object: runtimeObject, media: mediaDraft, onProgress: setMediaStatus });
       await onSaveObject?.({
         objectId,
         object: runtimeObject,
         displayName: runtimeObject.displayName,
         fields: { ...safeObject(runtimeObject?.fields) },
-        media: [...mediaDraft]
+        media: canonicalMedia
       });
+      setMediaDraft(canonicalMedia);
+      setMediaStatus("");
       onIxiStateChange?.(objectId, { editing: false, editDraft: null });
+    } catch (caught) {
+      setMediaStatus("");
+      setMediaError(clean(caught?.message) || "PHOTO NOT SAVED");
     } finally {
       setSaving(false);
     }
@@ -274,6 +286,8 @@ export default function IXIAosCard001Location({
             moduleDefinition={{ config: { height: 158 } }}
             editing={editing}
             onAddPhoto={addPhoto}
+            status={mediaStatus}
+            error={mediaError}
           />
         </div>
 

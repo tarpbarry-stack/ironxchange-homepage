@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import IXICollectionThumbRail from "../../../ixi-object-system/IXICollectionThumbRail";
 import IXIAosCardHeaderControls from "../../card-runtime/modules/IXIAosCardHeaderControls";
 import IXIAosPrimaryMediaEditor from "../../card-runtime/modules/IXIAosPrimaryMediaEditor";
+import { persistIXIAosMediaDraft } from "../../../../lib/media/ixiMediaClient";
 import {
   createBusinessIdentifierDefinition,
   getBusinessIdentifierDefinition,
@@ -51,24 +52,38 @@ function GenericEditor({ object, saving, onCancel, onSave }) {
   const [name, setName] = useState(getObjectDisplayName(object));
   const [draft, setDraft] = useState({});
   const [media, setMedia] = useState(asArray(object?.media));
+  const [mediaStatus, setMediaStatus] = useState("");
+  const [mediaError, setMediaError] = useState("");
 
   useEffect(() => {
     setName(getObjectDisplayName(object));
     setMedia(asArray(object?.media));
+    setMediaStatus("");
+    setMediaError("");
     const output = {};
     definitions.forEach(definition => { output[definition.fieldId] = fieldInputValue(getObjectFields(object)?.[definition.fieldId]); });
     setDraft(output);
   }, [object]);
 
   async function save() {
+    if (saving || mediaStatus) return;
     const nextFields = { ...getObjectFields(object) };
     definitions.forEach(definition => { nextFields[definition.fieldId] = parseEditedValue(definition, draft[definition.fieldId]); });
-    await onSave?.({ ...object, displayName: clean(name) || getObjectDisplayName(object), fields: nextFields, media });
+    try {
+      setMediaError("");
+      const canonicalMedia = await persistIXIAosMediaDraft({ object, media, onProgress: setMediaStatus });
+      await onSave?.({ ...object, displayName: clean(name) || getObjectDisplayName(object), fields: nextFields, media: canonicalMedia });
+      setMedia(canonicalMedia);
+      setMediaStatus("");
+    } catch (caught) {
+      setMediaStatus("");
+      setMediaError(clean(caught?.message) || "The photo was not saved.");
+    }
   }
 
   return <div className="gcv12-editor" onPointerDown={event => event.stopPropagation()}>
-    <div className="gcv12-editor-head"><div><small>{getObjectLabel(object)}</small><strong>EDIT OBJECT</strong></div><nav><button type="button" disabled={saving} onClick={save}>SAVE</button><button type="button" disabled={saving} onClick={onCancel}>CANCEL</button></nav></div>
-    <div className="gcv12-editor-scroll"><IXIAosPrimaryMediaEditor media={media} onChange={setMedia}/><label><span>DISPLAY NAME</span><input value={name} onChange={event => setName(event.target.value)} /></label>{definitions.map(definition => <label key={definition.fieldId}><span>{definition.label}</span><input value={draft[definition.fieldId] ?? ""} onChange={event => setDraft(current => ({ ...current, [definition.fieldId]: event.target.value }))}/></label>)}</div>
+    <div className="gcv12-editor-head"><div><small>{getObjectLabel(object)}</small><strong>EDIT OBJECT</strong></div><nav><button type="button" disabled={saving || Boolean(mediaStatus)} onClick={save}>SAVE</button><button type="button" disabled={saving || Boolean(mediaStatus)} onClick={onCancel}>CANCEL</button></nav></div>
+    <div className="gcv12-editor-scroll"><IXIAosPrimaryMediaEditor media={media} onChange={setMedia} status={mediaStatus} error={mediaError} disabled={saving || Boolean(mediaStatus)}/><label><span>DISPLAY NAME</span><input value={name} onChange={event => setName(event.target.value)} /></label>{definitions.map(definition => <label key={definition.fieldId}><span>{definition.label}</span><input value={draft[definition.fieldId] ?? ""} onChange={event => setDraft(current => ({ ...current, [definition.fieldId]: event.target.value }))}/></label>)}</div>
   </div>;
 }
 
