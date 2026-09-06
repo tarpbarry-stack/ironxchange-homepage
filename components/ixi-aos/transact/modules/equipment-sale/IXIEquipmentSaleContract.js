@@ -57,6 +57,45 @@ export function createIXIEquipmentSaleDraft({ context = {}, quote = null, input 
   };
 }
 
+export function hydrateIXIEquipmentSaleRecord({ context = {}, record = {} } = {}) {
+  const source = object(record);
+  const base = createIXIEquipmentSaleDraft({
+    context,
+    input: { dealId: source?.identity?.dealId },
+  });
+  const sourceContext = object(source.context);
+  const sourceAsset = object(source.asset);
+  const primaryPassportId = clean(
+    sourceContext.primaryPassportId ||
+      base.context.primaryPassportId ||
+      sourceAsset.passportId,
+  );
+
+  return {
+    ...base,
+    ...source,
+    identity: { ...base.identity, ...object(source.identity) },
+    context: {
+      ...base.context,
+      ...sourceContext,
+      primaryPassportId,
+    },
+    brand: { ...base.brand, ...object(source.brand) },
+    customer: { ...base.customer, ...object(source.customer) },
+    asset: {
+      ...base.asset,
+      ...sourceAsset,
+      passportId: clean(sourceAsset.passportId || primaryPassportId),
+    },
+    commercial: { ...base.commercial, ...object(source.commercial) },
+    totals: { ...base.totals, ...object(source.totals) },
+    termsDocument: { ...base.termsDocument, ...object(source.termsDocument) },
+    signing: { ...base.signing, ...object(source.signing) },
+    related: { ...base.related, ...object(source.related) },
+    audit: { ...base.audit, ...object(source.audit) },
+  };
+}
+
 export function saleInputFromRecord(record = {}) {
   return {
     dealType: dealType(record?.dealType), rpo: rpo(record?.rpo), additionalTerms: additionalTerms(record?.additionalTerms),

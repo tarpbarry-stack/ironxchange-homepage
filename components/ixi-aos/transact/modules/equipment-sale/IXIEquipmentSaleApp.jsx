@@ -7,6 +7,7 @@ import {
 } from "./IXIEquipmentSaleCommands";
 import {
   createIXIEquipmentSaleDraft,
+  hydrateIXIEquipmentSaleRecord,
   getIXIEquipmentSaleReadiness,
   saleInputFromRecord,
   updateIXIEquipmentSale,
@@ -350,7 +351,10 @@ function initialSaleRecord({
     !clean(
       invoice?.sourceFinancialDocumentId || invoice?.metadata?.salesOrderId,
     );
-  if (entryMode === "sales-order") return initialRecord || base;
+  if (entryMode === "sales-order")
+    return initialRecord
+      ? hydrateIXIEquipmentSaleRecord({ context, record: initialRecord })
+      : base;
   return directInvoice
     ? saleRecordFromInvoice(base, invoice)
     : initialRecord || base;
@@ -837,11 +841,15 @@ export default function IXIEquipmentSaleApp({
   useEffect(() => setMounted(true), []);
   useEffect(() => {
     if (initialRecord) {
-      setRecord(initialRecord);
-      setInput(saleInputFromRecord(initialRecord));
+      const hydrated = hydrateIXIEquipmentSaleRecord({
+        context,
+        record: initialRecord,
+      });
+      setRecord(hydrated);
+      setInput(saleInputFromRecord(hydrated));
       setRevisionOpen(false);
     }
-  }, [initialRecord]);
+  }, [context, initialRecord]);
   useEffect(() => {
     setInvoiceRecord(invoice);
     setInvoiceDraft({
