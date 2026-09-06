@@ -18,7 +18,8 @@ test("Sold closes the original Invoice instead of creating a second receivable",
   assert.doesNotMatch(closeout, /createIXIAosObjectFinancialDocument/u);
   assert.match(closeout, /financialDocumentId: financialInvoiceId/u);
   assert.match(closeout, /expectedRevision/u);
-  assert.match(closeout, /financialState: "receivable"/u);
+  assert.match(closeout, /financialState: "billed"/u);
+  assert.doesNotMatch(closeout, /financialState: "receivable"/u);
   assert.match(closeout, /assetSaleRecord: soldRecord/u);
   assert.match(closeout, /financialId !== financialInvoiceId/u);
   assert.match(app, /sourceInvoice,type,buyerLabel/u);
