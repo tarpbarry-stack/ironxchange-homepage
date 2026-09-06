@@ -149,7 +149,7 @@ export async function createIXIAssetSale({
           idempotencyKey: `ixi-asset-sale:${commandId}`,
           patch: {
             status: "issued",
-            financialState: "receivable",
+            financialState: "billed",
             invoiceType: "asset-sale",
             assetSale: draft.sale,
             attachments: draft.documents,
