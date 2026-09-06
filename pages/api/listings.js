@@ -2,6 +2,9 @@ import {
   normalizeMachineAccess,
   normalizeMachineChannel
 } from "../../lib/machine-access/IXIMachineAccess";
+import {
+  compactMarketplaceListing
+} from "../../lib/listings/compactMarketplaceListing";
 
 let accessTokenCache = null;
 let accessTokenExpiresAt = 0;
@@ -503,6 +506,17 @@ const sharetribeImageObjects = imageIds
           finalImages[0] ||
           "/images/hero-equipment-yard.jpg";
 
+        const passportId =
+          publicData.passportId ||
+          publicData.ixiMedia?.passportId ||
+          "";
+
+        const stockNumber =
+          publicData.stockNumber ||
+          publicData.sellerReference ||
+          metadata.sellerReference ||
+          "";
+
         return {
           id,
           authorId,
@@ -526,6 +540,8 @@ const sharetribeImageObjects = imageIds
 
           image: imageUrl,
           imageUrl,
+
+          imageCount: finalImages.length,
 
           images: finalImages,
 imageUrls: finalImages,
@@ -577,8 +593,16 @@ keywords: Array.isArray(publicData.keywords)
             metadata.sellerReference ||
             "",
 
+          stockNumber,
           serialNumber: publicData.serialNumber || "",
           condition: publicData.condition || "",
+
+          passportId,
+          passportUrl: publicData.passportUrl || "",
+          ixiMediaMachineKey:
+            publicData.ixiMedia?.machineKey ||
+            publicData.ixiMediaMachineKey ||
+            "",
 
           ...sellerInfo,
 
@@ -595,7 +619,20 @@ keywords: Array.isArray(publicData.keywords)
       "public, s-maxage=60, stale-while-revalidate=86400"
     );
 
-    res.status(200).json(listings);
+    const responseListings =
+      marketplaceBrowsePerformance &&
+      req.query.projection === "card"
+        ? listings.map(compactMarketplaceListing)
+        : listings;
+
+    res.setHeader(
+      "X-IXI-Listings-Projection",
+      responseListings === listings
+        ? "full"
+        : "card"
+    );
+
+    res.status(200).json(responseListings);
   } catch (err) {
     console.error("LISTINGS API ERROR:", err);
 

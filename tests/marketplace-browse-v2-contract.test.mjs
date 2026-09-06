@@ -10,6 +10,9 @@ import {
 import {
   normalizeDistributionListing
 } from "../lib/marketplace/loadDistributionListing.mjs";
+import {
+  compactMarketplaceListing
+} from "../lib/listings/compactMarketplaceListing.js";
 
 function read(path) {
   return fs.readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
@@ -45,6 +48,54 @@ test("Browse V2 keeps all sortable IDs while rendering inventory in 24-card batc
   assert.match(board, /items=\{sortableItemIds\}/u);
   assert.match(board, /items\.slice\(0, renderLimit\)/u);
   assert.match(board, /IntersectionObserver/u);
+});
+
+test("Marketplace card projection removes duplicate heavy fields and retains card behavior", () => {
+  const compact = compactMarketplaceListing({
+    id: "listing-123",
+    title: "2022 EXCAVATOR",
+    category: "EXCAVATORS",
+    make: "CATERPILLAR",
+    model: "320",
+    imageUrl: "hero.jpg",
+    imageCount: 4,
+    passportId: "IXITEST123",
+    sellerLogo: "seller.jpg",
+    publicData: { oversized: true },
+    metadata: { duplicated: true },
+    imageObjects: [{ url: "hero.jpg" }],
+    images: ["hero.jpg", "two.jpg"],
+    imageUrls: ["hero.jpg", "two.jpg"],
+    authorProfile: { duplicated: true }
+  });
+
+  assert.deepEqual(compact, {
+    id: "listing-123",
+    title: "2022 EXCAVATOR",
+    category: "EXCAVATORS",
+    make: "CATERPILLAR",
+    model: "320",
+    imageUrl: "hero.jpg",
+    imageCount: 4,
+    passportId: "IXITEST123",
+    sellerLogo: "seller.jpg"
+  });
+  assert.equal("publicData" in compact, false);
+  assert.equal("imageUrls" in compact, false);
+  assert.equal("authorProfile" in compact, false);
+});
+
+test("Marketplace loads secondary photos only after the photo controls are used", () => {
+  const card = read(
+    "components/ixi-machine-card/marketplace/MarketplaceListingCard.js"
+  );
+  const engine = read("lib/listings/IXIListingsEngine.js");
+
+  assert.match(engine, /projection=card/u);
+  assert.match(engine, /hydrateProgressiveMedia/u);
+  assert.match(card, /loadIXIListingDetails/u);
+  assert.match(card, /imageCount > 1/u);
+  assert.match(card, /MARKETPLACE CARD PHOTOS UNAVAILABLE/u);
 });
 
 test("deferred closed Consoles preserve the Marketplace scale shell", () => {

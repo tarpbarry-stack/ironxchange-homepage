@@ -3,6 +3,7 @@ import dynamic from "next/dynamic";
 // DnD is owned by IXISortableMachineCard wrapper.
 
 import { captureIXEvent } from "../../../lib/posthog";
+import { loadIXIListingDetails } from "../../../lib/listings/IXIListingDetailClient";
 
 import {
   cleanMachineTitle,
@@ -144,6 +145,8 @@ onExpandConsoleRight,
 consoleActuatorVariant = "compact"
 }) {
   const [photoIndex, setPhotoIndex] = useState(0);
+  const [detailImages, setDetailImages] = useState([]);
+  const [loadingDetailImages, setLoadingDetailImages] = useState(false);
 
   const [localBoardColor, setLocalBoardColor] = useState("none");
 const [localBoardOutline, setLocalBoardOutline] = useState(1);
@@ -343,10 +346,16 @@ function getSellerState() {
   const sharetribeImages = getCardImages(listing);
   const bulkImages = getBulkImageUrls(listing);
 
-  const images =
-    bulkImages.length > 0
+  const images = detailImages.length > 0
+    ? detailImages
+    : bulkImages.length > 0
       ? bulkImages
       : sharetribeImages;
+
+  const imageCount = Math.max(
+    images.length,
+    Number(listing.imageCount) || 0
+  );
 
   const currentPhoto = images[photoIndex];
   const [photoFitMap, setPhotoFitMap] = useState({});
@@ -366,9 +375,42 @@ function getSellerState() {
     .map(k => String(k).trim().toLowerCase())
     .slice(0, 6);
 
-  function changePhoto(e, direction) {
+  async function changePhoto(e, direction) {
     e.preventDefault();
     e.stopPropagation();
+
+    if (images.length < 2 && imageCount > 1) {
+      if (loadingDetailImages) return;
+
+      setLoadingDetailImages(true);
+
+      try {
+        const details =
+          await loadIXIListingDetails(id);
+
+        const loadedImages =
+          getCardImages(details || {});
+
+        if (loadedImages.length > 1) {
+          setDetailImages(loadedImages);
+          setPhotoIndex(
+            direction > 0
+              ? 1
+              : loadedImages.length - 1
+          );
+        }
+      } catch (error) {
+        console.warn(
+          "MARKETPLACE CARD PHOTOS UNAVAILABLE:",
+          id,
+          error
+        );
+      } finally {
+        setLoadingDetailImages(false);
+      }
+
+      return;
+    }
 
     if (images.length < 2) return;
 
@@ -594,7 +636,7 @@ style={getFrameStyle(currentImageObject, "card")}
   </div>
 ) : null}
 
-    {images.length > 1 ? (
+    {imageCount > 1 ? (
       <>
         <button
           type="button"
@@ -615,7 +657,9 @@ style={getFrameStyle(currentImageObject, "card")}
         </button>
 
         <span className="photo-count">
-          {photoIndex + 1}/{images.length}
+          {loadingDetailImages
+            ? "LOADING"
+            : `${photoIndex + 1}/${imageCount}`}
         </span>
       </>
     ) : null}
