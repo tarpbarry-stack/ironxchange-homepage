@@ -220,7 +220,7 @@ function withLocalCardDrafts(templates = []) {
     source.push({
       templateNumber: 18,
       templateSlug: "aos-card-018",
-      label: "Card 018 · Equipment Index",
+      label: "Card 018",
       librarySection: "AOS CONTAINER LAYOUTS",
       baseObjectType: "customer-defined-container",
       version: 12,

@@ -289,7 +289,7 @@ function card017Items() {
 function card018Sample() {
   return {
     objectId: "preview-card-018", entityId: "aos-card-preview-entity", objectType: "customer-defined-container",
-    singularLabel: "EQUIPMENT", pluralLabel: "EQUIPMENT", displayName: "EQUIPMENT", status: "active",
+    singularLabel: "SYSTEM INDEX", pluralLabel: "SYSTEM INDEXES", displayName: "EQUIPMENT", status: "active",
     capabilities: { canContain: true, canCreate: true, canTransact: true, editable: true, hasConsole: true, hasRail: true, hasRelationships: true },
     presentation: { directChildrenLabel: "CHILDREN", sampleUse: "EQUIPMENT COLLECTION / VISUAL INDEX" },
     fields: {}, fieldDefinitions: [], relationships: [], media: [],
