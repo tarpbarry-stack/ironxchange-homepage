@@ -3,6 +3,10 @@ import test from "node:test";
 import { readFileSync } from "node:fs";
 
 const actuatorSource = readFileSync(new URL("../components/ixi-chassis/IXIObjectCardActuator.jsx", import.meta.url), "utf8");
+const marketplaceConsoleSource = readFileSync(
+  new URL("../components/ixi-machine-object/IXIMarketplaceObjectConsole.jsx", import.meta.url),
+  "utf8"
+);
 
 test("Marketplace actuator keeps the existing bottom edge while matching full actuator height", () => {
   assert.match(
@@ -16,4 +20,13 @@ test("Marketplace override does not change actuator side position or behavior", 
   assert.match(actuatorSource, /\.ixi-object-card-actuator\.right \{[\s\S]*?right: -1px;/);
   assert.match(actuatorSource, /\.ixi-object-card-actuator\.left \{[\s\S]*?left: -1px;/);
   assert.match(actuatorSource, /onClick\?\.\(event\)/);
+});
+
+test("Marketplace Console add and close actuators use the one large size", () => {
+  assert.match(actuatorSource, /variant === "marketplace"/u);
+  assert.match(actuatorSource, /isTall \|\| isMarketplace[\s\S]*?\? 34/u);
+  assert.equal(
+    (marketplaceConsoleSource.match(/variant="marketplace"/gu) || []).length,
+    3
+  );
 });

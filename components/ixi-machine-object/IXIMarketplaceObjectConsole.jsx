@@ -411,6 +411,8 @@ export default function IXIMarketplaceObjectConsole({
               closeActuatorSide
             }
 
+            variant="marketplace"
+
             label="
               Close marketplace module
             "
@@ -430,6 +432,8 @@ export default function IXIMarketplaceObjectConsole({
           {showLeftExpansion ? (
             <IXIObjectCardActuator
               side="left"
+
+              variant="marketplace"
 
               label="
                 Add marketplace module left
@@ -451,6 +455,8 @@ export default function IXIMarketplaceObjectConsole({
           {showRightExpansion ? (
             <IXIObjectCardActuator
               side="right"
+
+              variant="marketplace"
 
               label="
                 Add marketplace module right
