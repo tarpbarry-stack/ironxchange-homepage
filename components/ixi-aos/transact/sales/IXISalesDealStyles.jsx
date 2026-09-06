@@ -169,6 +169,7 @@ export default function IXISalesDealStyles() {
         border-right: 1px solid #252a27;
         background: #0b0e0c;
         color: #737874;
+        cursor: pointer;
       }
       .ixi-deal-stage-rail button.completed {
         background: #ffc400;
@@ -196,9 +197,6 @@ export default function IXISalesDealStyles() {
       .ixi-deal-stage-rail button:focus-visible {
         outline: 2px solid #ffc400;
         outline-offset: -2px;
-      }
-      .ixi-deal-stage-rail button:disabled {
-        cursor: default;
       }
       .ixi-deal-stage-rail i,
       .ixi-deal-stage-rail span {

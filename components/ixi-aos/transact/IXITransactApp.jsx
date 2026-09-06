@@ -487,7 +487,9 @@ export default function IXITransactApp({
     : null;
   const selectedSalesOrderSnapshot = selectedSalesDeal
     ? recordForIXISalesStage(selectedSalesDeal, "sales-order") ||
-      (activeSalesStageId === "sales-order" ? salesOrderDraftForIXISalesDeal(selectedSalesDeal) : null)
+      (["sales-order", "signed"].includes(activeSalesStageId)
+        ? salesOrderDraftForIXISalesDeal(selectedSalesDeal)
+        : null)
     : null;
   const selectedSalesInvoiceSnapshot = selectedSalesDeal ? documentForIXISalesStage(selectedSalesDeal, "invoice") : null;
   const selectedSaleSnapshot = selectedSalesDeal ? recordForIXISalesStage(selectedSalesDeal, "sold") : null;
