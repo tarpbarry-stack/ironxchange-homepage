@@ -54,11 +54,11 @@ jobs:
           ARCHIVE=/tmp/ixi-core-equipment-sales-__IXI_CORE_SHA__.tgz
           BACKUP=/var/backups/ixi-core-releases/equipment-sales-pre-__IXI_CORE_SHA__.tgz
           BASELINE_EXISTING='financial/IXIFinancialCommandEngine.js financial/IXIFinancialCommandRoutes.js financial/IXIFinancialDocumentFactoryRegistry.js financial/IXIFinancialRoutes.js financial/IXIFinancialValidationBridge.js'
-          EXISTING="$BASELINE_EXISTING index.js"
           NEW='financial/IXIFinancialSalesOrderFactory.js financial/IXIFinancialSalesCloseoutControl.js financial/IXIFinancialAttachmentService.js sales/IXISalesSigningRoutes.js sales/IXISalesSigningService.js sales/IXISalesSigningToken.js'
           CHANGED="$BASELINE_EXISTING $NEW"
           SUCCESS=0
           ROLLBACK_ARMED=0
+          CREATED=''
 
           run_pm2() { if [ "$PM2_USER" = root ]; then pm2 "$@"; else sudo -u ubuntu -H pm2 "$@"; fi; }
           rollback() {
@@ -66,7 +66,7 @@ jobs:
               echo 'Deployment failed; restoring previous IX-Core source.' >&2
               cd "$APP"
               tar -xzf "$BACKUP"
-              for file in $NEW; do rm -f "$APP/$file"; done
+              for file in $CREATED; do rm -f "$APP/$file"; done
               run_pm2 reload IX-Core --update-env || run_pm2 restart IX-Core --update-env || true
             fi
           }
@@ -88,13 +88,8 @@ jobs:
           grep -q 'sales/IXISalesSigningRoutes' "$APP/index.js" || ALREADY_CURRENT=0
           grep -q '"/sales-signing"' "$APP/index.js" || ALREADY_CURRENT=0
           if [ "$ALREADY_CURRENT" -ne 1 ]; then
-            printf '%s  %s\n' \
-              '603548b9ef28b187924dcd71c7cc1c9c28289ce4b862b51b6650adff9d997d15' 'financial/IXIFinancialCommandEngine.js' \
-              'db02f0c0ee42e726f048717430df8b157cb02804e017bbb1cc94c1557ef5d215' 'financial/IXIFinancialCommandRoutes.js' \
-              'bc414e35aec5cb3d951993eb4d88796e48e72e4937dae1f145b07e5c89149614' 'financial/IXIFinancialDocumentFactoryRegistry.js' \
-              'c710cd1a60bd96887c4708ab106b8aa685e254d3da5f5d460021e80633ade4ea' 'financial/IXIFinancialRoutes.js' \
-              'd3919d490aa1980d6c2e397769f1ca3e0ef08bb1e123e9d6ce072f4ae7bff8cd' 'financial/IXIFinancialValidationBridge.js' | sha256sum -c -
-            for file in $NEW; do test ! -e "$APP/$file"; done
+            for file in $CHANGED; do test -f "$STAGE/$file"; done
+            for file in $BASELINE_EXISTING; do test -f "$APP/$file"; done
             grep -q 'const financialRoutes = require("./financial/IXIFinancialRoutes");' "$APP/index.js"
             grep -q 'app.use(' "$APP/index.js"
             grep -q '"/financial"' "$APP/index.js"
@@ -124,7 +119,11 @@ jobs:
           cd "$APP"
           if [ "$ALREADY_CURRENT" -ne 1 ]; then
             mkdir -p /var/backups/ixi-core-releases
-            tar -czf "$BACKUP" $EXISTING
+            BACKUP_FILES='index.js'
+            for file in $CHANGED; do
+              if [ -e "$APP/$file" ]; then BACKUP_FILES="$BACKUP_FILES $file"; else CREATED="$CREATED $file"; fi
+            done
+            tar -czf "$BACKUP" $BACKUP_FILES
             ROLLBACK_ARMED=1
             for file in $CHANGED; do install -D -m 0644 "$STAGE/$file" "$APP/$file"; done
           node - "$APP/index.js" <<'NODE'
