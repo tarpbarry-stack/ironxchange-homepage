@@ -71,6 +71,10 @@ import {
 import IXIAosWorkspaceBoard
   from "../../components/ixi-mos/workspace/IXIAosWorkspaceBoard";
 
+import {
+  resolveAosWorkspaceParentName
+} from "../../lib/mos/ixiAosHierarchyContract.mjs";
+
 import { getListingId } from "../../lib/listingFormatters";
 import {
   fetchIxiMachineState,
@@ -2421,16 +2425,7 @@ async function createRootContainerFromTemplate(
 ) {
   const result =
     createRootContainerDraft({
-      template,
-      metadata: {
-        parentDisplayName:
-          String(
-            aosEntity?.displayName ||
-            aosEntity?.legalName ||
-            aosEntity?.name ||
-            "IXI ENTITY"
-          ).trim()
-      }
+      template
     });
 
   const draftId =
@@ -3182,13 +3177,10 @@ if (
       : null;
 
   const parentLabel =
-    String(
-      parentObject?.displayName ||
-      parentObject?.label ||
-      object?.metadata
-        ?.parentDisplayName ||
-      "OBJECT"
-    ).trim();
+    resolveAosWorkspaceParentName({
+      object,
+      parentObject
+    });
 
   const directChildren =
     (aosObjects || [])

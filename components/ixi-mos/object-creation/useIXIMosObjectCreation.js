@@ -29,6 +29,11 @@ import {
   getAosTemplateNumber
 } from "../../../lib/mos/ixiAosSystemObjectTemplateContract.mjs";
 
+import {
+  getAosHierarchyDisplayName,
+  IXI_AOS_SYSTEM_INDEX_LABEL
+} from "../../../lib/mos/ixiAosHierarchyContract.mjs";
+
 
 const IXI_SYSTEM_INDEX_TEMPLATE_ID =
   "ixi-system-index-v1";
@@ -534,6 +539,8 @@ export default function useIXIMosObjectCreation({
           true,
         createdFrom:
           "aos-scoreboard-plus",
+        parentDisplayName:
+          IXI_AOS_SYSTEM_INDEX_LABEL,
         creationState:
           "naming",
         persistenceState:
@@ -875,6 +882,12 @@ export default function useIXIMosObjectCreation({
         "aos-container-plus",
       createdInsideContainerId:
         destinationContainerId,
+      parentObjectId:
+        destinationContainerId,
+      parentDisplayName:
+        getAosHierarchyDisplayName(
+          container
+        ),
       creationState:
         "naming",
       persistenceState:

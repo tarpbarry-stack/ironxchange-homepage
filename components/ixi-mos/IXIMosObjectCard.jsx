@@ -18,6 +18,10 @@ import IXICollectionThumbRail
   from "../ixi-object-system/IXICollectionThumbRail";
 
 import {
+  resolveAosWorkspaceParentName
+} from "../../lib/mos/ixiAosHierarchyContract.mjs";
+
+import {
   getCollectionDeckState,
   getNextCollectionFace,
   getPreviousCollectionFace,
@@ -328,14 +332,11 @@ export default function IXIMosObjectCard({
     );
 
   const resolvedParentLabel =
-    clean(
-      parentLabel
-    ) ||
-    clean(
-      object?.metadata
-        ?.parentDisplayName
-    ) ||
-    "OBJECT";
+    resolveAosWorkspaceParentName({
+      object,
+      explicitParentLabel:
+        parentLabel
+    });
 
 
   const isContainer =

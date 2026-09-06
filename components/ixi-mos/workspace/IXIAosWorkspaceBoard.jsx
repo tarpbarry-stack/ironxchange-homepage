@@ -26,6 +26,10 @@ import {
   getIXIAosSystemAdapter
 } from "../../../lib/mos/IXIAosSystemAdapterRegistry";
 
+import {
+  resolveAosWorkspaceParentName
+} from "../../../lib/mos/ixiAosHierarchyContract.mjs";
+
 
 function cleanId(value) {
   return String(value ?? "").trim();
@@ -378,11 +382,10 @@ export default function IXIAosWorkspaceBoard({
                 : null;
 
             const parentLabel =
-              String(
-                parentObject?.displayName ||
-                parentObject?.label ||
-                ""
-              ).trim();
+              resolveAosWorkspaceParentName({
+                object: item,
+                parentObject
+              });
 
             const directChildren =
               Array.isArray(item?.items)
