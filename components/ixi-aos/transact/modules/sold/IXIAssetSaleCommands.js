@@ -1,7 +1,9 @@
 import {
   createIXIAosObjectFinancialDocument,
   createIXIAosFinancialObjectReference,
+  mergeIXIAosFinancialReferences,
 } from "../../../financial-runtime/IXIAosFinancialRuntimeAdapter";
+import { patchIXIAosFinancialDocument } from "../../../financial-runtime/IXIAosFinancialReadClient";
 import { runIXIActionNoticeLifecycle } from "../../../../ixi-object-system/IXIActionNoticeEngine";
 import {
   createIXIAssetSaleDraft,
@@ -90,6 +92,19 @@ export async function createIXIAssetSale({
       label: clean(object.label || draft.context.assetLabel),
     },
     notice = clean(resolved.objectId || resolved.passportId);
+  const financialInvoiceId = clean(
+    input.sourceFinancialDocumentId ||
+      input.sourceInvoice?.financialBinding?.financialDocumentId ||
+      input.sourceInvoice?.financialDocumentId,
+  );
+  const expectedRevision = Number(
+    input.sourceInvoice?.financialBinding?.revision ||
+      input.sourceInvoice?.server?.revision ||
+      0,
+  );
+  if (!financialInvoiceId || !Number.isInteger(expectedRevision) || expectedRevision < 1) {
+    throw new Error("SOLD closeout requires the current canonical Invoice revision.");
+  }
   return runIXIActionNoticeLifecycle({
     objectId: notice,
     commandId,
@@ -99,56 +114,22 @@ export async function createIXIAssetSale({
       `SOLD ${clean(r?.record?.identity?.number) || "RECORDED"}`,
     errorMessage: "SOLD SAVE FAILED",
     operation: async () => {
-      const refs = refsFor(context, draft, resolved),
-        response = await createIXIAosObjectFinancialDocument({
-          object: resolved,
-          documentType: "invoice",
-          input: {
-            currency: "USD",
-            amount: draft.sale.salePrice,
-            description: `Asset Sale · ${draft.context.assetLabel} · ${draft.sale.buyerLabel}`,
-            status: "issued",
-            financialState: "receivable",
-            sourceFinancialDocumentId: clean(input.sourceFinancialDocumentId),
-            invoiceType: "asset-sale",
-            assetSale: draft.sale,
-            metadata: { ...metadata, transactModule: "sold", dealId: clean(draft?.identity?.dealId), assetSale: true, assetSaleRecord: draft, invoiceType: "asset-sale" },
-            attachments: draft.documents,
-            references: refs,
-          },
-          additionalReferences: refs,
-          commandId,
-          idempotencyKey: `ixi-asset-sale:${commandId}`,
-          metadata: {
-            ...metadata,
-            transactModule: "sold",
-            dealId: clean(draft?.identity?.dealId),
-            recordSchema: draft.schema,
-            assetSale: true,
-            assetSaleRecord: draft,
-            assetPassportId: draft.context.assetPassportId,
-            buyerLabel: draft.sale.buyerLabel,
-            saleDate: draft.sale.saleDate,
-          },
-          apiBaseUrl,
-          headers,
-          signal,
-        });
-      const financialId = documentIdOf(response),
-        number = `SALE-${financialId
+      const refs = mergeIXIAosFinancialReferences([
+          ...(Array.isArray(input.sourceInvoice?.references) ? input.sourceInvoice.references : []),
+          ...refsFor(context, draft, resolved),
+        ]),
+        number = `SALE-${financialInvoiceId
           .replace(/^SALE-/i, "")
           .slice(-6)
           .toUpperCase()}`,
-        at = new Date().toISOString();
-      if (!financialId) throw new Error("Asset sale was not bound to a canonical IXI Financial invoice.");
-      return {
-        record: {
+        at = new Date().toISOString(),
+        soldRecord = {
           ...draft,
           identity: {
             ...draft.identity,
-            saleId: financialId,
+            saleId: financialInvoiceId,
             number,
-            financialInvoiceId: financialId,
+            financialInvoiceId,
           },
           status: "sold",
           activity: [
@@ -160,6 +141,52 @@ export async function createIXIAssetSale({
             },
           ],
           audit: { ...draft.audit, updatedAt: at },
+        },
+        response = await patchIXIAosFinancialDocument({
+          financialDocumentId: financialInvoiceId,
+          expectedRevision,
+          commandId,
+          idempotencyKey: `ixi-asset-sale:${commandId}`,
+          patch: {
+            status: "issued",
+            financialState: "receivable",
+            invoiceType: "asset-sale",
+            assetSale: draft.sale,
+            attachments: draft.documents,
+            references: refs,
+            metadata: {
+              ...(input.sourceInvoice?.metadata || {}),
+              ...metadata,
+              transactModule: "sold",
+              dealId: clean(draft?.identity?.dealId),
+              assetSale: true,
+              assetSaleRecord: soldRecord,
+              invoiceType: "asset-sale",
+            },
+          },
+          metadata: {
+            ...metadata,
+            transactModule: "sold",
+            dealId: clean(draft?.identity?.dealId),
+            recordSchema: draft.schema,
+            assetSale: true,
+            assetSaleRecord: draft,
+            assetPassportId: draft.context.assetPassportId,
+            buyerLabel: draft.sale.buyerLabel,
+            saleDate: draft.sale.saleDate,
+          },
+          signal,
+        });
+      const financialId = documentIdOf(response);
+      if (!financialId || financialId !== financialInvoiceId) throw new Error("SOLD closeout did not return the original canonical Invoice.");
+      const stored = storedRecord(response);
+      return {
+        record: {
+          ...soldRecord,
+          financialBinding: {
+            financialDocumentId: financialId,
+            revision: Number(stored?.server?.revision || expectedRevision + 1),
+          },
         },
         response,
       };
