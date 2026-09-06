@@ -18,11 +18,22 @@ test("Sold closes the original Invoice instead of creating a second receivable",
   assert.doesNotMatch(closeout, /createIXIAosObjectFinancialDocument/u);
   assert.match(closeout, /financialDocumentId: financialInvoiceId/u);
   assert.match(closeout, /expectedRevision/u);
-  assert.match(closeout, /financialState: "billed"/u);
+  assert.match(closeout, /financialState: "collected"/u);
   assert.doesNotMatch(closeout, /financialState: "receivable"/u);
   assert.match(closeout, /assetSaleRecord: soldRecord/u);
   assert.match(closeout, /financialId !== financialInvoiceId/u);
-  assert.match(app, /sourceInvoice,type,buyerLabel/u);
+  assert.match(app, /SOURCE INVOICE/u);
+  assert.match(app, /BALANCE IS \$0\.00/u);
+  assert.match(commands, /financialState: "paid"/u);
+  assert.match(commands, /sourceFinancialDocumentId: invoiceId/u);
+});
+
+test("Invoice issuance is an explicit Step 4 command on the same canonical document", async () => {
+  const commands = await read("components/ixi-aos/transact/modules/equipment-sale/IXIEquipmentSaleCommands.js");
+  assert.match(commands, /export async function issueIXIEquipmentInvoice/u);
+  assert.match(commands, /patchIXIAosFinancialDocument/u);
+  assert.match(commands, /financialState: "billed"/u);
+  assert.match(commands, /invoiceStatus: "issued"/u);
 });
 
 test("Settlement remains a separate non-revenue control sourced to the sold Invoice", async () => {

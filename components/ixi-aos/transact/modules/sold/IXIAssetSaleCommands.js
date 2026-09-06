@@ -5,98 +5,86 @@ import {
 } from "../../../financial-runtime/IXIAosFinancialRuntimeAdapter";
 import { patchIXIAosFinancialDocument } from "../../../financial-runtime/IXIAosFinancialReadClient";
 import { runIXIActionNoticeLifecycle } from "../../../../ixi-object-system/IXIActionNoticeEngine";
-import {
-  createIXIAssetSaleDraft,
-  validateIXIAssetSale,
-} from "./IXIAssetSaleContract";
-const clean = (v) => String(v ?? "").trim();
+import { createIXIAssetSaleDraft, validateIXIAssetSale } from "./IXIAssetSaleContract";
+
+const clean = value => String(value ?? "").trim();
 const storedRecord = response => response?.data?.record || response?.record || {};
-const documentOf = response => storedRecord(response)?.financialDocument || response?.financialDocument || response?.document || {};
+const documentOf = response =>
+  storedRecord(response)?.financialDocument ||
+  response?.financialDocument ||
+  response?.document ||
+  {};
 const documentIdOf = response => clean(documentOf(response)?.financialDocumentId || response?.documentId);
-function push(refs, ref) {
-  if (!ref) return;
-  const key = [ref.passportId, ref.externalId, ref.role, ref.label]
+
+function push(references, reference) {
+  if (!reference) return;
+  const key = [reference.passportId, reference.externalId, reference.role, reference.label]
     .map(clean)
     .join("|");
-  if (
-    !refs.some(
-      (x) =>
-        [x.passportId, x.externalId, x.role, x.label].map(clean).join("|") ===
-        key,
-    )
-  )
-    refs.push(ref);
+  if (!references.some(item =>
+    [item.passportId, item.externalId, item.role, item.label].map(clean).join("|") === key
+  )) references.push(reference);
 }
-function refsFor(context = {}, record = {}, object = {}) {
-  const refs = [];
-  push(
-    refs,
-    createIXIAosFinancialObjectReference({
-      object: context.primary || object,
-      role: "asset",
-    }),
-  );
-  push(
-    refs,
-    createIXIAosFinancialObjectReference({
-      object: context.entity || {},
-      role: "entity",
-    }),
-  );
-  push(
-    refs,
-    createIXIAosFinancialObjectReference({
-      object: context.location || {},
-      role: "location",
-    }),
-  );
-  push(
-    refs,
-    createIXIAosFinancialObjectReference({
-      object: context.actor || {},
-      role: "employee",
-    }),
-  );
-  if (record.sale?.buyerLabel)
-    push(refs, {
+
+function referencesFor(context = {}, record = {}, object = {}) {
+  const references = [];
+  push(references, createIXIAosFinancialObjectReference({ object: context.primary || object, role: "asset" }));
+  push(references, createIXIAosFinancialObjectReference({ object: context.entity || {}, role: "entity" }));
+  push(references, createIXIAosFinancialObjectReference({ object: context.location || {}, role: "location" }));
+  push(references, createIXIAosFinancialObjectReference({ object: context.actor || {}, role: "employee" }));
+  if (record.sale?.buyerLabel) {
+    push(references, {
       role: "customer",
       label: record.sale.buyerLabel,
       objectType: "entity",
       passportId: record.sale.buyerPassportId,
       externalId: record.sale.buyerId,
     });
-  return refs;
+  }
+  return references;
 }
+
+function canonicalInvoice(sourceInvoice = {}, response = null, financialState = "") {
+  const stored = storedRecord(response);
+  const document = documentOf(response);
+  if (!clean(document.financialDocumentId)) {
+    return { ...sourceInvoice, financialState: clean(financialState || sourceInvoice.financialState) };
+  }
+  return {
+    ...sourceInvoice,
+    ...document,
+    financialBinding: {
+      financialDocumentId: document.financialDocumentId,
+      revision: Number(stored?.server?.revision || sourceInvoice?.financialBinding?.revision || 1),
+      line: document?.lines?.[0] || sourceInvoice?.financialBinding?.line || null,
+    },
+  };
+}
+
 export async function createIXIAssetSale({
   object = {},
   context = {},
   input = {},
   metadata = {},
-  apiBaseUrl = "",
   headers = {},
   signal,
 } = {}) {
-  const draft = createIXIAssetSaleDraft({ context, input }),
-    check = validateIXIAssetSale(draft);
+  const draft = createIXIAssetSaleDraft({ context, input });
+  const check = validateIXIAssetSale(draft, input.sourceInvoice);
   if (!check.valid) {
-    const e = new Error("SOLD record is incomplete");
-    e.validation = check;
-    throw e;
+    const error = new Error("SOLD requires an issued Invoice with a zero customer balance.");
+    error.validation = check;
+    throw error;
   }
-  const commandId = draft.identity.clientRequestId,
-    resolved = {
-      ...object,
-      passportId: clean(object.passportId || draft.context.assetPassportId),
-      objectId: clean(object.objectId || draft.context.assetObjectId),
-      objectType: clean(object.objectType || draft.context.assetObjectType),
-      label: clean(object.label || draft.context.assetLabel),
-    },
-    notice = clean(resolved.objectId || resolved.passportId);
-  const financialInvoiceId = clean(
-    input.sourceFinancialDocumentId ||
-      input.sourceInvoice?.financialBinding?.financialDocumentId ||
-      input.sourceInvoice?.financialDocumentId,
-  );
+  const commandId = draft.identity.clientRequestId;
+  const resolved = {
+    ...object,
+    passportId: clean(object.passportId || draft.context.assetPassportId),
+    objectId: clean(object.objectId || draft.context.assetObjectId),
+    objectType: clean(object.objectType || draft.context.assetObjectType),
+    label: clean(object.label || draft.context.assetLabel),
+  };
+  const financialInvoiceId = clean(draft.identity.financialInvoiceId);
   const expectedRevision = Number(
     input.sourceInvoice?.financialBinding?.revision ||
       input.sourceInvoice?.server?.revision ||
@@ -106,79 +94,84 @@ export async function createIXIAssetSale({
     throw new Error("SOLD closeout requires the current canonical Invoice revision.");
   }
   return runIXIActionNoticeLifecycle({
-    objectId: notice,
+    objectId: clean(resolved.objectId || resolved.passportId),
     commandId,
     source: "ixi-transact-sold",
-    savingMessage: "RECORDING SOLD...",
-    successMessage: (r) =>
-      `SOLD ${clean(r?.record?.identity?.number) || "RECORDED"}`,
-    errorMessage: "SOLD SAVE FAILED",
+    savingMessage: "VERIFYING FUNDS + CLOSING SALE...",
+    successMessage: result => `SOLD ${clean(result?.record?.identity?.number) || "RECORDED"}`,
+    errorMessage: "SOLD CLOSEOUT FAILED",
     operation: async () => {
-      const refs = mergeIXIAosFinancialReferences([
-          ...(Array.isArray(input.sourceInvoice?.references) ? input.sourceInvoice.references : []),
-          ...refsFor(context, draft, resolved),
-        ]),
-        number = `SALE-${financialInvoiceId
-          .replace(/^SALE-/i, "")
-          .slice(-6)
-          .toUpperCase()}`,
-        at = new Date().toISOString(),
-        soldRecord = {
-          ...draft,
-          identity: {
-            ...draft.identity,
-            saleId: financialInvoiceId,
-            number,
-            financialInvoiceId,
-          },
-          status: "sold",
-          activity: [
-            {
-              eventId: `SALE-CREATE-${Date.now()}`,
-              type: "asset-sold",
-              occurredAt: at,
-              actorLabel: draft.context.actorLabel,
-            },
-          ],
-          audit: { ...draft.audit, updatedAt: at },
+      const references = mergeIXIAosFinancialReferences([
+        ...(Array.isArray(input.sourceInvoice?.references) ? input.sourceInvoice.references : []),
+        ...referencesFor(context, draft, resolved),
+      ]);
+      const closedAt = new Date().toISOString();
+      const soldRecord = {
+        ...draft,
+        identity: {
+          ...draft.identity,
+          saleId: financialInvoiceId,
+          financialInvoiceId,
         },
-        response = await patchIXIAosFinancialDocument({
-          financialDocumentId: financialInvoiceId,
-          expectedRevision,
-          commandId,
-          idempotencyKey: `ixi-asset-sale:${commandId}`,
-          patch: {
-            status: "issued",
-            financialState: "billed",
-            invoiceType: "asset-sale",
-            assetSale: draft.sale,
-            attachments: draft.documents,
-            references: refs,
-            metadata: {
-              ...(input.sourceInvoice?.metadata || {}),
-              ...metadata,
-              transactModule: "sold",
-              dealId: clean(draft?.identity?.dealId),
-              assetSale: true,
-              assetSaleRecord: soldRecord,
-              invoiceType: "asset-sale",
-            },
+        collection: { ...draft.collection, status: "paid", balanceDue: 0 },
+        status: "sold",
+        activity: [
+          {
+            eventId: `SALE-CLOSE-${Date.now()}`,
+            type: "asset-sale-closed",
+            occurredAt: closedAt,
+            actorLabel: draft.context.actorLabel,
+            invoiceNumber: draft.sale.invoiceNumber,
           },
+        ],
+        audit: { ...draft.audit, updatedAt: closedAt, closedAt },
+      };
+      const response = await patchIXIAosFinancialDocument({
+        financialDocumentId: financialInvoiceId,
+        expectedRevision,
+        commandId,
+        idempotencyKey: `ixi-asset-sale-close:${financialInvoiceId}:${expectedRevision}`,
+        patch: {
+          status: "closed",
+          financialState: "collected",
+          invoiceType: "asset-sale",
+          assetSale: soldRecord.sale,
+          attachments: soldRecord.documents.filter(document =>
+            ["uploaded", "available", "verified"].includes(clean(document?.status).toLowerCase()),
+          ),
+          references,
           metadata: {
+            ...(input.sourceInvoice?.metadata || {}),
             ...metadata,
             transactModule: "sold",
-            dealId: clean(draft?.identity?.dealId),
-            recordSchema: draft.schema,
+            dealId: clean(soldRecord.identity.dealId),
             assetSale: true,
-            assetSaleRecord: draft,
-            assetPassportId: draft.context.assetPassportId,
-            buyerLabel: draft.sale.buyerLabel,
-            saleDate: draft.sale.saleDate,
+            assetSaleRecord: soldRecord,
+            invoiceType: "asset-sale",
+            invoiceNumber: soldRecord.sale.invoiceNumber,
+            billOfSaleNumber: soldRecord.sale.billOfSaleNumber,
+            soldAt: closedAt,
+            collectionStatus: "paid",
+            balanceDue: 0,
           },
-          signal,
-        });
+        },
+        metadata: {
+          ...metadata,
+          transactModule: "sold",
+          dealId: clean(soldRecord.identity.dealId),
+          recordSchema: soldRecord.schema,
+          assetSale: true,
+          assetPassportId: soldRecord.context.assetPassportId,
+          buyerLabel: soldRecord.sale.buyerLabel,
+          saleDate: soldRecord.sale.saleDate,
+        },
+        headers,
+        signal,
+      });
       const financialId = documentIdOf(response);
-      if (!financialId || financialId !== financialInvoiceId) throw new Error("SOLD closeout did not return the original canonical Invoice.");
+      if (!financialId || financialId !== financialInvoiceId) {
+        throw new Error("SOLD closeout did not return the original canonical Invoice.");
+      }
       const stored = storedRecord(response);
       return {
         record: {
@@ -188,15 +181,18 @@ export async function createIXIAssetSale({
             revision: Number(stored?.server?.revision || expectedRevision + 1),
           },
         },
+        invoice: canonicalInvoice(input.sourceInvoice, response, "collected"),
         response,
       };
     },
   });
 }
+
 export async function recordIXIAssetSaleReceipt({
   object = {},
   context = {},
   sale = {},
+  sourceInvoice = {},
   input = {},
   metadata = {},
   apiBaseUrl = "",
@@ -204,51 +200,98 @@ export async function recordIXIAssetSaleReceipt({
   signal,
 } = {}) {
   const amount = Math.round(Number(input.amount || 0) * 100) / 100;
-  if (!(amount > 0))
-    throw new Error("Receipt amount must be greater than zero");
-  if (!clean(input.reference)) throw new Error("Receipt reference is required");
-  const commandId = clean(input.clientRequestId) || `SALE-PAY-${Date.now()}`,
-    refs = refsFor(context, sale, object);
+  if (!(amount > 0)) throw new Error("Receipt amount must be greater than zero.");
+  if (!clean(input.reference)) throw new Error("Receipt reference is required.");
+  const invoiceId = clean(
+    sourceInvoice?.financialBinding?.financialDocumentId ||
+      sourceInvoice?.financialDocumentId ||
+      sale?.identity?.financialInvoiceId ||
+      sale?.identity?.saleId,
+  );
+  const invoiceRevision = Number(sourceInvoice?.financialBinding?.revision || sourceInvoice?.server?.revision || 0);
+  if (!invoiceId || invoiceRevision < 1) throw new Error("Customer payment requires the canonical Invoice.");
+  const currentBalance = Number(sale?.collection?.balanceDue || 0);
+  if (amount > currentBalance + 0.005) throw new Error("Receipt exceeds the open Invoice balance.");
+  const commandId = clean(input.clientRequestId) || `SALE-PAY-${Date.now()}`;
+  const references = referencesFor(context, sale, object);
   const response = await createIXIAosObjectFinancialDocument({
     object,
     documentType: "payment",
     input: {
-      currency: "USD",
+      currency: clean(sourceInvoice.currency || sale?.sale?.currency || "USD"),
       amount,
-      description: `Asset sale receipt · ${sale.identity?.number || "SALE"}`,
-      financialState: "received",
+      description: `Customer receipt · ${clean(sourceInvoice.documentNumber || sale?.sale?.invoiceNumber || invoiceId)}`,
+      financialState: "paid",
       paymentDirection: "inflow",
       paymentMethod: clean(input.method || "wire"),
       transactionReference: clean(input.reference),
       occurredAt: clean(input.date),
-      sourceFinancialDocumentId: clean(sale?.financialBinding?.financialDocumentId || sale.identity?.financialInvoiceId || sale.identity?.saleId),
-      metadata: { ...metadata, transactModule: "sold", assetSalePayment: true, saleId: sale.identity?.saleId },
-      references: refs,
+      sourceFinancialDocumentId: invoiceId,
+      metadata: {
+        ...metadata,
+        transactModule: "sold",
+        assetSalePayment: true,
+        dealId: clean(sale?.identity?.dealId),
+        invoiceNumber: clean(sourceInvoice.documentNumber),
+      },
+      references,
     },
-    additionalReferences: refs,
+    additionalReferences: references,
     commandId,
-    idempotencyKey: `ixi-asset-sale-payment:${commandId}`,
+    idempotencyKey: `ixi-asset-sale-payment:${invoiceId}:${commandId}`,
     metadata: {
       ...metadata,
       transactModule: "sold",
       assetSalePayment: true,
-      saleId: sale.identity?.saleId,
-      saleNumber: sale.identity?.number,
+      dealId: clean(sale?.identity?.dealId),
+      invoiceId,
     },
     apiBaseUrl,
     headers,
     signal,
   });
+  const payment = {
+    paymentId: documentIdOf(response) || commandId,
+    date: clean(input.date),
+    amount,
+    method: clean(input.method || "wire"),
+    reference: clean(input.reference),
+    recordedAt: new Date().toISOString(),
+  };
+  const nextBalance = Math.max(0, currentBalance - amount);
+  const nextState = nextBalance <= 0.005 ? "collected" : "partially-collected";
+  let invoiceResponse = null;
+  let syncWarning = "";
+  try {
+    const invoiceCommandId = clean(globalThis.crypto?.randomUUID?.()) || `INV-COLLECT-${Date.now()}`;
+    invoiceResponse = await patchIXIAosFinancialDocument({
+      financialDocumentId: invoiceId,
+      expectedRevision: invoiceRevision,
+      commandId: invoiceCommandId,
+      idempotencyKey: `ixi-invoice-collection:${invoiceId}:${payment.paymentId}`,
+      patch: {
+        financialState: nextState,
+        metadata: {
+          ...(sourceInvoice?.metadata || {}),
+          collectionStatus: nextState,
+          amountReceived: Math.round((Number(sale?.collection?.amountReceived || 0) + amount) * 100) / 100,
+          balanceDue: Math.round(nextBalance * 100) / 100,
+          lastReceiptId: payment.paymentId,
+        },
+      },
+      metadata: { transactModule: "sold", action: "synchronize-invoice-collection" },
+      signal,
+    });
+  } catch (error) {
+    syncWarning = clean(error?.message || "Invoice collection state will reconcile on refresh.");
+  }
   return {
     response,
-    payment: {
-      paymentId: documentIdOf(response) || commandId,
-      date: clean(input.date),
-      amount,
-      method: clean(input.method || "wire"),
-      reference: clean(input.reference),
-      recordedAt: new Date().toISOString(),
-    },
+    invoiceResponse,
+    invoice: canonicalInvoice(sourceInvoice, invoiceResponse, nextState),
+    payment,
+    syncWarning,
   };
 }
+
 export default { createIXIAssetSale, recordIXIAssetSaleReceipt };

@@ -12,8 +12,8 @@ const settlement = await importSource("../components/ixi-aos/transact/modules/se
 
 test("Collections projects canonical provider records and linked A/R settlements", () => {
   const financialRecords = [
-    { financialDocument: { financialDocumentId: "ifd_invoice1", documentType: "invoice", financialState: "receivable", documentNumber: "INV-1", dueDate: "2026-08-01", totals: { total: 100 }, references: [{ role: "customer", passportId: "pass_customer", label: "Acme" }] } },
-    { financialDocument: { financialDocumentId: "ifd_payment1", documentType: "payment", financialState: "received", paymentDirection: "inflow", sourceFinancialDocumentId: "ifd_invoice1", totals: { total: 25 }, metadata: { arPayment: true } } },
+    { financialDocument: { financialDocumentId: "ifd_invoice1", documentType: "invoice", financialState: "billed", documentNumber: "INV-1", dueDate: "2026-08-01", totals: { total: 100 }, references: [{ role: "customer", passportId: "pass_customer", label: "Acme" }] } },
+    { financialDocument: { financialDocumentId: "ifd_payment1", documentType: "payment", financialState: "paid", paymentDirection: "inflow", sourceFinancialDocumentId: "ifd_invoice1", totals: { total: 25 }, metadata: { arPayment: true } } },
     { financialDocument: { financialDocumentId: "ifd_credit1", documentType: "credit", financialState: "incurred", sourceFinancialDocumentId: "ifd_invoice1", totals: { total: 10 }, metadata: { arCredit: true } } },
   ];
   const result = collections.buildIXIReceivableProjection({ financialRecords, asOf: new Date("2026-09-03T00:00:00Z") });
@@ -27,11 +27,27 @@ test("Settlement derives collected cash from canonical invoice-linked receipts",
   const result = settlement.projectIXIAssetSettlement({
     sale: { identity: { saleId: "ifd_sale1", financialInvoiceId: "ifd_sale1" }, sale: { salePrice: 100 }, collection: { amountReceived: 0 } },
     acquisition: { acquisition: { directAcquisitionCost: 40 }, makeReady: { actualTotal: 10 } },
-    financialRecords: [{ financialDocument: { documentType: "payment", paymentDirection: "inflow", sourceFinancialDocumentId: "ifd_sale1", totals: { total: 100 }, metadata: { assetSalePayment: true } } }],
+    financialRecords: [{ financialDocument: { documentType: "payment", financialState: "paid", paymentDirection: "inflow", sourceFinancialDocumentId: "ifd_sale1", totals: { total: 100 }, metadata: { assetSalePayment: true } } }],
   });
   assert.equal(result.collected, 100);
   assert.equal(result.buyerBalance, 0);
   assert.equal(result.cashAvailableBeforeOwners, 100);
+});
+
+test("Settlement excludes draft, void, and reversed customer consideration", () => {
+  const financialRecords = [
+    { financialDocument: { documentType: "payment", financialState: "paid", paymentDirection: "inflow", sourceFinancialDocumentId: "ifd_sale1", totals: { total: 60 } } },
+    { financialDocument: { documentType: "payment", financialState: "draft", paymentDirection: "inflow", sourceFinancialDocumentId: "ifd_sale1", totals: { total: 40 } } },
+    { financialDocument: { documentType: "payment", financialState: "reversed", paymentDirection: "inflow", sourceFinancialDocumentId: "ifd_sale1", totals: { total: 20 } } },
+    { financialDocument: { documentType: "credit", financialState: "void", sourceFinancialDocumentId: "ifd_sale1", totals: { total: 10 } } },
+  ];
+  const result = settlement.projectIXIAssetSettlement({
+    sale: { identity: { saleId: "ifd_sale1" }, sale: { salePrice: 100 }, collection: {} },
+    financialRecords,
+  });
+  assert.equal(result.collected, 60);
+  assert.equal(result.credited, 0);
+  assert.equal(result.buyerBalance, 40);
 });
 
 test("Collections and Settlement commands use canonical lineage and revision control", async () => {

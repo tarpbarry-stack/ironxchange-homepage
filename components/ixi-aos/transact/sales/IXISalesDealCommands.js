@@ -23,7 +23,7 @@ export async function closeIXISalesDeal(deal, { reason = "Customer opportunity c
   };
   if (documentType === "quote") patch.quote = { ...(document.quote || {}), dealStatus: "lost", status: "declined", audit: { ...(document.quote?.audit || {}), updatedAt: at } };
   if (documentType === "sales-order") patch.salesOrder = { ...(document.salesOrder || {}), dealStatus: "lost", status: "cancelled", audit: { ...(document.salesOrder?.audit || {}), updatedAt: at } };
-  if (documentType === "invoice") patch.financialState = "voided";
+  if (documentType === "invoice") patch.financialState = "void";
   return patchIXIAosFinancialDocument({
     financialDocumentId: entry.documentId,
     expectedRevision: Number(entry.item?.server?.revision || entry.item?.record?.server?.revision || 1),

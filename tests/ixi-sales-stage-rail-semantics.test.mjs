@@ -16,7 +16,7 @@ test("an Invoice completes Quote and Sales Order progression without fabricating
     stageRecords: {
       quote: { documentId: "quote-1" },
       "sales-order": { documentId: "order-1" },
-      invoice: { documentId: "invoice-1" },
+      invoice: { documentId: "invoice-1", document: { financialState: "billed" } },
     },
   };
 
@@ -34,6 +34,7 @@ test("an Invoice generated from verified customer signature completes stages 1 t
       invoice: {
         documentId: "invoice-1",
         document: {
+          financialState: "billed",
           sourceFinancialDocumentId: "order-1",
           metadata: { salesOrderId: "order-1", signedPackageHash: "sha256-package" },
         },
@@ -48,7 +49,7 @@ test("an Invoice generated from verified customer signature completes stages 1 t
 });
 
 test("Signed never completes from position alone or from an unverified direct Invoice", () => {
-  const deal = { stageRecords: { invoice: { documentId: "invoice-1", document: { metadata: {} } } } };
+  const deal = { stageRecords: { invoice: { documentId: "invoice-1", document: { financialState: "billed", metadata: {} } } } };
 
   assert.equal(rail.salesStagePresentation(deal, "quote", "invoice").state, "completed");
   assert.equal(rail.salesStagePresentation(deal, "sales-order", "invoice").state, "completed");
@@ -59,7 +60,7 @@ test("Signed never completes from position alone or from an unverified direct In
 test("Sold becomes completed and Settlement becomes the outlined next action only after Sold persists", () => {
   const deal = {
     stageRecords: {
-      invoice: { documentId: "invoice-1" },
+      invoice: { documentId: "invoice-1", document: { financialState: "billed" } },
       sold: { documentId: "sale-1" },
     },
   };
@@ -69,10 +70,21 @@ test("Sold becomes completed and Settlement becomes the outlined next action onl
 });
 
 test("an available historical action is clickable without borrowing completed or next styling", () => {
-  const deal = { stageRecords: { invoice: { documentId: "invoice-1" } } };
+  const deal = { stageRecords: { invoice: { documentId: "invoice-1", document: { financialState: "billed" } } } };
 
   assert.equal(rail.salesStagePresentation(deal, "quote", "sold").state, "completed");
   assert.equal(rail.salesStagePresentation(deal, "sales-order", "sold").state, "completed");
   assert.equal(rail.salesStagePresentation(deal, "quote", "sold").startable, true);
   assert.equal(rail.salesStagePresentation(deal, "sales-order", "sold").startable, true);
+});
+
+test("a saved draft Invoice is not shown as completed and cannot unlock SOLD", () => {
+  const deal = {
+    stageRecords: {
+      invoice: { documentId: "invoice-1", document: { financialState: "draft" } },
+    },
+  };
+
+  assert.notEqual(rail.salesStagePresentation(deal, "invoice", "invoice").state, "completed");
+  assert.equal(rail.salesStagePresentation(deal, "sold", "sold").state, "unavailable");
 });

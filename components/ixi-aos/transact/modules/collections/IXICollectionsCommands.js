@@ -263,7 +263,7 @@ export async function recordIXICollectionPayment({
       currency: clean(receivable.currency || "USD"),
       amount,
       description: `A/R receipt · ${receivable.invoiceNumber || receivable.invoiceId}`,
-      financialState: "received",
+      financialState: "paid",
       paymentDirection: "inflow",
       paymentMethod: clean(input.method || "wire"),
       transactionReference: clean(input.reference),
@@ -322,7 +322,7 @@ export async function recordIXICollectionCredit({
           input.reason ||
           `A/R credit · ${receivable.invoiceNumber || receivable.invoiceId}`,
       ),
-      financialState: "receivable-credit",
+      financialState: "incurred",
       reasonCode: clean(input.reason),
       sourceFinancialDocumentId: clean(receivable.invoiceId),
       metadata: { ...metadata, transactModule: "collections", arCredit: true, writeOff: Boolean(input.writeOff), collectionId: collection.identity?.collectionId },

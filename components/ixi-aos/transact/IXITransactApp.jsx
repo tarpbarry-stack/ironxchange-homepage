@@ -1164,10 +1164,12 @@ export default function IXITransactApp({
         object={object}
         dealId={salesRoute?.dealId || selectedSalesDeal?.dealId || ""}
         sourceInvoice={selectedSalesInvoiceSnapshot}
+        financialRecords={salesFinancialRecords}
         initialRecord={selectedSaleSnapshot}
         onBack={back}
         onRecordChange={async (record, changePayload, sourceContext) => {
-          setSaleSnapshot(record);
+          if (changePayload?.action === "record-sold") setSaleSnapshot(record);
+          await onFinancialRecordsChange?.();
           await change(
             "sold",
             "SOLD UPDATE",

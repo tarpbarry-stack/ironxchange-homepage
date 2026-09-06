@@ -161,3 +161,27 @@ export async function saveIXIEquipmentInvoice({ object = {}, context = {}, recor
   });
   return { response, invoice: canonicalInvoice(null, response) };
 }
+
+export async function issueIXIEquipmentInvoice({ invoice = null, signal } = {}) {
+  const id = clean(invoice?.financialBinding?.financialDocumentId || invoice?.financialDocumentId);
+  const revision = Number(invoice?.financialBinding?.revision || 0);
+  if (!id || revision < 1) throw new Error("Save the Invoice before issuing it.");
+  if (clean(invoice?.financialState).toLowerCase() !== "draft") throw new Error("Only a draft Invoice can be issued.");
+  if (!clean(invoice?.documentNumber)) throw new Error("Invoice number is required before issue.");
+  const commandId = crypto.randomUUID();
+  const issuedAt = new Date().toISOString();
+  const response = await patchIXIAosFinancialDocument({
+    financialDocumentId: id,
+    expectedRevision: revision,
+    commandId,
+    idempotencyKey: `ixi-equipment-invoice-issue:${id}:${revision}`,
+    patch: {
+      status: "issued",
+      financialState: "billed",
+      metadata: { ...(invoice?.metadata || {}), invoiceStatus: "issued", issuedAt },
+    },
+    metadata: { transactModule: "equipment-sale", action: "issue-invoice", issuedAt },
+    signal,
+  });
+  return { response, invoice: canonicalInvoice(invoice, response) };
+}
