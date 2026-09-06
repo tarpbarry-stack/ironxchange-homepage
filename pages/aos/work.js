@@ -67,10 +67,6 @@ import {
   hydrateIXIListingCollection
 } from "../../lib/listings/hydrateIXIListingMedia";
 
-import {
-  filterAosOwnedMachines
-} from "../../lib/listings/IXIAosOwnedInventoryPolicy.mjs";
-
 import { captureIXEvent } from "../../lib/posthog";
 
 import IXIDragEngine from "../../components/ixi-chassis/IXIDragEngine";
@@ -265,13 +261,6 @@ const POCKET_TARGETS = [
   }, []);
 
   const hasAppliedRemoteLayoutRef = useRef(false);
-  const inventoryLoadedAtRef = useRef(0);
-  const inventoryRefreshInFlightRef = useRef(null);
-  const workspacePlacementsRef = useRef(workspacePlacements);
-
-  useEffect(() => {
-    workspacePlacementsRef.current = workspacePlacements;
-  }, [workspacePlacements]);
   
   const [activeDndId, setActiveDndId] = useState("");
   const {
@@ -364,13 +353,8 @@ setSavedIds(
 );
 
 const res = await fetch(
-  `/api/account-listings?authorId=${encodeURIComponent(String(userId))}`,
-  { cache: "no-store" }
+  `/api/account-listings?authorId=${encodeURIComponent(String(userId))}`
 );
-
-if (!res.ok) {
-  throw new Error(`Account inventory request failed (${res.status})`);
-}
 
 const data = await res.json();
 
@@ -441,7 +425,6 @@ console.log(
 );
 
 setListings(hydratedListings);
-inventoryLoadedAtRef.current = Date.now();
 }
 
       } catch (err) {
@@ -452,77 +435,6 @@ inventoryLoadedAtRef.current = Date.now();
 
     loadSavedPage();
   }, []);
-
-  useEffect(() => {
-    if (!ixiUserId || ixiUserId === "guest") {
-      return undefined;
-    }
-
-    async function refreshOwnedInventory() {
-      if (
-        Date.now() - inventoryLoadedAtRef.current < 5000 ||
-        inventoryRefreshInFlightRef.current
-      ) {
-        return inventoryRefreshInFlightRef.current;
-      }
-
-      const request = (async () => {
-        try {
-          const response = await fetch(
-            `/api/account-listings?authorId=${encodeURIComponent(ixiUserId)}`,
-            { cache: "no-store" }
-          );
-
-          if (!response.ok) {
-            throw new Error(
-              `Account inventory refresh failed (${response.status})`
-            );
-          }
-
-          const data = await response.json();
-
-          if (!Array.isArray(data)) {
-            throw new Error("Account inventory response was not a list");
-          }
-
-          const hydratedListings =
-            await hydrateIXIListingCollection(data);
-
-          setListings(hydratedListings);
-          inventoryLoadedAtRef.current = Date.now();
-        } catch (error) {
-          console.error("AOS OWNED INVENTORY REFRESH FAILED:", error);
-        } finally {
-          inventoryRefreshInFlightRef.current = null;
-        }
-      })();
-
-      inventoryRefreshInFlightRef.current = request;
-      return request;
-    }
-
-    function refreshWhenVisible() {
-      if (document.visibilityState === "visible") {
-        refreshOwnedInventory();
-      }
-    }
-
-    function refreshOnPageShow(event) {
-      if (event.persisted) {
-        refreshOwnedInventory();
-      }
-    }
-
-    window.addEventListener("focus", refreshOwnedInventory);
-    window.addEventListener("pageshow", refreshOnPageShow);
-    document.addEventListener("visibilitychange", refreshWhenVisible);
-
-    return () => {
-      window.removeEventListener("focus", refreshOwnedInventory);
-      window.removeEventListener("pageshow", refreshOnPageShow);
-      document.removeEventListener("visibilitychange", refreshWhenVisible);
-    };
-  }, [ixiUserId]);
 
 useEffect(() => {
   let cancelled = false;
@@ -621,7 +533,54 @@ setSystemIndexes(
   }, [listings, savedIds]);
 
 const sellerListings = useMemo(() => {
-  return filterAosOwnedMachines(listings);
+  return listings.filter(item => {
+    const publicData =
+      item.publicData ||
+      item.attributes?.publicData ||
+      {};
+
+    const listingStatus =
+      item.listingStatus ||
+      publicData.listingStatus;
+
+    const machineChannel =
+      publicData.machineChannel ||
+      "";
+
+    const ownershipRole =
+      publicData.ownershipRole ||
+      "";
+
+    if (listingStatus === "archived") {
+      return false;
+    }
+
+    /* Never show auction work objects */
+
+    if (
+      machineChannel === "auction"
+    ) {
+      return false;
+    }
+
+    if (
+      machineChannel ===
+      "auction-archive"
+    ) {
+      return false;
+    }
+
+    /* Never show research/private work */
+
+    if (
+      ownershipRole ===
+      "non-owner"
+    ) {
+      return false;
+    }
+
+    return true;
+  });
 }, [listings]);
 
 const workspaceListings = useMemo(() => {
@@ -863,67 +822,6 @@ placements:
   if (
     hasAppliedRemoteLayoutRef.current
   ) {
-    let nextPlacements =
-      sanitizeWorkspacePlacements({
-        placements:
-          workspacePlacementsRef.current,
-        validObjectIds:
-          validWorkspaceObjectIds,
-        includeUnplacedObjects: false
-      });
-
-    nextPlacements =
-      moveObjectToWorkspaceSurface({
-        placements: nextPlacements,
-        objectId:
-          IXI_EQUIPMENT_INDEX_OBJECT_ID,
-        targetSurface: "board",
-        position: "start"
-      });
-
-    validMachineIds.forEach(machineId => {
-      const alreadyPlaced =
-        Object.values(nextPlacements).some(ids =>
-          Array.isArray(ids) &&
-          ids.map(String).includes(machineId)
-        );
-
-      if (!alreadyPlaced) {
-        nextPlacements =
-          moveObjectToWorkspaceSurface({
-            placements: nextPlacements,
-            objectId: machineId,
-            targetSurface: "indexEquipment"
-          });
-      }
-    });
-
-    validMosObjectIds.forEach(objectId => {
-      const alreadyPlaced =
-        Object.values(nextPlacements).some(ids =>
-          Array.isArray(ids) &&
-          ids.map(String).includes(objectId)
-        );
-
-      if (!alreadyPlaced) {
-        nextPlacements =
-          moveObjectToWorkspaceSurface({
-            placements: nextPlacements,
-            objectId,
-            targetSurface: "board"
-          });
-      }
-    });
-
-    if (
-      JSON.stringify(nextPlacements) !==
-      JSON.stringify(workspacePlacementsRef.current)
-    ) {
-      workspacePlacementsRef.current = nextPlacements;
-      setWorkspacePlacements(nextPlacements);
-      saveWorkspaceLayout(nextPlacements);
-    }
-
     return;
   }
 

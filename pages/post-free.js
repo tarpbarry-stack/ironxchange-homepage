@@ -1128,10 +1128,6 @@ async function createListing() {
           listingType: "free-listing",
           listingStatus: "live",
 
-          ownershipRole: "owner",
-          ownershipStatus: "owned",
-          machineOrigin: "owner-created",
-
           machineAccess,
           machineChannel,
 
