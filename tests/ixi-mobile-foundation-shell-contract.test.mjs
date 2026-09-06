@@ -132,6 +132,15 @@ test("mobile Marketplace scroll wins unless touch drag is intentionally held", (
   assert.match(browse, /padding-right: 2px;/u);
 });
 
+test("two-column Marketplace cards keep four pixels clear around every side actuator", () => {
+  assert.match(
+    browse,
+    /\.ixi-board-surface\.ixi-mobile-current-card-board-ii\) \{[\s\S]*?gap: 10px 8px;[\s\S]*?padding-left: 4px;[\s\S]*?padding-right: 4px;/u
+  );
+  assert.match(browse, /-webkit-user-select: none;/u);
+  assert.match(browse, /user-select: none;/u);
+});
+
 test("single-side normalization preserves the real Console while moving it around the listing", () => {
   const listing = createConsoleSlot({
     type: IXI_CONSOLE_SLOT_TYPES.LISTING

@@ -3266,6 +3266,8 @@ outline: none;
 
   :global(.ixi-mobile-current-card-board .ixi-board-sortable-card) {
     touch-action: manipulation;
+    -webkit-user-select: none;
+    user-select: none;
   }
 
   :global(.ixi-board-surface.ixi-mobile-current-card-board-i) {
@@ -3275,9 +3277,11 @@ outline: none;
     padding-right: 2px;
   }
 
-  :global(.ixi-mobile-current-card-board-ii) {
+  :global(.ixi-board-surface.ixi-mobile-current-card-board-ii) {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px 4px;
+    gap: 10px 8px;
+    padding-left: 4px;
+    padding-right: 4px;
   }
 
   .workspace-head {

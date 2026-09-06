@@ -55,3 +55,14 @@ test("Mode I owns exactly two pixels beside both card actuators", () => {
   assert.match(marketplaceBoard, /fitCardScalingToCell=\{isMobileCardPresentation\}/u);
   assert.match(marketplaceBoard, /fillCardScalingToCell=\{[\s\S]*?mobileCardDensity === "I"/u);
 });
+
+test("Mode II preserves four pixels around every card actuator and cannot select card text", () => {
+  assert.match(
+    page,
+    /\.ixi-board-surface\.ixi-mobile-current-card-board-ii\) \{[\s\S]*?gap: 10px 8px;[\s\S]*?padding-left: 4px;[\s\S]*?padding-right: 4px;/u
+  );
+  assert.match(
+    page,
+    /\.ixi-mobile-current-card-board \.ixi-board-sortable-card\) \{[\s\S]*?-webkit-user-select: none;[\s\S]*?user-select: none;/u
+  );
+});
