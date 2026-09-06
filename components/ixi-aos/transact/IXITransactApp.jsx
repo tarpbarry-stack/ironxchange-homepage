@@ -36,6 +36,7 @@ import {
   dealsForIXISalesModule,
   documentForIXISalesStage,
   findIXISalesDeal,
+  quoteDraftForIXISalesDeal,
   recordForIXISalesStage,
   salesStageForIXIModule,
 } from "./sales/IXISalesDealEngine";
@@ -417,8 +418,13 @@ export default function IXITransactApp({
   const salesDeals = useMemo(() => buildIXISalesDealRegister(salesFinancialRecords), [salesFinancialRecords]);
   const moduleSalesDeals = useMemo(() => dealsForIXISalesModule(salesDeals, moduleId), [salesDeals, moduleId]);
   const selectedSalesDeal = useMemo(() => findIXISalesDeal(salesDeals, salesRoute || {}), [salesDeals, salesRoute]);
-  const activeSalesStageId = clean(salesRoute?.stageId) || salesStageForIXIModule(moduleId);
-  const selectedQuoteSnapshot = selectedSalesDeal ? recordForIXISalesStage(selectedSalesDeal, "quote") : null;
+  const activeSalesStageId = salesRoute?.detail
+    ? clean(salesRoute.stageId) || salesStageForIXIModule(moduleId)
+    : salesStageForIXIModule(moduleId);
+  const selectedQuoteSnapshot = selectedSalesDeal
+    ? recordForIXISalesStage(selectedSalesDeal, "quote") ||
+      (activeSalesStageId === "quote" ? quoteDraftForIXISalesDeal(selectedSalesDeal) : null)
+    : null;
   const selectedSalesOrderSnapshot = selectedSalesDeal ? recordForIXISalesStage(selectedSalesDeal, "sales-order") : null;
   const selectedSalesInvoiceSnapshot = selectedSalesDeal ? documentForIXISalesStage(selectedSalesDeal, "invoice") : null;
   const selectedSaleSnapshot = selectedSalesDeal ? recordForIXISalesStage(selectedSalesDeal, "sold") : null;
@@ -554,7 +560,14 @@ export default function IXITransactApp({
   }
 
   async function open(item) {
-    if (SALES_MODULE_IDS.has(item.id)) setSalesRoute(null);
+    if (SALES_MODULE_IDS.has(item.id)) {
+      setSalesRoute({
+        documentId: "",
+        dealId: "",
+        stageId: salesStageForIXIModule(item.id),
+        detail: false,
+      });
+    }
     setModuleId(item.id);
     await onOpenModule?.(item, context, {});
   }
