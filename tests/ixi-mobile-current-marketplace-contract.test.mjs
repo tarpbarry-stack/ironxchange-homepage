@@ -7,6 +7,9 @@ const router = fs.readFileSync(
   "components/ixi-machine-card/IXIMachineCard.js",
   "utf8"
 );
+const marketplaceBoard = page.match(
+  /<IXIBoard\s+cardContext="marketplace"[\s\S]*?\/>/u
+)?.[0] || "";
 
 test("mobile presentation is mounted on the real public Marketplace", () => {
   assert.match(page, /export default function BrowseV2/);
@@ -35,8 +38,8 @@ test("existing DnD owns movement and the overlay owns the top plane", () => {
   assert.match(page, /MouseSensor/);
   assert.match(page, /TouchSensor/);
   assert.match(page, /distance:\s*6/);
-  assert.match(page, /MOBILE_TOUCH_HOLD_MS = 300/);
-  assert.match(page, /MOBILE_TOUCH_TOLERANCE_PX = 10/);
+  assert.match(page, /MOBILE_TOUCH_HOLD_MS = 500/);
+  assert.match(page, /MOBILE_TOUCH_TOLERANCE_PX = 5/);
   assert.match(page, /delay:\s*MOBILE_TOUCH_HOLD_MS/);
   assert.match(page, /tolerance:\s*MOBILE_TOUCH_TOLERANCE_PX/);
   assert.match(page, /IXIDragEngine/);
@@ -49,5 +52,6 @@ test("Mode I owns exactly two pixels beside both card actuators", () => {
     page,
     /\.ixi-board-surface\.ixi-mobile-current-card-board-i\) \{[\s\S]*?padding-left: 2px;[\s\S]*?padding-right: 2px;/u
   );
-  assert.match(page, /fillCardScalingToCell=\{[\s\S]*?mobileCardDensity === "I"/u);
+  assert.match(marketplaceBoard, /fitCardScalingToCell=\{isMobileCardPresentation\}/u);
+  assert.match(marketplaceBoard, /fillCardScalingToCell=\{[\s\S]*?mobileCardDensity === "I"/u);
 });

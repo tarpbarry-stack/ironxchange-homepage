@@ -10,8 +10,8 @@ import {
   useDroppable
 } from "@dnd-kit/core";
 
-const MOBILE_TOUCH_HOLD_MS = 300;
-const MOBILE_TOUCH_TOLERANCE_PX = 10;
+const MOBILE_TOUCH_HOLD_MS = 500;
+const MOBILE_TOUCH_TOLERANCE_PX = 5;
 
 import {
   useSortable,
@@ -1576,11 +1576,6 @@ if (armedDestination === "stackBottom") {
   sendMachineToArmedDestination={sendMachineToArmedDestination}
   cardScaleMode={presentedCardScaleMode}
   enableCardScaling={isMobileCardPresentation}
-  fitCardScalingToCell={isMobileCardPresentation}
-  fillCardScalingToCell={
-    isMobileCardPresentation &&
-    mobileCardDensity === "I"
-  }
 />
 
 <nav
@@ -1644,6 +1639,11 @@ if (armedDestination === "stackBottom") {
   draggingListingId={draggingListingId}
   ghostListingId={ghostListingId}
   enableCardScaling={true}
+  fitCardScalingToCell={isMobileCardPresentation}
+  fillCardScalingToCell={
+    isMobileCardPresentation &&
+    mobileCardDensity === "I"
+  }
   cardScaleMode={presentedCardScaleMode}
     />
         </IXIBoardSurface>
@@ -3262,6 +3262,10 @@ outline: none;
     grid-column: 1 / -1;
     width: 100% !important;
     max-width: 100% !important;
+  }
+
+  :global(.ixi-mobile-current-card-board .ixi-board-sortable-card) {
+    touch-action: manipulation;
   }
 
   :global(.ixi-board-surface.ixi-mobile-current-card-board-i) {

@@ -51,6 +51,9 @@ const consoleEngine = fs.readFileSync(
   "components/ixi-chassis/IXIObjectConsoleEngine.js",
   "utf8"
 );
+const marketplaceBoard = browse.match(
+  /<IXIBoard\s+cardContext="marketplace"[\s\S]*?\/>/u
+)?.[0] || "";
 
 test("one shared mobile foundation is mounted by the real app", () => {
   assert.match(app, /<IXIMobileShell\s*\/>/u);
@@ -95,8 +98,9 @@ test("mobile preserves the desktop Marketplace price and location row", () => {
 });
 
 test("real Marketplace cards and assembled Consoles fit their mobile grid cell", () => {
-  assert.match(browse, /enableCardScaling=\{isMobileCardPresentation\}/u);
-  assert.match(browse, /fitCardScalingToCell=\{isMobileCardPresentation\}/u);
+  assert.match(marketplaceBoard, /enableCardScaling=\{true\}/u);
+  assert.match(marketplaceBoard, /fitCardScalingToCell=\{isMobileCardPresentation\}/u);
+  assert.match(marketplaceBoard, /fillCardScalingToCell=\{[\s\S]*?mobileCardDensity === "I"/u);
   assert.match(browse, /\.ixi-console-expanded\) \{\s*grid-column: 1 \/ -1;/u);
   assert.match(board, /fitCardScalingToCell/u);
   assert.match(fitWidthShell, /ResizeObserver/u);
@@ -121,8 +125,9 @@ test("mobile Marketplace permits one Console side and switches sides without add
 test("mobile Marketplace scroll wins unless touch drag is intentionally held", () => {
   assert.match(browse, /MouseSensor/u);
   assert.match(browse, /TouchSensor/u);
-  assert.match(browse, /MOBILE_TOUCH_HOLD_MS = 300/u);
-  assert.match(browse, /MOBILE_TOUCH_TOLERANCE_PX = 10/u);
+  assert.match(browse, /MOBILE_TOUCH_HOLD_MS = 500/u);
+  assert.match(browse, /MOBILE_TOUCH_TOLERANCE_PX = 5/u);
+  assert.match(browse, /\.ixi-mobile-current-card-board \.ixi-board-sortable-card\) \{\s*touch-action: manipulation;/u);
   assert.match(browse, /padding-left: 2px;/u);
   assert.match(browse, /padding-right: 2px;/u);
 });
