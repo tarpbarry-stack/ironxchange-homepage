@@ -2,12 +2,16 @@ import Head from "next/head";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import {
-  PointerSensor,
+  MouseSensor,
+  TouchSensor,
   KeyboardSensor,
   useSensor,
   useSensors,
   useDroppable
 } from "@dnd-kit/core";
+
+const MOBILE_TOUCH_HOLD_MS = 300;
+const MOBILE_TOUCH_TOLERANCE_PX = 10;
 
 import {
   useSortable,
@@ -380,9 +384,17 @@ function handleWorkspaceDragEnd(event) {
 
   
 const sensors = useSensors(
-  useSensor(PointerSensor, {
+  useSensor(MouseSensor, {
     activationConstraint: {
       distance: 6
+    }
+  }),
+  useSensor(TouchSensor, {
+    activationConstraint: {
+      delay:
+        MOBILE_TOUCH_HOLD_MS,
+      tolerance:
+        MOBILE_TOUCH_TOLERANCE_PX
     }
   }),
   useSensor(KeyboardSensor, {
@@ -3251,6 +3263,8 @@ outline: none;
   :global(.ixi-mobile-current-card-board-i) {
     grid-template-columns: minmax(0, 1fr);
     gap: 16px 0;
+    padding-left: 8px;
+    padding-right: 8px;
   }
 
   :global(.ixi-mobile-current-card-board-ii) {

@@ -116,6 +116,15 @@ test("mobile Marketplace permits one Console side and switches sides without add
   assert.match(marketplaceConsole, /!useMobileSingleSideConsole &&\s*!atCapacity/u);
 });
 
+test("mobile Marketplace scroll wins unless touch drag is intentionally held", () => {
+  assert.match(browse, /MouseSensor/u);
+  assert.match(browse, /TouchSensor/u);
+  assert.match(browse, /MOBILE_TOUCH_HOLD_MS = 300/u);
+  assert.match(browse, /MOBILE_TOUCH_TOLERANCE_PX = 10/u);
+  assert.match(browse, /padding-left: 8px;/u);
+  assert.match(browse, /padding-right: 8px;/u);
+});
+
 test("single-side normalization preserves the real Console while moving it around the listing", () => {
   const listing = createConsoleSlot({
     type: IXI_CONSOLE_SLOT_TYPES.LISTING
