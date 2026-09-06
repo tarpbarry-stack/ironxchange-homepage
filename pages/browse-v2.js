@@ -3273,15 +3273,15 @@ outline: none;
   :global(.ixi-board-surface.ixi-mobile-current-card-board-i) {
     grid-template-columns: minmax(0, 1fr);
     gap: 16px 0;
-    padding-left: 2px;
-    padding-right: 2px;
+    padding-left: 4px;
+    padding-right: 4px;
   }
 
   :global(.ixi-board-surface.ixi-mobile-current-card-board-ii) {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px 8px;
-    padding-left: 4px;
-    padding-right: 4px;
+    gap: 10px 4px;
+    padding-left: 2px;
+    padding-right: 2px;
   }
 
   .workspace-head {

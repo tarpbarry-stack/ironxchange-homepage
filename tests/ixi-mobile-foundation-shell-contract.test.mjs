@@ -128,14 +128,14 @@ test("mobile Marketplace scroll wins unless touch drag is intentionally held", (
   assert.match(browse, /MOBILE_TOUCH_HOLD_MS = 500/u);
   assert.match(browse, /MOBILE_TOUCH_TOLERANCE_PX = 5/u);
   assert.match(browse, /\.ixi-mobile-current-card-board \.ixi-board-sortable-card\) \{\s*touch-action: manipulation;/u);
-  assert.match(browse, /padding-left: 2px;/u);
-  assert.match(browse, /padding-right: 2px;/u);
+  assert.match(browse, /padding-left: 4px;/u);
+  assert.match(browse, /padding-right: 4px;/u);
 });
 
-test("two-column Marketplace cards keep four pixels clear around every side actuator", () => {
+test("two-column Marketplace cards keep two pixels clear around every side actuator", () => {
   assert.match(
     browse,
-    /\.ixi-board-surface\.ixi-mobile-current-card-board-ii\) \{[\s\S]*?gap: 10px 8px;[\s\S]*?padding-left: 4px;[\s\S]*?padding-right: 4px;/u
+    /\.ixi-board-surface\.ixi-mobile-current-card-board-ii\) \{[\s\S]*?gap: 10px 4px;[\s\S]*?padding-left: 2px;[\s\S]*?padding-right: 2px;/u
   );
   assert.match(browse, /-webkit-user-select: none;/u);
   assert.match(browse, /user-select: none;/u);

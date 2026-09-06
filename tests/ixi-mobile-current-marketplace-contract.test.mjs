@@ -47,19 +47,19 @@ test("existing DnD owns movement and the overlay owns the top plane", () => {
   assert.match(page, /IXISortableMachineCard/);
 });
 
-test("Mode I owns exactly two pixels beside both card actuators", () => {
+test("Mode I owns four pixels beside both card actuators", () => {
   assert.match(
     page,
-    /\.ixi-board-surface\.ixi-mobile-current-card-board-i\) \{[\s\S]*?padding-left: 2px;[\s\S]*?padding-right: 2px;/u
+    /\.ixi-board-surface\.ixi-mobile-current-card-board-i\) \{[\s\S]*?padding-left: 4px;[\s\S]*?padding-right: 4px;/u
   );
   assert.match(marketplaceBoard, /fitCardScalingToCell=\{isMobileCardPresentation\}/u);
   assert.match(marketplaceBoard, /fillCardScalingToCell=\{[\s\S]*?mobileCardDensity === "I"/u);
 });
 
-test("Mode II preserves four pixels around every card actuator and cannot select card text", () => {
+test("Mode II preserves two pixels around every card actuator and cannot select card text", () => {
   assert.match(
     page,
-    /\.ixi-board-surface\.ixi-mobile-current-card-board-ii\) \{[\s\S]*?gap: 10px 8px;[\s\S]*?padding-left: 4px;[\s\S]*?padding-right: 4px;/u
+    /\.ixi-board-surface\.ixi-mobile-current-card-board-ii\) \{[\s\S]*?gap: 10px 4px;[\s\S]*?padding-left: 2px;[\s\S]*?padding-right: 2px;/u
   );
   assert.match(
     page,
