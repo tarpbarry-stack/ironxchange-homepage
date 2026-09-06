@@ -94,7 +94,9 @@ export default function IXIAosCard018({
       ) : null}
 
       <style jsx>{`
-        .ixi-card-018{position:relative;width:298px;height:471px;font-family:Arial,Helvetica,sans-serif}
+        .ixi-card-018{position:relative;width:298px;height:471px;overflow:hidden;border-radius:13px;font-family:'Inter Variable',Inter,Arial,Helvetica,sans-serif}
+        .ixi-card-018:after{content:"";position:absolute;inset:7px 7px 24px;z-index:80;border:1px solid rgba(255,255,255,.075);border-radius:9px;box-shadow:inset 0 1px rgba(255,255,255,.025);pointer-events:none}
+        :global(.ixi-card-018 .system-index-card){border-color:#454b47!important;border-radius:13px!important;background:radial-gradient(circle at 84% 12%,rgba(23,73,94,.11),transparent 26%),linear-gradient(180deg,#111412,#080a09)!important;box-shadow:inset 0 1px rgba(255,255,255,.07),0 18px 40px rgba(0,0,0,.53)!important}
         .c018-editor{position:absolute;inset:7px 7px 24px;z-index:200;overflow:hidden;border:1px solid #4a504c;border-radius:8px;background:#0a0d0b;box-shadow:0 18px 40px #000c;color:#eef1ef}
         .c018-editor header{height:42px;display:flex;align-items:center;justify-content:space-between;padding:0 9px;border-bottom:1px solid #303531;background:#151916}.c018-editor header small{display:block;color:#ffc400;font-size:6px;font-weight:950}.c018-editor header strong{display:block;margin-top:3px;font-size:10px}.c018-editor nav{display:flex;gap:4px}.c018-editor button{height:22px;padding:0 7px;border:1px solid #4a504c;border-radius:4px;background:#0e110f;color:#dfe3e0;font-size:6px;font-weight:950}.c018-editor button:last-child{border-color:#ffc40066;color:#ffc400}.c018-editor main{padding:12px}.c018-editor label span{display:block;margin-bottom:5px;color:#8b938d;font-size:6px;font-weight:950}.c018-editor input{width:100%;height:29px;padding:0 8px;border:1px solid #3c433f;border-radius:4px;background:#111411;color:#fff;font-size:9px;font-weight:900;outline:none}.c018-editor input:focus{border-color:#ffc400}.c018-editor p{margin:12px 0 0;color:#69716c;font-size:6px;font-weight:800;line-height:1.5}
       `}</style>

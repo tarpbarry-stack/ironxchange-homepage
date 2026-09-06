@@ -297,29 +297,6 @@ function card018Sample() {
   };
 }
 
-function card018Items() {
-  const machines = [
-    ["2017 DEERE 544K II", "/images/2021-deere-750l.jpg", "4,500 HRS", "SOLD 2-4-2026", 2283800],
-    ["2019 KOMATSU WA500", "/images/2023-komatsu-wa475-10.jpg", "6,212 HRS", "AVAILABLE", 485000],
-    ["2019 DEERE 844K III", "/images/2020-deere-872gp.jpg", "7,105 HRS", "AVAILABLE", 395000],
-    ["2019 KOMATSU WA470", "/images/2023-komatsu-wa475-10.jpg", "5,884 HRS", "AVAILABLE", 310000]
-  ];
-  return Array.from({ length: 23 }, (_, index) => {
-    const machine = machines[index % machines.length];
-    return {
-      objectId: `c018-machine-${index + 1}`,
-      objectType: "machine",
-      singularLabel: "EQUIPMENT",
-      displayName: machine[0],
-      value: index === 0 ? machine[4] : 0,
-      presentation: { primaryDescriptor: machine[2], secondaryDescriptor: machine[3] },
-      fields: { primaryMeter: machine[2], operatingStatus: machine[3], askingPrice: index === 0 ? machine[4] : 0 },
-      publicData: { hours: machine[2], status: machine[3], price: index === 0 ? machine[4] : 0, imageUrls: [machine[1]] },
-      images: [machine[1]], media: [], fieldDefinitions: [], relationships: [], metadata: {}
-    };
-  });
-}
-
 function previewObject(template = {}, sample = {}) {
   const cardNumber = resolveCatalogCardNumber(template);
   const hasSampleFields = Object.keys(safeObject(sample?.fields)).length > 0;
@@ -392,7 +369,7 @@ function getInitialPreviewItems(template = {}, directItems = []) {
   const cardNumber = resolveCatalogCardNumber(template);
   if (cardNumber === 7) return getUniversal007PreviewItems();
   if (cardNumber === 17) return card017Items();
-  if (cardNumber === 18) return card018Items();
+  if (cardNumber === 18) return [];
   return [];
 }
 
