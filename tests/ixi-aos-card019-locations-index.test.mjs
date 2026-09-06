@@ -45,7 +45,9 @@ test("AOS Work routes only the Locations System Index through Card 019", async (
   const board = await read("components/ixi-mos/workspace/IXIAosWorkspaceBoard.jsx");
 
   assert.match(board, /IXIAosCard019/);
-  assert.match(board, /item\?\.indexId[\s\S]*toLowerCase\(\) === "locations"/);
+  assert.match(board, /function isLocationsSystemIndex/);
+  assert.match(board, /item\?\.displayName/);
+  assert.match(board, /isLocationsSystemIndex\(item, systemAdapter\)/);
   assert.match(board, /displayName:\s*"LOCATIONS"/);
   assert.match(board, /templateSlug:\s*"aos-card-019"/);
   assert.match(board, /cardNumber:\s*19/);

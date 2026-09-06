@@ -51,6 +51,27 @@ function getMosObjectId(item = {}) {
 }
 
 
+function isLocationsSystemIndex(item = {}, adapter = null) {
+  const identities = [
+    adapter?.indexId,
+    item?.indexId,
+    item?.systemIndexId,
+    item?.metadata?.indexId,
+    item?.displayName,
+    item?.name,
+    item?.title
+  ]
+    .map(value => cleanId(value).toLowerCase())
+    .filter(Boolean);
+
+  if (identities.includes("locations")) return true;
+
+  const objectId = getMosObjectId(item).toLowerCase();
+  return objectId === "system-index:locations" ||
+    objectId === "index:locations";
+}
+
+
 function isSystemIndexPresentation(item = {}) {
   return Boolean(
     item?.metadata?.systemIndexPresentation === true ||
@@ -328,7 +349,7 @@ export default function IXIAosWorkspaceBoard({
                           templateSlug: "aos-card-018",
                           cardNumber: 18
                         }
-                      : String(item?.indexId || "").trim().toLowerCase() === "locations"
+                      : isLocationsSystemIndex(item, systemAdapter)
                         ? {
                             Card: IXIAosCard019,
                             displayName: "LOCATIONS",
