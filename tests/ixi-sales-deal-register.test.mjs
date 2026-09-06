@@ -137,3 +137,75 @@ test("a lost opportunity is terminal without creating a sold stage", () => {
   assert.equal(deal.status, "lost");
   assert.equal(deal.stageRecords.sold, undefined);
 });
+
+test("document snapshots rebuild a navigable deal when the financial index has not returned it", () => {
+  const salesOrder = {
+    identity: {
+      dealId: "DEAL-CLEMENTS",
+      salesOrderId: "so-clements-snapshot",
+      number: "SO-CLEMENTS",
+    },
+    customer: { name: "Clements Farm" },
+    asset: { passportId: "IXI-MACHINE-544K" },
+    totals: { total: 82000 },
+    related: { invoiceId: "inv-clements-snapshot" },
+    audit: { updatedAt: "2026-09-06T01:00:00Z" },
+    financialBinding: {
+      financialDocumentId: "so-clements-snapshot",
+      revision: 4,
+    },
+  };
+  const invoice = {
+    financialDocumentId: "inv-clements-snapshot",
+    sourceFinancialDocumentId: "so-clements-snapshot",
+    financialState: "billed",
+    metadata: { dealId: "DEAL-CLEMENTS", salesOrderId: "so-clements-snapshot" },
+    totals: { total: 82000 },
+    updatedAt: "2026-09-06T01:01:00Z",
+    financialBinding: {
+      financialDocumentId: "inv-clements-snapshot",
+      revision: 2,
+    },
+  };
+
+  const records = engine.includeIXISalesSnapshots([], { salesOrder, invoice });
+  const [deal] = engine.buildIXISalesDealRegister(records);
+
+  assert.equal(records.length, 2);
+  assert.equal(deal.dealId, "DEAL-CLEMENTS");
+  assert.equal(deal.stageRecords["sales-order"].documentId, "so-clements-snapshot");
+  assert.equal(deal.stageRecords.invoice.documentId, "inv-clements-snapshot");
+  assert.equal(
+    engine.findIXISalesDeal([deal], { documentId: "so-clements-snapshot" }),
+    deal,
+  );
+});
+
+test("authoritative financial records win over duplicate embedded snapshots", () => {
+  const durable = {
+    server: { revision: 9 },
+    financialDocument: {
+      financialDocumentId: "so-authoritative",
+      documentType: "sales-order",
+      salesOrder: {
+        identity: { dealId: "DEAL-AUTHORITATIVE" },
+        customer: { name: "Authoritative Buyer" },
+      },
+    },
+  };
+  const snapshot = {
+    identity: { dealId: "DEAL-SNAPSHOT" },
+    customer: { name: "Stale Snapshot" },
+    financialBinding: {
+      financialDocumentId: "so-authoritative",
+      revision: 2,
+    },
+  };
+
+  const records = engine.includeIXISalesSnapshots([durable], {
+    salesOrder: snapshot,
+  });
+
+  assert.equal(records.length, 1);
+  assert.equal(records[0], durable);
+});
