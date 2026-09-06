@@ -150,6 +150,7 @@ export async function createIXIAssetSale({
             invoiceType: "asset-sale",
             invoiceNumber: soldRecord.sale.invoiceNumber,
             billOfSaleNumber: soldRecord.sale.billOfSaleNumber,
+            assetCostBasis: Number(soldRecord.sale.assetCostBasis || 0),
             soldAt: closedAt,
             collectionStatus: "paid",
             balanceDue: 0,
