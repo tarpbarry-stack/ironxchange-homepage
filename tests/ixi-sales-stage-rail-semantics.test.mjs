@@ -10,9 +10,37 @@ const presentationSource = await readFile(
   "utf8",
 );
 
+const railSource = await readFile(
+  new URL(
+    "../components/ixi-aos/transact/sales/IXISalesDealRegister.jsx",
+    import.meta.url,
+  ),
+  "utf8",
+);
+
+const transactSource = await readFile(
+  new URL(
+    "../components/ixi-aos/transact/IXITransactApp.jsx",
+    import.meta.url,
+  ),
+  "utf8",
+);
+
 const rail = await import(
   `data:text/javascript;base64,${Buffer.from(presentationSource).toString("base64")}`
 );
+
+test("all sales stages remain navigable while commit validation stays in the stage form", () => {
+  assert.doesNotMatch(railSource, /disabled=\{!entry && !startable\}/u);
+  assert.match(
+    railSource,
+    /entry \? onOpenStage\?\.\(stage, entry, deal\) : onStartStage\?\.\(stage, deal\)/u,
+  );
+  assert.match(
+    transactSource,
+    /\["sales-order", "signed"\]\.includes\(activeSalesStageId\)/u,
+  );
+});
 
 test("an Invoice completes Quote and Sales Order progression without fabricating Signed", () => {
   const deal = {

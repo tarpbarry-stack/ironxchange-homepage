@@ -9,7 +9,11 @@ export function IXISalesStageRail({ deal, activeStageId = "", onOpenStage, onSta
   return <><div className="ixi-deal-stage-rail" aria-label={`Sales stages for ${deal?.customer || "customer"}`}>
     {IXI_SALES_STAGES.map(stage => {
       const { entry, completed, startable, selected, state } = salesStagePresentation(deal, stage.id, activeStageId);
-      return <button key={stage.id} type="button" className={`${state}${selected ? " selected" : ""}`} disabled={!entry && !startable} onClick={() => entry ? onOpenStage?.(stage, entry, deal) : startable && onStartStage?.(stage, deal)} aria-current={selected ? "step" : undefined} aria-label={`${entry || completed ? "Open" : startable ? "Start" : "Unavailable"} step ${stage.number}, ${stage.label}`}><i>{completed ? "✓" : stage.number}</i><span>{stage.label}</span></button>;
+      // The rail is navigation, not an authorization or accounting control.
+      // Every stage stays openable so an operator can inspect it, recover a
+      // legacy transaction, or enter an authorized manual override. The stage
+      // form remains responsible for validating what may be committed.
+      return <button key={stage.id} type="button" className={`${state}${selected ? " selected" : ""}`} onClick={() => entry ? onOpenStage?.(stage, entry, deal) : onStartStage?.(stage, deal)} aria-current={selected ? "step" : undefined} aria-label={`${entry || completed ? "Open" : startable ? "Start" : "Open"} step ${stage.number}, ${stage.label}`}><i>{completed ? "✓" : stage.number}</i><span>{stage.label}</span></button>;
     })}
   </div></>;
 }
