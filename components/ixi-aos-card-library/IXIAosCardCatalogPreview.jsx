@@ -409,6 +409,7 @@ export default function IXIAosCardCatalogPreview({ template = null, sampleData =
 
   const current = state[object.objectId] || {};
   const cardNumber = resolveCatalogCardNumber(template);
+  const catalogParentLabel = clean(parentLabel) || clean(template?.librarySection) || "AOS";
   const ContainerCard = cardNumber === 4 ? IXIAosCard004Personnel : cardNumber === 5 ? IXIAosCard005Personnel : cardNumber === 6 ? IXIAosCard006Personnel : null;
   const numberedObjectCards = { 7: IXIAosCard007EmployeeApplication, 8: IXIAosCard008Profile, 9: IXIAosCard009, 10: IXIAosCard010, 11: IXIAosCard011, 12: IXIAosCard012, 13: IXIAosCard013, 14: IXIAosCard014, 15: IXIAosCard015, 16: IXIAosCard016, 17: IXIAosCard017 };
 
@@ -422,7 +423,7 @@ export default function IXIAosCardCatalogPreview({ template = null, sampleData =
 
   const NumberedObjectCard = numberedObjectCards[cardNumber];
   if (NumberedObjectCard) {
-    return <IXIFaceLabScaledCard objectFamily="private" surfaceLabel="Face Lab AOS Cards"><NumberedObjectCard object={object} children={previewItems} projection={projection} ixiState={current} onIxiStateChange={update} onSaveObject={savePreview} onAddObject={addPreviewChild} onOpenTransact={() => setTransactOpen(true)} skinId="v12" /></IXIFaceLabScaledCard>;
+    return <IXIFaceLabScaledCard objectFamily="private" surfaceLabel="Face Lab AOS Cards"><NumberedObjectCard object={object} children={previewItems} projection={projection} parentLabel={catalogParentLabel} ixiState={current} onIxiStateChange={update} onSaveObject={savePreview} onAddObject={addPreviewChild} onOpenTransact={() => setTransactOpen(true)} skinId="v12" /></IXIFaceLabScaledCard>;
   }
 
   if ([1,2,3].includes(cardNumber)) {
@@ -437,5 +438,5 @@ export default function IXIAosCardCatalogPreview({ template = null, sampleData =
   }
 
   if (!definition) return <div className="preview-error">CARD DEFINITION FAILED</div>;
-  return <IXIFaceLabScaledCard objectFamily="private" surfaceLabel="Face Lab AOS Cards"><IXIAosCommandAwareObjectConsole object={object} objectId={object.objectId} projection={projection} objects={previewItems} cardDefinition={definition} skinId={skinId} parentLabel={clean(parentLabel) || clean(template.librarySection) || "AOS"} ixiCardState={{}} updateIxiCardState={null} previewCardState={current} updatePreviewCardState={update} renderModule={null} studioEditing={false} selectedModuleId="" onSelectModule={null} onSelectFace={null} onCreateFace={null} onSaveObject={savePreview} enableCardScaling={false} cardScaleMode="xl" onOpenTransact={() => setTransactOpen(true)} /></IXIFaceLabScaledCard>;
+  return <IXIFaceLabScaledCard objectFamily="private" surfaceLabel="Face Lab AOS Cards"><IXIAosCommandAwareObjectConsole object={object} objectId={object.objectId} projection={projection} objects={previewItems} cardDefinition={definition} skinId={skinId} parentLabel={catalogParentLabel} ixiCardState={{}} updateIxiCardState={null} previewCardState={current} updatePreviewCardState={update} renderModule={null} studioEditing={false} selectedModuleId="" onSelectModule={null} onSelectFace={null} onCreateFace={null} onSaveObject={savePreview} enableCardScaling={false} cardScaleMode="xl" onOpenTransact={() => setTransactOpen(true)} /></IXIFaceLabScaledCard>;
 }
