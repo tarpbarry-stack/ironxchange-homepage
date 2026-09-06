@@ -377,12 +377,20 @@ export function getObjectCapabilities(object = {}) {
 export function getObjectActionCapabilities(object = {}) {
   const capabilities = getObjectCapabilities(object);
   const permissions = getObjectPermissions(object);
+  const objectType = clean(
+    object?.objectType ||
+    object?.type ||
+    object?.definition?.objectType ||
+    object?.metadata?.objectType
+  ).toLowerCase();
+  const isPerson = objectType === "person" || objectType === "employee";
 
   const capabilityCreate = Boolean(
     capabilities?.canCreate ||
     capabilities?.canCreateChild ||
     capabilities?.canAdd ||
-    capabilities?.canContain
+    capabilities?.canContain ||
+    isPerson
   );
 
   const capabilityEdit =

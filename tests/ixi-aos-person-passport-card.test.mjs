@@ -8,22 +8,29 @@ function read(path) {
   return fs.readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
 }
 
-test("canonical Person identity outranks stale Card 007 presentation metadata", () => {
+test("Person identity preserves deliberately selected Card 007 presentation metadata", () => {
   assert.equal(resolveIXIAosOperatingCardNumber({
     objectType: "person",
     cardTemplateSlug: "universal-object-007",
     metadata: { cardNumber: "007" }
-  }), 8);
+  }), 7);
 
   assert.equal(resolveIXIAosOperatingCardNumber({
     definition: { objectType: "employee" },
     metadata: { cardNumber: 7 }
-  }), 8);
+  }), 7);
 });
 
-test("Person template aliases resolve to Profile Card 008", () => {
-  assert.equal(resolveIXIAosOperatingCardNumber({ cardTemplateSlug: "employee-basic-007" }), 8);
+test("Person template aliases preserve Card 007 while Profile Card 008 remains available", () => {
+  assert.equal(resolveIXIAosOperatingCardNumber({ cardTemplateSlug: "employee-basic-007" }), 7);
   assert.equal(resolveIXIAosOperatingCardNumber({ cardTemplateSlug: "profile-layout-008" }), 8);
+});
+
+test("a Person Passport without presentation metadata defaults to Card 007", () => {
+  assert.equal(resolveIXIAosOperatingCardNumber({
+    objectType: "person",
+    capabilities: { canContain: true, canCreate: true }
+  }), 7);
 });
 
 test("identity precedence does not change non-Person cards", () => {
@@ -54,4 +61,6 @@ test("Person transactional capabilities drive the object toolbar with explicit d
   assert.match(presentation, /capabilities\?\.canHaveDocuments/);
   assert.match(presentation, /explicitTransact !== undefined/);
   assert.match(presentation, /explicitTransact === true/);
+  assert.match(presentation, /isPerson/);
+  assert.match(presentation, /capabilities\?\.canContain \|\|[\s\S]*?isPerson/);
 });

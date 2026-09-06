@@ -74,6 +74,18 @@ function safeArray(value) {
 }
 
 
+function isPersonObject(object = {}) {
+  const objectType = clean(
+    object?.objectType ||
+    object?.type ||
+    object?.definition?.objectType ||
+    object?.metadata?.objectType
+  ).toLowerCase();
+
+  return objectType === "person" || objectType === "employee";
+}
+
+
 function replaceWorkspaceObjectId(
   placements,
   fromObjectId,
@@ -575,11 +587,12 @@ export default function useIXIMosObjectCreation({
     }
 
     if (
-      container?.capabilities?.canContain !==
-      true
+      container?.capabilities?.canContain !== true &&
+      container?.capabilities?.canCreate !== true &&
+      !isPersonObject(container)
     ) {
       throw new Error(
-        "Destination object is not a container."
+        "Destination object does not allow child creation."
       );
     }
 
@@ -934,11 +947,12 @@ export default function useIXIMosObjectCreation({
     }
 
     if (
-      container?.capabilities?.canContain !==
-      true
+      container?.capabilities?.canContain !== true &&
+      container?.capabilities?.canCreate !== true &&
+      !isPersonObject(container)
     ) {
       throw new Error(
-        "Destination object is not a container."
+        "Destination object does not allow child creation."
       );
     }
 

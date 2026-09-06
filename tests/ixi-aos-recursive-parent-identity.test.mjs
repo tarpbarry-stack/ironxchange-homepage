@@ -4,6 +4,7 @@ import test from "node:test";
 
 import {
   IXI_AOS_SYSTEM_INDEX_LABEL,
+  IXI_AOS_PERSON_ROOT_LABEL,
   IXI_AOS_UNAVAILABLE_PARENT_LABEL,
   resolveAosWorkspaceParentName
 } from "../lib/mos/ixiAosHierarchyContract.mjs";
@@ -21,6 +22,20 @@ test("a root AOS card always identifies SYSTEM INDEX as its parent", () => {
       }
     }),
     IXI_AOS_SYSTEM_INDEX_LABEL
+  );
+});
+
+
+test("an automatically provisioned root Person identifies itself as PERSON", () => {
+  assert.equal(
+    resolveAosWorkspaceParentName({
+      object: {
+        objectId: "owner-person-1",
+        objectType: "person",
+        displayName: "IXI DADDY"
+      }
+    }),
+    IXI_AOS_PERSON_ROOT_LABEL
   );
 });
 
@@ -101,4 +116,3 @@ test("AOS creation and rendering share the recursive parent contract", async () 
   assert.doesNotMatch(page, /parentDisplayName:\s*String\(\s*aosEntity/u);
   assert.match(legacyCard, /resolveAosWorkspaceParentName/u);
 });
-
