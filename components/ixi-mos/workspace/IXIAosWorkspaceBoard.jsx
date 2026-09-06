@@ -13,6 +13,9 @@ import IXISystemIndexCard
 import IXIAosCard018
   from "../../ixi-aos/cards/018/IXIAosCard018";
 
+import IXIAosCard019
+  from "../../ixi-aos/cards/019/IXIAosCard019";
+
 import IXISystemIndexConsole, {
   getSystemIndexConsoleNativeWidth,
   getSystemIndexConsoleNativeHeight
@@ -317,18 +320,34 @@ export default function IXIAosWorkspaceBoard({
                     });
                   };
 
-                  if (
-                    systemAdapter?.adapterId ===
-                    "ixi-owned-equipment"
-                  ) {
+                  const systemIndexCard =
+                    systemAdapter?.adapterId === "ixi-owned-equipment"
+                      ? {
+                          Card: IXIAosCard018,
+                          displayName: "EQUIPMENT",
+                          templateSlug: "aos-card-018",
+                          cardNumber: 18
+                        }
+                      : String(item?.indexId || "").trim().toLowerCase() === "locations"
+                        ? {
+                            Card: IXIAosCard019,
+                            displayName: "LOCATIONS",
+                            templateSlug: "aos-card-019",
+                            cardNumber: 19
+                          }
+                        : null;
+
+                  if (systemIndexCard) {
+                    const NumberedSystemIndexCard = systemIndexCard.Card;
+
                     return (
-                      <IXIAosCard018
+                      <NumberedSystemIndexCard
                         object={{
                           ...item,
                           singularLabel: "SYSTEM INDEX",
-                          displayName: "EQUIPMENT",
-                          cardTemplateSlug: "aos-card-018",
-                          cardNumber: 18
+                          displayName: systemIndexCard.displayName,
+                          cardTemplateSlug: systemIndexCard.templateSlug,
+                          cardNumber: systemIndexCard.cardNumber
                         }}
                         children={item?.items || []}
                         ixiState={indexState}
@@ -341,6 +360,11 @@ export default function IXIAosWorkspaceBoard({
                         onSendToArmedDestination={sendMachineToArmedDestination}
                         onExposeObject={exposeObject}
                         onOpenTransact={onOpenConsole}
+                        onAddObject={
+                          canCreateChild
+                            ? onAddObject
+                            : null
+                        }
                         onCycleFace={() =>
                           updateIxiCardState?.(id, {
                             face:

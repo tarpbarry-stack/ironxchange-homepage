@@ -24,7 +24,8 @@ export const IXI_AOS_COMMERCIAL_ADMISSION = Object.freeze({
   "015": Object.freeze({ status: "ready-for-runtime-qa", blockers: [] }),
   "016": Object.freeze({ status: "ready-for-runtime-qa", blockers: [] }),
   "017": Object.freeze({ status: "ready-for-runtime-qa", blockers: [] }),
-  "018": Object.freeze({ status: "ready-for-runtime-qa", blockers: [] })
+  "018": Object.freeze({ status: "ready-for-runtime-qa", blockers: [] }),
+  "019": Object.freeze({ status: "ready-for-runtime-qa", blockers: [] })
 });
 
 export function getAosCommercialAdmission(cardNumber) {

@@ -3,7 +3,7 @@ import { useState } from "react";
 import IXIObjectRail from "../../ixi-object-system/IXIObjectRail";
 
 function formatCardNumber(cardNumber) {
-  return String(Math.min(18, Math.max(1, Number(cardNumber) || 1))).padStart(3, "0");
+  return String(Math.min(19, Math.max(1, Number(cardNumber) || 1))).padStart(3, "0");
 }
 
 export default function IXIAosCardIdentityFace({

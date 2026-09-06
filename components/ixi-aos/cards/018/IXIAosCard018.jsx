@@ -42,7 +42,10 @@ export default function IXIAosCard018({
   onCycleOutline = null,
   onSendToArmedDestination = null,
   armedDestination = "",
-  dragHandleProps = null
+  dragHandleProps = null,
+  cardDefinition = CARD_018,
+  defaultDisplayName = "EQUIPMENT",
+  editHeading = "EDIT EQUIPMENT INDEX"
 }) {
   const [editing, setEditing] = useState(false);
   const [draftName, setDraftName] = useState(clean(object?.displayName));
@@ -52,14 +55,14 @@ export default function IXIAosCard018({
   async function saveName(event) {
     event?.preventDefault?.();
     event?.stopPropagation?.();
-    const displayName = clean(draftName) || clean(object?.displayName) || "EQUIPMENT";
+    const displayName = clean(draftName) || clean(object?.displayName) || defaultDisplayName;
     await onSaveObject?.({ object: { ...object, displayName } });
     setEditing(false);
   }
 
   return (
     <IXIAosCardHeaderIdentity object={object}>
-    <div className="ixi-card-018" data-card-number="018" data-card-skin="v12">
+    <div className="ixi-card-018" data-card-number={String(cardDefinition.cardNumber).padStart(3, "0")} data-card-skin="v12">
       <IXISystemIndexCard
         index={{ ...object, items }}
         objectId={objectId}
@@ -91,7 +94,7 @@ export default function IXIAosCard018({
         <header className="c018-head">
           <div className="c018-identity">
             <span>SYSTEM INDEX</span>
-            <h2>{clean(object?.displayName) || "UNTITLED CONTAINER"}</h2>
+            <h2>{clean(object?.displayName) || defaultDisplayName}</h2>
           </div>
           <IXIAosCardHeaderControls
             canAdd={typeof onAddObject === "function"}
@@ -126,7 +129,7 @@ export default function IXIAosCard018({
       {editing ? (
         <form className="c018-editor" onSubmit={saveName} onPointerDown={event => event.stopPropagation()}>
           <header>
-            <div><small>CARD 018 · FACE 1</small><strong>EDIT EQUIPMENT INDEX</strong></div>
+            <div><small>CARD {String(cardDefinition.cardNumber).padStart(3, "0")} · FACE 1</small><strong>{editHeading}</strong></div>
             <nav><button type="button" onClick={() => setEditing(false)}>CANCEL</button><button type="submit">SAVE</button></nav>
           </header>
           <main>

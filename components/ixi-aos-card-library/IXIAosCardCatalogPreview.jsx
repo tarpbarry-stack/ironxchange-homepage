@@ -18,6 +18,7 @@ import IXIAosCard015 from "../ixi-aos/cards/015/IXIAosCard015";
 import IXIAosCard016 from "../ixi-aos/cards/016/IXIAosCard016";
 import IXIAosCard017 from "../ixi-aos/cards/017/IXIAosCard017";
 import IXIAosCard018 from "../ixi-aos/cards/018/IXIAosCard018";
+import IXIAosCard019 from "../ixi-aos/cards/019/IXIAosCard019";
 import IXIAosCardIdentityFace from "../ixi-aos/card-runtime/IXIAosCardIdentityFace";
 import { adaptAosCardTemplate } from "../ixi-aos/card-runtime/IXIAosCardTemplateAdapter";
 import IXIFaceLabScaledCard from "../ixi-face-studio/IXIFaceLabScaledCard";
@@ -297,6 +298,17 @@ function card018Sample() {
   };
 }
 
+function card019Sample() {
+  return {
+    objectId: "preview-card-019", entityId: "aos-card-preview-entity", objectType: "customer-defined-container",
+    singularLabel: "SYSTEM INDEX", pluralLabel: "SYSTEM INDEXES", displayName: "LOCATIONS", status: "active",
+    capabilities: { canContain: true, canCreate: true, canTransact: true, editable: true, hasConsole: true, hasRail: true, hasRelationships: true },
+    presentation: { directChildrenLabel: "CHILDREN", sampleUse: "LOCATIONS COLLECTION / VISUAL INDEX" },
+    fields: {}, fieldDefinitions: [], relationships: [], media: [],
+    metadata: { sampleUse: "LOCATIONS COLLECTION / VISUAL INDEX", nomenclature: { singular: "LOCATION", plural: "LOCATIONS" } }
+  };
+}
+
 function previewObject(template = {}, sample = {}) {
   const cardNumber = resolveCatalogCardNumber(template);
   const hasSampleFields = Object.keys(safeObject(sample?.fields)).length > 0;
@@ -312,6 +324,7 @@ function previewObject(template = {}, sample = {}) {
     else if (cardNumber === 16) resolvedSample = card016Sample();
     else if (cardNumber === 17) resolvedSample = card017Sample();
     else if (cardNumber === 18) resolvedSample = card018Sample();
+    else if (cardNumber === 19) resolvedSample = card019Sample();
   }
   const sampleFields = safeObject(resolvedSample?.fields);
   const templateFieldSchema = Array.isArray(template?.fieldSchema) ? template.fieldSchema : [];
@@ -369,7 +382,7 @@ function getInitialPreviewItems(template = {}, directItems = []) {
   const cardNumber = resolveCatalogCardNumber(template);
   if (cardNumber === 7) return getUniversal007PreviewItems();
   if (cardNumber === 17) return card017Items();
-  if (cardNumber === 18) return [];
+  if (cardNumber === 18 || cardNumber === 19) return [];
   return [];
 }
 
@@ -434,7 +447,7 @@ export default function IXIAosCardCatalogPreview({ template = null, sampleData =
   const cardNumber = resolveCatalogCardNumber(template);
   const catalogParentLabel = clean(parentLabel) || clean(template?.librarySection) || "AOS";
   const ContainerCard = cardNumber === 4 ? IXIAosCard004Personnel : cardNumber === 5 ? IXIAosCard005Personnel : cardNumber === 6 ? IXIAosCard006Personnel : null;
-  const numberedObjectCards = { 7: IXIAosCard007EmployeeApplication, 8: IXIAosCard008Profile, 9: IXIAosCard009, 10: IXIAosCard010, 11: IXIAosCard011, 12: IXIAosCard012, 13: IXIAosCard013, 14: IXIAosCard014, 15: IXIAosCard015, 16: IXIAosCard016, 17: IXIAosCard017, 18: IXIAosCard018 };
+  const numberedObjectCards = { 7: IXIAosCard007EmployeeApplication, 8: IXIAosCard008Profile, 9: IXIAosCard009, 10: IXIAosCard010, 11: IXIAosCard011, 12: IXIAosCard012, 13: IXIAosCard013, 14: IXIAosCard014, 15: IXIAosCard015, 16: IXIAosCard016, 17: IXIAosCard017, 18: IXIAosCard018, 19: IXIAosCard019 };
   const renderNumberedPreview = Card => Number(current?.face || 1) === 2
     ? <IXIAosCardIdentityFace cardNumber={cardNumber} object={object} ixiState={current} onCycleFace={() => update(object.objectId, { face: 1 })} />
     : <Card object={object} children={previewItems} projection={projection} parentLabel={catalogParentLabel} ixiState={current} onIxiStateChange={update} onCycleFace={() => update(object.objectId, { face: 2 })} onSaveObject={savePreview} onAddObject={addPreviewChild} onOpenTransact={() => setTransactOpen(true)} skinId="v12" />;

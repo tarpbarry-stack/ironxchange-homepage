@@ -20,12 +20,13 @@ const CARD_BY_SLUG = Object.freeze({
   "aos-card-015": 15,
   "aos-card-016": 16,
   "aos-card-017": 17,
-  "aos-card-018": 18
+  "aos-card-018": 18,
+  "aos-card-019": 19
 });
 
 function supportedNumber(value) {
   const number = Number(value);
-  return Number.isInteger(number) && number >= 1 && number <= 18 ? number : 0;
+  return Number.isInteger(number) && number >= 1 && number <= 19 ? number : 0;
 }
 
 function numberFromSlug(value) {

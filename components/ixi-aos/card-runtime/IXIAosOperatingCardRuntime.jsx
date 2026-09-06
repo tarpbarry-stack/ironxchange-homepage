@@ -24,6 +24,7 @@ const IXIAosCard015 = dynamicCard(() => import("../cards/015/IXIAosCard015"));
 const IXIAosCard016 = dynamicCard(() => import("../cards/016/IXIAosCard016"));
 const IXIAosCard017 = dynamicCard(() => import("../cards/017/IXIAosCard017"));
 const IXIAosCard018 = dynamicCard(() => import("../cards/018/IXIAosCard018"));
+const IXIAosCard019 = dynamicCard(() => import("../cards/019/IXIAosCard019"));
 
 const NUMBERED_CARDS = Object.freeze({
   4: IXIAosCard004Personnel,
@@ -40,7 +41,8 @@ const NUMBERED_CARDS = Object.freeze({
   15: IXIAosCard015,
   16: IXIAosCard016,
   17: IXIAosCard017,
-  18: IXIAosCard018
+  18: IXIAosCard018,
+  19: IXIAosCard019
 });
 
 function clean(value) {

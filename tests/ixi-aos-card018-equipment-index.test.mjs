@@ -30,7 +30,8 @@ test("AOS Work renders the canonical Equipment System Index through Card 018", a
   assert.match(board, /systemAdapter\?\.adapterId ===\s*"ixi-owned-equipment"/);
   assert.match(board, /singularLabel:\s*"SYSTEM INDEX"/);
   assert.match(board, /displayName:\s*"EQUIPMENT"/);
-  assert.match(board, /cardTemplateSlug:\s*"aos-card-018"/);
+  assert.match(board, /templateSlug:\s*"aos-card-018"/);
+  assert.match(board, /cardTemplateSlug:\s*systemIndexCard\.templateSlug/);
   assert.match(board, /children=\{item\?\.items \|\| \[\]\}/);
   assert.match(board, /onExposeObject=\{exposeObject\}/);
 });
@@ -46,10 +47,10 @@ test("Card 018 is registered in FaceLab, runtime resolution, and operating-card 
   ]);
   assert.match(catalog, /aos-card-018/);
   assert.match(preview, /IXIAosCard018/);
-  assert.match(preview, /if \(cardNumber === 18\) return \[\]/);
+  assert.match(preview, /cardNumber === 18 \|\| cardNumber === 19/);
   assert.doesNotMatch(preview, /c018-machine-/);
   assert.match(resolver, /"aos-card-018":\s*18/);
   assert.match(runtime, /18:\s*IXIAosCard018/);
-  assert.match(identity, /Math\.min\(18/);
+  assert.match(identity, /Math\.min\(19/);
   assert.match(admission, /"018":/);
 });

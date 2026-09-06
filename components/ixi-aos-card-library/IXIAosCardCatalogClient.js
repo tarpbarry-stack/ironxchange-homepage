@@ -236,6 +236,26 @@ function withLocalCardDrafts(templates = []) {
     });
   }
 
+  if (!source.some(template => Number(template?.templateNumber || template?.metadata?.cardNumber) === 19)) {
+    source.push({
+      templateNumber: 19,
+      templateSlug: "aos-card-019",
+      label: "Card 019",
+      librarySection: "AOS CONTAINER LAYOUTS",
+      baseObjectType: "customer-defined-container",
+      version: 12,
+      fieldSchema: [],
+      capabilities: genericContainerCapabilities({}),
+      metadata: {
+        localCardDraft: true,
+        cardNumber: "019",
+        visualLanguage: "v12",
+        renderer: "system-index-locations-container",
+        sampleUse: "LOCATIONS COLLECTION / VISUAL INDEX"
+      }
+    });
+  }
+
   return source.sort((a, b) => Number(a?.templateNumber || 999) - Number(b?.templateNumber || 999));
 }
 
