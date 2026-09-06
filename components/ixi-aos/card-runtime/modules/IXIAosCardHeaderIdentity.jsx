@@ -32,6 +32,8 @@ export default function IXIAosCardHeaderIdentity({ object = {}, children = null,
         .ixi-aos-header-identity-shell{position:relative;width:298px;height:471px}
         .ixi-aos-header-ixi-number{position:absolute;top:7px;right:9px;z-index:190;color:#858c87;font-family:inherit;font-size:7px;font-weight:850;line-height:1;letter-spacing:.06em;white-space:nowrap;pointer-events:none}
         :global(.ixi-aos-header-identity-shell .ixi-aos-card-header-controls){top:17px!important}
+        .card-009-header-identity>.ixi-aos-header-ixi-number{top:6px;right:10px;z-index:220;color:#aab0ac;font-size:7px;font-weight:950;letter-spacing:.08em}
+        :global(.card-009-header-identity .ixi-aos-card-header-controls){top:19px!important}
       `}</style>
     </div>
   );
