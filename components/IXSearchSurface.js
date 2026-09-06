@@ -86,13 +86,18 @@ const availableModels =
     const error = filterErrors[field] || "";
 
     return {
-      className: `dash-control dash-secondary ${error ? "has-error" : ""}`,
       inputMode: "decimal",
       "aria-invalid": error ? "true" : "false",
       "aria-describedby": error
         ? "marketplace-range-error"
         : undefined
     };
+  }
+
+  function rangeInputClassName(field) {
+    return `dash-control dash-secondary ${
+      filterErrors[field] ? "has-error" : ""
+    }`;
   }
 
   function clearAll() {
@@ -218,6 +223,7 @@ const availableModels =
     <div className="ix-search-secondary-row">
      <input
   type="text"
+  className={rangeInputClassName("yearMin")}
   {...rangeInputProps("yearMin")}
   value={filters.yearMin || ""}
   onChange={(e) => updateFilter("yearMin", e.target.value)}
@@ -227,6 +233,7 @@ const availableModels =
 
 <input
   type="text"
+  className={rangeInputClassName("yearMax")}
   {...rangeInputProps("yearMax")}
   value={filters.yearMax || ""}
   onChange={(e) => updateFilter("yearMax", e.target.value)}
@@ -236,6 +243,7 @@ const availableModels =
 
 <input
   type="text"
+  className={rangeInputClassName("priceMin")}
   {...rangeInputProps("priceMin")}
   value={filters.priceMin || ""}
   onChange={(e) => updateFilter("priceMin", e.target.value)}
@@ -245,6 +253,7 @@ const availableModels =
 
 <input
   type="text"
+  className={rangeInputClassName("priceMax")}
   {...rangeInputProps("priceMax")}
   value={filters.priceMax || ""}
   onChange={(e) => updateFilter("priceMax", e.target.value)}
@@ -254,6 +263,7 @@ const availableModels =
 
 <input
   type="text"
+  className={rangeInputClassName("hoursMin")}
   {...rangeInputProps("hoursMin")}
   value={filters.hoursMin || ""}
   onChange={(e) => updateFilter("hoursMin", e.target.value)}
@@ -263,6 +273,7 @@ const availableModels =
 
 <input
   type="text"
+  className={rangeInputClassName("hoursMax")}
   {...rangeInputProps("hoursMax")}
   value={filters.hoursMax || ""}
   onChange={(e) => updateFilter("hoursMax", e.target.value)}
@@ -392,7 +403,7 @@ const availableModels =
 .ix-search-secondary-row {
   width: 100%;
   display: grid;
-  grid-template-columns: repeat(8, 1fr);
+  grid-template-columns: repeat(8, minmax(0, 1fr));
   gap: 10px;
   align-items: end;
   margin-bottom: 0;
@@ -498,6 +509,10 @@ transition:
 }
 
 .dash-secondary {
+  min-width: 0;
+  box-sizing: border-box;
+  font-size: clamp(8px, .7vw, 11px);
+  letter-spacing: .15px;
   border-bottom-color: rgba(255,255,255,.13);
 }
 
@@ -595,4 +610,3 @@ transition:
 );
 
 }
-

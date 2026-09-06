@@ -58,6 +58,21 @@ test("invalid and reversed ranges report errors instead of becoming NaN filters"
   assert.match(reversed.message, /MINIMUM CANNOT EXCEED MAXIMUM/u);
 });
 
+test("desktop numeric filters retain their styled class and cannot expand the grid", () => {
+  const searchSurface = fs.readFileSync("components/IXSearchSurface.js", "utf8");
+
+  assert.match(searchSurface, /function rangeInputClassName\(field\)/u);
+  assert.match(
+    searchSurface,
+    /className=\{rangeInputClassName\("yearMin"\)\}/u
+  );
+  assert.match(
+    searchSurface,
+    /grid-template-columns:\s*repeat\(8, minmax\(0, 1fr\)\)/u
+  );
+  assert.match(searchSurface, /\.dash-secondary\s*\{[\s\S]*?min-width:\s*0;/u);
+});
+
 test("Deal Sheet separates purchase total, credits, and amount financed", () => {
   const deal = calculateDealSheet({
     offer: 100000,
