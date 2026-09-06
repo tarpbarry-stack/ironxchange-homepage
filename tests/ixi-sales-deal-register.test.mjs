@@ -83,6 +83,32 @@ test("a direct Sales Order can materialize a populated editable Quote without re
   assert.equal(draft.financialBinding, undefined);
 });
 
+test("an Invoice-only legacy deal appears in Sales Order and materializes a populated order draft", () => {
+  const [deal] = engine.buildIXISalesDealRegister([{ financialDocument: {
+    financialDocumentId: "inv-clements",
+    documentType: "invoice",
+    currency: "USD",
+    occurredAt: "2026-09-05",
+    dueDate: "2026-09-12",
+    paymentTerms: "Wire before release",
+    metadata: {
+      customer: { name: "Clements Farm" },
+      asset: { passportId: "IXI-MACHINE-544K", serialNumber: "1DW544KZCHF681737" },
+      commercialBreakdown: { subtotal: 82000, total: 82000 },
+    },
+    totals: { total: 82000 },
+    updatedAt: "2026-09-05T12:00:00Z",
+  } }]);
+  assert.deepEqual(engine.dealsForIXISalesModule([deal], "sales-order"), [deal]);
+  const draft = engine.salesOrderDraftForIXISalesDeal(deal);
+  assert.equal(draft.customer.name, "Clements Farm");
+  assert.equal(draft.asset.passportId, "IXI-MACHINE-544K");
+  assert.equal(draft.totals.total, 82000);
+  assert.equal(draft.related.invoiceId, "inv-clements");
+  assert.equal(draft.lineage.materializedFromInvoiceId, "inv-clements");
+  assert.equal(draft.financialBinding, undefined);
+});
+
 test("exact stage readback retains canonical document identity and revision", () => {
   const records = [{ server: { revision: 7 }, financialDocument: { financialDocumentId: "so-exact", documentType: "sales-order", metadata: { dealId: "DEAL-EXACT" }, salesOrder: { identity: { dealId: "DEAL-EXACT" }, customer: { name: "Exact Buyer" }, status: "draft", audit: { updatedAt: "2026-09-05" } } } }];
   const [deal] = engine.buildIXISalesDealRegister(records);
@@ -91,7 +117,7 @@ test("exact stage readback retains canonical document identity and revision", ()
   assert.equal(order.financialBinding.revision, 7);
 });
 
-test("each sales module register shows only deals with that exact stage", () => {
+test("each sales module register shows deals that reached that stage or later", () => {
   const records = [
     { financialDocument: { financialDocumentId: "qt-only", documentType: "quote", quote: { identity: { dealId: "DEAL-QUOTE" }, customer: { name: "Quote Only" }, status: "sent", audit: { updatedAt: "2026-09-01" } } } },
     { financialDocument: { financialDocumentId: "qt-order", documentType: "quote", quote: { identity: { dealId: "DEAL-ORDER" }, customer: { name: "Clements Farm" }, status: "converted", audit: { updatedAt: "2026-09-01" } } } },

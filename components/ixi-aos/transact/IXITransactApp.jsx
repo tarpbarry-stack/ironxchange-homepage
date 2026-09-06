@@ -38,6 +38,7 @@ import {
   findIXISalesDeal,
   quoteDraftForIXISalesDeal,
   recordForIXISalesStage,
+  salesOrderDraftForIXISalesDeal,
   salesStageForIXIModule,
 } from "./sales/IXISalesDealEngine";
 import { closeIXISalesDeal } from "./sales/IXISalesDealCommands";
@@ -425,7 +426,10 @@ export default function IXITransactApp({
     ? recordForIXISalesStage(selectedSalesDeal, "quote") ||
       (activeSalesStageId === "quote" ? quoteDraftForIXISalesDeal(selectedSalesDeal) : null)
     : null;
-  const selectedSalesOrderSnapshot = selectedSalesDeal ? recordForIXISalesStage(selectedSalesDeal, "sales-order") : null;
+  const selectedSalesOrderSnapshot = selectedSalesDeal
+    ? recordForIXISalesStage(selectedSalesDeal, "sales-order") ||
+      (activeSalesStageId === "sales-order" ? salesOrderDraftForIXISalesDeal(selectedSalesDeal) : null)
+    : null;
   const selectedSalesInvoiceSnapshot = selectedSalesDeal ? documentForIXISalesStage(selectedSalesDeal, "invoice") : null;
   const selectedSaleSnapshot = selectedSalesDeal ? recordForIXISalesStage(selectedSalesDeal, "sold") : null;
   const selectedSettlementSnapshot = selectedSalesDeal ? recordForIXISalesStage(selectedSalesDeal, "settlement") : null;

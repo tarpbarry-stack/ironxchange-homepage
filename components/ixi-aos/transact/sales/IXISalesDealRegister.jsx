@@ -6,7 +6,7 @@ const clean = value => String(value ?? "").trim();
 
 function canStartStage(deal, stageId) {
   if (stageId === "quote") return Boolean(deal?.stageRecords?.["sales-order"] || deal?.stageRecords?.invoice);
-  if (stageId === "sales-order") return Boolean(deal?.stageRecords?.quote);
+  if (stageId === "sales-order") return Boolean(deal?.stageRecords?.quote || deal?.stageRecords?.invoice);
   if (stageId === "signed") return Boolean(deal?.stageRecords?.["sales-order"]);
   if (stageId === "invoice") return Boolean(deal?.stageRecords?.signed);
   if (stageId === "sold") return Boolean(deal?.stageRecords?.invoice);
@@ -36,7 +36,7 @@ export default function IXISalesDealRegister({ deals = [], moduleLabel = "SALES"
     <div className="ixi-sales-register-label">CUSTOMER DEAL THREADS</div>
     <main>{deals.length ? deals.map(deal => {
       const primaryEntry = deal?.stageRecords?.[primaryStage.id];
-      return <article key={deal.dealId} className={deal.terminal ? "terminal" : "active"}><button className="ixi-deal-head" type="button" onClick={() => primaryEntry && onOpenDeal?.(primaryStage, primaryEntry, deal)} aria-label={`Open ${primaryStage.label} for ${deal.customer}`}><div><strong>{deal.customer}</strong><small>{deal.dealId}</small></div><div><b>{money(primaryEntry?.amount ?? deal.amount)}</b><span>OPEN {primaryStage.label} ›</span></div></button><IXISalesStageRail deal={deal} activeStageId={primaryStage.id} onOpenStage={onOpenStage} onStartStage={onStartStage} /><footer><span>CURRENT · {clean(deal.currentStage).replace(/-/g, " ").toUpperCase()}</span><span>{clean(deal.updatedAt).slice(0, 10) || "NO DATE"}</span>{canCloseIXISalesDeal(deal) ? <button type="button" onClick={() => onCloseDeal?.(deal)}>MARK LOST</button> : null}</footer></article>;
+      return <article key={deal.dealId} className={deal.terminal ? "terminal" : "active"}><button className="ixi-deal-head" type="button" onClick={() => primaryEntry ? onOpenDeal?.(primaryStage, primaryEntry, deal) : onStartStage?.(primaryStage, deal)} aria-label={`Open ${primaryStage.label} for ${deal.customer}`}><div><strong>{deal.customer}</strong><small>{deal.dealId}</small></div><div><b>{money(primaryEntry?.amount ?? deal.amount)}</b><span>OPEN {primaryStage.label} ›</span></div></button><IXISalesStageRail deal={deal} activeStageId={primaryStage.id} onOpenStage={onOpenStage} onStartStage={onStartStage} /><footer><span>CURRENT · {clean(deal.currentStage).replace(/-/g, " ").toUpperCase()}</span><span>{clean(deal.updatedAt).slice(0, 10) || "NO DATE"}</span>{canCloseIXISalesDeal(deal) ? <button type="button" onClick={() => onCloseDeal?.(deal)}>MARK LOST</button> : null}</footer></article>;
     }) : <div className="ixi-sales-register-empty"><strong>NO {primaryStage.label} RECORDS</strong><span>Only customer deals with an existing {primaryStage.label.toLowerCase()} appear in this module.</span></div>}</main>
     <button className="ixi-sales-register-new" type="button" onClick={onNewDeal}>+ NEW CUSTOMER DEAL</button>
     {allowDirectInvoice ? <button className="ixi-sales-register-direct" type="button" onClick={onNewDirectInvoice}>+ CONTROLLED DIRECT INVOICE</button> : null}

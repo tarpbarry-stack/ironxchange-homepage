@@ -903,6 +903,21 @@ export default function IXIEquipmentSaleApp({
         record: workingRecord,
         action: effectiveAction,
       });
+      if (
+        wasNew &&
+        invoiceRecord &&
+        clean(invoiceRecord.financialState).toLowerCase() === "draft" &&
+        !clean(invoiceRecord.sourceFinancialDocumentId || invoiceRecord.metadata?.salesOrderId)
+      ) {
+        const linked = await saveIXIEquipmentInvoice({
+          object,
+          context,
+          record: result.record,
+          invoice: invoiceRecord,
+          input: invoiceDraft,
+        });
+        setInvoiceRecord(linked.invoice);
+      }
       if (wasNew && clean(quote?.financialBinding?.financialDocumentId)) {
         const convertedQuote = {
           ...quote,
@@ -1032,7 +1047,8 @@ export default function IXIEquipmentSaleApp({
     entryMode === "sales-order" &&
     !hasSavedOrder &&
     Boolean(invoiceRecord) &&
-    !linkedInvoice;
+    !linkedInvoice &&
+    !clean(initialRecord?.lineage?.materializedFromInvoiceId);
   const signedOrder = [
     "sent-for-signature",
     "viewed",
