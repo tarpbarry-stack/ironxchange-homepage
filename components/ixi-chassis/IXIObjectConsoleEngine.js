@@ -614,6 +614,83 @@ export function getConsoleSlots(
   );
 }
 
+export function normalizeSingleSideConsoleSlots(
+  slots = [],
+  {
+    side
+  } = {}
+) {
+  const normalized =
+    normalizeConsoleSlots(slots);
+
+  const listingSlot =
+    normalized.find(
+      slot =>
+        slot.type ===
+        IXI_CONSOLE_SLOT_TYPES
+          .LISTING
+    ) ||
+    createConsoleSlot({
+      type:
+        IXI_CONSOLE_SLOT_TYPES
+          .LISTING
+    });
+
+  const listingIndex =
+    normalized.findIndex(
+      slot =>
+        slot.type ===
+        IXI_CONSOLE_SLOT_TYPES
+          .LISTING
+    );
+
+  const leftModules =
+    normalized
+      .slice(
+        0,
+        Math.max(listingIndex, 0)
+      )
+      .filter(
+        slot =>
+          slot.type !==
+          IXI_CONSOLE_SLOT_TYPES
+            .LISTING
+      );
+
+  const rightModules =
+    normalized
+      .slice(listingIndex + 1)
+      .filter(
+        slot =>
+          slot.type !==
+          IXI_CONSOLE_SLOT_TYPES
+            .LISTING
+      );
+
+  const requestedSide =
+    side === "left" ||
+    side === "right"
+      ? side
+      : leftModules.length
+        ? "left"
+        : "right";
+
+  const moduleSlot =
+    requestedSide === "left"
+      ? leftModules.at(-1) ||
+        rightModules[0]
+      : rightModules[0] ||
+        leftModules.at(-1);
+
+  if (!moduleSlot) {
+    return [listingSlot];
+  }
+
+  return requestedSide === "left"
+    ? [moduleSlot, listingSlot]
+    : [listingSlot, moduleSlot];
+}
+
 /* ===================================== */
 /* DEFAULT FACE SEQUENCE                 */
 /* ===================================== */

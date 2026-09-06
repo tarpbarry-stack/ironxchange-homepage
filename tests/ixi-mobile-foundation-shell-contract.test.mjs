@@ -2,6 +2,12 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import test from "node:test";
 
+import {
+  IXI_CONSOLE_SLOT_TYPES,
+  createConsoleSlot,
+  normalizeSingleSideConsoleSlots
+} from "../components/ixi-chassis/IXIObjectConsoleEngine.js";
+
 const app = fs.readFileSync("pages/_app.js", "utf8");
 const shell = fs.readFileSync(
   "components/ixi-mobile/IXIMobileShell.jsx",
@@ -39,6 +45,10 @@ const browseConsoleRouter = fs.readFileSync(
 );
 const marketplaceConsole = fs.readFileSync(
   "components/ixi-machine-object/IXIMarketplaceObjectConsole.jsx",
+  "utf8"
+);
+const consoleEngine = fs.readFileSync(
+  "components/ixi-chassis/IXIObjectConsoleEngine.js",
   "utf8"
 );
 
@@ -93,4 +103,43 @@ test("real Marketplace cards and assembled Consoles fit their mobile grid cell",
   assert.match(fitWidthShell, /availableWidth \/ width/u);
   assert.match(browseConsoleRouter, /IXIFitWidthObjectShell/u);
   assert.match(marketplaceConsole, /nativeWidth=\{consoleNativeWidth\}/u);
+});
+
+test("mobile Marketplace permits one Console side and switches sides without adding a third panel", () => {
+  assert.match(consoleEngine, /export function normalizeSingleSideConsoleSlots/u);
+  assert.match(marketplaceConsole, /useMobileSingleSideConsole/u);
+  assert.match(marketplaceConsole, /normalizeSingleSideConsoleSlots\(\s*consoleSlots,\s*\{\s*side/u);
+  assert.match(marketplaceConsole, /useMobileSingleSideConsole\s*\? 2\s*: IXI_CONSOLE_MAX_DEPTH/u);
+  assert.match(marketplaceConsole, /!useMobileSingleSideConsole &&\s*!atCapacity/u);
+});
+
+test("single-side normalization preserves the real Console while moving it around the listing", () => {
+  const listing = createConsoleSlot({
+    type: IXI_CONSOLE_SLOT_TYPES.LISTING
+  });
+  const module = createConsoleSlot({
+    slotId: "module-preserved",
+    face: 3
+  });
+  const extraModule = createConsoleSlot({
+    slotId: "module-removed",
+    face: 4
+  });
+
+  const left = normalizeSingleSideConsoleSlots(
+    [module, listing, extraModule],
+    { side: "left" }
+  );
+  const right = normalizeSingleSideConsoleSlots(
+    left,
+    { side: "right" }
+  );
+
+  assert.equal(left.length, 2);
+  assert.equal(left[0].slotId, "module-preserved");
+  assert.equal(left[1].type, IXI_CONSOLE_SLOT_TYPES.LISTING);
+  assert.equal(right.length, 2);
+  assert.equal(right[0].type, IXI_CONSOLE_SLOT_TYPES.LISTING);
+  assert.equal(right[1].slotId, "module-preserved");
+  assert.equal(right[1].face, 3);
 });

@@ -24,6 +24,7 @@ import {
   IXI_CONSOLE_SLOT_TYPES,
   createConsoleSlot,
   normalizeConsoleSlots,
+  normalizeSingleSideConsoleSlots,
   insertConsoleSlot,
   removeConsoleSlot,
   cycleConsoleSlotFace,
@@ -140,7 +141,7 @@ export default function IXIMarketplaceObjectConsole({
     objectState.consoleSlots.length >
       0;
 
-  const consoleSlots =
+  const unrestrictedConsoleSlots =
     hasSavedSlotModel
       ? normalizeConsoleSlots(
           objectState.consoleSlots
@@ -148,6 +149,17 @@ export default function IXIMarketplaceObjectConsole({
       : getLegacyConsoleSlots(
           objectState
         );
+
+  const useMobileSingleSideConsole =
+    enableCardScaling &&
+    fitCardScalingToCell;
+
+  const consoleSlots =
+    useMobileSingleSideConsole
+      ? normalizeSingleSideConsoleSlots(
+          unrestrictedConsoleSlots
+        )
+      : unrestrictedConsoleSlots;
 
   const consoleDepth =
     consoleSlots.length;
@@ -169,7 +181,11 @@ export default function IXIMarketplaceObjectConsole({
 
   const atCapacity =
     consoleDepth >=
-    IXI_CONSOLE_MAX_DEPTH;
+    (
+      useMobileSingleSideConsole
+        ? 2
+        : IXI_CONSOLE_MAX_DEPTH
+    );
 
   const consoleNativeWidth =
     (
@@ -216,6 +232,19 @@ export default function IXIMarketplaceObjectConsole({
   ) {
     event?.preventDefault?.();
     event?.stopPropagation?.();
+
+    if (useMobileSingleSideConsole) {
+      saveConsoleSlots(
+        normalizeSingleSideConsoleSlots(
+          consoleSlots,
+          {
+            side
+          }
+        )
+      );
+
+      return;
+    }
 
     if (atCapacity) {
       return;
@@ -389,10 +418,12 @@ export default function IXIMarketplaceObjectConsole({
       consoleSlots.length - 1;
 
     const showLeftExpansion =
+      !useMobileSingleSideConsole &&
       !atCapacity &&
       isFirstSlot;
 
     const showRightExpansion =
+      !useMobileSingleSideConsole &&
       !atCapacity &&
       isLastSlot;
 
@@ -521,11 +552,19 @@ export default function IXIMarketplaceObjectConsole({
       consoleSlots.length - 1;
 
     const canExpandLeft =
-      !atCapacity &&
+      (
+        useMobileSingleSideConsole
+          ? !consoleLeftOpen
+          : !atCapacity
+      ) &&
       isFirstSlot;
 
     const canExpandRight =
-      !atCapacity &&
+      (
+        useMobileSingleSideConsole
+          ? !consoleRightOpen
+          : !atCapacity
+      ) &&
       isLastSlot;
 
     /*
@@ -539,11 +578,17 @@ export default function IXIMarketplaceObjectConsole({
      */
     const parentConsoleLeftOpen =
       consoleLeftOpen ||
-      atCapacity;
+      (
+        atCapacity &&
+        !useMobileSingleSideConsole
+      );
 
     const parentConsoleRightOpen =
       consoleRightOpen ||
-      atCapacity;
+      (
+        atCapacity &&
+        !useMobileSingleSideConsole
+      );
 
     const parentCard =
       typeof renderParentCard ===
