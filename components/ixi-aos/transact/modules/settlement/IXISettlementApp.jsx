@@ -998,17 +998,17 @@ export default function IXISettlementApp({
             className={`stl-row ${item.included ? "" : "muted"}`}
             key={item.ledgerItemId}
           >
-            <div className="stl-rowhead">
+            <div className="stl-rowhead stl-ledger-head">
               <strong>{item.label}</strong>
               <b>
                 {item.direction === "income" ? "+" : "−"}
                 {usd(item.amount)}
               </b>
             </div>
-            <small>
-              {item.date || "—"} ·{" "}
-              {item.counterpartyLabel || item.type.toUpperCase()} ·{" "}
-              {item.included ? t.canonical : t.excluded}
+            <small className="stl-ledger-meta">
+              <span>{item.date || "—"}</span>
+              <span>{item.counterpartyLabel || item.type.toUpperCase()}</span>
+              <span>{item.included ? t.canonical : t.excluded}</span>
             </small>
             {item.exclusionReason ? (
               <small>{item.exclusionReason}</small>
