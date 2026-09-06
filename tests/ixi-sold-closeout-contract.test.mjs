@@ -27,6 +27,13 @@ test("SOLD carries the canonical Invoice identity and commercial terms forward",
       sourceInvoice,
       buyerLabel: "Clements Farm",
       saleDate: "2026-09-06",
+      billOfSaleNumber: "BOS-1001",
+      documents: [{
+        type: "bill-of-sale",
+        status: "verified",
+        storageKey: "financial-evidence/entity/ifd_invoice_1/bos.pdf",
+        verification: "server-proof",
+      }],
       receipts: [{ paymentId: "pay-1", amount: 82000, reference: "QB-DEP-1" }],
     },
   });
@@ -38,6 +45,22 @@ test("SOLD carries the canonical Invoice identity and commercial terms forward",
   assert.equal(sale.sale.buyerPoNumber, "PO-77");
   assert.equal(sale.collection.balanceDue, 0);
   assert.equal(contract.validateIXIAssetSale(sale, sourceInvoice).valid, true);
+});
+
+test("SOLD requires an authoritative Bill of Sale number and server-verified evidence", () => {
+  const baseInput = {
+    sourceInvoice,
+    buyerLabel: "Clements Farm",
+    saleDate: "2026-09-06",
+    receipts: [{ paymentId: "pay-1", amount: 82000, reference: "QB-DEP-1" }],
+  };
+  const missing = contract.createIXIAssetSaleDraft({
+    context: { primary: { passportId: "IXI544KII" } },
+    input: baseInput,
+  });
+  assert.equal(contract.validateIXIAssetSale(missing, sourceInvoice).valid, false);
+  assert.equal(contract.validateIXIAssetSale(missing, sourceInvoice).errors.billOfSaleNumber, "required");
+  assert.equal(contract.validateIXIAssetSale(missing, sourceInvoice).errors.billOfSaleDocument, "server-verified-bill-of-sale-required");
 });
 
 test("SOLD rejects open balances and ignores non-final consideration", () => {
