@@ -53,7 +53,7 @@ test("Sales Order and Invoice are separate launcher entries with canonical forms
   assert.match(shell, /onOpenDeal=\{openSalesStage\}/u);
   assert.match(shell, /stageId: "invoice"/u);
   assert.match(app, /entryMode === "invoice"/u);
-  assert.match(app, /if \(entryMode === "sales-order"\) return initialRecord \|\| base/u);
+  assert.match(app, /hydrateIXIEquipmentSaleRecord\(\{ context, record: initialRecord \}\)/u);
   assert.match(app, /signedPackageHash/u);
   assert.match(app, /invoiceDisplayNumber/u);
   assert.match(app, /className="es-card-form"/u);
