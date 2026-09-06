@@ -1,4 +1,4 @@
-name: Deploy IX-Core AOS objects production
+name: Deploy IX-Core commercial onboarding production
 
 on:
   workflow_dispatch:
@@ -6,7 +6,7 @@ on:
       commit_sha:
         description: Immutable IX-Core commit SHA
         required: true
-        default: c5d41fccae5f7966be8aa7178e74beb0120ab687
+        default: 438d99a1b342c53544024ae54460657c9442af09
   push:
     branches:
       - main
@@ -27,7 +27,7 @@ jobs:
     env:
       AWS_REGION: ${{ secrets.AWS_REGION }}
       AWS_INSTANCE_ID: ${{ secrets.AWS_INSTANCE_ID }}
-      IXI_CORE_SHA: ${{ inputs.commit_sha || 'c5d41fccae5f7966be8aa7178e74beb0120ab687' }}
+      IXI_CORE_SHA: ${{ inputs.commit_sha || '438d99a1b342c53544024ae54460657c9442af09' }}
 
     steps:
       - name: Validate immutable release
@@ -54,7 +54,7 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Deploy guarded AOS object runtime
+      - name: Deploy guarded commercial onboarding runtime
         id: deploy
         shell: bash
         run: |
@@ -65,11 +65,12 @@ jobs:
 
           APP=/var/www/ix-core
           RELEASE_SHA=__IXI_CORE_SHA__
-          STAGE=/tmp/ixi-core-aos-release-__IXI_CORE_SHA__
-          ARCHIVE=/tmp/ixi-core-aos-release-__IXI_CORE_SHA__.tgz
+          STAGE=/tmp/ixi-core-onboarding-release-__IXI_CORE_SHA__
+          ARCHIVE=/tmp/ixi-core-onboarding-release-__IXI_CORE_SHA__.tgz
           BACKUP_ROOT=/var/backups/ixi-core-releases
-          BACKUP=$BACKUP_ROOT/pre-aos-__IXI_CORE_SHA__.tgz
-          MANAGED_FILES='mos/objects/objectService.js mos/routes/mosRouter.js'
+          BACKUP=$BACKUP_ROOT/pre-onboarding-__IXI_CORE_SHA__.tgz
+          MANAGED_EXISTING='identity/IXIPassportIdentityBridge.js mos/accounts/aosAccountService.js mos/provisioning/aosObjectPassportService.js mos/provisioning/aosObjectProvisioningService.js mos/provisioning/aosObjectProvisioningValidator.js mos/routes/mosRouter.js mos/security/internalTenantBoundaryService.js'
+          MANAGED_ADDED='mos/onboarding/aosCommercialOnboardingService.js mos/onboarding/sharetribeMachineProvisioningService.js'
           SUCCESS=0
 
           run_pm2() {
@@ -86,8 +87,9 @@ jobs:
             fi
 
             if [ -f "$BACKUP" ]; then
-              echo 'Deployment failed after backup; restoring the previous AOS object runtime.' >&2
+              echo 'Deployment failed after backup; restoring the previous commercial onboarding runtime.' >&2
               cd "$APP"
+              rm -f $MANAGED_ADDED
               tar -xzf "$BACKUP"
               run_pm2 reload IX-Core --update-env || run_pm2 restart IX-Core --update-env || true
             fi
@@ -121,14 +123,13 @@ jobs:
 
           trap rollback EXIT
 
-          verify_managed_file \
-            mos/objects/objectService.js \
-            9ecb7fe8524a45550a8922f79ae42360a3522d69a163b9a81aa89c71e71632c4 \
-            8f2d8a98ff269005d2dcd04bd65786f8a191f1c4f365f0a272e68f5dce2b9cb8
-          verify_managed_file \
-            mos/routes/mosRouter.js \
-            bbdb5427430e459e5acfb283d67b446c2c820ed064c3c203089cd27d9f975303 \
-            b583bb6e385740935db7a94ddf005f54834694df245dd848d1b6e952edde3d40
+          verify_managed_file identity/IXIPassportIdentityBridge.js 12bc7cc2a3ea27e186fa0b238a63d02718973461042c9f9306dafd174f2aeeea 4ef853160482fc593df06a4517d0a92465ec5df896a255d03af77d1379915f82
+          verify_managed_file mos/accounts/aosAccountService.js c30397c207bf469881ca8cde70ec3612fd612bfecf20346106e0cfaf4f078023 cdc69ae7632eb197d738bb441723a11ae1295be42cd318d2c49fe7d0503e3237
+          verify_managed_file mos/provisioning/aosObjectPassportService.js 750d4594d4dec4977841536df5cc10e3927da11d3756e2edbcec47f2075ace7b d839c61b164574a94ed23fd4d960c08caaffb99ddfa9bfe6eab516c0fcdf0893
+          verify_managed_file mos/provisioning/aosObjectProvisioningService.js 9d0565ab55587cd15b525b4a47cdbdb31c1c5b28fb96dd42badd39effcd1e254 edbab67e4319a4ee53bc20cb3b535b4a3aaf441cbd35cd6ad93d5d5c703e184b
+          verify_managed_file mos/provisioning/aosObjectProvisioningValidator.js 984c43ceab764bc1b9b5cc9c59e1dd80950b50756427a577bc7e836925df92f3 85ba5da1f05fcc9ff9c3da6f764eb96291ab304e7ec1cfa028270850c649710d
+          verify_managed_file mos/routes/mosRouter.js b583bb6e385740935db7a94ddf005f54834694df245dd848d1b6e952edde3d40 c5bf7c92376e74463deb0740a1435a61b0cf560d9e2c08c4b814dd8519068211
+          verify_managed_file mos/security/internalTenantBoundaryService.js 4aa19fd6a9f55914a7f4629723c05141244e2672394e518ef6ebfd4500765c08 1ff93b3233f37670effc6c3ae45048202e4a1e840d03bdbb1229780271ea551a
 
           rm -rf "$STAGE"
           mkdir -p "$STAGE" "$BACKUP_ROOT"
@@ -140,14 +141,15 @@ jobs:
           cd "$STAGE"
           npm ci --ignore-scripts
           npm test
-          node --test mos/tests/objectMutationContract.test.js
-          node --check mos/objects/objectService.js
+          node --test mos/tests/commercialOnboarding.test.js mos/tests/sharetribeMachineProvisioning.test.js
+          node --check mos/onboarding/aosCommercialOnboardingService.js
+          node --check mos/onboarding/sharetribeMachineProvisioningService.js
           node --check mos/routes/mosRouter.js
 
           cd "$APP"
-          tar -czf "$BACKUP" $MANAGED_FILES
+          tar -czf "$BACKUP" $MANAGED_EXISTING
 
-          for file in $MANAGED_FILES; do
+          for file in $MANAGED_EXISTING $MANAGED_ADDED; do
             install -D -m 0644 "$STAGE/$file" "$APP/$file"
           done
 
@@ -163,10 +165,22 @@ jobs:
             sleep 2
           done
 
+          route_status="$(curl -sS -o "$STAGE/bootstrap-route.json" -w '%{http_code}' \
+            -X POST -H 'Content-Type: application/json' -d '{}' \
+            http://127.0.0.1:4100/mos/v1/aos/onboarding/bootstrap)"
+          case "$route_status" in
+            400|401|403) ;;
+            *)
+              echo "Protected onboarding bootstrap route returned unexpected HTTP $route_status" >&2
+              cat "$STAGE/bootstrap-route.json" >&2 || true
+              exit 1
+              ;;
+          esac
+
           SUCCESS=1
           trap - EXIT
           rm -rf "$STAGE" "$ARCHIVE"
-          printf 'IX-Core AOS object runtime %s deployed; health=200\n' "$RELEASE_SHA"
+          printf 'IX-Core commercial onboarding runtime %s deployed; health=200; bootstrap-route=%s\n' "$RELEASE_SHA" "$route_status"
           REMOTE_SCRIPT
           )"
 
@@ -176,7 +190,7 @@ jobs:
             --region "$AWS_REGION" \
             --instance-ids "$AWS_INSTANCE_ID" \
             --document-name AWS-RunShellScript \
-            --comment "Deploy immutable IX-Core AOS object runtime $IXI_CORE_SHA" \
+            --comment "Deploy immutable IX-Core commercial onboarding runtime $IXI_CORE_SHA" \
             --parameters "$parameters" \
             --query 'Command.CommandId' \
             --output text)"
@@ -207,7 +221,7 @@ jobs:
         run: |
           command_id="${{ steps.deploy.outputs.command_id }}"
           {
-            echo '## IX-Core AOS object deployment'
+            echo '## IX-Core commercial onboarding deployment'
             if [ -z "$command_id" ]; then
               echo '- SSM command was not created.'
             else
