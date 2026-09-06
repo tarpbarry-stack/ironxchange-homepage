@@ -121,6 +121,7 @@ export default function IXIAssetSaleApp({
   sourceInvoice = null,
   financialRecords = [],
   initialRecord = null,
+  stageRail = null,
   language = "en",
   onBack = null,
   onRecordChange = null,
@@ -342,17 +343,27 @@ export default function IXIAssetSaleApp({
   const shownRecord = record || preview;
   const shownCollection = record?.collection || collection;
 
+  const headerStatus = record ? "SOLD" : readyToClose ? "READY" : "OPEN";
+
   return <div className="ixi-sale">
     <div className="sale-top">
+      <button type="button" className="sale-back" aria-label="Back to TRAN$ACT apps" onClick={() => onBack?.()}>‹</button>
       <div>
         <div className="sale-k">IXI TRAN$ACT</div>
         <div className="sale-title">{copy.title}</div>
-        <div className="sale-id">{record?.identity?.number || clean(invoiceSnapshot?.documentNumber)}</div>
       </div>
-      <div className="sale-lang">
-        <button type="button" className={lang === "en" ? "on" : ""} onClick={() => setLang("en")}>ENG</button>
-        <button type="button" className={lang === "es" ? "on" : ""} onClick={() => setLang("es")}>ESP</button>
+      <div className="sale-head-actions">
+        <div className="sale-lang">
+          <button type="button" className={lang === "en" ? "on" : ""} onClick={() => setLang("en")}>ENG</button>
+          <button type="button" className={lang === "es" ? "on" : ""} onClick={() => setLang("es")}>ESP</button>
+        </div>
+        <i>{headerStatus}</i>
       </div>
+    </div>
+    {stageRail}
+    <div className="sale-card-record">
+      <span>{record?.identity?.number || clean(invoiceSnapshot?.documentNumber) || "SOLD"}</span>
+      <strong>{money(shownCollection.invoiceTotal || shownRecord.sale?.salePrice)}</strong>
     </div>
 
     <div className="sale-context">

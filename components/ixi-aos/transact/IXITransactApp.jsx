@@ -1387,14 +1387,6 @@ export default function IXITransactApp({
   else if (moduleId === "sold")
     body = (
       <div className="ixi-sales-detail">
-        {selectedSalesDeal ? (
-          <IXISalesStageRail
-            deal={selectedSalesDeal}
-            activeStageId={activeSalesStageId}
-            onOpenStage={openSalesStage}
-            onStartStage={startSalesStage}
-          />
-        ) : null}
         <IXIAssetSaleApp
           key={`sold:${salesRoute?.dealId || selectedSalesDeal?.dealId || "new"}:${salesRoute?.documentId || ""}`}
           context={context}
@@ -1403,6 +1395,16 @@ export default function IXITransactApp({
           sourceInvoice={selectedSalesInvoiceSnapshot}
           financialRecords={salesFinancialRecords}
           initialRecord={selectedSaleSnapshot}
+          stageRail={
+            selectedSalesDeal ? (
+              <IXISalesStageRail
+                deal={selectedSalesDeal}
+                activeStageId={activeSalesStageId}
+                onOpenStage={openSalesStage}
+                onStartStage={startSalesStage}
+              />
+            ) : null
+          }
           onBack={back}
           onRecordChange={async (record, changePayload, sourceContext) => {
             if (changePayload?.action === "record-sold")
@@ -1648,14 +1650,6 @@ export default function IXITransactApp({
   else if (moduleId === "settlement")
     body = (
       <div className="ixi-sales-detail">
-        {selectedSalesDeal ? (
-          <IXISalesStageRail
-            deal={selectedSalesDeal}
-            activeStageId={activeSalesStageId}
-            onOpenStage={openSalesStage}
-            onStartStage={startSalesStage}
-          />
-        ) : null}
         <IXISettlementApp
           key={`settlement:${salesRoute?.dealId || selectedSalesDeal?.dealId || "new"}:${salesRoute?.documentId || ""}`}
           context={context}
@@ -1674,6 +1668,16 @@ export default function IXITransactApp({
                 []
           }
           initialRecord={selectedSettlementSnapshot}
+          stageRail={
+            selectedSalesDeal ? (
+              <IXISalesStageRail
+                deal={selectedSalesDeal}
+                activeStageId={activeSalesStageId}
+                onOpenStage={openSalesStage}
+                onStartStage={startSalesStage}
+              />
+            ) : null
+          }
           onBack={back}
           onRecordChange={async (record, changePayload, sourceContext) => {
             setSettlementSnapshot(record);

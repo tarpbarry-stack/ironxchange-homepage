@@ -286,6 +286,7 @@ export default function IXISettlementApp({
   acquisition = null,
   financialRecords = [],
   initialRecord = null,
+  stageRail = null,
   language = "en",
   onBack = null,
   onRecordChange = null,
@@ -780,7 +781,8 @@ export default function IXISettlementApp({
   if (!clean(resolvedSale.identity?.saleId || resolvedSale.identity?.number))
     return (
       <div className="ixi-stl">
-        <Header t={t} lang={lang} setLang={setLang} />
+        <Header t={t} lang={lang} setLang={setLang} onBack={onBack} status="OPEN" />
+        {stageRail}
         <div className="stl-blockers">
           {lang === "es"
             ? "SE REQUIERE LA VENTA. REGISTRE VENDIDO ANTES DE LIQUIDAR."
@@ -800,8 +802,14 @@ export default function IXISettlementApp({
           t={t}
           lang={lang}
           setLang={setLang}
-          id={record.identity?.number}
+          onBack={onBack}
+          status={clean(record.status).toUpperCase() || "READY"}
         />
+        {stageRail}
+        <div className="stl-card-record">
+          <span>{record.identity?.number || record.references?.saleNumber || "SETTLEMENT"}</span>
+          <strong>{usd(record.projection?.salePrice)}</strong>
+        </div>
         <div className="stl-context">
           <strong>{record.context?.assetLabel}</strong>
           <small>
@@ -954,8 +962,14 @@ export default function IXISettlementApp({
         t={t}
         lang={lang}
         setLang={setLang}
-        id={record?.identity?.number}
+        onBack={onBack}
+        status={blockers.length ? "OPEN" : "READY"}
       />
+      {stageRail}
+      <div className="stl-card-record">
+        <span>{resolvedSale.identity?.number || "NEW SETTLEMENT"}</span>
+        <strong>{usd(projection.salePrice)}</strong>
+      </div>
       <div className="stl-context">
         <strong>
           {resolvedSale.context?.assetLabel || context.primary?.label}
@@ -1239,27 +1253,37 @@ export default function IXISettlementApp({
   );
 }
 
-function Header({ t, lang, setLang, id = "" }) {
+function Header({ t, lang, setLang, onBack, status }) {
   return (
     <div className="stl-top">
+      <button
+        type="button"
+        className="stl-back"
+        aria-label="Back to TRAN$ACT apps"
+        onClick={() => onBack?.()}
+      >
+        ‹
+      </button>
       <div>
         <div className="stl-k">IXI TRAN$ACT</div>
         <div className="stl-title">{t.title}</div>
-        {id ? <div className="stl-id">{id}</div> : null}
       </div>
-      <div className="stl-lang">
-        <button
-          className={lang === "en" ? "on" : ""}
-          onClick={() => setLang("en")}
-        >
-          ENG
-        </button>
-        <button
-          className={lang === "es" ? "on" : ""}
-          onClick={() => setLang("es")}
-        >
-          ESP
-        </button>
+      <div className="stl-head-actions">
+        <div className="stl-lang">
+          <button
+            className={lang === "en" ? "on" : ""}
+            onClick={() => setLang("en")}
+          >
+            ENG
+          </button>
+          <button
+            className={lang === "es" ? "on" : ""}
+            onClick={() => setLang("es")}
+          >
+            ESP
+          </button>
+        </div>
+        <i>{status}</i>
       </div>
     </div>
   );

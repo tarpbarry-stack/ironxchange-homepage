@@ -9,24 +9,29 @@ export default function IXISettlementStyles() {
         width: 100%;
         min-height: 100%;
         color: #f3f4ef;
-        font-family:
-          "Arial Narrow",
-          Arial,
-          sans-serif;
+        font-family: Arial, sans-serif;
       }
       .stl-top {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        gap: 6px;
-        padding: 2px 1px 7px;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        display: grid;
+        grid-template-columns: 30px minmax(0, 1fr) auto;
+        align-items: center;
+        gap: 7px;
+        padding: 8px 10px;
+        border-bottom: 1px solid #303030;
+      }
+      .stl-back {
+        border: 0;
+        background: transparent;
+        color: #ffc400;
+        font-size: 24px;
+        line-height: 1;
+        cursor: pointer;
       }
       .stl-k {
-        color: #ffc400;
-        font-size: 7px;
-        font-weight: 950;
-        letter-spacing: 0.12em;
+        color: #999;
+        font-size: 9px;
+        font-weight: 800;
+        letter-spacing: 1.2px;
       }
       .stl-title {
         margin-top: 2px;
@@ -40,6 +45,24 @@ export default function IXISettlementStyles() {
         font-size: 6px;
         font-weight: 900;
       }
+      .stl-head-actions {
+        display: flex;
+        align-items: flex-end;
+        flex-direction: column;
+        gap: 3px;
+      }
+      .stl-head-actions > i {
+        padding: 5px 7px;
+        background: #ffc400;
+        color: #080808;
+        font-size: 8px;
+        font-style: normal;
+        font-weight: 950;
+      }
+      .stl-lang {
+        display: flex;
+        gap: 2px;
+      }
       .stl-lang button {
         border: 0;
         background: transparent;
@@ -50,6 +73,31 @@ export default function IXISettlementStyles() {
       }
       .stl-lang button.on {
         color: #ffc400;
+      }
+      .stl-card-record {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        padding: 5px 10px;
+        border-block: 1px solid #242424;
+        background: #111;
+      }
+      .stl-card-record span {
+        min-width: 0;
+        overflow: hidden;
+        color: #999;
+        font-size: 9px;
+        letter-spacing: 1.2px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .stl-card-record strong {
+        flex: none;
+        color: #ffc400;
+        font-size: 15px;
+        font-variant-numeric: tabular-nums;
+        white-space: nowrap;
       }
       .stl-context {
         margin: 7px 0;
@@ -66,14 +114,14 @@ export default function IXISettlementStyles() {
         display: block;
       }
       .stl-context strong {
-        font-size: 10px;
+        font-size: 11px;
         line-height: 1.2;
         overflow-wrap: anywhere;
       }
       .stl-context small {
         margin-top: 2px;
         color: #aaa;
-        font-size: 6px;
+        font-size: 7px;
         font-weight: 850;
       }
       .stl-section {
@@ -81,7 +129,7 @@ export default function IXISettlementStyles() {
         padding-bottom: 2px;
         border-bottom: 1px solid rgba(255, 196, 0, 0.22);
         color: #ffc400;
-        font-size: 6px;
+        font-size: 7.5px;
         font-weight: 950;
         letter-spacing: 0.12em;
       }
@@ -90,29 +138,29 @@ export default function IXISettlementStyles() {
         justify-content: space-between;
         align-items: baseline;
         gap: 8px;
-        padding: 4px 6px;
+        padding: 5px 6px;
         border-bottom: 1px solid rgba(255, 255, 255, 0.05);
       }
       .stl-money span {
         color: #aaa;
         min-width: 0;
-        font-size: 5.5px;
+        font-size: 6.5px;
         font-weight: 900;
       }
       .stl-money b {
         flex: none;
-        font-size: 7px;
+        font-size: 8px;
         font-variant-numeric: tabular-nums;
         white-space: nowrap;
       }
       .stl-money.big b {
         color: #ffc400;
-        font-size: 13px;
+        font-size: 15px;
       }
       .stl-row {
         min-width: 0;
-        margin: 4px 0;
-        padding: 6px;
+        margin: 5px 0;
+        padding: 7px;
         border: 1px solid rgba(255, 255, 255, 0.07);
         border-radius: 4px;
         background: rgba(255, 255, 255, 0.018);
@@ -135,13 +183,13 @@ export default function IXISettlementStyles() {
       }
       .stl-row strong,
       .stl-row b {
-        font-size: 7px;
+        font-size: 8px;
       }
       .stl-row small {
         display: block;
         margin-top: 2px;
         color: #999;
-        font-size: 5.5px;
+        font-size: 6.5px;
         font-weight: 800;
         line-height: 1.35;
         overflow-wrap: anywhere;
@@ -152,7 +200,7 @@ export default function IXISettlementStyles() {
       }
       .stl-ledger-head > b {
         justify-self: end;
-        font-size: 8px;
+        font-size: 9px;
       }
       .stl-ledger-meta {
         display: flex !important;
@@ -166,13 +214,15 @@ export default function IXISettlementStyles() {
         opacity: 0.55;
       }
       .stl-field {
-        margin: 4px 0;
+        margin: 5px 0;
       }
       .stl-field label {
         display: block;
         margin-bottom: 2px;
         color: #aaa;
-        font-size: 5.5px;
+        min-height: 9px;
+        font-size: 6.5px;
+        line-height: 1.25;
         font-weight: 950;
       }
       .stl-field input,
@@ -180,20 +230,20 @@ export default function IXISettlementStyles() {
       .stl-field textarea {
         width: 100%;
         min-width: 0;
-        min-height: 27px;
+        min-height: 30px;
         border: 1px solid rgba(255, 255, 255, 0.11);
         border-radius: 4px;
         background: #0d100f;
         color: #f3f4ef;
-        padding: 5px 6px;
+        padding: 6px 7px;
         font:
-          800 8px "Arial Narrow",
+          800 9px Arial,
           Arial,
           sans-serif;
         outline: none;
       }
       .stl-field textarea {
-        min-height: 44px;
+        min-height: 48px;
         resize: vertical;
       }
       .stl-grid {
@@ -205,10 +255,10 @@ export default function IXISettlementStyles() {
       .stl-secondary,
       .stl-danger {
         width: 100%;
-        min-height: 31px;
-        margin-top: 6px;
+        min-height: 36px;
+        margin-top: 7px;
         border-radius: 4px;
-        font-size: 7px;
+        font-size: 8.5px;
         font-weight: 950;
       }
       .stl-primary {
@@ -230,23 +280,23 @@ export default function IXISettlementStyles() {
         color: #ff8585;
       }
       .stl-small {
-        min-height: 27px;
+        min-height: 31px;
       }
       .stl-check {
         display: flex;
         align-items: center;
         gap: 5px;
         color: #ddd;
-        font-size: 6px;
+        font-size: 7px;
       }
       .stl-check input {
         width: 13px;
         height: 13px;
       }
       .stl-help {
-        padding: 6px;
+        padding: 7px;
         color: #bbb;
-        font-size: 6px;
+        font-size: 7px;
         line-height: 1.4;
       }
       .stl-status {
@@ -257,7 +307,7 @@ export default function IXISettlementStyles() {
         background: #0b0d0c;
       }
       .stl-status strong {
-        font-size: 10px;
+        font-size: 11px;
         color: #ffc400;
       }
       .stl-status.ok strong {
@@ -265,11 +315,11 @@ export default function IXISettlementStyles() {
       }
       .stl-blockers {
         margin: 6px 0;
-        padding: 6px;
+        padding: 7px;
         border: 1px solid rgba(255, 76, 76, 0.32);
         border-radius: 4px;
         color: #ff8585;
-        font-size: 6px;
+        font-size: 7px;
         font-weight: 900;
         line-height: 1.4;
       }
@@ -284,7 +334,7 @@ export default function IXISettlementStyles() {
       .stl-foot {
         margin: 7px 2px;
         color: #777;
-        font-size: 5px;
+        font-size: 6px;
         font-weight: 800;
         text-align: center;
         line-height: 1.3;
