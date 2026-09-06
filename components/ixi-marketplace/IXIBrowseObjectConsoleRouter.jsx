@@ -3,6 +3,9 @@ import dynamic from "next/dynamic";
 import IXIScaledCardShell
   from "../ixi-machine-object/IXIScaledCardShell";
 
+import IXIFitWidthObjectShell
+  from "../ixi-mobile/IXIFitWidthObjectShell";
+
 import {
   IXI_CONSOLE_SLOT_TYPES,
   createConsoleSlot,
@@ -52,6 +55,7 @@ export default function IXIBrowseObjectConsoleRouter({
   ixiCardState = {},
   updateIxiCardState,
   enableCardScaling = false,
+  fitCardScalingToCell = false,
   cardScaleMode = "xl",
   renderParentCard,
   ...props
@@ -68,6 +72,9 @@ export default function IXIBrowseObjectConsoleRouter({
         ixiCardState={ixiCardState}
         enableCardScaling={
           enableCardScaling
+        }
+        fitCardScalingToCell={
+          fitCardScalingToCell
         }
         cardScaleMode={
           cardScaleMode
@@ -140,6 +147,21 @@ export default function IXIBrowseObjectConsoleRouter({
     onExpandConsoleRight: event =>
       openConsole("right", event)
   });
+
+  if (
+    enableCardScaling &&
+    fitCardScalingToCell
+  ) {
+    return (
+      <IXIFitWidthObjectShell
+        size={cardScaleMode}
+        nativeWidth={300}
+        nativeHeight={400}
+      >
+        {parentCard}
+      </IXIFitWidthObjectShell>
+    );
+  }
 
   return enableCardScaling ? (
     <IXIScaledCardShell

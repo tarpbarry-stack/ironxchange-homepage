@@ -1,6 +1,9 @@
 import IXIScaledCardShell
   from "./IXIScaledCardShell";
 
+import IXIFitWidthObjectShell
+  from "../ixi-mobile/IXIFitWidthObjectShell";
+
 import IXIObjectCardActuator
   from "../ixi-chassis/IXIObjectCardActuator";
 
@@ -117,6 +120,7 @@ export default function IXIMarketplaceObjectConsole({
   updateIxiCardState,
 
   enableCardScaling = false,
+  fitCardScalingToCell = false,
   cardScaleMode = "xl",
 
   dragHandleProps,
@@ -827,6 +831,21 @@ export default function IXIMarketplaceObjectConsole({
       `}</style>
     </div>
   );
+if (
+  enableCardScaling &&
+  fitCardScalingToCell
+) {
+  return (
+    <IXIFitWidthObjectShell
+      size={cardScaleMode}
+      nativeWidth={consoleNativeWidth}
+      nativeHeight={MARKETPLACE_NATIVE_HEIGHT}
+    >
+      {assembledConsole}
+    </IXIFitWidthObjectShell>
+  );
+}
+
 return enableCardScaling ? (
   <IXIScaledCardShell
     size={cardScaleMode}

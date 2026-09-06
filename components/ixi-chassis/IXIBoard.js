@@ -46,6 +46,7 @@ export default function IXIBoard({
   getSellerListingCardProps,
   SellerObjectCard,
   enableCardScaling = false,
+  fitCardScalingToCell = false,
   cardScaleMode = "xl",
   cardScaleMetrics,
    onRecoverSellerObject,
@@ -353,6 +354,14 @@ const customNativeHeight =
     customNativeSize?.height
   ) || 471;
 
+const desktopSortableStyle = {
+  width:
+    transactFootprintWidth
+      ? `${transactFootprintWidth}px`
+      : "max-content",
+  maxWidth: "none"
+};
+
 return (
  <IXISortableMachineCard
   key={id}
@@ -389,11 +398,13 @@ return (
 
     style={{
       flex: "0 0 auto",
-      width:
-        transactFootprintWidth
-          ? `${transactFootprintWidth}px`
-          : "max-content",
-      maxWidth: "none",
+      ...desktopSortableStyle,
+      ...(fitCardScalingToCell
+        ? {
+            width: "100%",
+            maxWidth: "100%"
+          }
+        : {}),
       minWidth: 0,
       alignSelf: "flex-start"
     }}
@@ -513,6 +524,10 @@ return (
 
           enableCardScaling={
             enableCardScaling
+          }
+
+          fitCardScalingToCell={
+            fitCardScalingToCell
           }
 
           cardScaleMode={

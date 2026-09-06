@@ -1563,6 +1563,8 @@ if (armedDestination === "stackBottom") {
   sendListingToBack={sendListingToBack}
   sendMachineToArmedDestination={sendMachineToArmedDestination}
   cardScaleMode={presentedCardScaleMode}
+  enableCardScaling={isMobileCardPresentation}
+  fitCardScalingToCell={isMobileCardPresentation}
 />
 
 <nav
@@ -3237,7 +3239,13 @@ outline: none;
     align-items: start;
     justify-items: center;
     overflow: visible;
-    padding: 0;
+    padding: 0 6px;
+  }
+
+  :global(.ixi-mobile-current-card-board .ixi-board-sortable-card.ixi-console-expanded) {
+    grid-column: 1 / -1;
+    width: 100% !important;
+    max-width: 100% !important;
   }
 
   :global(.ixi-mobile-current-card-board-i) {

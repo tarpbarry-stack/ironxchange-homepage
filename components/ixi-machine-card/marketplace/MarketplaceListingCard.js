@@ -1677,16 +1677,25 @@ text-align: right;
           }
 
           .price-row {
-            flex-wrap: wrap;
+            flex-wrap: nowrap;
           }
 
           .meta {
-            width: 100%;
+            width: auto;
+            min-width: 0;
           }
 
-                   .location-input {
-            width: 100%;
-            text-align: left;
+          .location-input {
+            width: 72px;
+            text-align: right;
+          }
+
+          .city-input {
+            width: 72px;
+          }
+
+          .state-input {
+            width: 30px;
           }
         }
       `}</style>
