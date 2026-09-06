@@ -28,6 +28,9 @@ export default function IXIWorkspaceEngine({
   const searchSurfaceRevealed =
   workspaceSettings?.searchSurfaceRevealed === true;
 
+  const parkBrakeOn =
+    workspaceSettings?.parkBrakeOn === true;
+
   function toggleArmedDestination(target) {
     setArmedDestination(current =>
       current === target ? "" : target
@@ -60,6 +63,19 @@ function toggleSearchSurfaceRevealed() {
       !searchSurfaceRevealed
   });
 }
+
+  function toggleParkBrake() {
+    if (
+      typeof onSaveWorkspaceSettings !==
+      "function"
+    ) {
+      return;
+    }
+
+    onSaveWorkspaceSettings({
+      parkBrakeOn: !parkBrakeOn
+    });
+  }
   
   return children({
     leftPocketMode,
@@ -82,6 +98,9 @@ function toggleSearchSurfaceRevealed() {
     toggleRailRevealed,
 
     searchSurfaceRevealed,
-    toggleSearchSurfaceRevealed
+    toggleSearchSurfaceRevealed,
+
+    parkBrakeOn,
+    toggleParkBrake
   });
 }

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 
 const COLOR_CONTROLS = [
   "none",
@@ -55,11 +55,10 @@ export default function IXIRelationshipControls({
   onToggleArmedDestination = () => {},
   onCycleActiveStackTarget = () => {},
   railRevealed = false,
-  onToggleRailRevealed = () => {}
+  onToggleRailRevealed = () => {},
+  parkBrakeOn = false,
+  onToggleParkBrake = () => {}
 }) {
-  
-  const [parkBrakeOn, setParkBrakeOn] = useState(false);
-
   const existingColors = getExistingColors(ixiCardState);
   const existingOutlines = getExistingOutlines(ixiCardState);
 
@@ -178,7 +177,7 @@ export default function IXIRelationshipControls({
           <button
             type="button"
             className={`ixi-park-brake ${parkBrakeOn ? "engaged" : ""}`}
-            onClick={() => setParkBrakeOn(current => !current)}
+            onClick={onToggleParkBrake}
             aria-label={parkBrakeOn ? "Park brake engaged" : "Park brake off"}
             title={parkBrakeOn ? "Park Brake Engaged" : "Park Brake"}
           >

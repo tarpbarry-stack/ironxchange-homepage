@@ -5,6 +5,10 @@ import {
 import {
   compactMarketplaceListing
 } from "../../lib/listings/compactMarketplaceListing";
+import {
+  getCache,
+  waitUntil
+} from "@vercel/functions";
 
 let accessTokenCache = null;
 let accessTokenExpiresAt = 0;
@@ -339,11 +343,10 @@ function buildSlug(attrs = {}, id = "") {
     .replace(/(^-|-$)/g, "");
 }
 
-export default async function handler(req, res) {
-  try {
-    const marketplaceBrowsePerformance =
-      req.query.surface ===
-        "browse-v2";
+async function buildListingsCatalogue() {
+    const timings = {};
+    const totalStartedAt = Date.now();
+    const tokenStartedAt = Date.now();
 
     // This is a public, read-only catalogue endpoint. Reusing the Sharetribe
     // integration token avoids paying for an authentication round trip on
@@ -352,11 +355,17 @@ export default async function handler(req, res) {
       useCache: true
     });
 
+    timings.tokenMs = Date.now() - tokenStartedAt;
+
+    const firstPageStartedAt = Date.now();
+
     const firstPage =
       await fetchListingsPage(
         token,
         1
       );
+
+    timings.firstPageMs = Date.now() - firstPageStartedAt;
 
     const totalPages = Number(
       firstPage.meta?.totalPages ||
@@ -365,6 +374,7 @@ export default async function handler(req, res) {
     );
 
     const remainingPages = [];
+    const remainingPagesStartedAt = Date.now();
 
     if (totalPages > 1) {
       remainingPages.push(
@@ -383,6 +393,11 @@ export default async function handler(req, res) {
         )
       );
     }
+
+    timings.remainingPagesMs =
+      Date.now() - remainingPagesStartedAt;
+
+    const normalizeStartedAt = Date.now();
 
     const pages = [
       firstPage,
@@ -611,32 +626,228 @@ keywords: Array.isArray(publicData.keywords)
         };
       });
 
-    // The catalogue changes far less often than it is read. Let Vercel serve
-    // the warm response immediately and refresh it in the background instead
-    // of rebuilding the full Sharetribe projection for every visitor.
-    res.setHeader(
-      "Cache-Control",
-      "public, s-maxage=60, stale-while-revalidate=86400"
+    timings.normalizeMs = Date.now() - normalizeStartedAt;
+    timings.totalMs = Date.now() - totalStartedAt;
+
+    return {
+      listings,
+      timings
+    };
+}
+
+const BROWSE_CACHE_KEY = "card-catalogue-v3";
+const BROWSE_CACHE_FRESH_MS = 60 * 1000;
+const BROWSE_CACHE_TTL_SECONDS = 7 * 24 * 60 * 60;
+const BROWSE_CACHE_MAX_BYTES = 1_800_000;
+
+let browseRefreshPromise = null;
+let browseMemoryFallback = null;
+
+function getBrowseRuntimeCache() {
+  return getCache({
+    namespace: "ixi-marketplace"
+  });
+}
+
+async function readBrowseCatalogueCache() {
+  try {
+    const cached = await getBrowseRuntimeCache().get(BROWSE_CACHE_KEY);
+    return cached || browseMemoryFallback;
+  } catch (error) {
+    console.warn(JSON.stringify({
+      level: "warn",
+      message: "marketplace_runtime_cache_read_failed",
+      error: error?.message || String(error)
+    }));
+
+    return browseMemoryFallback;
+  }
+}
+
+async function writeBrowseCatalogueCache(entry) {
+  browseMemoryFallback = entry;
+
+  const bytes = Buffer.byteLength(
+    JSON.stringify(entry.listings),
+    "utf8"
+  );
+
+  if (bytes > BROWSE_CACHE_MAX_BYTES) {
+    console.warn(JSON.stringify({
+      level: "warn",
+      message: "marketplace_runtime_cache_item_too_large",
+      bytes
+    }));
+    return;
+  }
+
+  try {
+    await getBrowseRuntimeCache().set(
+      BROWSE_CACHE_KEY,
+      entry,
+      {
+        ttl: BROWSE_CACHE_TTL_SECONDS,
+        tags: ["marketplace-listings"],
+        name: "IXI marketplace compact card catalogue"
+      }
     );
+  } catch (error) {
+    console.warn(JSON.stringify({
+      level: "warn",
+      message: "marketplace_runtime_cache_write_failed",
+      error: error?.message || String(error)
+    }));
+  }
+}
 
-    const responseListings =
-      marketplaceBrowsePerformance &&
-      req.query.projection === "card"
-        ? listings.map(compactMarketplaceListing)
-        : listings;
+function refreshBrowseCatalogue() {
+  if (browseRefreshPromise) return browseRefreshPromise;
 
-    res.setHeader(
-      "X-IXI-Listings-Projection",
-      responseListings === listings
-        ? "full"
-        : "card"
-    );
+  browseRefreshPromise = buildListingsCatalogue()
+    .then(async result => {
+      const entry = {
+        listings: result.listings.map(compactMarketplaceListing),
+        cachedAt: Date.now(),
+        timings: result.timings
+      };
 
-    res.status(200).json(responseListings);
+      await writeBrowseCatalogueCache(entry);
+      return entry;
+    })
+    .finally(() => {
+      browseRefreshPromise = null;
+    });
+
+  return browseRefreshPromise;
+}
+
+function scheduleBrowseRefresh() {
+  const refresh = refreshBrowseCatalogue().catch(error => {
+    console.error(JSON.stringify({
+      level: "error",
+      message: "marketplace_background_refresh_failed",
+      error: error?.message || String(error)
+    }));
+  });
+
+  try {
+    waitUntil(refresh);
+  } catch {
+    // Local Next.js execution does not always provide a request waitUntil
+    // context. The in-process promise still refreshes the development cache.
+  }
+}
+
+function setCatalogueResponseHeaders(res, {
+  projection,
+  cacheStatus,
+  timings = {}
+}) {
+  res.setHeader(
+    "Cache-Control",
+    "public, s-maxage=60, stale-while-revalidate=604800, stale-if-error=604800"
+  );
+  res.setHeader(
+    "Vercel-CDN-Cache-Control",
+    "public, s-maxage=60, stale-while-revalidate=604800, stale-if-error=604800"
+  );
+  res.setHeader("X-IXI-Listings-Projection", projection);
+  res.setHeader("X-IXI-Catalog-Cache", cacheStatus);
+
+  const serverTiming = [
+    ["cache", timings.cacheReadMs],
+    ["auth", timings.tokenMs],
+    ["sharetribe_page_1", timings.firstPageMs],
+    ["sharetribe_remaining", timings.remainingPagesMs],
+    ["normalize", timings.normalizeMs]
+  ]
+    .filter(([, duration]) => Number.isFinite(duration))
+    .map(([name, duration]) => `${name};dur=${Math.max(0, duration)}`)
+    .join(", ");
+
+  if (serverTiming) {
+    res.setHeader("Server-Timing", serverTiming);
+  }
+}
+
+export default async function handler(req, res) {
+  const requestStartedAt = Date.now();
+  const requestId = String(
+    req.headers["x-vercel-id"] ||
+    req.headers["x-request-id"] ||
+    ""
+  );
+
+  try {
+    const isBrowseCardProjection =
+      req.query.surface === "browse-v2" &&
+      req.query.projection === "card";
+
+    let responseListings;
+    let timings = {};
+    let cacheStatus = "bypass";
+
+    if (isBrowseCardProjection) {
+      const cacheReadStartedAt = Date.now();
+      const cached = await readBrowseCatalogueCache();
+      const cacheReadMs = Date.now() - cacheReadStartedAt;
+      const cacheAgeMs = cached?.cachedAt
+        ? Date.now() - Number(cached.cachedAt)
+        : Number.POSITIVE_INFINITY;
+
+      if (Array.isArray(cached?.listings)) {
+        responseListings = cached.listings;
+        timings = { cacheReadMs };
+        cacheStatus = cacheAgeMs <= BROWSE_CACHE_FRESH_MS
+          ? "hit"
+          : "stale";
+
+        if (cacheStatus === "stale") {
+          scheduleBrowseRefresh();
+        }
+      } else {
+        const refreshed = await refreshBrowseCatalogue();
+        responseListings = refreshed.listings;
+        timings = {
+          ...(refreshed.timings || {}),
+          cacheReadMs
+        };
+        cacheStatus = "miss";
+      }
+    } else {
+      const result = await buildListingsCatalogue();
+      responseListings = result.listings;
+      timings = result.timings;
+    }
+
+    setCatalogueResponseHeaders(res, {
+      projection: isBrowseCardProjection ? "card" : "full",
+      cacheStatus,
+      timings
+    });
+
+    console.log(JSON.stringify({
+      level: "info",
+      message: "marketplace_catalogue_served",
+      requestId,
+      cacheStatus,
+      projection: isBrowseCardProjection ? "card" : "full",
+      count: responseListings.length,
+      durationMs: Date.now() - requestStartedAt,
+      timings
+    }));
+
+    return res.status(200).json(responseListings);
   } catch (err) {
-    console.error("LISTINGS API ERROR:", err);
+    console.error(JSON.stringify({
+      level: "error",
+      message: "marketplace_catalogue_failed",
+      requestId,
+      error: err?.message || String(err),
+      durationMs: Date.now() - requestStartedAt
+    }));
 
-    res.status(500).json({
+    return res.status(500).json({
       error: err.message || "Listings API failed"
     });
   }

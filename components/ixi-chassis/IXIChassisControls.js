@@ -24,6 +24,10 @@ export default function IXIChassisControls({
   toggleRailRevealed = () => {},
   searchSurfaceRevealed = false,
   toggleSearchSurfaceRevealed = () => {},
+  workspaceFilterErrors = {},
+  workspaceFilterErrorMessage = "",
+  parkBrakeOn = false,
+  toggleParkBrake = () => {},
   cycleActiveStackTarget
 }) {
   return (
@@ -36,6 +40,8 @@ export default function IXIChassisControls({
   setSearchQuery={setSearchQuery}
   filters={workspaceFilters}
   setFilters={setWorkspaceFilters}
+  filterErrors={workspaceFilterErrors}
+  filterErrorMessage={workspaceFilterErrorMessage}
   sortMode={savedBoardMode}
   setSortMode={setSavedBoardMode}
   pocketThumbSize={pocketThumbSize}
@@ -72,6 +78,8 @@ export default function IXIChassisControls({
   railRevealed={railRevealed}
   onToggleRailRevealed={toggleRailRevealed}
   onCycleActiveStackTarget={cycleActiveStackTarget}
+  parkBrakeOn={parkBrakeOn}
+  onToggleParkBrake={toggleParkBrake}
 />
       </IXIControlSurface>
 

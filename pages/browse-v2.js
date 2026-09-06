@@ -103,6 +103,11 @@ import loadIXIListingsEnvironment from "../lib/listings/IXIListingsEngine";
 import {
   sendMachineToTheater
 } from "../lib/ixiTheaterQueue";
+import {
+  matchesMarketplaceRanges,
+  sortMarketplaceListings,
+  validateMarketplaceRangeFilters
+} from "../lib/marketplace/marketplaceBrowseFilters.mjs";
 
 import {
   IXI_COMMANDS
@@ -127,7 +132,7 @@ export default function BrowseV2() {
   const [sdk, setSdk] = useState(null);
 
   const [searchQuery, setSearchQuery] = useState("");
-const [workspaceFilters, setWorkspaceFilters] = useState({
+const initialWorkspaceFilters = {
   category: "ALL CATEGORIES",
   make: "ALL MAKES",
   model: "ALL MODELS",
@@ -138,7 +143,37 @@ const [workspaceFilters, setWorkspaceFilters] = useState({
   priceMax: "",
   hoursMin: "",
   hoursMax: ""
-});
+};
+const [workspaceFilters, setWorkspaceFiltersState] = useState(
+  initialWorkspaceFilters
+);
+const [appliedWorkspaceRanges, setAppliedWorkspaceRanges] = useState(
+  validateMarketplaceRangeFilters(initialWorkspaceFilters).values
+);
+
+const workspaceRangeValidation = useMemo(
+  () => validateMarketplaceRangeFilters(workspaceFilters),
+  [workspaceFilters]
+);
+
+function setWorkspaceFilters(nextFilters) {
+  const resolvedFilters =
+    typeof nextFilters === "function"
+      ? nextFilters(workspaceFilters)
+      : nextFilters;
+
+  const validation = validateMarketplaceRangeFilters(
+    resolvedFilters
+  );
+
+  setWorkspaceFiltersState(resolvedFilters);
+
+  // Invalid edits remain visible for correction, while the last valid
+  // range continues driving results. A typo must never blank the board.
+  if (validation.valid) {
+    setAppliedWorkspaceRanges(validation.values);
+  }
+}
 
   const [savedBoardMode, setSavedBoardMode] = useState("saved");
   const [savedBoardListings, setSavedBoardListings] = useState([]);
@@ -215,12 +250,49 @@ useEffect(() => {
   const hasAppliedRemoteLayoutRef = useRef(false);
   const inventoryRequestIdRef = useRef(0);
   
-  const [activeDndId, setActiveDndId] = useState("");
+const [activeDndId, setActiveDndId] = useState("");
+const [workspaceNotice, setWorkspaceNotice] = useState("");
+const workspaceNoticeTimerRef = useRef(null);
 
-const handleWorkspaceDragStart =
+const parkBrakeOn =
+  workspaceSettings?.parkBrakeOn === true;
+
+function showParkBrakeNotice() {
+  setWorkspaceNotice("PARK BRAKE ENGAGED");
+
+  if (workspaceNoticeTimerRef.current) {
+    clearTimeout(workspaceNoticeTimerRef.current);
+  }
+
+  workspaceNoticeTimerRef.current = setTimeout(() => {
+    setWorkspaceNotice("");
+    workspaceNoticeTimerRef.current = null;
+  }, 1600);
+}
+
+function blockMechanicalMutation() {
+  if (!parkBrakeOn) return false;
+  showParkBrakeNotice();
+  return true;
+}
+
+useEffect(() => {
+  return () => {
+    if (workspaceNoticeTimerRef.current) {
+      clearTimeout(workspaceNoticeTimerRef.current);
+    }
+  };
+}, []);
+
+const startWorkspaceDrag =
   createWorkspaceDragStartHandler({
     setActiveDndId
   });
+
+function handleWorkspaceDragStart(event) {
+  if (blockMechanicalMutation()) return;
+  startWorkspaceDrag(event);
+}
 
 const handleWorkspaceDragCancel =
   createWorkspaceDragCancelHandler({
@@ -229,6 +301,12 @@ const handleWorkspaceDragCancel =
   });
 
 function handleWorkspaceDragEnd(event) {
+  if (blockMechanicalMutation()) {
+    setActiveDndId("");
+    clearMachineDragState();
+    return;
+  }
+
   const dragId = String(event?.active?.id || "");
   const overId = String(event?.over?.id || "");
 
@@ -604,16 +682,10 @@ const matchesIxiColor =
   ixiColorFilters.length === 0 ||
   ixiColorFilters.includes(ixState.color);
 
-const yearValue = Number(item.year || item.publicData?.year || 0);
-const priceValue = Number(String(item.price || "").replace(/[^0-9]/g, ""));
-const hoursValue = Number(String(item.hours || "").replace(/[^0-9]/g, ""));
-const matchesWorkspaceRanges =
-  (!workspaceFilters.yearMin || yearValue >= Number(workspaceFilters.yearMin)) &&
-  (!workspaceFilters.yearMax || yearValue <= Number(workspaceFilters.yearMax)) &&
-  (!workspaceFilters.priceMin || priceValue >= Number(workspaceFilters.priceMin)) &&
-  (!workspaceFilters.priceMax || priceValue <= Number(workspaceFilters.priceMax)) &&
-  (!workspaceFilters.hoursMin || hoursValue >= Number(workspaceFilters.hoursMin)) &&
-  (!workspaceFilters.hoursMax || hoursValue <= Number(workspaceFilters.hoursMax));
+const matchesWorkspaceRanges = matchesMarketplaceRanges(
+  item,
+  appliedWorkspaceRanges
+);
 
 const matchesIxiOutline =
   ixiOutlineFilter === "all" ||
@@ -630,31 +702,14 @@ return (
 );
     });
 
-return [...filtered].sort((a, b) => {
-  const priceA = Number(String(a.price || a.publicData?.price || "").replace(/[^0-9]/g, ""));
-  const priceB = Number(String(b.price || b.publicData?.price || "").replace(/[^0-9]/g, ""));
-
-  const hoursA = Number(String(a.hours || a.publicData?.hours || "").replace(/[^0-9]/g, ""));
-  const hoursB = Number(String(b.hours || b.publicData?.hours || "").replace(/[^0-9]/g, ""));
-
-  const yearA = Number(a.year || a.publicData?.year || 0);
-  const yearB = Number(b.year || b.publicData?.year || 0);
-
-  if (savedBoardMode === "price-low") return priceA - priceB;
-  if (savedBoardMode === "price-high") return priceB - priceA;
-  if (savedBoardMode === "hours-low") return hoursA - hoursB;
-  if (savedBoardMode === "hours-high") return hoursB - hoursA;
-  if (savedBoardMode === "year-new") return yearB - yearA;
-  if (savedBoardMode === "year-old") return yearA - yearB;
-
-  return 0;
-});
+return sortMarketplaceListings(filtered, savedBoardMode);
      }, [
     searchQuery,
     savedBoardMode,
     savedBoardListings,
     marketplaceListings,
     workspaceFilters,
+    appliedWorkspaceRanges,
     machineContainers,
     ixiCardState,
     ixiColorFilters,
@@ -737,6 +792,7 @@ function getMachineContainer(machineId) {
 
 function executeIXITransaction(result) {
   if (!result) return;
+  if (blockMechanicalMutation()) return false;
 
   const nextIxiCardState =
     result.nextIxiCardState || ixiCardState;
@@ -762,6 +818,7 @@ function executeIXITransaction(result) {
   });
 
   saveWorkspaceLayout(nextMachineContainers);
+  return true;
 }
   
 function moveMachineToContainer(machineId, targetContainer) {
@@ -835,6 +892,7 @@ function getListingById(machineId) {
 
   function moveListingToSlot(dragId, targetId) {
     if (!dragId || !targetId || dragId === targetId) return;
+    if (blockMechanicalMutation()) return;
 
     setSavedBoardMode("custom");
 
@@ -868,6 +926,8 @@ function getListingById(machineId) {
 }
   
 function rotatePocket(pocketKey) {
+  if (blockMechanicalMutation()) return;
+
   setMachineContainers(current => {
     const finalContainers = rotatePocketState(
       current,
@@ -995,6 +1055,8 @@ function toggleActiveStack(stackKey) {
 }
   
 function toggleActiveStackLayout(stackKey) {
+  if (blockMechanicalMutation()) return;
+
   setActiveStackLayouts(current => {
     const nextLayouts = toggleStackLayoutState(
   current,
@@ -1030,7 +1092,9 @@ function moveActiveStackToContainer(stackKey, targetContainer) {
     machineContainers
   });
 
-  executeIXITransaction(result);
+  const moved = executeIXITransaction(result);
+
+  if (!moved) return;
 
   setActiveStacksOpen(current => ({
     ...current,
@@ -1039,6 +1103,8 @@ function moveActiveStackToContainer(stackKey, targetContainer) {
 }
 
  function sendActiveStackToTheater(stackKey) {
+  if (blockMechanicalMutation()) return;
+
   const sourceContainer = getStackContainerKey(stackKey);
   const stackIds = machineContainers[sourceContainer] || [];
 
@@ -1050,6 +1116,7 @@ function moveActiveStackToContainer(stackKey, targetContainer) {
   
 function addListingToActiveStack(stackKey, listingId) {
   if (!listingId) return;
+  if (blockMechanicalMutation()) return;
 
  const targetContainer = getStackContainerKey(stackKey);
 
@@ -1088,6 +1155,8 @@ function movePocketToContainer(pocketKey, targetContainer) {
 }
 
 function movePocketToStack(pocketKey, stackKey) {
+  if (blockMechanicalMutation()) return;
+
   const targetContainer = getStackContainerKey(stackKey);
 
   movePocketToContainer(
@@ -1110,6 +1179,7 @@ function recallPocketToBoard(pocketKey) {
   
 function recallPocketMachineToBoard(machineId, pocketKey) {
   if (!machineId || !pocketKey) return;
+  if (blockMechanicalMutation()) return;
 
   setMachineContainers(current => {
     const id = String(machineId);
@@ -1250,6 +1320,9 @@ toggleRailRevealed,
 searchSurfaceRevealed,
 toggleSearchSurfaceRevealed,
 
+parkBrakeOn: workspaceParkBrakeOn,
+toggleParkBrake,
+
 cycleActiveStackTarget
 }) => {
           const handleWorkspaceDragEnd =
@@ -1266,9 +1339,21 @@ cycleActiveStackTarget
     setRightPocket2Mode,
     setActiveDndId,
     clearMachineDragState
-  });  
+  });
+
+  const guardedWorkspaceDragEnd = event => {
+    if (blockMechanicalMutation()) {
+      setActiveDndId("");
+      clearMachineDragState();
+      return;
+    }
+
+    handleWorkspaceDragEnd(event);
+  };
+
     function sendMachineToArmedDestination(listing) {
   if (!armedDestination) return;
+  if (blockMechanicalMutation()) return;
 
   const id = String(getListingId(listing));
 
@@ -1325,10 +1410,10 @@ if (armedDestination === "stackBottom") {
   <IXIDragEngine
     cardContext="marketplace"
     listingOrigin="browse"
-    sensors={sensors}
+    sensors={workspaceParkBrakeOn ? [] : sensors}
     workspaceCollisionDetection={workspaceCollisionDetection}
     handleWorkspaceDragStart={handleWorkspaceDragStart}
-    handleWorkspaceDragEnd={handleWorkspaceDragEnd}
+    handleWorkspaceDragEnd={guardedWorkspaceDragEnd}
     handleWorkspaceDragCancel={handleWorkspaceDragCancel}
     getActiveDndListing={getActiveDndListing}
     activeDndId={activeDndId}
@@ -1399,6 +1484,8 @@ if (armedDestination === "stackBottom") {
   setSearchQuery={setSearchQuery}
   workspaceFilters={workspaceFilters}
   setWorkspaceFilters={setWorkspaceFilters}
+  workspaceFilterErrors={workspaceRangeValidation.errors}
+  workspaceFilterErrorMessage={workspaceRangeValidation.message}
   savedBoardMode={savedBoardMode}
   setSavedBoardMode={setSavedBoardMode}
   pocketThumbSize={pocketThumbSize}
@@ -1415,6 +1502,8 @@ if (armedDestination === "stackBottom") {
   toggleRailRevealed={toggleRailRevealed}
   searchSurfaceRevealed={searchSurfaceRevealed}
   toggleSearchSurfaceRevealed={toggleSearchSurfaceRevealed}
+  parkBrakeOn={workspaceParkBrakeOn}
+  toggleParkBrake={toggleParkBrake}
   />
                 </div>
 
@@ -1454,6 +1543,16 @@ if (armedDestination === "stackBottom") {
  </section>
   </aside>
     </IXIChassis>
+
+{workspaceNotice ? (
+  <div
+    className="workspace-mechanical-notice"
+    role="status"
+    aria-live="polite"
+  >
+    {workspaceNotice}
+  </div>
+) : null}
 
               
 <IXIActiveStackZone
@@ -1617,6 +1716,24 @@ if (armedDestination === "stackBottom") {
             radial-gradient(circle at 50% 0%, rgba(255,196,0,.05), transparent 34%),
             linear-gradient(180deg, rgba(255,255,255,.014), rgba(255,255,255,0)),
             #0b0b0b;
+        }
+
+        .workspace-mechanical-notice {
+          position: fixed;
+          left: 50%;
+          bottom: 28px;
+          z-index: 100000;
+          transform: translateX(-50%);
+          padding: 8px 14px;
+          border: 1px solid rgba(229, 62, 62, .55);
+          border-radius: 5px;
+          background: rgba(16, 8, 8, .94);
+          color: rgba(255, 122, 122, .96);
+          box-shadow: 0 10px 28px rgba(0, 0, 0, .42);
+          font-size: 10px;
+          font-weight: 950;
+          letter-spacing: .7px;
+          pointer-events: none;
         }
 
         .inventory-state {

@@ -17,6 +17,8 @@ export default function IXSearchSurface({
   onClear = null,
   listings = [],
   hasRelationship = false,
+  filterErrors = {},
+  filterErrorMessage = "",
   searchSurfaceRevealed = false,
   onToggleSearchSurfaceRevealed = () => {}
 }) {
@@ -28,8 +30,7 @@ export default function IXSearchSurface({
     { value: "price-high", label: "PRICE ↓" },
     { value: "hours-low", label: "HOURS ↑" },
     { value: "hours-high", label: "HOURS ↓" },
-    { value: "year-new", label: "YEAR ↓" },
-    { value: "year-old", label: "YEAR ↑" }
+    { value: "year-old", label: "OLDEST" }
   ];
 
 const categories = [
@@ -79,6 +80,19 @@ const availableModels =
       ...filters,
       [key]: value
     });
+  }
+
+  function rangeInputProps(field) {
+    const error = filterErrors[field] || "";
+
+    return {
+      className: `dash-control dash-secondary ${error ? "has-error" : ""}`,
+      inputMode: "decimal",
+      "aria-invalid": error ? "true" : "false",
+      "aria-describedby": error
+        ? "marketplace-range-error"
+        : undefined
+    };
   }
 
   function clearAll() {
@@ -204,7 +218,7 @@ const availableModels =
     <div className="ix-search-secondary-row">
      <input
   type="text"
-  className="dash-control dash-secondary"
+  {...rangeInputProps("yearMin")}
   value={filters.yearMin || ""}
   onChange={(e) => updateFilter("yearMin", e.target.value)}
   placeholder="YEAR MIN"
@@ -213,7 +227,7 @@ const availableModels =
 
 <input
   type="text"
-  className="dash-control dash-secondary"
+  {...rangeInputProps("yearMax")}
   value={filters.yearMax || ""}
   onChange={(e) => updateFilter("yearMax", e.target.value)}
   placeholder="YEAR MAX"
@@ -222,7 +236,7 @@ const availableModels =
 
 <input
   type="text"
-  className="dash-control dash-secondary"
+  {...rangeInputProps("priceMin")}
   value={filters.priceMin || ""}
   onChange={(e) => updateFilter("priceMin", e.target.value)}
   placeholder="PRICE MIN"
@@ -231,7 +245,7 @@ const availableModels =
 
 <input
   type="text"
-  className="dash-control dash-secondary"
+  {...rangeInputProps("priceMax")}
   value={filters.priceMax || ""}
   onChange={(e) => updateFilter("priceMax", e.target.value)}
   placeholder="PRICE MAX"
@@ -240,7 +254,7 @@ const availableModels =
 
 <input
   type="text"
-  className="dash-control dash-secondary"
+  {...rangeInputProps("hoursMin")}
   value={filters.hoursMin || ""}
   onChange={(e) => updateFilter("hoursMin", e.target.value)}
   placeholder="HOURS MIN"
@@ -249,7 +263,7 @@ const availableModels =
 
 <input
   type="text"
-  className="dash-control dash-secondary"
+  {...rangeInputProps("hoursMax")}
   value={filters.hoursMax || ""}
   onChange={(e) => updateFilter("hoursMax", e.target.value)}
   placeholder="HOURS MAX"
@@ -275,6 +289,16 @@ const availableModels =
         aria-label="Clear"
       />
     </div>
+
+    {filterErrorMessage ? (
+      <div
+        id="marketplace-range-error"
+        className="marketplace-range-error"
+        role="alert"
+      >
+        {filterErrorMessage}
+      </div>
+    ) : null}
 
 <style jsx>{`
 .ix-search-surface {
@@ -477,6 +501,22 @@ transition:
   border-bottom-color: rgba(255,255,255,.13);
 }
 
+.dash-secondary.has-error {
+  border-bottom-color: rgba(229,62,62,.96);
+  color: rgba(255,122,122,.96);
+  box-shadow: 0 3px 8px rgba(229,62,62,.14);
+}
+
+.marketplace-range-error {
+  min-height: 12px;
+  padding-top: 4px;
+  color: rgba(255,122,122,.96);
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: .35px;
+  text-align: center;
+}
+
 .dash-secondary::placeholder {
   color: transparent;
 }
@@ -555,7 +595,4 @@ transition:
 );
 
 }
-
-
-
 

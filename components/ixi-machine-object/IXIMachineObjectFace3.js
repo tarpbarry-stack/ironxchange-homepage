@@ -1,6 +1,11 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import IXIMachineObjectActions from "./IXIMachineObjectActions";
+import {
+  calculateDealSheet,
+  parseDealSheetNumber,
+  sanitizeDealSheetDecimal
+} from "../../lib/marketplace/dealSheetMath.mjs";
 
 export default function IXIMachineObjectFace3({
   listing = {},
@@ -33,44 +38,51 @@ const [taxRate, setTaxRate] = useState("0");
 const [taxDollar, setTaxDollar] = useState(0);
 const [slipDollar, setSlipDollar] = useState(Math.round(askNumber * 0.015));
 
-const downPercent = offer ? (downDollar / offer) * 100 : 0;
-const slipPercent = offer ? (slipDollar / offer) * 100 : 0;
+const deal = useMemo(
+  () => calculateDealSheet({
+    offer,
+    downPayment: downDollar,
+    tradeCredit: trade,
+    repairs,
+    tax: taxDollar,
+    slip: slipDollar,
+    miles,
+    loadedRate,
+    permits,
+    annualRate: rate
+  }),
+  [
+    offer,
+    downDollar,
+    trade,
+    repairs,
+    taxDollar,
+    slipDollar,
+    miles,
+    loadedRate,
+    permits,
+    rate
+  ]
+);
 
-const taxPercent = offer ? (taxDollar / offer) * 100 : 0;
-const taxAmount = taxDollar;
+const downPercent = offer ? (deal.downPayment / offer) * 100 : 0;
+const slipPercent = offer ? (deal.slip / offer) * 100 : 0;
+const taxPercent = offer ? (deal.tax / offer) * 100 : 0;
 
-const freightCost =
-  Math.round((miles * loadedRate) + permits);
-  
-const totalDeal =
-  offer -
-  downDollar -
-  trade +
-  repairs +
-  taxAmount +
-  slipDollar +
-  freightCost;
-
-  const financedAmount = Math.max(totalDeal, 0);
-  const rateNumber = Number(rate) || 0;
-  
-function payment(months) {
-  const monthlyRate = rateNumber / 100 / 12;
-
-  if (!monthlyRate) {
-    return financedAmount / months;
+useEffect(() => {
+  if (downDollar !== deal.downPayment) {
+    setDownDollar(deal.downPayment);
   }
 
-  return (
-    financedAmount *
-    (monthlyRate * Math.pow(1 + monthlyRate, months)) /
-    (Math.pow(1 + monthlyRate, months) - 1)
-  );
-}
-
-const pay36 = payment(36);
-const pay48 = payment(48);
-const pay60 = payment(60);
+  if (trade !== deal.tradeCredit) {
+    setTrade(deal.tradeCredit);
+  }
+}, [
+  deal.downPayment,
+  deal.tradeCredit,
+  downDollar,
+  trade
+]);
 
 function money(value) {
   return value.toLocaleString("en-US", {
@@ -104,7 +116,7 @@ function money(value) {
           input
           value={offer}
           onChange={(v) =>
-            setOffer(Number(v.replace(/[^0-9.]/g, "")) || 0)
+            setOffer(parseDealSheetNumber(v, { maximum: 1_000_000_000 }))
           }
         />
 
@@ -127,7 +139,9 @@ function money(value) {
           input
           value={downDollar}
           onChange={(v) =>
-            setDownDollar(Number(v.replace(/[^0-9.]/g, "")) || 0)
+            setDownDollar(parseDealSheetNumber(v, {
+              maximum: Math.max(deal.purchaseTotal - trade, 0)
+            }))
           }
         />
 
@@ -136,7 +150,7 @@ function money(value) {
           input
           value={downPercent.toFixed(1)}
           onChange={(v) => {
-            const pct = Number(v.replace(/[^0-9.]/g, "")) || 0;
+            const pct = parseDealSheetNumber(v, { maximum: 100 });
             setDownDollar(Math.round(offer * (pct / 100)));
           }}
         />
@@ -146,7 +160,9 @@ function money(value) {
   input
   value={trade}
   onChange={(v) =>
-    setTrade(Number(v.replace(/[^0-9.]/g, "")) || 0)
+    setTrade(parseDealSheetNumber(v, {
+      maximum: Math.max(deal.purchaseTotal - downDollar, 0)
+    }))
   }
 />
 
@@ -155,7 +171,7 @@ function money(value) {
   input
   value={repairs}
   onChange={(v) =>
-    setRepairs(Number(v.replace(/[^0-9.]/g, "")) || 0)
+    setRepairs(parseDealSheetNumber(v, { maximum: 100_000_000 }))
   }
 />
       </div>
@@ -168,7 +184,7 @@ function money(value) {
     input
     value={miles}
     onChange={(v) =>
-      setMiles(Number(v.replace(/[^0-9.]/g, "")) || 0)
+      setMiles(parseDealSheetNumber(v, { maximum: 100_000 }))
     }
   />
 
@@ -177,7 +193,7 @@ function money(value) {
     input
     value={loadedRate}
     onChange={(v) =>
-      setLoadedRate(Number(v.replace(/[^0-9.]/g, "")) || 0)
+      setLoadedRate(parseDealSheetNumber(v, { maximum: 100 }))
     }
   />
 
@@ -186,13 +202,13 @@ function money(value) {
     input
     value={permits}
     onChange={(v) =>
-      setPermits(Number(v.replace(/[^0-9.]/g, "")) || 0)
+      setPermits(parseDealSheetNumber(v, { maximum: 1_000_000 }))
     }
   />
 
   <Row
     label="FREIGHT"
-    value={money(freightCost)}
+    value={money(deal.freight)}
   />
 </div>
 
@@ -202,7 +218,7 @@ function money(value) {
   input
   value={taxPercent.toFixed(2)}
   onChange={(v) => {
-    const pct = Number(v.replace(/[^0-9.]/g, "")) || 0;
+    const pct = parseDealSheetNumber(v, { maximum: 25 });
     setTaxDollar(Math.round(offer * (pct / 100)));
   }}
 />
@@ -212,7 +228,7 @@ function money(value) {
   input
   value={taxDollar}
   onChange={(v) =>
-    setTaxDollar(Number(v.replace(/[^0-9.]/g, "")) || 0)
+    setTaxDollar(parseDealSheetNumber(v, { maximum: 100_000_000 }))
   }
 />
 
@@ -221,7 +237,7 @@ function money(value) {
       input
       value={slipPercent.toFixed(1)}
       onChange={(v) => {
-        const pct = Number(v.replace(/[^0-9.]/g, "")) || 0;
+        const pct = parseDealSheetNumber(v, { maximum: 25 });
         setSlipDollar(Math.round(offer * (pct / 100)));
       }}
     />
@@ -231,43 +247,57 @@ function money(value) {
       input
       value={slipDollar}
       onChange={(v) =>
-        setSlipDollar(Number(v.replace(/[^0-9.]/g, "")) || 0)
+        setSlipDollar(parseDealSheetNumber(v, { maximum: 100_000_000 }))
       }
     />
   </div>
 </div>
-    <section className="mof3-total">
-  <span>TOTAL DEAL</span>
-  <strong>{money(totalDeal)}</strong>
-</section>
+    <section className="mof3-totals" aria-label="Deal totals">
+      <div>
+        <span>PURCHASE TOTAL</span>
+        <strong>{money(deal.purchaseTotal)}</strong>
+      </div>
+      <div>
+        <span>CREDITS</span>
+        <strong>{money(deal.credits)}</strong>
+      </div>
+      <div className="finance-total">
+        <span>AMOUNT TO FINANCE</span>
+        <strong>{money(deal.amountFinanced)}</strong>
+      </div>
+    </section>
 
     <section className="mof3-rate">
       <span>RATE</span>
       <input
         value={rate}
         inputMode="decimal"
+        aria-label="Estimated annual interest rate"
         onChange={(e) => {
-          const cleaned = e.target.value.replace(/[^0-9.]/g, "");
+          const cleaned = sanitizeDealSheetDecimal(
+            e.target.value,
+            { maximum: 50, decimalPlaces: 2 }
+          );
           setRate(cleaned);
         }}
       />
-      <span>%</span>
+      <span>% EST. P&amp;I</span>
     </section>
 
     <section className="mof3-payments">
       <div>
         <span>36 MO</span>
-        <strong>{money(pay36)}</strong>
+        <strong>{money(deal.payments[36])}</strong>
       </div>
 
       <div>
         <span>48 MO</span>
-        <strong>{money(pay48)}</strong>
+        <strong>{money(deal.payments[48])}</strong>
       </div>
 
       <div>
         <span>60 MO</span>
-        <strong>{money(pay60)}</strong>
+        <strong>{money(deal.payments[60])}</strong>
       </div>
     </section>
 
@@ -454,51 +484,61 @@ color: #f2f2f2;
   outline: none;
 }
 
-        .mof3-total {
-          height: 25px;
-
+        .mof3-totals {
+          min-height: 34px;
           position: relative;
-          top: 5px;
-
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          
+          top: 2px;
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          overflow: hidden;
           border: 1px solid rgba(255,196,0,.18);
           border-radius: 8px;
-
           background:
             linear-gradient(180deg, rgba(255,196,0,.07), rgba(255,196,0,.015)),
             rgba(0,0,0,.34);
-
           box-shadow:
             inset 0 1px 0 rgba(255,255,255,.035),
             0 0 12px rgba(255,196,0,.055);
         }
 
-        .mof3-total span {
+        .mof3-totals div {
+          min-width: 0;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          padding: 3px 4px;
+          border-right: 1px solid rgba(255,255,255,.06);
+        }
+
+        .mof3-totals div:last-child {
+          border-right: 0;
+        }
+
+        .mof3-totals span {
           color: rgba(255,255,255,.48);
-          font-size: 7.8px;
+          font-size: 6.7px;
           font-weight: 950;
-          letter-spacing: .55px;
-          position: relative;
-          top: -5px;
-}
+          letter-spacing: .32px;
+          white-space: nowrap;
+        }
 
-       .mof3-total strong {
-  margin-top: 0;
+        .mof3-totals strong {
+          max-width: 100%;
+          margin-top: 3px;
+          overflow: hidden;
+          color: rgba(255,255,255,.88);
+          font-size: 9px;
+          font-weight: 950;
+          line-height: 1;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
 
-  color: #FFC400;
-
-  font-size: 15px;
-  font-weight: 950;
-
-  line-height: 1;
-
-  position: relative;
-  top: -2px;
-}
+        .mof3-totals .finance-total strong {
+          color: #FFC400;
+          font-size: 10px;
+        }
 
         .mof3-rate {
   height: 18px;
@@ -588,6 +628,8 @@ function Row({
         <input
           className="mof3-input"
           value={value ?? defaultValue}
+          inputMode="decimal"
+          aria-label={label}
           onChange={(e) => onChange?.(e.target.value)}
         />
       ) : (
