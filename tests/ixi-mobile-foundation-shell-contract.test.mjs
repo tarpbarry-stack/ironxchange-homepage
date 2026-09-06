@@ -101,6 +101,9 @@ test("real Marketplace cards and assembled Consoles fit their mobile grid cell",
   assert.match(board, /fitCardScalingToCell/u);
   assert.match(fitWidthShell, /ResizeObserver/u);
   assert.match(fitWidthShell, /availableWidth \/ width/u);
+  assert.match(fitWidthShell, /getViewportAvailableWidth/u);
+  assert.match(fitWidthShell, /contain: inline-size/u);
+  assert.match(fitWidthShell, /100dvw/u);
   assert.match(browseConsoleRouter, /IXIFitWidthObjectShell/u);
   assert.match(marketplaceConsole, /nativeWidth=\{consoleNativeWidth\}/u);
 });
