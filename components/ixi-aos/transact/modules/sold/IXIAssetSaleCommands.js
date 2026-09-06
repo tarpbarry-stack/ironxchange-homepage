@@ -61,6 +61,55 @@ function canonicalInvoice(sourceInvoice = {}, response = null, financialState = 
   };
 }
 
+async function ensureInvoiceIsCollectible(sourceInvoice = {}, signal) {
+  const financialState = clean(sourceInvoice?.financialState).toLowerCase();
+  if (["billed", "partially-collected", "collected"].includes(financialState)) {
+    return { invoice: sourceInvoice, response: null };
+  }
+  if (financialState !== "draft") {
+    throw new Error("Customer payment requires a draft or issued Invoice.");
+  }
+
+  const financialDocumentId = clean(
+    sourceInvoice?.financialBinding?.financialDocumentId ||
+      sourceInvoice?.financialDocumentId,
+  );
+  const expectedRevision = Number(
+    sourceInvoice?.financialBinding?.revision || sourceInvoice?.server?.revision || 0,
+  );
+  if (!financialDocumentId || expectedRevision < 1) {
+    throw new Error("Customer payment requires the canonical Invoice.");
+  }
+
+  const issuedAt = new Date().toISOString();
+  const commandId = clean(globalThis.crypto?.randomUUID?.()) || `INV-ISSUE-${Date.now()}`;
+  const response = await patchIXIAosFinancialDocument({
+    financialDocumentId,
+    expectedRevision,
+    commandId,
+    idempotencyKey: `ixi-asset-sale-issue:${financialDocumentId}:${expectedRevision}`,
+    patch: {
+      status: "issued",
+      financialState: "billed",
+      metadata: {
+        ...(sourceInvoice?.metadata || {}),
+        invoiceStatus: "issued",
+        issuedAt,
+      },
+    },
+    metadata: {
+      transactModule: "sold",
+      action: "issue-invoice-before-receipt",
+      issuedAt,
+    },
+    signal,
+  });
+  return {
+    invoice: canonicalInvoice(sourceInvoice, response, "billed"),
+    response,
+  };
+}
+
 export async function createIXIAssetSale({
   object = {},
   context = {},
@@ -203,13 +252,15 @@ export async function recordIXIAssetSaleReceipt({
   const amount = Math.round(Number(input.amount || 0) * 100) / 100;
   if (!(amount > 0)) throw new Error("Receipt amount must be greater than zero.");
   if (!clean(input.reference)) throw new Error("Receipt reference is required.");
+  const issued = await ensureInvoiceIsCollectible(sourceInvoice, signal);
+  const collectibleInvoice = issued.invoice;
   const invoiceId = clean(
-    sourceInvoice?.financialBinding?.financialDocumentId ||
-      sourceInvoice?.financialDocumentId ||
+    collectibleInvoice?.financialBinding?.financialDocumentId ||
+      collectibleInvoice?.financialDocumentId ||
       sale?.identity?.financialInvoiceId ||
       sale?.identity?.saleId,
   );
-  const invoiceRevision = Number(sourceInvoice?.financialBinding?.revision || sourceInvoice?.server?.revision || 0);
+  const invoiceRevision = Number(collectibleInvoice?.financialBinding?.revision || collectibleInvoice?.server?.revision || 0);
   if (!invoiceId || invoiceRevision < 1) throw new Error("Customer payment requires the canonical Invoice.");
   const currentBalance = Number(sale?.collection?.balanceDue || 0);
   if (amount > currentBalance + 0.005) throw new Error("Receipt exceeds the open Invoice balance.");
@@ -219,9 +270,9 @@ export async function recordIXIAssetSaleReceipt({
     object,
     documentType: "payment",
     input: {
-      currency: clean(sourceInvoice.currency || sale?.sale?.currency || "USD"),
+      currency: clean(collectibleInvoice.currency || sale?.sale?.currency || "USD"),
       amount,
-      description: `Customer receipt · ${clean(sourceInvoice.documentNumber || sale?.sale?.invoiceNumber || invoiceId)}`,
+      description: `Customer receipt · ${clean(collectibleInvoice.documentNumber || sale?.sale?.invoiceNumber || invoiceId)}`,
       financialState: "paid",
       paymentDirection: "inflow",
       paymentMethod: clean(input.method || "wire"),
@@ -233,7 +284,7 @@ export async function recordIXIAssetSaleReceipt({
         transactModule: "sold",
         assetSalePayment: true,
         dealId: clean(sale?.identity?.dealId),
-        invoiceNumber: clean(sourceInvoice.documentNumber),
+        invoiceNumber: clean(collectibleInvoice.documentNumber),
       },
       references,
     },
@@ -273,7 +324,7 @@ export async function recordIXIAssetSaleReceipt({
       patch: {
         financialState: nextState,
         metadata: {
-          ...(sourceInvoice?.metadata || {}),
+          ...(collectibleInvoice?.metadata || {}),
           collectionStatus: nextState,
           amountReceived: Math.round((Number(sale?.collection?.amountReceived || 0) + amount) * 100) / 100,
           balanceDue: Math.round(nextBalance * 100) / 100,
@@ -288,8 +339,9 @@ export async function recordIXIAssetSaleReceipt({
   }
   return {
     response,
+    invoiceIssueResponse: issued.response,
     invoiceResponse,
-    invoice: canonicalInvoice(sourceInvoice, invoiceResponse, nextState),
+    invoice: canonicalInvoice(collectibleInvoice, invoiceResponse, nextState),
     payment,
     syncWarning,
   };
