@@ -1,10 +1,12 @@
 import { useState } from "react";
 
 import {
-  getV12CategoryNames,
-  getV12Makes,
-  getV12Models
-} from "../lib/v12TaxonomyAdapter";
+  getListingCategory,
+  getListingMake,
+  getListingModel,
+  getUniqueListingValues,
+  taxonomyKey
+} from "../lib/listings/marketplaceFilterOptions";
 
 export default function IXSearchSurfaceMobile({
   searchQuery = "",
@@ -13,7 +15,8 @@ export default function IXSearchSurfaceMobile({
   setFilters = () => {},
   sortMode = "custom",
   setSortMode = () => {},
-  onClear = null
+  onClear = null,
+  listings = []
 }) {
   const sortOptions = [
     { value: "custom", label: "SORT" },
@@ -28,7 +31,7 @@ export default function IXSearchSurfaceMobile({
 
   const categories = [
     "ALL CATEGORIES",
-    ...getV12CategoryNames()
+    ...getUniqueListingValues(listings, getListingCategory)
   ];
 
   const selectedCategory =
@@ -45,7 +48,13 @@ export default function IXSearchSurfaceMobile({
       ? ["ALL MAKES"]
       : [
           "ALL MAKES",
-          ...getV12Makes(selectedCategory)
+          ...getUniqueListingValues(
+            listings,
+            getListingMake,
+            item =>
+              taxonomyKey(getListingCategory(item)) ===
+              taxonomyKey(selectedCategory)
+          )
         ];
 
   const availableModels =
@@ -53,9 +62,14 @@ export default function IXSearchSurfaceMobile({
       ? ["ALL MODELS"]
       : [
           "ALL MODELS",
-          ...getV12Models(
-            selectedCategory,
-            selectedMake
+          ...getUniqueListingValues(
+            listings,
+            getListingModel,
+            item =>
+              (selectedCategory === "ALL CATEGORIES" ||
+                taxonomyKey(getListingCategory(item)) ===
+                  taxonomyKey(selectedCategory)) &&
+              taxonomyKey(getListingMake(item)) === taxonomyKey(selectedMake)
           )
         ];
 

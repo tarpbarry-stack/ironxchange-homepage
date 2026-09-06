@@ -310,6 +310,8 @@ const sensors = useSensors(
   }, []);
 
   useEffect(() => {
+    let cancelled = false;
+
     async function loadSavedPage() {
       try {
         const SharetribeSdk = await import("sharetribe-flex-sdk");
@@ -318,128 +320,115 @@ const sensors = useSensors(
           clientId: process.env.NEXT_PUBLIC_SHARETRIBE_CLIENT_ID
         });
 
-        setSdk(sdkInstance);
+        if (!cancelled) setSdk(sdkInstance);
 
         const currentUser =
           await fetchCurrentUserWithSavedListings(sdkInstance);
 
-        const userId =
-  currentUser?.id?.uuid ||
-  currentUser?.id ||
-  "guest";
+        const userId = String(
+          currentUser?.id?.uuid ||
+          currentUser?.id ||
+          "guest"
+        );
 
-setIxiUserId(String(userId));
+        if (cancelled) return;
 
-const remoteIxiResponse =
-  await fetchIxiMachineState(String(userId));
+        setIxiUserId(userId);
+        setSavedIds(
+          getSavedListingIdsFromUser(currentUser)
+        );
 
-const remoteIxiState =
-  remoteIxiResponse?.state || remoteIxiResponse || {};
+        // Inventory and workspace state are independent. Start both now, but
+        // paint usable seller cards as soon as the inventory response arrives.
+        const remoteStateRequest =
+          fetchIxiMachineState(userId).then(
+            value => ({ value, error: null }),
+            error => ({ value: null, error })
+          );
 
-const workspaceSettings =
-  remoteIxiState?.[IXI_WORKSPACE_SETTINGS_ID] || {};
+        const inventoryRequest = fetch(
+          `/api/account-listings?authorId=${encodeURIComponent(userId)}`
+        );
 
-setWorkspaceSettings(workspaceSettings);
+        const res = await inventoryRequest;
 
-const workspaceLayout =
-  remoteIxiState?.[IXI_WORKSPACE_LAYOUT_ID] || {};
+        if (!res.ok) {
+          throw new Error(
+            `Inventory request failed (${res.status})`
+          );
+        }
 
-console.log("IXI WORKSPACE LAYOUT LOADED", workspaceLayout);
+        const data = await res.json();
+        const rawListings = Array.isArray(data)
+          ? data
+          : [];
 
-setIxiCardState(remoteIxiState);
+        if (!cancelled) {
+          setListings(rawListings);
+        }
 
-setCardScaleMode(
-  resolveSitewideCardScaleMode(
-    workspaceSettings.cardScaleMode
-  )
-);
-        
-setSavedIds(
-  getSavedListingIdsFromUser(currentUser)
-);
+        hydrateIXIListingCollection(
+          rawListings,
+          { dedupeRequests: true }
+        ).then(hydratedListings => {
+          if (!cancelled) {
+            setListings(hydratedListings);
+          }
+        }).catch(error => {
+          console.warn(
+            "INVENTORY BACKGROUND MEDIA HYDRATION FAILED:",
+            error
+          );
+        });
 
-const res = await fetch(
-  `/api/account-listings?authorId=${encodeURIComponent(String(userId))}`
-);
+        try {
+          const remoteStateOutcome =
+            await remoteStateRequest;
 
-const data = await res.json();
+          if (remoteStateOutcome.error) {
+            throw remoteStateOutcome.error;
+          }
 
-      const firstIXIListing = Array.isArray(data)
-  ? data.find(item =>
-      item.ixiMedia ||
-      item.publicData?.ixiMedia ||
-      item.attributes?.publicData?.ixiMedia
-    )
-  : null;
+          const remoteIxiResponse =
+            remoteStateOutcome.value;
 
-console.log(
-  "FIRST INVENTORY PASSPORT DEBUG",
-  JSON.stringify(
-    {
-      title:
-        firstIXIListing?.title ||
-        firstIXIListing?.attributes?.title ||
-        "",
+          if (cancelled) return;
 
-      passportId:
-        firstIXIListing?.passportId ||
-        firstIXIListing?.publicData?.passportId ||
-        firstIXIListing?.attributes?.publicData?.passportId ||
-        "",
+          const remoteIxiState =
+            remoteIxiResponse?.state ||
+            remoteIxiResponse ||
+            {};
 
-      passportUrl:
-        firstIXIListing?.passportUrl ||
-        firstIXIListing?.publicData?.passportUrl ||
-        firstIXIListing?.attributes?.publicData?.passportUrl ||
-        "",
+          const workspaceSettings =
+            remoteIxiState?.[IXI_WORKSPACE_SETTINGS_ID] ||
+            {};
 
-      ixiMediaPassportId:
-        firstIXIListing?.ixiMedia?.passportId ||
-        firstIXIListing?.publicData?.ixiMedia?.passportId ||
-        firstIXIListing?.attributes?.publicData?.ixiMedia?.passportId ||
-        ""
-    },
-    null,
-    2
-  )
-);
-
-if (Array.isArray(data)) {
-  const hydratedListings =
-  await hydrateIXIListingCollection(data);
-
-const firstHydratedIXIListing =
-  hydratedListings.find(item =>
-    item.ixiMediaSource === "ixi"
-  );
-
-console.log(
-  "INVENTORY HYDRATED LISTING RESULT",
-  {
-    title: firstHydratedIXIListing?.title,
-    imageObjectsLength:
-      firstHydratedIXIListing?.imageObjects?.length,
-    imageUrlsLength:
-      firstHydratedIXIListing?.imageUrls?.length,
-    imagesLength:
-      firstHydratedIXIListing?.images?.length,
-    firstImageUrl:
-      firstHydratedIXIListing?.imageUrls?.[0],
-    source:
-      firstHydratedIXIListing?.ixiMediaSource
-  }
-);
-
-setListings(hydratedListings);
-}
+          setWorkspaceSettings(workspaceSettings);
+          setIxiCardState(remoteIxiState);
+          setCardScaleMode(
+            resolveSitewideCardScaleMode(
+              workspaceSettings.cardScaleMode
+            )
+          );
+        } catch (error) {
+          console.warn(
+            "INVENTORY WORKSPACE STATE UNAVAILABLE:",
+            error
+          );
+        }
 
       } catch (err) {
+        if (cancelled) return;
         console.error("Saved page load failed:", err);
         setSavedIds([]);
       }
     }
 
     loadSavedPage();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
   
   const savedListings = useMemo(() => {

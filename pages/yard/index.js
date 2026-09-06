@@ -419,7 +419,15 @@ const sensors = useSensors(
     try {
       const environment =
         await loadIXIListingsEnvironment({
-          includePrivateState: true
+          includePrivateState: true,
+          marketplaceBrowsePerformance: true,
+          progressiveMedia: true,
+          onListingsReady: nextListings => {
+            if (!cancelled) setListings(nextListings);
+          },
+          onListingsHydrated: nextListings => {
+            if (!cancelled) setListings(nextListings);
+          }
         });
 
       if (cancelled) return;

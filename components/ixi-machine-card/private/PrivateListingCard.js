@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+import dynamic from "next/dynamic";
 // DnD is owned by IXISortableMachineCard wrapper.
 
 import { captureIXEvent } from "../../../lib/posthog";
@@ -21,17 +22,25 @@ from "../../ixi-chassis/IXIObjectCardActuator";
 import IXIMachinePlacementControl
 from "../../ixi-machine-placement/IXIMachinePlacementControl";
 
-import IXIMachineObjectFace2
-from "../../ixi-machine-object/IXIMachineObjectFace2";
+const IXIMachineObjectFace2 = dynamic(
+  () => import("../../ixi-machine-object/IXIMachineObjectFace2"),
+  { ssr: false }
+);
 
-import IXISellerMachineObjectFace2
-from "../../ixi-machine-object/IXISellerMachineObjectFace2";
+const IXISellerMachineObjectFace2 = dynamic(
+  () => import("../../ixi-machine-object/IXISellerMachineObjectFace2"),
+  { ssr: false }
+);
 
-import IXIMachineObjectFace3
-from "../../ixi-machine-object/IXIMachineObjectFace3";
+const IXIMachineObjectFace3 = dynamic(
+  () => import("../../ixi-machine-object/IXIMachineObjectFace3"),
+  { ssr: false }
+);
 
-import IXIMachineObjectFace4
-from "../../ixi-machine-object/IXIMachineObjectFace4";
+const IXIMachineObjectFace4 = dynamic(
+  () => import("../../ixi-machine-object/IXIMachineObjectFace4"),
+  { ssr: false }
+);
 
 import {
   getFrameClass,

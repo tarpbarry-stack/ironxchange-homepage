@@ -8,6 +8,8 @@ export default function IXIGlobalTicketLauncher() {
 
   useEffect(() => {
     let active = true;
+    let idleId = null;
+    let timerId = null;
 
     async function checkAuth() {
       try {
@@ -23,9 +25,22 @@ export default function IXIGlobalTicketLauncher() {
       }
     }
 
-    checkAuth();
+    if (typeof window.requestIdleCallback === "function") {
+      idleId = window.requestIdleCallback(checkAuth, {
+        timeout: 2500
+      });
+    } else {
+      timerId = window.setTimeout(checkAuth, 750);
+    }
+
     return () => {
       active = false;
+      if (idleId !== null) {
+        window.cancelIdleCallback?.(idleId);
+      }
+      if (timerId !== null) {
+        window.clearTimeout(timerId);
+      }
     };
   }, []);
 

@@ -300,11 +300,23 @@ const sensors = useSensors(
   }, []);
 
  useEffect(() => {
+  let cancelled = false;
+
   async function loadWorkspaceEnvironment() {
     const environment =
       await loadIXIListingsEnvironment({
-        includePrivateState: true
+        includePrivateState: true,
+        marketplaceBrowsePerformance: true,
+        progressiveMedia: true,
+        onListingsReady: nextListings => {
+          if (!cancelled) setListings(nextListings);
+        },
+        onListingsHydrated: nextListings => {
+          if (!cancelled) setListings(nextListings);
+        }
       });
+
+    if (cancelled) return;
 
     setListings(environment.listings);
     setSdk(environment.sdk);
@@ -346,6 +358,10 @@ setWorkspaceSettings(
   }
 
   loadWorkspaceEnvironment();
+
+  return () => {
+    cancelled = true;
+  };
 }, []);
   
   const savedListings = useMemo(() => {

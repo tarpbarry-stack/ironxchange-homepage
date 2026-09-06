@@ -1,11 +1,24 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import dynamic from "next/dynamic";
 
 import PrivateListingCard from "./PrivateListingCard";
 import { registerOwnedPrivateActions, unregisterOwnedPrivateActions } from "./IXIOwnedPrivateActionBridge";
-import IXIOwnedPrivateTransactRuntime from "./IXIOwnedPrivateTransactRuntime";
 import { IXI_MACHINE_MUTATION_COMMANDS } from "../../ixi-object-system/IXIMachineMutationCommandBus";
 import { mergeVerifiedMachineFacts, updateMachineFacts } from "../../ixi-object-system/IXIMachineMutationEngine";
 import { getListingId } from "../../../lib/listingFormatters";
+
+const IXIOwnedPrivateTransactRuntime = dynamic(
+  () => import("./IXIOwnedPrivateTransactRuntime"),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="tx-runtime-state">
+        <strong>OPENING TRAN$ACT</strong>
+        <span>LOADING MACHINE FINANCIAL WORKSPACE</span>
+      </div>
+    )
+  }
+);
 
 const SKINS = [
   ["v12", "V12"], ["default", "DEFAULT"], ["steel", "STEEL"],

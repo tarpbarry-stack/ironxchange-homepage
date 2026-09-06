@@ -7,7 +7,6 @@ import {
   useState
 } from "react";
 import { useRouter } from "next/router";
-import { createInstance, types as sdkTypes } from "sharetribe-flex-sdk";
 
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
@@ -61,12 +60,6 @@ import {
 } from "../components/ixi-object-system/IXIActionNoticeEngine";
 
 const BRAND_YELLOW = "#FFC400";
-
-const { Money, UUID } = sdkTypes;
-
-const sdk = createInstance({
-  clientId: process.env.NEXT_PUBLIC_SHARETRIBE_CLIENT_ID
-});
 
 const categories = getV12CategoryNames();
 
@@ -231,6 +224,7 @@ ${linkLine}`;
 
 export default function PostFreePage() {
   const router = useRouter();
+  const [sdk, setSdk] = useState(null);
   const draftHydratedRef = useRef(false);
   const draftSaveTimerRef = useRef(null);
 
@@ -469,12 +463,24 @@ const [machineChannel, setMachineChannel] =
 ]);
 
   useEffect(() => {
+    let active = true;
+    let idleId = null;
+    let timerId = null;
+
     async function checkAuth() {
       try {
-        const currentUser = await sdk.currentUser.show({
+        const SharetribeSdk = await import("sharetribe-flex-sdk");
+        const sdkInstance = SharetribeSdk.createInstance({
+          clientId: process.env.NEXT_PUBLIC_SHARETRIBE_CLIENT_ID
+        });
+
+        const currentUser = await sdkInstance.currentUser.show({
   include: ["profileImage"]
 });
 
+if (!active) return;
+
+setSdk(sdkInstance);
 setLoggedIn(true);
 
 const user = currentUser.data.data;
@@ -528,11 +534,30 @@ setSellerProfile({
     ""
 });
       } catch {
-        setLoggedIn(false);
+        if (active) {
+          setSdk(null);
+          setLoggedIn(false);
+        }
       }
     }
 
-    checkAuth();
+    if (typeof window.requestIdleCallback === "function") {
+      idleId = window.requestIdleCallback(checkAuth, {
+        timeout: 1200
+      });
+    } else {
+      timerId = window.setTimeout(checkAuth, 250);
+    }
+
+    return () => {
+      active = false;
+      if (idleId !== null) {
+        window.cancelIdleCallback?.(idleId);
+      }
+      if (timerId !== null) {
+        window.clearTimeout(timerId);
+      }
+    };
   }, []);
 
   useEffect(() => {
@@ -952,7 +977,7 @@ function clearMachineNotice() {
 }
   
 async function createListing() {
-  if (!loggedIn) {
+  if (!loggedIn || !sdk) {
     showMachineNotice({
       message: "LOGIN REQUIRED TO POST",
       tone: "warning",
@@ -1003,6 +1028,11 @@ async function createListing() {
   let passport = null;
 
   try {
+    const { types: sdkTypes } =
+      await import("sharetribe-flex-sdk");
+
+    const { Money } = sdkTypes;
+
     showMachineNotice({
       message: "PREPARING MACHINE...",
       tone: "info",

@@ -332,7 +332,22 @@ async function loadBrowseEnvironment({
       await loadIXIListingsEnvironment({
         includePrivateState: true,
         marketplaceBrowsePerformance:
-          true
+          true,
+        progressiveMedia: true,
+        onListingsReady: nextListings => {
+          if (
+            inventoryRequestIdRef.current === requestId
+          ) {
+            setListings(nextListings);
+          }
+        },
+        onListingsHydrated: nextListings => {
+          if (
+            inventoryRequestIdRef.current === requestId
+          ) {
+            setListings(nextListings);
+          }
+        }
       });
 
     if (

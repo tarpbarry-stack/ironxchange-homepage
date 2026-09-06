@@ -1,6 +1,4 @@
-import AuctionListingCard from "./auction/AuctionListingCard";
-import PrivateListingCard from "./private/PrivateListingCard";
-import IXIOwnedPrivateListingRuntime from "./private/IXIOwnedPrivateListingRuntime";
+import dynamic from "next/dynamic";
 import MarketplaceListingCard
   from "./marketplace/MarketplaceListingCard";
 
@@ -10,6 +8,37 @@ import {
 
 import resolveMachineCardPresentation
   from "./resolveMachineCardPresentation";
+
+function MachineCardBundleFallback() {
+  return (
+    <div
+      aria-label="Loading machine card"
+      style={{
+        width: "100%",
+        height: "100%",
+        minHeight: 400,
+        border: "1px solid rgba(255,255,255,.08)",
+        borderRadius: 8,
+        background: "#080808"
+      }}
+    />
+  );
+}
+
+const AuctionListingCard = dynamic(
+  () => import("./auction/AuctionListingCard"),
+  { ssr: false, loading: MachineCardBundleFallback }
+);
+
+const PrivateListingCard = dynamic(
+  () => import("./private/PrivateListingCard"),
+  { ssr: false, loading: MachineCardBundleFallback }
+);
+
+const IXIOwnedPrivateListingRuntime = dynamic(
+  () => import("./private/IXIOwnedPrivateListingRuntime"),
+  { ssr: false, loading: MachineCardBundleFallback }
+);
 
 export default function IXIMachineCard({
   cardContext = "workspace",

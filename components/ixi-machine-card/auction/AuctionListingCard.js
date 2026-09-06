@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import dynamic from "next/dynamic";
 
 import { captureIXEvent } from "../../../lib/posthog";
 
@@ -16,14 +17,20 @@ import IXIMachineRail from "../../IXIMachineRail";
 import IXIAuctionObjectFace1
   from "../../ixi-auction-object/IXIAuctionObjectFace1";
 
-import IXIAuctionObjectFace2
-  from "../../ixi-auction-object/IXIAuctionObjectFace2";
+const IXIAuctionObjectFace2 = dynamic(
+  () => import("../../ixi-auction-object/IXIAuctionObjectFace2"),
+  { ssr: false }
+);
 
-import IXIAuctionObjectFace3
-  from "../../ixi-auction-object/IXIAuctionObjectFace3";
+const IXIAuctionObjectFace3 = dynamic(
+  () => import("../../ixi-auction-object/IXIAuctionObjectFace3"),
+  { ssr: false }
+);
 
-import IXIAuctionObjectFace4
-  from "../../ixi-auction-object/IXIAuctionObjectFace4";
+const IXIAuctionObjectFace4 = dynamic(
+  () => import("../../ixi-auction-object/IXIAuctionObjectFace4"),
+  { ssr: false }
+);
 
 import {
   getFrameClass,

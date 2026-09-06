@@ -2,6 +2,26 @@
 const nextConfig = {
   reactStrictMode: true,
 
+  async redirects() {
+    return [
+      {
+        source: "/BrowseV2",
+        destination: "/browse-v2",
+        permanent: true
+      },
+      {
+        source: "/postfree",
+        destination: "/post-free",
+        permanent: true
+      },
+      {
+        source: "/my-listings-v2",
+        destination: "/account/my-listings-v2",
+        permanent: true
+      }
+    ];
+  },
+
   async rewrites() {
     return [
       {

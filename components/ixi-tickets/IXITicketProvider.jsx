@@ -146,8 +146,30 @@ export function IXITicketProvider({ children }) {
   useEffect(() => {
     setTickets(listLocalTickets());
     const unsubscribe = subscribeLocalTickets(setTickets);
-    refreshRemoteTickets();
-    return unsubscribe;
+    let idleId = null;
+    let timerId = null;
+
+    if (typeof window.requestIdleCallback === "function") {
+      idleId = window.requestIdleCallback(
+        () => refreshRemoteTickets(),
+        { timeout: 2500 }
+      );
+    } else {
+      timerId = window.setTimeout(
+        () => refreshRemoteTickets(),
+        750
+      );
+    }
+
+    return () => {
+      unsubscribe();
+      if (idleId !== null) {
+        window.cancelIdleCallback?.(idleId);
+      }
+      if (timerId !== null) {
+        window.clearTimeout(timerId);
+      }
+    };
   }, [refreshRemoteTickets]);
 
   useEffect(() => {

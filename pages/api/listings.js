@@ -342,9 +342,11 @@ export default async function handler(req, res) {
       req.query.surface ===
         "browse-v2";
 
+    // This is a public, read-only catalogue endpoint. Reusing the Sharetribe
+    // integration token avoids paying for an authentication round trip on
+    // every Marketplace, Saved, Yard and Launch navigation.
     const token = await getAccessToken({
-      useCache:
-        marketplaceBrowsePerformance
+      useCache: true
     });
 
     const firstPage =
@@ -362,36 +364,21 @@ export default async function handler(req, res) {
     const remainingPages = [];
 
     if (totalPages > 1) {
-      if (marketplaceBrowsePerformance) {
-        remainingPages.push(
-          ...await Promise.all(
-            Array.from(
-              {
-                length:
-                  totalPages - 1
-              },
-              (_, index) =>
-                fetchListingsPage(
-                  token,
-                  index + 2
-                )
-            )
+      remainingPages.push(
+        ...await Promise.all(
+          Array.from(
+            {
+              length:
+                totalPages - 1
+            },
+            (_, index) =>
+              fetchListingsPage(
+                token,
+                index + 2
+              )
           )
-        );
-      } else {
-        for (
-          let page = 2;
-          page <= totalPages;
-          page += 1
-        ) {
-          remainingPages.push(
-            await fetchListingsPage(
-              token,
-              page
-            )
-          );
-        }
-      }
+        )
+      );
     }
 
     const pages = [
@@ -599,6 +586,14 @@ keywords: Array.isArray(publicData.keywords)
           stagingLink: `https://staging.ironxchange.com/l/${slug}/${id}`
         };
       });
+
+    // The catalogue changes far less often than it is read. Let Vercel serve
+    // the warm response immediately and refresh it in the background instead
+    // of rebuilding the full Sharetribe projection for every visitor.
+    res.setHeader(
+      "Cache-Control",
+      "public, s-maxage=60, stale-while-revalidate=300"
+    );
 
     res.status(200).json(listings);
   } catch (err) {
