@@ -26,6 +26,17 @@ import {
   getIXIAosSystemAdapter
 } from "../../../lib/mos/IXIAosSystemAdapterRegistry";
 
+import {
+  IXI_CONSOLE_SLOT_TYPES,
+  createConsoleSlot,
+  normalizeConsoleSlots,
+  normalizeSingleSideConsoleSlots
+} from "../../ixi-chassis/IXIObjectConsoleEngine";
+
+import {
+  resolveIXIAosOperatingCardNumber
+} from "../../ixi-aos/card-runtime/IXIAosOperatingCardResolver.mjs";
+
 
 function cleanId(value) {
   return String(value ?? "").trim();
@@ -155,6 +166,45 @@ function getContainerCommandTarget(item = {}) {
 }
 
 
+function getMobileAosObjectNativeSize({
+  item,
+  objectId,
+  ixiCardState
+}) {
+  const cardNumber =
+    resolveIXIAosOperatingCardNumber(item);
+
+  if (cardNumber > 3) {
+    return { width: 300, height: 475 };
+  }
+
+  const storedSlots =
+    ixiCardState?.[objectId]
+      ?.consoleSlots;
+
+  const unrestrictedSlots =
+    normalizeConsoleSlots(
+      Array.isArray(storedSlots) && storedSlots.length
+        ? storedSlots
+        : [
+            createConsoleSlot({
+              type: IXI_CONSOLE_SLOT_TYPES.LISTING
+            })
+          ]
+    );
+
+  const slots =
+    normalizeSingleSideConsoleSlots(
+      unrestrictedSlots
+    );
+
+  return {
+    width: slots.length * 298 + 2,
+    height: 475
+  };
+}
+
+
 export default function IXIAosWorkspaceBoard({
   items = [],
 
@@ -193,12 +243,25 @@ export default function IXIAosWorkspaceBoard({
 
   onCreateObjectChild,
   onSaveObject,
-  onDeleteObject
+  onDeleteObject,
+
+  mobilePresentation = false,
+  mobileCardDensity = "I"
 }) {
   return (
     <IXIBoardSurface
       scaleMode={cardScaleMode}
       centerRows={true}
+      className={
+        mobilePresentation
+          ? `ixi-mobile-aos-work-card-board ixi-mobile-aos-work-card-board-${String(mobileCardDensity).toLowerCase()}`
+          : ""
+      }
+      data-ixi-mobile-card-density={
+        mobilePresentation
+          ? mobileCardDensity
+          : undefined
+      }
     >
       <IXIBoard
         items={items}
@@ -217,6 +280,11 @@ export default function IXIAosWorkspaceBoard({
         draggingListingId={draggingListingId}
         ghostListingId={ghostListingId}
         enableCardScaling={true}
+        fitCardScalingToCell={mobilePresentation}
+        fillCardScalingToCell={
+          mobilePresentation &&
+          mobileCardDensity === "I"
+        }
         cardScaleMode={cardScaleMode}
         cardScaleMetrics={cardScaleMetrics}
         getSellerListingCardProps={getSellerListingCardProps}
@@ -248,20 +316,33 @@ export default function IXIAosWorkspaceBoard({
         }
 
         getCustomItemNativeSize={({ item, id }) => {
-          if (!isSystemIndexPresentation(item)) {
-            return null;
+          if (isSystemIndexPresentation(item)) {
+            return {
+              width:
+                getSystemIndexConsoleNativeWidth({
+                  objectId: id,
+                  ixiCardState,
+                  mobileSingleSideConsole:
+                    mobilePresentation
+                }),
+
+              height:
+                getSystemIndexConsoleNativeHeight()
+            };
           }
 
-          return {
-            width:
-              getSystemIndexConsoleNativeWidth({
-                objectId: id,
-                ixiCardState
-              }),
+          if (
+            mobilePresentation &&
+            isMosWorkspaceObject(item)
+          ) {
+            return getMobileAosObjectNativeSize({
+              item,
+              objectId: id,
+              ixiCardState
+            });
+          }
 
-            height:
-              getSystemIndexConsoleNativeHeight()
-          };
+          return null;
         }}
 
         renderCustomItem={({
@@ -286,6 +367,7 @@ export default function IXIAosWorkspaceBoard({
                 index={item}
                 ixiCardState={ixiCardState}
                 updateIxiCardState={updateIxiCardState}
+                mobileSingleSideConsole={mobilePresentation}
 
                 renderSystemIndexCard={({ onOpenConsole }) => (
                   <IXISystemIndexCard
@@ -444,6 +526,7 @@ export default function IXIAosWorkspaceBoard({
                 onAddObject={onCreateObjectChild}
                 onSaveObject={onSaveObject}
                 onDeleteObject={onDeleteObject}
+                mobileSingleSideConsole={mobilePresentation}
               />
             );
           }

@@ -7,6 +7,9 @@ import IXIMachineCard from "../ixi-machine-card/IXIMachineCard";
 
 import IXIScaledCardShell from "../ixi-machine-object/IXIScaledCardShell";
 
+import IXIFitWidthObjectShell
+  from "../ixi-mobile/IXIFitWidthObjectShell";
+
 import IXIObjectConsoleRouter
   from "./IXIObjectConsoleRouter";
 
@@ -421,7 +424,17 @@ return (
           : null;
 
       return customItem ? (
-  enableCardScaling ? (
+  enableCardScaling &&
+  fitCardScalingToCell ? (
+    <IXIFitWidthObjectShell
+      size={cardScaleMode}
+      nativeWidth={customNativeWidth}
+      nativeHeight={customNativeHeight}
+      fillAvailableWidth={fillCardScalingToCell}
+    >
+      {customItem}
+    </IXIFitWidthObjectShell>
+  ) : enableCardScaling ? (
     <IXIScaledCardShell
       size={
         cardScaleMode

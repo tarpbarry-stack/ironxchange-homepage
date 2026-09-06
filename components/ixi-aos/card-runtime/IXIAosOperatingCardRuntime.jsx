@@ -60,6 +60,7 @@ export default function IXIAosOperatingCardRuntime({
   onReturn = null,
   onExposeObject = null,
   onOpenTransact = null,
+  mobileSingleSideConsole = false,
   dragHandleProps = null
 }) {
   const cardNumber = resolveIXIAosOperatingCardNumber(object);
@@ -95,6 +96,7 @@ export default function IXIAosOperatingCardRuntime({
         onPrimaryFaceChange={face => {
           if (objectId) onIxiStateChange?.(objectId, { face });
         }}
+        mobileSingleSideConsole={mobileSingleSideConsole}
       />
     );
   } else {

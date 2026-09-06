@@ -6,6 +6,7 @@ import {
   IXI_CONSOLE_SLOT_TYPES,
   createConsoleSlot,
   normalizeConsoleSlots,
+  normalizeSingleSideConsoleSlots,
   insertConsoleSlot,
   removeConsoleSlot,
   cycleConsoleSlotFace,
@@ -102,7 +103,8 @@ export default function IXISystemIndexConsole({
   ixiCardState = {},
 updateIxiCardState,
 
-renderSystemIndexCard
+renderSystemIndexCard,
+mobileSingleSideConsole = false
 }) {
   const id =
     String(
@@ -124,7 +126,7 @@ renderSystemIndexCard
     objectState.consoleSlots.length >
       0;
 
-  const consoleSlots =
+  const unrestrictedConsoleSlots =
     hasSavedSlotModel
       ? normalizeConsoleSlots(
           objectState.consoleSlots
@@ -132,6 +134,13 @@ renderSystemIndexCard
       : getLegacyConsoleSlots(
           objectState
         );
+
+  const consoleSlots =
+    mobileSingleSideConsole
+      ? normalizeSingleSideConsoleSlots(
+          unrestrictedConsoleSlots
+        )
+      : unrestrictedConsoleSlots;
 
   const consoleDepth =
     consoleSlots.length;
@@ -153,7 +162,11 @@ renderSystemIndexCard
 
   const atCapacity =
     consoleDepth >=
-    IXI_CONSOLE_MAX_DEPTH;
+    (
+      mobileSingleSideConsole
+        ? 2
+        : IXI_CONSOLE_MAX_DEPTH
+    );
 
 
   /*
@@ -220,6 +233,17 @@ renderSystemIndexCard
   ) {
     event?.preventDefault?.();
     event?.stopPropagation?.();
+
+    if (mobileSingleSideConsole) {
+      saveConsoleSlots(
+        normalizeSingleSideConsoleSlots(
+          consoleSlots,
+          { side }
+        )
+      );
+
+      return;
+    }
 
     if (atCapacity) {
       return;
@@ -1161,7 +1185,8 @@ renderSystemIndexCard
 
 export function getSystemIndexConsoleNativeWidth({
   objectId,
-  ixiCardState = {}
+  ixiCardState = {},
+  mobileSingleSideConsole = false
 }) {
   const id =
     String(
@@ -1178,7 +1203,7 @@ export function getSystemIndexConsoleNativeWidth({
     objectState.consoleSlots.length >
       0;
 
-  const consoleSlots =
+  const unrestrictedConsoleSlots =
     hasSavedSlotModel
       ? normalizeConsoleSlots(
           objectState.consoleSlots
@@ -1186,6 +1211,13 @@ export function getSystemIndexConsoleNativeWidth({
       : getLegacyConsoleSlots(
           objectState
         );
+
+  const consoleSlots =
+    mobileSingleSideConsole
+      ? normalizeSingleSideConsoleSlots(
+          unrestrictedConsoleSlots
+        )
+      : unrestrictedConsoleSlots;
 
   return (
   consoleSlots.length *

@@ -2,7 +2,8 @@ import Head from "next/head";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import {
-  PointerSensor,
+  MouseSensor,
+  TouchSensor,
   KeyboardSensor,
   useSensor,
   useSensors,
@@ -91,15 +92,6 @@ import {
   sanitizeWorkspaceContainers
 } from "../../components/ixi-chassis/IXIWorkspacePersistenceEngine";
 
-const IXI_AOS_WORK_SETTINGS_ID =
-  "__ixi_aos_work_settings__";
-
-const IXI_AOS_WORK_LAYOUT_ID =
-  "__ixi_aos_work_layout__";
-
-const IXI_EQUIPMENT_INDEX_OBJECT_ID =
-  "system-index:equipment";
-
 import {
   getMachineContainerFromContainers,
   reorderMachineWithinContainerState,
@@ -151,6 +143,32 @@ import {
 import {
   setIXIActionNotice
 } from "../../components/ixi-object-system/IXIActionNoticeEngine";
+
+const IXI_AOS_WORK_SETTINGS_ID =
+  "__ixi_aos_work_settings__";
+
+const IXI_AOS_WORK_LAYOUT_ID =
+  "__ixi_aos_work_layout__";
+
+const IXI_EQUIPMENT_INDEX_OBJECT_ID =
+  "system-index:equipment";
+
+const MOBILE_TOUCH_HOLD_MS = 500;
+const MOBILE_TOUCH_TOLERANCE_PX = 5;
+const IXI_MOBILE_CARD_DENSITY_KEY =
+  "ixi-mobile-card-density";
+
+function resolveMobileCardScaleMode(density, viewportWidth) {
+  const width = Math.max(320, Number(viewportWidth) || 320);
+
+  if (density === "II") {
+    return width >= 392 ? "compact" : "micro";
+  }
+
+  if (width >= 424) return "focus";
+  if (width >= 364) return "work";
+  return "xl";
+}
 
 export default function IXIAosWorkPage() {
   console.log("IXI AOS WORK PAGE IS RUNNING");
@@ -250,7 +268,76 @@ const POCKET_TARGETS = [
   const [pocketThumbSize, setPocketThumbSize] = useState("medium");
 
   const [cardScaleMode, setCardScaleMode] = useState("xl");
-  const cardScaleMetrics = getIXICardScalePreset(cardScaleMode);
+  const [mobileCardDensity, setMobileCardDensity] = useState("I");
+  const [mobileViewportWidth, setMobileViewportWidth] = useState(0);
+
+  const isMobileCardPresentation =
+    mobileViewportWidth > 0 &&
+    mobileViewportWidth <= 850;
+
+  const presentedCardScaleMode =
+    isMobileCardPresentation
+      ? resolveMobileCardScaleMode(
+          mobileCardDensity,
+          mobileViewportWidth
+        )
+      : cardScaleMode;
+
+  const cardScaleMetrics =
+    getIXICardScalePreset(presentedCardScaleMode);
+
+  useEffect(() => {
+    function syncMobileViewportWidth() {
+      const visualViewportWidth =
+        Number(window.visualViewport?.width);
+
+      setMobileViewportWidth(
+        Math.max(
+          320,
+          Math.floor(
+            visualViewportWidth ||
+            window.innerWidth ||
+            320
+          )
+        )
+      );
+    }
+
+    const savedDensity =
+      window.sessionStorage.getItem(
+        IXI_MOBILE_CARD_DENSITY_KEY
+      );
+
+    setMobileCardDensity(
+      savedDensity === "II" ? "II" : "I"
+    );
+
+    syncMobileViewportWidth();
+    window.addEventListener("resize", syncMobileViewportWidth);
+    window.visualViewport?.addEventListener(
+      "resize",
+      syncMobileViewportWidth
+    );
+
+    return () => {
+      window.removeEventListener("resize", syncMobileViewportWidth);
+      window.visualViewport?.removeEventListener(
+        "resize",
+        syncMobileViewportWidth
+      );
+    };
+  }, []);
+
+  function updateMobileCardDensity(nextDensity) {
+    const normalizedDensity =
+      nextDensity === "II" ? "II" : "I";
+
+    setMobileCardDensity(normalizedDensity);
+    window.sessionStorage.setItem(
+      IXI_MOBILE_CARD_DENSITY_KEY,
+      normalizedDensity
+    );
+  }
 
   useEffect(() => {
     const savedMode = readSitewideCardScaleMode();
@@ -288,9 +375,15 @@ const handleWorkspaceDragCancel =
   });
 
 const sensors = useSensors(
-  useSensor(PointerSensor, {
+  useSensor(MouseSensor, {
     activationConstraint: {
       distance: 6
+    }
+  }),
+  useSensor(TouchSensor, {
+    activationConstraint: {
+      delay: MOBILE_TOUCH_HOLD_MS,
+      tolerance: MOBILE_TOUCH_TOLERANCE_PX
     }
   }),
   useSensor(KeyboardSensor, {
@@ -2981,7 +3074,7 @@ return null;
     activeDndId={activeDndId}
     savedIds={savedIds}
     ixiCardState={ixiCardState}
-    cardScaleMode={cardScaleMode}
+    cardScaleMode={presentedCardScaleMode}
   >
  <main>
   <section className="saved-environment-shell">
@@ -3110,7 +3203,29 @@ return null;
  </section>
   </aside>
     </IXIChassis>
-              
+
+<nav
+  className="mobile-card-density"
+  aria-label="AOS Work card density"
+>
+  <button
+    type="button"
+    className={mobileCardDensity === "I" ? "active" : ""}
+    aria-pressed={mobileCardDensity === "I"}
+    onClick={() => updateMobileCardDensity("I")}
+  >
+    I
+  </button>
+  <button
+    type="button"
+    className={mobileCardDensity === "II" ? "active" : ""}
+    aria-pressed={mobileCardDensity === "II"}
+    onClick={() => updateMobileCardDensity("II")}
+  >
+    II
+  </button>
+</nav>
+
 <IXIAosWorkspaceBoard
   items={
     aosBoardItems
@@ -3129,7 +3244,7 @@ getWorkspaceObjectById={
   }
 
   cardScaleMode={
-    cardScaleMode
+    presentedCardScaleMode
   }
 
   cardScaleMetrics={
@@ -3211,13 +3326,17 @@ onReturnContainerChildren={
   onDeleteObject={
     deleteMosWorkspaceObject
   }
+  mobilePresentation={isMobileCardPresentation}
+  mobileCardDensity={mobileCardDensity}
 />
-    
-<IXICardScaleControl
-  value={cardScaleMode}
-  onChange={updateCardScaleMode}
-  surfaceLabel="AOS Work"
-/>
+
+<div className="desktop-card-scale-control">
+  <IXICardScaleControl
+    value={cardScaleMode}
+    onChange={updateCardScaleMode}
+    surfaceLabel="AOS Work"
+  />
+</div>
 
         {visibleSavedListings.length === 0 && (
   <div className="empty">
@@ -3326,9 +3445,19 @@ onReturnContainerChildren={
 .desktop-search-surface {
   display: block;
 }
+
+.mobile-card-density {
+  display: none;
+}
+
 @media (max-width: 850px) {
   main {
-    padding: 18px 4% 48px;
+    padding: 18px 2px 48px;
+    overflow-x: hidden;
+  }
+
+  .desktop-card-scale-control {
+    display: none;
   }
 
   .desktop-search-surface {
@@ -3338,6 +3467,73 @@ onReturnContainerChildren={
 .mobile-search-surface {
   display: block;
 }
+
+  .mobile-card-density {
+    box-sizing: border-box;
+    width: calc(100% - 12px);
+    margin: 0 6px 12px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+  }
+
+  .mobile-card-density button {
+    min-height: 46px;
+    border: 1px solid rgba(255,255,255,.14);
+    border-radius: 9px;
+    background: #111;
+    color: #929792;
+    font: 900 16px/1 'Inter Variable', Inter, sans-serif;
+    letter-spacing: 1px;
+  }
+
+  .mobile-card-density button.active {
+    border-color: rgba(255,196,0,.82);
+    background: #19160b;
+    color: #ffc400;
+    box-shadow: inset 0 0 0 1px rgba(255,196,0,.16);
+  }
+
+  :global(.ixi-board-surface.ixi-mobile-aos-work-card-board) {
+    box-sizing: border-box;
+    width: 100%;
+    display: grid !important;
+    align-items: start;
+    justify-items: center;
+    overflow: visible;
+  }
+
+  :global(.ixi-mobile-aos-work-card-board .ixi-board-sortable-card) {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    touch-action: manipulation !important;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  :global(.ixi-mobile-aos-work-card-board .ixi-board-sortable-card.ixi-console-expanded) {
+    grid-column: 1 / -1;
+  }
+
+  :global(.ixi-mobile-aos-work-card-board [data-aos-operating-card]),
+  :global(.ixi-mobile-aos-work-card-board .system-index-child) {
+    touch-action: manipulation !important;
+  }
+
+  :global(.ixi-board-surface.ixi-mobile-aos-work-card-board-i) {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px 0;
+    padding-left: 4px;
+    padding-right: 4px;
+  }
+
+  :global(.ixi-board-surface.ixi-mobile-aos-work-card-board-ii) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px 4px;
+    padding-left: 2px;
+    padding-right: 2px;
+  }
 
   .workspace-head {
   display: flex;

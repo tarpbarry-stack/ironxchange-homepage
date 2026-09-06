@@ -6,6 +6,7 @@ import {
   IXI_CONSOLE_SLOT_TYPES,
   createConsoleSlot,
   normalizeConsoleSlots,
+  normalizeSingleSideConsoleSlots,
   insertConsoleSlot,
   removeConsoleSlot,
   assignConsoleSlotFace,
@@ -87,11 +88,12 @@ export default function IXIAosLocationObjectConsole({
   onPrimaryFaceChange = null,
   onOpenTransact = null,
   financialSnapshot = {},
-  maintenanceSnapshot = {}
+  maintenanceSnapshot = {},
+  mobileSingleSideConsole = false
 }) {
   const objectId = clean(object?.objectId || object?.id);
 
-  const consoleSlots = useMemo(
+  const unrestrictedConsoleSlots = useMemo(
     () => normalizeConsoleSlots(
       Array.isArray(ixiState?.consoleSlots) && ixiState.consoleSlots.length
         ? ixiState.consoleSlots
@@ -101,10 +103,23 @@ export default function IXIAosLocationObjectConsole({
     [ixiState?.consoleSlots]
   );
 
+  const consoleSlots = useMemo(
+    () => mobileSingleSideConsole
+      ? normalizeSingleSideConsoleSlots(
+          unrestrictedConsoleSlots
+        )
+      : unrestrictedConsoleSlots,
+    [mobileSingleSideConsole, unrestrictedConsoleSlots]
+  );
+
   const listingSlotIndex = consoleSlots.findIndex(
     slot => slot.type === IXI_CONSOLE_SLOT_TYPES.LISTING
   );
-  const atCapacity = consoleSlots.length >= IXI_CONSOLE_MAX_DEPTH;
+  const atCapacity = consoleSlots.length >= (
+    mobileSingleSideConsole
+      ? 2
+      : IXI_CONSOLE_MAX_DEPTH
+  );
   const Card = getPrimaryCard(cardNumber);
 
   function stop(event) {
@@ -125,6 +140,28 @@ export default function IXIAosLocationObjectConsole({
 
   function addPanel(side, event) {
     stop(event);
+
+    if (mobileSingleSideConsole) {
+      const slotsWithModule =
+        consoleSlots.length > 1
+          ? consoleSlots
+          : insertConsoleSlot({
+              slots: consoleSlots,
+              side,
+              type: IXI_CONSOLE_SLOT_TYPES.EMPTY,
+              maxSlots: 2,
+              faces: AVAILABLE_FACES
+            });
+
+      saveSlots(
+        normalizeSingleSideConsoleSlots(
+          slotsWithModule,
+          { side }
+        )
+      );
+      return;
+    }
+
     if (atCapacity) return;
     saveSlots(insertConsoleSlot({
       slots: consoleSlots,
@@ -146,14 +183,8 @@ export default function IXIAosLocationObjectConsole({
   }
 
   function openConsoleFromCard() {
-    if (atCapacity) return;
-    saveSlots(insertConsoleSlot({
-      slots: consoleSlots,
-      side: "right",
-      type: IXI_CONSOLE_SLOT_TYPES.EMPTY,
-      maxSlots: IXI_CONSOLE_MAX_DEPTH,
-      faces: AVAILABLE_FACES
-    }));
+    if (consoleSlots.length > 1) return;
+    addPanel("right");
   }
 
   const shared = {

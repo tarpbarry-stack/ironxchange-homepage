@@ -5,12 +5,15 @@ import fs from "node:fs";
 const page = fs.readFileSync("pages/aos/mobile-dnd-natural.js", "utf8");
 const work = fs.readFileSync("pages/aos/work.js", "utf8");
 
-test("mobile natural DnD uses the same pointer sensor contract as AOS Work", () => {
+test("the natural DnD diagnostic retains its pointer sensor while production AOS Work protects mobile scroll", () => {
   assert.match(page, /PointerSensor/);
   assert.match(page, /activationConstraint:\s*\{ distance: 6 \}/);
-  assert.match(work, /PointerSensor/);
+  assert.match(work, /MouseSensor/);
+  assert.match(work, /TouchSensor/);
   assert.match(work, /distance:\s*6/);
-  assert.doesNotMatch(page, /TouchSensor|MOBILE_TOUCH_HOLD_MS|MOBILE_TOUCH_TOLERANCE_PX/);
+  assert.match(work, /MOBILE_TOUCH_HOLD_MS = 500/);
+  assert.match(work, /MOBILE_TOUCH_TOLERANCE_PX = 5/);
+  assert.doesNotMatch(work, /PointerSensor/);
 });
 
 test("mobile natural DnD uses canonical IXI drag, sortable, collision and command engines", () => {
