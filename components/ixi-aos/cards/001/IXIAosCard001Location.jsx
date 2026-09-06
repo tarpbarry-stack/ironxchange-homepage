@@ -42,7 +42,7 @@ export default function IXIAosCard001Location(props) {
     <IXIAosDataContractCardAdapter {...props} showBusinessIdentifier={false}>
       {contractProps => {
         return (
-          <IXIAosCommercialEditorBridge object={contractProps.object} onSaveObject={contractProps.onSaveObject} persistenceAdapter={contractProps.hasPersistenceAdapter ? contractProps.onSaveObject : null} mediaEnabled>
+          <IXIAosCommercialEditorBridge object={contractProps.object} onSaveObject={contractProps.onSaveObject} persistenceAdapter={contractProps.hasPersistenceAdapter ? contractProps.onSaveObject : null} onCancelDraft={contractProps.onDeleteObject} mediaEnabled>
             {({ object: runtimeObject }) => {
               const ixiIdentity = formatIxiIdentity(runtimeObject);
               const face1Values = getFace1LocationValues(runtimeObject);

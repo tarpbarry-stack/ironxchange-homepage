@@ -1,3 +1,5 @@
+import { useEffect, useRef } from "react";
+
 import IXIAosCommercialObjectEditor from "./IXIAosCommercialObjectEditor";
 import IXIAosActionNotice from "./IXIAosActionNotice";
 import { IXIAosCardCommandProvider } from "../IXIAosCardCommandContext";
@@ -39,6 +41,7 @@ export default function IXIAosCommercialEditorBridge({
   object = {},
   onSaveObject = null,
   persistenceAdapter = onSaveObject,
+  onCancelDraft = null,
   mediaEnabled = true,
   faceNumber = 1,
   children
@@ -48,6 +51,24 @@ export default function IXIAosCommercialEditorBridge({
     persistenceAdapter
   });
   const noticeObjectId = noticeTargetIdOf(editSession.runtimeObject);
+  const didOpenCreationDraftRef = useRef(false);
+  const isCreationDraft =
+    clean(object?.status).toLowerCase() === "draft" &&
+    object?.metadata?.draftOnly === true &&
+    clean(object?.metadata?.creationState).toLowerCase() === "naming";
+
+  useEffect(() => {
+    if (
+      !isCreationDraft ||
+      didOpenCreationDraftRef.current ||
+      editSession.editing
+    ) {
+      return;
+    }
+
+    didOpenCreationDraftRef.current = true;
+    editSession.begin();
+  }, [isCreationDraft, editSession.editing, editSession.begin]);
 
   async function save(nextObject) {
     if (!nextObject || typeof nextObject !== "object") {
@@ -77,6 +98,17 @@ export default function IXIAosCommercialEditorBridge({
     });
   }
 
+  function cancel() {
+    editSession.cancel();
+
+    if (
+      isCreationDraft &&
+      typeof onCancelDraft === "function"
+    ) {
+      onCancelDraft(object);
+    }
+  }
+
   const rendered = typeof children === "function"
     ? children({ object: editSession.runtimeObject })
     : children;
@@ -104,7 +136,7 @@ export default function IXIAosCommercialEditorBridge({
             saving={editSession.saving}
             error={editSession.error}
             conflict={editSession.conflict}
-            onCancel={editSession.cancel}
+            onCancel={cancel}
             onSave={save}
             onReloadLatest={reloadLatest}
             mediaEnabled={mediaEnabled}

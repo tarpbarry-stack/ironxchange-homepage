@@ -48,6 +48,13 @@ import IXIAosOperatingCardRuntime
 import useIXIMosObjectCreation
   from "../../components/ixi-mos/object-creation/useIXIMosObjectCreation";
 
+import IXIAosSystemObjectTemplatePicker
+  from "../../components/ixi-mos/object-creation/IXIAosSystemObjectTemplatePicker";
+
+import {
+  isAosDraftId
+} from "../../lib/mos/ixiAosProvisioningContract";
+
 import useIXIAosWorkspaceRegistry
   from "../../components/ixi-mos/workspace/useIXIAosWorkspaceRegistry";
 
@@ -178,6 +185,9 @@ const [systemIndexes, setSystemIndexes] =
 
 const [aosCurrentUser, setAosCurrentUser] =
   useState(null);
+
+const [systemObjectPickerOpen, setSystemObjectPickerOpen] =
+  useState(false);
   
   const [savedIds, setSavedIds] = useState([]);
   const [sdk, setSdk] = useState(null);
@@ -2353,8 +2363,9 @@ function saveWorkspaceLayout(
 
 
 const {
-  createRootSystemIndexByName,
+  createRootContainerDraft,
   createObjectInContainer,
+  saveMosObjectName,
   deleteMosWorkspaceObject
 } = useIXIMosObjectCreation({
   entityId:
@@ -2401,37 +2412,86 @@ function updateCardScaleMode(nextMode) {
     return next;
   });
 }
-async function createRootSystemIndex() {
-  const rawName =
-    window.prompt(
-      "Name this index"
-    );
+async function createRootContainerFromTemplate(
+  template
+) {
+  const result =
+    createRootContainerDraft({
+      template,
+      metadata: {
+        parentDisplayName:
+          String(
+            aosEntity?.displayName ||
+            aosEntity?.legalName ||
+            aosEntity?.name ||
+            "IXI ENTITY"
+          ).trim()
+      }
+    });
 
-  const displayName =
-    String(
-      rawName || ""
-    ).trim();
+  const draftId =
+    String(result?.objectId || "").trim();
 
-  if (!displayName) {
-    return;
-  }
-
-  try {
-    await createRootSystemIndexByName(
-      displayName
-    );
-  } catch (error) {
-    console.error(
-      "AOS SYSTEM INDEX CREATE FAILED:",
-      error
-    );
-
-    window.alert(
-      error?.message ||
-      "Could not create Index."
+  if (!draftId) {
+    throw new Error(
+      "AOS did not return the new draft identity."
     );
   }
+
+  updateIxiCardState(draftId, {
+    color: "none",
+    outline: 1,
+    face: 1,
+    actionNotice: null
+  });
+
+  setSystemObjectPickerOpen(false);
+
+  return result;
 }
+
+
+const saveAosWorkspaceObjectOrDraft =
+  useCallback(async (payload = {}) => {
+    const objectId =
+      String(
+        payload?.objectId ||
+        payload?.object?.objectId ||
+        ""
+      ).trim();
+
+    if (isAosDraftId(objectId)) {
+      return saveMosObjectName({
+        objectId,
+        displayName:
+          payload?.displayName ||
+          payload?.object?.displayName,
+        businessIdentifiers:
+          payload?.businessIdentifiers ||
+          payload?.object?.businessIdentifiers,
+        fields:
+          payload?.fields ||
+          payload?.object?.fields,
+        fieldDefinitions:
+          payload?.fieldDefinitions ||
+          payload?.object?.fieldDefinitions,
+        media:
+          payload?.media ||
+          payload?.object?.media,
+        metadata: {
+          ...(payload?.object?.metadata || {}),
+          ...(payload?.metadata || {})
+        }
+      });
+    }
+
+    return saveAosWorkspaceObject(
+      payload
+    );
+  }, [
+    saveAosWorkspaceObject,
+    saveMosObjectName
+  ]);
 
 
 /*
@@ -3209,13 +3269,20 @@ return null;
   ownedListings={workspaceListings}
   aosObjects={aosObjects}
   onAdd={
-  createRootSystemIndex
+  () => setSystemObjectPickerOpen(true)
 }
   onMore={() => {
     console.log(
       "AOS WORK MORE"
     );
   }}
+/>
+
+<IXIAosSystemObjectTemplatePicker
+  open={systemObjectPickerOpen}
+  entityId={aosEntity?.entityId || null}
+  onClose={() => setSystemObjectPickerOpen(false)}
+  onCreate={createRootContainerFromTemplate}
 />
 
 <IXIChassis>
@@ -3413,7 +3480,7 @@ onReturnContainerChildren={
 }
 
   onSaveObject={
-    saveAosWorkspaceObject
+    saveAosWorkspaceObjectOrDraft
   }
 
   onDeleteObject={

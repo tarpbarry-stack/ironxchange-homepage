@@ -96,7 +96,7 @@ export default function IXIAosCard007EmployeeApplication(props) {
       showBusinessIdentifier={false}
     >
       {contractProps => (
-        <IXIAosCommercialEditorBridge object={contractProps.object} onSaveObject={contractProps.onSaveObject} persistenceAdapter={contractProps.hasPersistenceAdapter ? contractProps.onSaveObject : null} mediaEnabled>
+        <IXIAosCommercialEditorBridge object={contractProps.object} onSaveObject={contractProps.onSaveObject} persistenceAdapter={contractProps.hasPersistenceAdapter ? contractProps.onSaveObject : null} onCancelDraft={contractProps.onDeleteObject} mediaEnabled>
           {({ object: runtimeObject }) => <IXIAosFace1CardRuntime cardNumber={7} object={runtimeObject} onSaveObject={contractProps.onSaveObject}>
           {face1 => {
             let CardLayout = IXIAosGenericUniversalLayout007;

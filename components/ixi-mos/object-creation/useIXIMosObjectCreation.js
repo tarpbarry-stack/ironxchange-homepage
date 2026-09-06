@@ -25,6 +25,10 @@ import {
   moveObjectToWorkspaceSurface
 } from "../../ixi-chassis/IXIWorkspacePlacementEngine";
 
+import {
+  getAosTemplateNumber
+} from "../../../lib/mos/ixiAosSystemObjectTemplateContract.mjs";
+
 
 const IXI_SYSTEM_INDEX_TEMPLATE_ID =
   "ixi-system-index-v1";
@@ -294,7 +298,8 @@ export default function useIXIMosObjectCreation({
 
 
   function createClientOnlyDraft({
-    container,
+    container = null,
+    rootContainer = false,
     definitionId = null,
     definitionKey = null,
     objectType = null,
@@ -302,6 +307,7 @@ export default function useIXIMosObjectCreation({
     cardTemplateVersion = null,
     businessIdentifiers = [],
     fields = {},
+    fieldDefinitions = [],
     metadata = {},
     exposeToBoard = true
   }) {
@@ -317,7 +323,7 @@ export default function useIXIMosObjectCreation({
       );
     }
 
-    if (!destinationContainerId) {
+    if (!rootContainer && !destinationContainerId) {
       throw new Error(
         "Destination container is missing objectId."
       );
@@ -354,6 +360,9 @@ export default function useIXIMosObjectCreation({
       fields:
         safeObject(fields),
 
+      fieldDefinitions:
+        safeArray(fieldDefinitions),
+
       media: [],
 
       cardTemplateSlug:
@@ -363,7 +372,7 @@ export default function useIXIMosObjectCreation({
         cardTemplateVersion ?? null,
 
       directContainerId:
-        destinationContainerId,
+        destinationContainerId || null,
 
       status:
         "draft",
@@ -372,7 +381,20 @@ export default function useIXIMosObjectCreation({
         "aos-client-draft",
 
       capabilities: {
-        canMove: true
+        canMove: true,
+        ...(rootContainer
+          ? {
+              canContain: true,
+              canCreate: true,
+              canOpenStack: true,
+              canMoveToBoard: true,
+              canTransact: true,
+              editable: true,
+              hasConsole: true,
+              hasRail: true,
+              hasRelationships: true
+            }
+          : {})
       },
 
       metadata: {
@@ -380,7 +402,10 @@ export default function useIXIMosObjectCreation({
         draftOnly: true,
         creationState: "naming",
         persistenceState: "client-only",
-        destinationContainerId
+        destinationContainerId:
+          destinationContainerId || null,
+        rootContainer:
+          Boolean(rootContainer)
       },
 
       createdAt:
@@ -433,8 +458,89 @@ export default function useIXIMosObjectCreation({
       objectId:
         draftId,
       parentObjectId:
-        destinationContainerId
+        destinationContainerId || null
     };
+  }
+
+
+  /* =========================================================
+     ROOT CUSTOMER CONTAINER DRAFT
+
+     The scoreboard + chooses presentation only. The customer
+     supplies business meaning through the card editor. No MOS
+     Object or Passport exists until SAVE provisions this draft.
+     ========================================================= */
+  function createRootContainerDraft({
+    template = {},
+    fields = {},
+    metadata = {}
+  } = {}) {
+    const sourceTemplate =
+      safeObject(template);
+
+    const templateNumber =
+      getAosTemplateNumber(
+        sourceTemplate
+      );
+
+    const cardTemplateSlug =
+      clean(sourceTemplate?.templateSlug);
+
+    if (
+      !templateNumber ||
+      !cardTemplateSlug
+    ) {
+      throw new Error(
+        "Choose an AOS Card from 001 through 017."
+      );
+    }
+
+    return createClientOnlyDraft({
+      rootContainer: true,
+      definitionId:
+        clean(sourceTemplate?.definitionId) || null,
+      definitionKey:
+        clean(sourceTemplate?.definitionKey) || null,
+      objectType:
+        "container",
+      cardTemplateSlug,
+      cardTemplateVersion:
+        sourceTemplate?.version ?? null,
+      fields: {
+        ...safeObject(fields)
+      },
+      fieldDefinitions:
+        safeArray(sourceTemplate?.fieldSchema)
+          .map((definition, index) => ({
+            ...safeObject(definition),
+            fieldId:
+              clean(
+                definition?.fieldId ||
+                definition?.field
+              ) || `field-${index + 1}`,
+            label:
+              clean(definition?.label) ||
+              `FIELD ${index + 1}`
+          })),
+      metadata: {
+        ...safeObject(metadata),
+        cardNumber:
+          String(templateNumber).padStart(3, "0"),
+        templateSlug:
+          cardTemplateSlug,
+        templateLabel:
+          clean(sourceTemplate?.label),
+        customerDefined:
+          true,
+        createdFrom:
+          "aos-scoreboard-plus",
+        creationState:
+          "naming",
+        persistenceState:
+          "client-only"
+      },
+      exposeToBoard: true
+    });
   }
 
 
@@ -799,7 +905,10 @@ export default function useIXIMosObjectCreation({
   async function commitDraftObject({
     id,
     name,
+    businessIdentifiers,
     fields,
+    fieldDefinitions,
+    media,
     metadata
   }) {
     const draft =
@@ -835,13 +944,17 @@ export default function useIXIMosObjectCreation({
       displayName:
         name,
       businessIdentifiers:
-        draft.businessIdentifiers,
+        Array.isArray(businessIdentifiers)
+          ? businessIdentifiers
+          : draft.businessIdentifiers,
       fields: {
         ...safeObject(draft.fields),
         ...safeObject(fields)
       },
       media:
-        draft.media,
+        Array.isArray(media)
+          ? media
+          : draft.media,
       cardTemplateSlug:
         draft.cardTemplateSlug,
       cardTemplateVersion:
@@ -851,6 +964,9 @@ export default function useIXIMosObjectCreation({
       metadata: {
         ...safeObject(draft.metadata),
         ...safeObject(metadata),
+        ...(Array.isArray(fieldDefinitions)
+          ? { fieldDefinitions }
+          : {}),
         draftOnly:
           false,
         creationState:
@@ -919,7 +1035,10 @@ export default function useIXIMosObjectCreation({
   async function saveMosObjectName({
     objectId,
     displayName,
+    businessIdentifiers,
     fields,
+    fieldDefinitions,
+    media,
     metadata
   }) {
     const id =
@@ -955,7 +1074,10 @@ export default function useIXIMosObjectCreation({
         commitDraftObject({
           id,
           name,
+          businessIdentifiers,
           fields,
+          fieldDefinitions,
+          media,
           metadata
         });
 
@@ -1151,6 +1273,7 @@ export default function useIXIMosObjectCreation({
     reloadMosEnvironment,
     exposeObjectToBoard,
     createRootSystemIndexByName,
+    createRootContainerDraft,
     createObjectInContainer,
     saveMosObjectName,
     deleteMosWorkspaceObject
