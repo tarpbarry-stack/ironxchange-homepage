@@ -24,7 +24,7 @@ test("unfinished chassis are not exposed as operational TRANSACT applications", 
 });
 
 test("Sales Order and Invoice are separate launcher entries with canonical forms on the native card face", async () => {
-  const [registrySource, shell, app, commands, context, register, registerStyles] = await Promise.all([
+  const [registrySource, shell, app, commands, context, register, registerStyles, stagePresentation] = await Promise.all([
     read("components/ixi-aos/transact/IXITransactModuleRegistry.js"),
     read("components/ixi-aos/transact/IXITransactApp.jsx"),
     read("components/ixi-aos/transact/modules/equipment-sale/IXIEquipmentSaleApp.jsx"),
@@ -32,6 +32,7 @@ test("Sales Order and Invoice are separate launcher entries with canonical forms
     read("components/ixi-aos/transact/IXITransactContext.js"),
     read("components/ixi-aos/transact/sales/IXISalesDealRegister.jsx"),
     read("components/ixi-aos/transact/sales/IXISalesDealStyles.jsx"),
+    read("components/ixi-aos/transact/sales/IXISalesStagePresentation.js"),
   ]);
   const registry = await import(`data:text/javascript;base64,${Buffer.from(registrySource).toString("base64")}`);
   const visible = registry.getIXITransactModules({ objectType: "machine" });
@@ -69,11 +70,15 @@ test("Sales Order and Invoice are separate launcher entries with canonical forms
   assert.match(app, /const commercialLocked = invoiceEntry \? invoiceLocked : orderLocked/u);
   assert.match(commands, /const commercialPatch = \{/u);
   assert.doesNotMatch(commands, /const commercialPatch = linkedSalesOrderId \? \{\} :/u);
-  assert.match(register, /activeStageId === stage\.id/u);
-  assert.match(register, /entry \? "available" : startable \? "startable" : "missing"/u);
+  assert.match(register, /salesStagePresentation\(deal, stage\.id, activeStageId\)/u);
+  assert.match(stagePresentation, /state: "completed"/u);
+  assert.match(stagePresentation, /state: "next"/u);
+  assert.match(stagePresentation, /state: "available-action"/u);
+  assert.match(stagePresentation, /state: "unavailable"/u);
   assert.match(register, /entry \? "✓" : stage\.number/u);
-  assert.match(registerStyles, /button\.available/u);
-  assert.match(registerStyles, /button\.startable/u);
+  assert.match(registerStyles, /button\.completed/u);
+  assert.match(registerStyles, /button\.next/u);
+  assert.match(registerStyles, /button\.available-action/u);
   assert.match(app, />\s*EXPAND\s*</u);
   assert.doesNotMatch(app, /OPEN WORKSPACE/u);
   assert.match(commands, /documentType:\s*"invoice"/u);
