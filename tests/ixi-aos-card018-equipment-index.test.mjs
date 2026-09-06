@@ -15,6 +15,10 @@ test("Card 018 is a V12 Equipment Index backed by the canonical System Index car
   assert.match(card, /onSavePresentation/);
   assert.match(card, /\.ixi-card-018:after/);
   assert.match(card, /Inter Variable/);
+  assert.match(card, /IXIAosCardHeaderIdentity/);
+  assert.match(card, /IXIAosCardHeaderControls/);
+  assert.match(card, /IXIObjectRail/);
+  assert.match(card, /system-index-card>\.board-command-rail/);
 });
 
 test("Card 018 is registered in FaceLab, runtime resolution, and operating-card delivery", async () => {
