@@ -373,7 +373,7 @@ function getInitialPreviewItems(template = {}, directItems = []) {
   return [];
 }
 
-export default function IXIAosCardCatalogPreview({ template = null, sampleData = {}, projection = null, directItems = [], parentLabel = "", skinId = "ixi:skin:default", onSaveObject = null }) {
+export default function IXIAosCardCatalogPreview({ template = null, sampleData = {}, projection = null, directItems = [], parentLabel = "", skinId = "ixi:skin:default", onSaveObject = null, previewScaleMode = null, showScaleControl = true }) {
   const [state, setState] = useState({});
   const [face, setFace] = useState(1);
   const [transactOpen, setTransactOpen] = useState(false);
@@ -423,6 +423,14 @@ export default function IXIAosCardCatalogPreview({ template = null, sampleData =
   }
 
   const current = state[object.objectId] || {};
+  const scaledCardProps = {
+    objectFamily: "private",
+    surfaceLabel: "Face Lab AOS Cards",
+    showScaleControl,
+    ...(previewScaleMode
+      ? { scaleMode: previewScaleMode }
+      : {})
+  };
   const cardNumber = resolveCatalogCardNumber(template);
   const catalogParentLabel = clean(parentLabel) || clean(template?.librarySection) || "AOS";
   const ContainerCard = cardNumber === 4 ? IXIAosCard004Personnel : cardNumber === 5 ? IXIAosCard005Personnel : cardNumber === 6 ? IXIAosCard006Personnel : null;
@@ -432,16 +440,16 @@ export default function IXIAosCardCatalogPreview({ template = null, sampleData =
     : <Card object={object} children={previewItems} projection={projection} parentLabel={catalogParentLabel} ixiState={current} onIxiStateChange={update} onCycleFace={() => update(object.objectId, { face: 2 })} onSaveObject={savePreview} onAddObject={addPreviewChild} onOpenTransact={() => setTransactOpen(true)} skinId="v12" />;
 
   if (transactOpen) {
-    return <IXIFaceLabScaledCard objectFamily="private" surfaceLabel="Face Lab AOS Cards"><IXITransactObjectConsole object={object} ixiState={current} onIxiStateChange={update} onClose={() => setTransactOpen(false)} /></IXIFaceLabScaledCard>;
+    return <IXIFaceLabScaledCard {...scaledCardProps}><IXITransactObjectConsole object={object} ixiState={current} onIxiStateChange={update} onClose={() => setTransactOpen(false)} /></IXIFaceLabScaledCard>;
   }
 
   if (ContainerCard) {
-    return <IXIFaceLabScaledCard objectFamily="private" surfaceLabel="Face Lab AOS Cards">{renderNumberedPreview(ContainerCard)}</IXIFaceLabScaledCard>;
+    return <IXIFaceLabScaledCard {...scaledCardProps}>{renderNumberedPreview(ContainerCard)}</IXIFaceLabScaledCard>;
   }
 
   const NumberedObjectCard = numberedObjectCards[cardNumber];
   if (NumberedObjectCard) {
-    return <IXIFaceLabScaledCard objectFamily="private" surfaceLabel="Face Lab AOS Cards">{renderNumberedPreview(NumberedObjectCard)}</IXIFaceLabScaledCard>;
+    return <IXIFaceLabScaledCard {...scaledCardProps}>{renderNumberedPreview(NumberedObjectCard)}</IXIFaceLabScaledCard>;
   }
 
   if ([1,2,3].includes(cardNumber)) {
@@ -449,12 +457,12 @@ export default function IXIAosCardCatalogPreview({ template = null, sampleData =
     return (
       <div className="numbered-container-preview">
         <div className="face-switch">{faceNumbers.map(faceNumber => <button key={faceNumber} type="button" className={face === faceNumber ? "active" : ""} onClick={() => setFace(faceNumber)}><b>F{faceNumber}</b><small>{getFaceLabel(object, faceNumber)}</small></button>)}</div>
-        <IXIFaceLabScaledCard objectFamily="private" surfaceLabel="Face Lab AOS Cards"><IXIAosLocationObjectConsole cardNumber={cardNumber} object={object} projection={projection} objects={previewItems} ixiState={current} onIxiStateChange={update} onSaveObject={savePreview} onAddObject={addPreviewChild} primaryFace={face} onPrimaryFaceChange={setFace} onOpenTransact={() => setTransactOpen(true)} /></IXIFaceLabScaledCard>
+        <IXIFaceLabScaledCard {...scaledCardProps}><IXIAosLocationObjectConsole cardNumber={cardNumber} object={object} projection={projection} objects={previewItems} ixiState={current} onIxiStateChange={update} onSaveObject={savePreview} onAddObject={addPreviewChild} primaryFace={face} onPrimaryFaceChange={setFace} onOpenTransact={() => setTransactOpen(true)} /></IXIFaceLabScaledCard>
         <style jsx>{`.numbered-container-preview{width:max-content;display:flex;flex-direction:column;align-items:center;gap:7px;overflow:visible}.face-switch{width:300px;height:35px;display:grid;grid-template-columns:repeat(5,1fr);gap:3px;padding:3px;border:1px solid #292d2b;border-radius:8px;background:#0d0f0e}.face-switch button{height:27px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:2px 3px;border:1px solid transparent;border-radius:5px;background:transparent;color:#777}.face-switch b{font-size:6px}.face-switch small{max-width:100%;overflow:hidden;font-size:4.2px;font-weight:850;text-overflow:ellipsis;white-space:nowrap}.face-switch .active{border-color:rgba(255,196,0,.52);background:rgba(255,196,0,.07);color:#ffc400}`}</style>
       </div>
     );
   }
 
   if (!definition) return <div className="preview-error">CARD DEFINITION FAILED</div>;
-  return <IXIFaceLabScaledCard objectFamily="private" surfaceLabel="Face Lab AOS Cards"><IXIAosCommandAwareObjectConsole object={object} objectId={object.objectId} projection={projection} objects={previewItems} cardDefinition={definition} skinId={skinId} parentLabel={catalogParentLabel} ixiCardState={{}} updateIxiCardState={null} previewCardState={current} updatePreviewCardState={update} renderModule={null} studioEditing={false} selectedModuleId="" onSelectModule={null} onSelectFace={null} onCreateFace={null} onSaveObject={savePreview} enableCardScaling={false} cardScaleMode="xl" onOpenTransact={() => setTransactOpen(true)} /></IXIFaceLabScaledCard>;
+  return <IXIFaceLabScaledCard {...scaledCardProps}><IXIAosCommandAwareObjectConsole object={object} objectId={object.objectId} projection={projection} objects={previewItems} cardDefinition={definition} skinId={skinId} parentLabel={catalogParentLabel} ixiCardState={{}} updateIxiCardState={null} previewCardState={current} updatePreviewCardState={update} renderModule={null} studioEditing={false} selectedModuleId="" onSelectModule={null} onSelectFace={null} onCreateFace={null} onSaveObject={savePreview} enableCardScaling={false} cardScaleMode="xl" onOpenTransact={() => setTransactOpen(true)} /></IXIFaceLabScaledCard>;
 }

@@ -71,12 +71,29 @@ test("AOS Work routes scoreboard plus through template selection and draft provi
     ),
     "utf8"
   );
+  const picker = await readFile(
+    new URL(
+      "../components/ixi-mos/object-creation/IXIAosSystemObjectTemplatePicker.jsx",
+      import.meta.url
+    ),
+    "utf8"
+  );
+  const catalogPreview = await readFile(
+    new URL(
+      "../components/ixi-aos-card-library/IXIAosCardCatalogPreview.jsx",
+      import.meta.url
+    ),
+    "utf8"
+  );
 
   assert.match(page, /IXIAosSystemObjectTemplatePicker/u);
   assert.match(page, /onAdd=\{\s*\(\) => setSystemObjectPickerOpen\(true\)/u);
   assert.match(page, /isAosDraftId\(objectId\)/u);
   assert.match(page, /saveMosObjectName\(\{/u);
   assert.match(page, /parentDisplayName:/u);
+  assert.match(picker, /previewScaleMode="work"/u);
+  assert.match(picker, /showScaleControl=\{false\}/u);
+  assert.match(catalogPreview, /scaleMode: previewScaleMode/u);
   assert.match(creationHook, /function createRootContainerDraft/u);
   assert.match(creationHook, /objectType:\s*"container"/u);
   assert.match(creationHook, /rootContainer:\s*true/u);
