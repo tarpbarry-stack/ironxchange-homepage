@@ -50,6 +50,20 @@ test("Settlement excludes draft, void, and reversed customer consideration", () 
   assert.equal(result.buyerBalance, 40);
 });
 
+test("Settlement never trusts an embedded browser collection total", () => {
+  const result = settlement.projectIXIAssetSettlement({
+    sale: {
+      identity: { saleId: "ifd_sale1" },
+      sale: { salePrice: 100 },
+      collection: { amountReceived: 100, creditedAmount: 100 },
+    },
+    financialRecords: [],
+  });
+  assert.equal(result.collected, 0);
+  assert.equal(result.credited, 0);
+  assert.equal(result.buyerBalance, 100);
+});
+
 test("Collections and Settlement commands use canonical lineage and revision control", async () => {
   const collectionSource = await readFile(new URL("../components/ixi-aos/transact/modules/collections/IXICollectionsCommands.js", import.meta.url), "utf8");
   const settlementSource = await readFile(new URL("../components/ixi-aos/transact/modules/settlement/IXISettlementCommands.js", import.meta.url), "utf8");

@@ -5,6 +5,10 @@ import {
   validateIXIAssetSale,
 } from "./IXIAssetSaleContract";
 import { createIXIAssetSale, recordIXIAssetSaleReceipt } from "./IXIAssetSaleCommands";
+import { uploadIXIAosFinancialAttachment } from "../../../financial-runtime/IXIAosFinancialReadClient";
+import { getIXITransactRecordIndex } from "../../IXITransactRecordIndex";
+import { getIXIMachineCostBasis } from "../../IXIMachineCostBasisEngine";
+import { validateIXITransactFile } from "../../IXITransactFilePolicy";
 import IXIAssetSaleStyles from "./IXIAssetSaleStyles";
 
 const clean = value => String(value ?? "").trim();
@@ -16,10 +20,7 @@ const today = () => new Date().toISOString().slice(0, 10);
 const revisionOf = invoice => Number(invoice?.financialBinding?.revision || invoice?.server?.revision || 0);
 const invoiceIdOf = invoice => clean(invoice?.financialBinding?.financialDocumentId || invoice?.financialDocumentId);
 const billOfSaleDefault = invoice => {
-  const existing = clean(invoice?.metadata?.billOfSaleNumber);
-  if (existing) return existing;
-  const invoiceNumber = clean(invoice?.documentNumber);
-  return invoiceNumber ? `BOS-${invoiceNumber.replace(/^INV-/i, "")}` : "";
+  return clean(invoice?.metadata?.billOfSaleNumber);
 };
 
 const COPY = {
@@ -44,6 +45,8 @@ const COPY = {
     hours: "HOURS AT SALE",
     notes: "CLOSEOUT NOTES",
     documents: "CLOSING DOCUMENTS",
+    uploading: "SECURING + VERIFYING EVIDENCE…",
+    verified: "SERVER VERIFIED",
     record: "VERIFY FUNDS + RECORD SOLD",
     invoiceRequired: "ISSUE THE INVOICE IN STEP 4 BEFORE RECORDING PAYMENT OR SOLD.",
     fundsRequired: "SOLD REMAINS LOCKED UNTIL THE CANONICAL INVOICE BALANCE IS $0.00.",
@@ -82,6 +85,8 @@ const COPY = {
     hours: "HORAS AL VENDER",
     notes: "NOTAS DE CIERRE",
     documents: "DOCUMENTOS DE CIERRE",
+    uploading: "PROTEGIENDO + VERIFICANDO EVIDENCIA…",
+    verified: "VERIFICADO POR EL SERVIDOR",
     record: "VERIFICAR FONDOS + REGISTRAR VENDIDO",
     invoiceRequired: "EMITA LA FACTURA EN EL PASO 4 ANTES DE REGISTRAR EL PAGO O LA VENTA.",
     fundsRequired: "VENDIDO PERMANECE BLOQUEADO HASTA QUE EL SALDO DE LA FACTURA SEA $0.00.",
@@ -133,7 +138,7 @@ export default function IXIAssetSaleApp({
   );
   const [hoursAtSale, setHoursAtSale] = useState(initialRecord?.sale?.hoursAtSale || "");
   const [notes, setNotes] = useState(initialRecord?.sale?.notes || "");
-  const [documents, setDocuments] = useState(initialRecord?.documents || []);
+  const [documents, setDocuments] = useState(initialRecord?.documents || sourceInvoice?.attachments || []);
   const [payAmount, setPayAmount] = useState("");
   const [payDate, setPayDate] = useState(today());
   const [payMethod, setPayMethod] = useState("wire");
@@ -142,6 +147,7 @@ export default function IXIAssetSaleApp({
   const [error, setError] = useState("");
   const [warning, setWarning] = useState("");
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     if (!sourceInvoice) return;
@@ -157,6 +163,10 @@ export default function IXIAssetSaleApp({
     financialRecords,
     receipts: localReceipts,
   }), [financialRecords, invoiceSnapshot, localReceipts]);
+  const costBasis = useMemo(
+    () => getIXIMachineCostBasis(getIXITransactRecordIndex(financialRecords)),
+    [financialRecords],
+  );
 
   const customer = useMemo(() => invoiceSnapshot?.metadata?.customer || {}, [invoiceSnapshot]);
   const input = useMemo(() => ({
@@ -180,10 +190,12 @@ export default function IXIAssetSaleApp({
     hoursAtSale,
     notes,
     documents,
+    assetCostBasis: costBasis.totalInvested,
   }), [
     billOfSaleNumber,
     collection.receipts,
     customer,
+    costBasis.totalInvested,
     dealId,
     documents,
     financialRecords,
@@ -198,19 +210,46 @@ export default function IXIAssetSaleApp({
   const invoiceState = clean(invoiceSnapshot?.financialState).toLowerCase();
   const invoiceIssued = ["billed", "partially-collected", "collected"].includes(invoiceState);
   const readyToClose = invoiceIssued && collection.balanceDue <= 0.005;
+  const verifiedBillOfSale = documents.some(document =>
+    clean(document?.type).toLowerCase() === "bill-of-sale" &&
+    clean(document?.status).toLowerCase() === "verified" &&
+    clean(document?.verification),
+  );
+  const closeoutReady = readyToClose && Boolean(clean(billOfSaleNumber)) && verifiedBillOfSale;
 
-  function addDocuments(files, typeLabel) {
-    setDocuments(current => [
-      ...current,
-      ...Array.from(files || []).map((file, index) => ({
-        documentId: `SALE-DOC-${Date.now()}-${index}`,
-        type: typeLabel,
-        fileName: file.name,
-        mimeType: file.type,
-        size: file.size,
-        status: "local-pending-upload",
-      })),
-    ]);
+  async function addDocuments(files, typeLabel) {
+    const selected = Array.from(files || []);
+    if (!selected.length) return;
+    const invoiceId = invoiceIdOf(invoiceSnapshot);
+    if (!invoiceId) {
+      setError("Issue the canonical Invoice before uploading closing evidence.");
+      return;
+    }
+    setError("");
+    setUploading(true);
+    try {
+      const uploaded = [];
+      for (const file of selected) {
+        const validation = validateIXITransactFile(file, {
+          maxBytes: 10 * 1024 * 1024,
+          allowedMimeTypes: ["application/pdf", "image/jpeg", "image/png", "image/webp"],
+          allowedExtensions: [".pdf", ".jpg", ".jpeg", ".png", ".webp"],
+        });
+        if (!validation.valid) throw new Error(validation.message);
+        uploaded.push(await uploadIXIAosFinancialAttachment({
+          financialDocumentId: invoiceId,
+          file,
+          type: typeLabel,
+        }));
+      }
+      setDocuments(current => typeLabel === "bill-of-sale"
+        ? [...current.filter(document => clean(document?.type).toLowerCase() !== "bill-of-sale"), ...uploaded]
+        : [...current, ...uploaded]);
+    } catch (caught) {
+      setError(clean(caught?.message) || "Closing evidence could not be secured.");
+    } finally {
+      setUploading(false);
+    }
   }
 
   async function receipt() {
@@ -374,14 +413,19 @@ export default function IXIAssetSaleApp({
       </div>
       <div className="sale-section">{copy.documents}</div>
       <div className="sale-docs">
-        <button type="button" onClick={() => document.getElementById("sale-bos")?.click()}>{copy.addBillOfSale}</button>
-        <button type="button" onClick={() => document.getElementById("sale-doc")?.click()}>{copy.addDocument}</button>
+        <button type="button" disabled={uploading} onClick={() => document.getElementById("sale-bos")?.click()}>{copy.addBillOfSale}</button>
+        <button type="button" disabled={uploading} onClick={() => document.getElementById("sale-doc")?.click()}>{copy.addDocument}</button>
       </div>
-      <input id="sale-bos" hidden type="file" onChange={event => addDocuments(event.target.files, "bill-of-sale")} />
-      <input id="sale-doc" hidden type="file" multiple onChange={event => addDocuments(event.target.files, "other")} />
+      <input id="sale-bos" hidden type="file" accept="application/pdf,image/jpeg,image/png,image/webp" onChange={event => { addDocuments(event.target.files, "bill-of-sale"); event.target.value = ""; }} />
+      <input id="sale-doc" hidden type="file" multiple accept="application/pdf,image/jpeg,image/png,image/webp" onChange={event => { addDocuments(event.target.files, "other"); event.target.value = ""; }} />
+      {uploading ? <div className="sale-warning">{copy.uploading}</div> : null}
+      {documents.map(document => <div className="sale-row" key={document.attachmentId || document.storageKey}>
+        <div className="sale-rowhead"><strong>{document.fileName}</strong><b>{copy.verified}</b></div>
+        <small>{clean(document.type).replace(/-/g, " ").toUpperCase()} · SHA-256</small>
+      </div>)}
       <Field label={copy.notes}><textarea value={notes} onChange={event => setNotes(event.target.value)} /></Field>
       {Object.keys(errors).length ? <div className="sale-error">{copy.blocked}: {Object.values(errors).join(" · ").toUpperCase()}</div> : null}
-      <button type="button" className="sale-primary" disabled={saving || !readyToClose} onClick={closeSale}>{saving ? copy.verifying : copy.record}</button>
+      <button type="button" className="sale-primary" disabled={saving || uploading || !closeoutReady} onClick={closeSale}>{saving ? copy.verifying : copy.record}</button>
     </> : <div className="sale-status"><strong>{copy.soldStatus}</strong><div className="sale-money"><span>{copy.settlement}</span><b>{copy.ready}</b></div></div>}
 
     {warning ? <div className="sale-warning">{warning}</div> : null}

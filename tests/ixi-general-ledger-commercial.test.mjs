@@ -116,4 +116,7 @@ test("asset-sale billing and collection use the canonical A/R ledger path", asyn
   assert.match(posting, /ruleId="payment-received"/u);
   assert.match(posting, /line\(chart,cashAccount\(record\),"debit"/u);
   assert.match(posting, /line\(chart,"1100","credit"/u);
+  assert.match(posting, /asset-sale-cost-basis-required/u);
+  assert.match(posting, /line\(chart,"5100","debit",basis/u);
+  assert.match(posting, /line\(chart,"1510","credit",basis/u);
 });

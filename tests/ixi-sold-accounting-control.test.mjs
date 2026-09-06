@@ -26,6 +26,10 @@ test("Sold closes the original Invoice instead of creating a second receivable",
   assert.match(app, /BALANCE IS \$0\.00/u);
   assert.match(commands, /financialState: "paid"/u);
   assert.match(commands, /sourceFinancialDocumentId: invoiceId/u);
+  assert.match(app, /uploadIXIAosFinancialAttachment/u);
+  assert.match(app, /SERVER VERIFIED/u);
+  assert.doesNotMatch(app, /local-pending-upload/u);
+  assert.match(commands, /assetCostBasis/u);
 });
 
 test("Invoice issuance is an explicit Step 4 command on the same canonical document", async () => {

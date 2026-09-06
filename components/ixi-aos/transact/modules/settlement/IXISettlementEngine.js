@@ -46,8 +46,8 @@ export function projectIXIAssetSettlement({
     canonicalReceipts = records.filter(record => type(record) === "payment" && activeFinancialRecord(record) && clean(document(record)?.paymentDirection).toLowerCase() === "inflow" && clean(document(record)?.sourceFinancialDocumentId) === saleFinancialDocumentId),
     canonicalCredits = records.filter(record => type(record) === "credit" && activeFinancialRecord(record) && clean(document(record)?.sourceFinancialDocumentId) === saleFinancialDocumentId),
     salePrice = money(sale.sale?.salePrice),
-    collected = canonicalReceipts.length ? money(canonicalReceipts.reduce((sum, record) => sum + amount(record), 0)) : money(sale.collection?.amountReceived),
-    credited = canonicalCredits.length ? money(canonicalCredits.reduce((sum, record) => sum + amount(record), 0)) : money(sale.collection?.creditedAmount),
+    collected = money(canonicalReceipts.reduce((sum, record) => sum + amount(record), 0)),
+    credited = money(canonicalCredits.reduce((sum, record) => sum + amount(record), 0)),
     acqDirect = money(acquisition.acquisition?.directAcquisitionCost),
     makeReady = money(
       acquisition.makeReady?.actualTotal ||
