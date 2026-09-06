@@ -44,7 +44,9 @@ test("Sales Order and Invoice are separate launcher entries with canonical forms
   assert.match(shell, /moduleId === "sales-order" \|\| moduleId === "invoice"/u);
   assert.match(shell, /initialRecord=\{selectedSalesOrderSnapshot\}/u);
   assert.match(shell, /invoice=\{selectedSalesInvoiceSnapshot\}/u);
-  assert.match(shell, /activeSalesStageId = clean\(salesRoute\?\.stageId\) \|\| salesStageForIXIModule\(moduleId\)/u);
+  assert.match(shell, /activeSalesStageId = salesRoute\?\.detail/u);
+  assert.match(shell, /stageId: salesStageForIXIModule\(item\.id\)/u);
+  assert.match(shell, /detail: false/u);
   assert.match(shell, /initialTab=\{activeSalesStageId === "invoice" \? "invoice" : "order"\}/u);
   assert.match(shell, /entryMode=\{activeSalesStageId === "invoice" \? "invoice" : "sales-order"\}/u);
   assert.match(shell, /dealsForIXISalesModule\(salesDeals, moduleId\)/u);
@@ -68,9 +70,10 @@ test("Sales Order and Invoice are separate launcher entries with canonical forms
   assert.match(commands, /const commercialPatch = \{/u);
   assert.doesNotMatch(commands, /const commercialPatch = linkedSalesOrderId \? \{\} :/u);
   assert.match(register, /activeStageId === stage\.id/u);
-  assert.match(register, /current \? "current" : entry \? "complete" : startable \? "next" : "locked"/u);
-  assert.match(registerStyles, /button\.complete,.ixi-deal-stage-rail button\.current/u);
-  assert.match(registerStyles, /button\.next\{border-color:#ffc400/u);
+  assert.match(register, /entry \? "available" : startable \? "startable" : "missing"/u);
+  assert.match(register, /entry \? "✓" : stage\.number/u);
+  assert.match(registerStyles, /button\.available/u);
+  assert.match(registerStyles, /button\.startable/u);
   assert.match(app, />\s*EXPAND\s*</u);
   assert.doesNotMatch(app, /OPEN WORKSPACE/u);
   assert.match(commands, /documentType:\s*"invoice"/u);

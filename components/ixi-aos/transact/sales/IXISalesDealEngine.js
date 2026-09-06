@@ -116,6 +116,52 @@ function numberOf(document = {}, embedded = {}, id = "") {
   return clean(document.documentNumber || embedded?.identity?.number || (clean(document.documentType) === "invoice" && id ? `DRAFT INV-${id.slice(-8).toUpperCase()}` : id));
 }
 
+function normalized(value = "") {
+  return clean(value).toLowerCase().replace(/[^a-z0-9]/g, "");
+}
+
+function legacyAssetKey(document = {}, embedded = {}) {
+  const metadata = object(document.metadata);
+  const asset = { ...object(metadata.asset), ...object(embedded.asset) };
+  return normalized(
+    asset.passportId || asset.serialNumber || asset.vin ||
+    embedded?.context?.primaryPassportId || embedded?.context?.assetPassportId,
+  );
+}
+
+function legacyCommercialKey(entry = {}) {
+  const customer = normalized(entry.customer);
+  const asset = legacyAssetKey(entry.document, entry.embedded);
+  const amount = money(entry.amount);
+  if (!customer || customer === "customernotset" || !asset || !amount) return "";
+  return `${customer}:${asset}:${amount.toFixed(2)}`;
+}
+
+function safelyJoinLegacyLineage(entries = [], union) {
+  const buckets = new Map();
+  entries.forEach(entry => {
+    const key = legacyCommercialKey(entry);
+    if (!key) return;
+    if (!buckets.has(key)) buckets.set(key, []);
+    buckets.get(key).push(entry);
+  });
+  buckets.forEach(bucket => {
+    const types = new Map();
+    bucket.forEach(entry => {
+      const type = clean(entry.document.documentType).toLowerCase();
+      if (!types.has(type)) types.set(type, []);
+      types.get(type).push(entry);
+    });
+    const explicitIds = new Set(bucket.map(entry => entry.explicitDealId).filter(Boolean));
+    const timestamps = bucket.map(entry => Date.parse(entry.updatedAt)).filter(Number.isFinite);
+    const withinWindow = timestamps.length < 2 || Math.max(...timestamps) - Math.min(...timestamps) <= 180 * 24 * 60 * 60 * 1000;
+    const unambiguous = [...types.values()].every(records => records.length === 1);
+    if (types.size < 2 || explicitIds.size > 1 || !withinWindow || !unambiguous) return;
+    const [anchor, ...related] = bucket;
+    related.forEach(entry => union(anchor.documentId, entry.documentId));
+  });
+}
+
 export function buildIXISalesDealRegister(records = []) {
   const entries = array(records).flatMap((item, index) => {
     const document = financialDocumentOf(item);
@@ -136,6 +182,8 @@ export function buildIXISalesDealRegister(records = []) {
       else byExplicit.set(entry.explicitDealId, entry.documentId);
     }
   });
+  // Safely recover pre-lineage records without collapsing simultaneous deals.
+  safelyJoinLegacyLineage(entries, union);
   const groups = new Map();
   entries.forEach(entry => {
     const root = find(entry.documentId);
@@ -211,4 +259,50 @@ export function documentForIXISalesStage(deal = null, stageId = "") {
   };
 }
 
-export default { IXI_SALES_STAGES, IXI_DEAL_TERMINAL_STATES, salesStageForIXIModule, dealsForIXISalesModule, createIXISalesDealId, buildIXISalesDealRegister, findIXISalesDeal, recordForIXISalesStage, documentForIXISalesStage };
+export function quoteDraftForIXISalesDeal(deal = null) {
+  if (!deal || deal.stageRecords?.quote) return null;
+  const source = deal.stageRecords?.["sales-order"] || deal.stageRecords?.invoice;
+  if (!source) return null;
+  const embedded = object(source.embedded);
+  const document = object(source.document);
+  const metadata = object(document.metadata);
+  const commercial = object(embedded.commercial);
+  const totals = object(embedded.totals || metadata.commercialBreakdown || document.totals);
+  return {
+    identity: { dealId: deal.dealId, revision: 1 },
+    context: object(embedded.context),
+    brand: object(embedded.brand || metadata.brand),
+    dealType: clean(embedded.dealType || metadata.dealType || "standard-sale"),
+    customer: object(embedded.customer || metadata.customer),
+    asset: object(embedded.asset || metadata.asset),
+    commercial: {
+      quoteDate: clean(commercial.quoteDate || commercial.orderDate || document.occurredAt).slice(0, 10),
+      validThrough: clean(commercial.validThrough || commercial.dueDate || document.dueDate).slice(0, 10),
+      currency: clean(commercial.currency || document.currency || "USD"),
+      paymentTerms: clean(commercial.paymentTerms || document.paymentTerms),
+      depositTerms: clean(commercial.depositTerms),
+      deliveryTerms: clean(commercial.deliveryTerms),
+      tradeDescription: clean(commercial.tradeDescription),
+    },
+    totals: {
+      subtotal: money(totals.subtotal ?? totals.total ?? document.amount),
+      tax: money(totals.tax),
+      freight: money(totals.freight),
+      fees: money(totals.fees),
+      tradeAllowance: money(totals.tradeAllowance),
+      total: money(totals.customerTotal ?? totals.total ?? document.amount),
+    },
+    rpo: object(embedded.rpo || metadata.rpo),
+    additionalTerms: array(embedded.additionalTerms || metadata.additionalTerms),
+    presentation: {
+      headline: "EQUIPMENT QUOTATION",
+      conditionTerms: clean(embedded.presentation?.conditionTerms || embedded.conditionTerms),
+      warrantyTerms: clean(embedded.presentation?.warrantyTerms || embedded.warrantyTerms),
+    },
+    related: { salesOrderId: source.documentId },
+    status: "draft",
+    audit: { createdAt: source.updatedAt, updatedAt: source.updatedAt },
+  };
+}
+
+export default { IXI_SALES_STAGES, IXI_DEAL_TERMINAL_STATES, salesStageForIXIModule, dealsForIXISalesModule, createIXISalesDealId, buildIXISalesDealRegister, findIXISalesDeal, recordForIXISalesStage, documentForIXISalesStage, quoteDraftForIXISalesDeal };

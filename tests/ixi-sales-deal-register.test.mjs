@@ -36,6 +36,53 @@ test("legacy direct Invoice remains an addressable standalone deal", () => {
   assert.equal(deals[0].stageRecords.invoice.number, "DRAFT INV-12345678");
 });
 
+test("legacy Quote, Sales Order, and Invoice recover one unambiguous customer and Passport thread", () => {
+  const asset = { passportId: "IXI-MACHINE-544K", serialNumber: "1DW544KZCHF681737" };
+  const customer = { name: "Clements Farm" };
+  const records = [
+    { financialDocument: { financialDocumentId: "qt-legacy", documentType: "quote", quote: { customer, asset, totals: { total: 82000 }, status: "converted", audit: { updatedAt: "2026-09-05T10:00:00Z" } } } },
+    { financialDocument: { financialDocumentId: "so-legacy", documentType: "sales-order", salesOrder: { customer, asset, totals: { total: 82000 }, status: "signed", signing: { signedAt: "2026-09-05T11:00:00Z", signedPackageHash: "sha256" }, audit: { updatedAt: "2026-09-05T11:00:00Z" } } } },
+    { financialDocument: { financialDocumentId: "inv-legacy", documentType: "invoice", metadata: { transactModule: "equipment-sale", customer, asset }, totals: { total: 82000 }, updatedAt: "2026-09-05T12:00:00Z" } },
+  ];
+  const [deal] = engine.buildIXISalesDealRegister(records);
+  assert.equal(engine.buildIXISalesDealRegister(records).length, 1);
+  assert.deepEqual(Object.keys(deal.stageRecords), ["quote", "sales-order", "signed", "invoice"]);
+  assert.equal(engine.recordForIXISalesStage(deal, "sales-order").financialBinding.financialDocumentId, "so-legacy");
+});
+
+test("legacy recovery refuses an ambiguous duplicate stage", () => {
+  const asset = { passportId: "IXI-MACHINE-544K" };
+  const customer = { name: "Clements Farm" };
+  const records = [
+    { financialDocument: { financialDocumentId: "qt-a", documentType: "quote", quote: { customer, asset, totals: { total: 82000 }, audit: { updatedAt: "2026-09-05T09:00:00Z" } } } },
+    { financialDocument: { financialDocumentId: "qt-b", documentType: "quote", quote: { customer, asset, totals: { total: 82000 }, audit: { updatedAt: "2026-09-05T10:00:00Z" } } } },
+    { financialDocument: { financialDocumentId: "so-a", documentType: "sales-order", salesOrder: { customer, asset, totals: { total: 82000 }, audit: { updatedAt: "2026-09-05T11:00:00Z" } } } },
+  ];
+  assert.equal(engine.buildIXISalesDealRegister(records).length, 3);
+});
+
+test("a direct Sales Order can materialize a populated editable Quote without rewriting the order", () => {
+  const [deal] = engine.buildIXISalesDealRegister([{ financialDocument: {
+    financialDocumentId: "so-direct",
+    documentType: "sales-order",
+    salesOrder: {
+      identity: { dealId: "DEAL-DIRECT" },
+      customer: { name: "Clements Farm", phone: "555-0100" },
+      asset: { passportId: "IXI-MACHINE-544K", serialNumber: "1DW544KZCHF681737" },
+      commercial: { orderDate: "2026-09-05", dueDate: "2026-09-12", paymentTerms: "Wire" },
+      totals: { subtotal: 82000, total: 82000 },
+      audit: { updatedAt: "2026-09-05T11:00:00Z" },
+    },
+  } }]);
+  const draft = engine.quoteDraftForIXISalesDeal(deal);
+  assert.equal(draft.identity.dealId, "DEAL-DIRECT");
+  assert.equal(draft.customer.name, "Clements Farm");
+  assert.equal(draft.asset.passportId, "IXI-MACHINE-544K");
+  assert.equal(draft.totals.total, 82000);
+  assert.equal(draft.related.salesOrderId, "so-direct");
+  assert.equal(draft.financialBinding, undefined);
+});
+
 test("exact stage readback retains canonical document identity and revision", () => {
   const records = [{ server: { revision: 7 }, financialDocument: { financialDocumentId: "so-exact", documentType: "sales-order", metadata: { dealId: "DEAL-EXACT" }, salesOrder: { identity: { dealId: "DEAL-EXACT" }, customer: { name: "Exact Buyer" }, status: "draft", audit: { updatedAt: "2026-09-05" } } } }];
   const [deal] = engine.buildIXISalesDealRegister(records);

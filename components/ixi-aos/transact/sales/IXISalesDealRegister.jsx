@@ -5,7 +5,9 @@ const money = value => new Intl.NumberFormat("en-US", { style: "currency", curre
 const clean = value => String(value ?? "").trim();
 
 function canStartStage(deal, stageId) {
+  if (stageId === "quote") return Boolean(deal?.stageRecords?.["sales-order"] || deal?.stageRecords?.invoice);
   if (stageId === "sales-order") return Boolean(deal?.stageRecords?.quote);
+  if (stageId === "signed") return Boolean(deal?.stageRecords?.["sales-order"]);
   if (stageId === "invoice") return Boolean(deal?.stageRecords?.signed);
   if (stageId === "sold") return Boolean(deal?.stageRecords?.invoice);
   if (stageId === "settlement") return Boolean(deal?.stageRecords?.sold);
@@ -17,10 +19,9 @@ export function IXISalesStageRail({ deal, activeStageId = "", onOpenStage, onSta
     {IXI_SALES_STAGES.map(stage => {
       const entry = deal?.stageRecords?.[stage.id];
       const startable = !entry && canStartStage(deal, stage.id);
-      const current = Boolean(entry) && deal?.currentStage === stage.id;
       const selected = activeStageId === stage.id;
-      const state = current ? "current" : entry ? "complete" : startable ? "next" : "locked";
-      return <button key={stage.id} type="button" className={`${state}${selected ? " selected" : ""}`} disabled={!entry && !startable} onClick={() => entry ? onOpenStage?.(stage, entry, deal) : startable && onStartStage?.(stage, deal)} aria-current={selected ? "step" : undefined} aria-label={`${entry ? "Open" : startable ? "Start" : "Unavailable"} step ${stage.number}, ${stage.label}`}><i>{stage.number}</i><span>{stage.label}</span></button>;
+      const state = entry ? "available" : startable ? "startable" : "missing";
+      return <button key={stage.id} type="button" className={`${state}${selected ? " selected" : ""}`} disabled={!entry && !startable} onClick={() => entry ? onOpenStage?.(stage, entry, deal) : startable && onStartStage?.(stage, deal)} aria-current={selected ? "step" : undefined} aria-label={`${entry ? "Open" : startable ? "Start" : "Unavailable"} step ${stage.number}, ${stage.label}`}><i>{entry ? "✓" : stage.number}</i><span>{stage.label}</span></button>;
     })}
   </div></>;
 }
