@@ -8,6 +8,7 @@ const CARD_BY_SLUG = Object.freeze({
   "personnel-container-005": 5,
   "personnel-container-006": 6,
   "universal-object-007": 7,
+  "employee-basic-007": 8,
   "profile-layout-008": 8,
   "aos-card-009": 9,
   "aos-card-009b": 9,
@@ -40,6 +41,19 @@ function numberFromSlug(value) {
 }
 
 export function resolveIXIAosOperatingCardNumber(object = {}) {
+  const canonicalObjectType = clean(
+    object?.objectType ||
+    object?.type ||
+    object?.definition?.objectType ||
+    object?.metadata?.objectType
+  ).toLowerCase();
+
+  // A Passport's canonical identity outranks stale presentation metadata.
+  // Person records always use the current Profile card, never legacy Card 007.
+  if (canonicalObjectType === "person" || canonicalObjectType === "employee") {
+    return 8;
+  }
+
   const directCandidates = [
     object?.templateNumber,
     object?.cardNumber,

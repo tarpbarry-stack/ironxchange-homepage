@@ -389,11 +389,19 @@ export function getObjectActionCapabilities(object = {}) {
     capabilities?.editable !== false &&
     capabilities?.canEdit !== false;
 
-  const capabilityTransact = Boolean(
-    capabilities?.canTransact ||
-    capabilities?.transact ||
-    capabilities?.hasTransact
-  );
+  const explicitTransact =
+    capabilities?.canTransact ??
+    capabilities?.transact ??
+    capabilities?.hasTransact;
+
+  const capabilityTransact = explicitTransact !== undefined
+    ? explicitTransact === true
+    : Boolean(
+      capabilities?.canHaveExpenses ||
+      capabilities?.canHaveWorkOrders ||
+      capabilities?.canHaveJobTickets ||
+      capabilities?.canHaveDocuments
+    );
 
   const capabilityConsole =
     capabilities?.hasConsole !== false &&
