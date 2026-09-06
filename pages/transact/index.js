@@ -1,6 +1,6 @@
 import Head from "next/head";
 
-import IXITransactDashboardApp from "../../components/ixi-transact-dashboard/IXITransactDashboardApp";
+import IXITransactCommandCenter from "../../components/ixi-command-center/IXITransactCommandCenter";
 
 export default function IXITransactPage() {
   return (
@@ -13,7 +13,7 @@ export default function IXITransactPage() {
         />
       </Head>
 
-      <IXITransactDashboardApp />
+      <IXITransactCommandCenter />
     </>
   );
 }
