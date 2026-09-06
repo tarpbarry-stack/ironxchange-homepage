@@ -53,7 +53,7 @@ import {
   IXITransactLocaleProvider,
   translateIXITransact,
 } from "./IXITransactLocale";
-import { patchIXIAosFinancialDocument } from "../financial-runtime/IXIAosFinancialReadClient";
+import { loadIXIAosFinancialDocument, patchIXIAosFinancialDocument } from "../financial-runtime/IXIAosFinancialReadClient";
 
 const clean = (value) => String(value ?? "").trim();
 const financialDocumentOf = (item) => {
@@ -64,6 +64,28 @@ const financialDocumentOf = (item) => {
 const financialRevisionOf = (item) =>
   Number(item?.server?.revision || item?.record?.server?.revision || 1);
 const SALES_MODULE_IDS = new Set(["quote", "sales-order", "invoice", "sold", "settlement"]);
+const SALES_DOCUMENT_TYPES = new Set(["quote", "sales-order", "invoice", "settlement"]);
+const financialDocumentIdOf = item => clean(financialDocumentOf(item)?.financialDocumentId || item?.id);
+const linkedSalesDocumentIds = item => {
+  const document = financialDocumentOf(item);
+  if (!SALES_DOCUMENT_TYPES.has(clean(document?.documentType).toLowerCase())) return [];
+  const embedded = document?.quote || document?.salesOrder || document?.assetSettlement || document?.metadata?.assetSaleRecord || {};
+  return [
+    document.sourceFinancialDocumentId,
+    ...(Array.isArray(document.relatedFinancialDocumentIds) ? document.relatedFinancialDocumentIds : []),
+    ...(Array.isArray(document.relationships) ? document.relationships.map(link => link?.financialDocumentId) : []),
+    document?.metadata?.quoteId,
+    document?.metadata?.salesOrderId,
+    document?.metadata?.invoiceId,
+    embedded?.related?.quoteId,
+    embedded?.related?.salesOrderId,
+    embedded?.related?.invoiceId,
+    embedded?.related?.soldSheetId,
+    embedded?.related?.settlementId,
+    embedded?.references?.saleId,
+    embedded?.identity?.financialInvoiceId,
+  ].map(clean).filter(Boolean);
+};
 
 export default function IXITransactApp({
   object = {},
@@ -137,6 +159,8 @@ export default function IXITransactApp({
   const [salesRoute, setSalesRoute] = useState(() => clean(selectedFinancialDocumentId)
     ? { documentId: clean(selectedFinancialDocumentId), dealId: "", stageId: clean(initialModuleId), detail: true }
     : null);
+  const [salesLineageRecords, setSalesLineageRecords] = useState([]);
+  const attemptedSalesLineageIds = useRef(new Set());
   const [acquisitionWorkflowIntent, setAcquisitionWorkflowIntent] = useState(null);
   const [workOrderSnapshot, setWorkOrderSnapshot] = useState(
     activeWorkOrder || null,
@@ -413,9 +437,40 @@ export default function IXITransactApp({
       )
     )[0] || null;
   }, [object, financialRecords, salesOrderSnapshot]);
-  const salesFinancialRecords = useMemo(() => financialRecords.length
+  const baseSalesFinancialRecords = useMemo(() => financialRecords.length
     ? financialRecords
     : object?.assetFinancialTransactions || object?.relatedFinancialRecords || object?.financialRecords || [], [financialRecords, object]);
+  const salesFinancialRecords = useMemo(() => {
+    const records = [...baseSalesFinancialRecords, ...salesLineageRecords];
+    const seen = new Set();
+    return records.filter(item => {
+      const id = financialDocumentIdOf(item);
+      if (!id || seen.has(id)) return false;
+      seen.add(id);
+      return true;
+    });
+  }, [baseSalesFinancialRecords, salesLineageRecords]);
+  useEffect(() => {
+    attemptedSalesLineageIds.current.clear();
+    setSalesLineageRecords([]);
+  }, [context.primary.passportId]);
+  useEffect(() => {
+    if (!SALES_MODULE_IDS.has(moduleId)) return undefined;
+    const existing = new Set(salesFinancialRecords.map(financialDocumentIdOf).filter(Boolean));
+    const missing = [...new Set(salesFinancialRecords.flatMap(linkedSalesDocumentIds))]
+      .filter(id => !existing.has(id) && !attemptedSalesLineageIds.current.has(id));
+    if (!missing.length) return undefined;
+    missing.forEach(id => attemptedSalesLineageIds.current.add(id));
+    const controller = new AbortController();
+    Promise.all(missing.map(financialDocumentId =>
+      loadIXIAosFinancialDocument({ financialDocumentId, signal: controller.signal }).catch(() => null)
+    )).then(records => {
+      if (controller.signal.aborted) return;
+      const loaded = records.filter(Boolean);
+      if (loaded.length) setSalesLineageRecords(current => [...current, ...loaded]);
+    });
+    return () => controller.abort();
+  }, [moduleId, salesFinancialRecords]);
   const salesDeals = useMemo(() => buildIXISalesDealRegister(salesFinancialRecords), [salesFinancialRecords]);
   const moduleSalesDeals = useMemo(() => dealsForIXISalesModule(salesDeals, moduleId), [salesDeals, moduleId]);
   const selectedSalesDeal = useMemo(() => findIXISalesDeal(salesDeals, salesRoute || {}), [salesDeals, salesRoute]);

@@ -8,8 +8,8 @@ const clean = value => String(value ?? "").trim();
 export function IXISalesStageRail({ deal, activeStageId = "", onOpenStage, onStartStage }) {
   return <><div className="ixi-deal-stage-rail" aria-label={`Sales stages for ${deal?.customer || "customer"}`}>
     {IXI_SALES_STAGES.map(stage => {
-      const { entry, startable, selected, state } = salesStagePresentation(deal, stage.id, activeStageId);
-      return <button key={stage.id} type="button" className={`${state}${selected ? " selected" : ""}`} disabled={!entry && !startable} onClick={() => entry ? onOpenStage?.(stage, entry, deal) : startable && onStartStage?.(stage, deal)} aria-current={selected ? "step" : undefined} aria-label={`${entry ? "Open" : startable ? "Start" : "Unavailable"} step ${stage.number}, ${stage.label}`}><i>{entry ? "✓" : stage.number}</i><span>{stage.label}</span></button>;
+      const { entry, completed, startable, selected, state } = salesStagePresentation(deal, stage.id, activeStageId);
+      return <button key={stage.id} type="button" className={`${state}${selected ? " selected" : ""}`} disabled={!entry && !startable} onClick={() => entry ? onOpenStage?.(stage, entry, deal) : startable && onStartStage?.(stage, deal)} aria-current={selected ? "step" : undefined} aria-label={`${entry || completed ? "Open" : startable ? "Start" : "Unavailable"} step ${stage.number}, ${stage.label}`}><i>{completed ? "✓" : stage.number}</i><span>{stage.label}</span></button>;
     })}
   </div></>;
 }
