@@ -195,13 +195,6 @@ export function validateIXIAssetSale(record = {}, sourceInvoice = {}) {
   if (!clean(record.sale?.invoiceNumber)) errors.invoiceNumber = "required";
   if (!clean(record.sale?.buyerLabel)) errors.buyer = "required";
   if (!clean(record.sale?.saleDate)) errors.saleDate = "required";
-  if (!clean(record.sale?.billOfSaleNumber)) errors.billOfSaleNumber = "required";
-  if (!array(record.documents).some(document =>
-    clean(document?.type).toLowerCase() === "bill-of-sale" &&
-    clean(document?.status).toLowerCase() === "verified" &&
-    clean(document?.storageKey) &&
-    clean(document?.verification)
-  )) errors.billOfSaleDocument = "server-verified-bill-of-sale-required";
   if (!["billed", "partially-collected", "collected"].includes(invoiceState)) errors.invoiceState = "invoice-must-be-issued";
   if (number(record.collection?.balanceDue) > 0.005) errors.collection = "buyer-balance-outstanding";
   if (clean(record.collection?.status) !== "paid") errors.collectionStatus = "payment-required";

@@ -41,8 +41,8 @@ const COPY = {
     reference: "BANK / CHECK / QUICKBOOKS REFERENCE",
     closeout: "SALE CLOSEOUT",
     date: "CLOSED / SOLD DATE",
-    billOfSale: "BILL OF SALE #",
-    hours: "HOURS AT SALE",
+    billOfSale: "BILL OF SALE # · OPTIONAL",
+    hours: "HOURS AT SALE · OPTIONAL",
     notes: "CLOSEOUT NOTES",
     documents: "CLOSING DOCUMENTS",
     uploading: "SECURING + VERIFYING EVIDENCE…",
@@ -81,8 +81,8 @@ const COPY = {
     reference: "REFERENCIA BANCARIA / CHEQUE / QUICKBOOKS",
     closeout: "CIERRE DE VENTA",
     date: "FECHA DE CIERRE / VENTA",
-    billOfSale: "CONTRATO DE VENTA #",
-    hours: "HORAS AL VENDER",
+    billOfSale: "CONTRATO DE VENTA # · OPCIONAL",
+    hours: "HORAS AL VENDER · OPCIONAL",
     notes: "NOTAS DE CIERRE",
     documents: "DOCUMENTOS DE CIERRE",
     uploading: "PROTEGIENDO + VERIFICANDO EVIDENCIA…",
@@ -211,12 +211,7 @@ export default function IXIAssetSaleApp({
   const invoiceIssued = ["billed", "partially-collected", "collected"].includes(invoiceState);
   const invoiceCollectible = invoiceState === "draft" || invoiceIssued;
   const readyToClose = invoiceIssued && collection.balanceDue <= 0.005;
-  const verifiedBillOfSale = documents.some(document =>
-    clean(document?.type).toLowerCase() === "bill-of-sale" &&
-    clean(document?.status).toLowerCase() === "verified" &&
-    clean(document?.verification),
-  );
-  const closeoutReady = readyToClose && Boolean(clean(billOfSaleNumber)) && verifiedBillOfSale;
+  const closeoutReady = readyToClose;
 
   async function addDocuments(files, typeLabel) {
     const selected = Array.from(files || []);

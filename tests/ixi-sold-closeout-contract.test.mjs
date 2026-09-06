@@ -47,7 +47,7 @@ test("SOLD carries the canonical Invoice identity and commercial terms forward",
   assert.equal(contract.validateIXIAssetSale(sale, sourceInvoice).valid, true);
 });
 
-test("SOLD requires an authoritative Bill of Sale number and server-verified evidence", () => {
+test("SOLD allows optional closeout paperwork once canonical funds are collected", () => {
   const baseInput = {
     sourceInvoice,
     buyerLabel: "Clements Farm",
@@ -58,9 +58,9 @@ test("SOLD requires an authoritative Bill of Sale number and server-verified evi
     context: { primary: { passportId: "IXI544KII" } },
     input: baseInput,
   });
-  assert.equal(contract.validateIXIAssetSale(missing, sourceInvoice).valid, false);
-  assert.equal(contract.validateIXIAssetSale(missing, sourceInvoice).errors.billOfSaleNumber, "required");
-  assert.equal(contract.validateIXIAssetSale(missing, sourceInvoice).errors.billOfSaleDocument, "server-verified-bill-of-sale-required");
+  assert.equal(contract.validateIXIAssetSale(missing, sourceInvoice).valid, true);
+  assert.equal(missing.sale.billOfSaleNumber, "");
+  assert.equal(missing.documents.length, 0);
 });
 
 test("SOLD rejects open balances and ignores non-final consideration", () => {
