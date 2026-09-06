@@ -171,3 +171,31 @@ test("single-side normalization preserves the real Console while moving it aroun
   assert.equal(right[1].slotId, "module-preserved");
   assert.equal(right[1].face, 3);
 });
+
+test("an explicit mobile actuator request opens a real Console from a closed card", () => {
+  const listing = createConsoleSlot({
+    type: IXI_CONSOLE_SLOT_TYPES.LISTING
+  });
+
+  const closed = normalizeSingleSideConsoleSlots(
+    [listing]
+  );
+  const left = normalizeSingleSideConsoleSlots(
+    closed,
+    { side: "left" }
+  );
+  const right = normalizeSingleSideConsoleSlots(
+    closed,
+    { side: "right" }
+  );
+
+  assert.equal(closed.length, 1);
+  assert.equal(left.length, 2);
+  assert.equal(left[0].type, IXI_CONSOLE_SLOT_TYPES.MODULE);
+  assert.equal(left[0].face, 2);
+  assert.equal(left[1].type, IXI_CONSOLE_SLOT_TYPES.LISTING);
+  assert.equal(right.length, 2);
+  assert.equal(right[0].type, IXI_CONSOLE_SLOT_TYPES.LISTING);
+  assert.equal(right[1].type, IXI_CONSOLE_SLOT_TYPES.MODULE);
+  assert.equal(right[1].face, 2);
+});

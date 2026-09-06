@@ -675,12 +675,33 @@ export function normalizeSingleSideConsoleSlots(
         ? "left"
         : "right";
 
-  const moduleSlot =
+  const existingModuleSlot =
     requestedSide === "left"
       ? leftModules.at(-1) ||
         rightModules[0]
       : rightModules[0] ||
         leftModules.at(-1);
+
+  /*
+   * An explicit side is an open request. A closed mobile
+   * object only has its Listing slot, so create the same real
+   * default Console module that the desktop insertion path
+   * would create. Calls without a side remain normalization-only
+   * and must not open a Console during render.
+   */
+  const moduleSlot =
+    existingModuleSlot ||
+    (
+      side === "left" ||
+      side === "right"
+        ? createConsoleSlot({
+            face:
+              getNextConsoleDefaultFace(
+                normalized
+              )
+          })
+        : null
+    );
 
   if (!moduleSlot) {
     return [listingSlot];

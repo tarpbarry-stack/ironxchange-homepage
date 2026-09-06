@@ -99,6 +99,7 @@ test("Auction mobile Console is one side and the complete assembly fits its cell
   assert.match(auctionConsole, /IXIFitWidthObjectShell/u);
   assert.match(auctionConsole, /nativeWidth=\{consoleNativeWidth\}/u);
   assert.match(auctionConsole, /nativeHeight=\{AUCTION_NATIVE_HEIGHT\}/u);
+  assert.match(auctionConsole, /normalizeSingleSideConsoleSlots\(\s*consoleSlots,\s*\{\s*side/u);
 });
 
 test("Auction scrolling wins until intentional hold and scaled actuators keep a 44 pixel target", () => {
