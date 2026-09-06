@@ -40,6 +40,22 @@ test("Invoice issuance is an explicit Step 4 command on the same canonical docum
   assert.match(commands, /invoiceStatus: "issued"/u);
 });
 
+test("Sold can issue the same draft Invoice before recording its customer receipt", async () => {
+  const [commands, app] = await Promise.all([
+    read("components/ixi-aos/transact/modules/sold/IXIAssetSaleCommands.js"),
+    read("components/ixi-aos/transact/modules/sold/IXIAssetSaleApp.jsx"),
+  ]);
+  const receipt = commands.slice(commands.indexOf("async function ensureInvoiceIsCollectible"));
+
+  assert.match(receipt, /financialState: "billed"/u);
+  assert.match(receipt, /invoiceStatus: "issued"/u);
+  assert.match(receipt, /issue-invoice-before-receipt/u);
+  assert.match(receipt, /await ensureInvoiceIsCollectible\(sourceInvoice, signal\)/u);
+  assert.match(receipt, /financialState: "paid"/u);
+  assert.match(app, /invoiceState === "draft" \|\| invoiceIssued/u);
+  assert.match(app, /TRAN\$ACT WILL ISSUE THIS DRAFT INVOICE BEFORE APPLYING PAYMENT/u);
+});
+
 test("Settlement remains a separate non-revenue control sourced to the sold Invoice", async () => {
   const commands = await read("components/ixi-aos/transact/modules/settlement/IXISettlementCommands.js");
 

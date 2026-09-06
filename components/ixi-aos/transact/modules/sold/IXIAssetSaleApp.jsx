@@ -48,7 +48,7 @@ const COPY = {
     uploading: "SECURING + VERIFYING EVIDENCE…",
     verified: "SERVER VERIFIED",
     record: "VERIFY FUNDS + RECORD SOLD",
-    invoiceRequired: "ISSUE THE INVOICE IN STEP 4 BEFORE RECORDING PAYMENT OR SOLD.",
+    invoiceRequired: "RECORD THE RECEIPT. TRAN$ACT WILL ISSUE THIS DRAFT INVOICE BEFORE APPLYING PAYMENT.",
     fundsRequired: "SOLD REMAINS LOCKED UNTIL THE CANONICAL INVOICE BALANCE IS $0.00.",
     paid: "FUNDS VERIFIED · READY TO CLOSE",
     invoiceTotal: "INVOICE TOTAL",
@@ -88,7 +88,7 @@ const COPY = {
     uploading: "PROTEGIENDO + VERIFICANDO EVIDENCIA…",
     verified: "VERIFICADO POR EL SERVIDOR",
     record: "VERIFICAR FONDOS + REGISTRAR VENDIDO",
-    invoiceRequired: "EMITA LA FACTURA EN EL PASO 4 ANTES DE REGISTRAR EL PAGO O LA VENTA.",
+    invoiceRequired: "REGISTRE EL PAGO. TRAN$ACT EMITIRÁ ESTA FACTURA BORRADOR ANTES DE APLICARLO.",
     fundsRequired: "VENDIDO PERMANECE BLOQUEADO HASTA QUE EL SALDO DE LA FACTURA SEA $0.00.",
     paid: "FONDOS VERIFICADOS · LISTO PARA CERRAR",
     invoiceTotal: "TOTAL DE FACTURA",
@@ -209,6 +209,7 @@ export default function IXIAssetSaleApp({
   const preview = useMemo(() => createIXIAssetSaleDraft({ context, input }), [context, input]);
   const invoiceState = clean(invoiceSnapshot?.financialState).toLowerCase();
   const invoiceIssued = ["billed", "partially-collected", "collected"].includes(invoiceState);
+  const invoiceCollectible = invoiceState === "draft" || invoiceIssued;
   const readyToClose = invoiceIssued && collection.balanceDue <= 0.005;
   const verifiedBillOfSale = documents.some(document =>
     clean(document?.type).toLowerCase() === "bill-of-sale" &&
@@ -292,6 +293,7 @@ export default function IXIAssetSaleApp({
           action: "record-buyer-payment",
           payment: result.payment,
           response: result.response,
+          invoiceIssueResponse: result.invoiceIssueResponse,
           invoiceResponse: result.invoiceResponse,
           invoice: nextInvoice,
           warning: result.syncWarning,
@@ -382,7 +384,7 @@ export default function IXIAssetSaleApp({
       <small>{receiptItem.date} · {receiptItem.reference || "—"}</small>
     </div>)}
 
-    {!record && invoiceIssued && shownCollection.balanceDue > 0.005 ? <>
+    {!record && invoiceCollectible && shownCollection.balanceDue > 0.005 ? <>
       <div className="sale-grid">
         <Field label={copy.paymentAmount}><Input value={payAmount} onChange={setPayAmount} inputMode="decimal" /></Field>
         <Field label={copy.paymentDate}><Input type="date" value={payDate} onChange={setPayDate} /></Field>
