@@ -11,7 +11,7 @@ const rail = await import(
   `data:text/javascript;base64,${Buffer.from(presentationSource).toString("base64")}`
 );
 
-test("opening Sold does not present Sold as completed before a persisted Sold record exists", () => {
+test("an Invoice completes Quote and Sales Order progression without fabricating Signed", () => {
   const deal = {
     stageRecords: {
       quote: { documentId: "quote-1" },
@@ -26,6 +26,34 @@ test("opening Sold does not present Sold as completed before a persisted Sold re
   assert.equal(rail.salesStagePresentation(deal, "invoice", "sold").state, "completed");
   assert.equal(rail.salesStagePresentation(deal, "sold", "sold").state, "next");
   assert.equal(rail.salesStagePresentation(deal, "settlement", "sold").state, "unavailable");
+});
+
+test("an Invoice generated from verified customer signature completes stages 1 through 4", () => {
+  const deal = {
+    stageRecords: {
+      invoice: {
+        documentId: "invoice-1",
+        document: {
+          sourceFinancialDocumentId: "order-1",
+          metadata: { salesOrderId: "order-1", signedPackageHash: "sha256-package" },
+        },
+      },
+    },
+  };
+
+  for (const stageId of ["quote", "sales-order", "signed", "invoice"])
+    assert.equal(rail.salesStagePresentation(deal, stageId, "invoice").state, "completed");
+  assert.equal(rail.salesStagePresentation(deal, "sold", "invoice").state, "available-action");
+  assert.equal(rail.salesStagePresentation(deal, "settlement", "invoice").state, "unavailable");
+});
+
+test("Signed never completes from position alone or from an unverified direct Invoice", () => {
+  const deal = { stageRecords: { invoice: { documentId: "invoice-1", document: { metadata: {} } } } };
+
+  assert.equal(rail.salesStagePresentation(deal, "quote", "invoice").state, "completed");
+  assert.equal(rail.salesStagePresentation(deal, "sales-order", "invoice").state, "completed");
+  assert.notEqual(rail.salesStagePresentation(deal, "signed", "invoice").state, "completed");
+  assert.equal(rail.salesStagePresentation(deal, "invoice", "invoice").state, "completed");
 });
 
 test("Sold becomes completed and Settlement becomes the outlined next action only after Sold persists", () => {
@@ -43,6 +71,8 @@ test("Sold becomes completed and Settlement becomes the outlined next action onl
 test("an available historical action is clickable without borrowing completed or next styling", () => {
   const deal = { stageRecords: { invoice: { documentId: "invoice-1" } } };
 
-  assert.equal(rail.salesStagePresentation(deal, "quote", "sold").state, "available-action");
-  assert.equal(rail.salesStagePresentation(deal, "sales-order", "sold").state, "available-action");
+  assert.equal(rail.salesStagePresentation(deal, "quote", "sold").state, "completed");
+  assert.equal(rail.salesStagePresentation(deal, "sales-order", "sold").state, "completed");
+  assert.equal(rail.salesStagePresentation(deal, "quote", "sold").startable, true);
+  assert.equal(rail.salesStagePresentation(deal, "sales-order", "sold").startable, true);
 });
