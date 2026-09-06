@@ -46,6 +46,47 @@ export function financialDocumentOf(item = {}) {
   return { ...object(document), metadata: { ...object(record?.metadata), ...object(document?.metadata) } };
 }
 
+export function includeIXISalesSnapshots(records = [], { salesOrder = null, invoice = null } = {}) {
+  const candidates = [...array(records)];
+  const salesOrderId = clean(
+    salesOrder?.financialBinding?.financialDocumentId ||
+      salesOrder?.identity?.salesOrderId ||
+      salesOrder?.identity?.financialDocumentId,
+  );
+  if (salesOrderId) {
+    candidates.push({
+      server: { revision: Number(salesOrder?.financialBinding?.revision || 1) },
+      financialDocument: {
+        financialDocumentId: salesOrderId,
+        documentNumber: clean(salesOrder?.identity?.number),
+        documentType: "sales-order",
+        financialState: "committed",
+        salesOrder,
+      },
+    });
+  }
+  const invoiceId = clean(
+    invoice?.financialBinding?.financialDocumentId || invoice?.financialDocumentId,
+  );
+  if (invoiceId) {
+    candidates.push({
+      server: { revision: Number(invoice?.financialBinding?.revision || 1) },
+      financialDocument: {
+        ...object(invoice),
+        financialDocumentId: invoiceId,
+        documentType: "invoice",
+      },
+    });
+  }
+  const seen = new Set();
+  return candidates.filter((item) => {
+    const id = clean(financialDocumentOf(item).financialDocumentId);
+    if (!id || seen.has(id)) return false;
+    seen.add(id);
+    return true;
+  });
+}
+
 function embeddedOf(document = {}) {
   if (document?.quote) return document.quote;
   if (document?.salesOrder) return document.salesOrder;

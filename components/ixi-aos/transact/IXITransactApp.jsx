@@ -33,6 +33,7 @@ import IXISalesDealRegister, { IXISalesStageRail } from "./sales/IXISalesDealReg
 import {
   buildIXISalesDealRegister,
   createIXISalesDealId,
+  includeIXISalesSnapshots,
   dealsForIXISalesModule,
   documentForIXISalesStage,
   findIXISalesDeal,
@@ -440,16 +441,19 @@ export default function IXITransactApp({
   const baseSalesFinancialRecords = useMemo(() => financialRecords.length
     ? financialRecords
     : object?.assetFinancialTransactions || object?.relatedFinancialRecords || object?.financialRecords || [], [financialRecords, object]);
-  const salesFinancialRecords = useMemo(() => {
-    const records = [...baseSalesFinancialRecords, ...salesLineageRecords];
-    const seen = new Set();
-    return records.filter(item => {
-      const id = financialDocumentIdOf(item);
-      if (!id || seen.has(id)) return false;
-      seen.add(id);
-      return true;
-    });
-  }, [baseSalesFinancialRecords, salesLineageRecords]);
+  const salesFinancialRecords = useMemo(
+    () =>
+      includeIXISalesSnapshots(
+        [...baseSalesFinancialRecords, ...salesLineageRecords],
+        { salesOrder: salesOrderSnapshot, invoice: salesInvoiceSnapshot },
+      ),
+    [
+      baseSalesFinancialRecords,
+      salesLineageRecords,
+      salesOrderSnapshot,
+      salesInvoiceSnapshot,
+    ],
+  );
   useEffect(() => {
     attemptedSalesLineageIds.current.clear();
     setSalesLineageRecords([]);
