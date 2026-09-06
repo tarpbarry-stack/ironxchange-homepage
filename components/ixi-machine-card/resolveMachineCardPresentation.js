@@ -16,7 +16,10 @@ export default function resolveMachineCardPresentation({
     return "seller";
   }
 
-  if (cardContext === "auction-work") {
+  if (
+    cardContext === "auction-work" ||
+    cardContext === "auction-market"
+  ) {
     return "auction";
   }
 

@@ -342,6 +342,12 @@ export default async function handler(req, res) {
       req.query.surface ===
         "browse-v2";
 
+    const publicMachineChannel =
+      req.query.surface ===
+        "auction-market"
+        ? "auction"
+        : "marketplace";
+
     const token = await getAccessToken({
       useCache:
         marketplaceBrowsePerformance
@@ -462,7 +468,7 @@ export default async function handler(req, res) {
     listingStatus !== "deleted" &&
     listingStatus !== "archived" &&
     machineAccess === "public" &&
-    machineChannel === "marketplace"
+    machineChannel === publicMachineChannel
   );
 })
       .map(item => {

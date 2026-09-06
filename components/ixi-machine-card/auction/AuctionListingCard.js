@@ -52,6 +52,8 @@ function getBulkImageUrls(listing = {}) {
 export default function AuctionListingCard({
   listing = {},
   sourceListingUrl = "",
+  cardContext = "auction-work",
+  sellerMode = false,
 
   saved = false,
   onToggleSaved,
@@ -106,6 +108,10 @@ consoleRightOpen = false,
   
 dragHandleProps
 }) {
+
+  const canEditAuction =
+    sellerMode ||
+    cardContext === "auction-work";
 
   const [photoIndex, setPhotoIndex] = useState(0);
   console.log("AUCTION DRAG HANDLE RECEIVED", {
@@ -412,7 +418,7 @@ function handlePhotoLoad(e, photoUrl) {
     sourceListingUrl={sourceListingUrl}
     dragHandleProps={dragHandleProps}
 
-    sellerMode={true}
+    sellerMode={canEditAuction}
 
     lotNumberValue={lotNumberValue}
   onLotNumberChange={onLotNumberChange}
@@ -525,7 +531,7 @@ function handlePhotoLoad(e, photoUrl) {
   from={from}
   onListingClick={handleCardClick}
 
-  sellerMode={true}
+  sellerMode={canEditAuction}
 
   lotNumberValue={lotNumberValue}
   onLotNumberChange={onLotNumberChange}

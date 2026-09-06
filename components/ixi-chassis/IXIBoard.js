@@ -564,7 +564,9 @@ return (
 
 consoleActuatorVariant={
   cardContext === "inventory" ||
-  cardContext === "enterprise"
+  cardContext === "enterprise" ||
+  cardContext === "auction-work" ||
+  cardContext === "auction-market"
     ? "tall"
     : "compact"
 }

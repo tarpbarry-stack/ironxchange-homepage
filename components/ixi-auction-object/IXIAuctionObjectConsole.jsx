@@ -1,6 +1,9 @@
 import IXIScaledCardShell
   from "../ixi-machine-object/IXIScaledCardShell";
 
+import IXIFitWidthObjectShell
+  from "../ixi-mobile/IXIFitWidthObjectShell";
+
 import IXIObjectCardActuator
   from "../ixi-chassis/IXIObjectCardActuator";
 
@@ -13,6 +16,7 @@ import {
   IXI_CONSOLE_SLOT_TYPES,
   createConsoleSlot,
   normalizeConsoleSlots,
+  normalizeSingleSideConsoleSlots,
   insertConsoleSlot,
   removeConsoleSlot,
   cycleConsoleSlotFace,
@@ -91,6 +95,8 @@ export default function IXIAuctionObjectConsole({
   updateIxiCardState,
 
   enableCardScaling = false,
+  fitCardScalingToCell = false,
+  fillCardScalingToCell = false,
   cardScaleMode = "xl",
 
   dragHandleProps,
@@ -109,7 +115,7 @@ export default function IXIAuctionObjectConsole({
     ) &&
     objectState.consoleSlots.length > 0;
 
-  const consoleSlots =
+  const unrestrictedConsoleSlots =
     hasSavedSlotModel
       ? normalizeConsoleSlots(
           objectState.consoleSlots
@@ -117,6 +123,17 @@ export default function IXIAuctionObjectConsole({
       : getLegacyConsoleSlots(
           objectState
         );
+
+  const useMobileSingleSideConsole =
+    enableCardScaling &&
+    fitCardScalingToCell;
+
+  const consoleSlots =
+    useMobileSingleSideConsole
+      ? normalizeSingleSideConsoleSlots(
+          unrestrictedConsoleSlots
+        )
+      : unrestrictedConsoleSlots;
 
   const consoleDepth =
     consoleSlots.length;
@@ -138,7 +155,11 @@ export default function IXIAuctionObjectConsole({
 
   const atCapacity =
     consoleDepth >=
-    IXI_CONSOLE_MAX_DEPTH;
+    (
+      useMobileSingleSideConsole
+        ? 2
+        : IXI_CONSOLE_MAX_DEPTH
+    );
 
   const consoleNativeWidth =
     (
@@ -185,6 +206,19 @@ export default function IXIAuctionObjectConsole({
   ) {
     event?.preventDefault?.();
     event?.stopPropagation?.();
+
+    if (useMobileSingleSideConsole) {
+      saveConsoleSlots(
+        normalizeSingleSideConsoleSlots(
+          consoleSlots,
+          {
+            side
+          }
+        )
+      );
+
+      return;
+    }
 
     if (atCapacity) return;
 
@@ -773,6 +807,24 @@ export default function IXIAuctionObjectConsole({
       `}</style>
     </div>
   );
+
+  if (
+    enableCardScaling &&
+    fitCardScalingToCell
+  ) {
+    return (
+      <IXIFitWidthObjectShell
+        size={cardScaleMode}
+        nativeWidth={consoleNativeWidth}
+        nativeHeight={AUCTION_NATIVE_HEIGHT}
+        fillAvailableWidth={
+          fillCardScalingToCell
+        }
+      >
+        {assembledConsole}
+      </IXIFitWidthObjectShell>
+    );
+  }
 
   return enableCardScaling ? (
     <IXIScaledCardShell

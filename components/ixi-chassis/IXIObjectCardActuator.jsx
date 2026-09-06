@@ -140,6 +140,9 @@ export default function IXIObjectCardActuator({
 
         :global(.ixi-fit-width-object-plane)
         :global(.private-listing-card)
+        .ixi-object-card-actuator,
+        :global(.ixi-fit-width-object-plane)
+        :global(.auction-listing-card)
         .ixi-object-card-actuator {
           top:
             calc(
@@ -195,6 +198,9 @@ export default function IXIObjectCardActuator({
 
         :global(.ixi-fit-width-object-plane)
         :global(.private-listing-card)
+        .ixi-object-card-actuator::after,
+        :global(.ixi-fit-width-object-plane)
+        :global(.auction-listing-card)
         .ixi-object-card-actuator::after {
           content: "";
           position: absolute;
@@ -224,6 +230,9 @@ export default function IXIObjectCardActuator({
 
         :global(.ixi-fit-width-object-plane)
         :global(.private-listing-card)
+        .ixi-object-card-actuator.right::after,
+        :global(.ixi-fit-width-object-plane)
+        :global(.auction-listing-card)
         .ixi-object-card-actuator.right::after {
           right: 0;
           border-radius: 3px 1px 1px 3px;
@@ -245,6 +254,9 @@ export default function IXIObjectCardActuator({
 
         :global(.ixi-fit-width-object-plane)
         :global(.private-listing-card)
+        .ixi-object-card-actuator.left::after,
+        :global(.ixi-fit-width-object-plane)
+        :global(.auction-listing-card)
         .ixi-object-card-actuator.left::after {
           left: 0;
           border-radius: 1px 3px 3px 1px;
@@ -278,6 +290,9 @@ export default function IXIObjectCardActuator({
 
         :global(.ixi-fit-width-object-plane)
         :global(.private-listing-card)
+        .ixi-object-card-actuator:hover,
+        :global(.ixi-fit-width-object-plane)
+        :global(.auction-listing-card)
         .ixi-object-card-actuator:hover {
           background: transparent;
           box-shadow: none;
@@ -298,6 +313,12 @@ export default function IXIObjectCardActuator({
         .ixi-object-card-actuator:hover::after,
         :global(.ixi-fit-width-object-plane)
         :global(.private-listing-card)
+        .ixi-object-card-actuator:focus-visible::after,
+        :global(.ixi-fit-width-object-plane)
+        :global(.auction-listing-card)
+        .ixi-object-card-actuator:hover::after,
+        :global(.ixi-fit-width-object-plane)
+        :global(.auction-listing-card)
         .ixi-object-card-actuator:focus-visible::after {
           background: rgba(255, 196, 0, .95);
           box-shadow: 0 0 8px rgba(255, 196, 0, .38);

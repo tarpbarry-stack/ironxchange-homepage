@@ -171,7 +171,7 @@ const pageContexts = {
   "pages/auction-work/index.js":
     "auction-work",
   "pages/auction-market/index.js":
-    "marketplace",
+    "auction-market",
   "pages/yard/index.js":
     "marketplace",
   "pages/yard/[sellerSlug].js":
