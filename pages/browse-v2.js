@@ -1227,21 +1227,19 @@ function getIxiColorValue(color) {
 }
 
   function saveWorkspaceSettings(patch = {}) {
-  if (!ixiUserId) {
-    console.warn(
-      "IXI WORKSPACE SETTINGS WRITE BLOCKED — IDENTITY NOT READY"
-    );
-
-    return null;
-  }
-
   const nextSettings = {
     ...workspaceSettings,
     ...patch,
     updatedAt: Date.now()
   };
 
+  // Workspace controls must respond immediately, including during the public
+  // identity-loading window. Persistence is added once an IXI identity exists.
   setWorkspaceSettings(nextSettings);
+
+  if (!ixiUserId) {
+    return null;
+  }
 
   return saveWorkspaceSettingsRecord({
     saveIxiMachinePatch,

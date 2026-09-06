@@ -112,6 +112,11 @@ test("Park Brake is persisted and guards mechanical commands without pointer blo
   assert.match(page, /sensors=\{workspaceParkBrakeOn \? \[\] : sensors\}/u);
   assert.match(page, /function executeIXITransaction[\s\S]*blockMechanicalMutation/u);
   assert.match(page, /function rotatePocket[\s\S]*blockMechanicalMutation/u);
+  assert.ok(
+    page.indexOf("setWorkspaceSettings(nextSettings)") <
+      page.indexOf("if (!ixiUserId)", page.indexOf("function saveWorkspaceSettings")),
+    "workspace controls must update locally before identity-gated persistence"
+  );
   assert.match(controls, /onClick=\{onToggleParkBrake\}/u);
   assert.doesNotMatch(page, /parkBrake[\s\S]{0,100}pointer-events:\s*none/u);
 });
@@ -126,4 +131,3 @@ test("Browse catalogue has durable cache, stale serving, and timing headers", ()
   assert.match(api, /stale-while-revalidate=604800/u);
   assert.match(api, /marketplace_catalogue_served/u);
 });
-
