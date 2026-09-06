@@ -14,11 +14,17 @@ const visualCorrectionsSource = fs.readFileSync(
   new URL("../components/ixi-aos/card-runtime/modules/IXIAosLocationVisualCorrections.jsx", import.meta.url),
   "utf8"
 );
+const operatingResolverSource = fs.readFileSync(
+  new URL("../components/ixi-aos/card-runtime/IXIAosOperatingCardResolver.mjs", import.meta.url),
+  "utf8"
+);
 
-test("Card 009 reserves a dedicated top-right lane for its live IXI identity", () => {
-  assert.match(cardSource, /className="card-009-header-identity"/u);
-  assert.match(identitySource, /\.card-009-header-identity>\.ixi-aos-header-ixi-number\{top:6px;right:10px;z-index:220/u);
-  assert.match(identitySource, /\.card-009-header-identity \.ixi-aos-card-header-controls\)\{top:19px!important\}/u);
+test("Cards 009 and 009B use the canonical library header alignment", () => {
+  assert.doesNotMatch(cardSource, /card-009-header-identity/u);
+  assert.match(identitySource, /\.ixi-aos-header-ixi-number\{position:absolute;top:7px;right:9px;z-index:190/u);
+  assert.match(identitySource, /\.ixi-aos-header-identity-shell \.ixi-aos-card-header-controls\)\{top:17px!important\}/u);
+  assert.doesNotMatch(identitySource, /\.card-009-header-identity/u);
+  assert.match(operatingResolverSource, /"aos-card-009b": 9/u);
 });
 
 test("Card 009 does not cover the live IXI identity with synthetic text", () => {
