@@ -6,6 +6,10 @@ const page = fs.readFileSync(
   "pages/auction-market/index.js",
   "utf8"
 );
+const auctionWorkPage = fs.readFileSync(
+  "pages/auction-work/index.js",
+  "utf8"
+);
 const auctionConsole = fs.readFileSync(
   "components/ixi-auction-object/IXIAuctionObjectConsole.jsx",
   "utf8"
@@ -37,6 +41,9 @@ const listingApi = fs.readFileSync(
 const auctionBoard = page.match(
   /<IXIBoard\s+items=\{visibleSellerListings\}[\s\S]*?\/>/u
 )?.[0] || "";
+const auctionWorkBoard = auctionWorkPage.match(
+  /<IXIBoard\s+items=\{visibleSavedListings\}[\s\S]*?\/>/u
+)?.[0] || "";
 
 test("Auction Market loads real public Auction machines instead of an empty source", () => {
   assert.match(page, /isPublicAuctionMachine/u);
@@ -60,6 +67,20 @@ test("the production Auction Market owns the mobile I and II presentation", () =
   assert.match(page, /ixi-mobile-auction-card-board-i\) \{[\s\S]*?padding-left: 4px;[\s\S]*?padding-right: 4px;/u);
   assert.match(page, /ixi-mobile-auction-card-board-ii\) \{[\s\S]*?gap: 10px 4px;[\s\S]*?padding-left: 2px;[\s\S]*?padding-right: 2px;/u);
   assert.match(page, /className="desktop-card-scale-control"/u);
+});
+
+test("authenticated Auction Work applies the same mobile contract to owned Auction cards", () => {
+  assert.match(auctionWorkPage, /\/api\/account-listings\?authorId=/u);
+  assert.match(auctionWorkPage, /getMachineChannel\(item\) ===[\s\S]*?IXI_MACHINE_CHANNELS\.AUCTION/u);
+  assert.match(auctionWorkPage, /aria-label="Auction Work card density"/u);
+  assert.match(auctionWorkBoard, /cardContext="auction-work"/u);
+  assert.match(auctionWorkBoard, /fitCardScalingToCell=\{isMobileCardPresentation\}/u);
+  assert.match(auctionWorkBoard, /fillCardScalingToCell=\{[\s\S]*?mobileCardDensity === "I"/u);
+  assert.match(auctionWorkPage, /ixi-mobile-auction-work-card-board-i\) \{[\s\S]*?padding-left: 4px;[\s\S]*?padding-right: 4px;/u);
+  assert.match(auctionWorkPage, /ixi-mobile-auction-work-card-board-ii\) \{[\s\S]*?gap: 10px 4px;[\s\S]*?padding-left: 2px;[\s\S]*?padding-right: 2px;/u);
+  assert.match(auctionWorkPage, /MouseSensor/u);
+  assert.match(auctionWorkPage, /TouchSensor/u);
+  assert.doesNotMatch(auctionWorkPage, /PointerSensor/u);
 });
 
 test("Auction Market uses the real 300 by 475 Auction family without enabling operator edits", () => {
