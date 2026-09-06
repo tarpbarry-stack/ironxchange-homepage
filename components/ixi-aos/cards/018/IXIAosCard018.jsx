@@ -90,7 +90,7 @@ export default function IXIAosCard018({
       {!editing ? (
         <header className="c018-head">
           <div className="c018-identity">
-            <span>{clean(object?.singularLabel) || "CONTAINER"}</span>
+            <span>SYSTEM INDEX</span>
             <h2>{clean(object?.displayName) || "UNTITLED CONTAINER"}</h2>
           </div>
           <IXIAosCardHeaderControls
