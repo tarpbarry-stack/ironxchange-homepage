@@ -14,6 +14,8 @@ test("Card 018 is a V12 Equipment Index backed by the canonical System Index car
   assert.match(card, /onReturnContents/);
   assert.match(card, /onSavePresentation/);
   assert.match(card, /\.ixi-card-018:after/);
+  assert.match(card, /\.ixi-card-018:before/);
+  assert.match(card, /border:1px solid #454b47/);
   assert.match(card, /Inter Variable/);
   assert.match(card, /IXIAosCardHeaderIdentity/);
   assert.match(card, /IXIAosCardHeaderControls/);

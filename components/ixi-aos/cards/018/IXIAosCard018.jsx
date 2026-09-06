@@ -137,7 +137,8 @@ export default function IXIAosCard018({
       ) : null}
 
       <style jsx>{`
-        .ixi-card-018{position:relative;width:298px;height:471px;overflow:hidden;border-radius:13px;font-family:'Inter Variable',Inter,Arial,Helvetica,sans-serif}
+        .ixi-card-018{position:relative;width:298px;height:471px;overflow:hidden;border-radius:13px;background:#090b0a;font-family:'Inter Variable',Inter,Arial,Helvetica,sans-serif;box-shadow:inset 0 1px rgba(255,255,255,.045),0 18px 42px rgba(0,0,0,.46)}
+        .ixi-card-018:before{content:"";position:absolute;inset:0;z-index:250;border:1px solid #454b47;border-radius:13px;box-shadow:inset 0 1px rgba(255,255,255,.055),inset 0 -1px rgba(0,194,255,.09);pointer-events:none}
         .ixi-card-018:after{content:"";position:absolute;inset:7px 7px 24px;z-index:80;border:1px solid rgba(255,255,255,.075);border-radius:9px;box-shadow:inset 0 1px rgba(255,255,255,.025);pointer-events:none}
         :global(.ixi-card-018 .system-index-card){border-color:#454b47!important;border-radius:13px!important;background:radial-gradient(circle at 84% 12%,rgba(23,73,94,.11),transparent 26%),linear-gradient(180deg,#111412,#080a09)!important;box-shadow:inset 0 1px rgba(255,255,255,.07),0 18px 40px rgba(0,0,0,.53)!important}
         :global(.ixi-card-018 .system-index-card>.board-command-rail){display:none!important}
