@@ -71,6 +71,9 @@ test("desktop numeric filters retain their styled class and cannot expand the gr
     /grid-template-columns:\s*repeat\(8, minmax\(0, 1fr\)\)/u
   );
   assert.match(searchSurface, /\.dash-secondary\s*\{[\s\S]*?min-width:\s*0;/u);
+  for (const placeholder of ["YR MIN", "YR MAX", "$ MIN", "$ MAX", "HRS MIN", "HRS MAX"]) {
+    assert.ok(searchSurface.includes(`placeholder="${placeholder}"`));
+  }
 });
 
 test("Deal Sheet separates purchase total, credits, and amount financed", () => {

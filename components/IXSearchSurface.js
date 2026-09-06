@@ -227,7 +227,7 @@ const availableModels =
   {...rangeInputProps("yearMin")}
   value={filters.yearMin || ""}
   onChange={(e) => updateFilter("yearMin", e.target.value)}
-  placeholder="YEAR MIN"
+  placeholder="YR MIN"
   aria-label="Year min"
 />
 
@@ -237,7 +237,7 @@ const availableModels =
   {...rangeInputProps("yearMax")}
   value={filters.yearMax || ""}
   onChange={(e) => updateFilter("yearMax", e.target.value)}
-  placeholder="YEAR MAX"
+  placeholder="YR MAX"
   aria-label="Year max"
 />
 
@@ -247,7 +247,7 @@ const availableModels =
   {...rangeInputProps("priceMin")}
   value={filters.priceMin || ""}
   onChange={(e) => updateFilter("priceMin", e.target.value)}
-  placeholder="PRICE MIN"
+  placeholder="$ MIN"
   aria-label="Price min"
 />
 
@@ -257,7 +257,7 @@ const availableModels =
   {...rangeInputProps("priceMax")}
   value={filters.priceMax || ""}
   onChange={(e) => updateFilter("priceMax", e.target.value)}
-  placeholder="PRICE MAX"
+  placeholder="$ MAX"
   aria-label="Price max"
 />
 
@@ -267,7 +267,7 @@ const availableModels =
   {...rangeInputProps("hoursMin")}
   value={filters.hoursMin || ""}
   onChange={(e) => updateFilter("hoursMin", e.target.value)}
-  placeholder="HOURS MIN"
+  placeholder="HRS MIN"
   aria-label="Hours min"
 />
 
@@ -277,7 +277,7 @@ const availableModels =
   {...rangeInputProps("hoursMax")}
   value={filters.hoursMax || ""}
   onChange={(e) => updateFilter("hoursMax", e.target.value)}
-  placeholder="HOURS MAX"
+  placeholder="HRS MAX"
   aria-label="Hours max"
 />
       <select
