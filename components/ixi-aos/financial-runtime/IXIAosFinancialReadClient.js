@@ -91,6 +91,69 @@ export async function patchIXIAosFinancialDocument({
   );
 }
 
+function bytesToBase64(bytes) {
+  let binary = "";
+  bytes.forEach(byte => { binary += String.fromCharCode(byte); });
+  return btoa(binary);
+}
+
+export async function uploadIXIAosFinancialAttachment({
+  financialDocumentId,
+  file,
+  type = "attachment",
+  signal,
+} = {}) {
+  const id = clean(financialDocumentId);
+  if (!id) throw new Error("Financial document ID is required for evidence upload.");
+  if (!file) throw new Error("An evidence file is required.");
+  if (!globalThis.crypto?.subtle) throw new Error("Secure file hashing is unavailable in this browser.");
+  const checksumSha256 = bytesToBase64(new Uint8Array(
+    await globalThis.crypto.subtle.digest("SHA-256", await file.arrayBuffer()),
+  ));
+  const controlled = {
+    type: clean(type) || "attachment",
+    fileName: clean(file.name),
+    contentType: clean(file.type),
+    sizeBytes: Number(file.size || 0),
+    checksumSha256,
+  };
+  const initialized = await request(
+    `/api/ixi/financial/documents/${encodeURIComponent(id)}/attachments/init`,
+    { method: "POST", body: JSON.stringify(controlled), signal },
+    "The evidence upload could not be initialized.",
+  );
+  const upload = initialized?.data?.upload;
+  if (!clean(upload?.uploadUrl) || !clean(upload?.storageKey) || !clean(upload?.attachmentId)) {
+    throw new Error("The evidence upload contract was incomplete.");
+  }
+  const uploaded = await fetch(upload.uploadUrl, {
+    method: "PUT",
+    headers: {
+      "Content-Type": controlled.contentType,
+      "x-amz-checksum-sha256": checksumSha256,
+    },
+    body: file,
+    signal,
+  });
+  if (!uploaded.ok) throw new Error(`Evidence storage rejected the upload (${uploaded.status}).`);
+  const completed = await request(
+    `/api/ixi/financial/documents/${encodeURIComponent(id)}/attachments/complete`,
+    {
+      method: "POST",
+      body: JSON.stringify({
+        ...controlled,
+        attachmentId: upload.attachmentId,
+        storageKey: upload.storageKey,
+      }),
+      signal,
+    },
+    "The uploaded evidence could not be verified.",
+  );
+  const attachment = completed?.data?.attachment;
+  if (clean(attachment?.status).toLowerCase() !== "verified") throw new Error("Evidence verification did not complete.");
+  return attachment;
+}
+
 export function getIXIFinancialDocument(record = {}) {
   return record?.financialDocument || record?.record?.financialDocument || null;
 }
