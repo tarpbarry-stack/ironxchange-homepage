@@ -27,9 +27,7 @@ export default function IXIChassis({ children }) {
 
         @media (max-width: 850px) {
           .ixi-command-chassis {
-            display: block;
-            max-width: 100%;
-            margin: 0 auto 18px;
+            display: none;
           }
         }
       `}</style>
