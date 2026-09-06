@@ -210,17 +210,49 @@ export default function Navbar() {
         }
 
         @media (max-width: 850px) {
-          .nav { height: 60px; padding-inline: 10px; }
+          .nav {
+            box-sizing: border-box;
+            width: 100%;
+            height: calc(54px + env(safe-area-inset-top));
+            padding: env(safe-area-inset-top) 12px 0;
+            position: sticky;
+            top: 0;
+            z-index: 2147481000;
+            border-bottom-color: rgba(255,255,255,.09);
+            background:
+              linear-gradient(180deg, rgba(255,255,255,.028), rgba(255,255,255,0)),
+              rgba(5,5,5,.96);
+            backdrop-filter: blur(18px);
+          }
+
+          .brand-side,
+          .logo-wrap {
+            min-width: 0;
+          }
+
           .logo-img {
             width: auto;
-            height: 26px;
-            max-width: 120px;
+            height: 24px;
+            max-width: 132px;
             object-fit: contain;
           }
+
           .social-mini { display: none; }
-          .nav-links { gap: 7px; }
-          .header-tools { min-height: 36px; gap: 4px; }
-          .nav-links a { font-size: 10px; }
+
+          .nav-links {
+            gap: 0;
+          }
+
+          .header-tools {
+            display: none;
+          }
+
+          .login-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 9px;
+            font-size: 15px !important;
+          }
         }
       `}</style>
     </nav>
