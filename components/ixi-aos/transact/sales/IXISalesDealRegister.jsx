@@ -1,26 +1,14 @@
 import { IXI_SALES_STAGES } from "./IXISalesDealEngine";
 import { canCloseIXISalesDeal } from "./IXISalesDealCommands";
+import { salesStagePresentation } from "./IXISalesStagePresentation";
 
 const money = value => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(Number(value || 0));
 const clean = value => String(value ?? "").trim();
 
-function canStartStage(deal, stageId) {
-  if (stageId === "quote") return Boolean(deal?.stageRecords?.["sales-order"] || deal?.stageRecords?.invoice);
-  if (stageId === "sales-order") return Boolean(deal?.stageRecords?.quote || deal?.stageRecords?.invoice);
-  if (stageId === "signed") return Boolean(deal?.stageRecords?.["sales-order"]);
-  if (stageId === "invoice") return Boolean(deal?.stageRecords?.signed);
-  if (stageId === "sold") return Boolean(deal?.stageRecords?.invoice);
-  if (stageId === "settlement") return Boolean(deal?.stageRecords?.sold);
-  return false;
-}
-
 export function IXISalesStageRail({ deal, activeStageId = "", onOpenStage, onStartStage }) {
   return <><div className="ixi-deal-stage-rail" aria-label={`Sales stages for ${deal?.customer || "customer"}`}>
     {IXI_SALES_STAGES.map(stage => {
-      const entry = deal?.stageRecords?.[stage.id];
-      const startable = !entry && canStartStage(deal, stage.id);
-      const selected = activeStageId === stage.id;
-      const state = entry ? "available" : startable ? "startable" : "missing";
+      const { entry, startable, selected, state } = salesStagePresentation(deal, stage.id, activeStageId);
       return <button key={stage.id} type="button" className={`${state}${selected ? " selected" : ""}`} disabled={!entry && !startable} onClick={() => entry ? onOpenStage?.(stage, entry, deal) : startable && onStartStage?.(stage, deal)} aria-current={selected ? "step" : undefined} aria-label={`${entry ? "Open" : startable ? "Start" : "Unavailable"} step ${stage.number}, ${stage.label}`}><i>{entry ? "✓" : stage.number}</i><span>{stage.label}</span></button>;
     })}
   </div></>;
