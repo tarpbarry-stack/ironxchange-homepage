@@ -34,12 +34,14 @@ export default function IXIMachineRail({
         e.stopPropagation();
         onSendFront?.(listing);
       }}
+      aria-label="Move card forward"
     />
 
     <button
       type="button"
       className="rail-zone rail-color"
       onClick={onCycleColor}
+      aria-label="Change relationship color"
     />
 
    <button
@@ -98,6 +100,7 @@ export default function IXIMachineRail({
         e.stopPropagation();
         onSendBack?.(listing);
       }}
+      aria-label="Move card backward"
     />
   </div>
 
