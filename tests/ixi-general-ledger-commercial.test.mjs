@@ -106,3 +106,14 @@ test("public FaceLab contains no synthetic ledger or reporting fixtures", async 
   assert.match(gl, /permissions:\s*\[\]/u);
   assert.match(reporting, /permissions:\s*\[\]/u);
 });
+
+test("asset-sale billing and collection use the canonical A/R ledger path", async () => {
+  const posting = await readFile(modulePath("IXIGLPostingEngine.js"), "utf8");
+  assert.match(posting, /asset-sale-invoice-receivable/u);
+  assert.match(posting, /line\(chart,"1100","debit"/u);
+  assert.match(posting, /line\(chart,revenueAccount\(record\),"credit"/u);
+  assert.match(posting, /s\.paymentDirection\|\|s\.direction/u);
+  assert.match(posting, /ruleId="payment-received"/u);
+  assert.match(posting, /line\(chart,cashAccount\(record\),"debit"/u);
+  assert.match(posting, /line\(chart,"1100","credit"/u);
+});

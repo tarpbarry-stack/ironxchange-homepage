@@ -101,7 +101,9 @@ function isReceivableInvoice(record = {}) {
   const direction = clean(
     source.direction || canonical.direction,
   ).toLowerCase();
+  if (["draft", "submitted", "rejected", "void", "reversed"].includes(state)) return false;
   return (
+    ["billed", "partially-collected", "collected", "paid", "closed"].includes(state) ||
     state === "receivable" ||
     state === "open" ||
     direction === "out" ||
@@ -114,6 +116,8 @@ function isReceivableInvoice(record = {}) {
 function isIncomingPayment(record = {}) {
   if (documentType(record) !== "payment") return false;
   const source = document(record);
+  const state = clean(source.financialState).toLowerCase();
+  if (["draft", "submitted", "rejected", "void", "reversed"].includes(state)) return false;
   return (
     clean(source.paymentDirection || source.direction).toLowerCase() ===
       "inflow" ||
@@ -125,6 +129,7 @@ function isIncomingPayment(record = {}) {
 function isReceivableCredit(record = {}) {
   if (documentType(record) !== "credit") return false;
   const source = document(record);
+  if (["draft", "submitted", "rejected", "void", "reversed"].includes(clean(source.financialState).toLowerCase())) return false;
   return (
     source?.metadata?.arCredit === true ||
     clean(source.direction || "out").toLowerCase() !== "in"

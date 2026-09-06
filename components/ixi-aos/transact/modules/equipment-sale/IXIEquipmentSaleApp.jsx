@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import {
   createIXIEquipmentSaleSigningInvitation,
+  issueIXIEquipmentInvoice,
   saveIXIEquipmentInvoice,
   saveIXIEquipmentSale,
 } from "./IXIEquipmentSaleCommands";
@@ -1038,6 +1039,33 @@ export default function IXIEquipmentSaleApp({
     }
   }
 
+  async function issueInvoice() {
+    setBusy(true);
+    setError("");
+    try {
+      const saved = await saveIXIEquipmentInvoice({
+        object,
+        context,
+        record: draft,
+        invoice: invoiceRecord,
+        input: invoiceDraft,
+      });
+      const issued = await issueIXIEquipmentInvoice({ invoice: saved.invoice });
+      setInvoiceRecord(issued.invoice);
+      await onRecordChange?.(
+        record,
+        { action: "issue-invoice", response: issued.response, invoice: issued.invoice },
+        context,
+      );
+      return issued.invoice;
+    } catch (caught) {
+      setError(clean(caught?.message) || "Invoice could not be issued.");
+      return null;
+    } finally {
+      setBusy(false);
+    }
+  }
+
   const linkedInvoice = Boolean(
     clean(
       invoiceRecord?.sourceFinancialDocumentId ||
@@ -1120,6 +1148,11 @@ export default function IXIEquipmentSaleApp({
                 >
                   {busy ? "WORKING…" : "SAVE"}
                 </button>
+                {tab === "invoice" && !invoiceLocked ? (
+                  <button type="button" className="issue" disabled={busy} onClick={issueInvoice}>
+                    ISSUE INVOICE
+                  </button>
+                ) : null}
                 <button className="close" onClick={() => setOpen(false)}>
                   ×
                 </button>
@@ -1518,6 +1551,11 @@ export default function IXIEquipmentSaleApp({
                   : "CREATE INVOICE"
                 : "SAVE ORDER"}
           </button>
+          {invoiceEntry && !invoiceLocked ? (
+            <button type="button" className="issue" disabled={busy} onClick={issueInvoice}>
+              ISSUE INVOICE
+            </button>
+          ) : null}
           {invoiceEntry ? null : (
             <button
               type="button"

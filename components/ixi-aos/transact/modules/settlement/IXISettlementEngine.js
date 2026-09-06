@@ -28,6 +28,13 @@ function type(r = {}) {
   ).toLowerCase();
 }
 const metadata = record => document(record)?.metadata || {};
+const activeFinancialRecord = record => ![
+  "draft",
+  "submitted",
+  "rejected",
+  "void",
+  "reversed",
+].includes(clean(document(record)?.financialState).toLowerCase());
 export function projectIXIAssetSettlement({
   sale = {},
   acquisition = {},
@@ -36,9 +43,11 @@ export function projectIXIAssetSettlement({
 } = {}) {
   const records = arr(financialRecords),
     saleFinancialDocumentId = clean(sale?.financialBinding?.financialDocumentId || sale?.identity?.financialInvoiceId || sale?.identity?.saleId),
-    canonicalReceipts = records.filter(record => type(record) === "payment" && clean(document(record)?.paymentDirection).toLowerCase() === "inflow" && clean(document(record)?.sourceFinancialDocumentId) === saleFinancialDocumentId),
+    canonicalReceipts = records.filter(record => type(record) === "payment" && activeFinancialRecord(record) && clean(document(record)?.paymentDirection).toLowerCase() === "inflow" && clean(document(record)?.sourceFinancialDocumentId) === saleFinancialDocumentId),
+    canonicalCredits = records.filter(record => type(record) === "credit" && activeFinancialRecord(record) && clean(document(record)?.sourceFinancialDocumentId) === saleFinancialDocumentId),
     salePrice = money(sale.sale?.salePrice),
     collected = canonicalReceipts.length ? money(canonicalReceipts.reduce((sum, record) => sum + amount(record), 0)) : money(sale.collection?.amountReceived),
+    credited = canonicalCredits.length ? money(canonicalCredits.reduce((sum, record) => sum + amount(record), 0)) : money(sale.collection?.creditedAmount),
     acqDirect = money(acquisition.acquisition?.directAcquisitionCost),
     makeReady = money(
       acquisition.makeReady?.actualTotal ||
@@ -97,10 +106,11 @@ export function projectIXIAssetSettlement({
     cashAvailableBeforeOwners = money(
       Math.max(0, collected - sellingCosts - liens),
     ),
-    buyerBalance = money(Math.max(0, salePrice - collected));
+    buyerBalance = money(Math.max(0, salePrice - collected - credited));
   return {
     salePrice,
     collected,
+    credited,
     buyerBalance,
     acquisitionCost: acqDirect,
     makeReadyCost: makeReady,
@@ -231,8 +241,8 @@ export function getIXISettlementBlockers({
   liabilities = [],
 } = {}) {
   const blockers = [];
-  if (!sale?.identity?.saleId && !sale?.identity?.number)
-    blockers.push("SALE RECORD REQUIRED");
+  if ((!sale?.identity?.saleId && !sale?.identity?.number) || clean(sale?.status).toLowerCase() !== "sold")
+    blockers.push("COMPLETED SOLD CLOSEOUT REQUIRED");
   if (num(projection.buyerBalance) > 0.005)
     blockers.push("BUYER BALANCE OUTSTANDING");
   if (arr(liabilities).some((x) => x.status !== "paid" && num(x.amount) > 0))
