@@ -44,9 +44,10 @@ test("existing DnD owns movement and the overlay owns the top plane", () => {
   assert.match(page, /IXISortableMachineCard/);
 });
 
-test("Mode I leaves two additional pixels beside both card actuators", () => {
+test("Mode I owns exactly two pixels beside both card actuators", () => {
   assert.match(
     page,
-    /\.ixi-mobile-current-card-board-i\) \{[\s\S]*?padding-left: 8px;[\s\S]*?padding-right: 8px;/u
+    /\.ixi-board-surface\.ixi-mobile-current-card-board-i\) \{[\s\S]*?padding-left: 2px;[\s\S]*?padding-right: 2px;/u
   );
+  assert.match(page, /fillCardScalingToCell=\{[\s\S]*?mobileCardDensity === "I"/u);
 });

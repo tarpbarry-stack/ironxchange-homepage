@@ -1577,6 +1577,10 @@ if (armedDestination === "stackBottom") {
   cardScaleMode={presentedCardScaleMode}
   enableCardScaling={isMobileCardPresentation}
   fitCardScalingToCell={isMobileCardPresentation}
+  fillCardScalingToCell={
+    isMobileCardPresentation &&
+    mobileCardDensity === "I"
+  }
 />
 
 <nav
@@ -3260,11 +3264,11 @@ outline: none;
     max-width: 100% !important;
   }
 
-  :global(.ixi-mobile-current-card-board-i) {
+  :global(.ixi-board-surface.ixi-mobile-current-card-board-i) {
     grid-template-columns: minmax(0, 1fr);
     gap: 16px 0;
-    padding-left: 8px;
-    padding-right: 8px;
+    padding-left: 2px;
+    padding-right: 2px;
   }
 
   :global(.ixi-mobile-current-card-board-ii) {

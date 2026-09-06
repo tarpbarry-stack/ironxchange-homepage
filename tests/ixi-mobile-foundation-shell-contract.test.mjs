@@ -103,7 +103,9 @@ test("real Marketplace cards and assembled Consoles fit their mobile grid cell",
   assert.match(fitWidthShell, /availableWidth \/ width/u);
   assert.match(fitWidthShell, /getViewportAvailableWidth/u);
   assert.match(fitWidthShell, /contain: inline-size/u);
-  assert.match(fitWidthShell, /100dvw/u);
+  assert.match(fitWidthShell, /fillAvailableWidth/u);
+  assert.match(fitWidthShell, /max-width: 100%/u);
+  assert.doesNotMatch(fitWidthShell, /MOBILE_VIEWPORT_GUTTER|100dvw/u);
   assert.match(browseConsoleRouter, /IXIFitWidthObjectShell/u);
   assert.match(marketplaceConsole, /nativeWidth=\{consoleNativeWidth\}/u);
 });
@@ -121,8 +123,8 @@ test("mobile Marketplace scroll wins unless touch drag is intentionally held", (
   assert.match(browse, /TouchSensor/u);
   assert.match(browse, /MOBILE_TOUCH_HOLD_MS = 300/u);
   assert.match(browse, /MOBILE_TOUCH_TOLERANCE_PX = 10/u);
-  assert.match(browse, /padding-left: 8px;/u);
-  assert.match(browse, /padding-right: 8px;/u);
+  assert.match(browse, /padding-left: 2px;/u);
+  assert.match(browse, /padding-right: 2px;/u);
 });
 
 test("single-side normalization preserves the real Console while moving it around the listing", () => {

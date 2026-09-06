@@ -122,6 +122,7 @@ export default function IXIMarketplaceObjectConsole({
 
   enableCardScaling = false,
   fitCardScalingToCell = false,
+  fillCardScalingToCell = false,
   cardScaleMode = "xl",
 
   dragHandleProps,
@@ -885,6 +886,9 @@ if (
       size={cardScaleMode}
       nativeWidth={consoleNativeWidth}
       nativeHeight={MARKETPLACE_NATIVE_HEIGHT}
+      fillAvailableWidth={
+        fillCardScalingToCell
+      }
     >
       {assembledConsole}
     </IXIFitWidthObjectShell>

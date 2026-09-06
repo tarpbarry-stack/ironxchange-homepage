@@ -17,3 +17,14 @@ test("Marketplace override does not change actuator side position or behavior", 
   assert.match(actuatorSource, /\.ixi-object-card-actuator\.left \{[\s\S]*?left: -1px;/);
   assert.match(actuatorSource, /onClick\?\.\(event\)/);
 });
+
+test("scaled mobile Marketplace actuators keep a five pixel rail with a 44 pixel rendered target", () => {
+  assert.match(actuatorSource, /--ixi-fit-width-inverse-scale/u);
+  assert.match(actuatorSource, /44px \*/u);
+  assert.match(actuatorSource, /\.ixi-object-card-actuator::after \{[\s\S]*?width: 5px;[\s\S]*?height: 34px;/u);
+  assert.match(actuatorSource, /touch-action: manipulation/u);
+  assert.doesNotMatch(
+    actuatorSource,
+    /onPointerDown=\{event => \{\s*event\.preventDefault\(\)/u
+  );
+});

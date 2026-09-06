@@ -56,6 +56,7 @@ export default function IXIBrowseObjectConsoleRouter({
   updateIxiCardState,
   enableCardScaling = false,
   fitCardScalingToCell = false,
+  fillCardScalingToCell = false,
   cardScaleMode = "xl",
   renderParentCard,
   ...props
@@ -75,6 +76,9 @@ export default function IXIBrowseObjectConsoleRouter({
         }
         fitCardScalingToCell={
           fitCardScalingToCell
+        }
+        fillCardScalingToCell={
+          fillCardScalingToCell
         }
         cardScaleMode={
           cardScaleMode
@@ -157,6 +161,9 @@ export default function IXIBrowseObjectConsoleRouter({
         size={cardScaleMode}
         nativeWidth={300}
         nativeHeight={400}
+        fillAvailableWidth={
+          fillCardScalingToCell
+        }
       >
         {parentCard}
       </IXIFitWidthObjectShell>

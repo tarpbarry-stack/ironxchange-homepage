@@ -41,7 +41,6 @@ export default function IXIObjectCardActuator({
       }
 
       onPointerDown={event => {
-        event.preventDefault();
         event.stopPropagation();
       }}
 
@@ -99,6 +98,61 @@ export default function IXIObjectCardActuator({
           height: 34px;
         }
 
+        :global(.ixi-fit-width-object-plane)
+        :global(.marketplace-listing-card)
+        .ixi-object-card-actuator {
+          top:
+            calc(
+              352px -
+              (
+                44px *
+                var(
+                  --ixi-fit-width-inverse-scale,
+                  1
+                ) /
+                2
+              )
+            );
+
+          width:
+            calc(
+              44px *
+              var(
+                --ixi-fit-width-inverse-scale,
+                1
+              )
+            );
+
+          height:
+            calc(
+              44px *
+              var(
+                --ixi-fit-width-inverse-scale,
+                1
+              )
+            );
+
+          background: transparent;
+          box-shadow: none;
+          touch-action: manipulation;
+          -webkit-tap-highlight-color: transparent;
+        }
+
+        :global(.ixi-fit-width-object-plane)
+        :global(.marketplace-listing-card)
+        .ixi-object-card-actuator::after {
+          content: "";
+          position: absolute;
+          top: 50%;
+          width: 5px;
+          height: 34px;
+          transform: translateY(-50%);
+          background: rgba(255, 255, 255, .18);
+          box-shadow:
+            inset 1px 0 0 rgba(255, 255, 255, .12),
+            1px 0 3px rgba(0, 0, 0, .32);
+        }
+
         .ixi-object-card-actuator.right {
           right: -1px;
 
@@ -106,11 +160,25 @@ export default function IXIObjectCardActuator({
             3px 1px 1px 3px;
         }
 
+        :global(.ixi-fit-width-object-plane)
+        :global(.marketplace-listing-card)
+        .ixi-object-card-actuator.right::after {
+          right: 0;
+          border-radius: 3px 1px 1px 3px;
+        }
+
         .ixi-object-card-actuator.left {
           left: -1px;
 
           border-radius:
             1px 3px 3px 1px;
+        }
+
+        :global(.ixi-fit-width-object-plane)
+        :global(.marketplace-listing-card)
+        .ixi-object-card-actuator.left::after {
+          left: 0;
+          border-radius: 1px 3px 3px 1px;
         }
 
         .ixi-object-card-actuator:hover {
@@ -130,6 +198,23 @@ export default function IXIObjectCardActuator({
                 0,
                 .38
               );
+        }
+
+        :global(.ixi-fit-width-object-plane)
+        :global(.marketplace-listing-card)
+        .ixi-object-card-actuator:hover {
+          background: transparent;
+          box-shadow: none;
+        }
+
+        :global(.ixi-fit-width-object-plane)
+        :global(.marketplace-listing-card)
+        .ixi-object-card-actuator:hover::after,
+        :global(.ixi-fit-width-object-plane)
+        :global(.marketplace-listing-card)
+        .ixi-object-card-actuator:focus-visible::after {
+          background: rgba(255, 196, 0, .95);
+          box-shadow: 0 0 8px rgba(255, 196, 0, .38);
         }
       `}</style>
     </button>

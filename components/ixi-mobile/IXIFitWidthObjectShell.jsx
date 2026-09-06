@@ -2,15 +2,11 @@ import { useEffect, useRef, useState } from "react";
 
 import { getIXIScalePreset } from "../../lib/ixiObjectGeometry";
 
-const MOBILE_VIEWPORT_GUTTER = 12;
 const MOBILE_MAX_VIEWPORT_WIDTH = 430;
 
 function getViewportAvailableWidth() {
   if (typeof window === "undefined") {
-    return (
-      MOBILE_MAX_VIEWPORT_WIDTH -
-      MOBILE_VIEWPORT_GUTTER
-    );
+    return MOBILE_MAX_VIEWPORT_WIDTH;
   }
 
   const viewportWidth =
@@ -23,17 +19,14 @@ function getViewportAvailableWidth() {
     ) ||
     MOBILE_MAX_VIEWPORT_WIDTH;
 
-  return Math.max(
-    1,
-    viewportWidth -
-      MOBILE_VIEWPORT_GUTTER
-  );
+  return Math.max(1, viewportWidth);
 }
 
 export default function IXIFitWidthObjectShell({
   size = "xl",
   nativeWidth = 300,
   nativeHeight = 400,
+  fillAvailableWidth = false,
   className = "",
   children
 }) {
@@ -45,9 +38,10 @@ export default function IXIFitWidthObjectShell({
   const [availableWidth, setAvailableWidth] = useState(
     () =>
       Math.min(
-        width * maximumScale,
-        MOBILE_MAX_VIEWPORT_WIDTH -
-          MOBILE_VIEWPORT_GUTTER
+        fillAvailableWidth
+          ? MOBILE_MAX_VIEWPORT_WIDTH
+          : width * maximumScale,
+        MOBILE_MAX_VIEWPORT_WIDTH
       )
   );
 
@@ -119,9 +113,12 @@ export default function IXIFitWidthObjectShell({
     return () => window.removeEventListener("resize", onResize);
   }, []);
 
-  const scale = Math.min(maximumScale, availableWidth / width);
+  const scale = fillAvailableWidth
+    ? availableWidth / width
+    : Math.min(maximumScale, availableWidth / width);
   const renderedWidth = width * scale;
   const renderedHeight = height * scale;
+  const inverseScale = 1 / scale;
 
   return (
     <div
@@ -140,7 +137,9 @@ export default function IXIFitWidthObjectShell({
           style={{
             width,
             height,
-            transform: `scale(${scale})`
+            transform: `scale(${scale})`,
+            "--ixi-fit-width-inverse-scale":
+              inverseScale
           }}
         >
           {children}
@@ -151,11 +150,7 @@ export default function IXIFitWidthObjectShell({
         .ixi-fit-width-object-shell {
           box-sizing: border-box;
           width: 100%;
-          max-width:
-            calc(
-              100dvw -
-              ${MOBILE_VIEWPORT_GUTTER}px
-            );
+          max-width: 100%;
           min-width: 0;
           position: relative;
           display: flex;

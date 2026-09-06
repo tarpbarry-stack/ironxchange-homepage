@@ -47,6 +47,7 @@ export default function IXIBoard({
   SellerObjectCard,
   enableCardScaling = false,
   fitCardScalingToCell = false,
+  fillCardScalingToCell = false,
   cardScaleMode = "xl",
   cardScaleMetrics,
    onRecoverSellerObject,
@@ -528,6 +529,10 @@ return (
 
           fitCardScalingToCell={
             fitCardScalingToCell
+          }
+
+          fillCardScalingToCell={
+            fillCardScalingToCell
           }
 
           cardScaleMode={
