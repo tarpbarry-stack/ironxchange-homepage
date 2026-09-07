@@ -125,18 +125,33 @@ test("container sources can enter accepted parent containers without moving the 
   );
 });
 
-test("desktop container drops serialize and confirm workspace persistence", () => {
+test("desktop container drops land immediately while persistence stays ordered", () => {
   assert.match(
     work,
     /workspaceLayoutSaveQueueRef = useRef\([\s\S]*?Promise\.resolve\(\)/
   );
-  assert.match(
+  assert.doesNotMatch(
     work,
     /const layoutResult = await saveWorkspaceLayout\([\s\S]*?nextPlacements[\s\S]*?\)/
   );
   assert.match(
     work,
-    /if \(!layoutResult\)[\s\S]*?IX CORE DID NOT CONFIRM THE WORKSPACE LAYOUT/
+    /void saveWorkspaceLayout\([\s\S]*?nextPlacements[\s\S]*?\)\.then/
+  );
+  const naturalDrop = work.indexOf("APPROVED NATURAL DROP CONTRACT");
+  const visualLanding = work.indexOf("setWorkspacePlacements(", naturalDrop);
+  const dragRelease = work.indexOf("setActiveDndId(null)", visualLanding);
+  const backgroundPersistence = work.indexOf("void (async () =>", dragRelease);
+  const canonicalCommit = work.indexOf("await commitMosContainerPlacement", backgroundPersistence);
+
+  assert.ok(naturalDrop >= 0);
+  assert.ok(visualLanding > naturalDrop);
+  assert.ok(dragRelease > visualLanding);
+  assert.ok(backgroundPersistence > dragRelease);
+  assert.ok(canonicalCommit > backgroundPersistence);
+  assert.match(
+    work,
+    /A real IX Core rejection restores the exact pre-drop state[\s\S]*?setWorkspacePlacements\([\s\S]*?previousPlacements/
   );
   assert.match(
     machineStateClient,

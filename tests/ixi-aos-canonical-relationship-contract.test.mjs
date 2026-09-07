@@ -44,7 +44,9 @@ test("AOS operational container drops change workspace placement without inventi
   assert.doesNotMatch(work, /IXIRelationshipDropDialog/u);
   assert.doesNotMatch(work, /setPendingRelationship/u);
   assert.doesNotMatch(work, /RELATIONSHIP NOT CREATED/u);
-  assert.match(work, /await commitMosContainerPlacement\(\{/u);
+  assert.match(work, /void \(async \(\) => \{[\s\S]*?await commitMosContainerPlacement\(\{/u);
+  assert.match(work, /APPROVED NATURAL DROP CONTRACT/u);
+  assert.match(work, /setWorkspacePlacements\([\s\S]*?nextPlacements/u);
   assert.match(work, /destinationContainerId:\s*targetWorkspaceObjectId/u);
   assert.match(work, /targetWorkspaceObject\?\.entityId/u);
   assert.match(work, /getAosWorkspaceObjectById\(id\)/u);

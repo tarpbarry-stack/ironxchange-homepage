@@ -2894,9 +2894,88 @@ if (
   );
 
   if (targetIsCanonicalContainer) {
-    try {
-      let sourceObject =
-        getCanonicalMosObjectForWorkspaceId(dragId);
+    const previousPlacements =
+      workspacePlacements;
+
+    nextPlacements =
+      moveObjectToWorkspaceSurface({
+        placements:
+          workspacePlacements,
+
+        objectId:
+          dragId,
+
+        targetSurface:
+          dropTargetSurface
+      });
+
+    const optimisticSourceObject =
+      getCanonicalMosObjectForWorkspaceId(dragId);
+
+    /*
+     * APPROVED NATURAL DROP CONTRACT
+     *
+     * The gesture owns the visible result. Land the card and release the
+     * drag immediately; IX Core persistence follows in the background.
+     * A server round trip must never make a successful drop snap back and
+     * later look as though the container "checked the card in."
+     */
+    setWorkspacePlacements(
+      nextPlacements
+    );
+
+    if (optimisticSourceObject?.objectId) {
+      setAosObjects(current => current.map(object =>
+        String(object?.objectId || "") ===
+          String(optimisticSourceObject.objectId)
+          ? {
+              ...object,
+              directContainerId:
+                targetWorkspaceObjectId
+            }
+          : object
+      ));
+    }
+
+    setIxiCardState(current => ({
+      ...current,
+      [IXI_AOS_WORK_LAYOUT_ID]: {
+        ...(current?.[IXI_AOS_WORK_LAYOUT_ID] || {}),
+        workspacePlacements:
+          nextPlacements,
+        machineContainers:
+          nextPlacements,
+        updatedAt:
+          Date.now()
+      }
+    }));
+
+    setActiveDndId(null);
+    clearMachineDragState?.();
+
+    void saveWorkspaceLayout(
+      nextPlacements
+    ).then(layoutResult => {
+      if (layoutResult) return;
+
+      showAosObjectNotice({
+        objectId: dragId,
+        message:
+          "CONTAINER LAYOUT SAVE FAILED · THE OBJECT MOVE IS STILL BEING VERIFIED BY IX CORE",
+        tone: "error",
+        duration: 4200
+      });
+    }).catch(error => {
+      console.error(
+        "AOS WORKSPACE LAYOUT SAVE FAILED:",
+        error
+      );
+    });
+
+    void (async () => {
+      try {
+        let sourceObject =
+          optimisticSourceObject;
 
       /*
        * AOS Work presents owned Sharetribe listings beside durable MOS
@@ -2953,50 +3032,88 @@ if (
         sourceObject = canonicalMachine;
       }
 
-      const placement = await commitMosContainerPlacement({
-        objectId: sourceObject.objectId,
-        destinationContainerId: targetWorkspaceObjectId,
-        metadata: {
-          createdFrom: "aos-work-drop",
-          sourceWorkspaceObjectId: dragId,
-          targetWorkspaceObjectId
-        }
-      });
+        const placement = await commitMosContainerPlacement({
+          objectId: sourceObject.objectId,
+          destinationContainerId: targetWorkspaceObjectId,
+          metadata: {
+            createdFrom: "aos-work-drop",
+            sourceWorkspaceObjectId: dragId,
+            targetWorkspaceObjectId
+          }
+        });
 
-      setAosObjects(current => {
-        const placedObjectId =
-          String(placement.object?.objectId || "");
+        setAosObjects(current => {
+          const placedObjectId =
+            String(placement.object?.objectId || "");
 
-        const existing = current.some(object =>
-          String(object?.objectId || "") === placedObjectId
+          const existing = current.some(object =>
+            String(object?.objectId || "") === placedObjectId
+          );
+
+          if (!existing) {
+            return [
+              ...current,
+              placement.object
+            ];
+          }
+
+          return current.map(object =>
+            String(object?.objectId || "") === placedObjectId
+              ? mergeAosCanonicalObject(object, placement.object)
+              : object
+          );
+        });
+      } catch (error) {
+        console.error("AOS CONTAINER PLACEMENT FAILED:", error);
+
+        /* A real IX Core rejection restores the exact pre-drop state. */
+        setWorkspacePlacements(
+          previousPlacements
         );
 
-        if (!existing) {
-          return [
-            ...current,
-            placement.object
-          ];
+        setIxiCardState(current => ({
+          ...current,
+          [IXI_AOS_WORK_LAYOUT_ID]: {
+            ...(current?.[IXI_AOS_WORK_LAYOUT_ID] || {}),
+            workspacePlacements:
+              previousPlacements,
+            machineContainers:
+              previousPlacements,
+            updatedAt:
+              Date.now()
+          }
+        }));
+
+        if (optimisticSourceObject?.objectId) {
+          setAosObjects(current => current.map(object =>
+            String(object?.objectId || "") ===
+              String(optimisticSourceObject.objectId) &&
+            String(object?.directContainerId || "") ===
+              targetWorkspaceObjectId
+              ? {
+                  ...object,
+                  directContainerId:
+                    optimisticSourceObject.directContainerId ||
+                    null
+                }
+              : object
+          ));
         }
 
-        return current.map(object =>
-          String(object?.objectId || "") === placedObjectId
-            ? mergeAosCanonicalObject(object, placement.object)
-            : object
+        void saveWorkspaceLayout(
+          previousPlacements
         );
-      });
-    } catch (error) {
-      console.error("AOS CONTAINER PLACEMENT FAILED:", error);
-      showAosObjectNotice({
-        objectId: dragId,
-        message: error?.message || "IX Core could not place this object in the container.",
-        tone: "error",
-        duration: 3200
-      });
 
-      setActiveDndId(null);
-      clearMachineDragState?.();
-      return;
-    }
+        showAosObjectNotice({
+          objectId: dragId,
+          message: error?.message || "IX Core could not place this object in the container.",
+          tone: "error",
+          duration: 3200
+        });
+      }
+    })();
+
+    return;
   }
 
   nextPlacements =
@@ -3136,28 +3253,29 @@ setWorkspacePlacements(
   nextPlacements
 );
 
-const layoutResult = await saveWorkspaceLayout(
+void saveWorkspaceLayout(
   nextPlacements
-);
+).then(layoutResult => {
+  if (layoutResult) return;
 
-if (!layoutResult) {
   showAosObjectNotice({
     objectId: dragId,
     message:
-      "CONTAINER MOVE WAS NOT SAVED · IX CORE DID NOT CONFIRM THE WORKSPACE LAYOUT",
+      "WORKSPACE LAYOUT SAVE FAILED · YOUR CARD REMAINS WHERE YOU DROPPED IT",
     tone: "error",
     duration: 4200
   });
-
-  setActiveDndId(null);
-  clearMachineDragState?.();
-  return;
-}
+}).catch(error => {
+  console.error(
+    "AOS WORKSPACE LAYOUT SAVE FAILED:",
+    error
+  );
+});
 
 /*
  * Keep the hydrated remote-state mirror current. This prevents a later
  * local reconciliation in the same session from reapplying the layout
- * that existed before the confirmed drop.
+ * that existed before the drop.
  */
 setIxiCardState(current => ({
   ...current,
