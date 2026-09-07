@@ -16,7 +16,8 @@ export const IXI_AOS_BOARD_SKIN_IDS =
     IXI_107: "ixi-107",
     IXI_108: "ixi-108",
     IXI_109: "ixi-109",
-    IXI_110: "ixi-110"
+    IXI_110: "ixi-110",
+    IXI_111: "ixi-111"
   });
 
 export const IXI_AOS_BOARD_SKINS =
@@ -97,6 +98,13 @@ export const IXI_AOS_BOARD_SKINS =
       designation: "NIGHT SURVEY",
       description: "Sparse midnight survey field with sight lines, benchmarks and control points.",
       className: "aos-work-board-skin-ixi-110"
+    }),
+    Object.freeze({
+      skinId: IXI_AOS_BOARD_SKIN_IDS.IXI_111,
+      name: "IXI-111",
+      designation: "QUARRY GRID",
+      description: "Open-pit bench plan with bore surveys, grade control and haul-road geometry.",
+      className: "aos-work-board-skin-ixi-111"
     })
   ]);
 
