@@ -42,6 +42,12 @@ const workspaceRegistry = read(
 const objectCreation = read(
   "components/ixi-mos/object-creation/useIXIMosObjectCreation.js"
 );
+const work = read(
+  "pages/aos/work.js"
+);
+const machineStateClient = read(
+  "lib/ixiMachineStateClient.js"
+);
 
 test("AOS container policy reaches the universal sortable chassis", () => {
   assert.match(
@@ -116,6 +122,29 @@ test("container sources can enter accepted parent containers without moving the 
   assert.match(
     collisionEngine,
     /acceptance engine already rejects self-drop[\s\S]*?container nesting impossible/
+  );
+});
+
+test("desktop container drops serialize and confirm workspace persistence", () => {
+  assert.match(
+    work,
+    /workspaceLayoutSaveQueueRef = useRef\([\s\S]*?Promise\.resolve\(\)/
+  );
+  assert.match(
+    work,
+    /const layoutResult = await saveWorkspaceLayout\([\s\S]*?nextPlacements[\s\S]*?\)/
+  );
+  assert.match(
+    work,
+    /if \(!layoutResult\)[\s\S]*?IX CORE DID NOT CONFIRM THE WORKSPACE LAYOUT/
+  );
+  assert.match(
+    machineStateClient,
+    /requestVersion=\$\{requestVersion\}/
+  );
+  assert.match(
+    machineStateClient,
+    /cache: "no-store"/
   );
 });
 

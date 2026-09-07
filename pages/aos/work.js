@@ -314,6 +314,9 @@ const POCKET_TARGETS = [
   }, []);
 
   const hasAppliedRemoteLayoutRef = useRef(false);
+  const workspaceLayoutSaveQueueRef = useRef(
+    Promise.resolve()
+  );
   
   const [activeDndId, setActiveDndId] = useState("");
   const {
@@ -2334,21 +2337,37 @@ function selectBoardSkin(nextSkinId) {
 function saveWorkspaceLayout(
   nextContainers = workspacePlacements
 ) {
-  return saveIxiMachinePatch({
-    userId: ixiUserId,
-    listingId: IXI_AOS_WORK_LAYOUT_ID,
+  const persistLayout = () =>
+    saveIxiMachinePatch({
+      userId: ixiUserId,
+      listingId: IXI_AOS_WORK_LAYOUT_ID,
 
-    patch: {
-      workspacePlacements:
-        nextContainers,
+      patch: {
+        workspacePlacements:
+          nextContainers,
 
-      machineContainers:
-        nextContainers,
+        machineContainers:
+          nextContainers,
 
-      updatedAt:
-        Date.now()
-    }
-  });
+        updatedAt:
+          Date.now()
+      }
+    });
+
+  /*
+   * Workspace writes must reach IX Core in the same order as the
+   * gestures that produced them. A late response from an older move
+   * must never overwrite the newest Board/container placement.
+   */
+  const queuedSave =
+    workspaceLayoutSaveQueueRef.current
+      .catch(() => null)
+      .then(persistLayout);
+
+  workspaceLayoutSaveQueueRef.current =
+    queuedSave;
+
+  return queuedSave;
 }
 
 
@@ -3103,9 +3122,38 @@ setWorkspacePlacements(
   nextPlacements
 );
 
-saveWorkspaceLayout(
+const layoutResult = await saveWorkspaceLayout(
   nextPlacements
 );
+
+if (!layoutResult) {
+  showAosObjectNotice({
+    objectId: dragId,
+    message:
+      "CONTAINER MOVE WAS NOT SAVED · IX CORE DID NOT CONFIRM THE WORKSPACE LAYOUT",
+    tone: "error",
+    duration: 4200
+  });
+
+  setActiveDndId(null);
+  clearMachineDragState?.();
+  return;
+}
+
+/*
+ * Keep the hydrated remote-state mirror current. This prevents a later
+ * local reconciliation in the same session from reapplying the layout
+ * that existed before the confirmed drop.
+ */
+setIxiCardState(current => ({
+  ...current,
+  [IXI_AOS_WORK_LAYOUT_ID]: {
+    ...(current?.[IXI_AOS_WORK_LAYOUT_ID] || {}),
+    workspacePlacements: nextPlacements,
+    machineContainers: nextPlacements,
+    updatedAt: Date.now()
+  }
+}));
 
 setActiveDndId(null);
 clearMachineDragState?.();
