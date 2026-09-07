@@ -3278,7 +3278,8 @@ return null;
     ixiCardState={ixiCardState}
     cardScaleMode={cardScaleMode}
   >
- <main>
+ <main className="aos-work-board">
+  <h1 className="aos-work-board-title">IXI AOS WORK</h1>
   <section className="saved-environment-shell">
     <IXIEnvironmentRail
       activeEnvironment="AOS"
@@ -3522,14 +3523,6 @@ onReturnContainerChildren={
   surfaceLabel="AOS Work"
 />
 
-        {visibleSavedListings.length === 0 && (
-  <div className="empty">
-    <h3>HELP US BUILD OUR MARKETPLACE</h3>
-    <p>
-      Touch a machine. Create a relationship. Machines will appear here.
-    </p>
-  </div>
-)}
 </main>
   </IXIDragEngine>
 );
@@ -3553,12 +3546,43 @@ onReturnContainerChildren={
         }
 
       main {
-  min-height: 72vh;
-  padding: 14px 5% 160px;
+          min-height: 100vh;
+          padding: 14px 5% 160px;
+          position: relative;
+          isolation: isolate;
+          background-color: #090a0a;
+          background-image: url('/images/ixi-aos-work-board.webp');
+          background-position: center top;
+          background-repeat: no-repeat;
+          background-size: 100% auto;
+        }
+
+        .aos-work-board::after {
+          content: "";
+          position: absolute;
+          inset: 0;
+          z-index: -1;
+          pointer-events: none;
           background:
-            radial-gradient(circle at 50% 0%, rgba(255,196,0,.05), transparent 34%),
-            linear-gradient(180deg, rgba(255,255,255,.014), rgba(255,255,255,0)),
-            #0b0b0b;
+            linear-gradient(
+              180deg,
+              transparent 0,
+              transparent min(78vw, 1180px),
+              rgba(9,10,10,.72) min(94vw, 1440px),
+              #090a0a min(112vw, 1720px)
+            );
+        }
+
+        .aos-work-board-title {
+          position: absolute;
+          width: 1px;
+          height: 1px;
+          padding: 0;
+          margin: -1px;
+          overflow: hidden;
+          clip: rect(0, 0, 0, 0);
+          white-space: nowrap;
+          border: 0;
         }
 
        .saved-environment-shell {
@@ -3592,36 +3616,6 @@ onReturnContainerChildren={
 :global(.ixi-board-sortable-card > *) {
   width: 100%;
 }
-        .empty {
-          max-width: 520px;
-          margin: 38px auto 0;
-          padding: 38px 28px;
-
-          text-align: center;
-
-          border: 1px solid rgba(255,255,255,.06);
-          border-radius: 14px;
-
-          background:
-            linear-gradient(180deg, rgba(255,255,255,.018), rgba(255,255,255,0)),
-            #111;
-
-          box-shadow:
-            0 14px 34px rgba(0,0,0,.18);
-        }
-
-        .empty h3 {
-          margin: 0 0 8px;
-          color: #f2f2f2;
-          font-size: 16px;
-          font-weight: 950;
-        }
-
-        .empty p {
-          margin: 0;
-          color: rgba(255,255,255,.42);
-          font-size: 12px;
-        }
 .mobile-search-surface {
   display: none;
 }
@@ -3632,6 +3626,8 @@ onReturnContainerChildren={
 @media (max-width: 850px) {
   main {
     padding: 18px 4% 48px;
+    background-size: auto 100vh;
+    background-position: center top;
   }
 
   .desktop-search-surface {
