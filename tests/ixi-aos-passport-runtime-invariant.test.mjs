@@ -111,6 +111,44 @@ test("browser-only synthetic system indexes are not manufactured", () => {
   );
 });
 
+test("persisted System Index membership comes from canonical rail projections only", () => {
+  const index = {
+    objectId: "object-customer-index",
+    objectType: "system-index",
+    displayName: "Wichita Falls",
+    status: "active",
+    identities: [passportIdentity("object-customer-index", "IXIWFT2345")],
+    metadata: { systemIndex: true }
+  };
+  const projected = {
+    objectId: "object-ripper",
+    objectType: "machine",
+    displayName: "Ripper",
+    status: "active",
+    identities: [passportIdentity("object-ripper", "IXIRPR2345")]
+  };
+  const legacyOnly = {
+    objectId: "object-legacy-child",
+    displayName: "Legacy Child",
+    status: "active",
+    directContainerId: index.objectId,
+    identities: [passportIdentity("object-legacy-child", "IXILGC2345")]
+  };
+
+  const [result] = buildAosSystemIndexes({
+    aosObjects: [index, projected, legacyOnly],
+    ownedListings: [],
+    railProjections: {
+      [index.objectId]: {
+        members: [{ objectId: projected.objectId }]
+      }
+    }
+  });
+
+  assert.deepEqual(result.items.map(item => item.objectId), [projected.objectId]);
+  assert.equal(result.itemCount, 1);
+});
+
 test("AOS/Work fails closed before rendering an active record without Passport", () => {
   const source = fs.readFileSync(
     new URL("../lib/mos/loadIXIMosEnvironment.js", import.meta.url),

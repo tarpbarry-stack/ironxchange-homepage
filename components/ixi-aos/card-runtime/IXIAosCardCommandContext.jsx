@@ -36,10 +36,10 @@ export function IXIAosCardCommandProvider({
 }) {
   const resolvedObjectId = clean(
     objectId ||
+    object?.canonicalIdentity?.objectId ||
     object?.objectId ||
     object?.id ||
-    object?.uuid ||
-    object?.passportId
+    object?.uuid
   );
 
   const externalNotice = ixiState?.actionNotice || null;

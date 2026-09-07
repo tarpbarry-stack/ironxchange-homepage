@@ -53,12 +53,14 @@ function factsOf(listing = {}) {
 function transactObjectFromListing(listing = {}) {
   const publicData = publicDataOf(listing);
   const passportId = clean(
+    listing?.canonicalIdentity?.passportId ||
     listing?.passportId ||
     publicData?.passportId ||
     listing?.ixiMedia?.passportId ||
     publicData?.ixiMedia?.passportId
   );
   const objectId = clean(
+    listing?.canonicalIdentity?.objectId ||
     listing?.objectId ||
     publicData?.objectId ||
     listing?.mosObjectId ||
@@ -91,13 +93,8 @@ function transactObjectFromListing(listing = {}) {
       model: listing?.model ?? publicData?.model ?? "",
       primaryMeter: listing?.hours ?? publicData?.hours ?? ""
     },
-    capabilities: {
-      ...(listing?.capabilities || {}),
-      canCreate: true,
-      canTransact: true,
-      editable: true,
-      hasConsole: true
-    }
+    capabilities: { ...(listing?.capabilities || {}) },
+    actorAuthority: { ...(listing?.actorAuthority || {}) }
   };
 }
 
@@ -145,6 +142,13 @@ export default function IXIOwnedPrivateListingRuntime({ cardContext = "inventory
 
   function beginEdit() {
     if (saving) return;
+    if (
+      runtimeListing?.normalizedAosObject === true &&
+      runtimeListing?.actorAuthority?.canEdit !== true
+    ) {
+      showNotice("EDIT NOT AUTHORIZED", "error");
+      return;
+    }
     setMenuOpen(false);
     const nextDraft = factsOf(runtimeListing);
     draftRef.current = nextDraft;
@@ -155,6 +159,13 @@ export default function IXIOwnedPrivateListingRuntime({ cardContext = "inventory
   async function persistFacts(after, context = "owned-private-card-inline-editor", closeFace1Edit = true) {
     const listingId = clean(getListingId(runtimeListing));
     if (!listingId || saving) return false;
+    if (
+      runtimeListing?.normalizedAosObject === true &&
+      runtimeListing?.actorAuthority?.canEdit !== true
+    ) {
+      showNotice("EDIT NOT AUTHORIZED", "error");
+      return false;
+    }
 
     setSaving(true);
 
@@ -218,6 +229,13 @@ export default function IXIOwnedPrivateListingRuntime({ cardContext = "inventory
 
   function handleAdd() {
     setMenuOpen(false);
+    if (
+      runtimeListing?.normalizedAosObject === true &&
+      runtimeListing?.actorAuthority?.canCreateChild !== true
+    ) {
+      showNotice("CREATE NOT AUTHORIZED", "error");
+      return;
+    }
     if (typeof props.onAddObject === "function") {
       props.onAddObject(runtimeListing);
       return;
@@ -226,10 +244,23 @@ export default function IXIOwnedPrivateListingRuntime({ cardContext = "inventory
     setMenuOpen(true);
   }
 
-  const ownerActionBridgeKey = clean(getListingId(runtimeListing));
+  const ownerActionBridgeKey = clean(
+    runtimeListing?.canonicalIdentity?.objectId ||
+    runtimeListing?.objectId ||
+    getListingId(runtimeListing)
+  );
 
   function setTransactVisibility(nextOpen) {
     const open = Boolean(nextOpen);
+
+    if (
+      open &&
+      runtimeListing?.normalizedAosObject === true &&
+      runtimeListing?.actorAuthority?.canTransact !== true
+    ) {
+      showNotice("TRAN$ACT NOT AUTHORIZED", "error");
+      return;
+    }
 
     setTransactOpen(open);
 
@@ -269,7 +300,13 @@ export default function IXIOwnedPrivateListingRuntime({ cardContext = "inventory
     return () => unregisterOwnedPrivateActions(ownerActionBridgeKey);
   }, [ownerActionBridgeKey, editing, saving, runtimeListing, draft]);
 
-  if (transactOpen) {
+  if (
+    transactOpen &&
+    (
+      runtimeListing?.normalizedAosObject !== true ||
+      runtimeListing?.actorAuthority?.canTransact === true
+    )
+  ) {
     return (
       <div className="owned-private-runtime transact-runtime">
         <IXIOwnedPrivateTransactRuntime

@@ -425,56 +425,12 @@ export function getObjectCapabilities(object = {}) {
 }
 
 export function getObjectActionCapabilities(object = {}) {
-  const metadata = getObjectMetadata(object);
-  const capabilities = getObjectCapabilities(object);
   const permissions = getObjectPermissions(object);
-  const objectType = clean(
-    object?.objectType ||
-    object?.type ||
-    object?.definition?.objectType ||
-    object?.metadata?.objectType
-  ).toLowerCase();
-  const isPerson = objectType === "person" || objectType === "employee";
-
-  const capabilityCreate = Boolean(
-    capabilities?.canCreate ||
-    capabilities?.canCreateChild ||
-    capabilities?.canAdd ||
-    capabilities?.canContain ||
-    isPerson
-  );
-
-  const capabilityEdit =
-    capabilities?.editable !== false &&
-    capabilities?.canEdit !== false;
-
-  const explicitTransact =
-    capabilities?.canTransact ??
-    capabilities?.transact ??
-    capabilities?.hasTransact;
-
-  const hasAosPassport = Boolean(
-    clean(object?.passportId || object?.ixiPassportId || object?.passport?.passportId || object?.passport?.id) ||
-    asArray(object?.identities).some(identity =>
-      clean(identity?.identityType || identity?.type || identity?.kind).toLowerCase() === "ixi-passport" &&
-      clean(identity?.passportId || identity?.value || identity?.id)
-    )
-  );
-
-  const capabilityTransact = explicitTransact !== undefined
-    ? explicitTransact === true
-    : Boolean(
-        hasAosPassport ||
-        metadata?.transactEligible === true ||
-        capabilities?.canHaveExpenses ||
-        capabilities?.canHaveWorkOrders ||
-        capabilities?.canHaveJobTickets ||
-        capabilities?.canHaveDocuments
-      );
-
-  const capabilityConsole =
-    capabilities?.hasConsole !== false &&
-    capabilities?.canOpenConsole !== false;
+  const authority = safeObject(object?.actorAuthority);
+  const governed = (authorityKey, aliases) =>
+    Object.prototype.hasOwnProperty.call(authority, authorityKey)
+      ? authority?.[authorityKey] === true
+      : permissionDecision(permissions, aliases, false);
 
   return {
     canView: permissionDecision(
@@ -483,35 +439,15 @@ export function getObjectActionCapabilities(object = {}) {
       true
     ),
     canCreate: permissionDecision(
-      permissions,
-      ["create", "add", "contain", "canCreate", "canAdd", "canContain"],
-      capabilityCreate
+      { ...permissions, canCreateChild: authority?.canCreateChild },
+      ["createChild", "canCreateChild", "create", "canCreate", "add", "canAdd"],
+      false
     ),
-    canEdit: permissionDecision(
-      permissions,
-      ["edit", "write", "canEdit", "canWrite"],
-      capabilityEdit
-    ),
-    canTransact: permissionDecision(
-      permissions,
-      ["transact", "financial", "canTransact", "canFinancial"],
-      capabilityTransact
-    ),
-    canOpenConsole: permissionDecision(
-      permissions,
-      ["console", "openConsole", "canOpenConsole"],
-      capabilityConsole
-    ),
-    canDelete: permissionDecision(
-      permissions,
-      ["delete", "remove", "canDelete", "canRemove"],
-      capabilities?.canDelete === true
-    ),
-    canHide: permissionDecision(
-      permissions,
-      ["hide", "canHide"],
-      capabilities?.canHide !== false
-    )
+    canEdit: governed("canEdit", ["edit", "write", "canEdit", "canWrite"]),
+    canTransact: governed("canTransact", ["transact", "financial", "canTransact", "canFinancial"]),
+    canOpenConsole: governed("canOpenConsole", ["console", "openConsole", "canOpenConsole"]),
+    canDelete: governed("canDelete", ["delete", "remove", "canDelete", "canRemove"]),
+    canHide: governed("canHide", ["hide", "canHide"])
   };
 }
 

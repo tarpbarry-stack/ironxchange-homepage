@@ -140,13 +140,10 @@ test("AOS Work routes scoreboard plus through template selection and draft provi
   assert.match(catalogPreview, /scaleMode: previewScaleMode/u);
   assert.match(creationHook, /function createRootContainerDraft/u);
   assert.match(creationHook, /objectType:\s*"generic"/u);
-  assert.match(creationHook, /canTransact:\s*true/u);
-  assert.match(creationHook, /transactEligible:\s*true/u);
+  assert.doesNotMatch(creationHook, /canTransact:\s*true/u);
+  assert.doesNotMatch(creationHook, /transactEligible:\s*true/u);
   assert.match(creationHook, /rootContainer:\s*true/u);
-  assert.match(
-    creationHook,
-    /parentDisplayName:\s*IXI_AOS_SYSTEM_INDEX_LABEL/u
-  );
+  assert.doesNotMatch(creationHook, /IXI_AOS_SYSTEM_INDEX_LABEL/u);
   assert.match(creationHook, /provisionPermanentObject\(\{/u);
 });
 

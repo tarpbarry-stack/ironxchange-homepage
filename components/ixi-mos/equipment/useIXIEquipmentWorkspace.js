@@ -13,17 +13,16 @@ export default function useIXIEquipmentWorkspace({
   machineContainers = {},
   ixiCardState = {},
 
-  executeIXITransaction
+  executeIXITransaction,
+  resolveCanonicalObjectId = value => String(value ?? "").trim()
 }) {
 
   function exposeEquipmentMachineToBoard(
     machine
   ) {
-    const machineId =
-      String(
-        getListingId(machine) ||
-        ""
-      );
+    const machineId = resolveCanonicalObjectId(
+      machine?.objectId || getListingId(machine)
+    );
 
     if (!machineId) {
       return;
@@ -85,14 +84,10 @@ export default function useIXIEquipmentWorkspace({
     const machineId =
       typeof machineOrId ===
         "object"
-        ? String(
-            getListingId(
-              machineOrId
-            ) || ""
+        ? resolveCanonicalObjectId(
+            machineOrId?.objectId || getListingId(machineOrId)
           )
-        : String(
-            machineOrId || ""
-          );
+        : resolveCanonicalObjectId(machineOrId);
 
     if (!machineId) {
       return;
@@ -159,12 +154,9 @@ export default function useIXIEquipmentWorkspace({
           equipmentIndex?.items ||
           []
         )
-          .map(item =>
-            String(
-              getListingId(item) ||
-              ""
-            )
-          )
+          .map(item => resolveCanonicalObjectId(
+            item?.objectId || getListingId(item) || item?.passportId
+          ))
           .filter(Boolean)
       );
 

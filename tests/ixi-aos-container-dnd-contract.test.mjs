@@ -137,7 +137,7 @@ test("desktop container drops land immediately while persistence stays ordered",
   const visualLanding = work.indexOf("setWorkspacePlacements(", naturalDrop);
   const dragRelease = work.indexOf("setActiveDndId(null)", visualLanding);
   const backgroundPersistence = work.indexOf("void (async () =>", dragRelease);
-  const canonicalCommit = work.indexOf("await createMosRelationship", backgroundPersistence);
+  const canonicalCommit = work.indexOf("await createAosMembershipRelationship", backgroundPersistence);
   const sessionSave = work.indexOf("await saveWorkspaceLayout(nextPlacements)", canonicalCommit);
 
   assert.ok(naturalDrop >= 0);
@@ -177,10 +177,8 @@ test("every universal AOS container mounts a visible accepting target", () => {
     workspaceBoard,
     /if \(isMosWorkspaceObject\(item\)\)[\s\S]*?enabled: true/
   );
-  assert.match(
-    workspaceRegistry,
-    /UNIVERSAL AOS OBJECT LAW[\s\S]*?canContain: true[\s\S]*?canCreate: true/
-  );
+  assert.match(workspaceRegistry, /for \(const \[objectId, admittedObject\] of admission\.objectsById\)/);
+  assert.doesNotMatch(workspaceRegistry, /canCreate:\s*true/);
   assert.doesNotMatch(
     objectCreation,
     /Destination object does not allow child creation/
@@ -234,14 +232,9 @@ test("durable AOS containers wire BOARD, RECALL, and RETURN to the operating run
   );
 });
 
-test("Face 2 can canonically clear direct children back to the card parent", () => {
+test("legacy clear-to-parent mutation is not connected to AOS Work", () => {
   assert.match(identityFace, /data-ixi-clear-to-parent/);
-  assert.match(identityFace, /CLEAR CHILDREN TO PARENT/);
-  assert.match(identityFace, /CONFIRM RETURN/);
-  assert.match(work, /async function clearContainerChildrenToParent/);
-  assert.match(work, /destinationContainerId:\s*parentContainerId/);
-  assert.match(work, /aos-clear-children-to-parent/);
-  assert.match(work, /await commitMosContainerPlacement/);
-  assert.match(work, /container:\$\{parentContainerId\}/);
-  assert.match(work, /onClearContainerToParent=\{/);
+  assert.doesNotMatch(work, /clearContainerChildrenToParent/);
+  assert.doesNotMatch(work, /commitMosContainerPlacement/);
+  assert.doesNotMatch(work, /onClearContainerToParent=\{/);
 });

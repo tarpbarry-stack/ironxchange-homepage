@@ -28,14 +28,15 @@ const ROUTES = [
   { methods: ["POST"], pattern: /^\/objects\/provision\/[^/]+\/recover$/ },
   { methods: ["GET", "PATCH", "DELETE"], pattern: /^\/objects\/[^/]+$/ },
 
+  { methods: ["POST"], pattern: /^\/identity\/admit$/ },
+
   { methods: ["POST"], pattern: /^\/relationships$/ },
   { methods: ["POST"], pattern: /^\/relationships\/[^/]+\/end$/ },
+  { methods: ["POST"], pattern: /^\/relationships\/[^/]+\/order$/ },
   { methods: ["GET"], pattern: /^\/objects\/[^/]+\/relationships$/ },
   { methods: ["GET"], pattern: /^\/objects\/[^/]+\/relationship-graph$/ },
 
   { methods: ["GET"], pattern: /^\/containers\/[^/]+$/ },
-  { methods: ["POST"], pattern: /^\/containers\/[^/]+\/place$/ },
-  { methods: ["POST"], pattern: /^\/objects\/[^/]+\/remove-from-container$/ },
 
   { methods: ["POST"], pattern: /^\/movements\/immediate$/ },
   { methods: ["POST"], pattern: /^\/movements\/freight$/ },
@@ -184,8 +185,7 @@ function sanitizeBody({
     /^\/objects\/[^/]+$/.test(path) ||
     path === "/relationships" ||
     /^\/relationships\/[^/]+\/end$/.test(path) ||
-    /^\/containers\/[^/]+\/place$/.test(path) ||
-    /^\/objects\/[^/]+\/remove-from-container$/.test(path) ||
+    /^\/relationships\/[^/]+\/order$/.test(path) ||
     /^\/movements\//.test(path) ||
     /^\/imports\/jobs(?:\/|$)/.test(path)
   ) {

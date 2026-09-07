@@ -25,33 +25,28 @@ test("Card 018 owns the system-index data, edit, persistence, and draft-cancel c
   assert.doesNotMatch(card018, /c018-editor/u);
 });
 
-test("selector creation inherits the visible preview schema and every draft is TRAN$ACT-ready", async () => {
-  const [picker, samples, creation, presentation] = await Promise.all([
+test("selector creation inherits the visible preview schema without manufacturing authority", async () => {
+  const [picker, samples, creation] = await Promise.all([
     read("components/ixi-mos/object-creation/IXIAosSystemObjectTemplatePicker.jsx"),
     read("components/ixi-aos-card-library/IXIAosCardSampleData.js"),
-    read("components/ixi-mos/object-creation/useIXIMosObjectCreation.js"),
-    read("components/ixi-aos/card-runtime/IXIAosSemanticObjectPresentation.js")
+    read("components/ixi-mos/object-creation/useIXIMosObjectCreation.js")
   ]);
   assert.match(picker, /buildAosCardCatalogPreviewObject/u);
   assert.match(picker, /fieldSchema:\s*\(templateSchema\.length \? templateSchema : previewSchema\)/u);
   assert.match(samples, /fieldId:\s*"addressLine1"/u);
   assert.match(samples, /2400 AVIATION DRIVE/u);
   assert.match(creation, /objectType:\s*"generic"/u);
-  assert.match(creation, /canTransact:\s*true/u);
-  assert.match(creation, /transactEligible:\s*true/u);
-  assert.match(presentation, /hasAosPassport/u);
-  assert.match(
-    presentation,
-    /export function getObjectActionCapabilities\(object = \{\}\) \{\s+const metadata = getObjectMetadata\(object\);/u
-  );
-  assert.match(presentation, /metadata\?\.transactEligible === true/u);
+  assert.doesNotMatch(creation, /canTransact:\s*true/u);
+  assert.doesNotMatch(creation, /canCreate:\s*true/u);
+  assert.doesNotMatch(creation, /transactEligible:\s*true/u);
+  assert.match(creation, /response\?\.transact\?\.eligible !== true/u);
   const preview = await read("components/ixi-aos-card-library/IXIAosCardCatalogPreview.jsx");
   for (const number of [9, 10, 11, 12, 13, 14, 15, 16, 17]) {
     assert.match(preview, new RegExp(`cardNumber === ${number}`), `Card ${number} must publish its visible preview schema to creation`);
   }
 });
 
-test("every numbered AOS card receives Console and TRAN$ACT from the shared operating runtime", async () => {
+test("every numbered AOS card receives shared controls gated by server authority", async () => {
   const [runtime, consoleRuntime, workspace, systemConsole] = await Promise.all([
     read("components/ixi-aos/card-runtime/IXIAosOperatingCardRuntime.jsx"),
     read("components/ixi-aos/console-runtime/IXIAosNumberedObjectConsole.jsx"),
@@ -59,10 +54,10 @@ test("every numbered AOS card receives Console and TRAN$ACT from the shared oper
     read("components/ixi-mos/system-index/IXISystemIndexConsole.jsx")
   ]);
 
-  assert.match(runtime, /canTransact:\s*true/u);
-  assert.match(runtime, /hasConsole:\s*true/u);
-  assert.match(runtime, /canOpenConsole:\s*true/u);
-  assert.match(runtime, /transactEligible:\s*true/u);
+  assert.doesNotMatch(runtime, /canTransact:\s*true/u);
+  assert.doesNotMatch(runtime, /canCreate:\s*true/u);
+  assert.match(runtime, /actorAuthority\?\.canTransact !== true/u);
+  assert.match(runtime, /actorAuthority\?\.canCreateChild === true/u);
   assert.match(runtime, /IXIOwnedPrivateTransactRuntime/u);
   assert.match(runtime, /transactVisible:\s*true/u);
   assert.match(runtime, /IXIAosLocationObjectConsole/u);

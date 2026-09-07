@@ -33,9 +33,20 @@ import {
 
 import {
   commitMosObjectCommand,
-  commitMosContainerPlacement,
   createMosRelationship
 } from "../../lib/mos/ixiMosClient";
+
+import {
+  buildAosCanonicalAdmission,
+  canonicalizeAosPlacementReferences
+} from "../../lib/mos/ixiAosCanonicalAdmission.mjs";
+
+import {
+  createAosMembershipRelationship,
+  createAosRailOrderKey,
+  getAosRailProjectionObjectIds,
+  getAosMembershipObjectIds
+} from "../../lib/mos/IXIAosMembershipBridge.mjs";
 
 import {
   mergeAosCanonicalObject
@@ -80,10 +91,6 @@ import IXIAosWorkspaceBoard
 import {
   resolveAosWorkspaceParentName
 } from "../../lib/mos/ixiAosHierarchyContract.mjs";
-
-import {
-  getCanonicalAosPassportId
-} from "../../lib/mos/ixiAosPassportPresentation.mjs";
 
 import { getListingId } from "../../lib/listingFormatters";
 import {
@@ -194,6 +201,9 @@ const [aosObjects, setAosObjects] =
 
 const [aosRelationships, setAosRelationships] =
   useState([]);
+
+const [aosRailProjections, setAosRailProjections] =
+  useState({});
 
 const [systemIndexes, setSystemIndexes] =
   useState([]);
@@ -572,6 +582,13 @@ if (cancelled) {
           : []
       );
 
+      setAosRailProjections(
+        environment?.railProjections &&
+        typeof environment.railProjections === "object"
+          ? environment.railProjections
+          : {}
+      );
+
 setSystemIndexes(
   Array.isArray(
     environment?.systemIndexes
@@ -663,14 +680,31 @@ const workspaceListings = useMemo(() => {
   return sellerListings;
 }, [sellerListings]);
 
+const aosCanonicalAdmission = useMemo(
+  () => buildAosCanonicalAdmission({
+    aosObjects,
+    workspaceListings
+  }),
+  [aosObjects, workspaceListings]
+);
+
+const canonicalSavedObjectIds = useMemo(
+  () => savedIds
+    .map(alias => aosCanonicalAdmission.resolveObjectId(alias))
+    .filter(Boolean),
+  [savedIds, aosCanonicalAdmission]
+);
+
 const containerStateKey = useMemo(() => {
   return workspaceListings
     .map(item => {
-      const id = String(getListingId(item));
+      const id = aosCanonicalAdmission.resolveObjectId(getListingId(item));
+      if (!id) return "";
       return `${id}:${ixiCardState[id]?.container || "board"}`;
     })
+    .filter(Boolean)
     .join("|");
-}, [workspaceListings, ixiCardState]);
+}, [workspaceListings, ixiCardState, aosCanonicalAdmission]);
    
 useEffect(() => {
   /*
@@ -693,9 +727,8 @@ useEffect(() => {
   const validMachineIds =
     workspaceListings
       .map(item =>
-        String(
-          getListingId(item) ||
-          ""
+        aosCanonicalAdmission.resolveObjectId(
+          getListingId(item)
         )
       )
       .filter(Boolean);
@@ -729,39 +762,12 @@ useEffect(() => {
     )
     .filter(Boolean);
 
-const validMosObjectIds =
-  (aosObjects || [])
-    .filter(object => {
-      const objectId =
-        String(
-          object?.objectId ||
-          object?.id ||
-          ""
-        ).trim();
-
-      const objectType =
-        String(
-          object?.objectType || ""
-        )
-          .trim()
-          .toLowerCase();
-
-      return (
-        objectId &&
-        !validSystemIndexIds.includes(objectId) &&
-        objectType &&
-        objectType !== "system-index" &&
-        objectType !== "machine"
-      );
-    })
-    .map(object =>
-      String(
-        object?.objectId ||
-        object?.id ||
-        ""
-      )
-    )
-    .filter(Boolean);
+const validMosObjectIds = [...aosCanonicalAdmission.objectsById.values()]
+  .filter(object =>
+    !validSystemIndexIds.includes(object.objectId) &&
+    object?.presentation?.kind !== "ixi-private-machine"
+  )
+  .map(object => object.objectId);
 
 const validWorkspaceObjectIds = [
   ...validSystemIndexIds,
@@ -792,7 +798,10 @@ const savedPlacements =
     let nextPlacements =
       sanitizeWorkspacePlacements({
 placements:
-  savedPlacements,
+  canonicalizeAosPlacementReferences(
+    savedPlacements,
+    aosCanonicalAdmission
+  ),
 
         validObjectIds:
           validWorkspaceObjectIds,
@@ -950,7 +959,9 @@ placements:
   hasLoadedRemoteIxiState,
   containerStateKey,
   systemIndexes,
-  aosObjects
+  aosObjects,
+  aosCanonicalAdmission,
+  workspaceListings
 ]);
   
   const visibleSavedListings = useMemo(() => {
@@ -965,13 +976,15 @@ const orderedSource =
   (machineContainers.board || [])
     .map(id =>
       source.find(item =>
-        String(getListingId(item)) === String(id)
+        aosCanonicalAdmission.resolveObjectId(getListingId(item)) === String(id)
       )
     )
     .filter(Boolean);
     
    const filtered = orderedSource.filter(item => {
-  const id = String(getListingId(item));
+  const id = aosCanonicalAdmission.resolveObjectId(getListingId(item));
+
+  if (!id) return false;
 
   if (getMachineContainer(id) !== "board") {
     return false;
@@ -1085,7 +1098,8 @@ return [...filtered].sort((a, b) => {
   machineContainers,
   ixiCardState,
   ixiColorFilters,
-  ixiOutlineFilter
+  ixiOutlineFilter,
+  aosCanonicalAdmission
 ]);
 
 
@@ -1113,8 +1127,12 @@ const workspaceSystemIndexes =
         const objectId =
           String(
             index?.objectId ||
-            `system-index:${indexId}`
+            ""
           );
+
+        if (!objectId) {
+          return null;
+        }
 
         const legacySurfaceId =
   indexId === "equipment"
@@ -1203,9 +1221,8 @@ const equipmentIndex =
         []
       ).filter(item => {
         const machineId =
-          String(
-            getListingId(item) ||
-            ""
+          aosCanonicalAdmission.resolveObjectId(
+            item?.objectId || getListingId(item) || item?.passportId
           );
 
         return tuckedIds.has(
@@ -1228,22 +1245,32 @@ const equipmentIndex =
     };
   }, [
     equipmentIndex,
-    machineContainers
+    machineContainers,
+    aosCanonicalAdmission
   ]);
 
   const {
+  admission:
+    aosWorkspaceAdmission,
+
   objectRegistry:
     aosWorkspaceObjectRegistry,
 
   boardItems:
     aosBoardItems
 } = useIXIAosWorkspaceRegistry({
+  canonicalAdmission:
+    aosCanonicalAdmission,
+
   workspaceListings,
 
   aosObjects,
 
   relationships:
     aosRelationships,
+
+  railProjections:
+    aosRailProjections,
 
   workspaceSystemIndexes,
 
@@ -1268,7 +1295,9 @@ const equipmentIndex =
 
   return (
     aosWorkspaceObjectRegistry
-      ?.get(id) ||
+      ?.get(
+        aosWorkspaceAdmission.resolveObjectId(id)
+      ) ||
     null
   );
 }
@@ -1277,80 +1306,11 @@ function getCanonicalMosObjectForWorkspaceId(workspaceObjectId) {
   const id = String(workspaceObjectId || "").trim();
   if (!id) return null;
 
-  const workspaceObject =
-    getAosWorkspaceObjectById(id) || null;
-
-  const workspacePassportId = getCanonicalAosPassportId(
-    workspaceObject || {}
-  );
-
-  const activeObjects = (aosObjects || []).filter(object =>
-    !["archived", "deleted", "soft-deleted"].includes(
-      String(object?.status || "active").trim().toLowerCase()
-    )
-  );
-  const exactObject = activeObjects.find(object =>
-    String(object?.objectId || "").trim() === id
-  );
-  if (exactObject) return exactObject;
-
-  const sourceMatches = activeObjects.filter(object =>
-    String(object?.metadata?.sourceListingId || "").trim() === id ||
-    (Array.isArray(object?.identities) ? object.identities : []).some(identity =>
-      String(identity?.sourceType || "").trim() === "sharetribe-listing" &&
-      String(identity?.sourceId || "").trim() === id
-    )
-  );
-  if (sourceMatches.length === 1) return sourceMatches[0];
-  if (sourceMatches.length > 1) {
-    const error = new Error(
-      "IDENTITY CONFLICT · THIS LISTING IS LINKED TO MULTIPLE ACTIVE IX CORE OBJECTS"
-    );
-    error.code = "IXI_AOS_CANONICAL_MACHINE_CONFLICT";
-    throw error;
-  }
-
-  const passportMatches = workspacePassportId
-    ? activeObjects.filter(object =>
-        getCanonicalAosPassportId(object) === workspacePassportId
-      )
-    : [];
-  if (passportMatches.length === 1) return passportMatches[0];
-  if (passportMatches.length > 1) {
-    const error = new Error(
-      `IDENTITY CONFLICT · PASSPORT ${workspacePassportId} HAS MULTIPLE ACTIVE IX CORE OBJECTS`
-    );
-    error.code = "IXI_AOS_CANONICAL_PASSPORT_CONFLICT";
-    throw error;
-  }
-
-  /*
-   * The workspace registry may already contain the permanent canonical
-   * readback while the environment array is completing its post-save
-   * refresh. A durable object_* identity with its owning Entity is safe
-   * to use; browser-only drafts and Sharetribe listing IDs are not.
-   */
-  if (
-    !isAosDraftId(id) &&
-    String(workspaceObject?.objectId || "").trim() === id &&
-    String(workspaceObject?.entityId || "").trim()
-  ) {
-    return workspaceObject;
-  }
-
-  return null;
+  return aosWorkspaceAdmission.resolveObject(id);
 }
 
 function getWorkspaceIdForCanonicalObject(object = {}) {
-  const sourceListingId =
-    String(object?.metadata?.sourceListingId || "").trim() ||
-    String((Array.isArray(object?.identities) ? object.identities : [])
-      .find(identity =>
-        String(identity?.sourceType || "").trim() === "sharetribe-listing"
-      )?.sourceId || "").trim();
-
-  return sourceListingId ||
-    String(object?.objectId || object?.id || "").trim();
+  return String(object?.objectId || "").trim();
 }
 
   function updateIxiCardState(listingId, patch) {
@@ -1454,11 +1414,13 @@ const saveAosWorkspaceObject = useCallback(async (payload = {}) => {
   };
 }, [aosEntity?.entityId]);
   
-function cycleMachineFace(listingOrId) {
+  function cycleMachineFace(listingOrId) {
   const id =
     typeof listingOrId === "object"
-      ? String(getListingId(listingOrId))
-      : String(listingOrId);
+      ? aosWorkspaceAdmission.resolveObjectId(getListingId(listingOrId))
+      : aosWorkspaceAdmission.resolveObjectId(listingOrId);
+
+  if (!id) return;
 
   const currentFace =
     Number(ixiCardState[id]?.face || 1);
@@ -1543,7 +1505,10 @@ const {
 
   ixiCardState,
 
-  executeIXITransaction
+  executeIXITransaction,
+
+  resolveCanonicalObjectId:
+    aosCanonicalAdmission.resolveObjectId
 });
 
 /* ---------- UNIVERSAL AOS CONTAINER BOARD / RECALL / RETURN ---------- */
@@ -1569,12 +1534,6 @@ function getDirectContainerChildIds(
    */
  if (
   container?.indexId ===
-    "equipment" ||
-  String(
-    container?.displayName || ""
-  )
-    .trim()
-    .toLowerCase() ===
     "equipment"
 ) {
   /*
@@ -1594,186 +1553,28 @@ function getDirectContainerChildIds(
     equipmentIndex?.items || []
   )
     .map(item =>
-      String(
-        getListingId(item) ||
-        ""
+      aosWorkspaceAdmission.resolveObjectId(
+        item?.objectId || getListingId(item) || item?.passportId
       )
     )
     .filter(Boolean);
 }
 
-  const objectsById = new Map(
-    (aosObjects || []).map(object => [
-      String(object?.objectId || "").trim(),
-      object
-    ])
-  );
-  const relationshipChildIds = (aosRelationships || [])
-    .filter(relationship =>
-      String(relationship?.status || "active").trim().toLowerCase() === "active" &&
-      String(
-        relationship?.relationshipKey ||
-        relationship?.relationshipType ||
-        relationship?.relationshipLabel ||
-        ""
-      ).trim().toLowerCase() === "contains" &&
-      String(relationship?.sourceObjectId || "").trim() === containerId
-    )
-    .map(relationship =>
-      objectsById.get(String(relationship?.targetObjectId || "").trim())
-    )
-    .filter(Boolean)
-    .map(getWorkspaceIdForCanonicalObject);
+  const relationshipChildIds = getAosMembershipObjectIds({
+    parentObjectId: containerId,
+    relationships: aosRelationships
+  }).filter(objectId => aosWorkspaceObjectRegistry.has(objectId));
 
-  /* Keep legacy direct children readable while old records are migrated. */
-  const legacyChildIds = (
-    aosObjects || []
-  )
-    .filter(object =>
-      String(
-        object?.directContainerId ||
-        ""
-      ) === containerId
-    )
-    .map(getWorkspaceIdForCanonicalObject)
-    .filter(Boolean);
+  const projectedChildIds = getAosRailProjectionObjectIds({
+    railOwnerObjectId: containerId,
+    railProjections: aosRailProjections
+  }).filter(objectId => aosWorkspaceObjectRegistry.has(objectId));
 
   return [...new Set([
+    ...projectedChildIds,
     ...relationshipChildIds,
-    ...legacyChildIds
   ])];
 }
-
-async function clearContainerChildrenToParent(
-  container
-) {
-  const containerId = String(
-    container?.objectId ||
-    container?.id ||
-    ""
-  ).trim();
-
-  const parentContainerId = String(
-    container?.directContainerId ||
-    ""
-  ).trim();
-
-  if (!containerId || !parentContainerId) {
-    const error = new Error(
-      "THIS CARD DOES NOT HAVE A CANONICAL PARENT"
-    );
-    error.code = "IXI_AOS_CLEAR_PARENT_REQUIRED";
-    throw error;
-  }
-
-  const childIds =
-    getDirectContainerChildIds(container);
-
-  if (!childIds.length) {
-    return {
-      ok: true,
-      moved: 0,
-      parentContainerId
-    };
-  }
-
-  const canonicalChildren = [];
-
-  for (const childId of childIds) {
-    const placement =
-      await commitMosContainerPlacement({
-        objectId: childId,
-        destinationContainerId:
-          parentContainerId,
-        metadata: {
-          createdFrom:
-            "aos-clear-children-to-parent",
-          clearedContainerId:
-            containerId,
-          destinationParentId:
-            parentContainerId
-        }
-      });
-
-    canonicalChildren.push(
-      placement.object
-    );
-  }
-
-  const canonicalById = new Map(
-    canonicalChildren.map(object => [
-      String(object?.objectId || ""),
-      object
-    ])
-  );
-
-  setAosObjects(current =>
-    current.map(object => {
-      const canonical = canonicalById.get(
-        String(object?.objectId || "")
-      );
-
-      return canonical
-        ? mergeAosCanonicalObject(
-            object,
-            canonical
-          )
-        : object;
-    })
-  );
-
-  let nextPlacements =
-    workspacePlacements;
-
-  childIds.forEach(childId => {
-    nextPlacements =
-      moveObjectToWorkspaceSurface({
-        placements:
-          nextPlacements,
-        objectId:
-          childId,
-        targetSurface:
-          `container:${parentContainerId}`
-      });
-  });
-
-  setWorkspacePlacements(
-    nextPlacements
-  );
-
-  const layoutResult =
-    await saveWorkspaceLayout(
-      nextPlacements
-    );
-
-  if (!layoutResult) {
-    const error = new Error(
-      "IX CORE MOVED THE CHILDREN, BUT THE WORKSPACE LAYOUT WAS NOT CONFIRMED"
-    );
-    error.code =
-      "IXI_AOS_CLEAR_PARENT_LAYOUT_UNCONFIRMED";
-    throw error;
-  }
-
-  showAosObjectNotice({
-    objectId:
-      containerId,
-    message:
-      `${childIds.length} CHILD${childIds.length === 1 ? "" : "REN"} RETURNED TO PARENT`,
-    tone:
-      "success",
-    duration:
-      2600
-  });
-
-  return {
-    ok: true,
-    moved: childIds.length,
-    parentContainerId,
-    children: canonicalChildren
-  };
-}
-
 
 /* =========================================================
    SMART CONTAINER TEMPORARY WORKSPACE SNAPSHOTS
@@ -2110,12 +1911,6 @@ async function recallContainerChildren(
 
 const isEquipment =
   container?.indexId ===
-    "equipment" ||
-  String(
-    container?.displayName || ""
-  )
-    .trim()
-    .toLowerCase() ===
     "equipment";
 
 if (isEquipment) {
@@ -2238,9 +2033,7 @@ function moveMachineBackToBoard(machineId) {
 }
 
 function getListingById(machineId) {
-  return listings.find(
-    item => String(getListingId(item)) === String(machineId)
-  );
+  return aosWorkspaceAdmission.resolveObject(machineId);
 }
 
   function getActiveDndListing() {
@@ -2298,11 +2091,11 @@ function getListingById(machineId) {
   : workspaceListings;
 
       const fromIndex = source.findIndex(
-        item => String(getListingId(item)) === String(dragId)
+        item => aosWorkspaceAdmission.resolveObjectId(getListingId(item)) === String(dragId)
       );
 
       const toIndex = source.findIndex(
-        item => String(getListingId(item)) === String(targetId)
+        item => aosWorkspaceAdmission.resolveObjectId(getListingId(item)) === String(targetId)
       );
 
       if (fromIndex === -1 || toIndex === -1) return source;
@@ -2352,7 +2145,11 @@ function cyclePocketMode(side) {
 }
 
 function sendListingToFront(listing) {
-  const listingId = String(getListingId(listing));
+  const listingId = aosWorkspaceAdmission.resolveObjectId(
+    listing?.objectId || getListingId(listing)
+  );
+
+  if (!listingId) return;
 
   const result = IXI_COMMANDS.moveObjectToContainerStart({
     objectId: listingId,
@@ -2365,7 +2162,11 @@ function sendListingToFront(listing) {
 }
 
 function sendListingToBack(listing) {
-  const listingId = String(getListingId(listing));
+  const listingId = aosWorkspaceAdmission.resolveObjectId(
+    listing?.objectId || getListingId(listing)
+  );
+
+  if (!listingId) return;
 
   const result = IXI_COMMANDS.moveObjectToContainerEnd({
     objectId: listingId,
@@ -3112,6 +2913,21 @@ if (
       return;
     }
 
+    if (
+      sourceObject?.actorAuthority?.canRelate !== true ||
+      targetWorkspaceObject?.actorAuthority?.canRelate !== true
+    ) {
+      showAosObjectNotice({
+        objectId: dragId,
+        message: "RELATIONSHIP NOT AUTHORIZED",
+        tone: "error",
+        duration: 4200
+      });
+      setActiveDndId(null);
+      clearMachineDragState?.();
+      return;
+    }
+
     nextPlacements =
       moveObjectToWorkspaceSurface({
         placements:
@@ -3128,7 +2944,7 @@ if (
      * ONE OBJECT / MANY RELATIONSHIPS / ONE VISUAL PLACEMENT
      *
      * The gesture owns the visible result. Land the card and release the
-     * drag immediately. The listing ID remains the visual card identity.
+     * drag immediately. Canonical objectId remains the operating identity.
      * Persistence creates only an idempotent, non-exclusive relationship
      * between the existing Objects; it never provisions, clones, checks in,
      * checks out, or rewrites the legacy exclusive-parent field.
@@ -3155,15 +2971,36 @@ if (
 
     void (async () => {
       try {
-        const relationshipResponse = await createMosRelationship({
-          sourceObjectId: targetWorkspaceObjectId,
-          targetObjectId: sourceObject.objectId,
-          relationshipType: "contains",
-          metadata: {
-            createdFrom: "aos-work-drop",
-            sourceWorkspaceObjectId: dragId,
-            targetWorkspaceObjectId
-          }
+        const memberPassportId = String(
+          sourceObject?.canonicalIdentity?.passportId ||
+          sourceObject?.passportId ||
+          ""
+        ).trim();
+        const parentPassportId = String(
+          targetWorkspaceObject?.canonicalIdentity?.passportId ||
+          targetWorkspaceObject?.passportId ||
+          ""
+        ).trim();
+        const railPosition = Math.max(
+          0,
+          (nextPlacements?.[dropTargetSurface] || []).indexOf(sourceObject.objectId)
+        );
+
+        if (!memberPassportId || !parentPassportId) {
+          const error = new Error(
+            "CANONICAL OBJECT AND PASSPORT ADMISSION IS REQUIRED BEFORE RELATING CARDS"
+          );
+          error.code = "CANONICAL_IDENTITY_REPAIR_REQUIRED";
+          throw error;
+        }
+
+        const relationshipResponse = await createAosMembershipRelationship({
+          createRelationship: createMosRelationship,
+          parentObjectId: targetWorkspaceObjectId,
+          parentPassportId,
+          memberObjectId: sourceObject.objectId,
+          memberPassportId,
+          orderKey: createAosRailOrderKey(railPosition)
         });
 
         const relationship = relationshipResponse?.relationship;
@@ -3423,7 +3260,11 @@ return;
     function sendMachineToArmedDestination(listing) {
   if (!armedDestination) return;
 
-  const id = String(getListingId(listing));
+  const id = aosWorkspaceAdmission.resolveObjectId(
+    listing?.objectId || getListingId(listing)
+  );
+
+  if (!id) return;
 
   if (
     !DIRECT_CONTAINER_TARGETS.includes(
@@ -3548,17 +3389,10 @@ if (
       parentObject
     });
 
-  const directChildren =
-    (aosObjects || [])
-      .filter(child =>
-        String(
-          child?.directContainerId ||
-          ""
-        ) ===
-        String(
-          objectId
-        )
-      );
+  const projectedChildren =
+    getDirectContainerChildIds(object)
+      .map(getAosWorkspaceObjectById)
+      .filter(Boolean);
 
   return (
     <IXIAosOperatingCardRuntime
@@ -3567,7 +3401,7 @@ if (
       }
 
       items={
-        directChildren
+        projectedChildren
       }
 
       parentLabel={
@@ -3609,7 +3443,7 @@ if (
 return null;
 }}
     activeDndId={activeDndId}
-    savedIds={savedIds}
+  savedIds={savedIds}
     ixiCardState={ixiCardState}
     cardScaleMode={cardScaleMode}
   >
@@ -3771,7 +3605,7 @@ getWorkspaceObjectById={
 }
 
   savedIds={
-    savedIds
+    canonicalSavedObjectIds
   }
 
   ixiCardState={
@@ -3848,10 +3682,6 @@ onGatherContainerChildren={
 
 onReturnContainerChildren={
   returnContainerChildren
-}
-
-onClearContainerToParent={
-  clearContainerChildrenToParent
 }
 
   onCreateObjectChild={
