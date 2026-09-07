@@ -27,7 +27,8 @@ export const IXI_AOS_BOARD_SKIN_IDS =
     IXI_118: "ixi-118",
     IXI_119: "ixi-119",
     IXI_120: "ixi-120",
-    IXI_121: "ixi-121"
+    IXI_121: "ixi-121",
+    IXI_122: "ixi-122"
   });
 
 export const IXI_AOS_BOARD_SKINS =
@@ -185,6 +186,13 @@ export const IXI_AOS_BOARD_SKINS =
       designation: "HEAVY HAUL",
       description: "Western Star 49X Power Hood plan with tridem-drive geometry, DD16 torque flow and fifth-wheel loading details.",
       className: "aos-work-board-skin-ixi-121"
+    }),
+    Object.freeze({
+      skinId: IXI_AOS_BOARD_SKIN_IDS.IXI_122,
+      name: "IXI-122",
+      designation: "DETACH 65",
+      description: "Fontaine Magnitude 65 MDSR plan with non-ground-bearing detach sequence, 3+2 axle loading and deck geometry.",
+      className: "aos-work-board-skin-ixi-122"
     })
   ]);
 
