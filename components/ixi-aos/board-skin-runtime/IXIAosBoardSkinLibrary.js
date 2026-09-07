@@ -14,7 +14,9 @@ export const IXI_AOS_BOARD_SKIN_IDS =
     IXI_105: "ixi-105",
     IXI_106: "ixi-106",
     IXI_107: "ixi-107",
-    IXI_108: "ixi-108"
+    IXI_108: "ixi-108",
+    IXI_109: "ixi-109",
+    IXI_110: "ixi-110"
   });
 
 export const IXI_AOS_BOARD_SKINS =
@@ -81,6 +83,20 @@ export const IXI_AOS_BOARD_SKINS =
       designation: "EARTHWORK PLAN",
       description: "Full-field civil grading plan with excavation, haul routes and survey controls.",
       className: "aos-work-board-skin-ixi-108"
+    }),
+    Object.freeze({
+      skinId: IXI_AOS_BOARD_SKIN_IDS.IXI_109,
+      name: "IXI-109",
+      designation: "DIRECTIONAL DRILLING",
+      description: "Jet-black oilfield plan with well paths, casing data and geological targets.",
+      className: "aos-work-board-skin-ixi-109"
+    }),
+    Object.freeze({
+      skinId: IXI_AOS_BOARD_SKIN_IDS.IXI_110,
+      name: "IXI-110",
+      designation: "NIGHT SURVEY",
+      description: "Sparse midnight survey field with sight lines, benchmarks and control points.",
+      className: "aos-work-board-skin-ixi-110"
     })
   ]);
 
