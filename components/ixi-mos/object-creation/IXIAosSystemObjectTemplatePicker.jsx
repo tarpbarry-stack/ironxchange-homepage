@@ -18,8 +18,9 @@ import {
 } from "../../ixi-aos-card-library/IXIAosCardSampleData";
 
 import {
-  IXI_AOS_CARD_NUMBER_MAX,
+  IXI_AOS_SELECTOR_CARD_COUNT,
   formatAosCardNumber,
+  getAosSelectorCardLabel,
   getAosTemplateNumber,
   getSelectableAosSystemTemplates,
   isCompleteAosSystemTemplateSet
@@ -90,7 +91,7 @@ export default function IXIAosSystemObjectTemplatePicker({
 
         if (!isCompleteAosSystemTemplateSet(selectable)) {
           throw new Error(
-            `AOS Card Library returned ${selectable.length} of ${IXI_AOS_CARD_NUMBER_MAX} required layouts.`
+            `AOS Card Library returned ${selectable.length} of ${IXI_AOS_SELECTOR_CARD_COUNT} required layouts.`
           );
         }
 
@@ -324,7 +325,7 @@ export default function IXIAosSystemObjectTemplatePicker({
           <div className="aos-create-directory">
             <div className="aos-create-directory-title">
               <span>CARD LIBRARY</span>
-              <strong>{templates.length}/{IXI_AOS_CARD_NUMBER_MAX}</strong>
+              <strong>{templates.length}/{IXI_AOS_SELECTOR_CARD_COUNT}</strong>
             </div>
 
             <div className="aos-create-grid">
@@ -349,7 +350,7 @@ export default function IXIAosSystemObjectTemplatePicker({
                     onClick={() => setSelectedSlug(slug)}
                     onDoubleClick={createSelected}
                   >
-                    <b>{formatAosCardNumber(templateNumber)}</b>
+                    <b>{getAosSelectorCardLabel(template)}</b>
                     <span>{clean(template?.label) || `AOS CARD ${formatAosCardNumber(templateNumber)}`}</span>
                     <small>{clean(template?.metadata?.sampleUse) || clean(template?.librarySection) || "CUSTOMER-DEFINED SYSTEM"}</small>
                   </button>
@@ -361,7 +362,7 @@ export default function IXIAosSystemObjectTemplatePicker({
           <aside className="aos-create-preview">
             <div className="aos-create-preview-title">
               <span>SELECTED LAYOUT</span>
-              <strong>{number ? `#${formatAosCardNumber(number)}` : "—"}</strong>
+              <strong>{number ? `#${getAosSelectorCardLabel(selectedTemplate)}` : "—"}</strong>
             </div>
 
             <div className="aos-create-preview-card" aria-hidden="true">
@@ -404,7 +405,7 @@ export default function IXIAosSystemObjectTemplatePicker({
               >
                 {creating
                   ? "OPENING DRAFT…"
-                  : `USE CARD ${number ? formatAosCardNumber(number) : "—"}`}
+                  : `USE CARD ${number ? getAosSelectorCardLabel(selectedTemplate) : "—"}`}
               </button>
             </div>
 

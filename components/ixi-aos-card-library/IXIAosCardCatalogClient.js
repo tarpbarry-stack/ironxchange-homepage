@@ -23,48 +23,54 @@ function genericContainerCapabilities(source = {}) {
 }
 
 function withLocalCardDrafts(templates = []) {
-  const source = (Array.isArray(templates) ? templates : []).map(template => {
-    const slug = clean(template?.templateSlug);
+  const source = (Array.isArray(templates) ? templates : [])
+    .filter(template => {
+      const slugNumber = clean(template?.templateSlug).match(/(?:^|[-_])(\d{3})(?:$|[-_])/i)?.[1];
+      const number = Number(template?.templateNumber || template?.metadata?.cardNumber || slugNumber || 0);
+      return !Number.isInteger(number) || number <= 18;
+    })
+    .map(template => {
+      const slug = clean(template?.templateSlug);
 
-    if (slug === "location-standard") {
-      return {
-        ...template,
-        templateNumber: 1,
-        label: "Container Layout 001",
-        librarySection: "AOS CONTAINER LAYOUTS",
-        baseObjectType: "customer-defined-container",
-        version: 12,
-        capabilities: genericContainerCapabilities(template?.capabilities || {}),
-        metadata: {
-          ...(template?.metadata || {}),
-          cardLocked: true,
-          lockedCardId: "001-v12",
-          renderer: "schema-driven-generic",
-          sampleUse: "location"
-        }
-      };
-    }
+      if (slug === "location-standard") {
+        return {
+          ...template,
+          templateNumber: 1,
+          label: "Container Layout 001",
+          librarySection: "AOS CONTAINER LAYOUTS",
+          baseObjectType: "customer-defined-container",
+          version: 12,
+          capabilities: genericContainerCapabilities(template?.capabilities || {}),
+          metadata: {
+            ...(template?.metadata || {}),
+            cardLocked: true,
+            lockedCardId: "001-v12",
+            renderer: "schema-driven-generic",
+            sampleUse: "location"
+          }
+        };
+      }
 
-    if (slug === "employee-basic-007") {
-      return {
-        ...template,
-        templateNumber: 8,
-        label: "Profile Layout 008",
-        librarySection: "AOS OBJECT LAYOUTS",
-        baseObjectType: "customer-defined-object",
-        version: 12,
-        capabilities: genericContainerCapabilities(template?.capabilities || {}),
-        metadata: {
-          ...(template?.metadata || {}),
-          cardNumber: "008",
-          renderer: "schema-driven-generic-profile",
-          sampleUse: "personnel"
-        }
-      };
-    }
+      if (slug === "employee-basic-007") {
+        return {
+          ...template,
+          templateNumber: 8,
+          label: "Profile Layout 008",
+          librarySection: "AOS OBJECT LAYOUTS",
+          baseObjectType: "customer-defined-object",
+          version: 12,
+          capabilities: genericContainerCapabilities(template?.capabilities || {}),
+          metadata: {
+            ...(template?.metadata || {}),
+            cardNumber: "008",
+            renderer: "schema-driven-generic-profile",
+            sampleUse: "personnel"
+          }
+        };
+      }
 
-    return template;
-  });
+      return template;
+    });
 
   const base001 = source.find(template => clean(template?.templateSlug) === "location-standard");
 
@@ -126,15 +132,41 @@ function withLocalCardDrafts(templates = []) {
     source.push({
       templateNumber: 7,
       templateSlug: "universal-object-007",
-      label: "Universal Card 007",
+      label: "Universal Card 007A",
       librarySection: "AOS UNIVERSAL LAYOUTS",
       baseObjectType: "customer-defined-object",
       version: 12,
       fieldSchema: [],
       capabilities: genericContainerCapabilities({}),
-      metadata: { localCardDraft: true, cardNumber: "007", visualLanguage: "v12", renderer: "universal-object-card", defaultCard: true }
+      metadata: { localCardDraft: true, cardNumber: "007", cardVariant: "A", visualLanguage: "v12", renderer: "universal-object-card", defaultCard: true }
     });
   }
+
+  [
+    { variant: "B", templateSlug: "universal-object-007b" },
+    { variant: "C", templateSlug: "universal-object-007c" }
+  ].forEach(draft => {
+    if (source.some(template => clean(template?.templateSlug) === draft.templateSlug)) return;
+    source.push({
+      templateNumber: 7,
+      templateSlug: draft.templateSlug,
+      label: `Universal Card 007${draft.variant}`,
+      librarySection: "AOS UNIVERSAL LAYOUTS",
+      baseObjectType: "customer-defined-object",
+      version: 12,
+      fieldSchema: [],
+      capabilities: genericContainerCapabilities({}),
+      metadata: {
+        localCardDraft: true,
+        cardNumber: "007",
+        cardVariant: draft.variant,
+        visualLanguage: "v12",
+        renderer: "universal-object-card",
+        derivedFrom: "universal-object-007",
+        sampleUse: "CUSTOMER-DEFINED OBJECT"
+      }
+    });
+  });
 
   if (!source.some(template => Number(template?.templateNumber || template?.metadata?.cardNumber) === 8)) {
     source.push({
@@ -232,26 +264,6 @@ function withLocalCardDrafts(templates = []) {
         visualLanguage: "v12",
         renderer: "system-index-equipment-container",
         sampleUse: "EQUIPMENT COLLECTION / VISUAL INDEX"
-      }
-    });
-  }
-
-  if (!source.some(template => Number(template?.templateNumber || template?.metadata?.cardNumber) === 19)) {
-    source.push({
-      templateNumber: 19,
-      templateSlug: "aos-card-019",
-      label: "Card 019",
-      librarySection: "AOS CONTAINER LAYOUTS",
-      baseObjectType: "customer-defined-container",
-      version: 12,
-      fieldSchema: [],
-      capabilities: genericContainerCapabilities({}),
-      metadata: {
-        localCardDraft: true,
-        cardNumber: "019",
-        visualLanguage: "v12",
-        renderer: "system-index-locations-container",
-        sampleUse: "LOCATIONS COLLECTION / VISUAL INDEX"
       }
     });
   }

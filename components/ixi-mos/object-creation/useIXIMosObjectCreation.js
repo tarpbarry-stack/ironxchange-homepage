@@ -516,7 +516,7 @@ export default function useIXIMosObjectCreation({
       !cardTemplateSlug
     ) {
       throw new Error(
-        "Choose an AOS Card from 001 through 019."
+        "Choose an AOS Card from 001 through 018."
       );
     }
 
@@ -551,6 +551,8 @@ export default function useIXIMosObjectCreation({
         ...safeObject(metadata),
         cardNumber:
           String(templateNumber).padStart(3, "0"),
+        cardVariant:
+          clean(sourceTemplate?.metadata?.cardVariant) || null,
         templateSlug:
           cardTemplateSlug,
         templateLabel:
@@ -574,7 +576,7 @@ export default function useIXIMosObjectCreation({
   /* =========================================================
      CHILD CUSTOMER CONTAINER DRAFT
 
-     Card + uses the same 001-019 presentation selector as the
+     Card + uses the same 001-018 presentation selector as the
      scoreboard. The clicked card supplies hierarchy only; the
      selected template supplies the new child's card contract.
      SAVE remains the only Passport/provisioning transition.
@@ -620,7 +622,7 @@ export default function useIXIMosObjectCreation({
       !cardTemplateSlug
     ) {
       throw new Error(
-        "Choose an AOS Card from 001 through 019."
+        "Choose an AOS Card from 001 through 018."
       );
     }
 
@@ -655,6 +657,8 @@ export default function useIXIMosObjectCreation({
         ...safeObject(metadata),
         cardNumber:
           String(templateNumber).padStart(3, "0"),
+        cardVariant:
+          clean(sourceTemplate?.metadata?.cardVariant) || null,
         templateSlug:
           cardTemplateSlug,
         templateLabel:

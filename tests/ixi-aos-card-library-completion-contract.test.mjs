@@ -49,9 +49,9 @@ test("Every machine rail zone has an accessible name", () => {
 });
 
 test("Card 007 keeps all three independently selectable commercial variants", () => {
-  assert.match(card007, /007A/u);
-  assert.match(card007, /007B/u);
-  assert.match(card007, /007C/u);
+  assert.match(card007, /universal-object-007b/u);
+  assert.match(card007, /universal-object-007c/u);
+  assert.match(card007, /return "A"/u);
   assert.match(card007, /IXIAosGenericUniversalLayout007B/u);
   assert.match(card007, /IXIAosGenericUniversalLayout007C/u);
 });

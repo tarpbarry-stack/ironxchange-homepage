@@ -16,17 +16,13 @@ test("Cards 001-003 keep their layouts while using the canonical generic Face 1 
   }
 });
 
-test("Cards 018-019 use the same data, edit, persistence, and draft-cancel contract", async () => {
-  const [card018, card019] = await Promise.all([
-    read("components/ixi-aos/cards/018/IXIAosCard018.jsx"),
-    read("components/ixi-aos/cards/019/IXIAosCard019.jsx")
-  ]);
+test("Card 018 owns the system-index data, edit, persistence, and draft-cancel contract", async () => {
+  const card018 = await read("components/ixi-aos/cards/018/IXIAosCard018.jsx");
   assert.match(card018, /IXIAosDataContractCardAdapter/u);
   assert.match(card018, /IXIAosCommercialEditorBridge/u);
   assert.match(card018, /IXIAosFace1CardRuntime/u);
   assert.match(card018, /onCancelDraft=\{contractProps\.onDeleteObject\}/u);
   assert.doesNotMatch(card018, /c018-editor/u);
-  assert.match(card019, /IXIAosCard018/u);
 });
 
 test("selector creation inherits the visible preview schema and every draft is TRAN$ACT-ready", async () => {
@@ -72,7 +68,7 @@ test("every numbered AOS card receives Console and TRAN$ACT from the shared oper
   assert.match(runtime, /IXIAosLocationObjectConsole/u);
   assert.match(runtime, /IXIAosNumberedObjectConsole/u);
 
-  for (const number of Array.from({ length: 16 }, (_, index) => index + 4)) {
+  for (const number of Array.from({ length: 15 }, (_, index) => index + 4)) {
     assert.match(
       runtime,
       new RegExp(`\\b${number}: IXIAosCard${String(number).padStart(3, "0")}`, "u"),

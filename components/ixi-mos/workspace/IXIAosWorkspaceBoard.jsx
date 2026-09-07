@@ -13,8 +13,6 @@ import IXISystemIndexCard
 import IXIAosCard018
   from "../../ixi-aos/cards/018/IXIAosCard018";
 
-import IXIAosCard019
-  from "../../ixi-aos/cards/019/IXIAosCard019";
 
 import IXISystemIndexConsole, {
   getSystemIndexConsoleNativeWidth,
@@ -387,14 +385,18 @@ export default function IXIAosWorkspaceBoard({
                           Card: IXIAosCard018,
                           displayName: "EQUIPMENT",
                           templateSlug: "aos-card-018",
-                          cardNumber: 18
+                          cardNumber: 18,
+                          childCardMode: "machine",
+                          loopChildDeck: true
                         }
                       : isLocationsSystemIndex(item, systemAdapter)
                         ? {
-                            Card: IXIAosCard019,
+                            Card: IXIAosCard018,
                             displayName: "LOCATIONS",
-                            templateSlug: "aos-card-019",
-                            cardNumber: 19
+                            templateSlug: "aos-card-018",
+                            cardNumber: 18,
+                            childCardMode: "object",
+                            loopChildDeck: false
                           }
                         : null;
 
@@ -420,6 +422,8 @@ export default function IXIAosWorkspaceBoard({
                         onSendBack={sendListingToBack}
                         onSendToArmedDestination={sendMachineToArmedDestination}
                         onExposeObject={exposeObject}
+                        childCardMode={systemIndexCard.childCardMode}
+                        loopChildDeck={systemIndexCard.loopChildDeck}
                         onOpenTransact={onOpenTransact}
                         onAddObject={
                           canCreateChild

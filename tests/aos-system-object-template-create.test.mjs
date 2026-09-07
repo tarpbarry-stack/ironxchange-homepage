@@ -4,6 +4,7 @@ import test from "node:test";
 
 import {
   formatAosCardNumber,
+  getAosSelectorCardLabel,
   getSelectableAosSystemTemplates,
   isCompleteAosSystemTemplateSet
 } from "../lib/mos/ixiAosSystemObjectTemplateContract.mjs";
@@ -11,21 +12,33 @@ import {
 
 function templates() {
   return Array.from(
-    { length: 19 },
+    { length: 18 },
     (_, index) => ({
       templateNumber: index + 1,
       templateSlug:
         index === 0
           ? "location-standard"
+          : index === 6
+            ? "universal-object-007"
           : `aos-card-${String(index + 1).padStart(3, "0")}`
     })
   );
 }
 
 
-test("system object picker exposes exactly cards 001 through 019", () => {
+test("system object picker exposes 001 through 018 with independent 007A, 007B, and 007C choices", () => {
   const source = [
     ...templates().reverse(),
+    {
+      templateNumber: 7,
+      templateSlug: "universal-object-007b",
+      metadata: { cardVariant: "B" }
+    },
+    {
+      templateNumber: 7,
+      templateSlug: "universal-object-007c",
+      metadata: { cardVariant: "C" }
+    },
     {
       templateNumber: 9,
       templateSlug: "aos-card-009b"
@@ -39,10 +52,10 @@ test("system object picker exposes exactly cards 001 through 019", () => {
   const selected =
     getSelectableAosSystemTemplates(source);
 
-  assert.equal(selected.length, 19);
+  assert.equal(selected.length, 20);
   assert.deepEqual(
-    selected.map(item => item.templateNumber),
-    Array.from({ length: 19 }, (_, index) => index + 1)
+    selected.map(item => getAosSelectorCardLabel(item)),
+    ["001", "002", "003", "004", "005", "006", "007A", "007B", "007C", "008", "009", "010", "011", "012", "013", "014", "015", "016", "017", "018"]
   );
   assert.equal(isCompleteAosSystemTemplateSet(selected), true);
   assert.equal(formatAosCardNumber(7), "007");
@@ -52,7 +65,7 @@ test("system object picker exposes exactly cards 001 through 019", () => {
 test("an incomplete card library is rejected", () => {
   assert.equal(
     isCompleteAosSystemTemplateSet(
-      templates().slice(0, 18)
+      templates()
     ),
     false
   );
@@ -138,7 +151,7 @@ test("AOS Work routes scoreboard plus through template selection and draft provi
 });
 
 
-test("every AOS card plus opens the same 001-019 selector for a child", async () => {
+test("every AOS card plus opens the same 001-018 selector for a child", async () => {
   const [page, creationHook, picker] = await Promise.all([
     readFile(
       new URL("../pages/aos/work.js", import.meta.url),
@@ -213,14 +226,10 @@ test("every AOS card plus opens the same 001-019 selector for a child", async ()
 });
 
 
-test("Cards 018 and 019 are selectable creation layouts with safe draft cancellation", async () => {
-  const [equipmentCard, locationsCard, contract] = await Promise.all([
+test("Card 018 remains the selectable system-index layout with safe draft cancellation", async () => {
+  const [equipmentCard, contract] = await Promise.all([
     readFile(
       new URL("../components/ixi-aos/cards/018/IXIAosCard018.jsx", import.meta.url),
-      "utf8"
-    ),
-    readFile(
-      new URL("../components/ixi-aos/cards/019/IXIAosCard019.jsx", import.meta.url),
       "utf8"
     ),
     readFile(
@@ -229,11 +238,10 @@ test("Cards 018 and 019 are selectable creation layouts with safe draft cancella
     )
   ]);
 
-  assert.match(contract, /IXI_AOS_CARD_NUMBER_MAX = 19/u);
+  assert.match(contract, /IXI_AOS_CARD_NUMBER_MAX = 18/u);
   assert.match(equipmentCard, /IXIAosCommercialEditorBridge/u);
   assert.match(equipmentCard, /onCancelDraft=\{contractProps\.onDeleteObject\}/u);
   assert.match(equipmentCard, /IXIAosFace1CardRuntime/u);
-  assert.match(locationsCard, /IXIAosCard018/u);
 });
 
 
@@ -274,10 +282,4 @@ test("all numbered cards discard an unsaved creation draft on Cancel", async () 
       card
     );
   }
-
-  const card019 = await readFile(
-    new URL("../components/ixi-aos/cards/019/IXIAosCard019.jsx", import.meta.url),
-    "utf8"
-  );
-  assert.match(card019, /IXIAosCard018/u);
 });
