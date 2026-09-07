@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import fs from "node:fs";
 import test from "node:test";
 
 import {
@@ -6,6 +7,8 @@ import {
   getCanonicalAosPassportId,
   isValidIxiPassportId
 } from "../lib/mos/ixiAosPassportPresentation.mjs";
+
+const read = path => fs.readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
 
 
 test("AOS headers display the verified seven-character IXI Passport serial", () => {
@@ -52,6 +55,17 @@ test("internal Object IDs and six-character browser fallbacks are never presente
     }),
     "PENDING"
   );
+});
+
+
+test("location Cards 001 through 003 never present an internal Object ID as an IXI Passport", () => {
+  for (const number of ["001", "002", "003"]) {
+    const source = read(`components/ixi-aos/cards/${number}/IXIAosCard${number}Location.jsx`);
+    assert.match(source, /getAosPassportDisplaySerial/u);
+    assert.doesNotMatch(source, /getObjectId/u);
+    assert.doesNotMatch(source, /FACELAB_IXI_ID_PREVIEW/u);
+    assert.doesNotMatch(source, /OBJECT_/u);
+  }
 });
 
 

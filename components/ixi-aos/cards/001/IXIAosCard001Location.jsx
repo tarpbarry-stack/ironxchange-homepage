@@ -8,7 +8,7 @@ import IXIAosV12CardPolish from "../../card-runtime/modules/IXIAosV12CardPolish"
 import IXIV12ReadabilityFoundation from "../../card-runtime/modules/IXIV12ReadabilityFoundation";
 import IXIAosDataContractCardAdapter from "../../card-runtime/IXIAosDataContractCardAdapter";
 import IXIAosCommercialEditorBridge from "../../card-runtime/modules/IXIAosCommercialEditorBridge";
-import { clean, getObjectId } from "../../card-runtime/IXIAosSemanticObjectPresentation";
+import { getAosPassportDisplaySerial } from "../../../../lib/mos/ixiAosPassportPresentation.mjs";
 
 export const CARD_001_LOCATION = Object.freeze({
   cardNumber: 1,
@@ -22,19 +22,8 @@ export const CARD_001_LOCATION = Object.freeze({
   renderer: "schema-driven-generic"
 });
 
-const FACELAB_IXI_ID_PREVIEW = "IXI - 482917";
-
 function formatIxiIdentity(object = {}) {
-  const rawId = clean(getObjectId(object) || object?.uuid || object?.passportId);
-  const isFaceLabPreview =
-    clean(object?.metadata?.source) === "aos-card-catalog-preview" ||
-    /^aos-card-(?:catalog-)?preview/i.test(rawId) ||
-    /^preview-/i.test(rawId);
-
-  if (isFaceLabPreview) return FACELAB_IXI_ID_PREVIEW;
-  if (!rawId) return "";
-  const normalizedId = rawId.replace(/^IXI\s*[-#:]?\s*/i, "").trim();
-  return normalizedId ? `IXI - ${normalizedId.toUpperCase()}` : "";
+  return `IXI - ${getAosPassportDisplaySerial(object)}`;
 }
 
 export default function IXIAosCard001Location(props) {
