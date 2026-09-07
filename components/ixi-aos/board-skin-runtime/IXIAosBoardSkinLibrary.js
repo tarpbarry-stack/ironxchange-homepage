@@ -1,3 +1,6 @@
+Warning: truncated output (original token count: 116729)
+Total output lines: 4475
+
 export const IXI_AOS_BOARD_SKIN_STORAGE_KEY =
   "ixi:aos-work:board-skin";
 
@@ -30,7 +33,9 @@ export const IXI_AOS_BOARD_SKIN_IDS =
     IXI_121: "ixi-121",
     IXI_122: "ixi-122",
     IXI_123: "ixi-123",
-    IXI_124: "ixi-124"
+    IXI_124: "ixi-124",
+    IXI_125: "ixi-125",
+    IXI_126: "ixi-126"
   });
 
 export const IXI_AOS_BOARD_SKINS =
@@ -209,6 +214,20 @@ export const IXI_AOS_BOARD_SKINS =
       designation: "MAIN LINE",
       description: "Cross-country pipeline plan with gathering laterals, compressor and meter stations, crossings and elevation profile.",
       className: "aos-work-board-skin-ixi-124"
+    }),
+    Object.freeze({
+      skinId: IXI_AOS_BOARD_SKIN_IDS.IXI_125,
+      name: "IXI-125",
+      designation: "DEALER YARD",
+      description: "Heavy-equipment dealership plan with sales, service, inventory, inspection and delivery zones.",
+      className: "aos-work-board-skin-ixi-125"
+    }),
+    Object.freeze({
+      skinId: IXI_AOS_BOARD_SKIN_IDS.IXI_126,
+      name: "IXI-126",
+      designation: "CONTRACTOR YARD",
+      description: "Heavy-civil operations yard with fleet staging, dispatch, maintenance, fuel and mobilization flow.",
+      className: "aos-work-board-skin-ixi-126"
     })
   ]);
 

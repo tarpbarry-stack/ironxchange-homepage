@@ -4031,6 +4031,16 @@ onClearContainerToParent={
           background-image: url('/images/ixi-aos-board-ixi-124.webp');
         }
 
+        .aos-work-board-skin-ixi-125 {
+          background-color: #000;
+          background-image: url('/images/ixi-aos-board-ixi-125.webp');
+        }
+
+        .aos-work-board-skin-ixi-126 {
+          background-color: #000;
+          background-image: url('/images/ixi-aos-board-ixi-126.webp');
+        }
+
         .aos-work-board-title {
           position: absolute;
           width: 1px;
