@@ -133,25 +133,19 @@ test("desktop container drops land immediately while persistence stays ordered",
     work,
     /workspaceLayoutSaveQueueRef = useRef\([\s\S]*?Promise\.resolve\(\)/
   );
-  assert.doesNotMatch(
-    work,
-    /const layoutResult = await saveWorkspaceLayout\([\s\S]*?nextPlacements[\s\S]*?\)/
-  );
-  assert.match(
-    work,
-    /void saveWorkspaceLayout\([\s\S]*?nextPlacements[\s\S]*?\)\.then/
-  );
-  const naturalDrop = work.indexOf("APPROVED NATURAL DROP CONTRACT");
+  const naturalDrop = work.indexOf("ONE OBJECT / MANY RELATIONSHIPS / ONE VISUAL PLACEMENT");
   const visualLanding = work.indexOf("setWorkspacePlacements(", naturalDrop);
   const dragRelease = work.indexOf("setActiveDndId(null)", visualLanding);
   const backgroundPersistence = work.indexOf("void (async () =>", dragRelease);
-  const canonicalCommit = work.indexOf("await commitMosContainerPlacement", backgroundPersistence);
+  const canonicalCommit = work.indexOf("await createMosRelationship", backgroundPersistence);
+  const sessionSave = work.indexOf("await saveWorkspaceLayout(nextPlacements)", canonicalCommit);
 
   assert.ok(naturalDrop >= 0);
   assert.ok(visualLanding > naturalDrop);
   assert.ok(dragRelease > visualLanding);
   assert.ok(backgroundPersistence > dragRelease);
   assert.ok(canonicalCommit > backgroundPersistence);
+  assert.ok(sessionSave > canonicalCommit);
   assert.match(
     work,
     /A real IX Core rejection restores the exact pre-drop state[\s\S]*?setWorkspacePlacements\([\s\S]*?previousPlacements/

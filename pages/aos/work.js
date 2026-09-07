@@ -33,7 +33,8 @@ import {
 
 import {
   commitMosObjectCommand,
-  commitMosContainerPlacement
+  commitMosContainerPlacement,
+  createMosRelationship
 } from "../../lib/mos/ixiMosClient";
 
 import {
@@ -97,10 +98,6 @@ import {
 import {
   filterAosOwnedMachines
 } from "../../lib/listings/IXIAosOwnedInventoryPolicy.mjs";
-
-import {
-  provisionListingMachine
-} from "../../lib/onboarding/ixiCommercialOnboardingClient";
 
 import { captureIXEvent } from "../../lib/posthog";
 
@@ -193,6 +190,9 @@ export default function IXIAosWorkPage() {
   useState(null);
 
 const [aosObjects, setAosObjects] =
+  useState([]);
+
+const [aosRelationships, setAosRelationships] =
   useState([]);
 
 const [systemIndexes, setSystemIndexes] =
@@ -563,6 +563,12 @@ if (cancelled) {
           environment?.objects
         )
           ? environment.objects
+          : []
+      );
+
+      setAosRelationships(
+        Array.isArray(environment?.relationships)
+          ? environment.relationships
           : []
       );
 
@@ -1236,6 +1242,9 @@ const equipmentIndex =
 
   aosObjects,
 
+  relationships:
+    aosRelationships,
+
   workspaceSystemIndexes,
 
   equipmentWorkspaceIndex,
@@ -1275,28 +1284,44 @@ function getCanonicalMosObjectForWorkspaceId(workspaceObjectId) {
     workspaceObject || {}
   );
 
-  const canonicalObject = (aosObjects || []).find(object => {
-    if (String(object?.objectId || "").trim() === id) return true;
+  const activeObjects = (aosObjects || []).filter(object =>
+    !["archived", "deleted", "soft-deleted"].includes(
+      String(object?.status || "active").trim().toLowerCase()
+    )
+  );
+  const exactObject = activeObjects.find(object =>
+    String(object?.objectId || "").trim() === id
+  );
+  if (exactObject) return exactObject;
 
-    if (String(object?.metadata?.sourceListingId || "").trim() === id) {
-      return true;
-    }
-
-    if (
-      workspacePassportId &&
-      getCanonicalAosPassportId(object) === workspacePassportId
-    ) {
-      return true;
-    }
-
-    return (Array.isArray(object?.identities) ? object.identities : []).some(identity =>
+  const sourceMatches = activeObjects.filter(object =>
+    String(object?.metadata?.sourceListingId || "").trim() === id ||
+    (Array.isArray(object?.identities) ? object.identities : []).some(identity =>
       String(identity?.sourceType || "").trim() === "sharetribe-listing" &&
       String(identity?.sourceId || "").trim() === id
+    )
+  );
+  if (sourceMatches.length === 1) return sourceMatches[0];
+  if (sourceMatches.length > 1) {
+    const error = new Error(
+      "IDENTITY CONFLICT · THIS LISTING IS LINKED TO MULTIPLE ACTIVE IX CORE OBJECTS"
     );
-  }) || null;
+    error.code = "IXI_AOS_CANONICAL_MACHINE_CONFLICT";
+    throw error;
+  }
 
-  if (canonicalObject) {
-    return canonicalObject;
+  const passportMatches = workspacePassportId
+    ? activeObjects.filter(object =>
+        getCanonicalAosPassportId(object) === workspacePassportId
+      )
+    : [];
+  if (passportMatches.length === 1) return passportMatches[0];
+  if (passportMatches.length > 1) {
+    const error = new Error(
+      `IDENTITY CONFLICT · PASSPORT ${workspacePassportId} HAS MULTIPLE ACTIVE IX CORE OBJECTS`
+    );
+    error.code = "IXI_AOS_CANONICAL_PASSPORT_CONFLICT";
+    throw error;
   }
 
   /*
@@ -1314,6 +1339,18 @@ function getCanonicalMosObjectForWorkspaceId(workspaceObjectId) {
   }
 
   return null;
+}
+
+function getWorkspaceIdForCanonicalObject(object = {}) {
+  const sourceListingId =
+    String(object?.metadata?.sourceListingId || "").trim() ||
+    String((Array.isArray(object?.identities) ? object.identities : [])
+      .find(identity =>
+        String(identity?.sourceType || "").trim() === "sharetribe-listing"
+      )?.sourceId || "").trim();
+
+  return sourceListingId ||
+    String(object?.objectId || object?.id || "").trim();
 }
 
   function updateIxiCardState(listingId, patch) {
@@ -1565,13 +1602,31 @@ function getDirectContainerChildIds(
     .filter(Boolean);
 }
 
-  /*
-   * MOS CONTAINERS
-   *
-   * Only direct canonical children. Business relationships are not
-   * workspace containment and must never populate a container deck.
-   */
-  return (
+  const objectsById = new Map(
+    (aosObjects || []).map(object => [
+      String(object?.objectId || "").trim(),
+      object
+    ])
+  );
+  const relationshipChildIds = (aosRelationships || [])
+    .filter(relationship =>
+      String(relationship?.status || "active").trim().toLowerCase() === "active" &&
+      String(
+        relationship?.relationshipKey ||
+        relationship?.relationshipType ||
+        relationship?.relationshipLabel ||
+        ""
+      ).trim().toLowerCase() === "contains" &&
+      String(relationship?.sourceObjectId || "").trim() === containerId
+    )
+    .map(relationship =>
+      objectsById.get(String(relationship?.targetObjectId || "").trim())
+    )
+    .filter(Boolean)
+    .map(getWorkspaceIdForCanonicalObject);
+
+  /* Keep legacy direct children readable while old records are migrated. */
+  const legacyChildIds = (
     aosObjects || []
   )
     .filter(object =>
@@ -1580,14 +1635,13 @@ function getDirectContainerChildIds(
         ""
       ) === containerId
     )
-    .map(object =>
-      String(
-        object?.objectId ||
-        object?.id ||
-        ""
-      )
-    )
+    .map(getWorkspaceIdForCanonicalObject)
     .filter(Boolean);
+
+  return [...new Set([
+    ...relationshipChildIds,
+    ...legacyChildIds
+  ])];
 }
 
 async function clearContainerChildrenToParent(
@@ -3027,6 +3081,37 @@ if (
     const previousPlacements =
       workspacePlacements;
 
+    let sourceObject = null;
+
+    try {
+      sourceObject =
+        getCanonicalMosObjectForWorkspaceId(dragId);
+    } catch (error) {
+      showAosObjectNotice({
+        objectId: dragId,
+        message: error?.message || "IX CORE IDENTITY CONFLICT",
+        tone: "error",
+        duration: 4200
+      });
+      setActiveDndId(null);
+      clearMachineDragState?.();
+      return;
+    }
+
+    if (!sourceObject?.objectId) {
+      showAosObjectNotice({
+        objectId: dragId,
+        message: isAosDraftId(dragId)
+          ? "SAVE THIS CARD BEFORE MOVING IT INTO ANOTHER CONTAINER"
+          : "MOVE BLOCKED · THE EXISTING IX CORE OBJECT COULD NOT BE RESOLVED",
+        tone: "error",
+        duration: 4200
+      });
+      setActiveDndId(null);
+      clearMachineDragState?.();
+      return;
+    }
+
     nextPlacements =
       moveObjectToWorkspaceSurface({
         placements:
@@ -3039,33 +3124,18 @@ if (
           dropTargetSurface
       });
 
-    const optimisticSourceObject =
-      getCanonicalMosObjectForWorkspaceId(dragId);
-
     /*
-     * APPROVED NATURAL DROP CONTRACT
+     * ONE OBJECT / MANY RELATIONSHIPS / ONE VISUAL PLACEMENT
      *
      * The gesture owns the visible result. Land the card and release the
-     * drag immediately; IX Core persistence follows in the background.
-     * A server round trip must never make a successful drop snap back and
-     * later look as though the container "checked the card in."
+     * drag immediately. The listing ID remains the visual card identity.
+     * Persistence creates only an idempotent, non-exclusive relationship
+     * between the existing Objects; it never provisions, clones, checks in,
+     * checks out, or rewrites the legacy exclusive-parent field.
      */
     setWorkspacePlacements(
       nextPlacements
     );
-
-    if (optimisticSourceObject?.objectId) {
-      setAosObjects(current => current.map(object =>
-        String(object?.objectId || "") ===
-          String(optimisticSourceObject.objectId)
-          ? {
-              ...object,
-              directContainerId:
-                targetWorkspaceObjectId
-            }
-          : object
-      ));
-    }
 
     setIxiCardState(current => ({
       ...current,
@@ -3083,88 +3153,12 @@ if (
     setActiveDndId(null);
     clearMachineDragState?.();
 
-    void saveWorkspaceLayout(
-      nextPlacements
-    ).then(layoutResult => {
-      if (layoutResult) return;
-
-      showAosObjectNotice({
-        objectId: dragId,
-        message:
-          "CONTAINER LAYOUT SAVE FAILED · THE OBJECT MOVE IS STILL BEING VERIFIED BY IX CORE",
-        tone: "error",
-        duration: 4200
-      });
-    }).catch(error => {
-      console.error(
-        "AOS WORKSPACE LAYOUT SAVE FAILED:",
-        error
-      );
-    });
-
     void (async () => {
       try {
-        let sourceObject =
-          optimisticSourceObject;
-
-      /*
-       * AOS Work presents owned Sharetribe listings beside durable MOS
-       * objects. A listing Passport alone does not make the listing a
-       * canonical container member. If an owned listing reaches a real
-       * container before its MOS Machine has been provisioned, establish
-       * that identity through the authenticated, idempotent onboarding
-       * route and use the returned canonical object for this same drop.
-       */
-      if (!sourceObject?.objectId) {
-        if (isAosDraftId(dragId)) {
-          const error = new Error(
-            "SAVE THIS CARD BEFORE MOVING IT INTO ANOTHER CONTAINER"
-          );
-          error.code = "IXI_AOS_CONTAINER_SOURCE_DRAFT";
-          throw error;
-        }
-
-        const sourceWorkspaceObject =
-          getAosWorkspaceObjectById(dragId);
-
-        const sourceIsOwnedListing = Boolean(
-          sourceWorkspaceObject &&
-          !sourceWorkspaceObject?.entityId &&
-          String(getListingId(sourceWorkspaceObject) || "").trim() === dragId
-        );
-
-        if (!sourceIsOwnedListing) {
-          const error = new Error(
-            "CONTAINER MOVE FAILED · SOURCE OBJECT IS NOT AVAILABLE IN IX CORE"
-          );
-          error.code = "IXI_AOS_CONTAINER_SOURCE_UNAVAILABLE";
-          throw error;
-        }
-
-        const provisioned =
-          await provisionListingMachine(dragId);
-
-        const canonicalMachine =
-          provisioned?.object || null;
-
-        if (
-          !canonicalMachine?.objectId ||
-          String(canonicalMachine?.entityId || "").trim() !==
-            String(aosEntity?.entityId || "").trim()
-        ) {
-          const error = new Error(
-            "IX Core did not return the canonical Machine for this listing."
-          );
-          error.code = "IXI_AOS_MACHINE_PROVISIONING_READBACK_REQUIRED";
-          throw error;
-        }
-
-        sourceObject = canonicalMachine;
-      }
-
-        const placement = await commitMosContainerPlacement({
-          objectId: sourceObject.objectId,
-          destinationContainerId: targetWorkspaceObjectId,
+        const relationshipResponse = await createMosRelationship({
+          sourceObjectId: targetWorkspaceObjectId,
+          targetObjectId: sourceObject.objectId,
+          relationshipType: "contains",
           metadata: {
             createdFrom: "aos-work-drop",
             sourceWorkspaceObjectId: dragId,
@@ -3172,29 +3166,47 @@ if (
           }
         });
 
-        setAosObjects(current => {
-          const placedObjectId =
-            String(placement.object?.objectId || "");
-
-          const existing = current.some(object =>
-            String(object?.objectId || "") === placedObjectId
+        const relationship = relationshipResponse?.relationship;
+        if (!relationship?.relationshipId) {
+          const error = new Error(
+            "IX CORE DID NOT CONFIRM THE CONTAINER RELATIONSHIP"
           );
+          error.code = "IXI_AOS_RELATIONSHIP_READBACK_REQUIRED";
+          throw error;
+        }
 
-          if (!existing) {
-            return [
-              ...current,
-              placement.object
-            ];
-          }
+        setAosRelationships(current => [
+          ...(current || []).filter(item =>
+            String(item?.relationshipId || "") !==
+              String(relationship.relationshipId)
+          ),
+          relationship
+        ]);
 
-          return current.map(object =>
-            String(object?.objectId || "") === placedObjectId
-              ? mergeAosCanonicalObject(object, placement.object)
-              : object
-          );
+        let layoutResult = null;
+        try {
+          layoutResult = await saveWorkspaceLayout(nextPlacements);
+        } catch (layoutError) {
+          console.error("AOS SESSION PLACEMENT SAVE FAILED:", layoutError);
+        }
+        if (!layoutResult) {
+          showAosObjectNotice({
+            objectId: dragId,
+            message: "RELATIONSHIP SAVED · SESSION PLACEMENT SAVE NEEDS RETRY",
+            tone: "error",
+            duration: 4200
+          });
+          return;
+        }
+
+        showAosObjectNotice({
+          objectId: dragId,
+          message: "RELATIONSHIP CONFIRMED · ONE OBJECT · ONE PASSPORT",
+          tone: "success",
+          duration: 2200
         });
       } catch (error) {
-        console.error("AOS CONTAINER PLACEMENT FAILED:", error);
+        console.error("AOS CONTAINER RELATIONSHIP FAILED:", error);
 
         /* A real IX Core rejection restores the exact pre-drop state. */
         setWorkspacePlacements(
@@ -3214,29 +3226,13 @@ if (
           }
         }));
 
-        if (optimisticSourceObject?.objectId) {
-          setAosObjects(current => current.map(object =>
-            String(object?.objectId || "") ===
-              String(optimisticSourceObject.objectId) &&
-            String(object?.directContainerId || "") ===
-              targetWorkspaceObjectId
-              ? {
-                  ...object,
-                  directContainerId:
-                    optimisticSourceObject.directContainerId ||
-                    null
-                }
-              : object
-          ));
-        }
-
         void saveWorkspaceLayout(
           previousPlacements
         );
 
         showAosObjectNotice({
           objectId: dragId,
-          message: error?.message || "IX Core could not place this object in the container.",
+          message: error?.message || "IX Core could not confirm this relationship.",
           tone: "error",
           duration: 3200
         });

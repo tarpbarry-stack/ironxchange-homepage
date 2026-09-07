@@ -15,11 +15,10 @@ function getIdentityAliases(object = {}) {
 
   (Array.isArray(object?.identities) ? object.identities : [])
     .forEach(identity => {
-      [
-        identity?.sourceId,
-        identity?.passportId,
-        identity?.identityId
-      ].map(clean).filter(Boolean).forEach(value => aliases.add(value));
+      [identity?.sourceId, identity?.passportId, identity?.identityId]
+        .map(clean)
+        .filter(Boolean)
+        .forEach(value => aliases.add(value));
     });
 
   return aliases;
@@ -64,12 +63,6 @@ function mergePlacedPresentation(canonicalChild, placedChild) {
   };
 }
 
-/*
- * A container rail is an immediate workspace projection backed by canonical
- * IX-Core membership. An accepted drag must appear in the destination rail in
- * the same render; the later canonical readback replaces that optimistic
- * listing by identity instead of adding a second card.
- */
 export function projectAosContainerChildren({
   canonicalChildren = [],
   placedChildren = []

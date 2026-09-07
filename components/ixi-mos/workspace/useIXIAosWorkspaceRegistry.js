@@ -11,6 +11,10 @@ import {
 } from "../../../lib/mos/IXIAosSystemAdapterRegistry";
 
 import {
+  getCanonicalAosPassportId
+} from "../../../lib/mos/ixiAosPassportPresentation.mjs";
+
+import {
   resolveWorkspaceObjects
 } from "../../ixi-chassis/IXIWorkspacePlacementEngine";
 
@@ -48,8 +52,33 @@ function isActiveMosObject(object = {}) {
 
 
 function buildDirectChildrenMap(
-  aosObjects = []
+  aosObjects = [],
+  workspaceListings = []
 ) {
+  const listingsById = new Map(
+    (workspaceListings || [])
+      .map(listing => [cleanId(getListingId(listing)), listing])
+      .filter(([listingId]) => Boolean(listingId))
+  );
+  const listingsByPassport = new Map();
+
+  (workspaceListings || []).forEach(listing => {
+    const passportId = getCanonicalAosPassportId(listing);
+    if (!passportId || listingsByPassport.has(passportId)) return;
+    listingsByPassport.set(passportId, listing);
+  });
+  const workspacePresentation = object => {
+    const sourceListingId = cleanId(object?.metadata?.sourceListingId) ||
+      cleanId((Array.isArray(object?.identities) ? object.identities : [])
+        .find(identity =>
+          cleanId(identity?.sourceType) === "sharetribe-listing"
+        )?.sourceId);
+    const passportId = getCanonicalAosPassportId(object);
+
+    return listingsById.get(sourceListingId) ||
+      listingsByPassport.get(passportId) ||
+      object;
+  };
   const childrenByParent =
     new Map();
 
@@ -85,7 +114,67 @@ function buildDirectChildrenMap(
 
       childrenByParent
         .get(parentId)
-        .push(object);
+        .push(workspacePresentation(object));
+    });
+
+  return childrenByParent;
+}
+
+
+function buildRelationshipChildrenMap(
+  aosObjects = [],
+  relationships = [],
+  workspaceListings = []
+) {
+  const objectsById = new Map(
+    (aosObjects || [])
+      .filter(isActiveMosObject)
+      .map(object => [getMosObjectId(object), object])
+      .filter(([objectId]) => Boolean(objectId))
+  );
+  const listingsById = new Map(
+    (workspaceListings || [])
+      .map(listing => [cleanId(getListingId(listing)), listing])
+      .filter(([listingId]) => Boolean(listingId))
+  );
+  const listingsByPassport = new Map();
+
+  (workspaceListings || []).forEach(listing => {
+    const passportId = getCanonicalAosPassportId(listing);
+    if (!passportId || listingsByPassport.has(passportId)) return;
+    listingsByPassport.set(passportId, listing);
+  });
+  const workspacePresentation = object => {
+    const sourceListingId = cleanId(object?.metadata?.sourceListingId) ||
+      cleanId((Array.isArray(object?.identities) ? object.identities : [])
+        .find(identity =>
+          cleanId(identity?.sourceType) === "sharetribe-listing"
+        )?.sourceId);
+    const passportId = getCanonicalAosPassportId(object);
+
+    return listingsById.get(sourceListingId) ||
+      listingsByPassport.get(passportId) ||
+      object;
+  };
+  const childrenByParent = new Map();
+
+  (relationships || [])
+    .filter(relationship =>
+      cleanId(relationship?.status || "active").toLowerCase() === "active" &&
+      cleanId(
+        relationship?.relationshipKey ||
+        relationship?.relationshipType ||
+        relationship?.relationshipLabel
+      ).toLowerCase() === "contains"
+    )
+    .forEach(relationship => {
+      const parentId = cleanId(relationship?.sourceObjectId);
+      const childId = cleanId(relationship?.targetObjectId);
+      const child = objectsById.get(childId);
+
+      if (!parentId || !child || parentId === childId) return;
+      if (!childrenByParent.has(parentId)) childrenByParent.set(parentId, []);
+      childrenByParent.get(parentId).push(workspacePresentation(child));
     });
 
   return childrenByParent;
@@ -95,6 +184,7 @@ function buildDirectChildrenMap(
 export default function useIXIAosWorkspaceRegistry({
   workspaceListings = [],
   aosObjects = [],
+  relationships = [],
   workspaceSystemIndexes = [],
   equipmentWorkspaceIndex = null,
 
@@ -136,9 +226,20 @@ export default function useIXIAosWorkspaceRegistry({
     useMemo(
       () =>
         buildDirectChildrenMap(
-          aosObjects
+          aosObjects,
+          workspaceListings
         ),
-      [aosObjects]
+      [aosObjects, workspaceListings]
+    );
+
+  const relationshipChildrenByParent =
+    useMemo(
+      () => buildRelationshipChildrenMap(
+        aosObjects,
+        relationships,
+        workspaceListings
+      ),
+      [aosObjects, relationships, workspaceListings]
     );
 
   /* =========================================================
@@ -151,9 +252,9 @@ export default function useIXIAosWorkspaceRegistry({
      - IXI system adapters resolve from the central adapter registry.
      - System Index presentation comes from assembled index records.
 
-     Canonical MOS child membership comes ONLY from
-     directContainerId. The registry hydrates `items` as a
-     runtime convenience; it does not create another truth.
+     New container membership is a non-exclusive `contains`
+     relationship. Legacy directContainerId children remain readable
+     during migration, but no workspace gesture creates that state.
      ========================================================= */
   const objectRegistry =
     useMemo(() => {
@@ -199,10 +300,13 @@ export default function useIXIAosWorkspaceRegistry({
                 canCreate: true
               },
 
-              items:
-                directChildrenByParent
-                  .get(objectId) ||
-                []
+              items: Array.from(new Map([
+                ...(relationshipChildrenByParent.get(objectId) || []),
+                ...(directChildrenByParent.get(objectId) || [])
+              ].map(item => [
+                cleanId(getListingId(item) || getMosObjectId(item)),
+                item
+              ])).values())
             }
           );
         });
@@ -261,43 +365,25 @@ export default function useIXIAosWorkspaceRegistry({
           );
         });
 
+      /* Keep the receiving rail synchronized with the accepted visual drop
+       * while IX-Core confirms the non-exclusive relationship. */
+      [...registry.entries()].forEach(([objectId, object]) => {
+        if (!cleanId(object?.entityId) || systemIndexIds.has(objectId)) return;
 
-      /*
-       * IMMEDIATE CONTAINER RAIL PROJECTION
-       *
-       * Natural drag/drop updates workspace placement before the governed
-       * IX-Core placement command completes. Hydrate every durable container
-       * with both truths here: canonical direct children plus the accepted
-       * local placement. The projection engine reconciles the later canonical
-       * Machine to its Sharetribe listing identity, so the rail never goes
-       * blank during readback and never renders the same machine twice.
-       */
-      [...registry.entries()].forEach(
-        ([objectId, object]) => {
-          if (
-            !cleanId(object?.entityId) ||
-            systemIndexIds.has(objectId)
-          ) {
-            return;
-          }
+        const placedChildren = resolveWorkspaceObjects({
+          placements: workspacePlacements,
+          surfaceId: `container:${objectId}`,
+          objectRegistry: registry
+        });
 
-          const placedChildren =
-            resolveWorkspaceObjects({
-              placements: workspacePlacements,
-              surfaceId: `container:${objectId}`,
-              objectRegistry: registry
-            });
-
-          registry.set(objectId, {
-            ...object,
-            items: projectAosContainerChildren({
-              canonicalChildren:
-                directChildrenByParent.get(objectId) || [],
-              placedChildren
-            })
-          });
-        }
-      );
+        registry.set(objectId, {
+          ...object,
+          items: projectAosContainerChildren({
+            canonicalChildren: object?.items || [],
+            placedChildren
+          })
+        });
+      });
 
 
       return registry;
@@ -308,6 +394,7 @@ export default function useIXIAosWorkspaceRegistry({
       equipmentWorkspaceIndex,
       systemIndexIds,
       directChildrenByParent,
+      relationshipChildrenByParent,
       workspacePlacements
     ]);
 

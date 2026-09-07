@@ -13,13 +13,10 @@ test("accepted listing placement appears in the destination rail immediately", (
     imageUrl: "https://media.example/ripper.jpg"
   };
 
-  assert.deepEqual(
-    projectAosContainerChildren({
-      canonicalChildren: [],
-      placedChildren: [listing]
-    }),
-    [listing]
-  );
+  assert.deepEqual(projectAosContainerChildren({
+    canonicalChildren: [],
+    placedChildren: [listing]
+  }), [listing]);
 });
 
 test("canonical Machine replaces its placed listing without a duplicate", () => {
@@ -35,9 +32,7 @@ test("canonical Machine replaces its placed listing without a duplicate", () => 
     objectType: "machine",
     displayName: "2019 RIPPER OTHER - 2 HRS",
     directContainerId: "object-wichita-falls",
-    metadata: {
-      sourceListingId: "listing-ripper-1"
-    }
+    metadata: { sourceListingId: "listing-ripper-1" }
   };
 
   const result = projectAosContainerChildren({
