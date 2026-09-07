@@ -12,7 +12,8 @@ export const IXI_AOS_BOARD_SKIN_IDS =
     IXI_103: "ixi-103",
     IXI_104: "ixi-104",
     IXI_105: "ixi-105",
-    IXI_106: "ixi-106"
+    IXI_106: "ixi-106",
+    IXI_107: "ixi-107"
   });
 
 export const IXI_AOS_BOARD_SKINS =
@@ -65,6 +66,13 @@ export const IXI_AOS_BOARD_SKINS =
       designation: "LOAD PATH",
       description: "Jet-black structural field with calibrated load paths and restrained force nodes.",
       className: "aos-work-board-skin-ixi-106"
+    }),
+    Object.freeze({
+      skinId: IXI_AOS_BOARD_SKIN_IDS.IXI_107,
+      name: "IXI-107",
+      designation: "DATUM ZERO",
+      description: "Jet-black metrology field with precision arcs, datum marks and calibrated nodes.",
+      className: "aos-work-board-skin-ixi-107"
     })
   ]);
 
