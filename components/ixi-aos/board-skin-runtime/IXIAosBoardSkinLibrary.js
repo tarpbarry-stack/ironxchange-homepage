@@ -20,7 +20,8 @@ export const IXI_AOS_BOARD_SKIN_IDS =
     IXI_111: "ixi-111",
     IXI_112: "ixi-112",
     IXI_113: "ixi-113",
-    IXI_114: "ixi-114"
+    IXI_114: "ixi-114",
+    IXI_115: "ixi-115"
   });
 
 export const IXI_AOS_BOARD_SKINS =
@@ -129,6 +130,13 @@ export const IXI_AOS_BOARD_SKINS =
       designation: "GRADER GEOMETRY",
       description: "Cat 14M engineering plan with articulation, moldboard geometry and tandem-drive details.",
       className: "aos-work-board-skin-ixi-114"
+    }),
+    Object.freeze({
+      skinId: IXI_AOS_BOARD_SKIN_IDS.IXI_115,
+      name: "IXI-115",
+      designation: "DOZER PROFILE",
+      description: "Cat D8T build plan with six-way PAT blade, high-drive undercarriage and rear ripper.",
+      className: "aos-work-board-skin-ixi-115"
     })
   ]);
 
