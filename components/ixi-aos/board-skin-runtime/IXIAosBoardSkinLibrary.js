@@ -21,7 +21,8 @@ export const IXI_AOS_BOARD_SKIN_IDS =
     IXI_112: "ixi-112",
     IXI_113: "ixi-113",
     IXI_114: "ixi-114",
-    IXI_115: "ixi-115"
+    IXI_115: "ixi-115",
+    IXI_116: "ixi-116"
   });
 
 export const IXI_AOS_BOARD_SKINS =
@@ -137,6 +138,13 @@ export const IXI_AOS_BOARD_SKINS =
       designation: "DOZER PROFILE",
       description: "Cat D8T build plan with six-way PAT blade, high-drive undercarriage and rear ripper.",
       className: "aos-work-board-skin-ixi-115"
+    }),
+    Object.freeze({
+      skinId: IXI_AOS_BOARD_SKIN_IDS.IXI_116,
+      name: "IXI-116",
+      designation: "ARTIC HAUL",
+      description: "Volvo A45G engineering plan with articulation, body-hoist geometry and 6×6 driveline.",
+      className: "aos-work-board-skin-ixi-116"
     })
   ]);
 
