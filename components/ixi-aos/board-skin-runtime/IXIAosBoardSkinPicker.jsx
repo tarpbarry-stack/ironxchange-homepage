@@ -93,7 +93,7 @@ export default function IXIAosBoardSkinPicker({
                   className={`ixi-board-skin-preview preview-${skin.skinId}`}
                   aria-hidden="true"
                 >
-                  {skin.skinId === "ixi-101" ? (
+                  {skin.skinId !== "v12" ? (
                     <b>IXI</b>
                   ) : null}
                 </span>
@@ -116,7 +116,9 @@ export default function IXIAosBoardSkinPicker({
 
         <footer>
           <span>LIBRARY 01</span>
-          <span>2 SKINS REGISTERED</span>
+          <span>
+            {IXI_AOS_BOARD_SKINS.length} SKINS REGISTERED
+          </span>
         </footer>
       </section>
 
@@ -230,7 +232,14 @@ export default function IXIAosBoardSkinPicker({
           background-size: 145% auto;
         }
 
-        .preview-ixi-101 b {
+        .preview-ixi-102 {
+          background-image: url('/images/ixi-aos-board-ixi-102.webp');
+          background-position: center;
+          background-size: cover;
+        }
+
+        .preview-ixi-101 b,
+        .preview-ixi-102 b {
           color: transparent;
           font-size: 1px;
         }
