@@ -71,3 +71,9 @@ test("canonical schema resolution cannot let custom_N mask a customer label", ()
   assert.match(presentation, /existingIsGenerated && candidateLabel && !candidateIsGenerated/u);
   assert.match(presentation, /label: candidateLabel/u);
 });
+
+test("Card 007 display reads the same bridge-owned object as its editor", () => {
+  assert.match(card, /<IXIAosCardHeaderIdentity object=\{runtimeObject\}/u);
+  assert.match(card, /<CardLayout \{\.\.\.contractProps\} object=\{runtimeObject\} onSaveObject=\{face1\.onSaveObject\}/u);
+  assert.doesNotMatch(card, /<CardLayout \{\.\.\.contractProps\} object=\{face1\.object\}/u);
+});

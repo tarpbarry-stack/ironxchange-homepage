@@ -104,7 +104,7 @@ export default function IXIAosCard007EmployeeApplication(props) {
             if (isFaceLabPreview && faceLabVariant === "007C") CardLayout = IXIAosGenericUniversalLayout007C;
 
             return (
-              <IXIAosCardHeaderIdentity object={face1.object} className="u007-face-lab-variant-shell">
+              <IXIAosCardHeaderIdentity object={runtimeObject} className="u007-face-lab-variant-shell">
                 {isFaceLabPreview ? (
                   <div className="u007-face-lab-variant-picker">
                     {["007A", "007B", "007C"].map(variant => (
@@ -112,7 +112,7 @@ export default function IXIAosCard007EmployeeApplication(props) {
                     ))}
                   </div>
                 ) : null}
-                <CardLayout {...contractProps} object={face1.object} onSaveObject={face1.onSaveObject} />
+                <CardLayout {...contractProps} object={runtimeObject} onSaveObject={face1.onSaveObject} />
                 <style jsx>{`
                   .u007-face-lab-variant-picker{position:absolute;left:50%;top:-31px;z-index:500;display:flex;gap:4px;transform:translateX(-50%)}
                   .u007-face-lab-variant-picker button{height:23px;min-width:49px;padding:0 8px;border:1px solid rgba(255,255,255,.10);border-radius:4px;background:#111411;color:rgba(255,255,255,.46);font-size:10px;font-weight:800;letter-spacing:.03em;cursor:pointer}
