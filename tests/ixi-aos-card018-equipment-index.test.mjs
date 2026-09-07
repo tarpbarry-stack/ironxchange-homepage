@@ -19,9 +19,27 @@ test("Card 018 is a V12 Equipment Index backed by the canonical System Index car
   assert.match(card, /Inter Variable/);
   assert.match(card, /IXIAosCardHeaderIdentity/);
   assert.match(card, /IXIAosCardHeaderControls/);
-  assert.match(card, /IXIObjectRail/);
-  assert.match(card, /system-index-card>\.board-command-rail/);
+  assert.doesNotMatch(card, /IXIObjectRail/);
+  assert.doesNotMatch(card, /system-index-card>\.board-command-rail/);
+  assert.match(card, /\.c018-head\{[^}]*height:43px/);
+  assert.match(card, /system-index-identity\)\{padding-top:49px/);
   assert.match(card, /<span>SYSTEM INDEX<\/span>/);
+});
+
+test("Card 018 leaves the canonical collection deck rail visible and solely responsible for navigation", async () => {
+  const [card, systemIndex, sellerYard] = await Promise.all([
+    read("components/ixi-aos/cards/018/IXIAosCard018.jsx"),
+    read("components/ixi-mos/IXISystemIndexCard.jsx"),
+    read("components/ixi-seller-object/IXISellerObjectCard.js")
+  ]);
+
+  assert.doesNotMatch(card, /system-index-card>\.board-command-rail\)\{display:none/);
+  assert.match(systemIndex, /onCycleMachineFace=\{goForward\}/);
+  assert.match(systemIndex, /onRailSend=\{goBackward\}/);
+  assert.match(systemIndex, /:\s*goHome/);
+  assert.match(systemIndex, /:\s*goEnd/);
+  assert.match(sellerYard, /onCycleMachineFace=\{\(\) =>/);
+  assert.match(sellerYard, /onRailSend=\{\(\) =>/);
 });
 
 test("AOS Work renders the canonical Equipment System Index through Card 018", async () => {

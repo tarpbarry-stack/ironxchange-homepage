@@ -19,7 +19,7 @@ test("Card 019 is the V12 Locations System Index composition", async () => {
   assert.match(card019, /editHeading="EDIT LOCATIONS INDEX"/);
   assert.match(card018, /<span>SYSTEM INDEX<\/span>/);
   assert.match(card018, /IXISystemIndexCard/);
-  assert.match(card018, /IXIObjectRail/);
+  assert.doesNotMatch(card018, /IXIObjectRail/);
 });
 
 test("FaceLab and the operating runtime register Card 019", async () => {
