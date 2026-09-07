@@ -120,3 +120,17 @@ test("AOS/Work fails closed before rendering an active record without Passport",
   assert.match(source, /objectsWithoutPassport/u);
   assert.doesNotMatch(source, /filter\(object => !getCanonicalAosPassportId\(object\)\)\.map/u);
 });
+
+test("AOS TRAN$ACT resolves the same canonical Passport shown on the card", () => {
+  const source = fs.readFileSync(
+    new URL(
+      "../components/ixi-machine-card/private/IXIOwnedPrivateTransactRuntime.jsx",
+      import.meta.url
+    ),
+    "utf8"
+  );
+
+  assert.match(source, /getCanonicalAosPassportId/u);
+  assert.match(source, /const passportId = getCanonicalAosPassportId\(object\)/u);
+  assert.doesNotMatch(source, /const passportId = clean\(object\?\.passportId\)/u);
+});

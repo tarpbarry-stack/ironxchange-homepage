@@ -6,6 +6,9 @@ import {
   loadIXIAosFinancialAccessContext,
   loadIXIAosPassportFinancialDocuments
 } from "../../ixi-aos/financial-runtime/IXIAosFinancialReadClient";
+import {
+  getCanonicalAosPassportId
+} from "../../../lib/mos/ixiAosPassportPresentation.mjs";
 
 const clean = value => String(value ?? "").trim();
 
@@ -100,7 +103,12 @@ export default function IXIOwnedPrivateTransactRuntime({
   armedDestination,
   onSendToArmedDestination
 }) {
-  const passportId = clean(object?.passportId);
+  /*
+   * AOS objects may carry their verified Passport in the canonical
+   * identities/metadata contract instead of a duplicated top-level field.
+   * Presentation, Console and TRAN$ACT must resolve the same identity.
+   */
+  const passportId = getCanonicalAosPassportId(object);
   const [state, setState] = useState({ loading: true, refreshing: false, error: "", access: null, records: [] });
 
   const refresh = useCallback(async signal => {
