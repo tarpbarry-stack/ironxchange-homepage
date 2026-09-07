@@ -17,7 +17,8 @@ export const IXI_AOS_BOARD_SKIN_IDS =
     IXI_108: "ixi-108",
     IXI_109: "ixi-109",
     IXI_110: "ixi-110",
-    IXI_111: "ixi-111"
+    IXI_111: "ixi-111",
+    IXI_112: "ixi-112"
   });
 
 export const IXI_AOS_BOARD_SKINS =
@@ -105,6 +106,13 @@ export const IXI_AOS_BOARD_SKINS =
       designation: "QUARRY GRID",
       description: "Open-pit bench plan with bore surveys, grade control and haul-road geometry.",
       className: "aos-work-board-skin-ixi-111"
+    }),
+    Object.freeze({
+      skinId: IXI_AOS_BOARD_SKIN_IDS.IXI_112,
+      name: "IXI-112",
+      designation: "LIFT RADIUS",
+      description: "Crane lift plan with swing geometry, working radii and a restrained cyan boom path.",
+      className: "aos-work-board-skin-ixi-112"
     })
   ]);
 
