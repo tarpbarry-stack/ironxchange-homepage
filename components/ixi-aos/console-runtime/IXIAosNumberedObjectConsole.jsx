@@ -9,6 +9,7 @@ import {
   insertConsoleSlot,
   removeConsoleSlot,
   assignConsoleSlotFace,
+  cycleConsoleSlotFace,
   createConsoleSlotsPatch
 } from "../../ixi-chassis/IXIObjectConsoleEngine";
 import { IXIAosCardCommandProvider } from "../card-runtime/IXIAosCardCommandContext";
@@ -121,6 +122,16 @@ export default function IXIAosNumberedObjectConsole({
   function assignFace(slotId, face, event) {
     stop(event);
     saveSlots(assignConsoleSlotFace({ slots: consoleSlots, slotId, face, faces: AVAILABLE_FACES }));
+  }
+
+  function cycleSlotFace(slotId, event) {
+    stop(event);
+    saveSlots(cycleConsoleSlotFace({
+      slots: consoleSlots,
+      slotId,
+      faces: AVAILABLE_FACES,
+      defaultFace: AVAILABLE_FACES[0]
+    }));
   }
 
   function openConsoleFromCard() {
@@ -238,6 +249,14 @@ export default function IXIAosNumberedObjectConsole({
         {renderOuterActuators(slotIndex)}
         {renderFace(slot.face)}
         <IXIAosActionNotice variant="office" />
+        <button
+          type="button"
+          className="ixi-aos-numbered-console-face-button"
+          aria-label={`Change AOS face ${slot.face}`}
+          title={`AOS face ${slot.face}`}
+          onPointerDown={stop}
+          onClick={event => cycleSlotFace(slot.slotId, event)}
+        />
       </section>
     );
   }
@@ -247,7 +266,7 @@ export default function IXIAosNumberedObjectConsole({
       <div className="aos-numbered-object-console" style={{ width: `${consoleSlots.length * PANEL_WIDTH}px` }} data-ixi-console-depth={consoleSlots.length}>
         {consoleSlots.map(renderSlot)}
         <style jsx global>{`
-          .aos-numbered-object-console,.aos-numbered-object-console *{box-sizing:border-box}.aos-numbered-object-console{position:relative;display:flex;align-items:flex-start;justify-content:flex-start;gap:0;overflow:visible}.aos-numbered-console-slot{position:relative;flex:0 0 ${PANEL_WIDTH}px;width:${PANEL_WIDTH}px;height:${PANEL_HEIGHT}px;overflow:visible}.aos-numbered-console-slot.empty-slot{overflow:hidden;border:1px solid rgba(255,255,255,.08);border-radius:13px;background:linear-gradient(180deg,rgba(255,255,255,.018),transparent),#141414}.aos-numbered-face-picker{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;gap:9px}.aos-numbered-face-picker>strong{color:#ffc400;font-size:12px;font-weight:950;letter-spacing:.08em}.aos-numbered-face-picker>span{color:rgba(255,255,255,.38);font-size:6px;font-weight:900;letter-spacing:.08em}.aos-numbered-face-picker>div{width:100%;display:grid;grid-template-columns:1fr 1fr;gap:6px}.aos-numbered-face-picker button{height:54px;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:4px;padding:0 9px;border:1px solid rgba(255,255,255,.08);border-radius:6px;background:rgba(255,255,255,.025);color:rgba(255,255,255,.68);cursor:pointer}.aos-numbered-face-picker button:hover{border-color:rgba(255,196,0,.35);background:rgba(255,196,0,.06)}.aos-numbered-face-picker b{color:#ffc400;font-size:9px;font-weight:950}.aos-numbered-face-picker small{font-size:5.5px;font-weight:950;letter-spacing:.04em}
+          .aos-numbered-object-console,.aos-numbered-object-console *{box-sizing:border-box}.aos-numbered-object-console{position:relative;display:flex;align-items:flex-start;justify-content:flex-start;gap:0;overflow:visible}.aos-numbered-console-slot{position:relative;flex:0 0 ${PANEL_WIDTH}px;width:${PANEL_WIDTH}px;height:${PANEL_HEIGHT}px;overflow:visible}.aos-numbered-console-slot.empty-slot{overflow:hidden;border:1px solid rgba(255,255,255,.08);border-radius:13px;background:linear-gradient(180deg,rgba(255,255,255,.018),transparent),#141414}.aos-numbered-face-picker{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;gap:9px}.aos-numbered-face-picker>strong{color:#ffc400;font-size:12px;font-weight:950;letter-spacing:.08em}.aos-numbered-face-picker>span{color:rgba(255,255,255,.38);font-size:6px;font-weight:900;letter-spacing:.08em}.aos-numbered-face-picker>div{width:100%;display:grid;grid-template-columns:1fr 1fr;gap:6px}.aos-numbered-face-picker button{height:54px;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:4px;padding:0 9px;border:1px solid rgba(255,255,255,.08);border-radius:6px;background:rgba(255,255,255,.025);color:rgba(255,255,255,.68);cursor:pointer}.aos-numbered-face-picker button:hover{border-color:rgba(255,196,0,.35);background:rgba(255,196,0,.06)}.aos-numbered-face-picker b{color:#ffc400;font-size:9px;font-weight:950}.aos-numbered-face-picker small{font-size:5.5px;font-weight:950;letter-spacing:.04em}.ixi-aos-numbered-console-face-button{position:absolute;left:50%;bottom:-1px;width:34px;height:5px;transform:translateX(-50%);padding:0;border:0;border-radius:3px 3px 1px 1px;background:rgba(255,255,255,.18);cursor:pointer;z-index:120;pointer-events:auto;box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 1px 3px rgba(0,0,0,.32)}.ixi-aos-numbered-console-face-button:hover,.ixi-aos-numbered-console-face-button:focus-visible{background:rgba(255,196,0,.95);box-shadow:0 0 8px rgba(255,196,0,.38);outline:0}
         `}</style>
       </div>
     </IXIAosCardCommandProvider>

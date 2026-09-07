@@ -9,6 +9,7 @@ import {
   insertConsoleSlot,
   removeConsoleSlot,
   assignConsoleSlotFace,
+  cycleConsoleSlotFace,
   createConsoleSlotsPatch
 } from "../../ixi-chassis/IXIObjectConsoleEngine";
 
@@ -151,6 +152,16 @@ export default function IXIAosLocationObjectConsole({
   function assignFace(slotId, face, event) {
     stop(event);
     saveSlots(assignConsoleSlotFace({ slots: consoleSlots, slotId, face, faces: AVAILABLE_FACES }));
+  }
+
+  function cycleSlotFace(slotId, event) {
+    stop(event);
+    saveSlots(cycleConsoleSlotFace({
+      slots: consoleSlots,
+      slotId,
+      faces: AVAILABLE_FACES,
+      defaultFace: AVAILABLE_FACES[0]
+    }));
   }
 
   function openConsoleFromCard() {
@@ -307,7 +318,14 @@ export default function IXIAosLocationObjectConsole({
         {renderOuterActuators(slotIndex)}
         {renderFace(slot.face)}
         <IXIAosActionNotice variant="office" />
-        <button type="button" className="aos-face-id" title={`Show F${slot.face} on primary card`} onClick={event => { stop(event); onPrimaryFaceChange?.(Number(slot.face)); }}>F{slot.face}</button>
+        <button
+          type="button"
+          className="ixi-aos-location-console-face-button"
+          aria-label={`Change AOS location face ${slot.face}`}
+          title={`AOS location face ${slot.face}`}
+          onPointerDown={stop}
+          onClick={event => cycleSlotFace(slot.slotId, event)}
+        />
       </section>
     );
   }
@@ -317,7 +335,7 @@ export default function IXIAosLocationObjectConsole({
       <div className="aos-generic-object-console" style={{ width: `${consoleSlots.length * PANEL_WIDTH}px` }} data-ixi-console-depth={consoleSlots.length}>
         {consoleSlots.map(renderSlot)}
         <style jsx global>{`
-          .aos-generic-object-console,.aos-generic-object-console *{box-sizing:border-box}.aos-generic-object-console{position:relative;display:flex;align-items:flex-start;justify-content:flex-start;gap:0;overflow:visible}.aos-generic-console-slot{position:relative;flex:0 0 ${PANEL_WIDTH}px;width:${PANEL_WIDTH}px;height:${PANEL_HEIGHT}px;overflow:visible}.aos-generic-console-slot.empty-slot{overflow:hidden;border:1px solid rgba(255,255,255,.08);border-radius:13px;background:linear-gradient(180deg,rgba(255,255,255,.018),transparent),#141414}.aos-face-picker{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;gap:8px}.aos-face-picker>strong{color:#ffc400;font-size:12px;font-weight:950;letter-spacing:.08em}.aos-face-picker>span{max-width:190px;margin-bottom:8px;overflow:hidden;color:rgba(255,255,255,.4);font-size:6px;font-weight:900;letter-spacing:.06em;text-overflow:ellipsis;white-space:nowrap}.aos-face-grid{width:100%;display:grid;grid-template-columns:1fr 1fr;gap:6px}.aos-face-grid button{height:54px;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:4px;padding:0 9px;border:1px solid rgba(255,255,255,.08);border-radius:6px;background:rgba(255,255,255,.025);color:rgba(255,255,255,.68);cursor:pointer}.aos-face-grid button:hover{border-color:rgba(255,196,0,.35);background:rgba(255,196,0,.06)}.aos-face-grid b{color:#ffc400;font-size:9px;font-weight:950}.aos-face-grid span{max-width:100%;overflow:hidden;font-size:5.5px;font-weight:950;letter-spacing:.04em;text-overflow:ellipsis;white-space:nowrap}.aos-face-id{position:absolute;left:50%;bottom:-1px;width:34px;height:7px;transform:translateX(-50%);padding:0;border:0;border-radius:3px 3px 1px 1px;background:rgba(255,196,0,.92);color:#080808;font-size:4.5px;font-weight:950;cursor:pointer;z-index:180}
+          .aos-generic-object-console,.aos-generic-object-console *{box-sizing:border-box}.aos-generic-object-console{position:relative;display:flex;align-items:flex-start;justify-content:flex-start;gap:0;overflow:visible}.aos-generic-console-slot{position:relative;flex:0 0 ${PANEL_WIDTH}px;width:${PANEL_WIDTH}px;height:${PANEL_HEIGHT}px;overflow:visible}.aos-generic-console-slot.empty-slot{overflow:hidden;border:1px solid rgba(255,255,255,.08);border-radius:13px;background:linear-gradient(180deg,rgba(255,255,255,.018),transparent),#141414}.aos-face-picker{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;gap:8px}.aos-face-picker>strong{color:#ffc400;font-size:12px;font-weight:950;letter-spacing:.08em}.aos-face-picker>span{max-width:190px;margin-bottom:8px;overflow:hidden;color:rgba(255,255,255,.4);font-size:6px;font-weight:900;letter-spacing:.06em;text-overflow:ellipsis;white-space:nowrap}.aos-face-grid{width:100%;display:grid;grid-template-columns:1fr 1fr;gap:6px}.aos-face-grid button{height:54px;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:4px;padding:0 9px;border:1px solid rgba(255,255,255,.08);border-radius:6px;background:rgba(255,255,255,.025);color:rgba(255,255,255,.68);cursor:pointer}.aos-face-grid button:hover{border-color:rgba(255,196,0,.35);background:rgba(255,196,0,.06)}.aos-face-grid b{color:#ffc400;font-size:9px;font-weight:950}.aos-face-grid span{max-width:100%;overflow:hidden;font-size:5.5px;font-weight:950;letter-spacing:.04em;text-overflow:ellipsis;white-space:nowrap}.ixi-aos-location-console-face-button{position:absolute;left:50%;bottom:-1px;width:34px;height:5px;transform:translateX(-50%);padding:0;border:0;border-radius:3px 3px 1px 1px;background:rgba(255,255,255,.18);cursor:pointer;z-index:120;pointer-events:auto;box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 1px 3px rgba(0,0,0,.32)}.ixi-aos-location-console-face-button:hover,.ixi-aos-location-console-face-button:focus-visible{background:rgba(255,196,0,.95);box-shadow:0 0 8px rgba(255,196,0,.38);outline:0}
         `}</style>
       </div>
     </IXIAosCardCommandProvider>

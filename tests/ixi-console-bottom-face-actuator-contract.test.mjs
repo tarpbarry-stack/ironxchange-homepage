@@ -23,6 +23,10 @@ const sources = {
     "components/ixi-aos/console-runtime/IXIAosLocationObjectConsole.jsx",
     "utf8"
   ),
+  numberedAos: fs.readFileSync(
+    "components/ixi-aos/console-runtime/IXIAosNumberedObjectConsole.jsx",
+    "utf8"
+  ),
   systemIndex: fs.readFileSync(
     "components/ixi-mos/system-index/IXISystemIndexConsole.jsx",
     "utf8"
@@ -52,7 +56,11 @@ test("every production Console family exposes a bottom face actuator", () => {
   );
   assert.match(
     sources.location,
-    /className="aos-face-id"/
+    /className="ixi-aos-location-console-face-button"/
+  );
+  assert.match(
+    sources.numberedAos,
+    /className="ixi-aos-numbered-console-face-button"/
   );
   assert.match(
     sources.systemIndex,
@@ -62,6 +70,27 @@ test("every production Console family exposes a bottom face actuator", () => {
     sources.transact,
     /className="tx-console-face-button"/
   );
+});
+
+test("current AOS Consoles loop each open face slot independently", () => {
+  for (const source of [sources.location, sources.numberedAos]) {
+    assert.match(source, /cycleConsoleSlotFace/u);
+    assert.match(source, /slots: consoleSlots,[\s\S]*?slotId,[\s\S]*?faces: AVAILABLE_FACES/u);
+    assert.match(source, /onPointerDown=\{stop\}/u);
+    assert.match(source, /onClick=\{event => cycleSlotFace\(slot\.slotId, event\)\}/u);
+  }
+});
+
+test("current AOS Console actuators retain approved bottom-edge geometry", () => {
+  assert.match(
+    sources.location,
+    /\.ixi-aos-location-console-face-button\{[^}]*bottom:-1px;[^}]*width:34px;height:5px;/u
+  );
+  assert.match(
+    sources.numberedAos,
+    /\.ixi-aos-numbered-console-face-button\{[^}]*bottom:-1px;[^}]*width:34px;height:5px;/u
+  );
+  assert.doesNotMatch(sources.location, /aos-face-id/u);
 });
 
 test("machine console cycles each workspace independently and persists its face", () => {
