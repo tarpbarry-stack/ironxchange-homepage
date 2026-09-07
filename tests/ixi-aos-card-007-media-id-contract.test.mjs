@@ -77,6 +77,18 @@ test("canonical schema resolution cannot let custom_N mask a customer label", ()
   assert.match(presentation, /label: candidateLabel/u);
 });
 
+test("canonical schema resolution reads current published definition envelopes", () => {
+  const presentation = fs.readFileSync(
+    new URL("../components/ixi-aos/card-runtime/IXIAosSemanticObjectPresentation.js", import.meta.url),
+    "utf8"
+  );
+
+  assert.match(presentation, /definition\?\.fields/u);
+  assert.match(presentation, /metadataDefinition\?\.fields/u);
+  assert.match(presentation, /objectCardDefinition\?\.fields/u);
+  assert.match(presentation, /metadataCardDefinition\?\.fields/u);
+});
+
 test("Card 007 display reads the same bridge-owned object as its editor", () => {
   assert.match(card, /<IXIAosCardHeaderIdentity object=\{runtimeObject\}/u);
   assert.match(card, /<CardLayout \{\.\.\.contractProps\} object=\{runtimeObject\} onSaveObject=\{face1\.onSaveObject\}/u);

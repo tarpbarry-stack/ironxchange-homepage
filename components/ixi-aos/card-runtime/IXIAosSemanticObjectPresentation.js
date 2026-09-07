@@ -283,12 +283,25 @@ function normalizeFieldDefinition(definition = {}, index = 0) {
 export function getFieldDefinitions(object = {}) {
   const metadata = getObjectMetadata(object);
   const definition = getObjectDefinition(object);
+  const objectCardDefinition = safeObject(object?.cardDefinition);
+  const metadataCardDefinition = safeObject(metadata?.cardDefinition);
+  const metadataDefinition = safeObject(metadata?.definition);
 
   const sources = [
     object?.fieldDefinitions,
     object?.fieldSchema,
     definition?.fieldDefinitions,
     definition?.fieldSchema,
+    definition?.fields,
+    metadataDefinition?.fieldDefinitions,
+    metadataDefinition?.fieldSchema,
+    metadataDefinition?.fields,
+    objectCardDefinition?.fieldDefinitions,
+    objectCardDefinition?.fieldSchema,
+    objectCardDefinition?.fields,
+    metadataCardDefinition?.fieldDefinitions,
+    metadataCardDefinition?.fieldSchema,
+    metadataCardDefinition?.fields,
     metadata?.fieldDefinitions,
     metadata?.fieldSchema
   ];
