@@ -19,9 +19,12 @@ test("every numbered AOS operating card exposes the shared record-control Face 2
 
 test("location cards 001 through 003 use card identification as Face 2 in cards and Console", () => {
   const consoleRuntime = read("components/ixi-aos/console-runtime/IXIAosLocationObjectConsole.jsx");
+  const locationOverview = read("components/ixi-aos/cards/location/IXIAosLocationOverviewCard.jsx");
 
   assert.match(consoleRuntime, /if \(Number\(faceNumber\) === 2\) return "CARD ID"/u);
   assert.match(consoleRuntime, /resolved === 2[\s\S]*IXIAosCardIdentityFace[\s\S]*cardNumber=\{cardNumber\}/u);
+  assert.match(locationOverview, /onCycleFace=\{onCycleFace\}/u);
+  assert.match(locationOverview, /onRailSend=\{onRailSend\}/u);
 });
 
 test("FaceLab previews expose the same Face 2 contract for cards 004 through 017", () => {

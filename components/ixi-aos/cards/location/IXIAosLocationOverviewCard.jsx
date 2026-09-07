@@ -92,6 +92,8 @@ export default function IXIAosLocationOverviewCard({
   onSendBack = null,
   onCycleColor = null,
   onCycleOutline = null,
+  onCycleFace = null,
+  onRailSend = null,
   armedDestination = "",
   onSendToArmedDestination = null
 }) {
@@ -343,6 +345,8 @@ export default function IXIAosLocationOverviewCard({
         onSendBack={onSendBack}
         onCycleColor={onCycleColor}
         onCycleOutline={onCycleOutline}
+        onCycleFace={onCycleFace}
+        onRailSend={onRailSend}
         armedDestination={armedDestination}
         onSendToArmedDestination={onSendToArmedDestination}
       />
