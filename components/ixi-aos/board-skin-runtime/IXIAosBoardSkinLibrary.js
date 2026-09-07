@@ -29,7 +29,8 @@ export const IXI_AOS_BOARD_SKIN_IDS =
     IXI_120: "ixi-120",
     IXI_121: "ixi-121",
     IXI_122: "ixi-122",
-    IXI_123: "ixi-123"
+    IXI_123: "ixi-123",
+    IXI_124: "ixi-124"
   });
 
 export const IXI_AOS_BOARD_SKINS =
@@ -201,6 +202,13 @@ export const IXI_AOS_BOARD_SKINS =
       designation: "YARD FORCE",
       description: "Komatsu WA500-8 Yard Loader plan with Z-bar breakout geometry, articulation, axle oscillation and hydraulic load paths.",
       className: "aos-work-board-skin-ixi-123"
+    }),
+    Object.freeze({
+      skinId: IXI_AOS_BOARD_SKIN_IDS.IXI_124,
+      name: "IXI-124",
+      designation: "MAIN LINE",
+      description: "Cross-country pipeline plan with gathering laterals, compressor and meter stations, crossings and elevation profile.",
+      className: "aos-work-board-skin-ixi-124"
     })
   ]);
 
