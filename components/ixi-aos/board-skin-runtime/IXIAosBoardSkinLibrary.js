@@ -40,7 +40,13 @@ export const IXI_AOS_BOARD_SKIN_IDS =
     IXI_131: "ixi-131",
     IXI_132: "ixi-132",
     IXI_133: "ixi-133",
-    IXI_134: "ixi-134"
+    IXI_134: "ixi-134",
+    IXI_135: "ixi-135",
+    IXI_136: "ixi-136",
+    IXI_137: "ixi-137",
+    IXI_138: "ixi-138",
+    IXI_139: "ixi-139",
+    IXI_140: "ixi-140"
   });
 
 export const IXI_AOS_BOARD_SKINS =
@@ -289,6 +295,48 @@ export const IXI_AOS_BOARD_SKINS =
       designation: "AIRFIELD CIVIL",
       description: "Runway reconstruction plan with phased paving, grading, drainage, lighting circuits and temporary haul routes.",
       className: "aos-work-board-skin-ixi-134"
+    }),
+    Object.freeze({
+      skinId: IXI_AOS_BOARD_SKIN_IDS.IXI_135,
+      name: "IXI-135",
+      designation: "TUNNEL DRIVE",
+      description: "Underground tunnel construction plan with twin bores, shafts, TBM systems, service rail and monitoring controls.",
+      className: "aos-work-board-skin-ixi-135"
+    }),
+    Object.freeze({
+      skinId: IXI_AOS_BOARD_SKIN_IDS.IXI_136,
+      name: "IXI-136",
+      designation: "THE INTERCHANGE",
+      description: "High-capacity interchange plan with elevated ramps, traffic-flow routing and civil control geometry.",
+      className: "aos-work-board-skin-ixi-136"
+    }),
+    Object.freeze({
+      skinId: IXI_AOS_BOARD_SKIN_IDS.IXI_137,
+      name: "IXI-137",
+      designation: "STEELWORKS",
+      description: "Integrated steel mill plan with blast furnaces, casting, rolling, material handling and utility circuits.",
+      className: "aos-work-board-skin-ixi-137"
+    }),
+    Object.freeze({
+      skinId: IXI_AOS_BOARD_SKIN_IDS.IXI_138,
+      name: "IXI-138",
+      designation: "POWER GRID",
+      description: "Generation and transmission plan with turbine hall, switchyard, substations and redundant power routes.",
+      className: "aos-work-board-skin-ixi-138"
+    }),
+    Object.freeze({
+      skinId: IXI_AOS_BOARD_SKIN_IDS.IXI_139,
+      name: "IXI-139",
+      designation: "DEEP MINE",
+      description: "Multi-level hard-rock mine plan with shafts, ramps, stopes, ventilation, crushing and haul systems.",
+      className: "aos-work-board-skin-ixi-139"
+    }),
+    Object.freeze({
+      skinId: IXI_AOS_BOARD_SKIN_IDS.IXI_140,
+      name: "IXI-140",
+      designation: "SHIPYARD",
+      description: "Shipbuilding yard plan with dry docks, hull assembly, gantry cranes, fabrication and outfitting zones.",
+      className: "aos-work-board-skin-ixi-140"
     })
   ]);
 
