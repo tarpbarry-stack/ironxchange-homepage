@@ -289,6 +289,8 @@ const POCKET_TARGETS = [
 
   const [ixiCardState, setIxiCardState] = useState({});
   const [ixiUserId, setIxiUserId] = useState("guest");
+  const [hasLoadedRemoteIxiState, setHasLoadedRemoteIxiState] =
+    useState(false);
   const [workspaceSettings, setWorkspaceSettings] =
   useState({});
   const [ixiColorFilters, setIxiColorFilters] = useState([]);
@@ -405,6 +407,7 @@ const workspaceLayout =
 console.log("IXI WORKSPACE LAYOUT LOADED", workspaceLayout);
 
 setIxiCardState(remoteIxiState);
+setHasLoadedRemoteIxiState(true);
 
 setCardScaleMode(
   resolveSitewideCardScaleMode(
@@ -664,6 +667,16 @@ const containerStateKey = useMemo(() => {
 }, [workspaceListings, ixiCardState]);
    
 useEffect(() => {
+  /*
+   * Do not manufacture a "first layout" while the authenticated IX Core
+   * layout is still in flight. Environment objects often arrive first;
+   * treating that timing window as an empty remote layout puts every MOS
+   * object back on Board and permanently masks the later readback.
+   */
+  if (!hasLoadedRemoteIxiState) {
+    return;
+  }
+
   if (
     !workspaceListings.length ||
     !systemIndexes.length
@@ -928,6 +941,7 @@ placements:
   hasAppliedRemoteLayoutRef.current =
     true;
 }, [
+  hasLoadedRemoteIxiState,
   containerStateKey,
   systemIndexes,
   aosObjects

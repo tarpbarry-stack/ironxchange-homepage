@@ -146,6 +146,14 @@ test("desktop container drops serialize and confirm workspace persistence", () =
     machineStateClient,
     /cache: "no-store"/
   );
+  assert.match(
+    work,
+    /hasLoadedRemoteIxiState[\s\S]*?setHasLoadedRemoteIxiState\(true\)/
+  );
+  assert.match(
+    work,
+    /if \(!hasLoadedRemoteIxiState\)[\s\S]*?return;/
+  );
 });
 
 test("every universal AOS container mounts a visible accepting target", () => {
