@@ -56,7 +56,8 @@ export const IXI_AOS_BOARD_SKIN_IDS =
     IXI_147: "ixi-147",
     IXI_148: "ixi-148",
     IXI_149: "ixi-149",
-    IXI_150: "ixi-150"
+    IXI_150: "ixi-150",
+    IXI_151: "ixi-151"
   });
 
 export const IXI_AOS_BOARD_SKINS =
@@ -417,6 +418,13 @@ export const IXI_AOS_BOARD_SKINS =
       designation: "PRECAST YARD",
       description: "Precast manufacturing yard with girder beds, pipe and culvert casting, curing, cranes and heavy-haul loadout.",
       className: "aos-work-board-skin-ixi-150"
+    }),
+    Object.freeze({
+      skinId: IXI_AOS_BOARD_SKIN_IDS.IXI_151,
+      name: "IXI-151",
+      designation: "STEEL WORKS",
+      description: "Integrated steel works with ore handling, blast furnace, steelmaking, continuous casting, rolling line and rail loadout.",
+      className: "aos-work-board-skin-ixi-151"
     })
   ]);
 
