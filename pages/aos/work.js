@@ -42,6 +42,17 @@ import {
 import IXISystemIndexCard
   from "../../components/ixi-mos/IXISystemIndexCard";
 
+import IXIAosBoardSkinPicker
+  from "../../components/ixi-aos/board-skin-runtime/IXIAosBoardSkinPicker";
+
+import {
+  IXI_AOS_DEFAULT_BOARD_SKIN_ID,
+  getIXIAosBoardSkin,
+  normalizeIXIAosBoardSkinId,
+  readIXIAosBoardSkinId,
+  writeIXIAosBoardSkinId
+} from "../../components/ixi-aos/board-skin-runtime/IXIAosBoardSkinLibrary";
+
 import IXIAosOperatingCardRuntime
   from "../../components/ixi-aos/card-runtime/IXIAosOperatingCardRuntime";
 
@@ -196,6 +207,15 @@ const [systemObjectPickerOpen, setSystemObjectPickerOpen] =
 
 const [systemObjectPickerParent, setSystemObjectPickerParent] =
   useState(null);
+
+const [boardSkinPickerOpen, setBoardSkinPickerOpen] =
+  useState(false);
+
+const [boardSkinId, setBoardSkinId] =
+  useState(IXI_AOS_DEFAULT_BOARD_SKIN_ID);
+
+const boardSkin =
+  getIXIAosBoardSkin(boardSkinId);
   
   const [savedIds, setSavedIds] = useState([]);
   const [sdk, setSdk] = useState(null);
@@ -288,6 +308,12 @@ const POCKET_TARGETS = [
     }
   }, []);
 
+  useEffect(() => {
+    setBoardSkinId(
+      readIXIAosBoardSkinId()
+    );
+  }, []);
+
   const hasAppliedRemoteLayoutRef = useRef(false);
   
   const [activeDndId, setActiveDndId] = useState("");
@@ -366,6 +392,14 @@ const workspaceSettings =
   remoteIxiState?.[IXI_AOS_WORK_SETTINGS_ID] || {};
 
 setWorkspaceSettings(workspaceSettings);
+
+setBoardSkinId(
+  workspaceSettings.boardSkinId
+    ? writeIXIAosBoardSkinId(
+        workspaceSettings.boardSkinId
+      )
+    : readIXIAosBoardSkinId()
+);
 
 const workspaceLayout =
   remoteIxiState?.[IXI_AOS_WORK_LAYOUT_ID] || {};
@@ -2370,6 +2404,29 @@ function saveWorkspaceSettings(patch = {}) {
     patch: nextSettings
   });
 }
+
+function selectBoardSkin(nextSkinId) {
+  const next =
+    normalizeIXIAosBoardSkinId(
+      nextSkinId
+    );
+
+  setBoardSkinId(
+    writeIXIAosBoardSkinId(next)
+  );
+
+  saveWorkspaceSettings({
+    boardSkinId: next
+  });
+
+  captureIXEvent(
+    "aos_board_skin_selected",
+    {
+      boardSkinId: next,
+      page: "aos-work"
+    }
+  );
+}
   
 function saveWorkspaceLayout(
   nextContainers = workspacePlacements
@@ -3286,7 +3343,10 @@ return null;
     ixiCardState={ixiCardState}
     cardScaleMode={cardScaleMode}
   >
- <main className="aos-work-board">
+ <main
+  className={`aos-work-board ${boardSkin.className}`}
+  data-ixi-board-skin={boardSkin.skinId}
+ >
   <h1 className="aos-work-board-title">IXI AOS WORK</h1>
   <section className="saved-environment-shell">
     <IXIEnvironmentRail
@@ -3308,10 +3368,18 @@ return null;
   () => openSystemObjectTemplatePicker()
 }
   onMore={() => {
-    console.log(
-      "AOS WORK MORE"
+    setBoardSkinPickerOpen(
+      current => !current
     );
   }}
+  moreExpanded={boardSkinPickerOpen}
+/>
+
+<IXIAosBoardSkinPicker
+  open={boardSkinPickerOpen}
+  selectedSkinId={boardSkinId}
+  onSelect={selectBoardSkin}
+  onClose={() => setBoardSkinPickerOpen(false)}
 />
 
 <IXIAosSystemObjectTemplatePicker
@@ -3559,10 +3627,19 @@ onReturnContainerChildren={
           position: relative;
           isolation: isolate;
           background-color: #090a0a;
-          background-image: url('/images/ixi-aos-work-board.webp');
           background-position: center top;
           background-repeat: repeat-y;
           background-size: 100% auto;
+        }
+
+        .aos-work-board-skin-v12 {
+          background-color: #050606;
+          background-image: none;
+        }
+
+        .aos-work-board-skin-ixi-101 {
+          background-color: #090a0a;
+          background-image: url('/images/ixi-aos-board-ixi-101.webp');
         }
 
         .aos-work-board-title {
