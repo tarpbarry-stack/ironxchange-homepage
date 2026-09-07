@@ -287,7 +287,7 @@ export default function IXIAosGenericUniversalLayout007({
         <section className="u007-media-shell">
           {image ? <img src={image} alt={getObjectDisplayName(runtimeObject)} /> : <div className="u007-media-empty"><b>IXI</b><span>PRIMARY MEDIA</span></div>}
           {showMediaBusinessIdentifier ? <><div className="u007-media-shade" /><div className="u007-media-id"><span>ID</span><strong>{businessIdentifierValue || "—"}</strong></div></> : null}
-          {actions.canEdit ? <button className="u007-media-action" type="button" disabled={saving || Boolean(mediaStatus)} onClick={openPhotoPicker}>{mediaStatus || (image ? "CHANGE PHOTO" : "+ ADD PHOTO")}</button> : null}
+          {editing && actions.canEdit ? <button className="u007-media-action" type="button" disabled={saving || Boolean(mediaStatus)} onClick={openPhotoPicker}>{mediaStatus || (image ? "CHANGE PHOTO" : "+ ADD PHOTO")}</button> : null}
           <input ref={mediaInputRef} className="u007-media-input" type="file" accept={IXI_AOS_MEDIA_ACCEPT} onChange={addPrimaryPhoto} />
           {mediaError ? <span className="u007-media-error" role="alert">{mediaError}</span> : null}
         </section>
