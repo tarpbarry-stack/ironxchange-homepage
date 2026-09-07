@@ -24,7 +24,8 @@ export const IXI_AOS_BOARD_SKIN_IDS =
     IXI_115: "ixi-115",
     IXI_116: "ixi-116",
     IXI_117: "ixi-117",
-    IXI_118: "ixi-118"
+    IXI_118: "ixi-118",
+    IXI_119: "ixi-119"
   });
 
 export const IXI_AOS_BOARD_SKINS =
@@ -161,6 +162,13 @@ export const IXI_AOS_BOARD_SKINS =
       designation: "COMPACTION",
       description: "HAMM 84-inch cab/A-C roller plan with vibration systems and removable padfoot shell kit.",
       className: "aos-work-board-skin-ixi-118"
+    }),
+    Object.freeze({
+      skinId: IXI_AOS_BOARD_SKIN_IDS.IXI_119,
+      name: "IXI-119",
+      designation: "TRACK POWER",
+      description: "Takeuchi TL12V-2 High Flow plan with vertical-lift geometry, auxiliary hydraulics and track-system details.",
+      className: "aos-work-board-skin-ixi-119"
     })
   ]);
 
