@@ -4081,6 +4081,36 @@ onClearContainerToParent={
           background-image: url('/images/ixi-aos-board-ixi-134.webp');
         }
 
+        .aos-work-board-skin-ixi-135 {
+          background-color: #000;
+          background-image: url('/images/ixi-aos-board-ixi-135.webp');
+        }
+
+        .aos-work-board-skin-ixi-136 {
+          background-color: #000;
+          background-image: url('/images/ixi-aos-board-ixi-136.webp');
+        }
+
+        .aos-work-board-skin-ixi-137 {
+          background-color: #000;
+          background-image: url('/images/ixi-aos-board-ixi-137.webp');
+        }
+
+        .aos-work-board-skin-ixi-138 {
+          background-color: #000;
+          background-image: url('/images/ixi-aos-board-ixi-138.webp');
+        }
+
+        .aos-work-board-skin-ixi-139 {
+          background-color: #000;
+          background-image: url('/images/ixi-aos-board-ixi-139.webp');
+        }
+
+        .aos-work-board-skin-ixi-140 {
+          background-color: #000;
+          background-image: url('/images/ixi-aos-board-ixi-140.webp');
+        }
+
         .aos-work-board-title {
           position: absolute;
           width: 1px;
