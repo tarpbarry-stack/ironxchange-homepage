@@ -18,7 +18,8 @@ export const IXI_AOS_BOARD_SKIN_IDS =
     IXI_109: "ixi-109",
     IXI_110: "ixi-110",
     IXI_111: "ixi-111",
-    IXI_112: "ixi-112"
+    IXI_112: "ixi-112",
+    IXI_113: "ixi-113"
   });
 
 export const IXI_AOS_BOARD_SKINS =
@@ -113,6 +114,13 @@ export const IXI_AOS_BOARD_SKINS =
       designation: "LIFT RADIUS",
       description: "Crane lift plan with swing geometry, working radii and a restrained cyan boom path.",
       className: "aos-work-board-skin-ixi-112"
+    }),
+    Object.freeze({
+      skinId: IXI_AOS_BOARD_SKIN_IDS.IXI_113,
+      name: "IXI-113",
+      designation: "EXCAVATOR BUILD",
+      description: "Excavator assembly blueprint with boom geometry, hydraulic details and component callouts.",
+      className: "aos-work-board-skin-ixi-113"
     })
   ]);
 
