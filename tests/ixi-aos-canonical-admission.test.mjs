@@ -6,6 +6,7 @@ import {
   canonicalizeAosPlacementReferences,
   createAosObjectPreviewReference,
   normalizeAosCanonicalObject,
+  normalizeIxCoreAdmissionEnvelope,
   resolveAosCanonicalPresentation
 } from "../lib/mos/ixiAosCanonicalAdmission.mjs";
 
@@ -20,6 +21,86 @@ function machine(overrides = {}) {
     ...overrides
   };
 }
+
+test("exact IX-Core admission envelope preserves only server-verified aliases and evidence", () => {
+  const response = {
+    ok: true,
+    identity: {
+      objectId: "object-machine-1",
+      passportId: "IXIABC2345",
+      entityId: "entity-1",
+      aliases: [
+        { sourceType: "sharetribe-listing", sourceId: "listing-1" },
+        { sourceType: "historical-passport", sourceId: "IXIDEF2345" },
+        { sourceType: "erp-asset", sourceId: "ERP-41" }
+      ],
+      evidence: { matchedBy: ["objectId", "passportId"] }
+    },
+    object: {
+      objectId: "object-machine-1",
+      entityId: "entity-1",
+      sourceBindings: [{ sourceType: "browser-invented", sourceId: "FAKE-1" }]
+    }
+  };
+  const admitted = normalizeIxCoreAdmissionEnvelope({
+    response,
+    requestedObject: machine(),
+    expectedEntityId: "entity-1"
+  });
+  const admission = buildAosCanonicalAdmission({ aosObjects: [admitted] });
+
+  assert.deepEqual(admitted.aliases, [
+    { sourceType: "sharetribe-listing", sourceId: "listing-1" },
+    { sourceType: "historical-passport", sourceId: "IXIDEF2345" },
+    { sourceType: "erp-asset", sourceId: "ERP-41" }
+  ]);
+  assert.deepEqual(admitted.evidence, {
+    matchedBy: ["objectId", "passportId"]
+  });
+  assert.equal(admitted.admissionIdentity, response.identity);
+  assert.equal(admission.resolveObjectId("listing-1"), "object-machine-1");
+  assert.equal(admission.resolveObjectId("IXIDEF2345"), "object-machine-1");
+  assert.equal(admission.resolveObjectId("ERP-41"), "object-machine-1");
+  assert.equal(admission.resolveObjectId("FAKE-1"), "");
+});
+
+test("flattened admission responses and conflicting canonical Object Passports fail closed", () => {
+  assert.throws(
+    () => normalizeIxCoreAdmissionEnvelope({
+      response: {
+        ok: true,
+        objectId: "object-machine-1",
+        passportId: "IXIABC2345",
+        entityId: "entity-1",
+        aliases: [],
+        evidence: {},
+        object: machine()
+      },
+      requestedObject: machine(),
+      expectedEntityId: "entity-1"
+    }),
+    error => error?.code === "CANONICAL_IDENTITY_REPAIR_REQUIRED"
+  );
+
+  assert.throws(
+    () => normalizeIxCoreAdmissionEnvelope({
+      response: {
+        ok: true,
+        identity: {
+          objectId: "object-machine-1",
+          passportId: "IXIABC2345",
+          entityId: "entity-1",
+          aliases: [],
+          evidence: {}
+        },
+        object: machine({ passportId: "IXIWRG2345" })
+      },
+      requestedObject: machine(),
+      expectedEntityId: "entity-1"
+    }),
+    error => error?.code === "CANONICAL_IDENTITY_REPAIR_REQUIRED"
+  );
+});
 
 function listing(overrides = {}) {
   return {
@@ -196,14 +277,35 @@ test("one machine has one operating identity and multiple rail previews", () => 
 
 test("machine presentation remains the established Private machine card", () => {
   const admitted = buildAosCanonicalAdmission({
-    aosObjects: [machine()],
+    aosObjects: [machine({
+      objectType: "customer-renamed-classification",
+      displayName: "Pickup"
+    })],
     workspaceListings: [listing()]
   }).objectsById.get("object-machine-1");
 
   assert.equal(admitted.presentation.kind, "ixi-private-machine");
   assert.equal(admitted.presentation.renderer, "established-private-machine-card");
+  assert.equal(
+    admitted.presentation.sourceAdapterId,
+    "ixi.sharetribe-owned-machine.v1"
+  );
   assert.equal(admitted.objectId, "object-machine-1");
   assert.equal(admitted.passportId, "IXIABC2345");
+});
+
+test("customer classification and label renames cannot change the source-adapter presentation", () => {
+  const left = buildAosCanonicalAdmission({
+    aosObjects: [machine({ objectType: "truck", displayName: "Pickup" })],
+    workspaceListings: [listing()]
+  }).objectsById.get("object-machine-1");
+  const right = buildAosCanonicalAdmission({
+    aosObjects: [machine({ objectType: "heavy-equipment", displayName: "Road Vehicle" })],
+    workspaceListings: [listing()]
+  }).objectsById.get("object-machine-1");
+
+  assert.deepEqual(left.presentation, right.presentation);
+  assert.equal(left.presentation.kind, "ixi-private-machine");
 });
 
 test("Cards 001-018 are presentation-only and Card 007 accepts customer-defined objects", () => {

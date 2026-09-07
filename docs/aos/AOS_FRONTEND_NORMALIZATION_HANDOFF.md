@@ -2,6 +2,7 @@
 
 - Branch: `aos/commercial-work-normalization`
 - Frontend base: `ecd11820473771f3eb4b4707f4cf2642cf18d5b3`
+- Amendment base: `cffc23ec8f9fcb3ad02931c5443d33e989afe2d5`
 - Paired IX-Core commits: `9eac236` and `114227c`
 - Status: tested integration candidate; not deployed or merged
 
@@ -15,6 +16,11 @@ read-only `POST /mos/v1/identity/admit` contract. Each request supplies the
 known object ID, permanent Passport, and verified typed aliases. Every response
 must return the same canonical Object, Passport, and authenticated Entity or
 the workspace fails closed.
+
+The integration consumes the exact IX-Core response envelope: canonical fields,
+aliases, and resolution evidence come from `response.identity`, while the
+canonical Object comes from `response.object`. Flattened responses fail closed,
+and browser-discovered aliases are request hints only—not server verification.
 
 `lib/mos/ixiAosCanonicalAdmission.mjs` then builds one in-memory registry keyed
 only by `objectId`, plus separate Passport, listing, historical, and authorized
@@ -32,6 +38,8 @@ Machine presentation resolves independently from identity. An admitted
 IronXchange machine with a Sharetribe presentation source remains in the
 established Private machine-card family and keeps its photo, faces, rail,
 Console, TRAN$ACT entry, canonical object ID, and permanent Passport.
+The selection uses the stable `ixi.sharetribe-owned-machine.v1` presentation
+adapter identifier, never the customer's editable classification or label.
 
 Cards 001-018 are presentation choices only. Card 007 is the neutral missing-
 presentation fallback and carries no Person, type, capability, vocabulary,
@@ -50,6 +58,11 @@ facts. IX-Core authorizes every command.
 target with both canonical Object and Passport pairs, an idempotent command ID,
 and a stable order key. Relationship end and order commands carry expected
 revision and idempotency headers through the authenticated gateway.
+
+Every hydrated rail member must resolve through canonical admission. Supplied
+Passport identity must match that Object. Relationship creation readback verifies
+relationship ID, source and target Object IDs, behavior ID, definition ID, order
+key, active status, and both endpoint Passports through fresh admission evidence.
 
 The legacy membership literal is absent from active frontend code. The browser
 client and gateway no longer expose the legacy container-place or remove-from-
@@ -73,10 +86,21 @@ Explicit Save remains a governed creation boundary. If Save creates a child,
 the subsequent rail placement uses the returned canonical Object and Passport;
 rendering, lookup, and movement cannot enter that path.
 
+Post Free and URL Import already route through authenticated listing admission.
+Bulk upload now does the same using the authenticated Sharetribe session and
+signed IX-Core Entity context. The generic Passport ensure routes and helpers
+and the standalone legacy backfill script are removed; bounded authenticated
+backfill remains under `/api/ixi/onboarding/backfill`. Auction disposition may
+remove its listing presentation and media, but no longer deletes a Passport.
+
+Workspace hydration no longer depends on a nonzero Sharetribe listing count.
+Canonical AOS Objects and durable System Indexes can hydrate by themselves;
+missing or unresolved listing identity never manufactures Equipment membership.
+
 ## Verification
 
 - `git diff --check`: passed.
-- `node --test tests/*.test.mjs`: 502 passed, 0 failed.
+- `node --test tests/*.test.mjs`: 510 passed, 0 failed.
 - `NEXT_PUBLIC_SHARETRIBE_CLIENT_ID=ixi-controlled-build-verification npm run build`:
   passed lint/type validation, optimized compilation, page-data collection,
   generation of 96 static pages, optimization, and trace collection.

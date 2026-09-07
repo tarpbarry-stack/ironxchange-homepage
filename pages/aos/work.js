@@ -717,10 +717,7 @@ useEffect(() => {
     return;
   }
 
-  if (
-    !workspaceListings.length ||
-    !systemIndexes.length
-  ) {
+  if (!systemIndexes.length && !aosObjects.length) {
     return;
   }
 
@@ -739,10 +736,6 @@ useEffect(() => {
         String(index?.indexId || "") === "equipment"
       )?.objectId || ""
     ).trim();
-
-  if (!equipmentSystemIndexObjectId) {
-    return;
-  }
 
   /*
    * Universal AOS workspace identities.
@@ -814,25 +807,27 @@ placements:
      * Equipment System Index itself must
      * live on the Board.
      */
-    nextPlacements =
-      moveObjectToWorkspaceSurface({
-        placements:
-          nextPlacements,
+    if (equipmentSystemIndexObjectId) {
+      nextPlacements =
+        moveObjectToWorkspaceSurface({
+          placements:
+            nextPlacements,
 
-        objectId:
-          equipmentSystemIndexObjectId,
+          objectId:
+            equipmentSystemIndexObjectId,
 
-        targetSurface:
-          "board",
+          targetSurface:
+            "board",
 
-        /*
-         * Preserve the visual behavior
-         * we already have: Equipment
-         * begins at the front.
-         */
-        position:
-          "start"
-      });
+          /*
+           * Preserve the visual behavior
+           * we already have: Equipment
+           * begins at the front.
+           */
+          position:
+            "start"
+        });
+    }
 
     /*
      * Any owned machine that has no saved
@@ -861,7 +856,9 @@ placements:
                 machineId,
 
               targetSurface:
-                "indexEquipment"
+                equipmentSystemIndexObjectId
+                  ? "indexEquipment"
+                  : "board"
             });
         }
       }
@@ -941,12 +938,19 @@ placements:
     ...createEmptyWorkspacePlacements(),
 
     board: [
-      equipmentSystemIndexObjectId,
-      ...validMosObjectIds
+      ...(equipmentSystemIndexObjectId
+        ? [equipmentSystemIndexObjectId]
+        : []),
+      ...validMosObjectIds,
+      ...(!equipmentSystemIndexObjectId
+        ? validMachineIds
+        : [])
     ],
 
     indexEquipment:
-      [...validMachineIds]
+      equipmentSystemIndexObjectId
+        ? [...validMachineIds]
+        : []
   };
 
   setWorkspacePlacements(
@@ -1562,12 +1566,14 @@ function getDirectContainerChildIds(
 
   const relationshipChildIds = getAosMembershipObjectIds({
     parentObjectId: containerId,
-    relationships: aosRelationships
+    relationships: aosRelationships,
+    admission: aosWorkspaceAdmission
   }).filter(objectId => aosWorkspaceObjectRegistry.has(objectId));
 
   const projectedChildIds = getAosRailProjectionObjectIds({
     railOwnerObjectId: containerId,
-    railProjections: aosRailProjections
+    railProjections: aosRailProjections,
+    admission: aosWorkspaceAdmission
   }).filter(objectId => aosWorkspaceObjectRegistry.has(objectId));
 
   return [...new Set([

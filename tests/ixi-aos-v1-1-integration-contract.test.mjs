@@ -15,7 +15,9 @@ import {
 } from "../lib/mos/IXIAosMembershipBridge.mjs";
 import {
   admitMosCanonicalIdentity,
-  createMosRelationship
+  createMosRelationship,
+  findVerifiedMosRelationship,
+  hasMosCanonicalAdmissionEvidence
 } from "../lib/mos/ixiMosBrowserGatewayClient.js";
 
 function canonicalObject({ objectId, passportId, displayName, objectType = "customer-defined" }) {
@@ -37,14 +39,26 @@ test("browser commands use the exact IX-Core v1.1 admission and rail contracts",
     calls.push({ url, options });
 
     if (url === "/api/aos/mos/identity/admit") {
+      const request = JSON.parse(options.body);
+      const isTarget = request.objectId === "object-wichita-falls";
       return {
         ok: true,
         json: async () => ({
-          objectId: "object-ripper-1",
-          passportId: "IXIRPR2345",
-          entityId: "entity-star-and-sons",
-          aliases: [{ sourceType: "sharetribe-listing", sourceId: "listing-ripper-1" }],
-          object: { objectId: "object-ripper-1" }
+          ok: true,
+          identity: {
+            objectId: request.objectId,
+            passportId: request.passportId,
+            entityId: "entity-star-and-sons",
+            aliases: isTarget
+              ? []
+              : [{ sourceType: "sharetribe-listing", sourceId: "listing-ripper-1" }],
+            evidence: { resolution: "canonical-admission" }
+          },
+          object: {
+            objectId: request.objectId,
+            passportId: request.passportId,
+            entityId: "entity-star-and-sons"
+          }
         })
       };
     }
@@ -56,8 +70,13 @@ test("browser commands use the exact IX-Core v1.1 admission and rail contracts",
           relationship: {
             relationshipId: "relationship-wf-ripper",
             sourceObjectId: "object-ripper-1",
+            sourcePassportId: "IXIRPR2345",
             targetObjectId: "object-wichita-falls",
-            behaviorId: IXI_AOS_RAIL_MEMBERSHIP_BEHAVIOR_ID
+            targetPassportId: "IXIWFT2345",
+            behaviorId: IXI_AOS_RAIL_MEMBERSHIP_BEHAVIOR_ID,
+            definitionId: null,
+            orderKey: "000100",
+            status: "active"
           }
         })
       };
@@ -69,8 +88,13 @@ test("browser commands use the exact IX-Core v1.1 admission and rail contracts",
         relationships: [{
           relationshipId: "relationship-wf-ripper",
           sourceObjectId: "object-ripper-1",
+          sourcePassportId: "IXIRPR2345",
           targetObjectId: "object-wichita-falls",
-          behaviorId: IXI_AOS_RAIL_MEMBERSHIP_BEHAVIOR_ID
+          targetPassportId: "IXIWFT2345",
+          behaviorId: IXI_AOS_RAIL_MEMBERSHIP_BEHAVIOR_ID,
+          definitionId: null,
+          orderKey: "000100",
+          status: "active"
         }]
       })
     };
@@ -180,21 +204,24 @@ test("Wichita Falls and Equipment project one ripper without changing Object or 
   assert.deepEqual(
     getAosRailProjectionObjectIds({
       railOwnerObjectId: equipment.objectId,
-      railProjections: hydratedRailProjections
+      railProjections: hydratedRailProjections,
+      admission
     }),
     [ripper.objectId]
   );
   assert.deepEqual(
     getAosRailProjectionObjectIds({
       railOwnerObjectId: wichitaFalls.objectId,
-      railProjections: hydratedRailProjections
+      railProjections: hydratedRailProjections,
+      admission
     }),
     [ripper.objectId]
   );
   assert.deepEqual(
     getAosMembershipObjectIds({
       parentObjectId: wichitaFalls.objectId,
-      relationships: [result.relationship]
+      relationships: [result.relationship],
+      admission
     }),
     [ripper.objectId]
   );
@@ -265,4 +292,121 @@ test("workspace deduplication is local to each placement scope", () => {
   assert.deepEqual(employeeOne.board, ["object-ripper-1"]);
   assert.deepEqual(employeeTwo.board, ["object-ripper-1"]);
   assert.notEqual(employeeOne, employeeTwo);
+});
+
+test("rail projections reject Passport mismatch, unresolved identity, and alias collision", () => {
+  const ripper = canonicalObject({
+    objectId: "object-ripper-1",
+    passportId: "IXIRPR2345",
+    displayName: "Ripper"
+  });
+  const owner = canonicalObject({
+    objectId: "object-wichita-falls",
+    passportId: "IXIWFT2345",
+    displayName: "Wichita Falls"
+  });
+  const admission = buildAosCanonicalAdmission({ aosObjects: [ripper, owner] });
+
+  assert.throws(
+    () => getAosRailProjectionObjectIds({
+      railOwnerObjectId: owner.objectId,
+      railProjections: {
+        [owner.objectId]: {
+          members: [{ objectId: ripper.objectId, passportId: "IXIBAD2345" }]
+        }
+      },
+      admission
+    }),
+    error => error?.code === "IXI_AOS_PROJECTION_PASSPORT_MISMATCH"
+  );
+
+  assert.throws(
+    () => getAosRailProjectionObjectIds({
+      railOwnerObjectId: owner.objectId,
+      railProjections: {
+        [owner.objectId]: { members: [{ objectId: "object-missing" }] }
+      },
+      admission
+    }),
+    error => error?.code === "IXI_AOS_PROJECTION_IDENTITY_UNRESOLVED"
+  );
+
+  assert.throws(
+    () => getAosRailProjectionObjectIds({
+      railOwnerObjectId: owner.objectId,
+      railProjections: {
+        [owner.objectId]: { members: [{ objectId: ripper.objectId }] }
+      },
+      admission: {
+        objectsById: admission.objectsById,
+        resolveObjectId() {
+          const error = new Error("collision");
+          error.code = "IXI_AOS_ALIAS_INDEX_CONFLICT";
+          throw error;
+        }
+      }
+    }),
+    error => error?.code === "IXI_AOS_PROJECTION_IDENTITY_CONFLICT"
+  );
+});
+
+test("durable relationship readback verifies every technical field and endpoint admission", () => {
+  const relationship = {
+    relationshipId: "relationship-wf-ripper",
+    sourceObjectId: "object-ripper-1",
+    sourcePassportId: "IXIRPR2345",
+    targetObjectId: "object-wichita-falls",
+    targetPassportId: "IXIWFT2345",
+    behaviorId: IXI_AOS_RAIL_MEMBERSHIP_BEHAVIOR_ID,
+    definitionId: "definition-rail-1",
+    orderKey: "000100",
+    status: "active"
+  };
+  const expected = {
+    readback: { relationships: [relationship] },
+    ...relationship
+  };
+
+  assert.equal(findVerifiedMosRelationship(expected), relationship);
+
+  for (const [field, value] of [
+    ["relationshipId", "relationship-other"],
+    ["sourceObjectId", "object-other"],
+    ["targetObjectId", "object-other"],
+    ["behaviorId", "aos.neutral-connection.v1"],
+    ["definitionId", "definition-other"],
+    ["orderKey", "000200"],
+    ["status", "ended"],
+    ["sourcePassportId", "IXIBAD2345"],
+    ["targetPassportId", "IXIBAD2345"]
+  ]) {
+    assert.equal(
+      findVerifiedMosRelationship({
+        ...expected,
+        readback: { relationships: [{ ...relationship, [field]: value }] }
+      }),
+      null,
+      field
+    );
+  }
+
+  const admission = {
+    ok: true,
+    identity: {
+      objectId: "object-ripper-1",
+      passportId: "IXIRPR2345",
+      evidence: { matchedBy: "objectId" }
+    },
+    object: { objectId: "object-ripper-1" }
+  };
+  assert.equal(hasMosCanonicalAdmissionEvidence({
+    admission,
+    objectId: "object-ripper-1",
+    passportId: "IXIRPR2345"
+  }), true);
+  assert.equal(hasMosCanonicalAdmissionEvidence({
+    admission,
+    objectId: "object-ripper-1",
+    passportId: "IXIBAD2345"
+  }), false);
 });

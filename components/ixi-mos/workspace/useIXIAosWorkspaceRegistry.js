@@ -75,11 +75,13 @@ export default function useIXIAosWorkspaceRegistry({
     for (const [objectId, admittedObject] of admission.objectsById) {
       const relationshipIds = getAosMembershipObjectIds({
         parentObjectId: objectId,
-        relationships
+        relationships,
+        admission
       });
       const railProjectionIds = getAosRailProjectionObjectIds({
         railOwnerObjectId: objectId,
-        railProjections
+        railProjections,
+        admission
       });
       const index = systemIndexesByObjectId.get(objectId);
       const projectedIndex = index?.metadata?.adapterId === "ixi-owned-equipment" && equipmentWorkspaceIndex
