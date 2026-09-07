@@ -80,6 +80,7 @@ export default function PrivateListingCard({
   sellerMode = false,
   launchMode = false,
   creationMode = false,
+  showListingManagementActions = true,
   workflowValue = "good-listing",
   onWorkflowChange,
   priceValue,
@@ -675,7 +676,7 @@ style={getFrameStyle(currentImageObject, "card")}
           </div>
         </div>
 
-       {presentation === "seller" && !creationMode ? (
+       {presentation === "seller" && showListingManagementActions && !creationMode ? (
   <div className="seller-actions">
             <button
   type="button"

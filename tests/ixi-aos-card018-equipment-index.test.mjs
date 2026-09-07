@@ -55,6 +55,25 @@ test("Card 018 always renders owned equipment through the current inventory mach
   assert.match(childRouter, /!forceMachineCard &&\s*isDurableMosObject/);
   assert.match(childRouter, /<IXIMachineCard/);
   assert.match(childRouter, /cardContext="inventory"/);
+  assert.match(childRouter, /showListingManagementActions=\{false\}/);
+});
+
+test("Card 018 equipment deck excludes retired seller-yard lifecycle controls", async () => {
+  const [childRouter, privateCard, marketplaceCard] = await Promise.all([
+    read("components/ixi-mos/workspace/IXIAosWorkspaceChildCard.jsx"),
+    read("components/ixi-machine-card/private/PrivateListingCard.js"),
+    read("components/ixi-machine-card/marketplace/MarketplaceListingCard.js")
+  ]);
+
+  assert.match(childRouter, /showListingManagementActions=\{false\}/);
+  assert.match(
+    privateCard,
+    /presentation === "seller" && showListingManagementActions && !creationMode/
+  );
+  assert.match(
+    marketplaceCard,
+    /sellerMode && showListingManagementActions && !creationMode/
+  );
 });
 
 test("Card 018 machine browsing removes the container header and loops without an End Deck face", async () => {

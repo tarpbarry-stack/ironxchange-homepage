@@ -87,6 +87,7 @@ export default function IXIAosWorkspaceChildCard({
     <IXIMachineCard
       listing={object}
       cardContext="inventory"
+      showListingManagementActions={false}
       saved={false}
       showSave={false}
       machineFace={1}

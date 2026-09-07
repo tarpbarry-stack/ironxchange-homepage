@@ -83,6 +83,7 @@ export default function MarketplaceListingCard({
   sellerMode = false,
   launchMode = false,
   creationMode = false,
+  showListingManagementActions = true,
   workflowValue = "good-listing",
   onWorkflowChange,
   priceValue,
@@ -798,7 +799,7 @@ style={getFrameStyle(currentImageObject, "card")}
           </div>
         </div>
 
-        {sellerMode && !creationMode ? (
+        {sellerMode && showListingManagementActions && !creationMode ? (
   <div className="seller-actions">
             <button
   type="button"
