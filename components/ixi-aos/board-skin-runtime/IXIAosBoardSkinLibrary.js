@@ -10,7 +10,8 @@ export const IXI_AOS_BOARD_SKIN_IDS =
     IXI_101: "ixi-101",
     IXI_102: "ixi-102",
     IXI_103: "ixi-103",
-    IXI_104: "ixi-104"
+    IXI_104: "ixi-104",
+    IXI_105: "ixi-105"
   });
 
 export const IXI_AOS_BOARD_SKINS =
@@ -49,6 +50,13 @@ export const IXI_AOS_BOARD_SKINS =
       designation: "BLACK TOPO",
       description: "Jet-black survey field with sparse contour lines and calibrated elevation marks.",
       className: "aos-work-board-skin-ixi-104"
+    }),
+    Object.freeze({
+      skinId: IXI_AOS_BOARD_SKIN_IDS.IXI_105,
+      name: "IXI-105",
+      designation: "BLACK SIGNAL",
+      description: "Jet-black diagnostic field with sparse telemetry traces and active signal pulses.",
+      className: "aos-work-board-skin-ixi-105"
     })
   ]);
 
