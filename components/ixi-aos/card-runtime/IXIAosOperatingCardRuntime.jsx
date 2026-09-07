@@ -3,6 +3,10 @@ import dynamic from "next/dynamic";
 import { resolveIXIAosOperatingCardNumber } from "./IXIAosOperatingCardResolver.mjs";
 import IXIAosCardIdentityFace from "./IXIAosCardIdentityFace";
 import IXIContainerDropTarget from "../../ixi-chassis/IXIContainerDropTarget";
+import {
+  getNextIXIRelationshipColor,
+  getNextIXIRelationshipOutline
+} from "../../ixi-object-system/IXIRailStateEngine.mjs";
 
 function CardLoading() {
   return <div className="ixi-aos-operating-card-loading" aria-label="Loading AOS card" />;
@@ -48,6 +52,11 @@ const NUMBERED_CARDS = Object.freeze({
 
 function clean(value) {
   return String(value ?? "").trim();
+}
+
+function stopRailEvent(event) {
+  event?.preventDefault?.();
+  event?.stopPropagation?.();
 }
 
 export default function IXIAosOperatingCardRuntime({
@@ -106,6 +115,31 @@ export default function IXIAosOperatingCardRuntime({
     if (objectId) onIxiStateChange?.(objectId, { face });
   };
   const cycleFace = () => setFace(currentFace === 1 ? 2 : 1);
+  const cycleFaceBackward = () => setFace(currentFace === 1 ? 2 : 1);
+  const cycleColor = event => {
+    stopRailEvent(event);
+
+    if (typeof onCycleColor === "function") {
+      onCycleColor(event, runtimeObject);
+      return;
+    }
+
+    const nextColor = getNextIXIRelationshipColor(ixiState?.color);
+
+    if (objectId) onIxiStateChange?.(objectId, { color: nextColor });
+  };
+  const cycleOutline = event => {
+    stopRailEvent(event);
+
+    if (typeof onCycleOutline === "function") {
+      onCycleOutline(event, runtimeObject);
+      return;
+    }
+
+    const nextOutline = getNextIXIRelationshipOutline(ixiState?.outline);
+
+    if (objectId) onIxiStateChange?.(objectId, { outline: nextOutline });
+  };
   const openTransact = () => {
     if (objectId) onIxiStateChange?.(objectId, { transactVisible: true });
     onOpenTransact?.(runtimeObject);
@@ -134,9 +168,12 @@ export default function IXIAosOperatingCardRuntime({
     onCycleFace: cycleFace,
     onSendFront,
     onSendBack,
-    onCycleColor,
-    onCycleOutline,
-    onRailSend,
+    onCycleColor: cycleColor,
+    onCycleOutline: cycleOutline,
+    onRailSend:
+      typeof onRailSend === "function"
+        ? onRailSend
+        : cycleFaceBackward,
     armedDestination,
     onSendToArmedDestination,
     workspaceDropPolicy,

@@ -38,6 +38,11 @@ import {
   resolveAosWorkspaceParentName
 } from "../../../lib/mos/ixiAosHierarchyContract.mjs";
 
+import {
+  getNextIXIRelationshipColor,
+  getNextIXIRelationshipOutline
+} from "../../ixi-object-system/IXIRailStateEngine.mjs";
+
 
 function cleanId(value) {
   return String(value ?? "").trim();
@@ -182,6 +187,12 @@ function getContainerCommandTarget(item = {}) {
 }
 
 
+function stopRailEvent(event) {
+  event?.preventDefault?.();
+  event?.stopPropagation?.();
+}
+
+
 export default function IXIAosWorkspaceBoard({
   items = [],
 
@@ -320,6 +331,25 @@ export default function IXIAosWorkspaceBoard({
           const commandTarget =
             getContainerCommandTarget(item);
 
+          const indexState =
+            ixiCardState[id] || {
+              color: "none",
+              outline: 1,
+              face: 1
+            };
+
+          const cycleObjectColor = event => {
+            stopRailEvent(event);
+            const nextColor = getNextIXIRelationshipColor(indexState.color);
+            updateIxiCardState?.(id, { color: nextColor });
+          };
+
+          const cycleObjectOutline = event => {
+            stopRailEvent(event);
+            const nextOutline = getNextIXIRelationshipOutline(indexState.outline);
+            updateIxiCardState?.(id, { outline: nextOutline });
+          };
+
           const systemAdapter =
             getIXIAosSystemAdapter(item);
 
@@ -342,6 +372,8 @@ export default function IXIAosWorkspaceBoard({
                   onIxiStateChange={updateIxiCardState}
                   onSendFront={sendListingToFront}
                   onSendBack={sendListingToBack}
+                  onCycleColor={cycleObjectColor}
+                  onCycleOutline={cycleObjectOutline}
                   armedDestination={armedDestination}
                   onSendToArmedDestination={sendMachineToArmedDestination}
                 />
@@ -358,13 +390,6 @@ export default function IXIAosWorkspaceBoard({
                 onOpenTransact={() => updateIxiCardState?.(id, { transactVisible: true })}
 
                 renderSystemIndexCard={({ onOpenConsole, onOpenTransact }) => {
-                  const indexState =
-                    ixiCardState[id] || {
-                      color: "none",
-                      outline: 1,
-                      face: 1
-                    };
-
                   const exposeObject = child => {
                     if (
                       systemAdapter?.adapterId ===
@@ -427,6 +452,8 @@ export default function IXIAosWorkspaceBoard({
                         armedDestination={armedDestination}
                         onSendFront={sendListingToFront}
                         onSendBack={sendListingToBack}
+                        onCycleColor={cycleObjectColor}
+                        onCycleOutline={cycleObjectOutline}
                         onSendToArmedDestination={sendMachineToArmedDestination}
                         onExposeObject={exposeObject}
                         childCardMode={systemIndexCard.childCardMode}
@@ -487,6 +514,8 @@ export default function IXIAosWorkspaceBoard({
                     armedDestination={armedDestination}
                     onSendFront={sendListingToFront}
                     onSendBack={sendListingToBack}
+                    onCycleColor={cycleObjectColor}
+                    onCycleOutline={cycleObjectOutline}
                     onSendToArmedDestination={sendMachineToArmedDestination}
 
                     onExposeObject={exposeObject}
@@ -577,6 +606,8 @@ export default function IXIAosWorkspaceBoard({
                 armedDestination={armedDestination}
                 onSendFront={sendListingToFront}
                 onSendBack={sendListingToBack}
+                onCycleColor={cycleObjectColor}
+                onCycleOutline={cycleObjectOutline}
                 onSendToArmedDestination={sendMachineToArmedDestination}
 
                 onExposeObject={child => {

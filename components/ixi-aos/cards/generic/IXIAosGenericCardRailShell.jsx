@@ -6,8 +6,8 @@ export default function IXIAosGenericCardRailShell({
   children,
   face = 1,
   saved = false,
-  boardColor = "none",
-  boardOutline = 1,
+  boardColor = null,
+  boardOutline = null,
   ixiState = {},
   onIxiStateChange = null,
   onOpenTransact = null,
@@ -21,6 +21,8 @@ export default function IXIAosGenericCardRailShell({
   onSendToArmedDestination = null
 }) {
   const objectId = String(object?.objectId || object?.id?.uuid || object?.id || "").trim();
+  const resolvedColor = boardColor ?? ixiState?.color ?? "none";
+  const resolvedOutline = Number(boardOutline ?? ixiState?.outline ?? 1);
 
   return (
     <IXIAosCardCommandProvider
@@ -30,14 +32,17 @@ export default function IXIAosGenericCardRailShell({
       onIxiStateChange={onIxiStateChange}
       onOpenTransact={onOpenTransact}
     >
-      <div className="ixi-generic-card-rail-shell">
+      <div
+        className={`ixi-generic-card-rail-shell card board-color-${resolvedColor} board-outline-${resolvedOutline}`}
+        data-ixi-command-rail-host
+      >
         {children}
 
         <IXIObjectRail
           object={object}
           saved={saved}
-          color={boardColor}
-          outline={boardOutline}
+          color={resolvedColor}
+          outline={resolvedOutline}
           face={face}
           onSendFront={onSendFront}
           onSendBack={onSendBack}
