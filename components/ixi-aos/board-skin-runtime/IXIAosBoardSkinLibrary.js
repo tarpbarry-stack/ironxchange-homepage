@@ -8,7 +8,8 @@ export const IXI_AOS_BOARD_SKIN_IDS =
   Object.freeze({
     V12: "v12",
     IXI_101: "ixi-101",
-    IXI_102: "ixi-102"
+    IXI_102: "ixi-102",
+    IXI_103: "ixi-103"
   });
 
 export const IXI_AOS_BOARD_SKINS =
@@ -33,6 +34,13 @@ export const IXI_AOS_BOARD_SKINS =
       designation: "INDEX LINE",
       description: "Shaded graphite field with numbered calibration rails and sparse IXI marks.",
       className: "aos-work-board-skin-ixi-102"
+    }),
+    Object.freeze({
+      skinId: IXI_AOS_BOARD_SKIN_IDS.IXI_103,
+      name: "IXI-103",
+      designation: "VECTOR FIELD",
+      description: "Jet-black coordinate field with sparse vector paths and calibrated IXI marks.",
+      className: "aos-work-board-skin-ixi-103"
     })
   ]);
 
