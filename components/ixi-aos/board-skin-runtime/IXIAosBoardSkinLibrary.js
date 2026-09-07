@@ -51,7 +51,12 @@ export const IXI_AOS_BOARD_SKIN_IDS =
     IXI_142: "ixi-142",
     IXI_143: "ixi-143",
     IXI_144: "ixi-144",
-    IXI_145: "ixi-145"
+    IXI_145: "ixi-145",
+    IXI_146: "ixi-146",
+    IXI_147: "ixi-147",
+    IXI_148: "ixi-148",
+    IXI_149: "ixi-149",
+    IXI_150: "ixi-150"
   });
 
 export const IXI_AOS_BOARD_SKINS =
@@ -377,6 +382,41 @@ export const IXI_AOS_BOARD_SKINS =
       designation: "HYDROELECTRIC WORKS",
       description: "Operational hydroelectric complex with dam, intakes, penstocks, turbines, spillway and transmission systems.",
       className: "aos-work-board-skin-ixi-145"
+    }),
+    Object.freeze({
+      skinId: IXI_AOS_BOARD_SKIN_IDS.IXI_146,
+      name: "IXI-146",
+      designation: "CEMENT WORKS",
+      description: "Integrated cement works with quarry feed, crushing, raw milling, kiln, clinker storage and loadout.",
+      className: "aos-work-board-skin-ixi-146"
+    }),
+    Object.freeze({
+      skinId: IXI_AOS_BOARD_SKIN_IDS.IXI_147,
+      name: "IXI-147",
+      designation: "ASPHALT PLANT",
+      description: "High-capacity asphalt plant with aggregate feed, dryer, baghouse, liquid storage, silos and truck flow.",
+      className: "aos-work-board-skin-ixi-147"
+    }),
+    Object.freeze({
+      skinId: IXI_AOS_BOARD_SKIN_IDS.IXI_148,
+      name: "IXI-148",
+      designation: "AGGREGATE WASH",
+      description: "Crushing and wash circuit with screens, classification, water recovery, conveyors and finished stockpiles.",
+      className: "aos-work-board-skin-ixi-148"
+    }),
+    Object.freeze({
+      skinId: IXI_AOS_BOARD_SKIN_IDS.IXI_149,
+      name: "IXI-149",
+      designation: "READY MIX",
+      description: "Ready-mix operation with aggregate storage, batch tower, water systems, truck staging and dispatch flow.",
+      className: "aos-work-board-skin-ixi-149"
+    }),
+    Object.freeze({
+      skinId: IXI_AOS_BOARD_SKIN_IDS.IXI_150,
+      name: "IXI-150",
+      designation: "PRECAST YARD",
+      description: "Precast manufacturing yard with girder beds, pipe and culvert casting, curing, cranes and heavy-haul loadout.",
+      className: "aos-work-board-skin-ixi-150"
     })
   ]);
 
