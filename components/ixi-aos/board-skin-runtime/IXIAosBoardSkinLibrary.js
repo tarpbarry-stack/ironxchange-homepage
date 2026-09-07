@@ -33,7 +33,14 @@ export const IXI_AOS_BOARD_SKIN_IDS =
     IXI_124: "ixi-124",
     IXI_125: "ixi-125",
     IXI_126: "ixi-126",
-    IXI_127: "ixi-127"
+    IXI_127: "ixi-127",
+    IXI_128: "ixi-128",
+    IXI_129: "ixi-129",
+    IXI_130: "ixi-130",
+    IXI_131: "ixi-131",
+    IXI_132: "ixi-132",
+    IXI_133: "ixi-133",
+    IXI_134: "ixi-134"
   });
 
 export const IXI_AOS_BOARD_SKINS =
@@ -233,6 +240,55 @@ export const IXI_AOS_BOARD_SKINS =
       designation: "HOUSING ADDITION",
       description: "Residential subdivision plan with phased lots, streets, utilities, grading, drainage and detention controls.",
       className: "aos-work-board-skin-ixi-127"
+    }),
+    Object.freeze({
+      skinId: IXI_AOS_BOARD_SKIN_IDS.IXI_128,
+      name: "IXI-128",
+      designation: "THE TERMINAL",
+      description: "Intermodal freight terminal with ship berths, container grids, rail yards, heavy-haul lanes and port controls.",
+      className: "aos-work-board-skin-ixi-128"
+    }),
+    Object.freeze({
+      skinId: IXI_AOS_BOARD_SKIN_IDS.IXI_129,
+      name: "IXI-129",
+      designation: "BRIDGE LIFT",
+      description: "Major bridge erection plan with piers, cofferdams, barges, crane radii, lift zones and temporary works.",
+      className: "aos-work-board-skin-ixi-129"
+    }),
+    Object.freeze({
+      skinId: IXI_AOS_BOARD_SKIN_IDS.IXI_130,
+      name: "IXI-130",
+      designation: "STRIP MINE",
+      description: "Open-pit mine plan with terraced benches, haul roads, shovel faces, blast blocks and crusher circuit.",
+      className: "aos-work-board-skin-ixi-130"
+    }),
+    Object.freeze({
+      skinId: IXI_AOS_BOARD_SKIN_IDS.IXI_131,
+      name: "IXI-131",
+      designation: "RAILHEAD",
+      description: "Heavy-equipment transload terminal with switching ladders, classification tracks, loading ramps and service zones.",
+      className: "aos-work-board-skin-ixi-131"
+    }),
+    Object.freeze({
+      skinId: IXI_AOS_BOARD_SKIN_IDS.IXI_132,
+      name: "IXI-132",
+      designation: "DAM WORKS",
+      description: "Hydroelectric construction plan with cofferdams, diversion tunnels, spillway, powerhouse and concrete logistics.",
+      className: "aos-work-board-skin-ixi-132"
+    }),
+    Object.freeze({
+      skinId: IXI_AOS_BOARD_SKIN_IDS.IXI_133,
+      name: "IXI-133",
+      designation: "REFINERY GRID",
+      description: "Process-plant master plan with vessels, pipe racks, tank farms, utilities, loading systems and emergency access.",
+      className: "aos-work-board-skin-ixi-133"
+    }),
+    Object.freeze({
+      skinId: IXI_AOS_BOARD_SKIN_IDS.IXI_134,
+      name: "IXI-134",
+      designation: "AIRFIELD CIVIL",
+      description: "Runway reconstruction plan with phased paving, grading, drainage, lighting circuits and temporary haul routes.",
+      className: "aos-work-board-skin-ixi-134"
     })
   ]);
 
