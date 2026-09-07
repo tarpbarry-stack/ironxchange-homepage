@@ -5,8 +5,9 @@ import {
   useState
 } from "react";
 
-import IXIAosCardCatalogPreview
-  from "../../ixi-aos-card-library/IXIAosCardCatalogPreview";
+import IXIAosCardCatalogPreview, {
+  buildAosCardCatalogPreviewObject
+} from "../../ixi-aos-card-library/IXIAosCardCatalogPreview";
 
 import {
   loadAosCardCatalog
@@ -226,7 +227,30 @@ export default function IXIAosSystemObjectTemplatePicker({
     setError("");
 
     try {
-      await onCreate?.(selectedTemplate);
+      const resolvedPreview = buildAosCardCatalogPreviewObject(
+        selectedTemplate,
+        sample?.sampleData || {}
+      );
+      const previewSchema = Array.isArray(resolvedPreview?.fieldDefinitions)
+        ? resolvedPreview.fieldDefinitions
+        : [];
+      const templateSchema = Array.isArray(selectedTemplate?.fieldSchema)
+        ? selectedTemplate.fieldSchema
+        : [];
+
+      await onCreate?.({
+        ...selectedTemplate,
+        fieldSchema: (templateSchema.length ? templateSchema : previewSchema)
+          .map((definition, index) => ({
+            ...definition,
+            fieldId: clean(definition?.fieldId || definition?.field) || `field-${index + 1}`,
+            label: clean(definition?.label) || `FIELD ${index + 1}`,
+            fieldType: clean(definition?.fieldType || definition?.type || "text") || "text",
+            type: clean(definition?.type || definition?.fieldType || "text") || "text",
+            editable: definition?.editable !== false,
+            presentationOrder: Number(definition?.presentationOrder ?? index)
+          }))
+      });
     } catch (caught) {
       setError(
         caught?.message ||
@@ -275,13 +299,13 @@ export default function IXIAosSystemObjectTemplatePicker({
             </span>
             <h2 id="aos-create-title">
               {creatingChild
-                ? "SELECT CHILD CONTAINER CARD"
-                : "SELECT SYSTEM CONTAINER CARD"}
+                ? "SELECT CHILD CARD"
+                : "SELECT AOS CARD"}
             </h2>
             <p id="aos-create-description">
               {creatingChild
-                ? `Choose the operating layout inside ${parentName}. You will name and define the child on the card before it receives a Passport.`
-                : "Choose the operating layout. You will name and define the container on the card before it receives a Passport."}
+                ? `Choose the operating layout inside ${parentName}. You will name and define it on the card before it receives a Passport and TRAN$ACT.`
+                : "Choose the operating layout. You will name and define it on the card before it receives a Passport and TRAN$ACT."}
             </p>
           </div>
 

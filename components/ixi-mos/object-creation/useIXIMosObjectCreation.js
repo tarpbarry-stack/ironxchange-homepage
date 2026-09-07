@@ -41,6 +41,21 @@ const IXI_SYSTEM_INDEX_TEMPLATE_ID =
 const DRAFT_DISPLAY_NAME =
   "NEW OBJECT";
 
+const UNIVERSAL_AOS_OPERATING_CAPABILITIES = Object.freeze({
+  canContain: true,
+  canCreate: true,
+  canOpenStack: true,
+  canMoveToBoard: true,
+  canTransact: true,
+  canHaveDocuments: true,
+  canHaveExpenses: true,
+  canHaveWorkOrders: true,
+  editable: true,
+  hasConsole: true,
+  hasRail: true,
+  hasRelationships: true
+});
+
 
 function clean(value) {
   return String(value ?? "").trim();
@@ -399,19 +414,7 @@ export default function useIXIMosObjectCreation({
 
       capabilities: {
         canMove: true,
-        ...(rootContainer
-          ? {
-              canContain: true,
-              canCreate: true,
-              canOpenStack: true,
-              canMoveToBoard: true,
-              canTransact: true,
-              editable: true,
-              hasConsole: true,
-              hasRail: true,
-              hasRelationships: true
-            }
-          : {})
+        ...UNIVERSAL_AOS_OPERATING_CAPABILITIES
       },
 
       metadata: {
@@ -422,7 +425,12 @@ export default function useIXIMosObjectCreation({
         destinationContainerId:
           destinationContainerId || null,
         rootContainer:
-          Boolean(rootContainer)
+          Boolean(rootContainer),
+        transactEligible: true,
+        capabilities: {
+          ...safeObject(metadata?.capabilities),
+          ...UNIVERSAL_AOS_OPERATING_CAPABILITIES
+        }
       },
 
       createdAt:
@@ -519,7 +527,7 @@ export default function useIXIMosObjectCreation({
       definitionKey:
         clean(sourceTemplate?.definitionKey) || null,
       objectType:
-        "container",
+        "generic",
       cardTemplateSlug,
       cardTemplateVersion:
         sourceTemplate?.version ?? null,
@@ -623,7 +631,7 @@ export default function useIXIMosObjectCreation({
       definitionKey:
         clean(sourceTemplate?.definitionKey) || null,
       objectType:
-        "container",
+        "generic",
       cardTemplateSlug,
       cardTemplateVersion:
         sourceTemplate?.version ?? null,
@@ -769,6 +777,11 @@ export default function useIXIMosObjectCreation({
           resolvedDraftId,
         metadata: {
           ...safeObject(metadata),
+          transactEligible: true,
+          capabilities: {
+            ...safeObject(metadata?.capabilities),
+            ...UNIVERSAL_AOS_OPERATING_CAPABILITIES
+          },
           draftOnly: false,
           creationState:
             "complete",

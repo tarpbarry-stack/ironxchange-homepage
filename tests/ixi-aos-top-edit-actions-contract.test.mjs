@@ -11,7 +11,7 @@ const editor = read("components/ixi-aos/card-runtime/modules/IXIAosCommercialObj
 const bridge = read("components/ixi-aos/card-runtime/modules/IXIAosCommercialEditorBridge.jsx");
 const runtime = read("components/ixi-aos/card-runtime/modules/IXIAosFace1CardRuntime.jsx");
 
-test("Cards 001-017 use the commercial editor header actions", () => {
+test("Cards 001-019 use the commercial editor header actions", () => {
   assert.match(donor, /\.gov-inline-edit-actions\{position:absolute;top:8px;right:8px/u);
   assert.match(editor, /<nav>/u);
   assert.match(editor, /disabled=\{saving \|\| Boolean\(mediaStatus\)\} onClick=\{save\}>SAVE<\/button>/u);
@@ -26,12 +26,14 @@ test("edit actions remain in the commercial editor header rather than inside fie
   assert.match(bridge, /IXIAosEditorCommandProvider/u);
 });
 
-test("the shared repair covers every numbered card from 004 through 017", () => {
+test("the shared repair covers every numbered card from 001 through 019", () => {
   assert.doesNotMatch(runtime, /IXIAosInlineFace1Editor/u);
 
-  for (let number = 4; number <= 17; number += 1) {
+  for (let number = 1; number <= 18; number += 1) {
     const card = String(number).padStart(3, "0");
-    const suffix = number === 4 || number === 5 || number === 6
+    const suffix = number <= 3
+      ? "Location"
+      : number === 4 || number === 5 || number === 6
       ? "Personnel"
       : number === 7
         ? "EmployeeApplication"
@@ -41,8 +43,15 @@ test("the shared repair covers every numbered card from 004 through 017", () => 
     const source = read(`components/ixi-aos/cards/${card}/IXIAosCard${card}${suffix}.jsx`);
     assert.match(source, /IXIAosCommercialEditorBridge/u, `Card ${card} must use the commercial editor`);
     assert.match(source, /IXIAosFace1CardRuntime/u, `Card ${card} must preserve its Face 1 presentation runtime`);
-    assert.match(source, new RegExp(`cardNumber=\\{${number}\\}`, "u"), `Card ${card} must publish its card number`);
+    if (number === 18) {
+      assert.match(source, /cardNumber=\{cardDefinition\.cardNumber\}/u, "Card 018/019 must publish the selected card number");
+    } else {
+      assert.match(source, new RegExp(`cardNumber=\\{${number}\\}`, "u"), `Card ${card} must publish its card number`);
+    }
   }
+
+  const card019 = read("components/ixi-aos/cards/019/IXIAosCard019.jsx");
+  assert.match(card019, /IXIAosCard018/u, "Card 019 must delegate to the shared Card 018 contract");
 });
 
 test("007A, 007B, and 007C remain on the shared Card 007 edit contract", () => {

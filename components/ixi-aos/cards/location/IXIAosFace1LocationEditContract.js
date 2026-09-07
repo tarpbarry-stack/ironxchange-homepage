@@ -1,6 +1,7 @@
 import {
   clean,
   getFieldDisplayValue,
+  getFieldDefinitions,
   getFieldsByRole,
   getObjectFields,
   getObjectPresentation
@@ -63,12 +64,23 @@ export function getFace1LocationValues(object = {}) {
   const presentation = getObjectPresentation(object);
   const { definition, value: businessIdentifier } = getBusinessIdentifier(object);
   const [fallbackAddressLine1, fallbackAddressLine2] = splitAddress(presentation?.primaryDescriptor);
+  const definitions = getFieldDefinitions(object)
+    .filter(item => item?.editable !== false && clean(item?.fieldId))
+    .sort((a, b) => Number(a?.presentationOrder || 0) - Number(b?.presentationOrder || 0));
+  const nonIdentifierDefinitions = definitions.filter(item => {
+    const role = clean(item?.presentationRole || item?.semanticRole).toLowerCase();
+    return role !== "business-identifier" && clean(item?.fieldId) !== "businessIdentifier";
+  });
+  const primaryDefinition = getFieldsByRole(object, "descriptor-primary")?.[0] || nonIdentifierDefinitions[0] || null;
+  const secondaryDefinition = getFieldsByRole(object, "descriptor-secondary")?.[0] || nonIdentifierDefinitions[1] || null;
+  const primaryValue = primaryDefinition ? clean(getFieldDisplayValue(object, primaryDefinition)) : "";
+  const secondaryValue = secondaryDefinition ? clean(getFieldDisplayValue(object, secondaryDefinition)) : "";
 
   return {
     customerId: clean(fields?.[FACE1_LOCATION_FIELD_IDS.customerId]) || businessIdentifier,
     customerIdLabel: clean(definition?.label) || "CUSTOMER YARD ID",
-    addressLine1: clean(fields?.[FACE1_LOCATION_FIELD_IDS.addressLine1]) || fallbackAddressLine1,
-    addressLine2: clean(fields?.[FACE1_LOCATION_FIELD_IDS.addressLine2]) || fallbackAddressLine2,
+    addressLine1: clean(fields?.[FACE1_LOCATION_FIELD_IDS.addressLine1]) || primaryValue || fallbackAddressLine1,
+    addressLine2: clean(fields?.[FACE1_LOCATION_FIELD_IDS.addressLine2]) || secondaryValue || fallbackAddressLine2,
     businessIdentifierDefinition: definition
   };
 }

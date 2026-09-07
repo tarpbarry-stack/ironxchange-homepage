@@ -126,7 +126,9 @@ test("AOS Work routes scoreboard plus through template selection and draft provi
   assert.match(picker, /showScaleControl=\{false\}/u);
   assert.match(catalogPreview, /scaleMode: previewScaleMode/u);
   assert.match(creationHook, /function createRootContainerDraft/u);
-  assert.match(creationHook, /objectType:\s*"container"/u);
+  assert.match(creationHook, /objectType:\s*"generic"/u);
+  assert.match(creationHook, /canTransact:\s*true/u);
+  assert.match(creationHook, /transactEligible:\s*true/u);
   assert.match(creationHook, /rootContainer:\s*true/u);
   assert.match(
     creationHook,
@@ -205,8 +207,9 @@ test("every AOS card plus opens the same 001-019 selector for a child", async ()
   );
 
   assert.match(picker, /parentObject = null/u);
-  assert.match(picker, /SELECT CHILD CONTAINER CARD/u);
+  assert.match(picker, /SELECT CHILD CARD/u);
   assert.match(picker, /parentLabel=\{parentName\}/u);
+  assert.match(picker, /buildAosCardCatalogPreviewObject/u);
 });
 
 
@@ -227,8 +230,9 @@ test("Cards 018 and 019 are selectable creation layouts with safe draft cancella
   ]);
 
   assert.match(contract, /IXI_AOS_CARD_NUMBER_MAX = 19/u);
-  assert.match(equipmentCard, /isCreationDraft/u);
-  assert.match(equipmentCard, /onDeleteObject\(object\)/u);
+  assert.match(equipmentCard, /IXIAosCommercialEditorBridge/u);
+  assert.match(equipmentCard, /onCancelDraft=\{contractProps\.onDeleteObject\}/u);
+  assert.match(equipmentCard, /IXIAosFace1CardRuntime/u);
   assert.match(locationsCard, /IXIAosCard018/u);
 });
 
@@ -251,7 +255,8 @@ test("all numbered cards discard an unsaved creation draft on Cancel", async () 
     "014/IXIAosCard014.jsx",
     "015/IXIAosCard015.jsx",
     "016/IXIAosCard016.jsx",
-    "017/IXIAosCard017.jsx"
+    "017/IXIAosCard017.jsx",
+    "018/IXIAosCard018.jsx"
   ];
 
   for (const card of cards) {
@@ -269,4 +274,10 @@ test("all numbered cards discard an unsaved creation draft on Cancel", async () 
       card
     );
   }
+
+  const card019 = await readFile(
+    new URL("../components/ixi-aos/cards/019/IXIAosCard019.jsx", import.meta.url),
+    "utf8"
+  );
+  assert.match(card019, /IXIAosCard018/u);
 });

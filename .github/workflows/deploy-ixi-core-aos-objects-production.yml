@@ -6,7 +6,7 @@ on:
       commit_sha:
         description: Immutable IX-Core commit SHA
         required: true
-        default: c5d41fccae5f7966be8aa7178e74beb0120ab687
+        default: 1227e98e0e2ebe625ccbc7f9b40eb72901322df2
   push:
     branches:
       - main
@@ -27,7 +27,7 @@ jobs:
     env:
       AWS_REGION: ${{ secrets.AWS_REGION }}
       AWS_INSTANCE_ID: ${{ secrets.AWS_INSTANCE_ID }}
-      IXI_CORE_SHA: ${{ inputs.commit_sha || 'c5d41fccae5f7966be8aa7178e74beb0120ab687' }}
+      IXI_CORE_SHA: ${{ inputs.commit_sha || '1227e98e0e2ebe625ccbc7f9b40eb72901322df2' }}
 
     steps:
       - name: Validate immutable release
@@ -69,7 +69,7 @@ jobs:
           ARCHIVE=/tmp/ixi-core-aos-release-__IXI_CORE_SHA__.tgz
           BACKUP_ROOT=/var/backups/ixi-core-releases
           BACKUP=$BACKUP_ROOT/pre-aos-__IXI_CORE_SHA__.tgz
-          MANAGED_FILES='mos/objects/objectService.js mos/routes/mosRouter.js'
+          MANAGED_FILES='mos/objects/objectService.js mos/routes/mosRouter.js mos/provisioning/aosObjectProvisioningService.js'
           SUCCESS=0
 
           run_pm2() {
@@ -96,10 +96,11 @@ jobs:
           verify_managed_file() {
             file="$1"
             baseline_sha="$2"
-            release_sha="$3"
+            previous_release_sha="$3"
+            release_sha="$4"
             actual_sha="$(sha256sum "$APP/$file" | awk '{print $1}')"
 
-            if [ "$actual_sha" != "$baseline_sha" ] && [ "$actual_sha" != "$release_sha" ]; then
+            if [ "$actual_sha" != "$baseline_sha" ] && [ "$actual_sha" != "$previous_release_sha" ] && [ "$actual_sha" != "$release_sha" ]; then
               echo "$file has unrecognized live drift: $actual_sha" >&2
               exit 1
             fi
@@ -124,11 +125,18 @@ jobs:
           verify_managed_file \
             mos/objects/objectService.js \
             9ecb7fe8524a45550a8922f79ae42360a3522d69a163b9a81aa89c71e71632c4 \
-            8f2d8a98ff269005d2dcd04bd65786f8a191f1c4f365f0a272e68f5dce2b9cb8
+            8f2d8a98ff269005d2dcd04bd65786f8a191f1c4f365f0a272e68f5dce2b9cb8 \
+            bb6a022ae20d2e7b539aaf5ac027f3a60b9bc22c3f7d0ecd492e38deb6b05ce2
           verify_managed_file \
             mos/routes/mosRouter.js \
             bbdb5427430e459e5acfb283d67b446c2c820ed064c3c203089cd27d9f975303 \
-            b583bb6e385740935db7a94ddf005f54834694df245dd848d1b6e952edde3d40
+            b583bb6e385740935db7a94ddf005f54834694df245dd848d1b6e952edde3d40 \
+            a2bd663d154beb00bbbbd494445e9cee2a6b0995a9ea63bace4dfd3c1e95cba2
+          verify_managed_file \
+            mos/provisioning/aosObjectProvisioningService.js \
+            9d0565ab55587cd15b525b4a47cdbdb31c1c5b28fb96dd42badd39effcd1e254 \
+            9d0565ab55587cd15b525b4a47cdbdb31c1c5b28fb96dd42badd39effcd1e254 \
+            7007eadef07ae610af910055685d181ce6bf756fdfb0e01f405419b71887ad50
 
           rm -rf "$STAGE"
           mkdir -p "$STAGE" "$BACKUP_ROOT"

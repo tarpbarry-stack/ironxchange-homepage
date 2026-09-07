@@ -64,6 +64,9 @@ const SAMPLE_LOCATION_OBJECT = Object.freeze({
     }
   },
   fieldDefinitions: [
+    { fieldId: "businessIdentifier", label: "ID", type: "text", fieldType: "text", presentationRole: "business-identifier", semanticRole: "business-identifier", presentationOrder: 0, editable: true },
+    { fieldId: "addressLine1", label: "ADDRESS", type: "text", fieldType: "text", presentationRole: "descriptor-primary", presentationOrder: 1, editable: true },
+    { fieldId: "addressLine2", label: "CITY / STATE / ZIP", type: "text", fieldType: "text", presentationRole: "descriptor-secondary", presentationOrder: 2, editable: true },
     { fieldId: "gateCode", label: "GATE CODE", type: "text", presentationFace: 2, editable: true },
     { fieldId: "gps", label: "GPS COORDINATES", type: "text", presentationFace: 2, editable: true },
     { fieldId: "contact", label: "YARD CONTACT", type: "text", presentationFace: 2, editable: true },
@@ -108,6 +111,7 @@ const SAMPLE_LOCATION_OBJECT = Object.freeze({
     { fieldId: "downtime", label: "DOWNTIME YTD", type: "text", presentationFace: 5, editable: true }
   ],
   fields: {
+    businessIdentifier: "482917", addressLine1: "2400 AVIATION DRIVE", addressLine2: "DFW AIRPORT, TX 75261",
     gateCode: "4821", gps: "32.899110, -97.040339", contact: "JOHN CARTER · 432-555-0186", hours: "MON–SAT 6:00 AM–6:00 PM", semiAccess: "YES", trailerAccess: "YES", gateWidth: "32 FT", clearance: "OPEN", forklift: "15,000 LB", electric: "120 / 240 / 480", air: "120 PSI", water: "YES",
     ownership: "OWNED", acquired: "MAR 12, 2018", propertyOwner: "IRONXCHANGE HOLDINGS LLC", propertyManager: "JOHN CARTER", landValue: 2750000, improvementValue: 6000000, currentValue: 8750000, lastAppraised: "AUG 12, 2024", electricCost: 4250, waterCost: 1150, insuranceCost: 1450, taxCost: 2980,
     nextObligation: "ELECTRIC", nextAmount: 4250, due30: 11540, ytdPaid: 321600, utilityAccount: "DFW-UTIL-22014", insurancePolicy: "IXI-PROP-8842", taxAccount: "TARRANT-77104",

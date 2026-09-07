@@ -1,8 +1,10 @@
-import { useEffect, useState } from "react";
-
 import IXISystemIndexCard from "../../../ixi-mos/IXISystemIndexCard";
+import IXIAosDataContractCardAdapter from "../../card-runtime/IXIAosDataContractCardAdapter";
+import { useIXIAosEditorCommands } from "../../card-runtime/IXIAosEditorCommandContext";
 import IXIAosCardHeaderControls from "../../card-runtime/modules/IXIAosCardHeaderControls";
 import IXIAosCardHeaderIdentity from "../../card-runtime/modules/IXIAosCardHeaderIdentity";
+import IXIAosCommercialEditorBridge from "../../card-runtime/modules/IXIAosCommercialEditorBridge";
+import IXIAosFace1CardRuntime from "../../card-runtime/modules/IXIAosFace1CardRuntime";
 
 export const CARD_018 = Object.freeze({
   cardNumber: 18,
@@ -18,7 +20,7 @@ function clean(value) {
   return String(value ?? "").trim();
 }
 
-export default function IXIAosCard018({
+function IXIAosCard018Presentation({
   object = {},
   children = [],
   objects = [],
@@ -48,45 +50,12 @@ export default function IXIAosCard018({
   loopChildDeck = true
 }) {
   const objectId = clean(object?.objectId || object?.id?.uuid || object?.id);
-  const isCreationDraft =
-    clean(object?.status).toLowerCase() === "draft" &&
-    object?.metadata?.draftOnly === true &&
-    clean(object?.metadata?.creationState).toLowerCase() === "naming";
-  const [editing, setEditing] = useState(isCreationDraft);
-  const [draftName, setDraftName] = useState(clean(object?.displayName));
+  const editorCommands = useIXIAosEditorCommands();
   const items = Array.isArray(children) && children.length ? children : (Array.isArray(objects) ? objects : []);
   const storedFace = Math.max(1, Number(ixiState?.face || 1));
   const isContainerFace =
     storedFace === 1 ||
     (loopChildDeck && storedFace > items.length + 1);
-
-  useEffect(() => {
-    setDraftName(clean(object?.displayName));
-
-    if (isCreationDraft) {
-      setEditing(true);
-    }
-  }, [objectId, isCreationDraft, object?.displayName]);
-
-  function cancelEditing(event) {
-    event?.preventDefault?.();
-    event?.stopPropagation?.();
-
-    if (isCreationDraft && typeof onDeleteObject === "function") {
-      onDeleteObject(object);
-      return;
-    }
-
-    setEditing(false);
-  }
-
-  async function saveName(event) {
-    event?.preventDefault?.();
-    event?.stopPropagation?.();
-    const displayName = clean(draftName) || clean(object?.displayName) || defaultDisplayName;
-    await onSaveObject?.({ object: { ...object, displayName } });
-    setEditing(false);
-  }
 
   return (
     <IXIAosCardHeaderIdentity object={object}>
@@ -114,13 +83,12 @@ export default function IXIAosCard018({
         loopChildDeck={loopChildDeck}
         onSavePresentation={(_, action = {}) => {
           if (action?.intent === "edit-face-1") {
-            setDraftName(clean(object?.displayName));
-            setEditing(true);
+            editorCommands?.openEditor?.({ faceNumber: 1 });
           }
         }}
       />
 
-      {!editing && isContainerFace ? (
+      {isContainerFace ? (
         <header className="c018-head">
           <div className="c018-identity">
             <span>SYSTEM INDEX</span>
@@ -131,27 +99,13 @@ export default function IXIAosCard018({
             canEdit
             canTransact={typeof onOpenTransact === "function"}
             onAdd={() => onAddObject?.(object)}
-            onToggleEdit={() => { setDraftName(clean(object?.displayName)); setEditing(true); }}
             onTransact={() => onOpenTransact?.(object)}
             onHide={onHideObject}
             onDelete={onDeleteObject}
             onOpenConsole={onOpenTransact}
             skinId="v12"
           />
-        </header>
-      ) : null}
-
-      {editing ? (
-        <form className="c018-editor" onSubmit={saveName} onPointerDown={event => event.stopPropagation()}>
-          <header>
-            <div><small>CARD {String(cardDefinition.cardNumber).padStart(3, "0")} · FACE 1</small><strong>{editHeading}</strong></div>
-            <nav><button type="button" onClick={cancelEditing}>CANCEL</button><button type="submit">SAVE</button></nav>
-          </header>
-          <main>
-            <label><span>INDEX NAME</span><input autoFocus value={draftName} onChange={event => setDraftName(event.target.value)} /></label>
-            <p>The child deck, values, media and relationships remain canonical AOS data.</p>
-          </main>
-        </form>
+      </header>
       ) : null}
 
       <style jsx>{`
@@ -162,10 +116,46 @@ export default function IXIAosCard018({
         :global(.ixi-card-018 .index-topline){display:none!important}
         :global(.ixi-card-018 .system-index-identity){padding-top:49px!important}
         .c018-head{position:absolute;inset:0 0 auto;height:43px;padding:7px 10px;border-bottom:1px solid #303531;background:linear-gradient(180deg,#181b19,#101210);z-index:120}.c018-identity{max-width:188px}.c018-identity>span{display:block;color:#ffc400;font-size:6px;font-weight:950;letter-spacing:.07em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.c018-identity h2{margin:4px 0 0;color:#f7f8f7;font-size:14px;font-weight:950;line-height:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-        .c018-editor{position:absolute;inset:7px 7px 24px;z-index:200;overflow:hidden;border:1px solid #4a504c;border-radius:8px;background:#0a0d0b;box-shadow:0 18px 40px #000c;color:#eef1ef}
-        .c018-editor header{height:42px;display:flex;align-items:center;justify-content:space-between;padding:0 9px;border-bottom:1px solid #303531;background:#151916}.c018-editor header small{display:block;color:#ffc400;font-size:6px;font-weight:950}.c018-editor header strong{display:block;margin-top:3px;font-size:10px}.c018-editor nav{display:flex;gap:4px}.c018-editor button{height:22px;padding:0 7px;border:1px solid #4a504c;border-radius:4px;background:#0e110f;color:#dfe3e0;font-size:6px;font-weight:950}.c018-editor button:last-child{border-color:#ffc40066;color:#ffc400}.c018-editor main{padding:12px}.c018-editor label span{display:block;margin-bottom:5px;color:#8b938d;font-size:6px;font-weight:950}.c018-editor input{width:100%;height:29px;padding:0 8px;border:1px solid #3c433f;border-radius:4px;background:#111411;color:#fff;font-size:9px;font-weight:900;outline:none}.c018-editor input:focus{border-color:#ffc400}.c018-editor p{margin:12px 0 0;color:#69716c;font-size:6px;font-weight:800;line-height:1.5}
       `}</style>
     </div>
     </IXIAosCardHeaderIdentity>
+  );
+}
+
+export default function IXIAosCard018(props) {
+  const cardDefinition = props.cardDefinition || CARD_018;
+
+  return (
+    <IXIAosDataContractCardAdapter {...props} showBusinessIdentifier={false}>
+      {contractProps => (
+        <IXIAosCommercialEditorBridge
+          object={contractProps.object}
+          onSaveObject={contractProps.onSaveObject}
+          persistenceAdapter={contractProps.hasPersistenceAdapter ? contractProps.onSaveObject : null}
+          onCancelDraft={contractProps.onDeleteObject}
+          mediaEnabled
+        >
+          {({ object: runtimeObject }) => (
+            <IXIAosFace1CardRuntime
+              cardNumber={cardDefinition.cardNumber}
+              object={runtimeObject}
+              onSaveObject={contractProps.onSaveObject}
+              includeBusinessIdentifier
+              allowAddFields
+            >
+              {face1 => (
+                <IXIAosCard018Presentation
+                  {...contractProps}
+                  {...props}
+                  object={face1.object}
+                  onSaveObject={face1.onSaveObject}
+                  cardDefinition={cardDefinition}
+                />
+              )}
+            </IXIAosFace1CardRuntime>
+          )}
+        </IXIAosCommercialEditorBridge>
+      )}
+    </IXIAosDataContractCardAdapter>
   );
 }

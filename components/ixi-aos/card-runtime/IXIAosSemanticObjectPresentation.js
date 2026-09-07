@@ -439,14 +439,24 @@ export function getObjectActionCapabilities(object = {}) {
     capabilities?.transact ??
     capabilities?.hasTransact;
 
+  const hasAosPassport = Boolean(
+    clean(object?.passportId || object?.ixiPassportId || object?.passport?.passportId || object?.passport?.id) ||
+    asArray(object?.identities).some(identity =>
+      clean(identity?.identityType || identity?.type || identity?.kind).toLowerCase() === "ixi-passport" &&
+      clean(identity?.passportId || identity?.value || identity?.id)
+    )
+  );
+
   const capabilityTransact = explicitTransact !== undefined
     ? explicitTransact === true
     : Boolean(
-      capabilities?.canHaveExpenses ||
-      capabilities?.canHaveWorkOrders ||
-      capabilities?.canHaveJobTickets ||
-      capabilities?.canHaveDocuments
-    );
+        hasAosPassport ||
+        metadata?.transactEligible === true ||
+        capabilities?.canHaveExpenses ||
+        capabilities?.canHaveWorkOrders ||
+        capabilities?.canHaveJobTickets ||
+        capabilities?.canHaveDocuments
+      );
 
   const capabilityConsole =
     capabilities?.hasConsole !== false &&

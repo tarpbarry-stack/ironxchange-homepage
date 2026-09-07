@@ -84,6 +84,34 @@ function card009Sample() {
   };
 }
 
+function card010Sample() {
+  return {
+    objectId: "preview-card-010", entityId: "aos-card-preview-entity", objectType: "customer-defined-object",
+    singularLabel: "RECORD", pluralLabel: "RECORDS", displayName: "PLANT 4 · COMPRESSOR A-17", status: "active",
+    capabilities: { canContain: true, canCreate: true, canTransact: true, editable: true, hasConsole: true, hasRail: true, hasRelationships: true },
+    presentation: { detailsTitle: "TECHNICAL DATA", relationshipsTitle: "RELATIONSHIPS", sampleUse: "STRUCTURED / TECHNICAL RECORD" },
+    fieldDefinitions: [
+      { fieldId: "businessIdentifier", label: "ID #", type: "text", fieldType: "text", editable: true, presentationOrder: 0, semanticRole: "business-identifier", presentationRole: "business-identifier" },
+      { fieldId: "classification", label: "CLASSIFICATION", type: "text", fieldType: "text", editable: true, presentationOrder: 1 },
+      { fieldId: "status", label: "STATUS", type: "text", fieldType: "text", editable: true, presentationOrder: 2 },
+      { fieldId: "manufacturer", label: "MANUFACTURER", type: "text", fieldType: "text", editable: true, presentationOrder: 3 },
+      { fieldId: "model", label: "MODEL / SPEC", type: "text", fieldType: "text", editable: true, presentationOrder: 4 },
+      { fieldId: "serial", label: "SERIAL / REFERENCE", type: "text", fieldType: "text", editable: true, presentationOrder: 5 },
+      { fieldId: "capacity", label: "RATED CAPACITY", type: "text", fieldType: "text", editable: true, presentationOrder: 6 },
+      { fieldId: "commissioned", label: "COMMISSIONED", type: "text", fieldType: "text", editable: true, presentationOrder: 7 },
+      { fieldId: "inspection", label: "LAST INSPECTION", type: "text", fieldType: "text", editable: true, presentationOrder: 8 },
+      { fieldId: "owner", label: "RESPONSIBLE GROUP", type: "text", fieldType: "text", editable: true, presentationOrder: 9 }
+    ],
+    fields: { businessIdentifier: "A-17", classification: "ROTARY SCREW", status: "ACTIVE", manufacturer: "ATLAS COPCO", model: "GA 90 VSD+", serial: "APF-22-41871", capacity: "125 HP · 460 V", commissioned: "APR 2022", inspection: "AUG 04, 2026", owner: "PLANT MAINTENANCE" },
+    relationships: [
+      { id: "c010-rel-1", displayLabel: "LOCATED AT", displayName: "PLANT 4" },
+      { id: "c010-rel-2", displayLabel: "RESPONSIBLE GROUP", displayName: "PLANT MAINTENANCE" },
+      { id: "c010-rel-3", displayLabel: "RELATED SYSTEM", displayName: "AIR SYSTEM 04" }
+    ],
+    media: [], metadata: { sampleUse: "STRUCTURED / TECHNICAL RECORD", nomenclature: { singular: "RECORD", plural: "RECORDS" } }
+  };
+}
+
 function card011Sample() {
   return {
     objectId: "preview-card-011", entityId: "aos-card-preview-entity", objectType: "customer-defined-object",
@@ -309,13 +337,14 @@ function card019Sample() {
   };
 }
 
-function previewObject(template = {}, sample = {}) {
+export function buildAosCardCatalogPreviewObject(template = {}, sample = {}) {
   const cardNumber = resolveCatalogCardNumber(template);
   const hasSampleFields = Object.keys(safeObject(sample?.fields)).length > 0;
   let resolvedSample = sample;
   if (!hasSampleFields) {
     if (cardNumber === 7) resolvedSample = universal007Sample();
     else if (cardNumber === 9) resolvedSample = card009Sample();
+    else if (cardNumber === 10) resolvedSample = card010Sample();
     else if (cardNumber === 11) resolvedSample = card011Sample();
     else if (cardNumber === 12) resolvedSample = card012Sample();
     else if (cardNumber === 13) resolvedSample = card013Sample();
@@ -392,7 +421,7 @@ export default function IXIAosCardCatalogPreview({ template = null, sampleData =
   const [transactOpen, setTransactOpen] = useState(false);
   const [previewObjectOverride, setPreviewObjectOverride] = useState(null);
   const [previewItems, setPreviewItems] = useState(() => getInitialPreviewItems(template || {}, directItems));
-  const baseObject = useMemo(() => previewObject(template || {}, sampleData), [template, sampleData]);
+  const baseObject = useMemo(() => buildAosCardCatalogPreviewObject(template || {}, sampleData), [template, sampleData]);
 
   useEffect(() => {
     setPreviewObjectOverride(null);

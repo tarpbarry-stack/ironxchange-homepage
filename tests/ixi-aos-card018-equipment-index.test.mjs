@@ -64,7 +64,7 @@ test("Card 018 machine browsing removes the container header and loops without a
   ]);
 
   assert.match(card, /loopChildDeck = true/);
-  assert.match(card, /!editing && isContainerFace/);
+  assert.match(card, /\{isContainerFace \? \(/);
   assert.match(card, /loopChildDeck=\{loopChildDeck\}/);
   assert.match(systemIndex, /loopChildDeck &&\s*activeItemIndex === items\.length - 1/);
   assert.match(systemIndex, /loopChildDeck\s*\? lastChildFace\s*:\s*getLastCollectionFace/);
