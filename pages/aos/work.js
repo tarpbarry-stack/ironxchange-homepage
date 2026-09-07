@@ -1565,6 +1565,136 @@ function getDirectContainerChildIds(
     .filter(Boolean);
 }
 
+async function clearContainerChildrenToParent(
+  container
+) {
+  const containerId = String(
+    container?.objectId ||
+    container?.id ||
+    ""
+  ).trim();
+
+  const parentContainerId = String(
+    container?.directContainerId ||
+    ""
+  ).trim();
+
+  if (!containerId || !parentContainerId) {
+    const error = new Error(
+      "THIS CARD DOES NOT HAVE A CANONICAL PARENT"
+    );
+    error.code = "IXI_AOS_CLEAR_PARENT_REQUIRED";
+    throw error;
+  }
+
+  const childIds =
+    getDirectContainerChildIds(container);
+
+  if (!childIds.length) {
+    return {
+      ok: true,
+      moved: 0,
+      parentContainerId
+    };
+  }
+
+  const canonicalChildren = [];
+
+  for (const childId of childIds) {
+    const placement =
+      await commitMosContainerPlacement({
+        objectId: childId,
+        destinationContainerId:
+          parentContainerId,
+        metadata: {
+          createdFrom:
+            "aos-clear-children-to-parent",
+          clearedContainerId:
+            containerId,
+          destinationParentId:
+            parentContainerId
+        }
+      });
+
+    canonicalChildren.push(
+      placement.object
+    );
+  }
+
+  const canonicalById = new Map(
+    canonicalChildren.map(object => [
+      String(object?.objectId || ""),
+      object
+    ])
+  );
+
+  setAosObjects(current =>
+    current.map(object => {
+      const canonical = canonicalById.get(
+        String(object?.objectId || "")
+      );
+
+      return canonical
+        ? mergeAosCanonicalObject(
+            object,
+            canonical
+          )
+        : object;
+    })
+  );
+
+  let nextPlacements =
+    workspacePlacements;
+
+  childIds.forEach(childId => {
+    nextPlacements =
+      moveObjectToWorkspaceSurface({
+        placements:
+          nextPlacements,
+        objectId:
+          childId,
+        targetSurface:
+          `container:${parentContainerId}`
+      });
+  });
+
+  setWorkspacePlacements(
+    nextPlacements
+  );
+
+  const layoutResult =
+    await saveWorkspaceLayout(
+      nextPlacements
+    );
+
+  if (!layoutResult) {
+    const error = new Error(
+      "IX CORE MOVED THE CHILDREN, BUT THE WORKSPACE LAYOUT WAS NOT CONFIRMED"
+    );
+    error.code =
+      "IXI_AOS_CLEAR_PARENT_LAYOUT_UNCONFIRMED";
+    throw error;
+  }
+
+  showAosObjectNotice({
+    objectId:
+      containerId,
+    message:
+      `${childIds.length} CHILD${childIds.length === 1 ? "" : "REN"} RETURNED TO PARENT`,
+    tone:
+      "success",
+    duration:
+      2600
+  });
+
+  return {
+    ok: true,
+    moved: childIds.length,
+    parentContainerId,
+    children: canonicalChildren
+  };
+}
+
   /*
    * MOS CONTAINERS
    *
@@ -3722,6 +3852,10 @@ onGatherContainerChildren={
 
 onReturnContainerChildren={
   returnContainerChildren
+}
+
+onClearContainerToParent={
+  clearContainerChildrenToParent
 }
 
   onCreateObjectChild={

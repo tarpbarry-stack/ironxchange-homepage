@@ -48,6 +48,9 @@ const work = read(
 const machineStateClient = read(
   "lib/ixiMachineStateClient.js"
 );
+const identityFace = read(
+  "components/ixi-aos/card-runtime/IXIAosCardIdentityFace.jsx"
+);
 
 test("AOS container policy reaches the universal sortable chassis", () => {
   assert.match(
@@ -216,4 +219,35 @@ test("every universal AOS container mounts a visible accepting target", () => {
     containerDropTarget,
     /outline: 2px solid rgba\(255, 196, 0, \.80\)[\s\S]*?0 0 24px rgba\(255, 196, 0, \.68\)/
   );
+});
+
+test("durable AOS containers wire BOARD, RECALL, and RETURN to the operating runtime", () => {
+  assert.match(
+    workspaceBoard,
+    /workspaceDropSurface=\{`container:\$\{id\}`\}[\s\S]*?onBoard=\{\(\) =>[\s\S]*?onExposeContainerChildren/
+  );
+  assert.match(
+    workspaceBoard,
+    /workspaceDropSurface=\{`container:\$\{id\}`\}[\s\S]*?onRecall=\{\(\) =>[\s\S]*?onGatherContainerChildren/
+  );
+  assert.match(
+    workspaceBoard,
+    /workspaceDropSurface=\{`container:\$\{id\}`\}[\s\S]*?onReturn=\{\(\) =>[\s\S]*?onReturnContainerChildren/
+  );
+  assert.doesNotMatch(
+    workspaceBoard,
+    /workspaceDropSurface=\{`container:\$\{id\}`\}[\s\S]{0,1800}onExposeContents=/
+  );
+});
+
+test("Face 2 can canonically clear direct children back to the card parent", () => {
+  assert.match(identityFace, /data-ixi-clear-to-parent/);
+  assert.match(identityFace, /CLEAR CHILDREN TO PARENT/);
+  assert.match(identityFace, /CONFIRM RETURN/);
+  assert.match(work, /async function clearContainerChildrenToParent/);
+  assert.match(work, /destinationContainerId:\s*parentContainerId/);
+  assert.match(work, /aos-clear-children-to-parent/);
+  assert.match(work, /await commitMosContainerPlacement/);
+  assert.match(work, /container:\$\{parentContainerId\}/);
+  assert.match(work, /onClearContainerToParent=\{/);
 });

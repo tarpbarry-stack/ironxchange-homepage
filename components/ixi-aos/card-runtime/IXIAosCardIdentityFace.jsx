@@ -11,6 +11,7 @@ function formatCardNumber(cardNumber) {
 export default function IXIAosCardIdentityFace({
   cardNumber,
   object = {},
+  objects = [],
   ixiState = {},
   onCycleFace = null,
   onSendFront = null,
@@ -20,6 +21,7 @@ export default function IXIAosCardIdentityFace({
   onRailSend = null,
   armedDestination = "",
   onSendToArmedDestination = null,
+  onClearToParent = null,
   onDeleteObject = null
 }) {
   const number = formatCardNumber(cardNumber);
@@ -28,6 +30,41 @@ export default function IXIAosCardIdentityFace({
   const [deleteArmed, setDeleteArmed] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState("");
+  const [clearArmed, setClearArmed] = useState(false);
+  const [clearing, setClearing] = useState(false);
+  const [clearError, setClearError] = useState("");
+  const directChildCount = Array.isArray(objects)
+    ? objects.length
+    : 0;
+  const canClearToParent = Boolean(
+    object?.directContainerId &&
+    typeof onClearToParent === "function"
+  );
+
+  async function clearToParent(event) {
+    event?.preventDefault?.();
+    event?.stopPropagation?.();
+
+    if (!clearArmed) {
+      setClearError("");
+      setClearArmed(true);
+      return;
+    }
+
+    if (clearing || !canClearToParent) return;
+
+    setClearing(true);
+    setClearError("");
+
+    try {
+      await onClearToParent(object);
+      setClearArmed(false);
+      setClearing(false);
+    } catch (error) {
+      setClearing(false);
+      setClearError(error?.message || "CLEAR TO PARENT FAILED");
+    }
+  }
 
   async function deleteForever(event) {
     event?.preventDefault?.();
@@ -67,6 +104,37 @@ export default function IXIAosCardIdentityFace({
         <strong>IXI - {passportSerial}</strong>
         <p>Manage this record and its canonical server registration.</p>
       </div>
+
+      {canClearToParent ? (
+        <div className="clear-parent-zone" onPointerDown={event => event.stopPropagation()}>
+          <span>
+            {directChildCount
+              ? `${directChildCount} DIRECT CHILD${directChildCount === 1 ? "" : "REN"} · PRESERVES THIS CARD'S PARENT`
+              : "NO DIRECT CHILDREN · THIS CARD'S PARENT IS PRESERVED"}
+          </span>
+          <div className="clear-parent-actions">
+            {clearArmed && !clearing ? (
+              <button type="button" className="cancel-clear" onClick={event => { event.stopPropagation(); setClearArmed(false); setClearError(""); }}>
+                CANCEL
+              </button>
+            ) : null}
+            <button
+              type="button"
+              className={clearArmed ? "clear-to-parent armed" : "clear-to-parent"}
+              data-ixi-clear-to-parent
+              disabled={clearing || directChildCount === 0}
+              onClick={clearToParent}
+            >
+              {clearing
+                ? "RETURNING CHILDREN IN IX CORE…"
+                : clearArmed
+                  ? `CONFIRM RETURN ${directChildCount} TO PARENT`
+                  : "CLEAR CHILDREN TO PARENT"}
+            </button>
+          </div>
+          {clearError ? <em role="alert">{clearError}</em> : null}
+        </div>
+      ) : null}
 
       {typeof onDeleteObject === "function" ? (
         <div className="delete-zone" onPointerDown={event => event.stopPropagation()}>
@@ -200,6 +268,36 @@ export default function IXIAosCardIdentityFace({
           align-items: center;
           gap: 4px;
         }
+
+        .clear-parent-zone {
+          position: absolute;
+          left: 22px;
+          right: 22px;
+          bottom: ${typeof onDeleteObject === "function" ? "88px" : "37px"};
+          z-index: 61;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 4px;
+        }
+
+        .clear-parent-zone > span,
+        .clear-parent-zone > em {
+          color: #ffc400;
+          font-size: 6px;
+          font-style: normal;
+          font-weight: 950;
+          letter-spacing: .08em;
+          text-align: center;
+          text-transform: uppercase;
+        }
+
+        .clear-parent-actions { width: 100%; display: flex; gap: 5px; }
+        .clear-parent-actions button { min-height: 34px; border-radius: 4px; padding: 0 8px; font-size: 7px; font-weight: 950; letter-spacing: .05em; cursor: pointer; }
+        .clear-to-parent { flex: 1; border: 1px solid rgba(255,196,0,.34); background: rgba(255,196,0,.045); color: #ffc400; }
+        .clear-to-parent.armed { border-color: rgba(255,196,0,.85); background: rgba(255,196,0,.16); color: #ffe06a; }
+        .clear-to-parent:disabled { cursor: default; opacity: .36; }
+        .cancel-clear { width: 72px; border: 1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.025); color: rgba(255,255,255,.55); }
 
         .delete-zone > span,
         .delete-zone > em {

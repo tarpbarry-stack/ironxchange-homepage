@@ -215,6 +215,7 @@ export default function IXIAosWorkspaceBoard({
   onExposeContainerChildren,
   onGatherContainerChildren,
   onReturnContainerChildren,
+  onClearContainerToParent,
 
   onSaveContainerPresentation,
 
@@ -585,14 +586,26 @@ export default function IXIAosWorkspaceBoard({
                   });
                 }}
 
-                onExposeContents={() =>
+                onBoard={() =>
                   onExposeContainerChildren?.(
                     commandTarget
                   )
                 }
 
-                onGatherContents={() =>
+                onRecall={() =>
                   onGatherContainerChildren?.(
+                    commandTarget
+                  )
+                }
+
+                onReturn={() =>
+                  onReturnContainerChildren?.(
+                    commandTarget
+                  )
+                }
+
+                onClearToParent={() =>
+                  onClearContainerToParent?.(
                     commandTarget
                   )
                 }
