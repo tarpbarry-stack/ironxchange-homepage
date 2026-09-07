@@ -11,7 +11,8 @@ export const IXI_AOS_BOARD_SKIN_IDS =
     IXI_102: "ixi-102",
     IXI_103: "ixi-103",
     IXI_104: "ixi-104",
-    IXI_105: "ixi-105"
+    IXI_105: "ixi-105",
+    IXI_106: "ixi-106"
   });
 
 export const IXI_AOS_BOARD_SKINS =
@@ -57,6 +58,13 @@ export const IXI_AOS_BOARD_SKINS =
       designation: "BLACK SIGNAL",
       description: "Jet-black diagnostic field with sparse telemetry traces and active signal pulses.",
       className: "aos-work-board-skin-ixi-105"
+    }),
+    Object.freeze({
+      skinId: IXI_AOS_BOARD_SKIN_IDS.IXI_106,
+      name: "IXI-106",
+      designation: "LOAD PATH",
+      description: "Jet-black structural field with calibrated load paths and restrained force nodes.",
+      className: "aos-work-board-skin-ixi-106"
     })
   ]);
 
