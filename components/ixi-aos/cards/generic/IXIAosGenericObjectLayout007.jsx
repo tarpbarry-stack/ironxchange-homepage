@@ -177,9 +177,9 @@ export default function IXIAosGenericObjectLayout007({
   onDeleteObject = null,
   onOpenConsole = null,
   onOpenTransact = null,
-  onPrimaryAction = null,
-  onSecondaryAction = null,
-  onRecords = null,
+  onRecall = null,
+  onBoard = null,
+  onReturn = null,
   skinId = "v12",
   onSkinChange = null,
   showHeaderDisplayName = false,
@@ -201,8 +201,12 @@ export default function IXIAosGenericObjectLayout007({
   const attributes = presentationFields.attributes.flatMap(definition => arrayFromValue(getObjectFields(runtimeObject)?.[definition.fieldId]));
   const attributesTitle = clean(presentation?.attributesTitle) || (presentationFields.attributes[0]?.label || "ATTRIBUTES");
   const relationshipsTitle = clean(presentation?.relationshipsTitle) || "RELATIONSHIPS & ASSOCIATIONS";
-  const actionOneLabel = clean(presentation?.primaryActionLabel) || "ACTION";
-  const actionTwoLabel = clean(presentation?.secondaryActionLabel) || "CONTACT";
+
+  function command(event, callback) {
+    event.preventDefault();
+    event.stopPropagation();
+    callback?.(runtimeObject);
+  }
 
   async function save(nextObject) {
     setSaving(true);
@@ -274,9 +278,9 @@ export default function IXIAosGenericObjectLayout007({
       </div>
 
       <nav className="go007-actions">
-        <button type="button" onClick={() => onPrimaryAction?.(runtimeObject)}><span>◇</span><b>{actionOneLabel}</b></button>
-        <button type="button" onClick={() => onSecondaryAction?.(runtimeObject)}><span>▢</span><b>{actionTwoLabel}</b></button>
-        <button type="button" onClick={() => onRecords?.(runtimeObject)}><span>▱</span><b>RECORDS</b></button>
+        <button type="button" onPointerDown={event => event.stopPropagation()} onClick={event => command(event, onRecall)}><span>↻</span><b>RECALL</b></button>
+        <button type="button" onPointerDown={event => event.stopPropagation()} onClick={event => command(event, onBoard)}><span>▦</span><b>BOARD</b></button>
+        <button type="button" onPointerDown={event => event.stopPropagation()} onClick={event => command(event, onReturn)}><span>↩</span><b>RETURN</b></button>
       </nav>
       {editing ? <GenericEditor object={runtimeObject} saving={saving} onCancel={() => setEditing(false)} onSave={save}/> : null}
 
