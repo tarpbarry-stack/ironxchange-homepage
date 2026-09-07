@@ -735,7 +735,7 @@ export default function BulkImportPage() {
 
               <div className="mappingGrid">
                 <label className="control required">
-                  <span>OBJECT NAME · REQUIRED</span>
+                  <span>NAME · REQUIRED</span>
                   <select
                     value={mapping.displayNameColumn || ""}
                     disabled={busy || mappingLocked}
@@ -867,7 +867,7 @@ export default function BulkImportPage() {
                       <th>ROW</th>
                       <th>NAME</th>
                       <th>STATUS</th>
-                      <th>OBJECT</th>
+                      <th>CARD</th>
                       <th>PASSPORT</th>
                       <th>DETAIL</th>
                     </tr>

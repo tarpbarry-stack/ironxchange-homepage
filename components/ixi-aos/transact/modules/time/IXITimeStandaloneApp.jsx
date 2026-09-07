@@ -180,8 +180,8 @@ export default function IXITimeStandaloneApp({
   const primary = context.primary || {};
   const actor = context.actor || {};
   const employeeLabel = clean(actor.displayName || actor.name || actor.label) || "EMPLOYEE";
-  const originLabel = clean(primary.label) || "AOS OBJECT";
-  const originType = clean(primary.objectType) || "AOS OBJECT";
+  const originLabel = clean(primary.label) || "AOS CARD";
+  const originType = clean(primary.objectType) || "AOS CARD";
   const targetKey = useMemo(() => getIXITimeTargetKey(context, {}), [context]);
   const timeRecords = useMemo(() => [...financialRecords, ...employeeFinancialRecords].map(raw => {
     const document = getIXIFinancialDocument(raw);
@@ -265,7 +265,7 @@ export default function IXITimeStandaloneApp({
       return;
     }
     if (!clean(primary.passportId || object.passportId)) {
-      setError("THIS OBJECT NEEDS AN IXI PASSPORT BEFORE TIME CAN START.");
+      setError("THIS CARD NEEDS AN IXI PASSPORT BEFORE TIME CAN START.");
       return;
     }
     setSaving(true);

@@ -162,7 +162,7 @@ function UniversalEditor({ object, saving, onCancel, onSave }) {
   return (
     <div className="u007-editor" onPointerDown={event => event.stopPropagation()}>
       <div className="u007-editor-head">
-        <div><small>{getObjectLabel(object)}</small><strong>EDIT OBJECT</strong></div>
+        <div><small>{getObjectLabel(object)}</small><strong>EDIT CARD</strong></div>
         <nav>
           <button type="button" disabled={saving || Boolean(mediaStatus)} onClick={save}>SAVE</button>
           <button type="button" disabled={saving || Boolean(mediaStatus)} onClick={onCancel}>CANCEL</button>
@@ -172,7 +172,7 @@ function UniversalEditor({ object, saving, onCancel, onSave }) {
         <IXIAosPrimaryMediaEditor media={media} onChange={setMedia} status={mediaStatus} error={mediaError} disabled={saving || Boolean(mediaStatus)} />
         <section>
           <div className="u007-editor-title">IDENTITY</div>
-          <label className="u007-name-field"><span>OBJECT NAME</span><input value={name} onChange={event => setName(event.target.value)} /></label>
+          <label className="u007-name-field"><span>NAME</span><input value={name} onChange={event => setName(event.target.value)} /></label>
         </section>
         <section>
           <div className="u007-editor-title">DETAIL FIELDS</div>
@@ -287,7 +287,7 @@ export default function IXIAosGenericUniversalLayout007({
         <section className="u007-media-shell">
           {image ? <img src={image} alt={getObjectDisplayName(runtimeObject)} /> : <div className="u007-media-empty"><b>IXI</b><span>PRIMARY MEDIA</span></div>}
           {showMediaBusinessIdentifier ? <><div className="u007-media-shade" /><div className="u007-media-id"><span>ID</span><strong>{businessIdentifierValue || "—"}</strong></div></> : null}
-          {editing && actions.canEdit ? <button className="u007-media-action" type="button" disabled={saving || Boolean(mediaStatus)} onClick={openPhotoPicker}>{mediaStatus || (image ? "CHANGE PHOTO" : "+ ADD PHOTO")}</button> : null}
+          {actions.canEdit ? <button className="u007-media-action" type="button" disabled={saving || Boolean(mediaStatus)} onClick={openPhotoPicker}>{mediaStatus || (image ? "CHANGE PHOTO" : "+ ADD PHOTO")}</button> : null}
           <input ref={mediaInputRef} className="u007-media-input" type="file" accept={IXI_AOS_MEDIA_ACCEPT} onChange={addPrimaryPhoto} />
           {mediaError ? <span className="u007-media-error" role="alert">{mediaError}</span> : null}
         </section>

@@ -72,7 +72,7 @@ function Editor({ object, saving, onCancel, onSave }) {
   return (
     <div className="c014-editor" onPointerDown={event => event.stopPropagation()}>
       <header>
-        <div><small>{getObjectLabel(object)}</small><strong>EDIT OBJECT</strong></div>
+        <div><small>{getObjectLabel(object)}</small><strong>EDIT CARD</strong></div>
         <nav>
           <button type="button" disabled={saving} onClick={save}>SAVE</button>
           <button type="button" disabled={saving} onClick={onCancel}>CANCEL</button>
@@ -80,7 +80,7 @@ function Editor({ object, saving, onCancel, onSave }) {
       </header>
       <main>
         <IXIAosPrimaryMediaEditor media={media} onChange={setMedia} />
-        <label><span>DISPLAY NAME</span><input value={name} onChange={event => setName(event.target.value)} /></label>
+        <label><span>NAME</span><input value={name} onChange={event => setName(event.target.value)} /></label>
         {definitions.map(definition => (
           <label key={definition.fieldId}>
             <span>{definition.label}</span>

@@ -598,7 +598,7 @@ export default function IXIServiceQuoteApp({
 
       <div className="sq-context">
         <strong>{primary.label || "CUSTOMER ASSET / AOS CONTEXT"}</strong>
-        <small>{primary.objectType || "AOS OBJECT"} · {context.location?.label || "NO LOCATION"}</small>
+        <small>{primary.objectType || "AOS CARD"} · {context.location?.label || "NO LOCATION"}</small>
       </div>
 
       <div className="sq-section">CUSTOMER / REQUEST</div>

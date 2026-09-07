@@ -376,7 +376,7 @@ export default function IXITechWorkOrderApp({
     context.actor?.name ||
     context.actor?.label
   ) || "—";
-  const objectLabel = clean(context.primary?.label) || "AOS OBJECT";
+  const objectLabel = clean(context.primary?.label) || "AOS CARD";
   function refreshTimer() {
     setTimerSession(getIXIActiveTimeSession(context));
     setTimerTick(Date.now());

@@ -220,7 +220,7 @@ function getObjectLabel(
     object
       ?.label ||
 
-    "OBJECT"
+    "CARD"
   );
 }
 

@@ -247,7 +247,7 @@ export default function IXIExpenseApp({
   const primary = context.primary || {};
   const actor = context.actor || {};
   const location = context.location || {};
-  const originLabel = clean(primary.label) || "AOS OBJECT";
+  const originLabel = clean(primary.label) || "AOS CARD";
   const locationLabel = clean(location.label || context.locationLabel) || originLabel;
   const actorLabel = clean(actor.displayName || actor.name || actor.label) || "—";
   const workOrderNumber = clean(

@@ -83,7 +83,7 @@ const selectedFieldValue =
       <section>
 
         <label>
-          OBJECT NAME
+          NAME
         </label>
 
         <input

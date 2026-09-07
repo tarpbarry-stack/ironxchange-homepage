@@ -199,9 +199,7 @@ export function getAosObjectDisplayName(
 
     publicData?.displayName,
     publicData?.name,
-    publicData?.title,
-
-    "OBJECT"
+    publicData?.title
   );
 }
 

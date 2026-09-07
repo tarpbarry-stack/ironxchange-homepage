@@ -149,14 +149,14 @@ function GenericEditor({ object, saving, onCancel, onSave }) {
   return (
     <div className="go007-editor" onPointerDown={event => event.stopPropagation()}>
       <div className="go007-editor-head">
-        <div><small>{getObjectLabel(object)}</small><strong>EDIT OBJECT</strong></div>
+        <div><small>{getObjectLabel(object)}</small><strong>EDIT CARD</strong></div>
         <nav><button type="button" disabled={saving || Boolean(mediaStatus)} onClick={save}>SAVE</button><button type="button" disabled={saving || Boolean(mediaStatus)} onClick={onCancel}>CANCEL</button></nav>
       </div>
       <div className="go007-editor-scroll">
         <IXIAosPrimaryMediaEditor media={media} onChange={setMedia} status={mediaStatus} error={mediaError} disabled={saving || Boolean(mediaStatus)} />
         <section>
           <div className="go007-editor-section-title">IDENTITY</div>
-          <label><span>DISPLAY NAME</span><input value={name} onChange={event => setName(event.target.value)} /></label>
+          <label><span>NAME</span><input value={name} onChange={event => setName(event.target.value)} /></label>
         </section>
         <section>
           <div className="go007-editor-section-title">FIELDS</div>

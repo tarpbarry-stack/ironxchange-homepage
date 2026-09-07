@@ -1923,7 +1923,7 @@ export default function IXITransactApp({
               {!active ? (
                 <>
                   <strong>{context.primary.label}</strong>
-                  <small>{context.primary.objectType || "AOS OBJECT"}</small>
+                  <small>{context.primary.objectType || "AOS CARD"}</small>
                 </>
               ) : worksheetOpen ? (
                 <strong className="tx-worksheet-title">

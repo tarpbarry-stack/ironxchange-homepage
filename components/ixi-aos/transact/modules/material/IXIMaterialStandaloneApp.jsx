@@ -489,7 +489,7 @@ export default function IXIMaterialStandaloneApp({
 
       <div className="ms-context">
         <div>
-          <b>{clean(primary.label) || "AOS OBJECT"}</b>
+          <b>{clean(primary.label) || "AOS CARD"}</b>
           <small>{t.object}</small>
         </div>
         <div>
@@ -709,7 +709,7 @@ export default function IXIMaterialStandaloneApp({
       <div className="ms-attribution">
         <div>
           <small>{t.usedOn}</small>
-          <b>{clean(primary.label) || "AOS OBJECT"}</b>
+          <b>{clean(primary.label) || "AOS CARD"}</b>
         </div>
         <div>
           <small>{t.relatedWork}</small>

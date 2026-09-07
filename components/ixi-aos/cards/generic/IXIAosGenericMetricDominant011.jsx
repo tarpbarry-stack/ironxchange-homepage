@@ -58,9 +58,9 @@ function Editor({ object, saving, onCancel, onSave }) {
 
   return (
     <div className="c011-editor" onPointerDown={event => event.stopPropagation()}>
-      <header><div><small>{getObjectLabel(object)}</small><strong>EDIT OBJECT</strong></div><nav><button disabled={saving} onClick={save}>SAVE</button><button disabled={saving} onClick={onCancel}>CANCEL</button></nav></header>
+      <header><div><small>{getObjectLabel(object)}</small><strong>EDIT CARD</strong></div><nav><button disabled={saving} onClick={save}>SAVE</button><button disabled={saving} onClick={onCancel}>CANCEL</button></nav></header>
       <main>
-        <label><span>DISPLAY NAME</span><input value={name} onChange={event => setName(event.target.value)} /></label>
+        <label><span>NAME</span><input value={name} onChange={event => setName(event.target.value)} /></label>
         {definitions.map(definition => <label key={definition.fieldId}><span>{definition.label}</span><input value={draft[definition.fieldId] ?? ""} onChange={event => setDraft(current => ({ ...current, [definition.fieldId]: event.target.value }))} /></label>)}
       </main>
     </div>

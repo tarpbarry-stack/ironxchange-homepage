@@ -69,7 +69,7 @@ export function getObjectDisplayName(object = {}) {
     fields?.displayName ||
     fields?.name ||
     fields?.title
-  ) || "OBJECT";
+  );
 }
 
 export function getObjectLabel(object = {}) {
@@ -85,7 +85,7 @@ export function getObjectLabel(object = {}) {
     metadata?.singularLabel ||
     metadata?.nomenclature?.singular ||
     getObjectPresentation(object)?.objectLabel
-  ) || "OBJECT";
+  ) || "CARD";
 }
 
 export function getObjectPluralLabel(object = {}) {
@@ -101,7 +101,7 @@ export function getObjectPluralLabel(object = {}) {
     metadata?.pluralLabel ||
     metadata?.nomenclature?.plural ||
     getObjectPresentation(object)?.pluralLabel
-  ) || "OBJECTS";
+  ) || "CARDS";
 }
 
 /* =========================================================

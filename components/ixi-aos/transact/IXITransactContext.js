@@ -25,7 +25,7 @@ export function createIXITransactContext({
       passportId,
       objectId: clean(source.objectId || source.mosObjectId),
       objectType: clean(source.objectType || source.type || source.templateType),
-      label: clean(source.displayName || source.name || source.title) || "AOS OBJECT"
+      label: clean(source.displayName || source.name || source.title) || "AOS CARD"
     },
 
     entity: {

@@ -543,7 +543,7 @@ export default function IXIAosFinancialFace3({
           .join(" ")
       )
     ) ||
-    "OBJECT";
+    "CARD";
 
 
   const descriptor =

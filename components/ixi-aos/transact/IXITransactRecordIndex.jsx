@@ -439,7 +439,7 @@ export default function IXITransactRecordIndex({
           <strong>
             {record ? record.number : category ? category.label : "RECORD INDEX"}
           </strong>
-          <small>{clean(context?.primary?.label) || "AOS OBJECT"}</small>
+          <small>{clean(context?.primary?.label) || "AOS CARD"}</small>
         </div>
         {category || onClose ? (
           <button type="button" onClick={navigateBack} aria-label="Back">

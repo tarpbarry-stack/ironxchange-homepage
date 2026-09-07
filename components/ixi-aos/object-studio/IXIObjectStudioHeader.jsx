@@ -28,7 +28,7 @@ export default function IXIObjectStudioHeader({
 
   const objectName =
     studio?.objectDraft?.displayName ||
-    "UNTITLED OBJECT";
+    "UNTITLED CARD";
 
   const untouchedProofFixture =
     studio?.objectDraft?.objectId ===
@@ -39,8 +39,8 @@ export default function IXIObjectStudioHeader({
   const customerNameReady =
     Boolean(String(objectName).trim()) &&
     ![
-      "UNTITLED OBJECT",
-      "NEW OBJECT"
+      "UNTITLED CARD",
+      "NEW CARD"
     ].includes(
       String(objectName).trim().toUpperCase()
     ) &&
@@ -153,7 +153,7 @@ export default function IXIObjectStudioHeader({
     } catch (error) {
       setLaunchError(
         error?.message ||
-        "Object Studio launch failed."
+        "Card Studio launch failed."
       );
     } finally {
       setLaunching(false);
@@ -166,7 +166,7 @@ export default function IXIObjectStudioHeader({
 
       <div className="header-left">
         <span className="eyebrow">
-          IXI OBJECT STUDIO
+          IXI CARD STUDIO
         </span>
 
         <strong>{objectName}</strong>
@@ -215,8 +215,8 @@ export default function IXIObjectStudioHeader({
           {launching
             ? "COMMITTING…"
             : studio?.draft?.mode === "edit"
-              ? "SAVE OBJECT"
-              : "OBJECT LAUNCH"}
+              ? "SAVE CARD"
+              : "CARD LAUNCH"}
         </button>
       </div>
 

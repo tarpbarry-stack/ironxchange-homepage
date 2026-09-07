@@ -50,6 +50,60 @@ test("system adapters use durable IX Core object and Passport identity", () => {
   assert.equal(indexes[1].objectId, "object-for-sale");
 });
 
+test("system adapter behavior never overwrites the customer's persisted ecosystem names", () => {
+  const equipment = {
+    objectId: "object-equipment-custom-name",
+    objectType: "system-index",
+    displayName: "MY IRON",
+    status: "active",
+    identities: [passportIdentity("object-equipment-custom-name", "IXI7777779")],
+    metadata: {
+      systemIndex: true,
+      adapterId: "ixi-owned-equipment"
+    }
+  };
+  const forSale = {
+    objectId: "object-for-sale-custom-name",
+    objectType: "system-index",
+    displayName: "READY TO SELL",
+    status: "active",
+    identities: [passportIdentity("object-for-sale-custom-name", "IXI7777782")],
+    metadata: {
+      systemIndex: true,
+      adapterId: "ixi-for-sale"
+    }
+  };
+
+  const indexes = buildAosSystemIndexes({
+    aosObjects: [equipment, forSale],
+    ownedListings: []
+  });
+
+  assert.equal(indexes[0].displayName, "MY IRON");
+  assert.equal(indexes[0].label, "MY IRON");
+  assert.equal(indexes[1].displayName, "READY TO SELL");
+  assert.equal(indexes[1].label, "READY TO SELL");
+});
+
+test("a durable system index without a customer-visible name fails closed", () => {
+  assert.throws(
+    () => buildAosSystemIndexes({
+      aosObjects: [{
+        objectId: "object-equipment-missing-name",
+        objectType: "system-index",
+        status: "active",
+        identities: [passportIdentity("object-equipment-missing-name", "IXI7777783")],
+        metadata: {
+          systemIndex: true,
+          adapterId: "ixi-owned-equipment"
+        }
+      }],
+      ownedListings: []
+    }),
+    error => error?.code === "AOS_SYSTEM_INDEX_NAME_REQUIRED"
+  );
+});
+
 test("browser-only synthetic system indexes are not manufactured", () => {
   assert.deepEqual(
     buildAosSystemIndexes({ aosObjects: [], ownedListings: [] }),

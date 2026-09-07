@@ -416,7 +416,7 @@ export default function IXIRentalExpenseApp({
       <div><div className="rent-kicker">IXI TRAN$ACT</div><div className="rent-title">{t.title}</div></div>
       <div className="rent-lang"><button className={lang === "en" ? "on" : ""} onClick={() => changeLang("en")}>ENG</button><button className={lang === "es" ? "on" : ""} onClick={() => changeLang("es")}>ESP</button></div>
     </div>
-    <div className="rent-context"><strong>{primary.label || "AOS CONTEXT"}</strong><small>{primary.objectType || "AOS OBJECT"} · {location.label || "NO LOCATION"} · {responsibleEmployeeLabel || "NO EMPLOYEE"}</small></div>
+    <div className="rent-context"><strong>{primary.label || "AOS CONTEXT"}</strong><small>{primary.objectType || "AOS CARD"} · {location.label || "NO LOCATION"} · {responsibleEmployeeLabel || "NO EMPLOYEE"}</small></div>
 
     <div className="rent-section">RENTAL</div>
     <Field label={t.vendor}><Input value={vendorName} onChange={setVendorName} /></Field>

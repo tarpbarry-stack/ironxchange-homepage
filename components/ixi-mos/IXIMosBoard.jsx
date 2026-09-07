@@ -31,7 +31,7 @@ export default function IXIMosBoard({
 
         <span>
           Create a Job, Yard, Tool, Vehicle,
-          Person, Machine, or other Object.
+          Add or recall a card.
         </span>
 
         <style jsx>{`

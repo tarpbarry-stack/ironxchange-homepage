@@ -161,7 +161,7 @@ export default function IXIAccessPolicyApp({ context = {}, object = {}, onBack =
           passportId,
           objectId,
           objectType: clean(object?.objectType || object?.templateType || context?.primary?.objectType || "generic"),
-          label: clean(object?.displayName || object?.label || context?.primary?.label || "AOS OBJECT")
+          label: clean(object?.displayName || object?.label || context?.primary?.label || "AOS CARD")
         },
         inheritance: nextInheritance,
         rules: nextRules,
@@ -234,7 +234,7 @@ export default function IXIAccessPolicyApp({ context = {}, object = {}, onBack =
         <div className="title">
           <span>SECURITY</span>
           <strong>ACCESS / POLICY</strong>
-          <small>{draftObject ? "DRAFT · NO PASSPORT YET" : (passportId || "LEGACY OBJECT · PASSPORT REQUIRED")}</small>
+          <small>{draftObject ? "DRAFT · NO PASSPORT YET" : (passportId || "LEGACY CARD · PASSPORT REQUIRED")}</small>
         </div>
         <div className="mode"><b>{canManage ? "ADMIN" : "READ"}</b><small>REV {revision}</small></div>
       </div>
@@ -259,11 +259,11 @@ export default function IXIAccessPolicyApp({ context = {}, object = {}, onBack =
           <div className="summary">
             <div><span>PRINCIPAL</span><b>{clean(access?.principal?.principalId) || "—"}</b></div>
             <div><span>POLICY</span><b>{policy?.policyId ? "ACTIVE" : "NONE"}</b></div>
-            <div><span>INHERIT</span><b>{inheritance.propagateToChildren ? "TREE" : "OBJECT"}</b></div>
+            <div><span>INHERIT</span><b>{inheritance.propagateToChildren ? "DESCENDANTS" : "CARD"}</b></div>
           </div>
 
-          {draftObject ? <div className="message passport-state">DRAFTS ARE NOT POLICY TARGETS. SAVE CREATES THE PERMANENT OBJECT + PASSPORT TOGETHER.</div> : null}
-          {!draftObject && !passportId ? <div className="message error">PRE-PROVISIONING LEGACY OBJECT WITHOUT PASSPORT IDENTITY. POLICY WRITES ARE FAIL-CLOSED.</div> : null}
+          {draftObject ? <div className="message passport-state">DRAFTS ARE NOT POLICY TARGETS. SAVE CREATES THE PERMANENT CARD + PASSPORT TOGETHER.</div> : null}
+          {!draftObject && !passportId ? <div className="message error">PRE-PROVISIONING LEGACY CARD WITHOUT PASSPORT IDENTITY. POLICY WRITES ARE FAIL-CLOSED.</div> : null}
 
           {!draftObject && passportId ? (
             <>
@@ -290,7 +290,7 @@ export default function IXIAccessPolicyApp({ context = {}, object = {}, onBack =
                     <label><span>SUBJECT</span><select value={draft.subjectType} onChange={event => setDraft(current => ({ ...current, subjectType: event.target.value }))}><option value="role">ROLE</option><option value="principal">PERSON</option><option value="group">GROUP</option><option value="authenticated">ALL AUTHENTICATED</option></select></label>
                   </div>
                   {draft.subjectType !== "authenticated" ? <label><span>SUBJECT ID</span><input value={draft.subjectId} onChange={event => setDraft(current => ({ ...current, subjectId: event.target.value }))} placeholder="role / employee / group ID" /></label> : null}
-                  <label><span>SCOPE</span><select value={draft.scopeType} onChange={event => setDraft(current => ({ ...current, scopeType: event.target.value }))}><option value="target">THIS OBJECT</option><option value="target-and-descendants">THIS + DESCENDANTS</option></select></label>
+                  <label><span>SCOPE</span><select value={draft.scopeType} onChange={event => setDraft(current => ({ ...current, scopeType: event.target.value }))}><option value="target">THIS CARD</option><option value="target-and-descendants">THIS + DESCENDANTS</option></select></label>
 
                   <div className="cap-groups">
                     {CAPABILITY_GROUPS.map(group => (

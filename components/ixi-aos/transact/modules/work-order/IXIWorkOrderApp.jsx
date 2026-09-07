@@ -444,7 +444,7 @@ export default function IXIWorkOrderApp({
     () => getIXIWorkOrderActuals(workOrder || {}),
     [workOrder]
   );
-  const label = context.primary?.label || "AOS OBJECT";
+  const label = context.primary?.label || "AOS CARD";
   const actorName = clean(
     context.actor?.displayName ||
       context.actor?.name ||

@@ -88,11 +88,11 @@ function Editor({ object, saving, onCancel, onSave }) {
   return (
     <div className="c017-editor" onPointerDown={event => event.stopPropagation()}>
       <header>
-        <div><small>{getObjectLabel(object)}</small><strong>EDIT OBJECT</strong></div>
+        <div><small>{getObjectLabel(object)}</small><strong>EDIT CARD</strong></div>
         <nav><button disabled={saving} onClick={save}>SAVE</button><button disabled={saving} onClick={onCancel}>CANCEL</button></nav>
       </header>
       <main>
-        <label><span>DISPLAY NAME</span><input value={name} onChange={event => setName(event.target.value)} /></label>
+        <label><span>NAME</span><input value={name} onChange={event => setName(event.target.value)} /></label>
         {definitions.map(definition => (
           <label key={definition.fieldId}>
             <span>{definition.label}</span>
@@ -213,7 +213,7 @@ export default function IXIAosGenericStructuralContainer017({
                 <button type="button" className="c017-child" key={getObjectId(child) || `child-${index}`} onClick={event => openChild(event, child)}>
                   <span className="c017-node">{index === items.length - 1 ? "└" : "├"}</span>
                   <span className="c017-child-copy">
-                    <small>{childDescriptor(child) || "OBJECT"}</small>
+                    <small>{childDescriptor(child) || "CARD"}</small>
                     <strong>{getObjectDisplayName(child)}</strong>
                   </span>
                   <span className="c017-child-count">{count === null ? "›" : <><b>{count}</b><small>DIRECT</small></>}</span>

@@ -75,7 +75,7 @@ export default function IXIMachineCostBasis({
         <div>
           <span>IXI MACHINE · F$2</span>
           <strong>{selected ? selected.label : "COST BASIS"}</strong>
-          <small>{clean(context?.primary?.label) || "AOS OBJECT"}</small>
+          <small>{clean(context?.primary?.label) || "AOS CARD"}</small>
         </div>
         <button type="button" onClick={navigateBack} aria-label="Back">‹</button>
       </header>

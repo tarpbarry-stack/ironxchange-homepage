@@ -91,7 +91,7 @@ function getObjectName(
     clean(
       object?.title
     ) ||
-    "OBJECT"
+    "CARD"
   );
 }
 
@@ -478,7 +478,7 @@ export default function IXIMosObjectCard({
       });
     } catch (error) {
       console.error(
-        "AOS OBJECT NAME SAVE FAILED:",
+        "AOS CARD NAME SAVE FAILED:",
         error
       );
 
@@ -538,7 +538,7 @@ export default function IXIMosObjectCard({
       );
     } catch (error) {
       console.error(
-        "AOS OBJECT DELETE FAILED:",
+        "AOS CARD DELETE FAILED:",
         error
       );
 
@@ -1128,7 +1128,7 @@ export default function IXIMosObjectCard({
                       }
 
                       placeholder="
-                        NAME OBJECT
+                        NAME CARD
                       "
 
                       disabled={
@@ -1370,7 +1370,7 @@ export default function IXIMosObjectCard({
                           </span>
                         ) : (
                           <span>
-                            OBJECT
+                            CARD
                           </span>
                         )}
                       </div>
@@ -1454,7 +1454,7 @@ export default function IXIMosObjectCard({
                   <span>
                     {isContainer
                       ? "EMPTY"
-                      : "OBJECT"}
+                      : "CARD"}
                   </span>
 
                   <strong>
@@ -1685,7 +1685,7 @@ export default function IXIMosObjectCard({
                 {getObjectSecondaryText(
                   activeItem
                 ) ||
-                "AOS OBJECT"}
+                "AOS CARD"}
               </span>
 
             </div>
@@ -1728,7 +1728,7 @@ export default function IXIMosObjectCard({
                   openConsole
                 }
               >
-                OPEN OBJECT
+                OPEN CARD
               </button>
             ) : null}
 

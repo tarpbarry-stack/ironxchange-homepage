@@ -52,7 +52,7 @@ export default function IXIAosObjectCardShell({
   const resolvedDisplayName =
     clean(displayName) ||
     clean(object?.displayName) ||
-    "OBJECT";
+    "CARD";
 
   const actionNotice =
     ixiState?.actionNotice ||

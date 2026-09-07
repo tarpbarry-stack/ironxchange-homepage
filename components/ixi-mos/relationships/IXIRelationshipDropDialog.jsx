@@ -54,12 +54,12 @@ export default function IXIRelationshipDropDialog({
 
         <div className="relationship-endpoints">
           <div>
-            <span>OBJECT</span>
+            <span>CARD</span>
             <strong>{pending.sourceLabel || pending.sourceObjectId}</strong>
           </div>
           <b aria-hidden="true">→</b>
           <div>
-            <span>CONNECTED OBJECT</span>
+            <span>CONNECTED CARD</span>
             <strong>{pending.targetLabel || pending.targetObjectId}</strong>
           </div>
         </div>

@@ -50,7 +50,7 @@ export default function IXISmartContainerIdentityFace({
   const containerName =
     title ||
     presentation.containerName ||
-    "OBJECT";
+    "CARD";
 
   const heroImage =
     presentation.heroImage || "";
