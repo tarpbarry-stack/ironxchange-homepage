@@ -13,7 +13,8 @@ export const IXI_AOS_BOARD_SKIN_IDS =
     IXI_104: "ixi-104",
     IXI_105: "ixi-105",
     IXI_106: "ixi-106",
-    IXI_107: "ixi-107"
+    IXI_107: "ixi-107",
+    IXI_108: "ixi-108"
   });
 
 export const IXI_AOS_BOARD_SKINS =
@@ -73,6 +74,13 @@ export const IXI_AOS_BOARD_SKINS =
       designation: "DATUM ZERO",
       description: "Jet-black metrology field with precision arcs, datum marks and calibrated nodes.",
       className: "aos-work-board-skin-ixi-107"
+    }),
+    Object.freeze({
+      skinId: IXI_AOS_BOARD_SKIN_IDS.IXI_108,
+      name: "IXI-108",
+      designation: "EARTHWORK PLAN",
+      description: "Full-field civil grading plan with excavation, haul routes and survey controls.",
+      className: "aos-work-board-skin-ixi-108"
     })
   ]);
 
