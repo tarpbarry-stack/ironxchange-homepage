@@ -46,3 +46,15 @@ test("Card 007 renders the bridge-owned object without a stale local object cach
   assert.doesNotMatch(source, /useState\(object\)/u);
   assert.doesNotMatch(source, /setRuntimeObject\(object\)/u);
 });
+
+test("Face 1 falls back to persisted metadata labels when the top-level schema is empty", () => {
+  const contract = fs.readFileSync(
+    new URL("../components/ixi-aos/card-runtime/modules/IXIAosFace1GenericEditContract.js", import.meta.url),
+    "utf8"
+  );
+
+  assert.match(contract, /objectDefinitions\.length \? objectDefinitions : metadataDefinitions/u);
+  assert.match(contract, /originalObjectDefinitions\.length[\s\S]*?originalObject\?\.metadata\?\.fieldDefinitions/u);
+  assert.match(contract, /editedObjectDefinitions\.length[\s\S]*?nextObject\?\.metadata\?\.fieldDefinitions/u);
+  assert.doesNotMatch(contract, /fieldDefinitions \|\| object\?\.metadata\?\.fieldDefinitions/u);
+});
