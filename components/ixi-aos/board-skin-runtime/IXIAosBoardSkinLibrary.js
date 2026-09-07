@@ -25,7 +25,8 @@ export const IXI_AOS_BOARD_SKIN_IDS =
     IXI_116: "ixi-116",
     IXI_117: "ixi-117",
     IXI_118: "ixi-118",
-    IXI_119: "ixi-119"
+    IXI_119: "ixi-119",
+    IXI_120: "ixi-120"
   });
 
 export const IXI_AOS_BOARD_SKINS =
@@ -169,6 +170,13 @@ export const IXI_AOS_BOARD_SKINS =
       designation: "TRACK POWER",
       description: "Takeuchi TL12V-2 High Flow plan with vertical-lift geometry, auxiliary hydraulics and track-system details.",
       className: "aos-work-board-skin-ixi-119"
+    }),
+    Object.freeze({
+      skinId: IXI_AOS_BOARD_SKIN_IDS.IXI_120,
+      name: "IXI-120",
+      designation: "LIFT ENVELOPE",
+      description: "Tadano GR-800XLL-4 rough-terrain crane plan with boom-radius arcs, outrigger geometry and 4x4x4 steering details.",
+      className: "aos-work-board-skin-ixi-120"
     })
   ]);
 
