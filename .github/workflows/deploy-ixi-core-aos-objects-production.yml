@@ -140,7 +140,8 @@ jobs:
             9d0565ab55587cd15b525b4a47cdbdb31c1c5b28fb96dd42badd39effcd1e254 \
             9d0565ab55587cd15b525b4a47cdbdb31c1c5b28fb96dd42badd39effcd1e254 \
             edbab67e4319a4ee53bc20cb3b535b4a3aaf441cbd35cd6ad93d5d5c703e184b \
-            7007eadef07ae610af910055685d181ce6bf756fdfb0e01f405419b71887ad50
+            7007eadef07ae610af910055685d181ce6bf756fdfb0e01f405419b71887ad50 \
+            5c474ef4c87f30e2da7a2da4a70b08b1ee379648616a4c6968cb4c735cdd0d25
           verify_managed_file \
             mos/accounts/aosEnvironmentService.js \
             5b77c39050a2a0b009966caf9c988320b333259e925d0c1ad6ff5675bc88941e \
