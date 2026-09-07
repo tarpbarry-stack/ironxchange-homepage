@@ -322,6 +322,18 @@ export default function IXIAosBoardSkinPicker({
           background-size: cover;
         }
 
+        .preview-ixi-117 {
+          background-image: url('/images/ixi-aos-board-ixi-117.webp');
+          background-position: center;
+          background-size: cover;
+        }
+
+        .preview-ixi-118 {
+          background-image: url('/images/ixi-aos-board-ixi-118.webp');
+          background-position: center;
+          background-size: cover;
+        }
+
         .preview-ixi-101 b,
         .preview-ixi-102 b,
         .preview-ixi-103 b,
@@ -337,7 +349,9 @@ export default function IXIAosBoardSkinPicker({
         .preview-ixi-113 b,
         .preview-ixi-114 b,
         .preview-ixi-115 b,
-        .preview-ixi-116 b {
+        .preview-ixi-116 b,
+        .preview-ixi-117 b,
+        .preview-ixi-118 b {
           color: transparent;
           font-size: 1px;
         }

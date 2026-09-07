@@ -22,7 +22,9 @@ export const IXI_AOS_BOARD_SKIN_IDS =
     IXI_113: "ixi-113",
     IXI_114: "ixi-114",
     IXI_115: "ixi-115",
-    IXI_116: "ixi-116"
+    IXI_116: "ixi-116",
+    IXI_117: "ixi-117",
+    IXI_118: "ixi-118"
   });
 
 export const IXI_AOS_BOARD_SKINS =
@@ -145,6 +147,20 @@ export const IXI_AOS_BOARD_SKINS =
       designation: "ARTIC HAUL",
       description: "Volvo A45G engineering plan with articulation, body-hoist geometry and 6×6 driveline.",
       className: "aos-work-board-skin-ixi-116"
+    }),
+    Object.freeze({
+      skinId: IXI_AOS_BOARD_SKIN_IDS.IXI_117,
+      name: "IXI-117",
+      designation: "EXTENDAHOE",
+      description: "Case 590SN 4×4 build plan with loader geometry, stabilizers and telescoping dipper.",
+      className: "aos-work-board-skin-ixi-117"
+    }),
+    Object.freeze({
+      skinId: IXI_AOS_BOARD_SKIN_IDS.IXI_118,
+      name: "IXI-118",
+      designation: "COMPACTION",
+      description: "HAMM 84-inch cab/A-C roller plan with vibration systems and removable padfoot shell kit.",
+      className: "aos-work-board-skin-ixi-118"
     })
   ]);
 
