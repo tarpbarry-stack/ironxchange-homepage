@@ -256,11 +256,18 @@ export default function IXIAosBoardSkinPicker({
           background-size: cover;
         }
 
+        .preview-ixi-106 {
+          background-image: url('/images/ixi-aos-board-ixi-106.webp');
+          background-position: center;
+          background-size: cover;
+        }
+
         .preview-ixi-101 b,
         .preview-ixi-102 b,
         .preview-ixi-103 b,
         .preview-ixi-104 b,
-        .preview-ixi-105 b {
+        .preview-ixi-105 b,
+        .preview-ixi-106 b {
           color: transparent;
           font-size: 1px;
         }
