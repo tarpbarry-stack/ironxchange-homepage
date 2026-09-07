@@ -4136,6 +4136,31 @@ onClearContainerToParent={
           background-image: url('/images/ixi-aos-board-ixi-145.webp');
         }
 
+        .aos-work-board-skin-ixi-146 {
+          background-color: #000;
+          background-image: url('/images/ixi-aos-board-ixi-146.webp');
+        }
+
+        .aos-work-board-skin-ixi-147 {
+          background-color: #000;
+          background-image: url('/images/ixi-aos-board-ixi-147.webp');
+        }
+
+        .aos-work-board-skin-ixi-148 {
+          background-color: #000;
+          background-image: url('/images/ixi-aos-board-ixi-148.webp');
+        }
+
+        .aos-work-board-skin-ixi-149 {
+          background-color: #000;
+          background-image: url('/images/ixi-aos-board-ixi-149.webp');
+        }
+
+        .aos-work-board-skin-ixi-150 {
+          background-color: #000;
+          background-image: url('/images/ixi-aos-board-ixi-150.webp');
+        }
+
         .aos-work-board-title {
           position: absolute;
           width: 1px;
