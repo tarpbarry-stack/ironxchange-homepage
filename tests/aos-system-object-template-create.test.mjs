@@ -204,7 +204,11 @@ test("every AOS card plus opens the same 001-018 selector for a child", async ()
   );
   assert.match(
     creationHook,
-    /canContain !== true &&[\s\S]*?canCreate !== true &&[\s\S]*?!isPersonObject\(container\)/u
+    /function createObjectInContainer/u
+  );
+  assert.doesNotMatch(
+    creationHook,
+    /Destination object does not allow child creation/u
   );
   assert.match(
     creationHook,

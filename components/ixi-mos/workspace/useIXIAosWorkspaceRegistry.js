@@ -181,6 +181,20 @@ export default function useIXIAosWorkspaceRegistry({
             {
               ...object,
 
+              /*
+               * UNIVERSAL AOS OBJECT LAW
+               *
+               * Every canonical AOS Object may be both a child and a
+               * parent. IX-Core persists this contract; the workspace
+               * also normalizes legacy readbacks so an older record can
+               * never lose its receiving surface while it is repaired.
+               */
+              capabilities: {
+                ...(object?.capabilities || {}),
+                canContain: true,
+                canCreate: true
+              },
+
               items:
                 directChildrenByParent
                   .get(objectId) ||

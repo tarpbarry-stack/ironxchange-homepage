@@ -1247,11 +1247,14 @@ function getCanonicalMosObjectForWorkspaceId(workspaceObjectId) {
   const id = String(workspaceObjectId || "").trim();
   if (!id) return null;
 
+  const workspaceObject =
+    getAosWorkspaceObjectById(id) || null;
+
   const workspacePassportId = getCanonicalAosPassportId(
-    getAosWorkspaceObjectById(id) || {}
+    workspaceObject || {}
   );
 
-  return (aosObjects || []).find(object => {
+  const canonicalObject = (aosObjects || []).find(object => {
     if (String(object?.objectId || "").trim() === id) return true;
 
     if (String(object?.metadata?.sourceListingId || "").trim() === id) {
@@ -1270,6 +1273,26 @@ function getCanonicalMosObjectForWorkspaceId(workspaceObjectId) {
       String(identity?.sourceId || "").trim() === id
     );
   }) || null;
+
+  if (canonicalObject) {
+    return canonicalObject;
+  }
+
+  /*
+   * The workspace registry may already contain the permanent canonical
+   * readback while the environment array is completing its post-save
+   * refresh. A durable object_* identity with its owning Entity is safe
+   * to use; browser-only drafts and Sharetribe listing IDs are not.
+   */
+  if (
+    !isAosDraftId(id) &&
+    String(workspaceObject?.objectId || "").trim() === id &&
+    String(workspaceObject?.entityId || "").trim()
+  ) {
+    return workspaceObject;
+  }
+
+  return null;
 }
 
   function updateIxiCardState(listingId, patch) {
@@ -2830,8 +2853,7 @@ if (
     getAosWorkspaceObjectById(targetWorkspaceObjectId);
   const targetIsCanonicalContainer = Boolean(
     targetWorkspaceObjectId &&
-    targetWorkspaceObject?.entityId &&
-    targetWorkspaceObject?.capabilities?.canContain === true
+    targetWorkspaceObject?.entityId
   );
 
   if (targetIsCanonicalContainer) {
@@ -2840,7 +2862,9 @@ if (
     if (!sourceObject?.objectId) {
       showAosObjectNotice({
         objectId: dragId,
-        message: "CONTAINER MOVE FAILED · SOURCE OBJECT IS NOT AVAILABLE IN IX CORE",
+        message: isAosDraftId(dragId)
+          ? "SAVE THIS CARD BEFORE MOVING IT INTO ANOTHER CONTAINER"
+          : "CONTAINER MOVE FAILED · SOURCE OBJECT IS NOT AVAILABLE IN IX CORE",
         tone: "error",
         duration: 3200
       });
@@ -3579,11 +3603,6 @@ onReturnContainerChildren={
         .aos-work-board-skin-ixi-113 {
           background-color: #000;
           background-image: url('/images/ixi-aos-board-ixi-113.webp');
-        }
-
-        .aos-work-board-skin-ixi-114 {
-          background-color: #000;
-          background-image: url('/images/ixi-aos-board-ixi-114.webp');
         }
 
         .aos-work-board-title {

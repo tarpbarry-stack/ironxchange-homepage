@@ -46,7 +46,10 @@ test("AOS operational container drops change workspace placement without inventi
   assert.doesNotMatch(work, /RELATIONSHIP NOT CREATED/u);
   assert.match(work, /await commitMosContainerPlacement\(\{/u);
   assert.match(work, /destinationContainerId:\s*targetWorkspaceObjectId/u);
-  assert.match(work, /targetWorkspaceObject\?\.capabilities\?\.canContain === true/u);
+  assert.match(work, /targetWorkspaceObject\?\.entityId/u);
+  assert.match(work, /getAosWorkspaceObjectById\(id\)/u);
+  assert.match(work, /!isAosDraftId\(id\)/u);
+  assert.match(work, /SAVE THIS CARD BEFORE MOVING IT INTO ANOTHER CONTAINER/u);
   assert.match(work, /createdFrom: "aos-work-drop"/u);
   assert.match(work, /getCanonicalAosPassportId\(object\) === workspacePassportId/u);
 });

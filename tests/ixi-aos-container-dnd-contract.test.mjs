@@ -36,6 +36,12 @@ const card018 = read(
 const containerDropTarget = read(
   "components/ixi-chassis/IXIContainerDropTarget.jsx"
 );
+const workspaceRegistry = read(
+  "components/ixi-mos/workspace/useIXIAosWorkspaceRegistry.js"
+);
+const objectCreation = read(
+  "components/ixi-mos/object-creation/useIXIMosObjectCreation.js"
+);
 
 test("AOS container policy reaches the universal sortable chassis", () => {
   assert.match(
@@ -110,6 +116,22 @@ test("active self-only containers use sortable collisions instead of ON targets"
 });
 
 test("every universal AOS container mounts a visible accepting target", () => {
+  assert.match(
+    workspaceBoard,
+    /isSystemIndexPresentation\(item\)[\s\S]*?isMosWorkspaceObject\(item\)/
+  );
+  assert.match(
+    workspaceBoard,
+    /if \(isMosWorkspaceObject\(item\)\)[\s\S]*?enabled: true/
+  );
+  assert.match(
+    workspaceRegistry,
+    /UNIVERSAL AOS OBJECT LAW[\s\S]*?canContain: true[\s\S]*?canCreate: true/
+  );
+  assert.doesNotMatch(
+    objectCreation,
+    /Destination object does not allow child creation/
+  );
   assert.match(
     operatingCardRuntime,
     /workspaceDropPolicy[\s\S]*?<IXIContainerDropTarget/

@@ -101,10 +101,7 @@ function isMosWorkspaceObject(item = {}) {
 function isContainerWorkspaceObject(item = {}) {
   return Boolean(
     isSystemIndexPresentation(item) ||
-    (
-      isMosWorkspaceObject(item) &&
-      item?.capabilities?.canContain === true
-    )
+    isMosWorkspaceObject(item)
   );
 }
 
@@ -127,10 +124,7 @@ function getSystemIndexDropPolicy(item = {}) {
     };
   }
 
-  if (
-    isMosWorkspaceObject(item) &&
-    item?.capabilities?.canContain === true
-  ) {
+  if (isMosWorkspaceObject(item)) {
     return (
       item?.workspace?.dropPolicy ||
       {
@@ -331,7 +325,7 @@ export default function IXIAosWorkspaceBoard({
           if (isSystemIndexPresentation(item)) {
             const canCreateChild =
               !systemAdapter &&
-              item?.capabilities?.canContain === true;
+              isMosWorkspaceObject(item);
 
             if (ixiCardState?.[id]?.transactVisible === true) {
               return (
@@ -574,8 +568,7 @@ export default function IXIAosWorkspaceBoard({
                 dragHandleProps={dragHandleProps}
 
                 workspaceDropPolicy={{
-                  enabled:
-                    item?.capabilities?.canContain === true,
+                  enabled: true,
                   acceptedObjectTypes: []
                 }}
 

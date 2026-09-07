@@ -6,7 +6,7 @@ on:
       commit_sha:
         description: Immutable IX-Core commit SHA
         required: true
-        default: 1227e98e0e2ebe625ccbc7f9b40eb72901322df2
+        default: fe5eb2a2cbb0150156dbc1087a534104dd4ff8d7
   push:
     branches:
       - main
@@ -27,7 +27,7 @@ jobs:
     env:
       AWS_REGION: ${{ secrets.AWS_REGION }}
       AWS_INSTANCE_ID: ${{ secrets.AWS_INSTANCE_ID }}
-      IXI_CORE_SHA: ${{ inputs.commit_sha || '1227e98e0e2ebe625ccbc7f9b40eb72901322df2' }}
+      IXI_CORE_SHA: ${{ inputs.commit_sha || 'fe5eb2a2cbb0150156dbc1087a534104dd4ff8d7' }}
 
     steps:
       - name: Validate immutable release
@@ -69,7 +69,7 @@ jobs:
           ARCHIVE=/tmp/ixi-core-aos-release-__IXI_CORE_SHA__.tgz
           BACKUP_ROOT=/var/backups/ixi-core-releases
           BACKUP=$BACKUP_ROOT/pre-aos-__IXI_CORE_SHA__.tgz
-          MANAGED_FILES='mos/objects/objectService.js mos/routes/mosRouter.js mos/provisioning/aosObjectProvisioningService.js'
+          MANAGED_FILES='mos/objects/objectService.js mos/objects/objectTemplates.js mos/routes/mosRouter.js mos/provisioning/aosObjectProvisioningService.js mos/accounts/aosEnvironmentService.js'
           SUCCESS=0
 
           run_pm2() {
@@ -141,6 +141,16 @@ jobs:
             9d0565ab55587cd15b525b4a47cdbdb31c1c5b28fb96dd42badd39effcd1e254 \
             edbab67e4319a4ee53bc20cb3b535b4a3aaf441cbd35cd6ad93d5d5c703e184b \
             7007eadef07ae610af910055685d181ce6bf756fdfb0e01f405419b71887ad50
+          verify_managed_file \
+            mos/accounts/aosEnvironmentService.js \
+            5b77c39050a2a0b009966caf9c988320b333259e925d0c1ad6ff5675bc88941e \
+            faf7eb871ba8881676ef3ffc412f67ea1e408e025a818ffe69e40bf91dcee86c
+          verify_managed_file \
+            mos/objects/objectTemplates.js \
+            789e8a76226167cd755c82816f29145ecdabf0b307c2c2f7ed0a1a66c384c9cf \
+            e6dcf2d1dee520295a7fd6bfd03cb6ce82e4c359ec7f4f914211e0eda0f0a495 \
+            df4f072f5a1e9a443647da966ea2ff3acfb7811bfe63520fb205412369a6de9f \
+            98c6c49293866cfc3297d6c7f533f5d89144253337ae24a95a2f513685c39b39
 
           rm -rf "$STAGE"
           mkdir -p "$STAGE" "$BACKUP_ROOT"
@@ -154,7 +164,9 @@ jobs:
           npm test
           node --test mos/tests/objectMutationContract.test.js
           node --check mos/objects/objectService.js
+          node --check mos/objects/objectTemplates.js
           node --check mos/routes/mosRouter.js
+          node --check mos/accounts/aosEnvironmentService.js
 
           cd "$APP"
           tar -czf "$BACKUP" $MANAGED_FILES

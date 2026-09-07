@@ -86,6 +86,8 @@ export default function IXIAosOperatingCardRuntime({
     ...object,
     capabilities: {
       ...(object?.capabilities || {}),
+      canContain: true,
+      canCreate: true,
       canTransact: true,
       hasConsole: true,
       canOpenConsole: true
