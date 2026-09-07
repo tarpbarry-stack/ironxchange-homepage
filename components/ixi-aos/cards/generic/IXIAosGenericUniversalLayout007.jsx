@@ -199,15 +199,18 @@ export default function IXIAosGenericUniversalLayout007({
   onCycleFace = null, onRailSend = null, armedDestination = "", onSendToArmedDestination = null,
   skinId = "v12", onSkinChange = null, showMediaBusinessIdentifier = true
 }) {
-  const [runtimeObject, setRuntimeObject] = useState(object);
+  /*
+   * The commercial editor bridge is the single runtime owner. Reading through
+   * a second local object cache allowed Face 1 to keep an obsolete generated
+   * label (custom_2) while the editor already held the customer's real label.
+   */
+  const runtimeObject = object;
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [activeChildIndex, setActiveChildIndex] = useState(0);
   const mediaInputRef = useRef(null);
   const [mediaStatus, setMediaStatus] = useState("");
   const [mediaError, setMediaError] = useState("");
-
-  useEffect(() => setRuntimeObject(object), [object]);
 
   const actions = getObjectActionCapabilities(runtimeObject);
   const presentation = getObjectPresentation(runtimeObject);
@@ -236,7 +239,6 @@ export default function IXIAosGenericUniversalLayout007({
         fields: { ...getObjectFields(nextObject) }, fieldDefinitions: asArray(nextObject.fieldDefinitions),
         metadata: { ...(nextObject.metadata || {}) }, media: asArray(nextObject.media)
       });
-      setRuntimeObject(nextObject);
       setEditing(false);
     } finally {
       setSaving(false);

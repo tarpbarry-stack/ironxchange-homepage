@@ -40,3 +40,9 @@ test("007A and 007B use the media ID while 007C places ID first in details", () 
   assert.match(source, /clean\(item\.value\) \|\| isBusinessIdentifier\(item\.definition\)/u);
   assert.match(source, /<span>\{isBusinessIdentifier\(definition\) \? "ID" : definition\.label\}<\/span><strong>\{value \|\| "—"\}<\/strong>/u);
 });
+
+test("Card 007 renders the bridge-owned object without a stale local object cache", () => {
+  assert.match(source, /const runtimeObject = object;/u);
+  assert.doesNotMatch(source, /useState\(object\)/u);
+  assert.doesNotMatch(source, /setRuntimeObject\(object\)/u);
+});
