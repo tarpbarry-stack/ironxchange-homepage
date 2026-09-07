@@ -39,7 +39,12 @@ test("AOS operational drops preserve one visual identity and create a non-exclus
   assert.doesNotMatch(work, /IXIRelationshipDropDialog/u);
   assert.doesNotMatch(work, /setPendingRelationship/u);
   assert.doesNotMatch(work, /RELATIONSHIP NOT CREATED/u);
-  assert.match(work, /void \(async \(\) => \{[\s\S]*?await createAosMembershipRelationship\(\{/u);
+  assert.match(work, /const operation = controller\.connect\(\{/u);
+  assert.match(work, /relationshipTransport: request => createAosMembershipRelationship\(\{/u);
+  assert.match(
+    read("components/ixi-mos/workspace/IXIAosWorkspaceSessionController.mjs"),
+    /relationshipTransport\(\{[\s\S]*?commandId: operationId/u
+  );
   assert.match(work, /ONE OBJECT \/ MANY RELATIONSHIPS \/ ONE VISUAL PLACEMENT/u);
   assert.match(work, /setWorkspacePlacements\([\s\S]*?nextPlacements/u);
   assert.match(work, /parentObjectId:\s*targetWorkspaceObjectId/u);
@@ -54,6 +59,7 @@ test("AOS operational drops preserve one visual identity and create a non-exclus
   assert.match(work, /getCanonicalMosObjectForWorkspaceId\(dragId\)/u);
   assert.doesNotMatch(dropBranch, /directContainerId/u);
   assert.doesNotMatch(dropBranch, /setAosObjects/u);
+  assert.doesNotMatch(dropBranch, /previousPlacements/u);
 });
 
 test("container drops can never provision or append a Machine", () => {

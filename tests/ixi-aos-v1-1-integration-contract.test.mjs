@@ -277,6 +277,33 @@ test("customer label changes cannot alter rail behavior or edge identity", async
   assert.equal(payloads[1].relationshipLabel, null);
 });
 
+test("durable relationship readback requires complete matching Passport evidence", () => {
+  const expected = {
+    relationshipId: "relationship-1",
+    sourceObjectId: "object-ripper-1",
+    sourcePassportId: "IXIRPR2345",
+    targetObjectId: "object-wichita-falls",
+    targetPassportId: "IXIWFT2345",
+    behaviorId: IXI_AOS_RAIL_MEMBERSHIP_BEHAVIOR_ID,
+    definitionId: null,
+    orderKey: "000100",
+    status: "active"
+  };
+
+  assert.equal(findVerifiedMosRelationship({
+    readback: { relationships: [{ ...expected, sourcePassportId: null }] },
+    ...expected
+  }), null);
+  assert.equal(findVerifiedMosRelationship({
+    readback: { relationships: [{ ...expected, targetPassportId: "IXIWRONG" }] },
+    ...expected
+  }), null);
+  assert.deepEqual(findVerifiedMosRelationship({
+    readback: { relationships: [expected] },
+    ...expected
+  }), expected);
+});
+
 test("workspace deduplication is local to each placement scope", () => {
   const admission = buildAosCanonicalAdmission({
     aosObjects: [canonicalObject({

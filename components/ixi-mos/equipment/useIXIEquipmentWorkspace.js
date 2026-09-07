@@ -14,8 +14,19 @@ export default function useIXIEquipmentWorkspace({
   ixiCardState = {},
 
   executeIXITransaction,
+  onSummonObject = null,
   resolveCanonicalObjectId = value => String(value ?? "").trim()
 }) {
+
+  function executeWithSummonedContext(result, objectIds = []) {
+    const completion = executeIXITransaction?.(result);
+    if (typeof onSummonObject === "function") {
+      void Promise.resolve(completion).then(() =>
+        Promise.all(objectIds.map(objectId => onSummonObject(objectId)))
+      ).catch(() => null);
+    }
+    return completion;
+  }
 
   function exposeEquipmentMachineToBoard(
     machine
@@ -72,9 +83,7 @@ export default function useIXIEquipmentWorkspace({
       )
     };
 
-    executeIXITransaction?.(
-      faceOneResult
-    );
+    executeWithSummonedContext(faceOneResult, [machineId]);
   }
 
 
@@ -106,9 +115,7 @@ export default function useIXIEquipmentWorkspace({
         machineContainers
       });
 
-    executeIXITransaction?.(
-      result
-    );
+    executeWithSummonedContext(result, [machineId]);
   }
 
 
@@ -141,9 +148,7 @@ export default function useIXIEquipmentWorkspace({
           machineContainers
         });
 
-    executeIXITransaction?.(
-      result
-    );
+    executeWithSummonedContext(result, equipmentIds);
   }
 
 
@@ -206,9 +211,7 @@ export default function useIXIEquipmentWorkspace({
           machineContainers
         });
 
-    executeIXITransaction?.(
-      result
-    );
+    executeWithSummonedContext(result, exposedIds);
   }
 
 

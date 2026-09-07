@@ -30,6 +30,11 @@ const ROUTES = [
 
   { methods: ["POST"], pattern: /^\/identity\/admit$/ },
 
+  { methods: ["POST"], pattern: /^\/aos\/workspace-sessions$/ },
+  { methods: ["GET"], pattern: /^\/aos\/workspace-sessions\/[^/]+$/ },
+  { methods: ["POST"], pattern: /^\/aos\/workspace-sessions\/[^/]+\/commands$/ },
+  { methods: ["POST"], pattern: /^\/aos\/workspace-sessions\/[^/]+\/end$/ },
+
   { methods: ["POST"], pattern: /^\/relationships$/ },
   { methods: ["POST"], pattern: /^\/relationships\/[^/]+\/end$/ },
   { methods: ["POST"], pattern: /^\/relationships\/[^/]+\/order$/ },

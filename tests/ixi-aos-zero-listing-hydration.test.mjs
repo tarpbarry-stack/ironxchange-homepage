@@ -53,5 +53,7 @@ test("canonical AOS objects and System Indexes hydrate with zero Sharetribe list
 
   const work = read("pages/aos/work.js");
   assert.doesNotMatch(work, /!workspaceListings\.length\s*\|\|\s*!systemIndexes\.length/u);
-  assert.match(work, /!systemIndexes\.length && !aosObjects\.length/u);
+  assert.match(work, /\.\.\.aosWorkspaceAdmission\.objectsById\.values\(\)/u);
+  assert.match(work, /controller\.admitObjects\(descriptors\)/u);
+  assert.doesNotMatch(work, /if \(!workspaceListings\.length\)/u);
 });
