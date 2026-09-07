@@ -6,6 +6,10 @@ const source = fs.readFileSync(
   new URL("../components/ixi-aos/cards/generic/IXIAosGenericObjectLayout007.jsx", import.meta.url),
   "utf8"
 );
+const card = fs.readFileSync(
+  new URL("../components/ixi-aos/cards/008/IXIAosCard008Profile.jsx", import.meta.url),
+  "utf8"
+);
 
 test("Card 008 does not reuse its durable ID as a subtitle", () => {
   assert.match(source, /BUSINESS_IDENTIFIER_FIELD_ID/u);
@@ -17,4 +21,11 @@ test("customer fields retain their labels instead of receiving positional meanin
   assert.match(source, /details:\s*definitions\.filter/u);
   assert.match(source, /presentationFields\.details\.map/u);
   assert.match(source, /definition\.label/u);
+});
+
+test("Card 008 display reads the same bridge-owned object as its editor", () => {
+  assert.match(card, /<IXIAosCardHeaderIdentity object=\{runtimeObject\}/u);
+  assert.match(card, /<IXIAosGenericCardRailShell \{\.\.\.contractProps\} object=\{runtimeObject\}/u);
+  assert.match(card, /<IXIAosGenericObjectLayout007 \{\.\.\.contractProps\} object=\{runtimeObject\} onSaveObject=\{face1\.onSaveObject\}/u);
+  assert.doesNotMatch(card, /object=\{face1\.object\}/u);
 });
