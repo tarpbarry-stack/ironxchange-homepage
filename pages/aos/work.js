@@ -1565,6 +1565,31 @@ function getDirectContainerChildIds(
     .filter(Boolean);
 }
 
+  /*
+   * MOS CONTAINERS
+   *
+   * Only direct canonical children. Business relationships are not
+   * workspace containment and must never populate a container deck.
+   */
+  return (
+    aosObjects || []
+  )
+    .filter(object =>
+      String(
+        object?.directContainerId ||
+        ""
+      ) === containerId
+    )
+    .map(object =>
+      String(
+        object?.objectId ||
+        object?.id ||
+        ""
+      )
+    )
+    .filter(Boolean);
+}
+
 async function clearContainerChildrenToParent(
   container
 ) {
@@ -1693,31 +1718,6 @@ async function clearContainerChildrenToParent(
     parentContainerId,
     children: canonicalChildren
   };
-}
-
-  /*
-   * MOS CONTAINERS
-   *
-   * Only direct canonical children. Business relationships are not
-   * workspace containment and must never populate a container deck.
-   */
-  return (
-    aosObjects || []
-  )
-    .filter(object =>
-      String(
-        object?.directContainerId ||
-        ""
-      ) === containerId
-    )
-    .map(object =>
-      String(
-        object?.objectId ||
-        object?.id ||
-        ""
-      )
-    )
-    .filter(Boolean);
 }
 
 
