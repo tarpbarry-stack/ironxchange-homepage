@@ -28,7 +28,8 @@ export const IXI_AOS_BOARD_SKIN_IDS =
     IXI_119: "ixi-119",
     IXI_120: "ixi-120",
     IXI_121: "ixi-121",
-    IXI_122: "ixi-122"
+    IXI_122: "ixi-122",
+    IXI_123: "ixi-123"
   });
 
 export const IXI_AOS_BOARD_SKINS =
@@ -193,6 +194,13 @@ export const IXI_AOS_BOARD_SKINS =
       designation: "DETACH 65",
       description: "Fontaine Magnitude 65 MDSR plan with non-ground-bearing detach sequence, 3+2 axle loading and deck geometry.",
       className: "aos-work-board-skin-ixi-122"
+    }),
+    Object.freeze({
+      skinId: IXI_AOS_BOARD_SKIN_IDS.IXI_123,
+      name: "IXI-123",
+      designation: "YARD FORCE",
+      description: "Komatsu WA500-8 Yard Loader plan with Z-bar breakout geometry, articulation, axle oscillation and hydraulic load paths.",
+      className: "aos-work-board-skin-ixi-123"
     })
   ]);
 
