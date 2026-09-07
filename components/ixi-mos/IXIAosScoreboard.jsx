@@ -191,7 +191,8 @@ export default function IXIAosScoreboard({
   aosObjects = [],
 
   onAdd = null,
-  onMore = null
+  onMore = null,
+  moreExpanded = false
 }) {
   const totalAssets =
     Array.isArray(ownedListings)
@@ -381,6 +382,8 @@ export default function IXIAosScoreboard({
           type="button"
           className="aos-scorecard-action"
           aria-label="More"
+          aria-haspopup="dialog"
+          aria-expanded={moreExpanded}
           title="More"
           onClick={
             typeof onMore === "function"
