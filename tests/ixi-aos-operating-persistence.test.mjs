@@ -5,7 +5,10 @@ import test from "node:test";
 import { resolveIXIAosOperatingCardNumber } from "../components/ixi-aos/card-runtime/IXIAosOperatingCardResolver.mjs";
 import { acceptIXIAosCanonicalObject } from "../components/ixi-aos/card-runtime/IXIAosFoundationEngine.mjs";
 import { assertAosObjectMutationRequest } from "../lib/server/aos/ixiAosObjectMutationPolicy.mjs";
-import { mergeAosCanonicalObject } from "../lib/mos/mergeAosCanonicalObject.mjs";
+import {
+  mergeAosCanonicalObject,
+  reconcileCanonicalFieldDefinitions
+} from "../lib/mos/mergeAosCanonicalObject.mjs";
 
 function read(path) {
   return fs.readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
@@ -128,6 +131,43 @@ test("workspace accepts IX-Core values while retaining derived definition hydrat
   assert.equal(merged.revision, 8);
   assert.equal(merged.definition.definitionId, "definition-1");
   assert.equal(merged.fieldDefinitions[0].fieldId, "hours");
+});
+
+test("canonical readback cannot replace customer labels with generated field ids", () => {
+  const current = {
+    objectId: "object-person-1",
+    fieldDefinitions: [
+      { fieldId: "placeValue", label: "PRIMARY LOCATION", fieldType: "text" },
+      { fieldId: "custom_10", label: "CAPABILITIES", fieldType: "text" }
+    ]
+  };
+  const canonical = {
+    objectId: "object-person-1",
+    revision: 9,
+    fields: { placeValue: "RINGLING", custom_10: "MAKE READY" },
+    fieldDefinitions: [
+      { fieldId: "placeValue", label: "placeValue", fieldType: "text" },
+      { fieldId: "custom_10", label: "custom_10", fieldType: "text" }
+    ]
+  };
+
+  const definitions = reconcileCanonicalFieldDefinitions(current, canonical);
+  assert.deepEqual(definitions.map(item => item.label), ["PRIMARY LOCATION", "CAPABILITIES"]);
+
+  const merged = mergeAosCanonicalObject(current, canonical);
+  assert.equal(merged.revision, 9);
+  assert.equal(merged.fields.placeValue, "RINGLING");
+  assert.deepEqual(merged.fieldDefinitions.map(item => item.label), ["PRIMARY LOCATION", "CAPABILITIES"]);
+  assert.deepEqual(merged.metadata.fieldDefinitions, merged.fieldDefinitions);
+});
+
+test("meaningful canonical labels still win over an older customer label", () => {
+  const definitions = reconcileCanonicalFieldDefinitions(
+    { fieldDefinitions: [{ fieldId: "placeValue", label: "LOCATION" }] },
+    { fieldDefinitions: [{ fieldId: "placeValue", label: "PRIMARY YARD" }] }
+  );
+
+  assert.equal(definitions[0].label, "PRIMARY YARD");
 });
 
 test("AOS Work mounts the production card runtime and canonical save adapter", () => {

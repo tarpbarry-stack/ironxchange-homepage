@@ -185,11 +185,11 @@ export default function IXIAosGenericObjectLayout007({
   showHeaderDisplayName = false,
   cardNumber = 7
 }) {
-  const [runtimeObject, setRuntimeObject] = useState(object);
+  // The commercial editor bridge owns runtime state for every numbered card.
+  // A second cache here can retain obsolete generated labels after readback.
+  const runtimeObject = object;
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
-
-  useEffect(() => setRuntimeObject(object), [object]);
 
   const presentationFields = choosePresentationFields(runtimeObject);
   const relationships = getObjectRelationships(runtimeObject).slice(0, 6);
@@ -218,7 +218,6 @@ export default function IXIAosGenericObjectLayout007({
         fields: { ...getObjectFields(nextObject) },
         media: asArray(nextObject.media)
       });
-      setRuntimeObject(nextObject);
       setEditing(false);
     } finally {
       setSaving(false);

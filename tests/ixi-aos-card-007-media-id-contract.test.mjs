@@ -82,3 +82,14 @@ test("Card 007 display reads the same bridge-owned object as its editor", () => 
   assert.match(card, /<CardLayout \{\.\.\.contractProps\} object=\{runtimeObject\} onSaveObject=\{face1\.onSaveObject\}/u);
   assert.doesNotMatch(card, /<CardLayout \{\.\.\.contractProps\} object=\{face1\.object\}/u);
 });
+
+test("007-style object layout does not cache stale canonical field labels", () => {
+  const objectLayout = fs.readFileSync(
+    new URL("../components/ixi-aos/cards/generic/IXIAosGenericObjectLayout007.jsx", import.meta.url),
+    "utf8"
+  );
+
+  assert.match(objectLayout, /const runtimeObject = object;/u);
+  assert.doesNotMatch(objectLayout, /useState\(object\)/u);
+  assert.doesNotMatch(objectLayout, /setRuntimeObject\(/u);
+});
