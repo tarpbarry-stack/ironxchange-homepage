@@ -1,6 +1,3 @@
-Warning: truncated output (original token count: 116729)
-Total output lines: 4475
-
 export const IXI_AOS_BOARD_SKIN_STORAGE_KEY =
   "ixi:aos-work:board-skin";
 
