@@ -102,6 +102,7 @@ export default function IXISystemIndexCard({
   onAddObject,
   onSavePresentation,
   childCardMode = "object",
+  loopChildDeck = false,
   workspaceDropPolicy = null,
   workspaceDropSurface = ""
 }) {
@@ -129,7 +130,14 @@ export default function IXISystemIndexCard({
 
   const boardColor = ixiState?.color || "none";
   const boardOutline = Number(ixiState?.outline ?? 1);
-  const face = Math.max(1, Number(ixiState?.face || 1));
+  const storedFace = Math.max(1, Number(ixiState?.face || 1));
+  const lastChildFace = items.length
+    ? getCollectionFaceForItemIndex(items.length - 1)
+    : getFirstCollectionFace();
+  const face =
+    loopChildDeck && storedFace > lastChildFace
+      ? getFirstCollectionFace()
+      : storedFace;
 
   const {
     isIdentityFace,
@@ -238,7 +246,9 @@ export default function IXISystemIndexCard({
 
   function goEnd() {
     setFace(
-      getLastCollectionFace({ items })
+      loopChildDeck
+        ? lastChildFace
+        : getLastCollectionFace({ items })
     );
   }
 
@@ -249,6 +259,14 @@ export default function IXISystemIndexCard({
           previewItemIndex
         )
       );
+      return;
+    }
+
+    if (
+      loopChildDeck &&
+      activeItemIndex === items.length - 1
+    ) {
+      setFace(getFirstCollectionFace());
       return;
     }
 

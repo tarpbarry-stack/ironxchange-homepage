@@ -57,6 +57,20 @@ test("Card 018 always renders owned equipment through the current inventory mach
   assert.match(childRouter, /cardContext="inventory"/);
 });
 
+test("Card 018 machine browsing removes the container header and loops without an End Deck face", async () => {
+  const [card, systemIndex] = await Promise.all([
+    read("components/ixi-aos/cards/018/IXIAosCard018.jsx"),
+    read("components/ixi-mos/IXISystemIndexCard.jsx")
+  ]);
+
+  assert.match(card, /loopChildDeck = true/);
+  assert.match(card, /!editing && isContainerFace/);
+  assert.match(card, /loopChildDeck=\{loopChildDeck\}/);
+  assert.match(systemIndex, /loopChildDeck &&\s*activeItemIndex === items\.length - 1/);
+  assert.match(systemIndex, /loopChildDeck\s*\? lastChildFace\s*:\s*getLastCollectionFace/);
+  assert.match(systemIndex, /forceMachineCard=\{childCardMode === "machine"\}/);
+});
+
 test("AOS Work renders the canonical Equipment System Index through Card 018", async () => {
   const board = await read("components/ixi-mos/workspace/IXIAosWorkspaceBoard.jsx");
   assert.match(board, /IXIAosCard018/);

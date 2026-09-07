@@ -18,6 +18,7 @@ test("Card 019 is the V12 Locations System Index composition", async () => {
   assert.match(card019, /defaultDisplayName="LOCATIONS"/);
   assert.match(card019, /editHeading="EDIT LOCATIONS INDEX"/);
   assert.match(card019, /childCardMode="object"/);
+  assert.match(card019, /loopChildDeck=\{false\}/);
   assert.match(card018, /<span>SYSTEM INDEX<\/span>/);
   assert.match(card018, /IXISystemIndexCard/);
   assert.doesNotMatch(card018, /IXIObjectRail/);

@@ -44,7 +44,8 @@ export default function IXIAosCard018({
   cardDefinition = CARD_018,
   defaultDisplayName = "EQUIPMENT",
   editHeading = "EDIT EQUIPMENT INDEX",
-  childCardMode = "machine"
+  childCardMode = "machine",
+  loopChildDeck = true
 }) {
   const objectId = clean(object?.objectId || object?.id?.uuid || object?.id);
   const isCreationDraft =
@@ -54,6 +55,10 @@ export default function IXIAosCard018({
   const [editing, setEditing] = useState(isCreationDraft);
   const [draftName, setDraftName] = useState(clean(object?.displayName));
   const items = Array.isArray(children) && children.length ? children : (Array.isArray(objects) ? objects : []);
+  const storedFace = Math.max(1, Number(ixiState?.face || 1));
+  const isContainerFace =
+    storedFace === 1 ||
+    (loopChildDeck && storedFace > items.length + 1);
 
   useEffect(() => {
     setDraftName(clean(object?.displayName));
@@ -106,6 +111,7 @@ export default function IXIAosCard018({
         onReturnContents={() => onReturn?.(object)}
         onAddObject={onAddObject}
         childCardMode={childCardMode}
+        loopChildDeck={loopChildDeck}
         onSavePresentation={(_, action = {}) => {
           if (action?.intent === "edit-face-1") {
             setDraftName(clean(object?.displayName));
@@ -114,7 +120,7 @@ export default function IXIAosCard018({
         }}
       />
 
-      {!editing ? (
+      {!editing && isContainerFace ? (
         <header className="c018-head">
           <div className="c018-identity">
             <span>SYSTEM INDEX</span>
