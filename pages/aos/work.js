@@ -3561,24 +3561,8 @@ onReturnContainerChildren={
           background-color: #090a0a;
           background-image: url('/images/ixi-aos-work-board.webp');
           background-position: center top;
-          background-repeat: no-repeat;
+          background-repeat: repeat-y;
           background-size: 100% auto;
-        }
-
-        .aos-work-board::after {
-          content: "";
-          position: absolute;
-          inset: 0;
-          z-index: -1;
-          pointer-events: none;
-          background:
-            linear-gradient(
-              180deg,
-              transparent 0,
-              transparent min(78vw, 1180px),
-              rgba(9,10,10,.72) min(94vw, 1440px),
-              #090a0a min(112vw, 1720px)
-            );
         }
 
         .aos-work-board-title {
