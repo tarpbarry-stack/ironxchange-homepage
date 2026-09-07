@@ -293,12 +293,49 @@ export function getFieldDefinitions(object = {}) {
     metadata?.fieldSchema
   ];
 
+  const merged = new Map();
+
   for (const source of sources) {
     if (!Array.isArray(source) || !source.length) continue;
 
-    return source
+    source
       .map(normalizeFieldDefinition)
       .filter(Boolean)
+      .forEach(definition => {
+        const existing = merged.get(definition.fieldId);
+        if (!existing) {
+          merged.set(definition.fieldId, definition);
+          return;
+        }
+
+        const existingLabel = clean(existing.label);
+        const candidateLabel = clean(definition.label);
+        const existingIsGenerated =
+          existingLabel === existing.fieldId ||
+          /^custom_\d+$/i.test(existingLabel) ||
+          /^field[_ ]\d+$/i.test(existingLabel);
+        const candidateIsGenerated =
+          candidateLabel === definition.fieldId ||
+          /^custom_\d+$/i.test(candidateLabel) ||
+          /^field[_ ]\d+$/i.test(candidateLabel);
+
+        if (existingIsGenerated && candidateLabel && !candidateIsGenerated) {
+          merged.set(definition.fieldId, {
+            ...definition,
+            ...existing,
+            label: candidateLabel,
+            aggregate: {
+              ...(definition.aggregate || {}),
+              ...(existing.aggregate || {}),
+              label: candidateLabel
+            }
+          });
+        }
+      });
+  }
+
+  if (merged.size) {
+    return Array.from(merged.values())
       .sort((a, b) => a.presentationOrder - b.presentationOrder);
   }
 

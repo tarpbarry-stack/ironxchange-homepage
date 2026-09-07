@@ -58,3 +58,16 @@ test("Face 1 uses the canonical schema resolver for customer labels", () => {
   assert.match(contract, /const originalDefinitions = getFieldDefinitions\(originalObject\)/u);
   assert.match(contract, /const editedDefinitions = getFieldDefinitions\(nextObject\)/u);
 });
+
+test("canonical schema resolution cannot let custom_N mask a customer label", () => {
+  const presentation = fs.readFileSync(
+    new URL("../components/ixi-aos/card-runtime/IXIAosSemanticObjectPresentation.js", import.meta.url),
+    "utf8"
+  );
+
+  assert.match(presentation, /const merged = new Map\(\)/u);
+  assert.match(presentation, /existingLabel === existing\.fieldId/u);
+  assert.match(presentation, /\^custom_\\d\+\$\/i/u);
+  assert.match(presentation, /existingIsGenerated && candidateLabel && !candidateIsGenerated/u);
+  assert.match(presentation, /label: candidateLabel/u);
+});
