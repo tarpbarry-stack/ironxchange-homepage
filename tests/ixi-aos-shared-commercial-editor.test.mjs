@@ -49,6 +49,15 @@ test("shared commercial editor preserves typed values and durable field definiti
   assert.match(editor, /metadata:[\s\S]*?fieldDefinitions:\s*normalizedDefinitions/u);
 });
 
+test("AOS Work preserves customer labels when canonical readback omits definitions", () => {
+  const work = read("pages/aos/work.js");
+
+  assert.match(
+    work,
+    /return mergeAosCanonicalObject\(\s*payload\?\.object \|\| existing,\s*canonical\s*\);/u
+  );
+});
+
 test("shared commercial editor includes the common media contract", () => {
   assert.match(editor, /IXIAosPrimaryMediaEditor/u);
   assert.match(editor, /mediaEnabled/u);

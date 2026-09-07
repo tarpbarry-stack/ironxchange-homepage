@@ -1407,7 +1407,18 @@ const saveAosWorkspaceObject = useCallback(async (payload = {}) => {
 
   setAosObjects(current => current.map(existing => {
     if (String(existing?.objectId || "") !== objectId) return existing;
-    return mergeAosCanonicalObject(existing, canonical);
+    /*
+     * The mutation response is authoritative for persisted values/revision,
+     * but older IX-Core projections can omit fieldDefinitions. Merge from the
+     * submitted object here so a customer-authored label (for example
+     * "TITLE") is not replaced by its stable storage key ("custom_2") after
+     * the save completes. mergeAosCanonicalObject still prefers definitions
+     * returned by IX-Core when they are present.
+     */
+    return mergeAosCanonicalObject(
+      payload?.object || existing,
+      canonical
+    );
   }));
 
   return {
