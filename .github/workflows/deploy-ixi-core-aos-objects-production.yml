@@ -95,17 +95,18 @@ jobs:
 
           verify_managed_file() {
             file="$1"
-            baseline_sha="$2"
-            previous_release_sha="$3"
-            release_sha="$4"
+            shift
             actual_sha="$(sha256sum "$APP/$file" | awk '{print $1}')"
 
-            if [ "$actual_sha" != "$baseline_sha" ] && [ "$actual_sha" != "$previous_release_sha" ] && [ "$actual_sha" != "$release_sha" ]; then
-              echo "$file has unrecognized live drift: $actual_sha" >&2
-              exit 1
-            fi
+            for accepted_sha in "$@"; do
+              if [ "$actual_sha" = "$accepted_sha" ]; then
+                echo "$file baseline accepted: $actual_sha"
+                return 0
+              fi
+            done
 
-            echo "$file baseline accepted: $actual_sha"
+            echo "$file has unrecognized live drift: $actual_sha" >&2
+            exit 1
           }
 
           test -d "$APP"
@@ -126,16 +127,19 @@ jobs:
             mos/objects/objectService.js \
             9ecb7fe8524a45550a8922f79ae42360a3522d69a163b9a81aa89c71e71632c4 \
             8f2d8a98ff269005d2dcd04bd65786f8a191f1c4f365f0a272e68f5dce2b9cb8 \
+            df2e1265efdad5924a33ab1a21c5313499542707a02bfefba25c0df184312c89 \
             bb6a022ae20d2e7b539aaf5ac027f3a60b9bc22c3f7d0ecd492e38deb6b05ce2
           verify_managed_file \
             mos/routes/mosRouter.js \
             bbdb5427430e459e5acfb283d67b446c2c820ed064c3c203089cd27d9f975303 \
             b583bb6e385740935db7a94ddf005f54834694df245dd848d1b6e952edde3d40 \
+            bf5c4d48f609ec289261f3fb3d3f7e6f48537148ccbbc47cd7c0e1824e16c3ef \
             a2bd663d154beb00bbbbd494445e9cee2a6b0995a9ea63bace4dfd3c1e95cba2
           verify_managed_file \
             mos/provisioning/aosObjectProvisioningService.js \
             9d0565ab55587cd15b525b4a47cdbdb31c1c5b28fb96dd42badd39effcd1e254 \
             9d0565ab55587cd15b525b4a47cdbdb31c1c5b28fb96dd42badd39effcd1e254 \
+            edbab67e4319a4ee53bc20cb3b535b4a3aaf441cbd35cd6ad93d5d5c703e184b \
             7007eadef07ae610af910055685d181ce6bf756fdfb0e01f405419b71887ad50
 
           rm -rf "$STAGE"
