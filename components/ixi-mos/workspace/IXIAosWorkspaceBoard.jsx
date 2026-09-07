@@ -25,6 +25,10 @@ import IXIAosOperatingCardRuntime
   from "../../ixi-aos/card-runtime/IXIAosOperatingCardRuntime";
 
 import {
+  getNumberedAosConsoleNativeWidth
+} from "../../ixi-aos/console-runtime/IXIAosNumberedObjectConsole";
+
+import {
   getListingId
 } from "../../../lib/listingFormatters";
 
@@ -279,20 +283,40 @@ export default function IXIAosWorkspaceBoard({
         }
 
         getCustomItemNativeSize={({ item, id }) => {
-          if (!isSystemIndexPresentation(item)) {
-            return null;
+          if (isSystemIndexPresentation(item)) {
+            if (ixiCardState?.[id]?.transactVisible === true) {
+              return {
+                width: getNumberedAosConsoleNativeWidth({
+                  objectId: id,
+                  ixiCardState
+                }),
+                height: 475
+              };
+            }
+
+            return {
+              width:
+                getSystemIndexConsoleNativeWidth({
+                  objectId: id,
+                  ixiCardState
+                }),
+
+              height:
+                getSystemIndexConsoleNativeHeight()
+            };
           }
 
-          return {
-            width:
-              getSystemIndexConsoleNativeWidth({
+          if (isMosWorkspaceObject(item)) {
+            return {
+              width: getNumberedAosConsoleNativeWidth({
                 objectId: id,
                 ixiCardState
               }),
+              height: 475
+            };
+          }
 
-            height:
-              getSystemIndexConsoleNativeHeight()
-          };
+          return null;
         }}
 
         renderCustomItem={({
@@ -311,6 +335,20 @@ export default function IXIAosWorkspaceBoard({
               !systemAdapter &&
               item?.capabilities?.canContain === true;
 
+            if (ixiCardState?.[id]?.transactVisible === true) {
+              return (
+                <IXIAosOperatingCardRuntime
+                  object={item}
+                  ixiState={ixiCardState[id] || {}}
+                  onIxiStateChange={updateIxiCardState}
+                  onSendFront={sendListingToFront}
+                  onSendBack={sendListingToBack}
+                  armedDestination={armedDestination}
+                  onSendToArmedDestination={sendMachineToArmedDestination}
+                />
+              );
+            }
+
             return (
               <IXISystemIndexConsole
                 objectId={id}
@@ -318,7 +356,9 @@ export default function IXIAosWorkspaceBoard({
                 ixiCardState={ixiCardState}
                 updateIxiCardState={updateIxiCardState}
 
-                renderSystemIndexCard={({ onOpenConsole }) => {
+                onOpenTransact={() => updateIxiCardState?.(id, { transactVisible: true })}
+
+                renderSystemIndexCard={({ onOpenConsole, onOpenTransact }) => {
                   const indexState =
                     ixiCardState[id] || {
                       color: "none",
@@ -380,7 +420,7 @@ export default function IXIAosWorkspaceBoard({
                         onSendBack={sendListingToBack}
                         onSendToArmedDestination={sendMachineToArmedDestination}
                         onExposeObject={exposeObject}
-                        onOpenTransact={onOpenConsole}
+                        onOpenTransact={onOpenTransact}
                         onAddObject={
                           canCreateChild
                             ? onAddObject

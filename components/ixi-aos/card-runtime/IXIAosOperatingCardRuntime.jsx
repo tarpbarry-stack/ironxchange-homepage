@@ -9,6 +9,8 @@ function CardLoading() {
 
 const dynamicCard = loader => dynamic(loader, { loading: CardLoading });
 const IXIAosLocationObjectConsole = dynamicCard(() => import("../console-runtime/IXIAosLocationObjectConsole"));
+const IXIAosNumberedObjectConsole = dynamicCard(() => import("../console-runtime/IXIAosNumberedObjectConsole"));
+const IXIOwnedPrivateTransactRuntime = dynamicCard(() => import("../../ixi-machine-card/private/IXIOwnedPrivateTransactRuntime"));
 const IXIAosCard004Personnel = dynamicCard(() => import("../cards/004/IXIAosCard004Personnel"));
 const IXIAosCard005Personnel = dynamicCard(() => import("../cards/005/IXIAosCard005Personnel"));
 const IXIAosCard006Personnel = dynamicCard(() => import("../cards/006/IXIAosCard006Personnel"));
@@ -74,16 +76,41 @@ export default function IXIAosOperatingCardRuntime({
   onSendToArmedDestination = null,
   dragHandleProps = null
 }) {
-  const cardNumber = resolveIXIAosOperatingCardNumber(object);
-  const objectId = clean(object?.objectId || object?.id?.uuid || object?.id);
+  /*
+   * A card number chooses presentation only. Every durable AOS card carries
+   * Console + TRAN$ACT at the operating-runtime boundary, including legacy
+   * objects created before universal capabilities were persisted by IX-Core.
+   */
+  const runtimeObject = {
+    ...object,
+    capabilities: {
+      ...(object?.capabilities || {}),
+      canTransact: true,
+      hasConsole: true,
+      canOpenConsole: true
+    },
+    metadata: {
+      ...(object?.metadata || {}),
+      transactEligible: true
+    }
+  };
+  const cardNumber = resolveIXIAosOperatingCardNumber(runtimeObject);
+  const objectId = clean(runtimeObject?.objectId || runtimeObject?.id?.uuid || runtimeObject?.id);
   const children = Array.isArray(items) ? items : [];
   const currentFace = Math.max(1, Number(ixiState?.face) || 1);
   const setFace = face => {
     if (objectId) onIxiStateChange?.(objectId, { face });
   };
   const cycleFace = () => setFace(currentFace === 1 ? 2 : 1);
+  const openTransact = () => {
+    if (objectId) onIxiStateChange?.(objectId, { transactVisible: true });
+    onOpenTransact?.(runtimeObject);
+  };
+  const closeTransact = () => {
+    if (objectId) onIxiStateChange?.(objectId, { transactVisible: false });
+  };
   const shared = {
-    object,
+    object: runtimeObject,
     projection,
     children,
     objects: children,
@@ -98,7 +125,7 @@ export default function IXIAosOperatingCardRuntime({
     onBoard,
     onReturn,
     onExposeObject,
-    onOpenTransact,
+    onOpenTransact: openTransact,
     onCycleFace: cycleFace,
     onSendFront,
     onSendBack,
@@ -111,7 +138,21 @@ export default function IXIAosOperatingCardRuntime({
   };
 
   let rendered;
-  if (cardNumber <= 3) {
+  if (ixiState?.transactVisible === true) {
+    rendered = (
+      <IXIOwnedPrivateTransactRuntime
+        object={runtimeObject}
+        layoutObjectId={objectId}
+        ixiState={ixiState}
+        onIxiStateChange={onIxiStateChange}
+        onClose={closeTransact}
+        onSendFront={onSendFront}
+        onSendBack={onSendBack}
+        armedDestination={armedDestination}
+        onSendToArmedDestination={onSendToArmedDestination}
+      />
+    );
+  } else if (cardNumber <= 3) {
     rendered = (
       <IXIAosLocationObjectConsole
         {...shared}
@@ -124,9 +165,15 @@ export default function IXIAosOperatingCardRuntime({
     );
   } else {
     const Card = NUMBERED_CARDS[cardNumber] || IXIAosCard007EmployeeApplication;
-    rendered = currentFace === 2
-      ? <IXIAosCardIdentityFace cardNumber={cardNumber} {...shared} />
-      : <Card {...shared} />;
+    rendered = (
+      <IXIAosNumberedObjectConsole
+        {...shared}
+        cardNumber={cardNumber}
+        renderPrimaryCard={consoleProps => currentFace === 2
+          ? <IXIAosCardIdentityFace cardNumber={cardNumber} {...consoleProps} />
+          : <Card {...consoleProps} />}
+      />
+    );
   }
 
   return (

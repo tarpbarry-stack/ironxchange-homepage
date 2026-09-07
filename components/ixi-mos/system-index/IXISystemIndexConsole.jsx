@@ -102,7 +102,8 @@ export default function IXISystemIndexConsole({
   ixiCardState = {},
 updateIxiCardState,
 
-renderSystemIndexCard
+renderSystemIndexCard,
+onOpenTransact = null
 }) {
   const id =
     String(
@@ -558,7 +559,9 @@ renderSystemIndexCard
           consoleDepth,
 
           onOpenConsole:
-            openConsole
+            openConsole,
+
+          onOpenTransact
         })
       : null;
 
