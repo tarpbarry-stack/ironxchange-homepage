@@ -47,7 +47,9 @@ function IXIAosCard018Presentation({
   defaultDisplayName = "EQUIPMENT",
   editHeading = "EDIT EQUIPMENT INDEX",
   childCardMode = "machine",
-  loopChildDeck = true
+  loopChildDeck = true,
+  workspaceDropPolicy = null,
+  workspaceDropSurface = ""
 }) {
   const objectId = clean(object?.objectId || object?.id?.uuid || object?.id);
   const editorCommands = useIXIAosEditorCommands();
@@ -81,6 +83,8 @@ function IXIAosCard018Presentation({
         onAddObject={onAddObject}
         childCardMode={childCardMode}
         loopChildDeck={loopChildDeck}
+        workspaceDropPolicy={workspaceDropPolicy}
+        workspaceDropSurface={workspaceDropSurface}
         onSavePresentation={(_, action = {}) => {
           if (action?.intent === "edit-face-1") {
             editorCommands?.openEditor?.({ faceNumber: 1 });
@@ -113,6 +117,7 @@ function IXIAosCard018Presentation({
         .ixi-card-018:before{content:"";position:absolute;inset:0;z-index:250;border:1px solid #454b47;border-radius:13px;box-shadow:inset 0 1px rgba(255,255,255,.055),inset 0 -1px rgba(0,194,255,.09);pointer-events:none}
         .ixi-card-018:after{content:"";position:absolute;inset:7px 7px 24px;z-index:80;border:1px solid rgba(255,255,255,.075);border-radius:9px;box-shadow:inset 0 1px rgba(255,255,255,.025);pointer-events:none}
         :global(.ixi-card-018 .system-index-card){border-color:#454b47!important;border-radius:13px!important;background:radial-gradient(circle at 84% 12%,rgba(23,73,94,.11),transparent 26%),linear-gradient(180deg,#111412,#080a09)!important;box-shadow:inset 0 1px rgba(255,255,255,.07),0 18px 40px rgba(0,0,0,.53)!important}
+        :global(.ixi-card-018 .system-index-card.ixi-container-drop-accepting){border-color:rgba(255,196,0,.92)!important;outline:1px solid rgba(255,196,0,.36);box-shadow:0 0 0 1px rgba(255,196,0,.20),0 0 18px rgba(255,196,0,.24),0 0 36px rgba(255,196,0,.10),inset 0 0 18px rgba(255,196,0,.035),inset 0 1px 0 rgba(255,255,255,.05)!important}
         :global(.ixi-card-018 .index-topline){display:none!important}
         :global(.ixi-card-018 .system-index-identity){padding-top:49px!important}
         .c018-head{position:absolute;inset:0 0 auto;height:43px;padding:7px 10px;border-bottom:1px solid #303531;background:linear-gradient(180deg,#181b19,#101210);z-index:120}.c018-identity{max-width:188px}.c018-identity>span{display:block;color:#ffc400;font-size:6px;font-weight:950;letter-spacing:.07em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.c018-identity h2{margin:4px 0 0;color:#f7f8f7;font-size:14px;font-weight:950;line-height:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}

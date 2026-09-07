@@ -13,6 +13,63 @@ export function universalWorkspaceCollisionDetection(
   const pointerHits =
     pointerWithin(args);
 
+  const activeReorderBehavior =
+    args?.active
+      ?.data
+      ?.current
+      ?.reorderBehavior;
+
+  const isSelfOnlyReorder =
+    activeReorderBehavior ===
+      "self-only";
+
+  /*
+   * A self-only container has two deliberately different roles:
+   *
+   * - while another object is active, its nested ON target captures
+   *   the drop and the container remains planted;
+   * - while the container itself is active, it is an ordinary
+   *   sortable card and must cross sibling cards cleanly.
+   *
+   * With universal canContain cards, allowing nested ON targets to
+   * compete during the second case makes every neighboring card steal
+   * the collision and turns a reorder into a relationship drop.
+   */
+  if (
+    isSelfOnlyReorder
+  ) {
+    const sortablePointerHits =
+      pointerHits.filter(
+        collision =>
+          !isIXIDropOnTargetId(
+            collision?.id
+          )
+      );
+
+    if (
+      sortablePointerHits.length
+    ) {
+      return sortablePointerHits;
+    }
+
+    const sortableContainers =
+      args.droppableContainers
+        ?.filter?.(
+          container =>
+            !isIXIDropOnTargetId(
+              container?.id
+            )
+        );
+
+    return closestCenter({
+      ...args,
+
+      droppableContainers:
+        sortableContainers ||
+        args.droppableContainers
+    });
+  }
+
   /*
    * ENTER / ON target has priority.
    *
@@ -33,9 +90,14 @@ export function universalWorkspaceCollisionDetection(
       }
 
       const container =
+        collision
+          ?.data
+          ?.droppableContainer ||
         args.droppableContainers
-          ?.get?.(
-            collision?.id
+          ?.find?.(
+            candidate =>
+              candidate?.id ===
+                collision?.id
           );
 
       return (

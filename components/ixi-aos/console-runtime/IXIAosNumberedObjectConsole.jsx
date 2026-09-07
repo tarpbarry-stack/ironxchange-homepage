@@ -75,7 +75,9 @@ export default function IXIAosNumberedObjectConsole({
   armedDestination = "",
   onSendToArmedDestination = null,
   onCycleFace = null,
-  renderPrimaryCard = null
+  renderPrimaryCard = null,
+  workspaceDropPolicy = null,
+  workspaceDropSurface = ""
 }) {
   const objectId = clean(object?.objectId || object?.id?.uuid || object?.id);
   const consoleSlots = useMemo(() => normalizedSlots(ixiState), [ixiState?.consoleSlots]);
@@ -157,6 +159,8 @@ export default function IXIAosNumberedObjectConsole({
     armedDestination,
     onSendToArmedDestination,
     onCycleFace,
+    workspaceDropPolicy,
+    workspaceDropSurface,
     skinId: "v12"
   };
 

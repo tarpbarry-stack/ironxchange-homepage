@@ -337,6 +337,12 @@ export default function IXIAosWorkspaceBoard({
               return (
                 <IXIAosOperatingCardRuntime
                   object={item}
+                  workspaceDropPolicy={getSystemIndexDropPolicy(item)}
+                  workspaceDropSurface={
+                    item?.workspace?.surfaceId ||
+                    systemAdapter?.workspaceSurfaceId ||
+                    ""
+                  }
                   ixiState={ixiCardState[id] || {}}
                   onIxiStateChange={updateIxiCardState}
                   onSendFront={sendListingToFront}
@@ -412,6 +418,12 @@ export default function IXIAosWorkspaceBoard({
                           cardTemplateSlug: systemIndexCard.templateSlug,
                           cardNumber: systemIndexCard.cardNumber
                         }}
+                        workspaceDropPolicy={getSystemIndexDropPolicy(item)}
+                        workspaceDropSurface={
+                          item?.workspace?.surfaceId ||
+                          systemAdapter?.workspaceSurfaceId ||
+                          ""
+                        }
                         children={item?.items || []}
                         ixiState={indexState}
                         ixiCardState={ixiCardState}

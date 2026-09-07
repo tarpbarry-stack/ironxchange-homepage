@@ -121,7 +121,15 @@ const suppressForeignTransform =
           typeof dragData === "object"
             ? dragData
             : {}
-        )
+        ),
+
+        /*
+         * Collision detection needs the same intent contract as
+         * transform handling. A self-only container must reorder as
+         * a sortable object when it is the active draggable; nested
+         * ON targets are reserved for foreign drags.
+         */
+        reorderBehavior
       }
     });
 

@@ -24,6 +24,18 @@ const collisionEngine = read(
 const dropTarget = read(
   "components/ixi-chassis/IXIObjectDropTarget.jsx"
 );
+const operatingCardRuntime = read(
+  "components/ixi-aos/card-runtime/IXIAosOperatingCardRuntime.jsx"
+);
+const numberedObjectConsole = read(
+  "components/ixi-aos/console-runtime/IXIAosNumberedObjectConsole.jsx"
+);
+const card018 = read(
+  "components/ixi-aos/cards/018/IXIAosCard018.jsx"
+);
+const containerDropTarget = read(
+  "components/ixi-chassis/IXIContainerDropTarget.jsx"
+);
 
 test("AOS container policy reaches the universal sortable chassis", () => {
   assert.match(
@@ -62,7 +74,7 @@ test("self-only containers stay planted during a foreign drag", () => {
 test("valid ON targets win collision detection and publish accepting state", () => {
   assert.match(
     collisionEngine,
-    /isIXIDropOnTargetId[\s\S]*?accepted === true/
+    /droppableContainer[\s\S]*?accepted === true/
   );
   assert.match(
     collisionEngine,
@@ -75,5 +87,55 @@ test("valid ON targets win collision detection and publish accepting state", () 
   assert.match(
     dropTarget,
     /accepting[\s\S]*?"ixi-drop-accepting"/
+  );
+});
+
+test("active self-only containers use sortable collisions instead of ON targets", () => {
+  assert.match(
+    sortableObject,
+    /data:[\s\S]*?reorderBehavior/
+  );
+  assert.match(
+    collisionEngine,
+    /activeReorderBehavior[\s\S]*?===\s*"self-only"/
+  );
+  assert.match(
+    collisionEngine,
+    /sortablePointerHits[\s\S]*?!isIXIDropOnTargetId/
+  );
+  assert.match(
+    collisionEngine,
+    /sortableContainers[\s\S]*?!isIXIDropOnTargetId/
+  );
+});
+
+test("every universal AOS container mounts a visible accepting target", () => {
+  assert.match(
+    operatingCardRuntime,
+    /workspaceDropPolicy[\s\S]*?<IXIContainerDropTarget/
+  );
+  assert.match(
+    numberedObjectConsole,
+    /workspaceDropPolicy[\s\S]*?const shared = \{[\s\S]*?workspaceDropPolicy/
+  );
+  assert.match(
+    card018,
+    /<IXISystemIndexCard[\s\S]*?workspaceDropPolicy=\{workspaceDropPolicy\}/
+  );
+  assert.match(
+    card018,
+    /system-index-card\.ixi-container-drop-accepting[\s\S]*?rgba\(255,196,0,\.92\)!important/
+  );
+  assert.match(
+    containerDropTarget,
+    /<IXIObjectDropTarget/
+  );
+  assert.match(
+    containerDropTarget,
+    /isDropAccepting[\s\S]*?ixi-container-drop-accepting/
+  );
+  assert.match(
+    containerDropTarget,
+    /rgba\(255, 196, 0, \.92\)/
   );
 });

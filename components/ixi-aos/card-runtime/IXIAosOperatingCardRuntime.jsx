@@ -2,6 +2,7 @@ import dynamic from "next/dynamic";
 
 import { resolveIXIAosOperatingCardNumber } from "./IXIAosOperatingCardResolver.mjs";
 import IXIAosCardIdentityFace from "./IXIAosCardIdentityFace";
+import IXIContainerDropTarget from "../../ixi-chassis/IXIContainerDropTarget";
 
 function CardLoading() {
   return <div className="ixi-aos-operating-card-loading" aria-label="Loading AOS card" />;
@@ -72,7 +73,9 @@ export default function IXIAosOperatingCardRuntime({
   onRailSend = null,
   armedDestination = "",
   onSendToArmedDestination = null,
-  dragHandleProps = null
+  dragHandleProps = null,
+  workspaceDropPolicy = null,
+  workspaceDropSurface = ""
 }) {
   /*
    * A card number chooses presentation only. Every durable AOS card carries
@@ -132,6 +135,8 @@ export default function IXIAosOperatingCardRuntime({
     onRailSend,
     armedDestination,
     onSendToArmedDestination,
+    workspaceDropPolicy,
+    workspaceDropSurface,
     skinId: "v12"
   };
 
@@ -174,7 +179,7 @@ export default function IXIAosOperatingCardRuntime({
     );
   }
 
-  return (
+  const operatingCard = (
     <div
       className="ixi-aos-operating-card-runtime"
       data-aos-operating-card
@@ -204,5 +209,27 @@ export default function IXIAosOperatingCardRuntime({
         }
       `}</style>
     </div>
+  );
+
+  const usesEmbeddedDropTarget =
+    cardNumber === 18 &&
+    ixiState?.transactVisible !== true;
+
+  if (
+    workspaceDropPolicy?.enabled !== true ||
+    usesEmbeddedDropTarget
+  ) {
+    return operatingCard;
+  }
+
+  return (
+    <IXIContainerDropTarget
+      object={runtimeObject}
+      objectId={objectId}
+      workspaceDropPolicy={workspaceDropPolicy}
+      workspaceDropSurface={workspaceDropSurface}
+    >
+      {operatingCard}
+    </IXIContainerDropTarget>
   );
 }
