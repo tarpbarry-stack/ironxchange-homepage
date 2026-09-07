@@ -1,6 +1,8 @@
 import { useState } from "react";
 
 import IXIObjectRail from "../../ixi-object-system/IXIObjectRail";
+import { getObjectDisplayName } from "./IXIAosSemanticObjectPresentation";
+import { getAosPassportDisplaySerial } from "../../../lib/mos/ixiAosPassportPresentation.mjs";
 
 function formatCardNumber(cardNumber) {
   return String(Math.min(19, Math.max(1, Number(cardNumber) || 1))).padStart(3, "0");
@@ -21,6 +23,8 @@ export default function IXIAosCardIdentityFace({
   onDeleteObject = null
 }) {
   const number = formatCardNumber(cardNumber);
+  const displayName = getObjectDisplayName(object) || "UNTITLED RECORD";
+  const passportSerial = getAosPassportDisplaySerial(object);
   const [deleteArmed, setDeleteArmed] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState("");
@@ -52,17 +56,21 @@ export default function IXIAosCardIdentityFace({
     <section
       className="ixi-aos-card-identity-face"
       data-aos-card-identity-face={number}
-      aria-label={`AOS card ${number}, face 2`}
+      aria-label={`${displayName}, record control, face 2`}
     >
       <div className="identity-kicker">IXI AOS · FACE 2</div>
       <div className="identity-rule" />
-      <div className="identity-label">CARD</div>
-      <strong>{number}</strong>
-      <div className="identity-foot">AOS CARD IDENTIFICATION</div>
+      <div className="record-control">
+        <span className="record-label">RECORD CONTROL</span>
+        <h2>{displayName}</h2>
+        <span className="passport-label">IXI PASSPORT</span>
+        <strong>IXI - {passportSerial}</strong>
+        <p>Manage this record and its canonical server registration.</p>
+      </div>
 
       {typeof onDeleteObject === "function" ? (
         <div className="delete-zone" onPointerDown={event => event.stopPropagation()}>
-          {deleteArmed ? <span>PERMANENT · NO RECOVERY</span> : null}
+          <span>{deleteArmed ? "PERMANENT · NO RECOVERY" : "REMOVES THIS RECORD FROM IX CORE AND THIS WORKSPACE"}</span>
           <div className="delete-actions">
             {deleteArmed && !deleting ? (
               <button type="button" className="cancel-delete" onClick={event => { event.stopPropagation(); setDeleteArmed(false); setDeleteError(""); }}>
@@ -70,7 +78,7 @@ export default function IXIAosCardIdentityFace({
               </button>
             ) : null}
             <button type="button" className={deleteArmed ? "delete-forever armed" : "delete-forever"} disabled={deleting} onClick={deleteForever}>
-              {deleting ? "DELETING…" : deleteArmed ? "DELETE FOREVER" : "DELETE CARD"}
+              {deleting ? "DELETING FROM IX CORE…" : deleteArmed ? "CONFIRM PERMANENT DELETE" : "DELETE FROM AOS"}
             </button>
           </div>
           {deleteError ? <em role="alert">{deleteError}</em> : null}
@@ -130,50 +138,62 @@ export default function IXIAosCardIdentityFace({
           background: linear-gradient(90deg, #ffc400, rgba(255,196,0,.08));
         }
 
-        .identity-label {
+        .record-control {
           position: absolute;
-          top: 157px;
-          left: 0;
-          right: 0;
-          color: rgba(255,255,255,.44);
-          font-size: 10px;
-          font-weight: 950;
-          letter-spacing: .34em;
-          text-align: center;
-          text-indent: .34em;
+          top: 82px;
+          left: 22px;
+          right: 22px;
+          min-height: 218px;
+          padding: 20px;
+          border: 1px solid rgba(255,255,255,.1);
+          border-radius: 8px;
+          box-sizing: border-box;
+          background: rgba(255,255,255,.018);
         }
 
-        strong {
-          position: absolute;
-          top: 181px;
-          left: 0;
-          right: 0;
+        .record-label,
+        .passport-label {
+          display: block;
+          color: rgba(255,255,255,.44);
+          font-size: 7px;
+          font-weight: 950;
+          letter-spacing: .16em;
+        }
+
+        h2 {
+          margin: 10px 0 28px;
+          color: #f4f4f2;
+          font-size: 21px;
+          font-weight: 950;
+          line-height: 1.08;
+          letter-spacing: -.025em;
+          overflow-wrap: anywhere;
+        }
+
+        .record-control strong {
+          display: block;
+          margin-top: 7px;
           color: #ffc400;
-          font-size: 82px;
-          font-weight: 1000;
+          font-size: 19px;
+          font-weight: 950;
           line-height: 1;
-          letter-spacing: -.045em;
-          text-align: center;
+          letter-spacing: .08em;
           text-shadow: 0 0 24px rgba(255,196,0,.12);
         }
 
-        .identity-foot {
-          position: absolute;
-          left: 0;
-          right: 0;
-          bottom: 97px;
-          color: rgba(255,255,255,.28);
-          font-size: 6px;
-          font-weight: 950;
-          letter-spacing: .18em;
-          text-align: center;
+        .record-control p {
+          margin: 15px 0 0;
+          color: rgba(255,255,255,.48);
+          font-size: 8px;
+          font-weight: 700;
+          line-height: 1.4;
         }
 
         .delete-zone {
           position: absolute;
           left: 22px;
           right: 22px;
-          bottom: 31px;
+          bottom: 37px;
           z-index: 60;
           display: flex;
           flex-direction: column;
@@ -184,7 +204,7 @@ export default function IXIAosCardIdentityFace({
         .delete-zone > span,
         .delete-zone > em {
           color: #ff7777;
-          font-size: 6px;
+          font-size: 6.5px;
           font-style: normal;
           font-weight: 950;
           letter-spacing: .12em;
@@ -192,7 +212,7 @@ export default function IXIAosCardIdentityFace({
         }
 
         .delete-actions { width: 100%; display: flex; gap: 5px; }
-        .delete-actions button { height: 27px; border-radius: 4px; font-size: 6px; font-weight: 950; letter-spacing: .08em; cursor: pointer; }
+        .delete-actions button { min-height: 34px; border-radius: 4px; padding: 0 8px; font-size: 7px; font-weight: 950; letter-spacing: .06em; cursor: pointer; }
         .delete-forever { flex: 1; border: 1px solid rgba(255,90,90,.25); background: rgba(255,70,70,.035); color: rgba(255,135,135,.72); }
         .delete-forever.armed { border-color: rgba(255,70,70,.75); background: rgba(140,0,0,.32); color: #ff8d8d; }
         .delete-forever:disabled { cursor: wait; opacity: .6; }

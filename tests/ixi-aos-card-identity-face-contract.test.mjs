@@ -4,14 +4,16 @@ import test from "node:test";
 
 const read = path => fs.readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
 
-test("every numbered AOS operating card exposes the shared card-identification Face 2", () => {
+test("every numbered AOS operating card exposes the shared record-control Face 2", () => {
   const runtime = read("components/ixi-aos/card-runtime/IXIAosOperatingCardRuntime.jsx");
   const identity = read("components/ixi-aos/card-runtime/IXIAosCardIdentityFace.jsx");
 
   assert.match(runtime, /currentFace === 2[\s\S]*IXIAosCardIdentityFace/u);
   assert.match(runtime, /currentFace === 1 \? 2 : 1/u);
   assert.match(identity, /data-aos-card-identity-face=\{number\}/u);
-  assert.match(identity, /<strong>\{number\}<\/strong>/u);
+  assert.match(identity, /RECORD CONTROL/u);
+  assert.match(identity, /IXI - \{passportSerial\}/u);
+  assert.doesNotMatch(identity, /<strong>\{number\}<\/strong>/u);
   assert.match(identity, /onCycleFace=\{onCycleFace\}/u);
 });
 
@@ -38,7 +40,8 @@ test("Face 2 permanently deletes the real AOS object only after explicit confirm
 
   assert.match(identity, /PERMANENT · NO RECOVERY/u);
   assert.match(identity, /await onDeleteObject\(object\)/u);
-  assert.match(identity, /deleteArmed \? "DELETE FOREVER" : "DELETE CARD"/u);
+  assert.match(identity, /deleteArmed \? "CONFIRM PERMANENT DELETE" : "DELETE FROM AOS"/u);
+  assert.match(identity, /REMOVES THIS RECORD FROM IX CORE AND THIS WORKSPACE/u);
   assert.match(creation, /await deleteMosObject\(\{[\s\S]*objectId/u);
   assert.match(creation, /removeWorkspaceObjectId\([\s\S]*workspacePlacements,[\s\S]*objectId/u);
   assert.match(creation, /OBJECT PERMANENTLY DELETED/u);

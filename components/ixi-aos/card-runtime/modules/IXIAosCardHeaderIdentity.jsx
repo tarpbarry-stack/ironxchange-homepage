@@ -1,32 +1,13 @@
 import IXIAosCommercialCardTypography from "./IXIAosCommercialCardTypography";
-
-function clean(value) {
-  return String(value || "").trim();
-}
-
-function ixiNumberFor(object = {}) {
-  const isPreview = object?.metadata?.source === "aos-card-catalog-preview";
-  if (isPreview) return "XXXXXX";
-
-  const explicit = clean(
-    object?.ixiNumber ||
-    object?.ixiId ||
-    object?.metadata?.ixiNumber ||
-    object?.metadata?.ixiId
-  );
-  if (explicit) return explicit.replace(/^IXI\s*[-#:]?\s*/i, "").toUpperCase();
-
-  const objectId = clean(object?.objectId || object?.id);
-  if (!objectId) return "XXXXXX";
-  const compact = objectId.replace(/[^a-z0-9]/gi, "").toUpperCase();
-  return compact.slice(-6).padStart(6, "X");
-}
+import {
+  getAosPassportDisplaySerial
+} from "../../../../lib/mos/ixiAosPassportPresentation.mjs";
 
 export default function IXIAosCardHeaderIdentity({ object = {}, children = null, className = "" }) {
   return (
     <div className={`ixi-aos-header-identity-shell ${className}`.trim()}>
       {children}
-      <span className="ixi-aos-header-ixi-number">IXI - {ixiNumberFor(object)}</span>
+      <span className="ixi-aos-header-ixi-number">IXI - {getAosPassportDisplaySerial(object)}</span>
       <IXIAosCommercialCardTypography />
       <style jsx>{`
         .ixi-aos-header-identity-shell{position:relative;width:298px;height:471px}

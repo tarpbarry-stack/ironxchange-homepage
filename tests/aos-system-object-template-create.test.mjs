@@ -59,6 +59,34 @@ test("an incomplete card library is rejected", () => {
 });
 
 
+test("the Card Library remains independently scrollable as the catalog grows", async () => {
+  const picker = await readFile(
+    new URL(
+      "../components/ixi-mos/object-creation/IXIAosSystemObjectTemplatePicker.jsx",
+      import.meta.url
+    ),
+    "utf8"
+  );
+
+  assert.match(
+    picker,
+    /\.aos-create-directory\{[^}]*min-height:0[^}]*overflow:hidden/u
+  );
+  assert.match(
+    picker,
+    /\.aos-create-grid\{[^}]*overflow-y:auto[^}]*overscroll-behavior:contain[^}]*scrollbar-gutter:stable/u
+  );
+  assert.match(
+    picker,
+    /\.aos-create-grid::-webkit-scrollbar\{width:5px/u
+  );
+  assert.match(
+    picker,
+    /\.aos-create-grid::-webkit-scrollbar-track\{background:#090b0a/u
+  );
+});
+
+
 test("AOS Work routes scoreboard plus through template selection and draft provisioning", async () => {
   const page = await readFile(
     new URL("../pages/aos/work.js", import.meta.url),
