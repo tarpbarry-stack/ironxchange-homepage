@@ -56,6 +56,13 @@ renderCustomItem,
 
 getCustomItemNativeSize,
 
+/*
+ * Some sortable objects are also operational drop containers.
+ * The board decides their reorder contract from the canonical item;
+ * the sortable chassis enforces it while another object is active.
+ */
+getItemReorderBehavior,
+
 consolePanelWidth,
 consolePanelGap,
 }) {
@@ -255,6 +262,17 @@ const resolvedConsolePanelGap =
         const id =
   resolveBoardItemId(item);
 
+const reorderBehavior =
+  typeof getItemReorderBehavior ===
+    "function"
+    ? (
+        getItemReorderBehavior(
+          item
+        ) ||
+        "normal"
+      )
+    : "normal";
+
       const objectType =
   resolveBoardItemType(
     item
@@ -360,6 +378,10 @@ return (
   id={id}
 
   containerId="board"
+
+  reorderBehavior={
+    reorderBehavior
+  }
 
   objectType={
     objectType
