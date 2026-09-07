@@ -46,7 +46,12 @@ export const IXI_AOS_BOARD_SKIN_IDS =
     IXI_137: "ixi-137",
     IXI_138: "ixi-138",
     IXI_139: "ixi-139",
-    IXI_140: "ixi-140"
+    IXI_140: "ixi-140",
+    IXI_141: "ixi-141",
+    IXI_142: "ixi-142",
+    IXI_143: "ixi-143",
+    IXI_144: "ixi-144",
+    IXI_145: "ixi-145"
   });
 
 export const IXI_AOS_BOARD_SKINS =
@@ -337,6 +342,41 @@ export const IXI_AOS_BOARD_SKINS =
       designation: "SHIPYARD",
       description: "Shipbuilding yard plan with dry docks, hull assembly, gantry cranes, fabrication and outfitting zones.",
       className: "aos-work-board-skin-ixi-140"
+    }),
+    Object.freeze({
+      skinId: IXI_AOS_BOARD_SKIN_IDS.IXI_141,
+      name: "IXI-141",
+      designation: "POWER STATION",
+      description: "Combined-cycle power station with gas turbines, heat recovery, steam generation, cooling and grid delivery.",
+      className: "aos-work-board-skin-ixi-141"
+    }),
+    Object.freeze({
+      skinId: IXI_AOS_BOARD_SKIN_IDS.IXI_142,
+      name: "IXI-142",
+      designation: "SOLAR FIELD",
+      description: "Utility-scale solar field with tracker blocks, collection circuits, battery storage and grid interconnect.",
+      className: "aos-work-board-skin-ixi-142"
+    }),
+    Object.freeze({
+      skinId: IXI_AOS_BOARD_SKIN_IDS.IXI_143,
+      name: "IXI-143",
+      designation: "NUCLEAR STATION",
+      description: "Twin-unit nuclear station with reactor systems, turbine halls, cooling, safety trains and protected controls.",
+      className: "aos-work-board-skin-ixi-143"
+    }),
+    Object.freeze({
+      skinId: IXI_AOS_BOARD_SKIN_IDS.IXI_144,
+      name: "IXI-144",
+      designation: "COAL STATION",
+      description: "Coal-fired generating station with rail unloading, fuel handling, boilers, turbines and emissions controls.",
+      className: "aos-work-board-skin-ixi-144"
+    }),
+    Object.freeze({
+      skinId: IXI_AOS_BOARD_SKIN_IDS.IXI_145,
+      name: "IXI-145",
+      designation: "HYDROELECTRIC WORKS",
+      description: "Operational hydroelectric complex with dam, intakes, penstocks, turbines, spillway and transmission systems.",
+      className: "aos-work-board-skin-ixi-145"
     })
   ]);
 
