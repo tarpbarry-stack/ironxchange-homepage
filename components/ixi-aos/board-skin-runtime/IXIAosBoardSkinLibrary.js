@@ -32,7 +32,8 @@ export const IXI_AOS_BOARD_SKIN_IDS =
     IXI_123: "ixi-123",
     IXI_124: "ixi-124",
     IXI_125: "ixi-125",
-    IXI_126: "ixi-126"
+    IXI_126: "ixi-126",
+    IXI_127: "ixi-127"
   });
 
 export const IXI_AOS_BOARD_SKINS =
@@ -225,6 +226,13 @@ export const IXI_AOS_BOARD_SKINS =
       designation: "CONTRACTOR YARD",
       description: "Heavy-civil operations yard with fleet staging, dispatch, maintenance, fuel and mobilization flow.",
       className: "aos-work-board-skin-ixi-126"
+    }),
+    Object.freeze({
+      skinId: IXI_AOS_BOARD_SKIN_IDS.IXI_127,
+      name: "IXI-127",
+      designation: "HOUSING ADDITION",
+      description: "Residential subdivision plan with phased lots, streets, utilities, grading, drainage and detention controls.",
+      className: "aos-work-board-skin-ixi-127"
     })
   ]);
 
