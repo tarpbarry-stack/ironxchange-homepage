@@ -397,7 +397,7 @@ export default function IXIAosWorkspaceBoard({
                             templateSlug: "aos-card-018",
                             cardNumber: 18,
                             childCardMode: "object",
-                            loopChildDeck: false
+                            loopChildDeck: true
                           }
                         : null;
 

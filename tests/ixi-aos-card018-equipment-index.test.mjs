@@ -90,19 +90,23 @@ test("Card 018 machine browsing removes the container header and loops without a
   assert.match(systemIndex, /forceMachineCard=\{childCardMode === "machine"\}/);
 });
 
-test("AOS Work renders the canonical Equipment System Index through Card 018", async () => {
-  const board = await read("components/ixi-mos/workspace/IXIAosWorkspaceBoard.jsx");
+test("AOS Work renders Equipment and Locations as continuous Card 018 indexes", async () => {
+  const [board, presentation] = await Promise.all([
+    read("components/ixi-mos/workspace/IXIAosWorkspaceBoard.jsx"),
+    read("components/ixi-mos/system-index/IXISystemIndexPresentationEngine.js")
+  ]);
   assert.match(board, /IXIAosCard018/);
   assert.match(board, /systemAdapter\?\.adapterId ===\s*"ixi-owned-equipment"/);
   assert.match(board, /singularLabel:\s*"SYSTEM INDEX"/);
   assert.match(board, /displayName:\s*"EQUIPMENT"/);
   assert.match(board, /templateSlug:\s*"aos-card-018"/);
-  assert.match(board, /displayName:\s*"LOCATIONS"[\s\S]*?childCardMode:\s*"object"[\s\S]*?loopChildDeck:\s*false/u);
+  assert.match(board, /displayName:\s*"LOCATIONS"[\s\S]*?childCardMode:\s*"object"[\s\S]*?loopChildDeck:\s*true/u);
   assert.match(board, /childCardMode=\{systemIndexCard\.childCardMode\}/u);
   assert.match(board, /loopChildDeck=\{systemIndexCard\.loopChildDeck\}/u);
   assert.match(board, /cardTemplateSlug:\s*systemIndexCard\.templateSlug/);
   assert.match(board, /children=\{item\?\.items \|\| \[\]\}/);
   assert.match(board, /onExposeObject=\{exposeObject\}/);
+  assert.match(presentation, /const genericMediaArrays = \[[\s\S]*?object\?\.media,[\s\S]*?fields\?\.media,/u);
 });
 
 test("Card 018 is registered in FaceLab, runtime resolution, and operating-card delivery", async () => {

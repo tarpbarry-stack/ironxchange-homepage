@@ -355,8 +355,15 @@ export function getAosObjectPrimaryImage(
 
   /*
    * Generic media arrays.
+   *
+   * Location Face 1 persists its canonical photo directly in
+   * `object.media[]`. System Index cards must read that same array so a
+   * location cannot have a real Face 1 photo and an empty collection
+   * thumbnail at the same time.
    */
   const genericMediaArrays = [
+    object?.media,
+    fields?.media,
     object?.media?.images,
     fields?.media?.images,
     object?.images,
