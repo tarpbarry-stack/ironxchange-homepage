@@ -3642,6 +3642,11 @@ onReturnContainerChildren={
           background-image: url('/images/ixi-aos-board-ixi-101.webp');
         }
 
+        .aos-work-board-skin-ixi-102 {
+          background-color: #101111;
+          background-image: url('/images/ixi-aos-board-ixi-102.webp');
+        }
+
         .aos-work-board-title {
           position: absolute;
           width: 1px;

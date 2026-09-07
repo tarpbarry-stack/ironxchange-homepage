@@ -7,7 +7,8 @@ export const IXI_AOS_DEFAULT_BOARD_SKIN_ID =
 export const IXI_AOS_BOARD_SKIN_IDS =
   Object.freeze({
     V12: "v12",
-    IXI_101: "ixi-101"
+    IXI_101: "ixi-101",
+    IXI_102: "ixi-102"
   });
 
 export const IXI_AOS_BOARD_SKINS =
@@ -25,6 +26,13 @@ export const IXI_AOS_BOARD_SKINS =
       designation: "SYSTEM GRID",
       description: "Technical rails, restrained field markings and an IXI row signature.",
       className: "aos-work-board-skin-ixi-101"
+    }),
+    Object.freeze({
+      skinId: IXI_AOS_BOARD_SKIN_IDS.IXI_102,
+      name: "IXI-102",
+      designation: "INDEX LINE",
+      description: "Shaded graphite field with numbered calibration rails and sparse IXI marks.",
+      className: "aos-work-board-skin-ixi-102"
     })
   ]);
 
