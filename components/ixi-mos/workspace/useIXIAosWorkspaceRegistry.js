@@ -14,6 +14,10 @@ import {
   resolveWorkspaceObjects
 } from "../../ixi-chassis/IXIWorkspacePlacementEngine";
 
+import {
+  projectAosContainerChildren
+} from "./IXIAosWorkspaceContainerProjection.mjs";
+
 
 function cleanId(value) {
   return String(value ?? "").trim();
@@ -258,6 +262,44 @@ export default function useIXIAosWorkspaceRegistry({
         });
 
 
+      /*
+       * IMMEDIATE CONTAINER RAIL PROJECTION
+       *
+       * Natural drag/drop updates workspace placement before the governed
+       * IX-Core placement command completes. Hydrate every durable container
+       * with both truths here: canonical direct children plus the accepted
+       * local placement. The projection engine reconciles the later canonical
+       * Machine to its Sharetribe listing identity, so the rail never goes
+       * blank during readback and never renders the same machine twice.
+       */
+      [...registry.entries()].forEach(
+        ([objectId, object]) => {
+          if (
+            !cleanId(object?.entityId) ||
+            systemIndexIds.has(objectId)
+          ) {
+            return;
+          }
+
+          const placedChildren =
+            resolveWorkspaceObjects({
+              placements: workspacePlacements,
+              surfaceId: `container:${objectId}`,
+              objectRegistry: registry
+            });
+
+          registry.set(objectId, {
+            ...object,
+            items: projectAosContainerChildren({
+              canonicalChildren:
+                directChildrenByParent.get(objectId) || [],
+              placedChildren
+            })
+          });
+        }
+      );
+
+
       return registry;
     }, [
       workspaceListings,
@@ -265,7 +307,8 @@ export default function useIXIAosWorkspaceRegistry({
       workspaceSystemIndexes,
       equipmentWorkspaceIndex,
       systemIndexIds,
-      directChildrenByParent
+      directChildrenByParent,
+      workspacePlacements
     ]);
 
 
