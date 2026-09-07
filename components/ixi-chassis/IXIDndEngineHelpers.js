@@ -13,63 +13,6 @@ export function universalWorkspaceCollisionDetection(
   const pointerHits =
     pointerWithin(args);
 
-  const activeReorderBehavior =
-    args?.active
-      ?.data
-      ?.current
-      ?.reorderBehavior;
-
-  const isSelfOnlyReorder =
-    activeReorderBehavior ===
-      "self-only";
-
-  /*
-   * A self-only container has two deliberately different roles:
-   *
-   * - while another object is active, its nested ON target captures
-   *   the drop and the container remains planted;
-   * - while the container itself is active, it is an ordinary
-   *   sortable card and must cross sibling cards cleanly.
-   *
-   * With universal canContain cards, allowing nested ON targets to
-   * compete during the second case makes every neighboring card steal
-   * the collision and turns a reorder into a relationship drop.
-   */
-  if (
-    isSelfOnlyReorder
-  ) {
-    const sortablePointerHits =
-      pointerHits.filter(
-        collision =>
-          !isIXIDropOnTargetId(
-            collision?.id
-          )
-      );
-
-    if (
-      sortablePointerHits.length
-    ) {
-      return sortablePointerHits;
-    }
-
-    const sortableContainers =
-      args.droppableContainers
-        ?.filter?.(
-          container =>
-            !isIXIDropOnTargetId(
-              container?.id
-            )
-        );
-
-    return closestCenter({
-      ...args,
-
-      droppableContainers:
-        sortableContainers ||
-        args.droppableContainers
-    });
-  }
-
   /*
    * ENTER / ON target has priority.
    *
@@ -77,6 +20,11 @@ export function universalWorkspaceCollisionDetection(
    * nested container target, that
    * target wins over the sortable
    * parent underneath it.
+   *
+   * This also applies when the source can contain children. The
+   * acceptance engine already rejects self-drop, while the sortable
+   * chassis keeps foreign containers planted. Filtering every ON target
+   * for a container source would make container nesting impossible.
    */
   const onTargetHits =
   pointerHits.filter(

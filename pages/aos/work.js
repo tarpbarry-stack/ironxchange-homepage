@@ -98,6 +98,10 @@ import {
   filterAosOwnedMachines
 } from "../../lib/listings/IXIAosOwnedInventoryPolicy.mjs";
 
+import {
+  provisionListingMachine
+} from "../../lib/onboarding/ixiCommercialOnboardingClient";
+
 import { captureIXEvent } from "../../lib/posthog";
 
 import IXIDragEngine from "../../components/ixi-chassis/IXIDragEngine";
@@ -2857,24 +2861,65 @@ if (
   );
 
   if (targetIsCanonicalContainer) {
-    const sourceObject = getCanonicalMosObjectForWorkspaceId(dragId);
-
-    if (!sourceObject?.objectId) {
-      showAosObjectNotice({
-        objectId: dragId,
-        message: isAosDraftId(dragId)
-          ? "SAVE THIS CARD BEFORE MOVING IT INTO ANOTHER CONTAINER"
-          : "CONTAINER MOVE FAILED · SOURCE OBJECT IS NOT AVAILABLE IN IX CORE",
-        tone: "error",
-        duration: 3200
-      });
-
-      setActiveDndId(null);
-      clearMachineDragState?.();
-      return;
-    }
-
     try {
+      let sourceObject =
+        getCanonicalMosObjectForWorkspaceId(dragId);
+
+      /*
+       * AOS Work presents owned Sharetribe listings beside durable MOS
+       * objects. A listing Passport alone does not make the listing a
+       * canonical container member. If an owned listing reaches a real
+       * container before its MOS Machine has been provisioned, establish
+       * that identity through the authenticated, idempotent onboarding
+       * route and use the returned canonical object for this same drop.
+       */
+      if (!sourceObject?.objectId) {
+        if (isAosDraftId(dragId)) {
+          const error = new Error(
+            "SAVE THIS CARD BEFORE MOVING IT INTO ANOTHER CONTAINER"
+          );
+          error.code = "IXI_AOS_CONTAINER_SOURCE_DRAFT";
+          throw error;
+        }
+
+        const sourceWorkspaceObject =
+          getAosWorkspaceObjectById(dragId);
+
+        const sourceIsOwnedListing = Boolean(
+          sourceWorkspaceObject &&
+          !sourceWorkspaceObject?.entityId &&
+          String(getListingId(sourceWorkspaceObject) || "").trim() === dragId
+        );
+
+        if (!sourceIsOwnedListing) {
+          const error = new Error(
+            "CONTAINER MOVE FAILED · SOURCE OBJECT IS NOT AVAILABLE IN IX CORE"
+          );
+          error.code = "IXI_AOS_CONTAINER_SOURCE_UNAVAILABLE";
+          throw error;
+        }
+
+        const provisioned =
+          await provisionListingMachine(dragId);
+
+        const canonicalMachine =
+          provisioned?.object || null;
+
+        if (
+          !canonicalMachine?.objectId ||
+          String(canonicalMachine?.entityId || "").trim() !==
+            String(aosEntity?.entityId || "").trim()
+        ) {
+          const error = new Error(
+            "IX Core did not return the canonical Machine for this listing."
+          );
+          error.code = "IXI_AOS_MACHINE_PROVISIONING_READBACK_REQUIRED";
+          throw error;
+        }
+
+        sourceObject = canonicalMachine;
+      }
+
       const placement = await commitMosContainerPlacement({
         objectId: sourceObject.objectId,
         destinationContainerId: targetWorkspaceObjectId,
@@ -2885,11 +2930,27 @@ if (
         }
       });
 
-      setAosObjects(current => current.map(object =>
-        String(object?.objectId || "") === String(placement.object?.objectId || "")
-          ? mergeAosCanonicalObject(object, placement.object)
-          : object
-      ));
+      setAosObjects(current => {
+        const placedObjectId =
+          String(placement.object?.objectId || "");
+
+        const existing = current.some(object =>
+          String(object?.objectId || "") === placedObjectId
+        );
+
+        if (!existing) {
+          return [
+            ...current,
+            placement.object
+          ];
+        }
+
+        return current.map(object =>
+          String(object?.objectId || "") === placedObjectId
+            ? mergeAosCanonicalObject(object, placement.object)
+            : object
+        );
+      });
     } catch (error) {
       console.error("AOS CONTAINER PLACEMENT FAILED:", error);
       showAosObjectNotice({

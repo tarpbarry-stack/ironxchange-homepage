@@ -54,6 +54,17 @@ test("AOS operational container drops change workspace placement without inventi
   assert.match(work, /getCanonicalAosPassportId\(object\) === workspacePassportId/u);
 });
 
+test("owned listing drops provision a canonical Machine before placement", () => {
+  const work = read("pages/aos/work.js");
+
+  assert.match(work, /provisionListingMachine/u);
+  assert.match(work, /sourceIsOwnedListing/u);
+  assert.match(work, /await provisionListingMachine\(dragId\)/u);
+  assert.match(work, /provisioned\?\.object/u);
+  assert.match(work, /IXI_AOS_MACHINE_PROVISIONING_READBACK_REQUIRED/u);
+  assert.match(work, /await commitMosContainerPlacement\(\{/u);
+});
+
 test("AOS relationships remain available without becoming container membership", () => {
   const loader = read("lib/mos/loadIXIMosEnvironment.js");
   const registry = read("components/ixi-mos/workspace/useIXIAosWorkspaceRegistry.js");

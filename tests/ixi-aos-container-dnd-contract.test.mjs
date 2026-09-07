@@ -96,22 +96,26 @@ test("valid ON targets win collision detection and publish accepting state", () 
   );
 });
 
-test("active self-only containers use sortable collisions instead of ON targets", () => {
+test("container sources can enter accepted parent containers without moving the targets", () => {
   assert.match(
     sortableObject,
     /data:[\s\S]*?reorderBehavior/
   );
-  assert.match(
+  assert.doesNotMatch(
     collisionEngine,
     /activeReorderBehavior[\s\S]*?===\s*"self-only"/
   );
-  assert.match(
+  assert.doesNotMatch(
     collisionEngine,
     /sortablePointerHits[\s\S]*?!isIXIDropOnTargetId/
   );
-  assert.match(
+  assert.doesNotMatch(
     collisionEngine,
     /sortableContainers[\s\S]*?!isIXIDropOnTargetId/
+  );
+  assert.match(
+    collisionEngine,
+    /acceptance engine already rejects self-drop[\s\S]*?container nesting impossible/
   );
 });
 
