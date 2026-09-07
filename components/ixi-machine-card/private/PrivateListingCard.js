@@ -414,9 +414,28 @@ function handlePhotoLoad(e, photoUrl) {
     [photoUrl]: fit
   }));
 }
+
+const {
+  ref: dndActivatorRef,
+  onPointerDown: onDndPointerDown,
+  ...keyboardDragHandleProps
+} = dragHandleProps || {};
+
+function beginCardDragFromNonInteractiveSurface(event) {
+  if (typeof onDndPointerDown !== "function") return;
+
+  const interactiveTarget = event.target?.closest?.(
+    "button,input,textarea,select,[contenteditable='true'],[data-ixi-no-drag]"
+  );
+
+  if (interactiveTarget) return;
+  onDndPointerDown(event);
+}
   
   return (
   <div
+    ref={dndActivatorRef}
+    onPointerDown={beginCardDragFromNonInteractiveSurface}
     data-listing-card-id={id}
     className={`card private-listing-card console-actuator-${consoleActuatorVariant} board-color-${boardColor} board-outline-${boardOutline} ${
       isBoardDragging ? "board-dragging" : ""
@@ -464,7 +483,7 @@ function handlePhotoLoad(e, photoUrl) {
 presentation === "seller" ? (
   <IXISellerMachineObjectFace2
       listing={listing}
-      dragHandleProps={dragHandleProps}
+      dragHandleProps={keyboardDragHandleProps}
       descriptionValue={descriptionValue}
       onDescriptionChange={onDescriptionChange}
       onDescriptionKeyDown={onDescriptionKeyDown}
@@ -473,18 +492,18 @@ presentation === "seller" ? (
   ) : (
     <IXIMachineObjectFace2
       listing={listing}
-      dragHandleProps={dragHandleProps}
+      dragHandleProps={keyboardDragHandleProps}
     />
   )
 ) : Number(machineFace || 1) === 3 ? (
   <IXIMachineObjectFace3
     listing={listing}
-    dragHandleProps={dragHandleProps}
+    dragHandleProps={keyboardDragHandleProps}
   />
 ) : Number(machineFace || 1) === 4 ? (
   <IXIMachineObjectFace4
     listing={listing}
-    dragHandleProps={dragHandleProps}
+    dragHandleProps={keyboardDragHandleProps}
   />
 ) : (
   <>
@@ -581,7 +600,7 @@ style={getFrameStyle(currentImageObject, "card")}
 
                              <div
   className="card-board-zone"
-  {...(dragHandleProps || {})}
+  {...keyboardDragHandleProps}
   {...(!dragHandleProps
     ? {
         onPointerDown: startBoardDrag,

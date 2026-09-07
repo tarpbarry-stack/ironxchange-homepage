@@ -32,7 +32,8 @@ import {
 } from "../../lib/mos/loadIXIMosEnvironment";
 
 import {
-  commitMosObjectCommand
+  commitMosObjectCommand,
+  commitMosContainerPlacement
 } from "../../lib/mos/ixiMosClient";
 
 import {
@@ -72,19 +73,16 @@ import useIXIAosWorkspaceRegistry
 import useIXIEquipmentWorkspace
   from "../../components/ixi-mos/equipment/useIXIEquipmentWorkspace";
 
-import IXIRelationshipDropDialog
-  from "../../components/ixi-mos/relationships/IXIRelationshipDropDialog";
-
-import {
-  createMosRelationship
-} from "../../lib/mos/ixiMosBrowserGatewayClient";
-
 import IXIAosWorkspaceBoard
   from "../../components/ixi-mos/workspace/IXIAosWorkspaceBoard";
 
 import {
   resolveAosWorkspaceParentName
 } from "../../lib/mos/ixiAosHierarchyContract.mjs";
+
+import {
+  getCanonicalAosPassportId
+} from "../../lib/mos/ixiAosPassportPresentation.mjs";
 
 import { getListingId } from "../../lib/listingFormatters";
 import {
@@ -191,9 +189,6 @@ export default function IXIAosWorkPage() {
   useState(null);
 
 const [aosObjects, setAosObjects] =
-  useState([]);
-
-const [aosRelationships, setAosRelationships] =
   useState([]);
 
 const [systemIndexes, setSystemIndexes] =
@@ -317,9 +312,6 @@ const POCKET_TARGETS = [
   const hasAppliedRemoteLayoutRef = useRef(false);
   
   const [activeDndId, setActiveDndId] = useState("");
-  const [pendingRelationship, setPendingRelationship] = useState(null);
-  const [relationshipBusy, setRelationshipBusy] = useState(false);
-  const [relationshipError, setRelationshipError] = useState("");
   const {
   getSellerListingCardProps
 } = useIXISellerMachineOps({
@@ -561,12 +553,6 @@ if (cancelled) {
           environment?.objects
         )
           ? environment.objects
-          : []
-      );
-
-      setAosRelationships(
-        Array.isArray(environment?.relationships)
-          ? environment.relationships
           : []
       );
 
@@ -1229,9 +1215,6 @@ const equipmentIndex =
 
   aosObjects,
 
-  relationships:
-    aosRelationships,
-
   workspaceSystemIndexes,
 
   equipmentWorkspaceIndex,
@@ -1264,10 +1247,21 @@ function getCanonicalMosObjectForWorkspaceId(workspaceObjectId) {
   const id = String(workspaceObjectId || "").trim();
   if (!id) return null;
 
+  const workspacePassportId = getCanonicalAosPassportId(
+    getAosWorkspaceObjectById(id) || {}
+  );
+
   return (aosObjects || []).find(object => {
     if (String(object?.objectId || "").trim() === id) return true;
 
     if (String(object?.metadata?.sourceListingId || "").trim() === id) {
+      return true;
+    }
+
+    if (
+      workspacePassportId &&
+      getCanonicalAosPassportId(object) === workspacePassportId
+    ) {
       return true;
     }
 
@@ -1276,96 +1270,6 @@ function getCanonicalMosObjectForWorkspaceId(workspaceObjectId) {
       String(identity?.sourceId || "").trim() === id
     );
   }) || null;
-}
-
-function cancelPendingRelationship() {
-  if (relationshipBusy) return;
-  setPendingRelationship(null);
-  setRelationshipError("");
-}
-
-async function confirmPendingRelationship(relationshipName) {
-  if (!pendingRelationship || relationshipBusy) return;
-
-  setRelationshipBusy(true);
-  setRelationshipError("");
-
-  try {
-    const response = await createMosRelationship({
-      sourceObjectId: pendingRelationship.sourceObjectId,
-      targetObjectId: pendingRelationship.targetObjectId,
-      relationshipType: relationshipName,
-      metadata: {
-        createdFrom: "aos-work-drop",
-        sourceWorkspaceObjectId: pendingRelationship.sourceWorkspaceObjectId,
-        targetWorkspaceObjectId: pendingRelationship.targetWorkspaceObjectId
-      }
-    });
-
-    const relationship = response?.relationship;
-    if (!relationship?.relationshipId) {
-      const error = new Error("IX Core did not confirm the canonical relationship.");
-      error.code = "IXI_AOS_RELATIONSHIP_READBACK_REQUIRED";
-      throw error;
-    }
-
-    setWorkspacePlacements(pendingRelationship.nextPlacements);
-    await saveWorkspaceLayout(pendingRelationship.nextPlacements);
-
-    const displayRelationship = {
-      id: relationship.relationshipId,
-      relationshipId: relationship.relationshipId,
-      label: relationship.relationshipLabel || relationship.relationshipType,
-      relationshipType: relationship.relationshipType,
-      sourceObjectId: relationship.sourceObjectId,
-      targetObjectId: relationship.targetObjectId,
-      displayName: pendingRelationship.targetLabel,
-      targetDisplayName: pendingRelationship.targetLabel,
-      status: relationship.status,
-      revision: relationship.revision
-    };
-
-    setAosObjects(current => current.map(object => {
-      const objectId = String(object?.objectId || "");
-      if (objectId !== relationship.sourceObjectId && objectId !== relationship.targetObjectId) {
-        return object;
-      }
-
-      const relationships = Array.isArray(object?.relationships)
-        ? object.relationships.filter(item =>
-            String(item?.relationshipId || item?.id || "") !== relationship.relationshipId
-          )
-        : [];
-
-      return {
-        ...object,
-        relationships: [...relationships, displayRelationship]
-      };
-    }));
-
-    setAosRelationships(current => [
-      ...(current || []).filter(item =>
-        String(item?.relationshipId || "") !== relationship.relationshipId
-      ),
-      relationship
-    ]);
-
-    showAosObjectNotice({
-      objectId: pendingRelationship.sourceWorkspaceObjectId,
-      message: `RELATIONSHIP CREATED · ${relationship.relationshipLabel || relationship.relationshipType}`,
-      tone: "success",
-      duration: 2400
-    });
-
-    setPendingRelationship(null);
-  } catch (error) {
-    console.error("AOS RELATIONSHIP CREATE FAILED:", error);
-    setRelationshipError(
-      error?.message || "IX Core could not create this relationship. Nothing was moved."
-    );
-  } finally {
-    setRelationshipBusy(false);
-  }
 }
 
   function updateIxiCardState(listingId, patch) {
@@ -1617,39 +1521,13 @@ function getDirectContainerChildIds(
     .filter(Boolean);
 }
 
-  const objectsById = new Map(
-    (aosObjects || []).map(object => [
-      String(object?.objectId || "").trim(),
-      object
-    ])
-  );
-  const workspaceIdForObject = object => {
-    const sourceListingId = String(object?.metadata?.sourceListingId || "").trim();
-    const listingIdentity = (Array.isArray(object?.identities) ? object.identities : [])
-      .find(identity =>
-        String(identity?.sourceType || "").trim() === "sharetribe-listing"
-      );
-
-    return sourceListingId || String(listingIdentity?.sourceId || "").trim() ||
-      String(object?.objectId || object?.id || "").trim();
-  };
-  const relatedIds = (aosRelationships || []).flatMap(relationship => {
-    if (String(relationship?.status || "active").toLowerCase() !== "active") return [];
-
-    const sourceId = String(relationship?.sourceObjectId || "").trim();
-    const targetId = String(relationship?.targetObjectId || "").trim();
-    const relatedObjectId = sourceId === containerId
-      ? targetId
-      : targetId === containerId
-        ? sourceId
-        : "";
-    const relatedObject = objectsById.get(relatedObjectId);
-
-    return relatedObject ? [workspaceIdForObject(relatedObject)] : [];
-  });
-
-  /* Legacy single-parent containment remains visible during migration. */
-  const legacyChildIds = (
+  /*
+   * MOS CONTAINERS
+   *
+   * Only direct canonical children. Business relationships are not
+   * workspace containment and must never populate a container deck.
+   */
+  return (
     aosObjects || []
   )
     .filter(object =>
@@ -1666,8 +1544,6 @@ function getDirectContainerChildIds(
       )
     )
     .filter(Boolean);
-
-  return [...new Set([...relatedIds, ...legacyChildIds].filter(Boolean))];
 }
 
 
@@ -2662,14 +2538,6 @@ return (
         />
       </Head>
 
-      <IXIRelationshipDropDialog
-        pending={pendingRelationship}
-        busy={relationshipBusy}
-        error={relationshipError}
-        onCancel={cancelPendingRelationship}
-        onConfirm={confirmPendingRelationship}
-      />
-
             <Navbar />
 
    
@@ -2711,7 +2579,7 @@ toggleSearchSurfaceRevealed
     clearMachineDragState
   });
 
-function handleWorkspaceDragEnd(event) {
+async function handleWorkspaceDragEnd(event) {
   const active =
     event?.active;
 
@@ -2955,7 +2823,65 @@ if (
   dropAccepted &&
   dropTargetSurface
 ) {
-  const candidatePlacements =
+  const targetWorkspaceObjectId = String(
+    overData.targetObjectId || ""
+  ).trim();
+  const targetWorkspaceObject =
+    getAosWorkspaceObjectById(targetWorkspaceObjectId);
+  const targetIsCanonicalContainer = Boolean(
+    targetWorkspaceObjectId &&
+    targetWorkspaceObject?.entityId &&
+    targetWorkspaceObject?.capabilities?.canContain === true
+  );
+
+  if (targetIsCanonicalContainer) {
+    const sourceObject = getCanonicalMosObjectForWorkspaceId(dragId);
+
+    if (!sourceObject?.objectId) {
+      showAosObjectNotice({
+        objectId: dragId,
+        message: "CONTAINER MOVE FAILED · SOURCE OBJECT IS NOT AVAILABLE IN IX CORE",
+        tone: "error",
+        duration: 3200
+      });
+
+      setActiveDndId(null);
+      clearMachineDragState?.();
+      return;
+    }
+
+    try {
+      const placement = await commitMosContainerPlacement({
+        objectId: sourceObject.objectId,
+        destinationContainerId: targetWorkspaceObjectId,
+        metadata: {
+          createdFrom: "aos-work-drop",
+          sourceWorkspaceObjectId: dragId,
+          targetWorkspaceObjectId
+        }
+      });
+
+      setAosObjects(current => current.map(object =>
+        String(object?.objectId || "") === String(placement.object?.objectId || "")
+          ? mergeAosCanonicalObject(object, placement.object)
+          : object
+      ));
+    } catch (error) {
+      console.error("AOS CONTAINER PLACEMENT FAILED:", error);
+      showAosObjectNotice({
+        objectId: dragId,
+        message: error?.message || "IX Core could not place this object in the container.",
+        tone: "error",
+        duration: 3200
+      });
+
+      setActiveDndId(null);
+      clearMachineDragState?.();
+      return;
+    }
+  }
+
+  nextPlacements =
     moveObjectToWorkspaceSurface({
       placements:
         workspacePlacements,
@@ -2966,53 +2892,6 @@ if (
       targetSurface:
         dropTargetSurface
     });
-
-  const targetWorkspaceObjectId = String(
-    overData.targetObjectId || ""
-  ).trim();
-  const sourceObject = getCanonicalMosObjectForWorkspaceId(dragId);
-  const targetObject = getCanonicalMosObjectForWorkspaceId(targetWorkspaceObjectId);
-
-  if (!sourceObject || !targetObject) {
-    showAosObjectNotice({
-      objectId: dragId,
-      message: "RELATIONSHIP NOT CREATED · BOTH OBJECTS REQUIRE IXI PASSPORTS",
-      tone: "error",
-      duration: 3200
-    });
-
-    setActiveDndId(null);
-    clearMachineDragState?.();
-    return;
-  }
-
-  const sourceWorkspaceObject = getAosWorkspaceObjectById(dragId);
-  const targetWorkspaceObject = getAosWorkspaceObjectById(targetWorkspaceObjectId);
-
-  setRelationshipError("");
-  setPendingRelationship({
-    sourceObjectId: sourceObject.objectId,
-    targetObjectId: targetObject.objectId,
-    sourceWorkspaceObjectId: dragId,
-    targetWorkspaceObjectId,
-    sourceLabel: String(
-      sourceWorkspaceObject?.displayName ||
-      sourceWorkspaceObject?.title ||
-      sourceObject.displayName ||
-      dragId
-    ).trim(),
-    targetLabel: String(
-      targetWorkspaceObject?.displayName ||
-      targetWorkspaceObject?.label ||
-      targetObject.displayName ||
-      targetWorkspaceObjectId
-    ).trim(),
-    nextPlacements: candidatePlacements
-  });
-
-  setActiveDndId(null);
-  clearMachineDragState?.();
-  return;
 }
 
 /*

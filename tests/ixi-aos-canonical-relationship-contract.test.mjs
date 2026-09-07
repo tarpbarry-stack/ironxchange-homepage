@@ -23,29 +23,51 @@ test("relationship client requires IX Core canonical readback", () => {
   assert.match(client, /X-IXI-Expected-Revision/u);
 });
 
-test("AOS drop waits for a named canonical relationship before changing layout", () => {
-  const work = read("pages/aos/work.js");
-  const dialog = read("components/ixi-mos/relationships/IXIRelationshipDropDialog.jsx");
+test("container placement uses the governed IX Core command and canonical readback", () => {
+  const client = read("lib/mos/ixiMosBrowserGatewayClient.js");
 
-  assert.match(work, /setPendingRelationship\(\{/u);
-  assert.match(work, /await createMosRelationship\(\{/u);
-  assert.match(work, /await saveWorkspaceLayout\(pendingRelationship\.nextPlacements\)/u);
-  assert.doesNotMatch(
-    work.match(/if \(\s*dropIntent === "on"[\s\S]*?\n\}/u)?.[0] || "",
-    /setWorkspacePlacements\(\s*candidatePlacements/u
-  );
-  assert.match(dialog, /IX Core will not rename it or infer a different meaning/u);
+  assert.match(client, /commitMosContainerPlacement/u);
+  assert.match(client, /aos-container-place/u);
+  assert.match(client, /await fetchMosObject\(objectId/u);
+  assert.match(client, /canonicalObject\.directContainerId/u);
+  assert.match(client, /IXI_AOS_CONTAINER_READBACK_REQUIRED/u);
 });
 
-test("AOS reload and Container recall use canonical relationships", () => {
+test("AOS operational container drops change workspace placement without inventing a relationship", () => {
+  const work = read("pages/aos/work.js");
+
+  const dropBranch = work.match(
+    /if \(\s*dropIntent === "on"[\s\S]*?\n\}/u
+  )?.[0] || "";
+
+  assert.match(dropBranch, /nextPlacements\s*=\s*moveObjectToWorkspaceSurface/u);
+  assert.doesNotMatch(work, /IXIRelationshipDropDialog/u);
+  assert.doesNotMatch(work, /setPendingRelationship/u);
+  assert.doesNotMatch(work, /RELATIONSHIP NOT CREATED/u);
+  assert.match(work, /await commitMosContainerPlacement\(\{/u);
+  assert.match(work, /destinationContainerId:\s*targetWorkspaceObjectId/u);
+  assert.match(work, /targetWorkspaceObject\?\.capabilities\?\.canContain === true/u);
+  assert.match(work, /createdFrom: "aos-work-drop"/u);
+  assert.match(work, /getCanonicalAosPassportId\(object\) === workspacePassportId/u);
+});
+
+test("AOS relationships remain available without becoming container membership", () => {
   const loader = read("lib/mos/loadIXIMosEnvironment.js");
   const registry = read("components/ixi-mos/workspace/useIXIAosWorkspaceRegistry.js");
   const work = read("pages/aos/work.js");
 
   assert.match(loader, /Array\.isArray\(environment\.relationships\)/u);
-  assert.match(registry, /buildRelatedObjectsMap\(aosObjects, relationships\)/u);
-  assert.match(registry, /relatedObjectsByObject\.get\(objectId\)/u);
-  assert.match(work, /setAosRelationships/u);
-  assert.match(work, /sourceId === containerId/u);
-  assert.match(work, /targetId === containerId/u);
+  assert.match(registry, /Canonical MOS child membership comes ONLY from/u);
+  assert.match(registry, /directChildrenByParent\s*\.get\(objectId\)/u);
+  assert.doesNotMatch(registry, /buildRelatedObjectsMap/u);
+  assert.doesNotMatch(work, /setAosRelationships/u);
+});
+
+test("owned machine cards expose the full non-interactive card as the pointer drag surface", () => {
+  const card = read("components/ixi-machine-card/private/PrivateListingCard.js");
+
+  assert.match(card, /beginCardDragFromNonInteractiveSurface/u);
+  assert.match(card, /onPointerDown=\{beginCardDragFromNonInteractiveSurface\}/u);
+  assert.match(card, /button,input,textarea,select/u);
+  assert.match(card, /onDndPointerDown\(event\)/u);
 });

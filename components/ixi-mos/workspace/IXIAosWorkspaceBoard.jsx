@@ -579,7 +579,7 @@ export default function IXIAosWorkspaceBoard({
                   acceptedObjectTypes: []
                 }}
 
-                workspaceDropSurface="board"
+                workspaceDropSurface={`container:${id}`}
                 armedDestination={armedDestination}
                 onSendFront={sendListingToFront}
                 onSendBack={sendListingToBack}
