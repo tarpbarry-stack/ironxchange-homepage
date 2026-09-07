@@ -87,15 +87,16 @@ export default function IXIContainerDropTarget({
           inset: 0;
           z-index: 300;
           pointer-events: none;
-          border: 1px solid rgba(255, 196, 0, .92);
+          border: 1px solid rgba(255, 196, 0, 1);
           border-radius: 13px;
-          outline: 1px solid rgba(255, 196, 0, .36);
+          outline: 2px solid rgba(255, 196, 0, .80);
+          background: rgba(255, 196, 0, .055);
           box-shadow:
-            0 0 0 1px rgba(255, 196, 0, .20),
-            0 0 18px rgba(255, 196, 0, .24),
-            0 0 36px rgba(255, 196, 0, .10),
-            inset 0 0 18px rgba(255, 196, 0, .035),
-            inset 0 1px 0 rgba(255, 255, 255, .05);
+            0 0 0 2px rgba(255, 196, 0, .42),
+            0 0 24px rgba(255, 196, 0, .68),
+            0 0 56px rgba(255, 196, 0, .38),
+            inset 0 0 28px rgba(255, 196, 0, .12),
+            inset 0 1px 0 rgba(255, 255, 255, .12);
         }
       `}</style>
     </div>

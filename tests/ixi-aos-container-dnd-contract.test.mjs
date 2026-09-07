@@ -124,7 +124,7 @@ test("every universal AOS container mounts a visible accepting target", () => {
   );
   assert.match(
     card018,
-    /system-index-card\.ixi-container-drop-accepting[\s\S]*?rgba\(255,196,0,\.92\)!important/
+    /system-index-card\.ixi-container-drop-accepting[\s\S]*?rgba\(255,196,0,1\)!important[\s\S]*?0 0 24px rgba\(255,196,0,\.68\)[\s\S]*?important/
   );
   assert.match(
     containerDropTarget,
@@ -136,6 +136,6 @@ test("every universal AOS container mounts a visible accepting target", () => {
   );
   assert.match(
     containerDropTarget,
-    /rgba\(255, 196, 0, \.92\)/
+    /outline: 2px solid rgba\(255, 196, 0, \.80\)[\s\S]*?0 0 24px rgba\(255, 196, 0, \.68\)/
   );
 });

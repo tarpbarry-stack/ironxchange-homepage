@@ -2124,7 +2124,7 @@ export default function IXIMosObjectCard({
               255,
               196,
               0,
-              .92
+              1
             );
         }
 
@@ -2135,50 +2135,50 @@ export default function IXIMosObjectCard({
               255,
               196,
               0,
-              .92
+              1
             );
 
           outline:
-            1px solid
+            2px solid
             rgba(
               255,
               196,
               0,
-              .36
+              .80
             );
 
           box-shadow:
-            0 0 0 1px
+            0 0 0 2px
             rgba(
               255,
               196,
               0,
-              .20
+              .42
             ),
 
-            0 0 18px
+            0 0 24px
             rgba(
               255,
               196,
               0,
-              .24
+              .68
             ),
 
-            0 0 36px
+            0 0 56px
             rgba(
               255,
               196,
               0,
-              .10
+              .38
             ),
 
             inset
-            0 0 18px
+            0 0 28px
             rgba(
               255,
               196,
               0,
-              .035
+              .12
             ),
 
             inset
@@ -2187,7 +2187,7 @@ export default function IXIMosObjectCard({
               255,
               255,
               255,
-              .05
+              .12
             );
         }
 

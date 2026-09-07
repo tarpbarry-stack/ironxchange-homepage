@@ -1184,14 +1184,14 @@ export default function IXISystemIndexCard({
         }
 
         .system-index-card.ixi-container-drop-accepting {
-          border-color: rgba(255,196,0,.92);
-          outline: 1px solid rgba(255,196,0,.36);
+          border-color: rgba(255,196,0,1);
+          outline: 2px solid rgba(255,196,0,.80);
           box-shadow:
-            0 0 0 1px rgba(255,196,0,.20),
-            0 0 18px rgba(255,196,0,.24),
-            0 0 36px rgba(255,196,0,.10),
-            inset 0 0 18px rgba(255,196,0,.035),
-            inset 0 1px 0 rgba(255,255,255,.05);
+            0 0 0 2px rgba(255,196,0,.42),
+            0 0 24px rgba(255,196,0,.68),
+            0 0 56px rgba(255,196,0,.38),
+            inset 0 0 28px rgba(255,196,0,.12),
+            inset 0 1px 0 rgba(255,255,255,.12);
         }
 
         :global(.system-index-thumb-shell .ixi-collection-thumb-rail) {
