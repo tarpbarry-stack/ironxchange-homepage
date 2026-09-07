@@ -412,6 +412,7 @@ export function getObjectCapabilities(object = {}) {
 }
 
 export function getObjectActionCapabilities(object = {}) {
+  const metadata = getObjectMetadata(object);
   const capabilities = getObjectCapabilities(object);
   const permissions = getObjectPermissions(object);
   const objectType = clean(

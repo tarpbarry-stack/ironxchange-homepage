@@ -44,6 +44,10 @@ test("selector creation inherits the visible preview schema and every draft is T
   assert.match(creation, /canTransact:\s*true/u);
   assert.match(creation, /transactEligible:\s*true/u);
   assert.match(presentation, /hasAosPassport/u);
+  assert.match(
+    presentation,
+    /export function getObjectActionCapabilities\(object = \{\}\) \{\s+const metadata = getObjectMetadata\(object\);/u
+  );
   assert.match(presentation, /metadata\?\.transactEligible === true/u);
   const preview = await read("components/ixi-aos-card-library/IXIAosCardCatalogPreview.jsx");
   for (const number of [9, 10, 11, 12, 13, 14, 15, 16, 17]) {
