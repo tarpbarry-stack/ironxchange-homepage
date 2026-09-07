@@ -252,7 +252,7 @@ export default function IXIAosCommercialObjectEditor({
       <header>
         <div>
           <small>{getObjectLabel(object)}</small>
-          <strong>EDIT OBJECT</strong>
+          <strong>EDIT CARD</strong>
         </div>
         <nav>
           <button type="button" disabled={saving || Boolean(mediaStatus)} onClick={save}>SAVE</button>
@@ -286,7 +286,7 @@ export default function IXIAosCommercialObjectEditor({
         <section>
           <h4>IDENTITY</h4>
           <label className="identity-field">
-            <span>OBJECT NAME</span>
+            <span>NAME</span>
             <input value={name} onChange={event => setName(event.target.value)} />
           </label>
         </section>

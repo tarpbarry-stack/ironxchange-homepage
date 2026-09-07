@@ -146,7 +146,7 @@ test("AOS Work mounts the production card runtime and canonical save adapter", (
   assert.match(page, /entityId !== activeEntityId/u);
   assert.match(page, /Existing durable AOS objects must remain manageable/u);
   assert.match(page, /validMosObjectIds\.forEach/u);
-  assert.match(page, /IXI_EQUIPMENT_INDEX_OBJECT_ID,\s*\.\.\.validMosObjectIds/u);
+  assert.match(page, /equipmentSystemIndexObjectId,\s*\.\.\.validMosObjectIds/u);
   assert.doesNotMatch(page, /IXIMosObjectCard/u);
   assert.match(read("lib/mos/ixiMosBrowserGatewayClient.js"), /X-IXI-Expected-Revision/u);
   assert.match(read("pages/api/aos/mos\/\[\.\.\.path\]\.js"), /headers\["If-Match"\]\s*=\s*expectedRevision/u);

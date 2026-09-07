@@ -119,9 +119,6 @@ const IXI_AOS_WORK_SETTINGS_ID =
 const IXI_AOS_WORK_LAYOUT_ID =
   "__ixi_aos_work_layout__";
 
-const IXI_EQUIPMENT_INDEX_OBJECT_ID =
-  "system-index:equipment";
-
 import {
   getMachineContainerFromContainers,
   reorderMachineWithinContainerState,
@@ -657,6 +654,17 @@ useEffect(() => {
       )
       .filter(Boolean);
 
+  const equipmentSystemIndexObjectId =
+    String(
+      (systemIndexes || []).find(index =>
+        String(index?.indexId || "") === "equipment"
+      )?.objectId || ""
+    ).trim();
+
+  if (!equipmentSystemIndexObjectId) {
+    return;
+  }
+
   /*
    * Universal AOS workspace identities.
    *
@@ -757,7 +765,7 @@ placements:
           nextPlacements,
 
         objectId:
-          IXI_EQUIPMENT_INDEX_OBJECT_ID,
+          equipmentSystemIndexObjectId,
 
         targetSurface:
           "board",
@@ -878,7 +886,7 @@ placements:
     ...createEmptyWorkspacePlacements(),
 
     board: [
-      IXI_EQUIPMENT_INDEX_OBJECT_ID,
+      equipmentSystemIndexObjectId,
       ...validMosObjectIds
     ],
 
