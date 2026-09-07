@@ -1,197 +1,115 @@
 import assert from "node:assert/strict";
+import crypto from "node:crypto";
 import fs from "node:fs";
 import http from "node:http";
+import os from "node:os";
 import path from "node:path";
 import test from "node:test";
+import { createRequire } from "node:module";
 import { pathToFileURL } from "node:url";
 
 const runtimeModules = process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES;
 const playwrightUrl = runtimeModules
   ? pathToFileURL(path.join(runtimeModules, "playwright/index.js")).href
   : "playwright";
-let chromium = null;
-try {
-  const playwright = await import(playwrightUrl);
-  chromium = (playwright["module.exports"] || playwright.default)?.chromium || null;
-} catch {
-  chromium = null;
-}
+const playwright = await import(playwrightUrl);
+const chromium = (playwright["module.exports"] || playwright.default)?.chromium;
 
 const root = path.resolve(new URL("../..", import.meta.url).pathname);
-const controllerPath = path.join(
-  root,
-  "components/ixi-mos/workspace/IXIAosWorkspaceSessionController.mjs"
+const coreRoot = path.resolve(process.env.IXI_CORE_CONTRACT_ROOT || "");
+const coreNodeModules = path.resolve(
+  process.env.IXI_CORE_NODE_MODULES || path.join(coreRoot, "node_modules")
 );
-const enginePath = path.join(
-  root,
-  "components/ixi-mos/workspace/IXIAosSessionPlacementEngine.mjs"
-);
+const browserExecutable = process.env.IXI_BROWSER_EXECUTABLE_PATH || "";
+const results = path.join(root, "test-results", "browser-commercial");
 
-const harness = `<!doctype html>
-<meta charset="utf-8">
-<title>IXI AOS Session Commercial Browser Proof</title>
-<style>
-body{font:15px system-ui;background:#101311;color:#f4f5f4;margin:24px}button{margin:4px;padding:8px 12px}.card,.preview{border:1px solid #ffc400;padding:10px;margin:8px}.preview{display:inline-block;border-style:dashed}.metric{display:inline-block;margin-right:22px}#status{color:#ffc400}
-</style>
-<h1>Star & Sons / Wichita Falls</h1>
-<div id="status">starting</div>
-<div class="metric">Objects <b id="object-count">3</b></div>
-<div class="metric">Passports <b id="passport-count">3</b></div>
-<div id="session"></div><div id="context"></div><div id="surface"></div>
-<button id="connect">Connect Wichita Falls</button>
-<button id="equipment">Call Equipment</button>
-<button id="wichita">Call Wichita Falls</button>
-<button id="recall">Recall to start</button>
-<button id="move">Move to board</button>
-<button id="return">Return operation</button>
-<section id="operating"></section>
-<section id="previews">
-  <div class="preview" data-owner="object_equipment" data-object-id="object_ripper">Equipment preview · IXI_RIPPER</div>
-  <div class="preview" data-owner="object_wichita" data-object-id="object_ripper">Wichita Falls preview · IXI_RIPPER</div>
-</section>
-<script type="module">
-import { createAosWorkspaceSessionController } from "/controller.mjs";
-const R="object_ripper", E="object_equipment", W="object_wichita";
-const passports={[R]:"IXI_RIPPER",[E]:"IXI_EQUIPMENT",[W]:"IXI_WICHITA"};
-const scope=new URLSearchParams(location.search).get("placementScope")||"personal";
-let sequence=0;
-let session=JSON.parse(sessionStorage.getItem("ixi-browser-session")||"null");
-let relationships=JSON.parse(sessionStorage.getItem("ixi-browser-relationships")||"[]");
-const clone=value=>JSON.parse(JSON.stringify(value));
-const save=()=>sessionStorage.setItem("ixi-browser-session",JSON.stringify(session));
-const stamp=()=>\`2026-09-07T19:\${String(++sequence).padStart(2,"0")}:00.000Z\`;
-function envelope(){return {ok:true,result:{changed:true,session:clone(session)},replayed:false}}
-const transport={
-  async open(request){
-    if(request.placementScope==="shared") {const error=new Error("Shared scope denied");error.code="WORKSPACE_SHARED_SCOPE_DENIED";error.status=403;throw error}
-    if(!session){session={sessionId:"session_browser_commercial",tenantId:"tenant_star",entityId:"entity_star",workspaceId:request.workspaceId,placementScope:"personal",scopeOwnerId:"principal_employee_1",sharedScopeId:null,status:"active",revision:0,objects:{},startedAt:"2026-09-07T19:00:00.000Z",updatedAt:"2026-09-07T19:00:00.000Z",expiresAt:"2026-09-08T19:00:00.000Z",endedAt:null};save();return {ok:true,result:{created:true,resumed:false,session:clone(session)},replayed:false}}
-    return {ok:true,result:{created:false,resumed:true,session:clone(session)},replayed:false}
-  },
-  async read(){return {ok:true,session:clone(session)}},
-  async command(request){
-    if(request.expectedRevision!==session.revision){const error=new Error("revision conflict");error.code="WORKSPACE_SESSION_REVISION_CONFLICT";error.status=409;throw error}
-    const p=request.payload||{}, id=p.objectId, now=stamp();
-    if(request.commandType==="object.admit") session.objects[id]={objectId:id,sessionOrigin:{surfaceId:p.surfaceId,visualOrder:p.visualOrder,operatingState:p.operatingState},currentPlacement:{surfaceId:p.surfaceId,visualOrder:p.visualOrder,operatingState:p.operatingState},activeSummonedContext:p.activeSummonedContext||null,returnSnapshot:null,admittedAt:now,updatedAt:now};
-    else if(request.commandType==="object.snapshot.capture") session.objects[id].returnSnapshot={operationId:p.operationId,placement:clone(session.objects[id].currentPlacement),capturedAt:now};
-    else if(request.commandType==="object.move") session.objects[id].currentPlacement={surfaceId:p.surfaceId,visualOrder:p.visualOrder,operatingState:p.operatingState};
-    else if(request.commandType==="object.recall") session.objects[id].currentPlacement=clone(session.objects[id].sessionOrigin);
-    else if(request.commandType==="object.undo"){session.objects[id].currentPlacement=clone(session.objects[id].returnSnapshot.placement);session.objects[id].returnSnapshot=null}
-    else if(request.commandType==="summon.set") session.objects[id].activeSummonedContext=p.activeSummonedContext||null;
-    else if(request.commandType==="surface.reorder") p.orderedObjectIds.forEach((objectId,index)=>session.objects[objectId].currentPlacement.visualOrder=index);
-    session.revision+=1;session.updatedAt=now;save();return envelope();
-  },
-  async end(){session.status="ended";session.revision+=1;save();return envelope()}
+const frontendFiles = {
+  "/controller.mjs": path.join(root, "components/ixi-mos/workspace/IXIAosWorkspaceSessionController.mjs"),
+  "/IXIAosSessionPlacementEngine.mjs": path.join(root, "components/ixi-mos/workspace/IXIAosSessionPlacementEngine.mjs"),
+  "/gateway-client.js": path.join(root, "lib/mos/ixiMosBrowserGatewayClient.js"),
+  "/membership.mjs": path.join(root, "lib/mos/IXIAosMembershipBridge.mjs")
 };
-let counter=0,lastOperationId=null;
-const controller=createAosWorkspaceSessionController({transport,createCommandId:prefix=>\`\${prefix}:browser:\${++counter}\`,initialSurfaces:{board:[],indexEquipment:[],[\`container:\${E}\`]:[],[\`container:\${W}\`]:[]},relationshipTransport:async request=>{
-  if(request.memberPassportId!==passports[R]||request.parentPassportId!==passports[W]) throw new Error("Passport evidence mismatch");
-  const relationship={relationshipId:"relationship_ripper_wichita",behaviorId:"aos.rail-membership.v1",sourceObjectId:R,sourcePassportId:passports[R],targetObjectId:W,targetPassportId:passports[W],revision:1,status:"active"};
-  relationships=[relationship];sessionStorage.setItem("ixi-browser-relationships",JSON.stringify(relationships));return {ok:true,relationship};
-}});
-function moveOnly(target){const current=controller.readPlacements();Object.keys(current).forEach(key=>current[key]=(current[key]||[]).filter(id=>id!==R));current[target]=[...(current[target]||[]),R];return current}
-function render(){const state=controller.readSession(), record=state.objects[R];document.querySelector("#session").textContent=\`Session: \${state.sessionId} · revision \${state.revision}\`;document.querySelector("#context").textContent=\`Context: \${record?.activeSummonedContext||"none"}\`;document.querySelector("#surface").textContent=\`Surface: \${record?.currentPlacement?.surfaceId||"none"}\`;document.querySelector("#operating").innerHTML=record?\`<article class="card operating-card" data-object-id="\${R}" data-passport-id="\${passports[R]}">Ripper · \${passports[R]}</article>\`:""}
-async function place(target,context){const op=controller.persistLayout(moveOnly(target),{objectIds:[R]});lastOperationId=op.operationId;await op.completion;await controller.summon(R,context);render()}
-window.browserReady=(async()=>{try{await controller.open({workspaceId:"aos-work",placementScope:scope,sharedScopeId:scope==="shared"?"dispatch":null});await controller.admitObjects([{objectId:E,surfaceId:"board",visualOrder:0,operatingState:"operating"},{objectId:W,surfaceId:"board",visualOrder:1,operatingState:"operating"},{objectId:R,surfaceId:"indexEquipment",visualOrder:0,operatingState:"tucked",activeSummonedContext:E}]);render();document.querySelector("#status").textContent="ready"}catch(error){document.querySelector("#status").textContent=error.code||error.message}})();
-document.querySelector("#connect").onclick=async()=>{const op=controller.connect({nextPlacements:moveOnly(\`container:\${W}\`),objectId:R,relationship:{parentObjectId:W,parentPassportId:passports[W],memberObjectId:R,memberPassportId:passports[R],orderKey:"000100"}});lastOperationId=op.operationId;await op.completion;await controller.summon(R,W);render()};
-document.querySelector("#equipment").onclick=()=>place(\`container:\${E}\`,E);
-document.querySelector("#wichita").onclick=()=>place(\`container:\${W}\`,W);
-document.querySelector("#recall").onclick=async()=>{const result=await controller.recall([R]);lastOperationId=result.operationId;render()};
-document.querySelector("#move").onclick=()=>place("board",null);
-document.querySelector("#return").onclick=async()=>{await controller.undo(lastOperationId);render()};
-window.evidence=()=>({sessionId:controller.readSession().sessionId,revision:controller.readSession().revision,record:clone(controller.readSession().objects[R]),relationships:clone(relationships),objectCount:Number(document.querySelector("#object-count").textContent),passportCount:Number(document.querySelector("#passport-count").textContent),previewCount:document.querySelectorAll(\`.preview[data-object-id="\${R}"]\`).length,operatingCount:document.querySelectorAll(\`.operating-card[data-object-id="\${R}"]\`).length});
-</script>`;
 
-function serveFile(res, file, contentType) {
-  res.writeHead(200, { "Content-Type": contentType, "Cache-Control": "no-store" });
-  res.end(fs.readFileSync(file));
+function passportId(object) {
+  return object.identities.find(identity => identity.identityType === "ixi-passport")?.passportId;
 }
 
-test("Star & Sons/Wichita Falls browser story uses one identity and session-only placement", async t => {
-  if (!chromium) {
-    t.skip("Playwright and a Chromium executable are required for the commercial browser gate.");
-    return;
-  }
-  const server = http.createServer((req, res) => {
-    const pathname = new URL(req.url, "http://127.0.0.1").pathname;
-    if (pathname === "/controller.mjs") return serveFile(res, controllerPath, "text/javascript");
-    if (pathname === "/IXIAosSessionPlacementEngine.mjs") return serveFile(res, enginePath, "text/javascript");
-    res.writeHead(200, { "Content-Type": "text/html", "Cache-Control": "no-store" });
-    res.end(harness);
-  });
-  await new Promise(resolve => server.listen(0, "127.0.0.1", resolve));
-  t.after(() => server.close());
+function buildHarness(fixture) {
+  const fixtureJson = JSON.stringify(fixture).replaceAll("<", "\\u003c");
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1"><title>IXI AOS Commercial Browser Gate</title>
+<style>
+:root{color-scheme:dark;--yellow:#ffd000;--panel:#151a17;--muted:#9ea6a0}*{box-sizing:border-box}
+body{font:15px system-ui;background:#090c0a;color:#f4f5f4;margin:0;padding:24px}h1{margin:0 0 4px;font-size:28px}.sub{color:var(--muted);margin-bottom:18px}
+.metrics,.actions,.surfaces{display:flex;gap:10px;flex-wrap:wrap}.metric,.surface{background:var(--panel);border:1px solid #343c36;border-radius:8px;padding:12px}.metric b{color:var(--yellow)}
+.surface{min-height:112px;min-width:240px;flex:1}.surface.active{border-color:var(--yellow);box-shadow:0 0 24px #ffd00033}.surface h2{font-size:14px;margin:0 0 8px;color:var(--yellow)}
+button{background:#252c27;border:1px solid #58625b;border-radius:6px;color:#fff;padding:9px 12px;cursor:pointer}button:hover{border-color:var(--yellow)}.actions{margin:16px 0}
+.card,.preview{border:1px solid var(--yellow);border-radius:7px;padding:10px;margin:7px 0;background:#0d110e}.card{cursor:grab}.preview{border-style:dashed;color:#d9ddd9}.empty{color:#69726b}
+.proof{margin-top:18px;padding:12px;background:#101411;border-left:3px solid var(--yellow)}#status{color:var(--yellow);font-weight:700}.board-order{font-family:ui-monospace,monospace;color:#cfd5d0}
+</style></head><body>
+<h1>Star &amp; Sons / Wichita Falls</h1><div class="sub">Paired frontend + IX-Core commercial session proof</div>
+<div class="metrics"><div class="metric">Status <b id="status">starting</b></div><div class="metric">Listings <b id="listing-count">0</b></div><div class="metric">Objects <b id="object-count">?</b></div><div class="metric">Passports <b id="passport-count">?</b></div><div class="metric">Session revision <b id="revision">?</b></div></div>
+<div class="actions"><button id="equipment">Call Equipment</button><button id="wichita">Call Wichita Falls</button><button id="board">Board</button><button id="recall">Recall to start</button><button id="return">Return operation</button><button id="reorder">Reorder board</button></div>
+<div class="surfaces"><section class="surface" id="equipment-container"><h2>Equipment</h2><div class="rail" data-owner="equipment"></div></section><section class="surface" id="wichita-container"><h2>Wichita Falls</h2><div class="rail" data-owner="wichita"></div></section><section class="surface" id="board-surface"><h2>Board</h2><div class="board-order"></div></section></div>
+<section class="proof"><div id="identity"></div><div id="origin"></div><div id="context"></div><div id="current"></div><div id="snapshot"></div><div id="operating"></div></section>
+<script type="module">
+import { createAosWorkspaceSessionController } from "/controller.mjs";
+import { createAosMembershipRelationship } from "/membership.mjs";
+import { applyAosWorkspaceSessionCommand, createMosCommandId, createMosRelationship, endAosWorkspaceSession, fetchAosWorkspaceSession, fetchMosObjectRelationships, openAosWorkspaceSession } from "/gateway-client.js";
+const F=${fixtureJson};const R=F.ripper.objectId,E=F.equipment.objectId,W=F.wichita.objectId;
+const passports={[R]:F.ripper.passportId,[E]:F.equipment.passportId,[W]:F.wichita.passportId};const surfaces={equipment:\`container:\${E}\`,wichita:\`container:\${W}\`};
+let lastOperationId=null,raceMode="normal",raceRelease=null,racePhase="idle",raceCompletion=null,reorderComplete=false,relationships=[];const clone=value=>JSON.parse(JSON.stringify(value));
+const controller=createAosWorkspaceSessionController({transport:{open:openAosWorkspaceSession,read:fetchAosWorkspaceSession,command:applyAosWorkspaceSessionCommand,end:endAosWorkspaceSession},createCommandId:createMosCommandId,initialSurfaces:{board:[],indexEquipment:[],[surfaces.equipment]:[],[surfaces.wichita]:[]},relationshipTransport:async request=>{const execute=()=>createAosMembershipRelationship({createRelationship:createMosRelationship,...request});if(raceMode==="success-hold"){const response=await execute();racePhase="success-held";await new Promise(resolve=>{raceRelease=resolve});return response}if(raceMode==="failure-hold"){await execute();racePhase="failure-held";await new Promise(resolve=>{raceRelease=resolve});const error=new Error("Controlled response-loss fault");error.code="CONTROLLED_RESPONSE_LOSS";error.status=418;throw error}return execute()}});
+function moveOnly(objectId,target){const next=controller.readPlacements();Object.keys(next).forEach(key=>next[key]=(next[key]||[]).filter(id=>id!==objectId));next[target]=[...(next[target]||[]),objectId];return next}
+async function refreshCounts(){const response=await fetch("/evidence/counts");const counts=await response.json();document.querySelector("#object-count").textContent=counts.objectCount;document.querySelector("#passport-count").textContent=counts.passportCount;return counts}
+async function refreshPreviews(){const pairs=await Promise.all([[E,"equipment"],[W,"wichita"]].map(async([owner,key])=>{const payload=await fetchMosObjectRelationships(owner,{direction:"incoming"});const records=(payload.relationships||[]).map(item=>item.relationship||item).filter(item=>item.status==="active"&&item.sourceObjectId===R&&item.sourcePassportId===passports[R]&&item.targetPassportId===passports[owner]);const rail=document.querySelector(\`.rail[data-owner="\${key}"]\`);rail.innerHTML=records.map(item=>\`<div class="preview" data-object-id="\${R}" data-passport-id="\${item.sourcePassportId}" data-relationship-id="\${item.relationshipId}">Ripper preview · \${item.sourcePassportId}</div>\`).join("")||'<div class="empty">No ripper preview</div>';return records}));relationships=pairs.flat();return relationships}
+function render(){const state=controller.readSession(),record=state.objects[R],placement=record?.currentPlacement;document.querySelector("#revision").textContent=state.revision;document.querySelector("#identity").textContent=\`Canonical ripper: \${R} · permanent Passport: \${passports[R]}\`;document.querySelector("#origin").textContent=\`Immutable origin: \${record?.sessionOrigin?.surfaceId||"none"}\`;document.querySelector("#context").textContent=\`Last-called context: \${record?.activeSummonedContext||"none"}\`;document.querySelector("#current").textContent=\`Operating surface: \${placement?.surfaceId||"none"}\`;document.querySelector("#snapshot").textContent=\`Return snapshot: \${record?.returnSnapshot?record.returnSnapshot.operationId:"consumed / none"}\`;document.querySelector("#operating").innerHTML=record?\`<article id="ripper-card" draggable="true" class="card operating-card" data-object-id="\${R}" data-passport-id="\${passports[R]}">Ripper operating card · \${passports[R]}</article>\`:"";document.querySelector(".board-order").textContent=\`Order: \${(controller.readPlacements().board||[]).join(" → ")||"empty"}\`}
+async function place(objectId,target,context){const op=controller.persistLayout(moveOnly(objectId,target),{objectIds:[objectId]});lastOperationId=op.operationId;await op.completion;if(objectId===R)await controller.summon(R,context);render();return op.operationId}
+async function connectWichita(){const op=controller.connect({nextPlacements:moveOnly(R,surfaces.wichita),objectId:R,relationship:{parentObjectId:W,parentPassportId:passports[W],memberObjectId:R,memberPassportId:passports[R],orderKey:"000200"}});lastOperationId=op.operationId;await op.completion;await controller.summon(R,W);await refreshPreviews();await refreshCounts();render();return op.operationId}
+window.browserReady=(async()=>{try{await controller.open({workspaceId:"aos-work",placementScope:"personal"});await controller.admitObjects([{objectId:E,surfaceId:"board",visualOrder:0,operatingState:"operating"},{objectId:W,surfaceId:"board",visualOrder:1,operatingState:"operating"},{objectId:R,surfaceId:"indexEquipment",visualOrder:0,operatingState:"tucked",activeSummonedContext:E}]);await refreshPreviews();await refreshCounts();render();document.querySelector("#status").textContent="ready"}catch(error){document.querySelector("#status").textContent=error.code||error.message;throw error}})();
+document.querySelector("#wichita-container").addEventListener("dragover",event=>event.preventDefault());document.querySelector("#wichita-container").addEventListener("drop",event=>{event.preventDefault();void connectWichita()});
+document.querySelector("#equipment").onclick=()=>place(R,surfaces.equipment,E);document.querySelector("#wichita").onclick=()=>place(R,surfaces.wichita,W);document.querySelector("#board").onclick=()=>place(R,"board",null);document.querySelector("#recall").onclick=async()=>{const result=await controller.recall([R]);lastOperationId=result.operationId;render()};document.querySelector("#return").onclick=async()=>{await controller.undo(lastOperationId);render()};document.querySelector("#reorder").onclick=async()=>{reorderComplete=false;const current=controller.readPlacements(),ordered=[...(current.board||[])].reverse();const op=controller.persistLayout({...current,board:ordered},{objectIds:ordered});lastOperationId=op.operationId;await op.completion;render();reorderComplete=true};
+window.startDelayedSuccess=()=>{raceMode="success-hold";racePhase="success-started";const op=controller.connect({nextPlacements:moveOnly(R,surfaces.equipment),objectId:R,relationship:{parentObjectId:E,parentPassportId:passports[E],memberObjectId:R,memberPassportId:passports[R],orderKey:"000100"}});raceCompletion=op.completion.then(()=>{racePhase="success-done"}).catch(error=>{racePhase=\`unexpected:\${error.code||error.message}\`});return op.operationId};
+window.startDelayedFailure=()=>{raceMode="failure-hold";racePhase="failure-started";const op=controller.connect({nextPlacements:moveOnly(R,surfaces.wichita),objectId:R,relationship:{parentObjectId:W,parentPassportId:passports[W],memberObjectId:R,memberPassportId:passports[R],orderKey:"000200"}});raceCompletion=op.completion.then(()=>{racePhase="unexpected:failure-succeeded"}).catch(error=>{racePhase=\`failure-done:\${error.code||error.message}\`});return op.operationId};
+window.releaseRace=()=>{raceMode="normal";raceRelease?.();raceRelease=null};window.moveRipperBoard=()=>place(R,"board",null);window.moveEquipment=()=>place(E,surfaces.wichita,null);window.raceState=()=>({phase:racePhase});
+window.evidence=()=>{const state=controller.readSession(),record=state.objects[R];return {sessionId:state.sessionId,revision:state.revision,listingCount:Number(document.querySelector("#listing-count").textContent),record:clone(record),equipmentRecord:clone(state.objects[E]),objectCount:Number(document.querySelector("#object-count").textContent),passportCount:Number(document.querySelector("#passport-count").textContent),previewOwners:[...document.querySelectorAll(\`.preview[data-object-id="\${R}"]\`)].map(node=>node.closest(".rail").dataset.owner).sort(),previewPassports:[...document.querySelectorAll(\`.preview[data-object-id="\${R}"]\`)].map(node=>node.dataset.passportId),operatingCount:document.querySelectorAll(\`.operating-card[data-object-id="\${R}"]\`).length,boardOrder:[...(controller.readPlacements().board||[])],relationships:clone(relationships),racePhase,reorderComplete}}
+</script></body></html>`;
+}
 
-  let browser;
-  try {
-    browser = await chromium.launch({
-      headless: true,
-      executablePath: process.env.IXI_BROWSER_EXECUTABLE_PATH || undefined
-    });
-  } catch (error) {
-    if (/Executable doesn't exist|browser executable/i.test(String(error?.message || error))) {
-      t.skip("A Chromium executable is required for the commercial browser gate.");
-      return;
-    }
-    throw error;
-  }
-  t.after(() => browser.close());
-  const context = await browser.newContext();
-  const page = await context.newPage();
-  const base = `http://127.0.0.1:${server.address().port}`;
-  await page.goto(`${base}/harness`);
-  await page.waitForFunction(() => document.querySelector("#status")?.textContent === "ready");
+function signedHeaders({ secret, method, targetPath, principalId, entityId, bodyString, requestHeaders }) {
+  const timestamp = String(Date.now()), requestId = crypto.randomUUID();
+  const bodyHash = crypto.createHash("sha256").update(bodyString).digest("hex");
+  const canonical = [timestamp, requestId, method, targetPath, principalId, entityId, bodyHash].join("\n");
+  return { accept: "application/json", ...(bodyString ? { "content-type": "application/json" } : {}), "x-ixi-internal-signature-version": "v1", "x-ixi-internal-timestamp": timestamp, "x-ixi-internal-request-id": requestId, "x-ixi-internal-principal-id": principalId, "x-ixi-internal-entity-id": entityId, "x-ixi-internal-signature": crypto.createHmac("sha256", secret).update(canonical).digest("hex"), ...(requestHeaders["idempotency-key"] ? { "idempotency-key": requestHeaders["idempotency-key"] } : {}), ...(requestHeaders["x-ixi-expected-revision"] ? { "if-match": requestHeaders["x-ixi-expected-revision"] } : {}) };
+}
+async function listen(app) { return new Promise(resolve => { const server = app.listen(0, "127.0.0.1", () => resolve(server)); }); }
+async function close(server) { if (server) await new Promise(resolve => server.close(resolve)); }
 
-  const baseline = await page.evaluate(() => window.evidence());
-  assert.equal(baseline.objectCount, 3);
-  assert.equal(baseline.passportCount, 3);
-  assert.equal(baseline.previewCount, 2);
-  assert.equal(baseline.operatingCount, 1);
-  assert.equal(baseline.record.sessionOrigin.surfaceId, "indexEquipment");
-
-  await page.click("#connect");
-  await page.waitForFunction(() => window.evidence().relationships.length === 1);
-  const connected = await page.evaluate(() => window.evidence());
-  assert.equal(connected.record.objectId, "object_ripper");
-  assert.equal(connected.relationships[0].sourcePassportId, "IXI_RIPPER");
-  assert.equal(connected.objectCount, baseline.objectCount);
-  assert.equal(connected.passportCount, baseline.passportCount);
-  assert.equal(connected.previewCount, 2);
-  assert.equal(connected.operatingCount, 1);
-
-  await page.click("#equipment");
-  await page.waitForFunction(() => window.evidence().record.activeSummonedContext === "object_equipment");
-  await page.click("#wichita");
-  await page.waitForFunction(() => window.evidence().record.activeSummonedContext === "object_wichita");
-  await page.click("#recall");
-  await page.waitForFunction(() => window.evidence().record.currentPlacement.surfaceId === "indexEquipment");
-
-  await page.click("#move");
-  await page.waitForFunction(() => window.evidence().record.currentPlacement.surfaceId === "board");
-  await page.click("#return");
-  await page.waitForFunction(() => window.evidence().record.currentPlacement.surfaceId === "indexEquipment");
-
-  const beforeRefresh = await page.evaluate(() => window.evidence());
-  await page.reload();
-  await page.waitForFunction(() => document.querySelector("#status")?.textContent === "ready");
-  const refreshed = await page.evaluate(() => window.evidence());
-  assert.equal(refreshed.sessionId, beforeRefresh.sessionId);
-  assert.equal(refreshed.record.sessionOrigin.surfaceId, "indexEquipment");
-  assert.equal(refreshed.objectCount, baseline.objectCount);
-  assert.equal(refreshed.passportCount, baseline.passportCount);
-
-  const results = path.join(root, "test-results");
-  fs.mkdirSync(results, { recursive: true });
-  await page.screenshot({
-    path: path.join(results, "aos-session-commercial-browser.png"),
-    fullPage: true
-  });
-  fs.writeFileSync(
-    path.join(results, "aos-session-commercial-browser.json"),
-    `${JSON.stringify(refreshed, null, 2)}\n`
-  );
-
-  const denied = await context.newPage();
-  await denied.goto(`${base}/harness?placementScope=shared&sharedScopeId=dispatch`);
-  await denied.waitForFunction(() => document.querySelector("#status")?.textContent !== "starting");
-  assert.equal(await denied.textContent("#status"), "WORKSPACE_SHARED_SCOPE_DENIED");
+test("Star & Sons/Wichita Falls runs through Chromium, the frontend gateway client, and exact IX-Core", { timeout: 120_000 }, async t => {
+  assert.ok(chromium, "Playwright Chromium support is required.");
+  assert.ok(browserExecutable && fs.existsSync(browserExecutable), "IXI_BROWSER_EXECUTABLE_PATH must name an installed Chromium executable.");
+  assert.ok(coreRoot && fs.existsSync(path.join(coreRoot, "mos/routes/mosRouter.js")), "IXI_CORE_CONTRACT_ROOT must name the exact governed IX-Core worktree.");
+  const testRoot = fs.mkdtempSync(path.join(os.tmpdir(), "ixi-browser-commercial-"));t.after(() => fs.rmSync(testRoot, { recursive: true, force: true }));
+  process.env.IXI_MOS_DATA_ROOT = path.join(testRoot, "mos");process.env.IXI_PASSPORT_DATA_FILE = path.join(testRoot, "passports.json");process.env.IXI_MOS_INTERNAL_SECRET = "browser-commercial-secret";process.env.IXI_MOS_INTERNAL_AUTH_ENFORCE = "true";
+  const require = createRequire(import.meta.url);const express = require(path.join(coreNodeModules, "express"));const authorityStore = require(path.join(coreRoot, "authority/IXIAuthorityDynamoStore.js"));authorityStore.getCurrentPolicyRecord = async () => null;
+  const { ensureAosAccount } = require(path.join(coreRoot, "mos/accounts/aosAccountService.js"));const { provisionAosObject } = require(path.join(coreRoot, "mos/provisioning/aosObjectProvisioningService.js"));const { createObjectRelationship } = require(path.join(coreRoot, "mos/relationships/relationshipService.js"));const { listObjects } = require(path.join(coreRoot, "mos/objects/objectService.js"));const { readPassportRecords } = require(path.join(coreRoot, "passport/passportRegistry.js"));const { mosRouter } = require(path.join(coreRoot, "mos/routes/mosRouter.js"));
+  const principalId = "browser-commercial-owner", bootstrap = ensureAosAccount({ ownerUserId: principalId, displayName: "Star & Sons" }), entityId = bootstrap.entity.entityId;
+  const provision = (commandId, displayName) => provisionAosObject({ commandId, entityId, objectType: "customer-defined", displayName, actorId: principalId }).object;
+  const equipment = provision("browser-equipment", "Equipment"), wichita = provision("browser-wichita", "Wichita Falls"), ripper = provision("browser-ripper", "Existing Ripper");
+  createObjectRelationship({ behaviorId: "aos.rail-membership.v1", sourceObjectId: ripper.objectId, targetObjectId: equipment.objectId, actorId: principalId, commandId: "browser-existing-equipment-edge", orderKey: "000100" });
+  const fixture = { equipment: { objectId: equipment.objectId, passportId: passportId(equipment) }, wichita: { objectId: wichita.objectId, passportId: passportId(wichita) }, ripper: { objectId: ripper.objectId, passportId: passportId(ripper) } };
+  const counts = () => ({ objectCount: listObjects({ entityId, status: "active" }).length, passportCount: readPassportRecords().length });const baselineCounts = counts();
+  const coreApp = express();coreApp.use(express.json());coreApp.use("/mos/v1", mosRouter);const coreServer = await listen(coreApp);t.after(() => close(coreServer));const coreBase = `http://127.0.0.1:${coreServer.address().port}`, gatewayEvidence = [];
+  const harnessServer = http.createServer(async (req, res) => {try {const requestUrl = new URL(req.url, "http://127.0.0.1");if (frontendFiles[requestUrl.pathname]) {res.writeHead(200, { "content-type": "text/javascript", "cache-control": "no-store" });return res.end(fs.readFileSync(frontendFiles[requestUrl.pathname]));}if (requestUrl.pathname === "/evidence/counts") {res.writeHead(200, { "content-type": "application/json", "cache-control": "no-store" });return res.end(JSON.stringify(counts()));}if (requestUrl.pathname.startsWith("/api/aos/mos/")) {const chunks=[];for await (const chunk of req) chunks.push(chunk);const bodyString=Buffer.concat(chunks).toString("utf8"),suffix=`${requestUrl.pathname.slice("/api/aos/mos".length)}${requestUrl.search}`,targetPath=`/mos/v1${suffix}`;const headers=signedHeaders({secret:process.env.IXI_MOS_INTERNAL_SECRET,method:req.method,targetPath,principalId,entityId,bodyString,requestHeaders:req.headers});const upstream=await fetch(`${coreBase}${targetPath}`,{method:req.method,headers,body:bodyString||undefined});const responseText=await upstream.text();let responseBody=null;try{responseBody=JSON.parse(responseText)}catch{responseBody={raw:responseText}}const relationship=responseBody?.result?.relationship||responseBody?.relationship||null;gatewayEvidence.push({method:req.method,path:suffix,status:upstream.status,commandId:bodyString?JSON.parse(bodyString).commandId||null:null,idempotencyKey:req.headers["idempotency-key"]||null,expectedRevision:req.headers["x-ixi-expected-revision"]||null,errorCode:responseBody?.error?.code||null,responseKeys:Object.keys(responseBody||{}),resultKeys:Object.keys(responseBody?.result||{}),sessionRevision:responseBody?.result?.session?.revision??responseBody?.session?.revision??null,relationshipEvidence:relationship?{relationshipId:relationship.relationshipId,sourceObjectId:relationship.sourceObjectId,sourcePassportId:relationship.sourcePassportId,targetObjectId:relationship.targetObjectId,targetPassportId:relationship.targetPassportId,behaviorId:relationship.behaviorId,revision:relationship.revision}:null});res.writeHead(upstream.ok?200:upstream.status,{"content-type":"application/json","cache-control":"no-store"});return res.end(responseText)}res.writeHead(200,{"content-type":"text/html","cache-control":"no-store"});return res.end(buildHarness(fixture))}catch(error){res.writeHead(500,{"content-type":"application/json"});return res.end(JSON.stringify({ok:false,error:{code:"BROWSER_GATEWAY_HARNESS_FAILED",message:error.message}}))}});
+  await new Promise(resolve => harnessServer.listen(0, "127.0.0.1", resolve));t.after(() => close(harnessServer));const base=`http://127.0.0.1:${harnessServer.address().port}`;
+  const browser=await chromium.launch({headless:true,executablePath:browserExecutable});t.after(()=>browser.close());const context=await browser.newContext({viewport:{width:1440,height:1000}}),page=await context.newPage();const consoleEntries=[],pageErrors=[],failedRequests=[];page.on("console",message=>consoleEntries.push({type:message.type(),text:message.text()}));page.on("pageerror",error=>pageErrors.push(String(error?.stack||error)));page.on("requestfailed",request=>failedRequests.push({url:request.url(),error:request.failure()?.errorText||null}));
+  fs.mkdirSync(results,{recursive:true});await page.goto(`${base}/aos/work?listings=0`);try{await page.waitForFunction(()=>document.querySelector("#status")?.textContent!=="starting",null,{timeout:10000})}catch(error){throw new Error(JSON.stringify({cause:error.message,status:await page.textContent("#status"),pageErrors,consoleEntries,gatewayEvidence,html:(await page.content()).slice(-2000)},null,2))}const readyStatus=await page.textContent("#status");assert.equal(readyStatus,"ready",JSON.stringify({readyStatus,pageErrors,consoleEntries,gatewayEvidence},null,2));const baseline=await page.evaluate(()=>window.evidence());assert.equal(baseline.listingCount,0);assert.deepEqual({objectCount:baseline.objectCount,passportCount:baseline.passportCount},baselineCounts);assert.equal(baseline.record.sessionOrigin.surfaceId,"indexEquipment");assert.equal(baseline.operatingCount,1);assert.deepEqual(baseline.previewOwners,["equipment"]);await page.screenshot({path:path.join(results,"01-zero-listing-load.png"),fullPage:true});
+  await page.dragAndDrop("#ripper-card","#wichita-container");await page.waitForFunction(()=>window.evidence().previewOwners.length===2);const connected=await page.evaluate(()=>window.evidence());assert.equal(connected.record.objectId,fixture.ripper.objectId);assert.ok(connected.previewPassports.every(id=>id===fixture.ripper.passportId));assert.deepEqual(connected.previewOwners,["equipment","wichita"]);assert.equal(connected.operatingCount,1);assert.deepEqual(counts(),baselineCounts);await page.screenshot({path:path.join(results,"02-drag-drop-two-rails.png"),fullPage:true});
+  await page.click("#equipment");await page.waitForFunction(id=>window.evidence().record.activeSummonedContext===id,fixture.equipment.objectId);const calledEquipment=await page.evaluate(()=>window.evidence());assert.equal(calledEquipment.record.currentPlacement.surfaceId,`container:${fixture.equipment.objectId}`);await page.click("#wichita");await page.waitForFunction(id=>window.evidence().record.activeSummonedContext===id,fixture.wichita.objectId);const calledWichita=await page.evaluate(()=>window.evidence());assert.equal(calledWichita.record.currentPlacement.surfaceId,`container:${fixture.wichita.objectId}`);
+  await page.click("#board");await page.waitForFunction(()=>window.evidence().record.currentPlacement.surfaceId==="board");const boarded=await page.evaluate(()=>window.evidence());await page.click("#recall");await page.waitForFunction(()=>window.evidence().record.currentPlacement.surfaceId==="indexEquipment");const recalled=await page.evaluate(()=>window.evidence());assert.equal(recalled.record.sessionOrigin.surfaceId,"indexEquipment");assert.equal(recalled.record.returnSnapshot.placement.surfaceId,"board");await page.click("#return");await page.waitForFunction(()=>window.evidence().record.currentPlacement.surfaceId==="board");const returned=await page.evaluate(()=>window.evidence());assert.equal(returned.record.sessionOrigin.surfaceId,"indexEquipment");assert.equal(returned.record.returnSnapshot,null);
+  await page.evaluate(()=>window.startDelayedSuccess());await page.waitForFunction(()=>window.raceState().phase==="success-held");await page.evaluate(()=>window.moveRipperBoard());await page.waitForFunction(()=>window.evidence().record.currentPlacement.surfaceId==="board");await page.evaluate(()=>window.releaseRace());await page.waitForFunction(()=>window.raceState().phase==="success-done");const afterDelayedSuccess=await page.evaluate(()=>window.evidence());assert.equal(afterDelayedSuccess.record.currentPlacement.surfaceId,"board");
+  await page.evaluate(()=>window.startDelayedFailure());await page.waitForFunction(()=>window.raceState().phase==="failure-held");await page.evaluate(()=>window.moveEquipment());await page.waitForFunction(surface=>window.evidence().equipmentRecord.currentPlacement.surfaceId===surface,`container:${fixture.wichita.objectId}`);await page.evaluate(()=>window.releaseRace());await page.waitForFunction(()=>window.raceState().phase.startsWith("failure-done:"));const afterFailure=await page.evaluate(()=>window.evidence());assert.equal(afterFailure.record.currentPlacement.surfaceId,"board");assert.equal(afterFailure.equipmentRecord.currentPlacement.surfaceId,`container:${fixture.wichita.objectId}`);
+  const orderBefore=(await page.evaluate(()=>window.evidence())).boardOrder;assert.ok(orderBefore.length>=2);await page.click("#reorder");await page.waitForFunction(previous=>window.evidence().reorderComplete&&JSON.stringify(window.evidence().boardOrder)!==JSON.stringify(previous),orderBefore);const reordered=await page.evaluate(()=>window.evidence());await page.screenshot({path:path.join(results,"03-session-semantics-and-races.png"),fullPage:true});await page.reload();await page.waitForFunction(()=>document.querySelector("#status")?.textContent==="ready");const refreshed=await page.evaluate(()=>window.evidence());assert.equal(refreshed.sessionId,reordered.sessionId);assert.deepEqual(refreshed.boardOrder,reordered.boardOrder);assert.equal(refreshed.record.sessionOrigin.surfaceId,"indexEquipment");assert.deepEqual(refreshed.previewOwners,["equipment","wichita"]);assert.equal(refreshed.operatingCount,1);assert.deepEqual(counts(),baselineCounts);await page.screenshot({path:path.join(results,"04-refresh-persistence.png"),fullPage:true});
+  const unexpectedGatewayFailures=gatewayEvidence.filter(entry=>entry.status>=400);assert.deepEqual(unexpectedGatewayFailures,[]);assert.deepEqual(failedRequests,[]);assert.deepEqual(pageErrors,[]);assert.deepEqual(consoleEntries.filter(entry=>entry.type==="error"),[]);assert.ok(gatewayEvidence.filter(entry=>entry.path.includes("/commands")).every(entry=>entry.idempotencyKey&&entry.expectedRevision!==null));assert.ok(gatewayEvidence.filter(entry=>entry.path==="/relationships").every(entry=>entry.commandId&&entry.commandId===entry.idempotencyKey));
+  const evidence={frontendCommit:process.env.IXI_FRONTEND_COMMIT||null,ixCoreCommit:process.env.IXI_CORE_COMMIT||null,browserVersion:await browser.version(),fixture,baselineCounts,finalCounts:counts(),baseline,connected,calledEquipment,calledWichita,boarded,recalled,returned,afterDelayedSuccess,afterFailure,reordered,refreshed,consoleEntries,pageErrors,failedRequests,gatewayEvidence,controlledFault:"CONTROLLED_RESPONSE_LOSS",unexpectedGatewayFailures};fs.writeFileSync(path.join(results,"aos-session-commercial-browser.json"),`${JSON.stringify(evidence,null,2)}\n`);
 });

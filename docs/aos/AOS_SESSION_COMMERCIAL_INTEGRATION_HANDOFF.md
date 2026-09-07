@@ -74,6 +74,12 @@ IXI_CORE_CONTRACT_ROOT=<exact-core-worktree> node --test tests/*.test.mjs
 IX-Core: npm test
 203 passed, 0 failed, 0 skipped
 
+IXI_CORE_CONTRACT_ROOT=<exact-core-worktree> \
+IXI_CORE_NODE_MODULES=<paired-core-node-modules> \
+IXI_BROWSER_EXECUTABLE_PATH=<isolated-chrome-headless-shell> \
+node --test tests/browser/ixi-aos-session-commercial.browser.mjs
+1 passed, 0 failed, 0 skipped
+
 NEXT_PUBLIC_SHARETRIBE_CLIENT_ID=ixi-controlled-build-verification npm run build
 PASS: compiled, generated 96/96 static pages, collected build traces
 
@@ -88,13 +94,12 @@ stable retry identity, revision conflict handling, and stale-response safety.
 
 ## Unresolved release blockers
 
-1. The runnable Playwright browser story is committed at
-   `tests/browser/ixi-aos-session-commercial.browser.mjs`, but this verification
-   runtime contains no browser executable. The browser package was present;
-   Chromium launch failed because its binary was absent, and the restricted
-   verification network could not download it. The suite reports an explicit
-   skip until a controlled runner supplies Chromium. No browser pass or visual
-   evidence is claimed.
+1. The Chromium gate is closed. The browser story now runs through the actual
+   frontend browser gateway client and membership bridge against a disposable
+   server booted from the exact paired IX-Core worktree. It captures four
+   screenshots plus JSON console, network, identity, revision, and count
+   evidence. It no longer substitutes an in-browser IX-Core mock or skips when
+   the executable is absent.
 2. The required production-clone Star & Sons/Wichita Falls proof has not run.
 3. Production census, identity-conflict report, checksummed backups, rollback
    proof, database integrity, and Passport-registry integrity remain release
@@ -104,8 +109,8 @@ stable retry identity, revision conflict handling, and stale-response safety.
 
 ## Release decision
 
-**REJECT production release.** The code is a tested integration candidate, but
-the browser pass and production-clone/census/backup/rollback gates are mandatory.
+**REJECT production release.** The browser integration candidate is verified,
+but the production-clone/census/backup/rollback gates remain mandatory.
 
 No production data, IX-Core source, AWS resource, deployment, or `main` branch
 was modified by this integration work.
