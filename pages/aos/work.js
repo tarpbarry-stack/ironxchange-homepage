@@ -3643,13 +3643,18 @@ onReturnContainerChildren={
         }
 
         .aos-work-board-skin-ixi-102 {
-          background-color: #101111;
+          background-color: #000;
           background-image: url('/images/ixi-aos-board-ixi-102.webp');
         }
 
         .aos-work-board-skin-ixi-103 {
           background-color: #000;
           background-image: url('/images/ixi-aos-board-ixi-103.webp');
+        }
+
+        .aos-work-board-skin-ixi-104 {
+          background-color: #000;
+          background-image: url('/images/ixi-aos-board-ixi-104.webp');
         }
 
         .aos-work-board-title {

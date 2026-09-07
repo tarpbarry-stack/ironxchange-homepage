@@ -9,7 +9,8 @@ export const IXI_AOS_BOARD_SKIN_IDS =
     V12: "v12",
     IXI_101: "ixi-101",
     IXI_102: "ixi-102",
-    IXI_103: "ixi-103"
+    IXI_103: "ixi-103",
+    IXI_104: "ixi-104"
   });
 
 export const IXI_AOS_BOARD_SKINS =
@@ -32,7 +33,7 @@ export const IXI_AOS_BOARD_SKINS =
       skinId: IXI_AOS_BOARD_SKIN_IDS.IXI_102,
       name: "IXI-102",
       designation: "INDEX LINE",
-      description: "Shaded graphite field with numbered calibration rails and sparse IXI marks.",
+      description: "Jet-black field with numbered calibration rails and sparse IXI marks.",
       className: "aos-work-board-skin-ixi-102"
     }),
     Object.freeze({
@@ -41,6 +42,13 @@ export const IXI_AOS_BOARD_SKINS =
       designation: "VECTOR FIELD",
       description: "Jet-black coordinate field with sparse vector paths and calibrated IXI marks.",
       className: "aos-work-board-skin-ixi-103"
+    }),
+    Object.freeze({
+      skinId: IXI_AOS_BOARD_SKIN_IDS.IXI_104,
+      name: "IXI-104",
+      designation: "BLACK TOPO",
+      description: "Jet-black survey field with sparse contour lines and calibrated elevation marks.",
+      className: "aos-work-board-skin-ixi-104"
     })
   ]);
 
