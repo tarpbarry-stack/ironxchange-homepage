@@ -1,4 +1,4 @@
-import { asArray, clean, getObjectFields } from "../IXIAosSemanticObjectPresentation";
+import { clean, getFieldDefinitions, getObjectFields } from "../IXIAosSemanticObjectPresentation";
 
 function isBusinessIdentifier(definition = {}) {
   const role = clean(definition?.presentationRole || definition?.semanticRole).toLowerCase();
@@ -7,9 +7,7 @@ function isBusinessIdentifier(definition = {}) {
 }
 
 export function buildFace1GenericEditObject(object = {}, { maxFields = null, includeBusinessIdentifier = false, fieldFilter = null } = {}) {
-  const objectDefinitions = asArray(object?.fieldDefinitions);
-  const metadataDefinitions = asArray(object?.metadata?.fieldDefinitions);
-  const definitions = (objectDefinitions.length ? objectDefinitions : metadataDefinitions)
+  const definitions = getFieldDefinitions(object)
     .filter(definition => definition?.editable !== false && clean(definition?.fieldId))
     .filter(definition => includeBusinessIdentifier || !isBusinessIdentifier(definition))
     .filter(definition => typeof fieldFilter === "function" ? fieldFilter(definition) : true);
@@ -20,14 +18,8 @@ export function buildFace1GenericEditObject(object = {}, { maxFields = null, inc
 export function restoreFace1GenericSave(originalObject = {}, nextObject = {}, { allowAddedDefinitions = false, allowDefinitionEdits = false } = {}) {
   const originalFields = getObjectFields(originalObject);
   const editedFields = getObjectFields(nextObject);
-  const originalObjectDefinitions = asArray(originalObject?.fieldDefinitions);
-  const editedObjectDefinitions = asArray(nextObject?.fieldDefinitions);
-  const originalDefinitions = originalObjectDefinitions.length
-    ? originalObjectDefinitions
-    : asArray(originalObject?.metadata?.fieldDefinitions);
-  const editedDefinitions = editedObjectDefinitions.length
-    ? editedObjectDefinitions
-    : asArray(nextObject?.metadata?.fieldDefinitions);
+  const originalDefinitions = getFieldDefinitions(originalObject);
+  const editedDefinitions = getFieldDefinitions(nextObject);
   const nextFields = { ...originalFields };
 
   editedDefinitions.forEach(definition => {
