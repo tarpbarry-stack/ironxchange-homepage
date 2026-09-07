@@ -17,6 +17,7 @@ export default function IXIAosCard019(props) {
       cardDefinition={CARD_019}
       defaultDisplayName="LOCATIONS"
       editHeading="EDIT LOCATIONS INDEX"
+      childCardMode="object"
     />
   );
 }

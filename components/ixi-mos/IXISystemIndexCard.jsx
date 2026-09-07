@@ -101,6 +101,7 @@ export default function IXISystemIndexCard({
   onReturnContents,
   onAddObject,
   onSavePresentation,
+  childCardMode = "object",
   workspaceDropPolicy = null,
   workspaceDropSurface = ""
 }) {
@@ -621,6 +622,7 @@ export default function IXISystemIndexCard({
               ixiState={activeItemIxiState}
               ixiCardState={ixiCardState}
               onIxiStateChange={onIxiStateChange}
+              forceMachineCard={childCardMode === "machine"}
             />
           </div>
         ) : (

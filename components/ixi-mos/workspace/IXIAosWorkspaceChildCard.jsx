@@ -38,9 +38,11 @@ export default function IXIAosWorkspaceChildCard({
   parentLabel = "",
   ixiState = {},
   ixiCardState = {},
-  onIxiStateChange = null
+  onIxiStateChange = null,
+  forceMachineCard = false
 }) {
   if (
+    !forceMachineCard &&
     isDurableMosObject(
       object
     )

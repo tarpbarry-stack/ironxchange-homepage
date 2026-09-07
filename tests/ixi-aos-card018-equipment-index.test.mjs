@@ -42,6 +42,21 @@ test("Card 018 leaves the canonical collection deck rail visible and solely resp
   assert.match(sellerYard, /onRailSend=\{\(\) =>/);
 });
 
+test("Card 018 always renders owned equipment through the current inventory machine-card family", async () => {
+  const [card, systemIndex, childRouter] = await Promise.all([
+    read("components/ixi-aos/cards/018/IXIAosCard018.jsx"),
+    read("components/ixi-mos/IXISystemIndexCard.jsx"),
+    read("components/ixi-mos/workspace/IXIAosWorkspaceChildCard.jsx")
+  ]);
+
+  assert.match(card, /childCardMode = "machine"/);
+  assert.match(card, /childCardMode=\{childCardMode\}/);
+  assert.match(systemIndex, /forceMachineCard=\{childCardMode === "machine"\}/);
+  assert.match(childRouter, /!forceMachineCard &&\s*isDurableMosObject/);
+  assert.match(childRouter, /<IXIMachineCard/);
+  assert.match(childRouter, /cardContext="inventory"/);
+});
+
 test("AOS Work renders the canonical Equipment System Index through Card 018", async () => {
   const board = await read("components/ixi-mos/workspace/IXIAosWorkspaceBoard.jsx");
   assert.match(board, /IXIAosCard018/);

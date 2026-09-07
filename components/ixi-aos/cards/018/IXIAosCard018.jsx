@@ -43,7 +43,8 @@ export default function IXIAosCard018({
   dragHandleProps = null,
   cardDefinition = CARD_018,
   defaultDisplayName = "EQUIPMENT",
-  editHeading = "EDIT EQUIPMENT INDEX"
+  editHeading = "EDIT EQUIPMENT INDEX",
+  childCardMode = "machine"
 }) {
   const objectId = clean(object?.objectId || object?.id?.uuid || object?.id);
   const isCreationDraft =
@@ -104,6 +105,7 @@ export default function IXIAosCard018({
         onGatherContents={() => onRecall?.(object)}
         onReturnContents={() => onReturn?.(object)}
         onAddObject={onAddObject}
+        childCardMode={childCardMode}
         onSavePresentation={(_, action = {}) => {
           if (action?.intent === "edit-face-1") {
             setDraftName(clean(object?.displayName));
