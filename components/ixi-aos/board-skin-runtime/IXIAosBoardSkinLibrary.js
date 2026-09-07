@@ -19,7 +19,8 @@ export const IXI_AOS_BOARD_SKIN_IDS =
     IXI_110: "ixi-110",
     IXI_111: "ixi-111",
     IXI_112: "ixi-112",
-    IXI_113: "ixi-113"
+    IXI_113: "ixi-113",
+    IXI_114: "ixi-114"
   });
 
 export const IXI_AOS_BOARD_SKINS =
@@ -121,6 +122,13 @@ export const IXI_AOS_BOARD_SKINS =
       designation: "EXCAVATOR BUILD",
       description: "Excavator assembly blueprint with boom geometry, hydraulic details and component callouts.",
       className: "aos-work-board-skin-ixi-113"
+    }),
+    Object.freeze({
+      skinId: IXI_AOS_BOARD_SKIN_IDS.IXI_114,
+      name: "IXI-114",
+      designation: "GRADER GEOMETRY",
+      description: "Cat 14M engineering plan with articulation, moldboard geometry and tandem-drive details.",
+      className: "aos-work-board-skin-ixi-114"
     })
   ]);
 
