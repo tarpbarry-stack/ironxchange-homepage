@@ -19,7 +19,7 @@ test("homepage is the connected Marketplace, AOS, and TRAN$ACT gateway", () => {
   assert.match(homepage, /MARKETPLACE/u);
   assert.match(homepage, /RUN THE WORK/u);
   assert.match(homepage, /CONTROL THE MONEY/u);
-  assert.match(homepage, /THE MACHINE IS THE CENTER OF THE SYSTEM/u);
+  assert.match(homepage, /THE MACHINE IS THE CENTER<br\/>OF THE SYSTEM/u);
   assert.doesNotMatch(homepage, /AUCTION/u);
 });
 
@@ -46,8 +46,8 @@ test("homepage search carries query and category into the real Marketplace", () 
 test("homepage preserves desktop fidelity and explicitly supports mobile", () => {
   assert.match(styles, /\.hero\s*\{[\s\S]*?min-height:\s*910px/u);
   assert.match(styles, /\.platformGrid\s*\{[\s\S]*?grid-template-columns:\s*1\.02fr 1\.08fr 1fr/u);
-  assert.match(styles, /@media \(max-width: 900px\)/u);
-  assert.match(styles, /@media \(max-width: 560px\)/u);
-  assert.match(styles, /@media \(prefers-reduced-motion: reduce\)/u);
+  assert.match(styles, /@media\s*\(max-width:\s*900px\)/u);
+  assert.match(styles, /@media\s*\(max-width:\s*560px\)/u);
+  assert.match(styles, /@media\s*\(prefers-reduced-motion:\s*reduce\)/u);
   assert.match(homepage, /viewport-fit=cover/u);
 });
