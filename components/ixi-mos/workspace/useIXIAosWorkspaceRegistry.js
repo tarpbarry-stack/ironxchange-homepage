@@ -11,6 +11,9 @@ import {
   getAosRailProjectionObjectIds
 } from "../../../lib/mos/IXIAosMembershipBridge.mjs";
 import { resolveWorkspaceObjects } from "../../ixi-chassis/IXIWorkspacePlacementEngine";
+import {
+  isIXIAosWorkspaceVisibleAdapter
+} from "../../../lib/mos/IXIAosSystemAdapterRegistry";
 
 function clean(value) {
   return String(value ?? "").trim();
@@ -73,6 +76,7 @@ export default function useIXIAosWorkspaceRegistry({
     const registry = new Map();
 
     for (const [objectId, admittedObject] of admission.objectsById) {
+      if (!isIXIAosWorkspaceVisibleAdapter(admittedObject)) continue;
       const relationshipIds = getAosMembershipObjectIds({
         parentObjectId: objectId,
         relationships,

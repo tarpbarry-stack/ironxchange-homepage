@@ -14,7 +14,7 @@ function passportIdentity(objectId, passportId) {
   };
 }
 
-test("system adapters use durable IX Core object and Passport identity", () => {
+test("only workspace-visible system adapters use durable IX Core object and Passport identity", () => {
   const equipment = {
     objectId: "object-equipment",
     entityId: "entity-1",
@@ -45,14 +45,14 @@ test("system adapters use durable IX Core object and Passport identity", () => {
     ownedListings: []
   });
 
-  assert.equal(indexes.length, 2);
+  assert.equal(indexes.length, 1);
   assert.equal(indexes[0].indexId, "equipment");
   assert.equal(indexes[0].objectId, "object-equipment");
   assert.equal(indexes[0].identities[0].passportId, "IXI7777777");
-  assert.equal(indexes[1].objectId, "object-for-sale");
+  assert.equal(indexes.some(index => index.objectId === "object-for-sale"), false);
 });
 
-test("system adapter behavior never overwrites the customer's persisted ecosystem names", () => {
+test("workspace adapter behavior never overwrites the customer's persisted ecosystem names", () => {
   const equipment = {
     objectId: "object-equipment-custom-name",
     entityId: "entity-1",
@@ -85,8 +85,7 @@ test("system adapter behavior never overwrites the customer's persisted ecosyste
 
   assert.equal(indexes[0].displayName, "MY IRON");
   assert.equal(indexes[0].label, "MY IRON");
-  assert.equal(indexes[1].displayName, "READY TO SELL");
-  assert.equal(indexes[1].label, "READY TO SELL");
+  assert.equal(indexes.some(index => index.displayName === "READY TO SELL"), false);
 });
 
 test("a durable system index without a customer-visible name fails closed", () => {

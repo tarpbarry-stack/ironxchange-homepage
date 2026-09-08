@@ -53,6 +53,10 @@ import {
 } from "../../lib/mos/IXIAosMembershipBridge.mjs";
 
 import {
+  isIXIAosWorkspaceVisibleAdapter
+} from "../../lib/mos/IXIAosSystemAdapterRegistry";
+
+import {
   mergeAosCanonicalObject
 } from "../../lib/mos/mergeAosCanonicalObject.mjs";
 
@@ -1155,7 +1159,9 @@ useEffect(() => {
   });
 
   const orderBySurface = new Map();
-  const descriptors = objects.map(object => {
+  const descriptors = objects
+    .filter(isIXIAosWorkspaceVisibleAdapter)
+    .map(object => {
     const objectId = String(object?.objectId || "").trim();
     const existing = locateWorkspaceObject(controller.readPlacements(), objectId);
     const railOwnerObjectId = projectedOwnerByMember.get(objectId);

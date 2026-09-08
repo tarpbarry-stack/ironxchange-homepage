@@ -294,6 +294,40 @@ test("machine presentation remains the established Private machine card", () => 
   assert.equal(admitted.passportId, "IXIABC2345");
 });
 
+test("server-verified historical listing source preserves the Private card without a listing Passport", () => {
+  const admitted = normalizeIxCoreAdmissionEnvelope({
+    response: {
+      ok: true,
+      identity: {
+        objectId: "object-machine-1",
+        passportId: "IXIABC2345",
+        entityId: "entity-1",
+        aliases: [],
+        evidence: { resolution: "canonical-admission" }
+      },
+      object: machine({
+        metadata: { sourceListingId: "legacy-listing-1" }
+      })
+    },
+    requestedObject: machine(),
+    expectedEntityId: "entity-1"
+  });
+
+  const normalized = buildAosCanonicalAdmission({
+    aosObjects: [admitted],
+    workspaceListings: [{
+      id: { uuid: "legacy-listing-1" },
+      title: "Historical private machine",
+      attributes: { publicData: {} }
+    }]
+  }).objectsById.get("object-machine-1");
+
+  assert.equal(normalized.presentation.kind, "ixi-private-machine");
+  assert.equal(normalized.presentation.sourceAlias, "legacy-listing-1");
+  assert.equal(normalized.title, "Historical private machine");
+  assert.deepEqual(normalized.aliases.listingIds, ["legacy-listing-1"]);
+});
+
 test("customer classification and label renames cannot change the source-adapter presentation", () => {
   const left = buildAosCanonicalAdmission({
     aosObjects: [machine({ objectType: "truck", displayName: "Pickup" })],
