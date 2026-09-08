@@ -3,7 +3,8 @@ import fs from "node:fs";
 import test from "node:test";
 
 import {
-  buildAosCanonicalAdmission
+  buildAosCanonicalAdmission,
+  preserveAosOwnedListingPresentations
 } from "../lib/mos/ixiAosCanonicalAdmission.mjs";
 import {
   buildAosSystemIndexes
@@ -21,7 +22,7 @@ function passportFor(index) {
 function admittedMachine(index) {
   const listingId = `historical-listing-${index + 1}`;
   const passportId = passportFor(index);
-  const historical = index < 20;
+  const historicallyBound = index >= 20;
 
   return {
     objectId: `object_machine_${index + 1}`,
@@ -30,10 +31,10 @@ function admittedMachine(index) {
     displayName: `Machine ${index + 1}`,
     status: "active",
     canonicalAdmissionVerified: true,
-    aliases: historical
-      ? []
-      : [{ sourceType: "sharetribe-listing", sourceId: listingId }],
-    metadata: historical ? { sourceListingId: listingId } : {},
+    aliases: historicallyBound
+      ? [{ sourceType: "sharetribe-listing", sourceId: listingId }]
+      : [],
+    metadata: {},
     permissions: {}
   };
 }
@@ -50,7 +51,7 @@ function listing(index) {
   };
 }
 
-test("all historical equipment stays in the Private listing-card family", () => {
+test("all owned equipment stays visible as Private cards while unresolved joins stay non-operational", () => {
   const machines = Array.from({ length: 23 }, (_, index) => admittedMachine(index));
   const listings = Array.from({ length: 23 }, (_, index) => listing(index));
   const admission = buildAosCanonicalAdmission({
@@ -59,16 +60,33 @@ test("all historical equipment stays in the Private listing-card family", () => 
   });
 
   const admitted = [...admission.objectsById.values()];
+  const presentations = preserveAosOwnedListingPresentations(
+    listings,
+    admission
+  );
   assert.equal(admitted.length, 23);
   assert.equal(
     admitted.filter(object => object.presentation.kind === "ixi-private-machine").length,
-    23
+    3
   );
   assert.equal(
     admitted.filter(object => object.presentation.kind === "aos-numbered-card").length,
     0
   );
-  assert.equal(admitted.every(object => object.imageUrls.length === 1), true);
+  assert.equal(
+    admitted.filter(object => object.presentation.kind === "unresolved-presentation").length,
+    20
+  );
+  assert.equal(presentations.length, 23);
+  assert.equal(
+    presentations.filter(item => item.presentation.kind === "ixi-private-machine").length,
+    23
+  );
+  assert.equal(
+    presentations.filter(item => item.canonicalIdentityStatus === "unresolved").length,
+    20
+  );
+  assert.equal(presentations.every(item => item.imageUrls.length === 1), true);
 });
 
 test("the passive legacy FOR SALE adapter cannot become an AOS workspace container", () => {
@@ -113,4 +131,6 @@ test("the passive legacy FOR SALE adapter cannot become an AOS workspace contain
   );
   assert.match(work, /\.filter\(isIXIAosWorkspaceVisibleAdapter\)/u);
   assert.match(registry, /if \(!isIXIAosWorkspaceVisibleAdapter\(admittedObject\)\) continue;/u);
+  assert.match(registry, /presentation\?\.kind === "unresolved-presentation"/u);
+  assert.match(registry, /preserveAosOwnedListingPresentations/u);
 });

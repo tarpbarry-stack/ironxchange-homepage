@@ -7,6 +7,7 @@ import {
   createAosObjectPreviewReference,
   normalizeAosCanonicalObject,
   normalizeIxCoreAdmissionEnvelope,
+  preserveAosOwnedListingPresentations,
   resolveAosCanonicalPresentation
 } from "../lib/mos/ixiAosCanonicalAdmission.mjs";
 
@@ -254,6 +255,29 @@ test("unresolved listing admission fails closed without creating a registry obje
   assert.equal(admission.unresolvedListings.length, 1);
 });
 
+test("unresolved owned listings remain Private-card presentations without gaining canonical authority", () => {
+  const unresolved = listing({
+    id: { uuid: "unresolved-listing" },
+    attributes: { publicData: {} }
+  });
+  const admission = buildAosCanonicalAdmission({
+    aosObjects: [machine({ metadata: {} })],
+    workspaceListings: [unresolved]
+  });
+  const presentations = preserveAosOwnedListingPresentations(
+    [unresolved],
+    admission
+  );
+
+  assert.equal(presentations.length, 1);
+  assert.equal(presentations[0].id.uuid, "unresolved-listing");
+  assert.equal(presentations[0].presentation.kind, "ixi-private-machine");
+  assert.equal(presentations[0].canonicalIdentityStatus, "unresolved");
+  assert.equal(presentations[0].governedActionsDisabled, true);
+  assert.equal(presentations[0].objectId, undefined);
+  assert.equal(admission.objectsById.size, 1);
+});
+
 test("one machine has one operating identity and multiple rail previews", () => {
   const admission = buildAosCanonicalAdmission({
     aosObjects: [machine()],
@@ -358,6 +382,17 @@ test("Cards 001-018 are presentation-only and Card 007 accepts customer-defined 
   assert.equal(resolveAosCanonicalPresentation({
     object: machine({ objectType: "anything-customer-defined", metadata: { cardNumber: 7 } })
   }).templateNumber, 7);
+});
+
+test("missing presentation metadata never manufactures a numbered AOS card", () => {
+  const presentation = resolveAosCanonicalPresentation({
+    object: machine({ metadata: {}, objectType: "machine" })
+  });
+
+  assert.equal(presentation.kind, "unresolved-presentation");
+  assert.equal(presentation.renderer, null);
+  assert.equal(presentation.explicit, false);
+  assert.equal(presentation.templateNumber, undefined);
 });
 
 test("customer labels do not change identity, presentation fallback, or authority", () => {

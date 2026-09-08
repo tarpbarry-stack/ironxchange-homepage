@@ -4,7 +4,8 @@ import { getListingId } from "../../../lib/listingFormatters";
 import {
   buildAosCanonicalAdmission,
   canonicalizeAosPlacementReferences,
-  createAosObjectPreviewReference
+  createAosObjectPreviewReference,
+  preserveAosOwnedListingPresentations
 } from "../../../lib/mos/ixiAosCanonicalAdmission.mjs";
 import {
   getAosMembershipObjectIds,
@@ -77,6 +78,7 @@ export default function useIXIAosWorkspaceRegistry({
 
     for (const [objectId, admittedObject] of admission.objectsById) {
       if (!isIXIAosWorkspaceVisibleAdapter(admittedObject)) continue;
+      if (admittedObject?.presentation?.kind === "unresolved-presentation") continue;
       const relationshipIds = getAosMembershipObjectIds({
         parentObjectId: objectId,
         relationships,
@@ -99,6 +101,14 @@ export default function useIXIAosWorkspaceRegistry({
         ...railProjectionIds,
         ...systemIndexIds
       ]);
+      const isEquipmentIndex =
+        projectedIndex?.metadata?.adapterId === "ixi-owned-equipment";
+      const presentationItems = isEquipmentIndex
+        ? preserveAosOwnedListingPresentations(
+            projectedIndex?.items || [],
+            admission
+          )
+        : previewsForObjectIds(itemObjectIds, admission);
 
       registry.set(objectId, {
         ...admittedObject,
@@ -111,7 +121,7 @@ export default function useIXIAosWorkspaceRegistry({
         presentation: admittedObject.presentation,
         selectedPresentation: admittedObject.selectedPresentation,
         itemObjectIds,
-        items: previewsForObjectIds(itemObjectIds, admission)
+        items: presentationItems
       });
     }
 
@@ -123,10 +133,14 @@ export default function useIXIAosWorkspaceRegistry({
         ...(object?.itemObjectIds || []),
         ...placedObjectIds
       ]);
+      const isEquipmentIndex =
+        object?.metadata?.adapterId === "ixi-owned-equipment";
       registry.set(objectId, {
         ...object,
         itemObjectIds,
-        items: previewsForObjectIds(itemObjectIds, admission)
+        items: isEquipmentIndex
+          ? object.items
+          : previewsForObjectIds(itemObjectIds, admission)
       });
     }
 

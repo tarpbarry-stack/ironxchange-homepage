@@ -1012,9 +1012,12 @@ const equipmentIndex =
             item?.objectId || getListingId(item) || item?.passportId
           );
 
-        return tuckedIds.has(
-          machineId
-        );
+        /*
+         * A listing whose IX-Core join is unresolved remains visible in the
+         * established Private-card deck.  It is not admitted to session
+         * placement and cannot execute a governed move until repaired.
+         */
+        return !machineId || tuckedIds.has(machineId);
       });
 
     return {
@@ -2287,14 +2290,23 @@ async function handleWorkspaceDragEnd(event) {
     dragType ===
     "collection-child"
   ) {
-    const machineId =
+    const requestedMachineId =
       String(
         dragData.objectId ||
         active?.id ||
         ""
       );
 
+    const machineId =
+      aosWorkspaceAdmission.resolveObjectId(requestedMachineId);
+
     if (!machineId) {
+      showAosObjectNotice({
+        objectId: requestedMachineId,
+        message: "MOVE BLOCKED · PRIVATE CARD NEEDS ITS EXISTING IX CORE IDENTITY LINK",
+        tone: "error",
+        duration: 4200
+      });
       setActiveDndId(null);
       clearMachineDragState?.();
       return;
