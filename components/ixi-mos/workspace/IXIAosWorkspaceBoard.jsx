@@ -51,9 +51,31 @@ function cleanId(value) {
 
 function getMosObjectId(item = {}) {
   return cleanId(
-    item?.canonicalIdentity?.objectId ||
-    item?.objectId
+    item?.objectId ||
+    item?.id?.uuid ||
+    item?.id
   );
+}
+
+
+function isLocationsSystemIndex(item = {}, adapter = null) {
+  const identities = [
+    adapter?.indexId,
+    item?.indexId,
+    item?.systemIndexId,
+    item?.metadata?.indexId,
+    item?.displayName,
+    item?.name,
+    item?.title
+  ]
+    .map(value => cleanId(value).toLowerCase())
+    .filter(Boolean);
+
+  if (identities.includes("locations")) return true;
+
+  const objectId = getMosObjectId(item).toLowerCase();
+  return objectId === "system-index:locations" ||
+    objectId === "index:locations";
 }
 
 
@@ -76,8 +98,7 @@ function isSystemIndexPresentation(item = {}) {
 function isMosWorkspaceObject(item = {}) {
   return Boolean(
     cleanId(item?.objectId) &&
-    cleanId(item?.entityId) &&
-    item?.presentation?.kind !== "ixi-private-machine"
+    cleanId(item?.entityId)
   );
 }
 
@@ -140,6 +161,10 @@ function getContainerCommandTarget(item = {}) {
     indexId:
       adapter?.indexId ||
       cleanId(item?.indexId),
+
+    directContainerId:
+      cleanId(item?.directContainerId) ||
+      null,
 
     capabilities: {
       ...(item?.capabilities || {})
@@ -247,10 +272,16 @@ export default function IXIAosWorkspaceBoard({
             /*
              * Only explicit System Index presentations and durable
              * MOS objects belong on the custom AOS renderer path.
-             * Every admitted object keeps canonical objectId as its sortable
-             * identity. Returning null from renderCustomItem below routes a
-             * normalized machine through the established IXIMachineCard.
+             * IronXchange listings deliberately return null here so
+             * IXIBoard routes them through IXIMachineCard.
              */
+            if (
+              !isSystemIndexPresentation(item) &&
+              !isMosWorkspaceObject(item)
+            ) {
+              return null;
+            }
+
             return getMosObjectId(item) || null;
           }
         }
@@ -324,9 +355,8 @@ export default function IXIAosWorkspaceBoard({
 
           if (isSystemIndexPresentation(item)) {
             const canCreateChild =
-              item?.actorAuthority?.canCreateChild === true;
-            const canTransact =
-              item?.actorAuthority?.canTransact === true;
+              !systemAdapter &&
+              isMosWorkspaceObject(item);
 
             if (ixiCardState?.[id]?.transactVisible === true) {
               return (
@@ -357,9 +387,7 @@ export default function IXIAosWorkspaceBoard({
                 ixiCardState={ixiCardState}
                 updateIxiCardState={updateIxiCardState}
 
-                onOpenTransact={canTransact
-                  ? () => updateIxiCardState?.(id, { transactVisible: true })
-                  : null}
+                onOpenTransact={() => updateIxiCardState?.(id, { transactVisible: true })}
 
                 renderSystemIndexCard={({ onOpenConsole, onOpenTransact }) => {
                   const exposeObject = child => {
@@ -378,19 +406,25 @@ export default function IXIAosWorkspaceBoard({
                   };
 
                   const systemIndexCard =
-                    Number(item?.presentation?.templateNumber) === 18
+                    systemAdapter?.adapterId === "ixi-owned-equipment"
                       ? {
                           Card: IXIAosCard018,
-                          displayName: cleanId(item?.displayName || item?.title || item?.name),
-                          templateSlug: cleanId(item?.presentation?.templateSlug),
+                          displayName: "EQUIPMENT",
+                          templateSlug: "aos-card-018",
                           cardNumber: 18,
-                          childCardMode:
-                            systemAdapter?.adapterId === "ixi-owned-equipment"
-                              ? "machine"
-                              : "object",
+                          childCardMode: "machine",
                           loopChildDeck: true
                         }
-                      : null;
+                      : isLocationsSystemIndex(item, systemAdapter)
+                        ? {
+                            Card: IXIAosCard018,
+                            displayName: "LOCATIONS",
+                            templateSlug: "aos-card-018",
+                            cardNumber: 18,
+                            childCardMode: "object",
+                            loopChildDeck: true
+                          }
+                        : null;
 
                   if (systemIndexCard) {
                     const NumberedSystemIndexCard = systemIndexCard.Card;
@@ -399,11 +433,9 @@ export default function IXIAosWorkspaceBoard({
                       <NumberedSystemIndexCard
                         object={{
                           ...item,
-                          singularLabel: item?.singularLabel,
+                          singularLabel: "SYSTEM INDEX",
                           displayName: systemIndexCard.displayName,
-                          ...(systemIndexCard.templateSlug
-                            ? { cardTemplateSlug: systemIndexCard.templateSlug }
-                            : {}),
+                          cardTemplateSlug: systemIndexCard.templateSlug,
                           cardNumber: systemIndexCard.cardNumber
                         }}
                         workspaceDropPolicy={getSystemIndexDropPolicy(item)}
@@ -609,9 +641,9 @@ export default function IXIAosWorkspaceBoard({
                   )
                 }
 
-                onAddObject={item?.actorAuthority?.canCreateChild === true ? onCreateObjectChild : null}
-                onSaveObject={item?.actorAuthority?.canEdit === true ? onSaveObject : null}
-                onDeleteObject={item?.actorAuthority?.canDelete === true ? onDeleteObject : null}
+                onAddObject={onCreateObjectChild}
+                onSaveObject={onSaveObject}
+                onDeleteObject={onDeleteObject}
               />
             );
           }

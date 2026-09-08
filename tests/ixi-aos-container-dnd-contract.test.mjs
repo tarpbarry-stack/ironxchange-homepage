@@ -128,30 +128,28 @@ test("container sources can enter accepted parent containers without moving the 
   );
 });
 
-test("desktop container drops land immediately through operation-scoped session persistence", () => {
+test("desktop container drops land immediately while persistence stays ordered", () => {
   assert.match(
     work,
-    /workspaceSessionControllerRef = useRef\(null\)/
+    /workspaceLayoutSaveQueueRef = useRef\([\s\S]*?Promise\.resolve\(\)/
   );
   const naturalDrop = work.indexOf("ONE OBJECT / MANY RELATIONSHIPS / ONE VISUAL PLACEMENT");
-  const dragRelease = work.indexOf("setActiveDndId(null)", naturalDrop);
-  const sessionConnect = work.indexOf("controller.connect({", dragRelease);
-  const operationCompletion = work.indexOf("void operation.completion", sessionConnect);
+  const visualLanding = work.indexOf("setWorkspacePlacements(", naturalDrop);
+  const dragRelease = work.indexOf("setActiveDndId(null)", visualLanding);
+  const backgroundPersistence = work.indexOf("void (async () =>", dragRelease);
+  const canonicalCommit = work.indexOf("await createMosRelationship", backgroundPersistence);
+  const sessionSave = work.indexOf("await saveWorkspaceLayout(nextPlacements)", canonicalCommit);
 
   assert.ok(naturalDrop >= 0);
-  assert.ok(dragRelease > naturalDrop);
-  assert.ok(sessionConnect > dragRelease);
-  assert.ok(operationCompletion > sessionConnect);
+  assert.ok(visualLanding > naturalDrop);
+  assert.ok(dragRelease > visualLanding);
+  assert.ok(backgroundPersistence > dragRelease);
+  assert.ok(canonicalCommit > backgroundPersistence);
+  assert.ok(sessionSave > canonicalCommit);
   assert.match(
     work,
-    /const operation = controller\.connect\(\{[\s\S]*?nextPlacements,[\s\S]*?objectId: sourceObject\.objectId/
+    /A real IX Core rejection restores the exact pre-drop state[\s\S]*?setWorkspacePlacements\([\s\S]*?previousPlacements/
   );
-  assert.doesNotMatch(work, /workspaceLayoutSaveQueueRef/u);
-  assert.doesNotMatch(work, /previousPlacements/u);
-  const controller = read("components/ixi-mos/workspace/IXIAosWorkspaceSessionController.mjs");
-  assert.match(controller, /function rollbackLocal\(operationId\)/u);
-  assert.match(controller, /objectEpoch\.get\(record\.objectId\) !== record\.epoch/u);
-  assert.match(controller, /objectIds:\s*\[sourceId\]/u);
   assert.match(
     machineStateClient,
     /requestVersion=\$\{requestVersion\}/
@@ -160,9 +158,14 @@ test("desktop container drops land immediately through operation-scoped session 
     machineStateClient,
     /cache: "no-store"/
   );
-  assert.doesNotMatch(work, /hasLoadedRemoteIxiState/u);
-  assert.match(work, /controller\.admitObjects\(descriptors\)/u);
-  assert.match(work, /setWorkspaceSessionReady\(true\)/u);
+  assert.match(
+    work,
+    /hasLoadedRemoteIxiState[\s\S]*?setHasLoadedRemoteIxiState\(true\)/
+  );
+  assert.match(
+    work,
+    /if \(!hasLoadedRemoteIxiState\)[\s\S]*?return;/
+  );
 });
 
 test("every universal AOS container mounts a visible accepting target", () => {
@@ -174,8 +177,10 @@ test("every universal AOS container mounts a visible accepting target", () => {
     workspaceBoard,
     /if \(isMosWorkspaceObject\(item\)\)[\s\S]*?enabled: true/
   );
-  assert.match(workspaceRegistry, /for \(const \[objectId, admittedObject\] of admission\.objectsById\)/);
-  assert.doesNotMatch(workspaceRegistry, /canCreate:\s*true/);
+  assert.match(
+    workspaceRegistry,
+    /UNIVERSAL AOS OBJECT LAW[\s\S]*?canContain: true[\s\S]*?canCreate: true/
+  );
   assert.doesNotMatch(
     objectCreation,
     /Destination object does not allow child creation/
@@ -229,9 +234,14 @@ test("durable AOS containers wire BOARD, RECALL, and RETURN to the operating run
   );
 });
 
-test("legacy clear-to-parent mutation is not connected to AOS Work", () => {
+test("Face 2 can canonically clear direct children back to the card parent", () => {
   assert.match(identityFace, /data-ixi-clear-to-parent/);
-  assert.doesNotMatch(work, /clearContainerChildrenToParent/);
-  assert.doesNotMatch(work, /commitMosContainerPlacement/);
-  assert.doesNotMatch(work, /onClearContainerToParent=\{/);
+  assert.match(identityFace, /CLEAR CHILDREN TO PARENT/);
+  assert.match(identityFace, /CONFIRM RETURN/);
+  assert.match(work, /async function clearContainerChildrenToParent/);
+  assert.match(work, /destinationContainerId:\s*parentContainerId/);
+  assert.match(work, /aos-clear-children-to-parent/);
+  assert.match(work, /await commitMosContainerPlacement/);
+  assert.match(work, /container:\$\{parentContainerId\}/);
+  assert.match(work, /onClearContainerToParent=\{/);
 });

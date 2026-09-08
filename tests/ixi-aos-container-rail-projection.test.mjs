@@ -5,24 +5,24 @@ import {
   projectAosContainerChildren
 } from "../components/ixi-mos/workspace/IXIAosWorkspaceContainerProjection.mjs";
 
-test("accepted canonical placement appears in the destination rail immediately", () => {
-  const reference = {
-    objectId: "object-ripper-1",
+test("accepted listing placement appears in the destination rail immediately", () => {
+  const listing = {
+    id: "listing-ripper-1",
+    listingId: "listing-ripper-1",
     displayName: "2019 RIPPER OTHER - 2 HRS",
-    imageUrl: "https://media.example/ripper.jpg",
-    referenceOnly: true
+    imageUrl: "https://media.example/ripper.jpg"
   };
 
   assert.deepEqual(projectAosContainerChildren({
     canonicalChildren: [],
-    placedChildren: [reference]
-  }), [reference]);
+    placedChildren: [listing]
+  }), [listing]);
 });
 
 test("canonical Machine replaces its placed listing without a duplicate", () => {
   const listing = {
-    objectId: "object-ripper-1",
-    passportId: "IXIABC2345",
+    id: "listing-ripper-1",
+    listingId: "listing-ripper-1",
     displayName: "2019 RIPPER OTHER - 2 HRS",
     imageUrl: "https://media.example/ripper.jpg"
   };
@@ -50,11 +50,11 @@ test("distinct duplicate-name machines remain distinct by identity", () => {
   const result = projectAosContainerChildren({
     canonicalChildren: [],
     placedChildren: [
-      { objectId: "object-ripper-a", displayName: "2019 RIPPER OTHER - 2 HRS" },
-      { objectId: "object-ripper-b", displayName: "2019 RIPPER OTHER - 2 HRS" }
+      { listingId: "ripper-a", displayName: "2019 RIPPER OTHER - 2 HRS" },
+      { listingId: "ripper-b", displayName: "2019 RIPPER OTHER - 2 HRS" }
     ]
   });
 
   assert.equal(result.length, 2);
-  assert.deepEqual(result.map(item => item.objectId), ["object-ripper-a", "object-ripper-b"]);
+  assert.deepEqual(result.map(item => item.listingId), ["ripper-a", "ripper-b"]);
 });

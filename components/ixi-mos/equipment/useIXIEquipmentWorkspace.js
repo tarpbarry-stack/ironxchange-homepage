@@ -13,27 +13,17 @@ export default function useIXIEquipmentWorkspace({
   machineContainers = {},
   ixiCardState = {},
 
-  executeIXITransaction,
-  onSummonObject = null,
-  resolveCanonicalObjectId = value => String(value ?? "").trim()
+  executeIXITransaction
 }) {
-
-  function executeWithSummonedContext(result, objectIds = []) {
-    const completion = executeIXITransaction?.(result);
-    if (typeof onSummonObject === "function") {
-      void Promise.resolve(completion).then(() =>
-        Promise.all(objectIds.map(objectId => onSummonObject(objectId)))
-      ).catch(() => null);
-    }
-    return completion;
-  }
 
   function exposeEquipmentMachineToBoard(
     machine
   ) {
-    const machineId = resolveCanonicalObjectId(
-      machine?.objectId || getListingId(machine)
-    );
+    const machineId =
+      String(
+        getListingId(machine) ||
+        ""
+      );
 
     if (!machineId) {
       return;
@@ -83,7 +73,9 @@ export default function useIXIEquipmentWorkspace({
       )
     };
 
-    executeWithSummonedContext(faceOneResult, [machineId]);
+    executeIXITransaction?.(
+      faceOneResult
+    );
   }
 
 
@@ -93,10 +85,14 @@ export default function useIXIEquipmentWorkspace({
     const machineId =
       typeof machineOrId ===
         "object"
-        ? resolveCanonicalObjectId(
-            machineOrId?.objectId || getListingId(machineOrId)
+        ? String(
+            getListingId(
+              machineOrId
+            ) || ""
           )
-        : resolveCanonicalObjectId(machineOrId);
+        : String(
+            machineOrId || ""
+          );
 
     if (!machineId) {
       return;
@@ -115,7 +111,9 @@ export default function useIXIEquipmentWorkspace({
         machineContainers
       });
 
-    executeWithSummonedContext(result, [machineId]);
+    executeIXITransaction?.(
+      result
+    );
   }
 
 
@@ -148,7 +146,9 @@ export default function useIXIEquipmentWorkspace({
           machineContainers
         });
 
-    executeWithSummonedContext(result, equipmentIds);
+    executeIXITransaction?.(
+      result
+    );
   }
 
 
@@ -159,9 +159,12 @@ export default function useIXIEquipmentWorkspace({
           equipmentIndex?.items ||
           []
         )
-          .map(item => resolveCanonicalObjectId(
-            item?.objectId || getListingId(item) || item?.passportId
-          ))
+          .map(item =>
+            String(
+              getListingId(item) ||
+              ""
+            )
+          )
           .filter(Boolean)
       );
 
@@ -211,7 +214,9 @@ export default function useIXIEquipmentWorkspace({
           machineContainers
         });
 
-    executeWithSummonedContext(result, exposedIds);
+    executeIXITransaction?.(
+      result
+    );
   }
 
 

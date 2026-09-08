@@ -17,7 +17,6 @@ function passportIdentity(objectId, passportId) {
 test("system adapters use durable IX Core object and Passport identity", () => {
   const equipment = {
     objectId: "object-equipment",
-    entityId: "entity-1",
     objectType: "system-index",
     displayName: "EQUIPMENT",
     status: "active",
@@ -29,7 +28,6 @@ test("system adapters use durable IX Core object and Passport identity", () => {
   };
   const forSale = {
     objectId: "object-for-sale",
-    entityId: "entity-1",
     objectType: "system-index",
     displayName: "FOR SALE",
     status: "active",
@@ -55,7 +53,6 @@ test("system adapters use durable IX Core object and Passport identity", () => {
 test("system adapter behavior never overwrites the customer's persisted ecosystem names", () => {
   const equipment = {
     objectId: "object-equipment-custom-name",
-    entityId: "entity-1",
     objectType: "system-index",
     displayName: "MY IRON",
     status: "active",
@@ -67,7 +64,6 @@ test("system adapter behavior never overwrites the customer's persisted ecosyste
   };
   const forSale = {
     objectId: "object-for-sale-custom-name",
-    entityId: "entity-1",
     objectType: "system-index",
     displayName: "READY TO SELL",
     status: "active",
@@ -94,7 +90,6 @@ test("a durable system index without a customer-visible name fails closed", () =
     () => buildAosSystemIndexes({
       aosObjects: [{
         objectId: "object-equipment-missing-name",
-        entityId: "entity-1",
         objectType: "system-index",
         status: "active",
         identities: [passportIdentity("object-equipment-missing-name", "IXI7777783")],
@@ -114,47 +109,6 @@ test("browser-only synthetic system indexes are not manufactured", () => {
     buildAosSystemIndexes({ aosObjects: [], ownedListings: [] }),
     []
   );
-});
-
-test("persisted System Index membership comes from canonical rail projections only", () => {
-  const index = {
-    objectId: "object-customer-index",
-    entityId: "entity-1",
-    objectType: "system-index",
-    displayName: "Wichita Falls",
-    status: "active",
-    identities: [passportIdentity("object-customer-index", "IXIWFT2345")],
-    metadata: { systemIndex: true }
-  };
-  const projected = {
-    objectId: "object-ripper",
-    entityId: "entity-1",
-    objectType: "machine",
-    displayName: "Ripper",
-    status: "active",
-    identities: [passportIdentity("object-ripper", "IXIRPR2345")]
-  };
-  const legacyOnly = {
-    objectId: "object-legacy-child",
-    entityId: "entity-1",
-    displayName: "Legacy Child",
-    status: "active",
-    directContainerId: index.objectId,
-    identities: [passportIdentity("object-legacy-child", "IXIWGC2345")]
-  };
-
-  const [result] = buildAosSystemIndexes({
-    aosObjects: [index, projected, legacyOnly],
-    ownedListings: [],
-    railProjections: {
-      [index.objectId]: {
-        members: [{ objectId: projected.objectId }]
-      }
-    }
-  });
-
-  assert.deepEqual(result.items.map(item => item.objectId), [projected.objectId]);
-  assert.equal(result.itemCount, 1);
 });
 
 test("AOS/Work fails closed before rendering an active record without Passport", () => {

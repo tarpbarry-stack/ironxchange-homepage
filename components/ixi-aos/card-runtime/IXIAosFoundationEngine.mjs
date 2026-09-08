@@ -62,7 +62,7 @@ function uniqueId(prefix, preferred, used, seed) {
 
 export function getIXIAosObjectId(value = {}) {
   const source = object(value);
-  return clean(source.objectId);
+  return clean(source.objectId || source.passportId || source.id?.uuid || source.id || source.uuid);
 }
 
 export function getIXIAosObjectRevision(value = {}) {

@@ -43,10 +43,14 @@ function numberFromSlug(value) {
 }
 
 export function resolveIXIAosOperatingCardNumber(object = {}) {
+  const canonicalObjectType = clean(
+    object?.objectType ||
+    object?.type ||
+    object?.definition?.objectType ||
+    object?.metadata?.objectType
+  ).toLowerCase();
+
   const directCandidates = [
-    object?.selectedPresentation?.templateNumber,
-    object?.selectedCardTemplate?.templateNumber,
-    object?.presentation?.templateNumber,
     object?.templateNumber,
     object?.cardNumber,
     object?.metadata?.cardNumber,
@@ -61,9 +65,6 @@ export function resolveIXIAosOperatingCardNumber(object = {}) {
   }
 
   const slugCandidates = [
-    object?.selectedPresentation?.templateSlug,
-    object?.selectedCardTemplate?.templateSlug,
-    object?.presentation?.templateSlug,
     object?.cardTemplateSlug,
     object?.templateSlug,
     object?.definition?.cardTemplateSlug,
@@ -78,9 +79,13 @@ export function resolveIXIAosOperatingCardNumber(object = {}) {
     if (number) return number;
   }
 
-  // Card 007 is the neutral visual fallback. It carries no Person, type,
-  // capability, vocabulary, identity, or authority meaning.
-  return 7;
+  // Identity does not dictate presentation. Person Passports default to the
+  // deliberately selected universal Card 007 when no card metadata exists.
+  if (canonicalObjectType === "person" || canonicalObjectType === "employee") {
+    return 7;
+  }
+
+  return object?.capabilities?.canContain === true ? 17 : 7;
 }
 
 export default resolveIXIAosOperatingCardNumber;

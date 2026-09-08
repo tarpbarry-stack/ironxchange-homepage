@@ -3,11 +3,14 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 import {
+  IXI_AOS_SYSTEM_INDEX_LABEL,
+  IXI_AOS_PERSON_ROOT_LABEL,
+  IXI_AOS_UNAVAILABLE_PARENT_LABEL,
   resolveAosWorkspaceParentName
 } from "../lib/mos/ixiAosHierarchyContract.mjs";
 
 
-test("a root AOS card uses only persisted customer parent presentation", () => {
+test("a root AOS card always identifies SYSTEM INDEX as its parent", () => {
   assert.equal(
     resolveAosWorkspaceParentName({
       object: {
@@ -18,12 +21,12 @@ test("a root AOS card uses only persisted customer parent presentation", () => {
         }
       }
     }),
-    "STALE ENTITY NAME"
+    IXI_AOS_SYSTEM_INDEX_LABEL
   );
 });
 
 
-test("a root object type does not manufacture a platform parent noun", () => {
+test("an automatically provisioned root Person identifies itself as PERSON", () => {
   assert.equal(
     resolveAosWorkspaceParentName({
       object: {
@@ -32,7 +35,7 @@ test("a root object type does not manufacture a platform parent noun", () => {
         displayName: "IXI DADDY"
       }
     }),
-    ""
+    IXI_AOS_PERSON_ROOT_LABEL
   );
 });
 
@@ -92,7 +95,7 @@ test("a linked child uses its stored parent snapshot only while live parent data
         directContainerId: "missing-parent"
       }
     }),
-    ""
+    IXI_AOS_UNAVAILABLE_PARENT_LABEL
   );
 });
 
@@ -105,7 +108,7 @@ test("AOS creation and rendering share the recursive parent contract", async () 
     readFile(new URL("../components/ixi-mos/IXIMosObjectCard.jsx", import.meta.url), "utf8")
   ]);
 
-  assert.doesNotMatch(creation, /IXI_AOS_SYSTEM_INDEX_LABEL/u);
+  assert.match(creation, /parentDisplayName:\s*IXI_AOS_SYSTEM_INDEX_LABEL/u);
   assert.match(creation, /parentObjectId:\s*destinationContainerId/u);
   assert.match(creation, /parentDisplayName:\s*getAosHierarchyDisplayName\(\s*container\s*\)/u);
   assert.match(board, /resolveAosWorkspaceParentName\(\{\s*object:\s*item,\s*parentObject\s*\}\)/u);

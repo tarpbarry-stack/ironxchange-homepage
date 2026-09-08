@@ -5,15 +5,11 @@ import {
   attachPassportToIntegrationListing
 } from "../../lib/passport/attachPassportToIntegrationListing";
 
-import {
-  resolveAosBrowserSession
-} from "../../lib/server/aos/resolveAosBrowserSession";
-
-import {
-  resolveIxCoreAosContext
-} from "../../lib/server/aos/ixiMosInternalClient";
-
 const { UUID, Money } = sharetribeSdk.types;
+
+const {
+  attachPassportToSharetribeListing
+} = require("../../lib/passport/attachPassportToSharetribeListing");
 
 function slugify(text = "") {
   return String(text)
@@ -59,19 +55,7 @@ export default async function handler(req, res) {
     });
   }
 
-  let session;
-  let context;
-
-  try {
-    session = await resolveAosBrowserSession(req, res);
-    context = await resolveIxCoreAosContext({ session });
-  } catch (error) {
-    return res.status(Number(error?.status || 401)).json({
-      error: error?.message || "Authenticated import session required"
-    });
-  }
-
-  const authorId = session.userId;
+  const authorId = req.body?.authorId;
   const rows = req.body?.rows || [];
 
   if (!authorId) {
@@ -192,10 +176,7 @@ let passport = null;
 if (listingId) {
   passport = await attachPassportToIntegrationListing({
     sdk,
-    listingId,
-    listing: created?.data?.data,
-    principalId: context.userId,
-    entityId: context.entityId
+    listingId
 });
 }
 

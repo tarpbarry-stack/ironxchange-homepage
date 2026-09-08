@@ -13,8 +13,7 @@ test("Equipment OUT opens the current Inventory card on Face 1", async () => {
   assert.match(workspace, /targetContainer:\s*"board"/);
   assert.match(workspace, /nextIxiCardState:\s*faceOneState/);
   assert.match(workspace, /patch:\s*\{[\s\S]*face:\s*1/);
-  assert.match(workspace, /executeWithSummonedContext\(faceOneResult, \[machineId\]\)/);
-  assert.match(workspace, /const completion = executeIXITransaction\?\.\(result\)/);
+  assert.match(workspace, /executeIXITransaction\?\.\(\s*faceOneResult/);
 });
 
 test("AOS board continues to render ordinary equipment through the current machine-card family", async () => {

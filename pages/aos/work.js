@@ -32,25 +32,10 @@ import {
 } from "../../lib/mos/loadIXIMosEnvironment";
 
 import {
-  applyAosWorkspaceSessionCommand,
   commitMosObjectCommand,
-  createMosCommandId,
-  createMosRelationship,
-  endAosWorkspaceSession,
-  fetchAosWorkspaceSession,
-  openAosWorkspaceSession
+  commitMosContainerPlacement,
+  createMosRelationship
 } from "../../lib/mos/ixiMosClient";
-
-import {
-  buildAosCanonicalAdmission
-} from "../../lib/mos/ixiAosCanonicalAdmission.mjs";
-
-import {
-  createAosMembershipRelationship,
-  createAosRailOrderKey,
-  getAosRailProjectionObjectIds,
-  getAosMembershipObjectIds
-} from "../../lib/mos/IXIAosMembershipBridge.mjs";
 
 import {
   mergeAosCanonicalObject
@@ -93,13 +78,12 @@ import IXIAosWorkspaceBoard
   from "../../components/ixi-mos/workspace/IXIAosWorkspaceBoard";
 
 import {
-  createAosWorkspaceSessionController,
-  locateWorkspaceObject
-} from "../../components/ixi-mos/workspace/IXIAosWorkspaceSessionController.mjs";
-
-import {
   resolveAosWorkspaceParentName
 } from "../../lib/mos/ixiAosHierarchyContract.mjs";
+
+import {
+  getCanonicalAosPassportId
+} from "../../lib/mos/ixiAosPassportPresentation.mjs";
 
 import { getListingId } from "../../lib/listingFormatters";
 import {
@@ -134,27 +118,16 @@ import WorkspaceDropZone from "../../components/ixi-chassis/WorkspaceDropZone";
 import WorkspaceDropPad from "../../components/ixi-chassis/WorkspaceDropPad";
 import useIXISellerMachineOps from "../../components/ixi-chassis/useIXISellerMachineOps";
 
+import {
+  createEmptyWorkspaceContainers,
+  sanitizeWorkspaceContainers
+} from "../../components/ixi-chassis/IXIWorkspacePersistenceEngine";
+
 const IXI_AOS_WORK_SETTINGS_ID =
   "__ixi_aos_work_settings__";
 
-const AOS_SESSION_ONLY_CARD_KEYS = new Set([
-  "container",
-  "sourceParentId",
-  "sourceParentType",
-  "sourceDeckId",
-  "checkedOutFromParent",
-  "checkedOutMachineIds",
-  "checkoutReason",
-  "checkoutAt"
-]);
-
-function stripAosSessionOnlyCardState(record = {}) {
-  return Object.fromEntries(
-    Object.entries(record || {}).filter(([key]) =>
-      !AOS_SESSION_ONLY_CARD_KEYS.has(key)
-    )
-  );
-}
+const IXI_AOS_WORK_LAYOUT_ID =
+  "__ixi_aos_work_layout__";
 
 import {
   getMachineContainerFromContainers,
@@ -165,11 +138,13 @@ import {
 
 import {
   createEmptyWorkspacePlacements,
+  sanitizeWorkspacePlacements,
   getObjectWorkspaceSurface,
   moveObjectToWorkspaceSurface,
   moveObjectToWorkspacePosition,
   reorderObjectWithinWorkspaceSurface,
-  resolveWorkspaceObjects
+  resolveWorkspaceObjects,
+  validateWorkspacePlacements
 } from "../../components/ixi-chassis/IXIWorkspacePlacementEngine";
 
 import {
@@ -211,22 +186,7 @@ export default function IXIAosWorkPage() {
   
   const [listings, setListings] = useState([]);
 
-const [aosEntity, setAosEntity] =
-  useState(null);
-
-const [aosAccount, setAosAccount] =
-  useState(null);
-
-const [aosPrincipal, setAosPrincipal] =
-  useState(null);
-
-const [aosWorkspaceSession, setAosWorkspaceSession] =
-  useState(null);
-
-const [workspaceSessionReady, setWorkspaceSessionReady] =
-  useState(false);
-
-const [workspaceScopeRequest, setWorkspaceScopeRequest] =
+  const [aosEntity, setAosEntity] =
   useState(null);
 
 const [aosObjects, setAosObjects] =
@@ -234,9 +194,6 @@ const [aosObjects, setAosObjects] =
 
 const [aosRelationships, setAosRelationships] =
   useState([]);
-
-const [aosRailProjections, setAosRailProjections] =
-  useState({});
 
 const [systemIndexes, setSystemIndexes] =
   useState([]);
@@ -332,6 +289,8 @@ const POCKET_TARGETS = [
 
   const [ixiCardState, setIxiCardState] = useState({});
   const [ixiUserId, setIxiUserId] = useState("guest");
+  const [hasLoadedRemoteIxiState, setHasLoadedRemoteIxiState] =
+    useState(false);
   const [workspaceSettings, setWorkspaceSettings] =
   useState({});
   const [ixiColorFilters, setIxiColorFilters] = useState([]);
@@ -356,22 +315,10 @@ const POCKET_TARGETS = [
     );
   }, []);
 
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const requestedScope =
-      String(params.get("placementScope") || "personal").toLowerCase();
-    const sharedScopeId =
-      String(params.get("sharedScopeId") || "").trim();
-
-    setWorkspaceScopeRequest(
-      requestedScope === "shared"
-        ? { placementScope: "shared", sharedScopeId }
-        : { placementScope: "personal", sharedScopeId: null }
-    );
-  }, []);
-
-  const workspaceSessionControllerRef = useRef(null);
-  const containerReturnSnapshotsRef = useRef({});
+  const hasAppliedRemoteLayoutRef = useRef(false);
+  const workspaceLayoutSaveQueueRef = useRef(
+    Promise.resolve()
+  );
   
   const [activeDndId, setActiveDndId] = useState("");
   const {
@@ -455,12 +402,12 @@ setBoardSkinId(
     : readIXIAosBoardSkinId()
 );
 
-setIxiCardState(Object.fromEntries(
-  Object.entries(remoteIxiState).map(([id, record]) => [
-    id,
-    stripAosSessionOnlyCardState(record)
-  ])
-));
+const workspaceLayout =
+  remoteIxiState?.[IXI_AOS_WORK_LAYOUT_ID] || {};
+console.log("IXI WORKSPACE LAYOUT LOADED", workspaceLayout);
+
+setIxiCardState(remoteIxiState);
+setHasLoadedRemoteIxiState(true);
 
 setCardScaleMode(
   resolveSitewideCardScaleMode(
@@ -611,14 +558,6 @@ if (cancelled) {
         environment?.entity || null
       );
 
-      setAosAccount(
-        environment?.account || null
-      );
-
-      setAosPrincipal(
-        environment?.principal || null
-      );
-
       setAosObjects(
         Array.isArray(
           environment?.objects
@@ -631,13 +570,6 @@ if (cancelled) {
         Array.isArray(environment?.relationships)
           ? environment.relationships
           : []
-      );
-
-      setAosRailProjections(
-        environment?.railProjections &&
-        typeof environment.railProjections === "object"
-          ? environment.railProjections
-          : {}
       );
 
 setSystemIndexes(
@@ -731,21 +663,295 @@ const workspaceListings = useMemo(() => {
   return sellerListings;
 }, [sellerListings]);
 
-const aosCanonicalAdmission = useMemo(
-  () => buildAosCanonicalAdmission({
-    aosObjects,
+const containerStateKey = useMemo(() => {
+  return workspaceListings
+    .map(item => {
+      const id = String(getListingId(item));
+      return `${id}:${ixiCardState[id]?.container || "board"}`;
+    })
+    .join("|");
+}, [workspaceListings, ixiCardState]);
+   
+useEffect(() => {
+  /*
+   * Do not manufacture a "first layout" while the authenticated IX Core
+   * layout is still in flight. Environment objects often arrive first;
+   * treating that timing window as an empty remote layout puts every MOS
+   * object back on Board and permanently masks the later readback.
+   */
+  if (!hasLoadedRemoteIxiState) {
+    return;
+  }
+
+  if (
+    !workspaceListings.length ||
+    !systemIndexes.length
+  ) {
+    return;
+  }
+
+  const validMachineIds =
     workspaceListings
-  }),
-  [aosObjects, workspaceListings]
-);
+      .map(item =>
+        String(
+          getListingId(item) ||
+          ""
+        )
+      )
+      .filter(Boolean);
 
-const canonicalSavedObjectIds = useMemo(
-  () => savedIds
-    .map(alias => aosCanonicalAdmission.resolveObjectId(alias))
-    .filter(Boolean),
-  [savedIds, aosCanonicalAdmission]
-);
+  const equipmentSystemIndexObjectId =
+    String(
+      (systemIndexes || []).find(index =>
+        String(index?.indexId || "") === "equipment"
+      )?.objectId || ""
+    ).trim();
 
+  if (!equipmentSystemIndexObjectId) {
+    return;
+  }
+
+  /*
+   * Universal AOS workspace identities.
+   *
+   * Equipment itself is a Board object,
+   * alongside machines and eventually
+   * Jobs, Locations, People, Containers,
+   * etc.
+   */
+  const validSystemIndexIds =
+  workspaceSystemIndexes
+    .map(index =>
+      String(
+        index?.objectId ||
+        ""
+      )
+    )
+    .filter(Boolean);
+
+const validMosObjectIds =
+  (aosObjects || [])
+    .filter(object => {
+      const objectId =
+        String(
+          object?.objectId ||
+          object?.id ||
+          ""
+        ).trim();
+
+      const objectType =
+        String(
+          object?.objectType || ""
+        )
+          .trim()
+          .toLowerCase();
+
+      return (
+        objectId &&
+        !validSystemIndexIds.includes(objectId) &&
+        objectType &&
+        objectType !== "system-index" &&
+        objectType !== "machine"
+      );
+    })
+    .map(object =>
+      String(
+        object?.objectId ||
+        object?.id ||
+        ""
+      )
+    )
+    .filter(Boolean);
+
+const validWorkspaceObjectIds = [
+  ...validSystemIndexIds,
+  ...validMosObjectIds,
+  ...validMachineIds
+];
+
+  const savedLayout =
+    ixiCardState?.[
+      IXI_AOS_WORK_LAYOUT_ID
+    ];
+
+const savedPlacements =
+  savedLayout?.workspacePlacements ||
+  savedLayout?.machineContainers;
+  
+  if (
+  savedPlacements &&
+  !hasAppliedRemoteLayoutRef.current
+) {
+    /*
+     * MIGRATE EXISTING AOS LAYOUT
+     *
+     * Do NOT automatically place missing
+     * objects yet. We decide where they
+     * belong below.
+     */
+    let nextPlacements =
+      sanitizeWorkspacePlacements({
+placements:
+  savedPlacements,
+
+        validObjectIds:
+          validWorkspaceObjectIds,
+
+        includeUnplacedObjects:
+          false
+      });
+
+    /*
+     * Equipment System Index itself must
+     * live on the Board.
+     */
+    nextPlacements =
+      moveObjectToWorkspaceSurface({
+        placements:
+          nextPlacements,
+
+        objectId:
+          equipmentSystemIndexObjectId,
+
+        targetSurface:
+          "board",
+
+        /*
+         * Preserve the visual behavior
+         * we already have: Equipment
+         * begins at the front.
+         */
+        position:
+          "start"
+      });
+
+    /*
+     * Any owned machine that has no saved
+     * workspace location begins tucked
+     * inside Equipment.
+     */
+    validMachineIds.forEach(
+      machineId => {
+        const alreadyPlaced =
+          Object.values(
+            nextPlacements
+          ).some(ids =>
+            Array.isArray(ids) &&
+            ids
+              .map(String)
+              .includes(machineId)
+          );
+
+        if (!alreadyPlaced) {
+          nextPlacements =
+            moveObjectToWorkspaceSurface({
+              placements:
+                nextPlacements,
+
+              objectId:
+                machineId,
+
+              targetSurface:
+                "indexEquipment"
+            });
+        }
+      }
+    );
+
+    /*
+     * Existing durable AOS objects must remain manageable after
+     * the workspace runtime migration. Older saved layouts did
+     * not know about these identities and could otherwise leave
+     * a valid object stranded outside every workspace surface.
+     *
+     * This is presentation recovery only: canonical containment,
+     * ownership, object data, and revision history are untouched.
+     */
+    validMosObjectIds.forEach(
+      objectId => {
+        const alreadyPlaced =
+          Object.values(
+            nextPlacements
+          ).some(ids =>
+            Array.isArray(ids) &&
+            ids
+              .map(String)
+              .includes(objectId)
+          );
+
+        if (!alreadyPlaced) {
+          nextPlacements =
+            moveObjectToWorkspaceSurface({
+              placements:
+                nextPlacements,
+
+              objectId,
+
+              targetSurface:
+                "board"
+            });
+        }
+      }
+    );
+
+    const validation =
+      validateWorkspacePlacements(
+        nextPlacements
+      );
+
+    if (!validation.ok) {
+      console.error(
+        "IXI AOS WORKSPACE PLACEMENT INVALID",
+        validation
+      );
+    }
+
+    setWorkspacePlacements(
+      nextPlacements
+    );
+
+    hasAppliedRemoteLayoutRef.current =
+      true;
+
+    return;
+  }
+
+  if (
+    hasAppliedRemoteLayoutRef.current
+  ) {
+    return;
+  }
+
+  /*
+   * FIRST AOS LAYOUT
+   *
+   * Equipment itself lives on Board.
+   * Owned machines begin tucked inside it.
+   */
+  const nextPlacements = {
+    ...createEmptyWorkspacePlacements(),
+
+    board: [
+      equipmentSystemIndexObjectId,
+      ...validMosObjectIds
+    ],
+
+    indexEquipment:
+      [...validMachineIds]
+  };
+
+  setWorkspacePlacements(
+    nextPlacements
+  );
+
+  hasAppliedRemoteLayoutRef.current =
+    true;
+}, [
+  hasLoadedRemoteIxiState,
+  containerStateKey,
+  systemIndexes,
+  aosObjects
+]);
   
   const visibleSavedListings = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
@@ -759,15 +965,13 @@ const orderedSource =
   (machineContainers.board || [])
     .map(id =>
       source.find(item =>
-        aosCanonicalAdmission.resolveObjectId(getListingId(item)) === String(id)
+        String(getListingId(item)) === String(id)
       )
     )
     .filter(Boolean);
     
    const filtered = orderedSource.filter(item => {
-  const id = aosCanonicalAdmission.resolveObjectId(getListingId(item));
-
-  if (!id) return false;
+  const id = String(getListingId(item));
 
   if (getMachineContainer(id) !== "board") {
     return false;
@@ -881,8 +1085,7 @@ return [...filtered].sort((a, b) => {
   machineContainers,
   ixiCardState,
   ixiColorFilters,
-  ixiOutlineFilter,
-  aosCanonicalAdmission
+  ixiOutlineFilter
 ]);
 
 
@@ -910,12 +1113,8 @@ const workspaceSystemIndexes =
         const objectId =
           String(
             index?.objectId ||
-            ""
+            `system-index:${indexId}`
           );
-
-        if (!objectId) {
-          return null;
-        }
 
         const legacySurfaceId =
   indexId === "equipment"
@@ -1004,8 +1203,9 @@ const equipmentIndex =
         []
       ).filter(item => {
         const machineId =
-          aosCanonicalAdmission.resolveObjectId(
-            item?.objectId || getListingId(item) || item?.passportId
+          String(
+            getListingId(item) ||
+            ""
           );
 
         return tuckedIds.has(
@@ -1028,32 +1228,22 @@ const equipmentIndex =
     };
   }, [
     equipmentIndex,
-    machineContainers,
-    aosCanonicalAdmission
+    machineContainers
   ]);
 
   const {
-  admission:
-    aosWorkspaceAdmission,
-
   objectRegistry:
     aosWorkspaceObjectRegistry,
 
   boardItems:
     aosBoardItems
 } = useIXIAosWorkspaceRegistry({
-  canonicalAdmission:
-    aosCanonicalAdmission,
-
   workspaceListings,
 
   aosObjects,
 
   relationships:
     aosRelationships,
-
-  railProjections:
-    aosRailProjections,
 
   workspaceSystemIndexes,
 
@@ -1063,144 +1253,6 @@ const equipmentIndex =
 
   visibleSavedListings
 });
-
-useEffect(() => {
-  const tenantId = String(aosAccount?.tenantId || "").trim();
-  const principalId = String(aosPrincipal?.principalId || "").trim();
-  const entityId = String(aosEntity?.entityId || "").trim();
-  const placementScope = workspaceScopeRequest?.placementScope;
-  const sharedScopeId = workspaceScopeRequest?.sharedScopeId || null;
-
-  if (!tenantId || !principalId || !entityId || !placementScope) return undefined;
-  if (placementScope === "shared" && !sharedScopeId) {
-    console.error("IXI AOS SHARED WORKSPACE REQUIRES A SHARED SCOPE ID");
-    return undefined;
-  }
-
-  let cancelled = false;
-  setWorkspaceSessionReady(false);
-
-  const controller = createAosWorkspaceSessionController({
-    transport: {
-      open: openAosWorkspaceSession,
-      read: fetchAosWorkspaceSession,
-      command: applyAosWorkspaceSessionCommand,
-      end: endAosWorkspaceSession
-    },
-    relationshipTransport: request => createAosMembershipRelationship({
-      createRelationship: createMosRelationship,
-      ...request
-    }),
-    createCommandId: createMosCommandId,
-    initialSurfaces: {
-      ...createEmptyWorkspacePlacements(),
-      indexEquipment: []
-    },
-    onSession: session => {
-      if (!cancelled) setAosWorkspaceSession(session);
-    },
-    onPlacements: placements => {
-      if (!cancelled) setWorkspacePlacements(placements);
-    },
-    onError: error => {
-      console.error("IXI AOS SESSION PLACEMENT FAILED:", error);
-    }
-  });
-
-  workspaceSessionControllerRef.current = controller;
-  void controller.open({
-    workspaceId: "aos-work",
-    placementScope,
-    sharedScopeId,
-    ttlMs: 8 * 60 * 60 * 1000
-  }).catch(error => {
-    if (!cancelled) {
-      console.error("IXI AOS WORKSPACE SESSION OPEN FAILED:", error);
-      setWorkspaceSessionReady(false);
-    }
-  });
-
-  return () => {
-    cancelled = true;
-    if (workspaceSessionControllerRef.current === controller) {
-      workspaceSessionControllerRef.current = null;
-    }
-  };
-}, [
-  aosAccount?.tenantId,
-  aosPrincipal?.principalId,
-  aosEntity?.entityId,
-  workspaceScopeRequest?.placementScope,
-  workspaceScopeRequest?.sharedScopeId
-]);
-
-useEffect(() => {
-  const controller = workspaceSessionControllerRef.current;
-  if (!controller || !aosWorkspaceSession?.sessionId) return;
-
-  const objects = [...aosWorkspaceAdmission.objectsById.values()];
-  const equipmentObjectId = String(equipmentIndex?.objectId || "").trim();
-  const projectedOwnerByMember = new Map();
-
-  Object.keys(aosRailProjections || {}).forEach(ownerObjectId => {
-    getAosRailProjectionObjectIds({
-      railOwnerObjectId: ownerObjectId,
-      railProjections: aosRailProjections,
-      admission: aosWorkspaceAdmission
-    }).forEach(memberObjectId => {
-      if (!projectedOwnerByMember.has(memberObjectId)) {
-        projectedOwnerByMember.set(memberObjectId, ownerObjectId);
-      }
-    });
-  });
-
-  const orderBySurface = new Map();
-  const descriptors = objects.map(object => {
-    const objectId = String(object?.objectId || "").trim();
-    const existing = locateWorkspaceObject(controller.readPlacements(), objectId);
-    const railOwnerObjectId = projectedOwnerByMember.get(objectId);
-    let surfaceId = existing?.surfaceId || "board";
-    let operatingState = "operating";
-
-    if (!existing && railOwnerObjectId && railOwnerObjectId !== equipmentObjectId) {
-      surfaceId = `container:${railOwnerObjectId}`;
-      operatingState = "tucked";
-    } else if (
-      !existing &&
-      object?.presentation?.kind === "ixi-private-machine" &&
-      equipmentObjectId
-    ) {
-      surfaceId = "indexEquipment";
-      operatingState = "tucked";
-    } else if (surfaceId.startsWith("container:") || surfaceId === "indexEquipment") {
-      operatingState = "tucked";
-    } else if (surfaceId.startsWith("rail:")) {
-      operatingState = "preview";
-    }
-
-    const visualOrder = existing?.visualOrder ?? (orderBySurface.get(surfaceId) || 0);
-    orderBySurface.set(surfaceId, visualOrder + 1);
-    return {
-      objectId,
-      surfaceId,
-      visualOrder,
-      operatingState,
-      activeSummonedContext: railOwnerObjectId || null
-    };
-  }).filter(descriptor => descriptor.objectId.startsWith("object_"));
-
-  void controller.admitObjects(descriptors).then(() => {
-    setWorkspaceSessionReady(true);
-  }).catch(error => {
-    console.error("IXI AOS CANONICAL SESSION ADMISSION FAILED:", error);
-    setWorkspaceSessionReady(false);
-  });
-}, [
-  aosWorkspaceSession?.sessionId,
-  aosWorkspaceAdmission,
-  equipmentIndex?.objectId,
-  aosRailProjections
-]);
 
   function getAosWorkspaceObjectById(
   objectId
@@ -1216,9 +1268,7 @@ useEffect(() => {
 
   return (
     aosWorkspaceObjectRegistry
-      ?.get(
-        aosWorkspaceAdmission.resolveObjectId(id)
-      ) ||
+      ?.get(id) ||
     null
   );
 }
@@ -1227,11 +1277,80 @@ function getCanonicalMosObjectForWorkspaceId(workspaceObjectId) {
   const id = String(workspaceObjectId || "").trim();
   if (!id) return null;
 
-  return aosWorkspaceAdmission.resolveObject(id);
+  const workspaceObject =
+    getAosWorkspaceObjectById(id) || null;
+
+  const workspacePassportId = getCanonicalAosPassportId(
+    workspaceObject || {}
+  );
+
+  const activeObjects = (aosObjects || []).filter(object =>
+    !["archived", "deleted", "soft-deleted"].includes(
+      String(object?.status || "active").trim().toLowerCase()
+    )
+  );
+  const exactObject = activeObjects.find(object =>
+    String(object?.objectId || "").trim() === id
+  );
+  if (exactObject) return exactObject;
+
+  const sourceMatches = activeObjects.filter(object =>
+    String(object?.metadata?.sourceListingId || "").trim() === id ||
+    (Array.isArray(object?.identities) ? object.identities : []).some(identity =>
+      String(identity?.sourceType || "").trim() === "sharetribe-listing" &&
+      String(identity?.sourceId || "").trim() === id
+    )
+  );
+  if (sourceMatches.length === 1) return sourceMatches[0];
+  if (sourceMatches.length > 1) {
+    const error = new Error(
+      "IDENTITY CONFLICT · THIS LISTING IS LINKED TO MULTIPLE ACTIVE IX CORE OBJECTS"
+    );
+    error.code = "IXI_AOS_CANONICAL_MACHINE_CONFLICT";
+    throw error;
+  }
+
+  const passportMatches = workspacePassportId
+    ? activeObjects.filter(object =>
+        getCanonicalAosPassportId(object) === workspacePassportId
+      )
+    : [];
+  if (passportMatches.length === 1) return passportMatches[0];
+  if (passportMatches.length > 1) {
+    const error = new Error(
+      `IDENTITY CONFLICT · PASSPORT ${workspacePassportId} HAS MULTIPLE ACTIVE IX CORE OBJECTS`
+    );
+    error.code = "IXI_AOS_CANONICAL_PASSPORT_CONFLICT";
+    throw error;
+  }
+
+  /*
+   * The workspace registry may already contain the permanent canonical
+   * readback while the environment array is completing its post-save
+   * refresh. A durable object_* identity with its owning Entity is safe
+   * to use; browser-only drafts and Sharetribe listing IDs are not.
+   */
+  if (
+    !isAosDraftId(id) &&
+    String(workspaceObject?.objectId || "").trim() === id &&
+    String(workspaceObject?.entityId || "").trim()
+  ) {
+    return workspaceObject;
+  }
+
+  return null;
 }
 
 function getWorkspaceIdForCanonicalObject(object = {}) {
-  return String(object?.objectId || "").trim();
+  const sourceListingId =
+    String(object?.metadata?.sourceListingId || "").trim() ||
+    String((Array.isArray(object?.identities) ? object.identities : [])
+      .find(identity =>
+        String(identity?.sourceType || "").trim() === "sharetribe-listing"
+      )?.sourceId || "").trim();
+
+  return sourceListingId ||
+    String(object?.objectId || object?.id || "").trim();
 }
 
   function updateIxiCardState(listingId, patch) {
@@ -1335,13 +1454,11 @@ const saveAosWorkspaceObject = useCallback(async (payload = {}) => {
   };
 }, [aosEntity?.entityId]);
   
-  function cycleMachineFace(listingOrId) {
+function cycleMachineFace(listingOrId) {
   const id =
     typeof listingOrId === "object"
-      ? aosWorkspaceAdmission.resolveObjectId(getListingId(listingOrId))
-      : aosWorkspaceAdmission.resolveObjectId(listingOrId);
-
-  if (!id) return;
+      ? String(getListingId(listingOrId))
+      : String(listingOrId);
 
   const currentFace =
     Number(ixiCardState[id]?.face || 1);
@@ -1382,15 +1499,11 @@ function getMachineContainer(machineId) {
   );
 }
 
-function executeIXITransaction(result) {
+  function executeIXITransaction(result) {
   if (!result) return;
 
-  const nextIxiCardState = Object.fromEntries(
-    Object.entries(result.nextIxiCardState || ixiCardState).map(([id, record]) => [
-      id,
-      stripAosSessionOnlyCardState(record)
-    ])
-  );
+  const nextIxiCardState =
+    result.nextIxiCardState || ixiCardState;
 
   const nextMachineContainers =
     result.nextMachineContainers || machineContainers;
@@ -1405,24 +1518,14 @@ function executeIXITransaction(result) {
   patches.forEach(item => {
     if (!item?.listingId) return;
 
-    const patch = stripAosSessionOnlyCardState(item.patch || {});
-    const meaningfulKeys = Object.keys(patch).filter(key =>
-      !["touched", "updatedAt"].includes(key)
-    );
-    if (!meaningfulKeys.length) return;
-
     saveIxiMachinePatch({
       userId: ixiUserId,
       listingId: item.listingId,
-      patch
+      patch: item.patch || {}
     });
   });
 
-  const completion = saveWorkspaceLayout(nextMachineContainers);
-  void completion.catch(error => {
-    console.error("AOS WORKSPACE TRANSACTION FAILED:", error);
-  });
-  return completion;
+  saveWorkspaceLayout(nextMachineContainers);
 }
 
 const {
@@ -1440,17 +1543,7 @@ const {
 
   ixiCardState,
 
-  executeIXITransaction,
-
-  onSummonObject: objectId => {
-    const contextObjectId = String(equipmentIndex?.objectId || "").trim();
-    const controller = workspaceSessionControllerRef.current;
-    if (!controller || !contextObjectId) return null;
-    return controller.summon(objectId, contextObjectId);
-  },
-
-  resolveCanonicalObjectId:
-    aosCanonicalAdmission.resolveObjectId
+  executeIXITransaction
 });
 
 /* ---------- UNIVERSAL AOS CONTAINER BOARD / RECALL / RETURN ---------- */
@@ -1476,6 +1569,12 @@ function getDirectContainerChildIds(
    */
  if (
   container?.indexId ===
+    "equipment" ||
+  String(
+    container?.displayName || ""
+  )
+    .trim()
+    .toLowerCase() ===
     "equipment"
 ) {
   /*
@@ -1495,137 +1594,594 @@ function getDirectContainerChildIds(
     equipmentIndex?.items || []
   )
     .map(item =>
-      aosWorkspaceAdmission.resolveObjectId(
-        item?.objectId || getListingId(item) || item?.passportId
+      String(
+        getListingId(item) ||
+        ""
       )
     )
     .filter(Boolean);
 }
 
-  const relationshipChildIds = getAosMembershipObjectIds({
-    parentObjectId: containerId,
-    relationships: aosRelationships,
-    admission: aosWorkspaceAdmission
-  }).filter(objectId => aosWorkspaceObjectRegistry.has(objectId));
+  const objectsById = new Map(
+    (aosObjects || []).map(object => [
+      String(object?.objectId || "").trim(),
+      object
+    ])
+  );
+  const relationshipChildIds = (aosRelationships || [])
+    .filter(relationship =>
+      String(relationship?.status || "active").trim().toLowerCase() === "active" &&
+      String(
+        relationship?.relationshipKey ||
+        relationship?.relationshipType ||
+        relationship?.relationshipLabel ||
+        ""
+      ).trim().toLowerCase() === "contains" &&
+      String(relationship?.sourceObjectId || "").trim() === containerId
+    )
+    .map(relationship =>
+      objectsById.get(String(relationship?.targetObjectId || "").trim())
+    )
+    .filter(Boolean)
+    .map(getWorkspaceIdForCanonicalObject);
 
-  const projectedChildIds = getAosRailProjectionObjectIds({
-    railOwnerObjectId: containerId,
-    railProjections: aosRailProjections,
-    admission: aosWorkspaceAdmission
-  }).filter(objectId => aosWorkspaceObjectRegistry.has(objectId));
+  /* Keep legacy direct children readable while old records are migrated. */
+  const legacyChildIds = (
+    aosObjects || []
+  )
+    .filter(object =>
+      String(
+        object?.directContainerId ||
+        ""
+      ) === containerId
+    )
+    .map(getWorkspaceIdForCanonicalObject)
+    .filter(Boolean);
 
   return [...new Set([
-    ...projectedChildIds,
     ...relationshipChildIds,
+    ...legacyChildIds
   ])];
 }
 
-/* ---------- UNIVERSAL AOS SESSION BOARD / RECALL / RETURN ---------- */
-function getContainerObjectId(container) {
-  const target = container?.container || container;
-  return String(target?.objectId || target?.id || "").trim();
-}
+async function clearContainerChildrenToParent(
+  container
+) {
+  const containerId = String(
+    container?.objectId ||
+    container?.id ||
+    ""
+  ).trim();
 
-function getContainerRequestedChildIds(request) {
-  const childObjectId = aosWorkspaceAdmission.resolveObjectId(
-    request?.child?.objectId ||
-    request?.child?.passportId ||
-    getListingId(request?.child || {})
-  );
-  return childObjectId
-    ? [childObjectId]
-    : getDirectContainerChildIds(request?.container || request);
-}
+  const parentContainerId = String(
+    container?.directContainerId ||
+    ""
+  ).trim();
 
-function getContainerReturnSnapshot(container) {
-  const containerId = getContainerObjectId(container);
-  const local = containerReturnSnapshotsRef.current[containerId];
-  if (local?.operationId) return local;
-
-  const childIds = getDirectContainerChildIds(container?.container || container);
-  const byOperation = new Map();
-  childIds.forEach(objectId => {
-    const operationId = String(
-      aosWorkspaceSession?.objects?.[objectId]?.returnSnapshot?.operationId || ""
-    ).trim();
-    if (!operationId) return;
-    if (!byOperation.has(operationId)) byOperation.set(operationId, []);
-    byOperation.get(operationId).push(objectId);
-  });
-  if (byOperation.size !== 1) return null;
-  const [[operationId, snapshotChildIds]] = byOperation;
-  return { operationId, childIds: snapshotChildIds };
-}
-
-function hasContainerReturnSnapshot(container) {
-  return Boolean(getContainerReturnSnapshot(container)?.operationId);
-}
-
-async function returnContainerChildren(container) {
-  const containerId = getContainerObjectId(container);
-  const snapshot = getContainerReturnSnapshot(container);
-  const controller = workspaceSessionControllerRef.current;
-  if (!containerId || !snapshot?.operationId || !controller) return;
-
-  await controller.undo(snapshot.operationId);
-  delete containerReturnSnapshotsRef.current[containerId];
-}
-
-async function boardContainerChildren(container) {
-  const containerId = getContainerObjectId(container);
-  const childIds = getContainerRequestedChildIds(container);
-  if (!containerId || !childIds.length || hasContainerReturnSnapshot(container)) {
-    return;
-  }
-
-  let nextPlacements = workspacePlacements;
-  childIds.forEach(objectId => {
-    nextPlacements = moveObjectToWorkspaceSurface({
-      placements: nextPlacements,
-      objectId,
-      targetSurface: "board"
-    });
-  });
-
-  const operationId = createMosCommandId("aos-board");
-  containerReturnSnapshotsRef.current[containerId] = {
-    operationId,
-    childIds: [...childIds]
-  };
-  setWorkspacePlacements(nextPlacements);
-
-  try {
-    await saveWorkspaceLayout(nextPlacements, {
-      operationId,
-      objectIds: childIds
-    });
-    await Promise.all(childIds.map(objectId =>
-      workspaceSessionControllerRef.current?.summon(objectId, containerId)
-    ));
-  } catch (error) {
-    delete containerReturnSnapshotsRef.current[containerId];
+  if (!containerId || !parentContainerId) {
+    const error = new Error(
+      "THIS CARD DOES NOT HAVE A CANONICAL PARENT"
+    );
+    error.code = "IXI_AOS_CLEAR_PARENT_REQUIRED";
     throw error;
   }
+
+  const childIds =
+    getDirectContainerChildIds(container);
+
+  if (!childIds.length) {
+    return {
+      ok: true,
+      moved: 0,
+      parentContainerId
+    };
+  }
+
+  const canonicalChildren = [];
+
+  for (const childId of childIds) {
+    const placement =
+      await commitMosContainerPlacement({
+        objectId: childId,
+        destinationContainerId:
+          parentContainerId,
+        metadata: {
+          createdFrom:
+            "aos-clear-children-to-parent",
+          clearedContainerId:
+            containerId,
+          destinationParentId:
+            parentContainerId
+        }
+      });
+
+    canonicalChildren.push(
+      placement.object
+    );
+  }
+
+  const canonicalById = new Map(
+    canonicalChildren.map(object => [
+      String(object?.objectId || ""),
+      object
+    ])
+  );
+
+  setAosObjects(current =>
+    current.map(object => {
+      const canonical = canonicalById.get(
+        String(object?.objectId || "")
+      );
+
+      return canonical
+        ? mergeAosCanonicalObject(
+            object,
+            canonical
+          )
+        : object;
+    })
+  );
+
+  let nextPlacements =
+    workspacePlacements;
+
+  childIds.forEach(childId => {
+    nextPlacements =
+      moveObjectToWorkspaceSurface({
+        placements:
+          nextPlacements,
+        objectId:
+          childId,
+        targetSurface:
+          `container:${parentContainerId}`
+      });
+  });
+
+  setWorkspacePlacements(
+    nextPlacements
+  );
+
+  const layoutResult =
+    await saveWorkspaceLayout(
+      nextPlacements
+    );
+
+  if (!layoutResult) {
+    const error = new Error(
+      "IX CORE MOVED THE CHILDREN, BUT THE WORKSPACE LAYOUT WAS NOT CONFIRMED"
+    );
+    error.code =
+      "IXI_AOS_CLEAR_PARENT_LAYOUT_UNCONFIRMED";
+    throw error;
+  }
+
+  showAosObjectNotice({
+    objectId:
+      containerId,
+    message:
+      `${childIds.length} CHILD${childIds.length === 1 ? "" : "REN"} RETURNED TO PARENT`,
+    tone:
+      "success",
+    duration:
+      2600
+  });
+
+  return {
+    ok: true,
+    moved: childIds.length,
+    parentContainerId,
+    children: canonicalChildren
+  };
 }
 
-async function recallContainerChildren(container) {
-  const containerId = getContainerObjectId(container);
-  const childIds = getContainerRequestedChildIds(container);
-  const controller = workspaceSessionControllerRef.current;
+
+/* =========================================================
+   SMART CONTAINER TEMPORARY WORKSPACE SNAPSHOTS
+
+   PURPOSE
+
+   BOARD and RECALL are temporary workspace operations.
+
+   Before either operation changes the placement of a
+   container's direct children, remember exactly where
+   those affected children were.
+
+   RETURN restores that arrangement.
+
+   THIS DOES NOT CHANGE:
+
+   - canonical containment
+   - relationships
+   - object identity
+   - MOS truth
+
+   It is workspace presentation history only.
+   ========================================================= */
+
+const containerReturnSnapshotsRef =
+  useRef({});
+
+
+function captureContainerReturnSnapshot({
+  container,
+  childIds
+}) {
+  const containerId =
+    String(
+      container?.objectId ||
+      container?.id ||
+      ""
+    ).trim();
+
   if (
     !containerId ||
-    !childIds.length ||
-    !controller ||
-    hasContainerReturnSnapshot(container)
+    !Array.isArray(childIds) ||
+    !childIds.length
   ) {
     return;
   }
 
-  const recalled = await controller.recall(childIds);
-  containerReturnSnapshotsRef.current[containerId] = {
-    operationId: recalled.operationId,
-    childIds: [...childIds]
-  };
+  const childIdSet =
+    new Set(
+      childIds.map(String)
+    );
+
+  const placements = {};
+
+  Object.entries(
+    workspacePlacements || {}
+  ).forEach(
+    ([
+      surfaceId,
+      objectIds
+    ]) => {
+      if (
+        !Array.isArray(
+          objectIds
+        )
+      ) {
+        return;
+      }
+
+      const affectedIds =
+        objectIds.filter(
+          objectId =>
+            childIdSet.has(
+              String(objectId)
+            )
+        );
+
+      if (
+        affectedIds.length
+      ) {
+        placements[
+          surfaceId
+        ] = [
+          ...affectedIds
+        ];
+      }
+    }
+  );
+
+  containerReturnSnapshotsRef
+    .current[
+      containerId
+    ] = {
+      containerId,
+
+      childIds: [
+        ...childIds
+      ],
+
+      placements,
+
+      capturedAt:
+        Date.now()
+    };
+}
+
+
+function hasContainerReturnSnapshot(
+  container
+) {
+  const containerId =
+    String(
+      container?.objectId ||
+      container?.id ||
+      ""
+    ).trim();
+
+  return Boolean(
+    containerId &&
+    containerReturnSnapshotsRef
+      .current[
+        containerId
+      ]
+  );
+}
+
+
+async function returnContainerChildren(
+  container
+) {
+  const containerId =
+    String(
+      container?.objectId ||
+      container?.id ||
+      ""
+    ).trim();
+
+  if (!containerId) {
+    return;
+  }
+
+  const snapshot =
+    containerReturnSnapshotsRef
+      .current[
+        containerId
+      ];
+
+  if (!snapshot) {
+    return;
+  }
+
+  const childIds =
+    new Set(
+      (
+        snapshot.childIds ||
+        []
+      ).map(String)
+    );
+
+  if (!childIds.size) {
+    delete (
+      containerReturnSnapshotsRef
+        .current[
+          containerId
+        ]
+    );
+
+    return;
+  }
+
+  /*
+   * First remove the affected direct
+   * children from wherever they are now.
+   */
+  const nextPlacements = {};
+
+  Object.entries(
+    workspacePlacements || {}
+  ).forEach(
+    ([
+      surfaceId,
+      objectIds
+    ]) => {
+      nextPlacements[
+        surfaceId
+      ] =
+        Array.isArray(
+          objectIds
+        )
+          ? objectIds.filter(
+              objectId =>
+                !childIds.has(
+                  String(objectId)
+                )
+            )
+          : [];
+    }
+  );
+
+  /*
+   * Then restore each child to the exact
+   * workspace surface recorded before
+   * BOARD / RECALL.
+   *
+   * Preserve the recorded ordering of the
+   * affected children on each surface.
+   */
+  Object.entries(
+    snapshot.placements ||
+    {}
+  ).forEach(
+    ([
+      surfaceId,
+      objectIds
+    ]) => {
+      if (
+        !Array.isArray(
+          objectIds
+        ) ||
+        !objectIds.length
+      ) {
+        return;
+      }
+
+      const existingIds =
+        Array.isArray(
+          nextPlacements[
+            surfaceId
+          ]
+        )
+          ? nextPlacements[
+              surfaceId
+            ]
+          : [];
+
+      nextPlacements[
+        surfaceId
+      ] = [
+        ...existingIds,
+        ...objectIds.filter(
+          objectId =>
+            !existingIds
+              .map(String)
+              .includes(
+                String(objectId)
+              )
+        )
+      ];
+    }
+  );
+
+  setWorkspacePlacements(
+    nextPlacements
+  );
+
+  await saveWorkspaceLayout(
+    nextPlacements
+  );
+
+  /*
+   * RETURN consumes the snapshot.
+   *
+   * A future BOARD / RECALL operation
+   * captures a new one.
+   */
+  delete (
+    containerReturnSnapshotsRef
+      .current[
+        containerId
+      ]
+  );
+}
+  
+async function boardContainerChildren(
+  container
+) {
+  const childIds =
+    getDirectContainerChildIds(
+      container
+    );
+
+  if (!childIds.length) {
+  return;
+}
+
+/*
+ * Only capture the starting arrangement
+ * once for this temporary operation.
+ *
+ * Repeated BOARD presses must not replace
+ * the original RETURN destination.
+ */
+if (
+  !hasContainerReturnSnapshot(
+    container
+  )
+) {
+  captureContainerReturnSnapshot({
+    container,
+    childIds
+  });
+}
+
+let nextPlacements =
+  workspacePlacements;
+  childIds.forEach(
+    objectId => {
+      nextPlacements =
+        moveObjectToWorkspaceSurface({
+          placements:
+            nextPlacements,
+
+          objectId,
+
+          targetSurface:
+            "board"
+        });
+    }
+  );
+
+  setWorkspacePlacements(
+    nextPlacements
+  );
+
+  await saveWorkspaceLayout(
+    nextPlacements
+  );
+}
+
+
+async function recallContainerChildren(
+  container
+) {
+
+const isEquipment =
+  container?.indexId ===
+    "equipment" ||
+  String(
+    container?.displayName || ""
+  )
+    .trim()
+    .toLowerCase() ===
+    "equipment";
+
+if (isEquipment) {
+  returnAllEquipmentHome?.();
+  return;
+}  
+  const childIds =
+    new Set(
+      getDirectContainerChildIds(
+        container
+      )
+    );
+
+  if (!childIds.size) {
+  return;
+}
+
+/*
+ * Same doctrine as BOARD:
+ *
+ * preserve the arrangement that existed
+ * before this temporary operation.
+ */
+if (
+  !hasContainerReturnSnapshot(
+    container
+  )
+) {
+  captureContainerReturnSnapshot({
+    container,
+
+    childIds: [
+      ...childIds
+    ]
+  });
+}
+
+const nextPlacements = {};
+  Object.entries(
+    workspacePlacements || {}
+  ).forEach(
+    ([
+      surfaceId,
+      objectIds
+    ]) => {
+      nextPlacements[
+        surfaceId
+      ] =
+        Array.isArray(objectIds)
+          ? objectIds.filter(
+              objectId =>
+                !childIds.has(
+                  String(objectId)
+                )
+            )
+          : [];
+    }
+  );
+
+  setWorkspacePlacements(
+    nextPlacements
+  );
+
+  await saveWorkspaceLayout(
+    nextPlacements
+  );
 }
   
 function moveMachineToContainer(machineId, targetContainer) {
@@ -1682,7 +2238,9 @@ function moveMachineBackToBoard(machineId) {
 }
 
 function getListingById(machineId) {
-  return aosWorkspaceAdmission.resolveObject(machineId);
+  return listings.find(
+    item => String(getListingId(item)) === String(machineId)
+  );
 }
 
   function getActiveDndListing() {
@@ -1740,11 +2298,11 @@ function getListingById(machineId) {
   : workspaceListings;
 
       const fromIndex = source.findIndex(
-        item => aosWorkspaceAdmission.resolveObjectId(getListingId(item)) === String(dragId)
+        item => String(getListingId(item)) === String(dragId)
       );
 
       const toIndex = source.findIndex(
-        item => aosWorkspaceAdmission.resolveObjectId(getListingId(item)) === String(targetId)
+        item => String(getListingId(item)) === String(targetId)
       );
 
       if (fromIndex === -1 || toIndex === -1) return source;
@@ -1794,11 +2352,7 @@ function cyclePocketMode(side) {
 }
 
 function sendListingToFront(listing) {
-  const listingId = aosWorkspaceAdmission.resolveObjectId(
-    listing?.objectId || getListingId(listing)
-  );
-
-  if (!listingId) return;
+  const listingId = String(getListingId(listing));
 
   const result = IXI_COMMANDS.moveObjectToContainerStart({
     objectId: listingId,
@@ -1811,11 +2365,7 @@ function sendListingToFront(listing) {
 }
 
 function sendListingToBack(listing) {
-  const listingId = aosWorkspaceAdmission.resolveObjectId(
-    listing?.objectId || getListingId(listing)
-  );
-
-  if (!listingId) return;
+  const listingId = String(getListingId(listing));
 
   const result = IXI_COMMANDS.moveObjectToContainerEnd({
     objectId: listingId,
@@ -1983,18 +2533,39 @@ function selectBoardSkin(nextSkinId) {
 }
   
 function saveWorkspaceLayout(
-  nextContainers = workspacePlacements,
-  options = {}
+  nextContainers = workspacePlacements
 ) {
-  const controller = workspaceSessionControllerRef.current;
-  if (!controller || !workspaceSessionReady) {
-    const error = new Error("Authenticated AOS workspace session is not ready.");
-    error.code = "WORKSPACE_SESSION_NOT_READY";
-    return Promise.reject(error);
-  }
+  const persistLayout = () =>
+    saveIxiMachinePatch({
+      userId: ixiUserId,
+      listingId: IXI_AOS_WORK_LAYOUT_ID,
 
-  const operation = controller.persistLayout(nextContainers, options);
-  return operation.completion;
+      patch: {
+        workspacePlacements:
+          nextContainers,
+
+        machineContainers:
+          nextContainers,
+
+        updatedAt:
+          Date.now()
+      }
+    });
+
+  /*
+   * Workspace writes must reach IX Core in the same order as the
+   * gestures that produced them. A late response from an older move
+   * must never overwrite the newest Board/container placement.
+   */
+  const queuedSave =
+    workspaceLayoutSaveQueueRef.current
+      .catch(() => null)
+      .then(persistLayout);
+
+  workspaceLayoutSaveQueueRef.current =
+    queuedSave;
+
+  return queuedSave;
 }
 
 
@@ -2507,6 +3078,9 @@ if (
   );
 
   if (targetIsCanonicalContainer) {
+    const previousPlacements =
+      workspacePlacements;
+
     let sourceObject = null;
 
     try {
@@ -2538,21 +3112,6 @@ if (
       return;
     }
 
-    if (
-      sourceObject?.actorAuthority?.canRelate !== true ||
-      targetWorkspaceObject?.actorAuthority?.canRelate !== true
-    ) {
-      showAosObjectNotice({
-        objectId: dragId,
-        message: "RELATIONSHIP NOT AUTHORIZED",
-        tone: "error",
-        duration: 4200
-      });
-      setActiveDndId(null);
-      clearMachineDragState?.();
-      return;
-    }
-
     nextPlacements =
       moveObjectToWorkspaceSurface({
         placements:
@@ -2569,80 +3128,116 @@ if (
      * ONE OBJECT / MANY RELATIONSHIPS / ONE VISUAL PLACEMENT
      *
      * The gesture owns the visible result. Land the card and release the
-     * drag immediately. Canonical objectId remains the operating identity.
+     * drag immediately. The listing ID remains the visual card identity.
      * Persistence creates only an idempotent, non-exclusive relationship
      * between the existing Objects; it never provisions, clones, checks in,
      * checks out, or rewrites the legacy exclusive-parent field.
      */
+    setWorkspacePlacements(
+      nextPlacements
+    );
+
+    setIxiCardState(current => ({
+      ...current,
+      [IXI_AOS_WORK_LAYOUT_ID]: {
+        ...(current?.[IXI_AOS_WORK_LAYOUT_ID] || {}),
+        workspacePlacements:
+          nextPlacements,
+        machineContainers:
+          nextPlacements,
+        updatedAt:
+          Date.now()
+      }
+    }));
+
     setActiveDndId(null);
     clearMachineDragState?.();
 
-    const memberPassportId = String(
-      sourceObject?.canonicalIdentity?.passportId ||
-      sourceObject?.passportId ||
-      ""
-    ).trim();
-    const parentPassportId = String(
-      targetWorkspaceObject?.canonicalIdentity?.passportId ||
-      targetWorkspaceObject?.passportId ||
-      ""
-    ).trim();
-    const railPosition = Math.max(
-      0,
-      (nextPlacements?.[dropTargetSurface] || []).indexOf(sourceObject.objectId)
-    );
-    const controller = workspaceSessionControllerRef.current;
+    void (async () => {
+      try {
+        const relationshipResponse = await createMosRelationship({
+          sourceObjectId: targetWorkspaceObjectId,
+          targetObjectId: sourceObject.objectId,
+          relationshipType: "contains",
+          metadata: {
+            createdFrom: "aos-work-drop",
+            sourceWorkspaceObjectId: dragId,
+            targetWorkspaceObjectId
+          }
+        });
 
-    if (!memberPassportId || !parentPassportId || !controller || !workspaceSessionReady) {
-      showAosObjectNotice({
-        objectId: dragId,
-        message: "CANONICAL SESSION AND PASSPORT ADMISSION IS REQUIRED BEFORE RELATING CARDS",
-        tone: "error",
-        duration: 4200
-      });
-      return;
-    }
+        const relationship = relationshipResponse?.relationship;
+        if (!relationship?.relationshipId) {
+          const error = new Error(
+            "IX CORE DID NOT CONFIRM THE CONTAINER RELATIONSHIP"
+          );
+          error.code = "IXI_AOS_RELATIONSHIP_READBACK_REQUIRED";
+          throw error;
+        }
 
-    const operation = controller.connect({
-      nextPlacements,
-      objectId: sourceObject.objectId,
-      relationship: {
-        parentObjectId: targetWorkspaceObjectId,
-        parentPassportId,
-        memberObjectId: sourceObject.objectId,
-        memberPassportId,
-        orderKey: createAosRailOrderKey(railPosition)
+        setAosRelationships(current => [
+          ...(current || []).filter(item =>
+            String(item?.relationshipId || "") !==
+              String(relationship.relationshipId)
+          ),
+          relationship
+        ]);
+
+        let layoutResult = null;
+        try {
+          layoutResult = await saveWorkspaceLayout(nextPlacements);
+        } catch (layoutError) {
+          console.error("AOS SESSION PLACEMENT SAVE FAILED:", layoutError);
+        }
+        if (!layoutResult) {
+          showAosObjectNotice({
+            objectId: dragId,
+            message: "RELATIONSHIP SAVED · SESSION PLACEMENT SAVE NEEDS RETRY",
+            tone: "error",
+            duration: 4200
+          });
+          return;
+        }
+
+        showAosObjectNotice({
+          objectId: dragId,
+          message: "RELATIONSHIP CONFIRMED · ONE OBJECT · ONE PASSPORT",
+          tone: "success",
+          duration: 2200
+        });
+      } catch (error) {
+        console.error("AOS CONTAINER RELATIONSHIP FAILED:", error);
+
+        /* A real IX Core rejection restores the exact pre-drop state. */
+        setWorkspacePlacements(
+          previousPlacements
+        );
+
+        setIxiCardState(current => ({
+          ...current,
+          [IXI_AOS_WORK_LAYOUT_ID]: {
+            ...(current?.[IXI_AOS_WORK_LAYOUT_ID] || {}),
+            workspacePlacements:
+              previousPlacements,
+            machineContainers:
+              previousPlacements,
+            updatedAt:
+              Date.now()
+          }
+        }));
+
+        void saveWorkspaceLayout(
+          previousPlacements
+        );
+
+        showAosObjectNotice({
+          objectId: dragId,
+          message: error?.message || "IX Core could not confirm this relationship.",
+          tone: "error",
+          duration: 3200
+        });
       }
-    });
-
-    void operation.completion.then(result => {
-      const relationship = result?.response?.relationship;
-      if (!relationship?.relationshipId) {
-        const error = new Error("IX CORE DID NOT CONFIRM THE CONTAINER RELATIONSHIP");
-        error.code = "IXI_AOS_RELATIONSHIP_READBACK_REQUIRED";
-        throw error;
-      }
-      setAosRelationships(current => [
-        ...(current || []).filter(item =>
-          String(item?.relationshipId || "") !== String(relationship.relationshipId)
-        ),
-        relationship
-      ]);
-      showAosObjectNotice({
-        objectId: dragId,
-        message: "RELATIONSHIP CONFIRMED · ONE OBJECT · ONE PASSPORT",
-        tone: "success",
-        duration: 2200
-      });
-    }).catch(error => {
-      console.error("AOS CONTAINER RELATIONSHIP FAILED:", error);
-      showAosObjectNotice({
-        objectId: dragId,
-        message: error?.message || "IX Core could not confirm this relationship.",
-        tone: "error",
-        duration: 3200
-      });
-    });
+    })();
 
     return;
   }
@@ -2785,14 +3380,14 @@ setWorkspacePlacements(
 );
 
 void saveWorkspaceLayout(
-  nextPlacements,
-  { objectIds: [dragId] }
+  nextPlacements
 ).then(layoutResult => {
   if (layoutResult) return;
 
   showAosObjectNotice({
     objectId: dragId,
-    message: "WORKSPACE SESSION COMMAND WAS NOT CONFIRMED",
+    message:
+      "WORKSPACE LAYOUT SAVE FAILED · YOUR CARD REMAINS WHERE YOU DROPPED IT",
     tone: "error",
     duration: 4200
   });
@@ -2802,6 +3397,21 @@ void saveWorkspaceLayout(
     error
   );
 });
+
+/*
+ * Keep the hydrated remote-state mirror current. This prevents a later
+ * local reconciliation in the same session from reapplying the layout
+ * that existed before the drop.
+ */
+setIxiCardState(current => ({
+  ...current,
+  [IXI_AOS_WORK_LAYOUT_ID]: {
+    ...(current?.[IXI_AOS_WORK_LAYOUT_ID] || {}),
+    workspacePlacements: nextPlacements,
+    machineContainers: nextPlacements,
+    updatedAt: Date.now()
+  }
+}));
 
 setActiveDndId(null);
 clearMachineDragState?.();
@@ -2813,11 +3423,7 @@ return;
     function sendMachineToArmedDestination(listing) {
   if (!armedDestination) return;
 
-  const id = aosWorkspaceAdmission.resolveObjectId(
-    listing?.objectId || getListingId(listing)
-  );
-
-  if (!id) return;
+  const id = String(getListingId(listing));
 
   if (
     !DIRECT_CONTAINER_TARGETS.includes(
@@ -2942,10 +3548,17 @@ if (
       parentObject
     });
 
-  const projectedChildren =
-    getDirectContainerChildIds(object)
-      .map(getAosWorkspaceObjectById)
-      .filter(Boolean);
+  const directChildren =
+    (aosObjects || [])
+      .filter(child =>
+        String(
+          child?.directContainerId ||
+          ""
+        ) ===
+        String(
+          objectId
+        )
+      );
 
   return (
     <IXIAosOperatingCardRuntime
@@ -2954,7 +3567,7 @@ if (
       }
 
       items={
-        projectedChildren
+        directChildren
       }
 
       parentLabel={
@@ -2996,7 +3609,7 @@ if (
 return null;
 }}
     activeDndId={activeDndId}
-  savedIds={savedIds}
+    savedIds={savedIds}
     ixiCardState={ixiCardState}
     cardScaleMode={cardScaleMode}
   >
@@ -3158,7 +3771,7 @@ getWorkspaceObjectById={
 }
 
   savedIds={
-    canonicalSavedObjectIds
+    savedIds
   }
 
   ixiCardState={
@@ -3235,6 +3848,10 @@ onGatherContainerChildren={
 
 onReturnContainerChildren={
   returnContainerChildren
+}
+
+onClearContainerToParent={
+  clearContainerChildrenToParent
 }
 
   onCreateObjectChild={

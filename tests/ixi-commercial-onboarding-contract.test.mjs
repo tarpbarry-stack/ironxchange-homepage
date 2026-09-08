@@ -30,37 +30,17 @@ test("browser bootstrap derives identity from the Sharetribe session and IX-Core
   assert.match(core, /person: getOnboardingProfile\(session\)/u);
 });
 
-test("Post Free and URL Import use governed listing admission, never generic Passport ensure", () => {
-  const postFree = read("pages/post-free.js");
-  const urlImport = read("pages/url-import.js");
+test("Post Free uses canonical Machine provisioning and never infers ownership from upload", () => {
   const attach = read("lib/passport/attachPassportToSharetribeListing.js");
-  const client = read("lib/onboarding/ixiCommercialOnboardingClient.js");
   const machineRoute = read("pages/api/ixi/onboarding/machine.js");
+  const legacyRoute = read("pages/api/passport/ensure.js");
 
-  assert.match(postFree, /attachPassportToSharetribeListing/u);
-  assert.match(urlImport, /attachPassportToSharetribeListing/u);
   assert.match(attach, /provisionListingMachine\(listingId\)/u);
   assert.doesNotMatch(attach, /ensurePassportForMachine/u);
-  assert.match(client, /\/api\/ixi\/onboarding\/machine/u);
   assert.match(machineRoute, /session\.sdk\.ownListings\.show/u);
   assert.match(machineRoute, /\/aos\/machines\/sharetribe-listing/u);
-  assert.equal(fs.existsSync(path.join(root, "pages/api/passport/ensure.js")), false);
-  assert.doesNotMatch(postFree, /passport\/ensure/u);
-  assert.doesNotMatch(urlImport, /passport\/ensure/u);
-});
-
-test("bulk upload uses authenticated governed listing admission", () => {
-  const route = read("pages/api/bulk-create-listings.js");
-  const attach = read("lib/passport/attachPassportToIntegrationListing.js");
-
-  assert.match(route, /resolveAosBrowserSession\(req, res\)/u);
-  assert.match(route, /resolveIxCoreAosContext/u);
-  assert.match(route, /principalId: context\.userId/u);
-  assert.match(route, /entityId: context\.entityId/u);
-  assert.match(attach, /\/aos\/machines\/sharetribe-listing/u);
-  assert.match(attach, /Idempotency-Key/u);
-  assert.doesNotMatch(attach, /passport\/ensure/u);
-  assert.doesNotMatch(attach, /ensurePassportForMachineServer/u);
+  assert.match(legacyRoute, /machineProvisioningHandler/u);
+  assert.match(legacyRoute, /sourceType !== "sharetribe-listing"/u);
 });
 
 test("AOS root renders the provisioned owner Person beside the Entity card", () => {
@@ -79,5 +59,4 @@ test("machine backfill is bounded and idempotent", () => {
   assert.match(route, /perPage, 20, 1, 25/u);
   assert.match(route, /Idempotency-Key/u);
   assert.match(route, /sharetribe-listing:\$\{listing\.listingId\}/u);
-  assert.equal(fs.existsSync(path.join(root, "scripts/backfillPassports.mjs")), false);
 });

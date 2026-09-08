@@ -53,11 +53,14 @@ test("runtime binds Card 008 to the current Profile card", () => {
   assert.match(objectLayout, /data-card-number=\{String\(cardNumber\)\.padStart\(3, "0"\)\}/);
 });
 
-test("governed actor authority drives the object toolbar without type or capability inference", () => {
+test("Person transactional capabilities drive the object toolbar with explicit denial precedence", () => {
   const presentation = read("components/ixi-aos/card-runtime/IXIAosSemanticObjectPresentation.js");
-  assert.match(presentation, /object\?\.actorAuthority/u);
-  assert.match(presentation, /governed\("canTransact"/u);
-  assert.doesNotMatch(presentation, /capabilities\?\.canHaveExpenses/u);
-  assert.doesNotMatch(presentation, /isPerson/u);
-  assert.doesNotMatch(presentation, /capabilities\?\.canContain/u);
+  assert.match(presentation, /capabilities\?\.canHaveExpenses/);
+  assert.match(presentation, /capabilities\?\.canHaveWorkOrders/);
+  assert.match(presentation, /capabilities\?\.canHaveJobTickets/);
+  assert.match(presentation, /capabilities\?\.canHaveDocuments/);
+  assert.match(presentation, /explicitTransact !== undefined/);
+  assert.match(presentation, /explicitTransact === true/);
+  assert.match(presentation, /isPerson/);
+  assert.match(presentation, /capabilities\?\.canContain \|\|[\s\S]*?isPerson/);
 });
