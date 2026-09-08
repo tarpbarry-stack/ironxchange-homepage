@@ -23,7 +23,6 @@ function passportFor(index) {
 function admittedMachine(index) {
   const listingId = `historical-listing-${index + 1}`;
   const passportId = passportFor(index);
-  const historicallyBound = index >= 20;
 
   return {
     objectId: `object_machine_${index + 1}`,
@@ -32,9 +31,8 @@ function admittedMachine(index) {
     displayName: `Machine ${index + 1}`,
     status: "active",
     canonicalAdmissionVerified: true,
-    aliases: historicallyBound
-      ? [{ sourceType: "sharetribe-listing", sourceId: listingId }]
-      : [],
+    // IX-Core returns the union of Passport and released Object aliases.
+    aliases: [{ sourceType: "sharetribe-listing", sourceId: listingId }],
     metadata: {},
     permissions: {}
   };
@@ -52,7 +50,7 @@ function listing(index) {
   };
 }
 
-test("all owned equipment stays visible as Private cards while unresolved joins stay non-operational", () => {
+test("released Object source bindings preserve all owned equipment as canonical Private cards", () => {
   const machines = Array.from({ length: 23 }, (_, index) => admittedMachine(index));
   const listings = Array.from({ length: 23 }, (_, index) => listing(index));
   const admission = buildAosCanonicalAdmission({
@@ -68,7 +66,7 @@ test("all owned equipment stays visible as Private cards while unresolved joins 
   assert.equal(admitted.length, 23);
   assert.equal(
     admitted.filter(object => object.presentation.kind === "ixi-private-machine").length,
-    3
+    23
   );
   assert.equal(
     admitted.filter(object => object.presentation.kind === "aos-numbered-card").length,
@@ -76,7 +74,7 @@ test("all owned equipment stays visible as Private cards while unresolved joins 
   );
   assert.equal(
     admitted.filter(object => object.presentation.kind === "unresolved-presentation").length,
-    20
+    0
   );
   assert.equal(presentations.length, 23);
   assert.equal(
@@ -85,8 +83,10 @@ test("all owned equipment stays visible as Private cards while unresolved joins 
   );
   assert.equal(
     presentations.filter(item => item.canonicalIdentityStatus === "unresolved").length,
-    20
+    0
   );
+  assert.equal(presentations.every(item => item.objectId.startsWith("object_machine_")), true);
+  assert.equal(presentations.every(item => item.governedActionsDisabled !== true), true);
   assert.equal(presentations.every(item => item.imageUrls.length === 1), true);
 });
 
@@ -172,4 +172,61 @@ test("unresolved backing presentation preserves Equipment and Locations System I
     },
     projectedIndex: null
   }), false);
+});
+
+test("Locations consumes IX-Core's corroborated legacy rail projection without rewriting it", () => {
+  const locations = {
+    objectId: "object_locations",
+    passportId: "IXI5F64883",
+    entityId: "entity-star-and-sons",
+    displayName: "LOCATIONS",
+    status: "active",
+    objectType: "system-index",
+    canonicalAdmissionVerified: true,
+    aliases: [],
+    metadata: {
+      systemIndex: true,
+      adapterId: "ixi-owned-locations"
+    }
+  };
+  const yard = {
+    objectId: "object_wichita",
+    passportId: "IXIYRPT5YY",
+    entityId: "entity-star-and-sons",
+    displayName: "Wichita Falls Yard",
+    status: "active",
+    canonicalAdmissionVerified: true,
+    aliases: [],
+    metadata: {},
+    presentation: { templateNumber: 7 }
+  };
+  const objects = [locations, yard];
+  const admission = buildAosCanonicalAdmission({ aosObjects: objects });
+  const indexes = buildAosSystemIndexes({
+    aosObjects: objects,
+    canonicalAdmission: admission,
+    railProjections: {
+      [locations.objectId]: {
+        railOwnerObjectId: locations.objectId,
+        railOwnerPassportId: locations.passportId,
+        members: [{
+          objectId: yard.objectId,
+          passportId: yard.passportId,
+          relationshipId: "relationship_legacy",
+          relationshipStatus: "active",
+          behaviorId: null,
+          migrationEvidence: {
+            kind: "legacy-direct-container-corroborated.v1",
+            readOnly: true
+          }
+        }]
+      }
+    }
+  });
+  const locationsIndex = indexes.find(index => index.objectId === locations.objectId);
+
+  assert.ok(locationsIndex);
+  assert.equal(locationsIndex.itemCount, 1);
+  assert.deepEqual(locationsIndex.items.map(item => item.objectId), [yard.objectId]);
+  assert.equal(locationsIndex.items[0].passportId, yard.passportId);
 });
