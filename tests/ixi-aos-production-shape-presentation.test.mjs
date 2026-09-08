@@ -4,7 +4,8 @@ import test from "node:test";
 
 import {
   buildAosCanonicalAdmission,
-  preserveAosOwnedListingPresentations
+  preserveAosOwnedListingPresentations,
+  shouldRegisterAosWorkspaceObject
 } from "../lib/mos/ixiAosCanonicalAdmission.mjs";
 import {
   buildAosSystemIndexes
@@ -130,7 +131,45 @@ test("the passive legacy FOR SALE adapter cannot become an AOS workspace contain
     "utf8"
   );
   assert.match(work, /\.filter\(isIXIAosWorkspaceVisibleAdapter\)/u);
-  assert.match(registry, /if \(!isIXIAosWorkspaceVisibleAdapter\(admittedObject\)\) continue;/u);
-  assert.match(registry, /presentation\?\.kind === "unresolved-presentation"/u);
+  assert.match(registry, /shouldRegisterAosWorkspaceObject/u);
   assert.match(registry, /preserveAosOwnedListingPresentations/u);
+});
+
+test("unresolved backing presentation preserves Equipment and Locations System Indexes", () => {
+  const unresolvedSystemIndexObject = adapterId => ({
+    objectId: `object_${adapterId}`,
+    entityId: "entity-star-and-sons",
+    status: "active",
+    metadata: { systemIndex: true, adapterId },
+    presentation: { kind: "unresolved-presentation" }
+  });
+  const projectedIndex = (adapterId, indexId) => ({
+    objectId: `object_${adapterId}`,
+    indexId,
+    metadata: {
+      systemIndexPresentation: true,
+      adapterId
+    }
+  });
+
+  for (const [adapterId, indexId] of [
+    ["ixi-owned-equipment", "equipment"],
+    ["ixi-owned-locations", "locations"]
+  ]) {
+    assert.equal(shouldRegisterAosWorkspaceObject({
+      admittedObject: unresolvedSystemIndexObject(adapterId),
+      projectedIndex: projectedIndex(adapterId, indexId)
+    }), true);
+  }
+
+  assert.equal(shouldRegisterAosWorkspaceObject({
+    admittedObject: {
+      objectId: "object_unresolved_machine",
+      entityId: "entity-star-and-sons",
+      status: "active",
+      metadata: {},
+      presentation: { kind: "unresolved-presentation" }
+    },
+    projectedIndex: null
+  }), false);
 });

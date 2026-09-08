@@ -5,7 +5,8 @@ import {
   buildAosCanonicalAdmission,
   canonicalizeAosPlacementReferences,
   createAosObjectPreviewReference,
-  preserveAosOwnedListingPresentations
+  preserveAosOwnedListingPresentations,
+  shouldRegisterAosWorkspaceObject
 } from "../../../lib/mos/ixiAosCanonicalAdmission.mjs";
 import {
   getAosMembershipObjectIds,
@@ -77,8 +78,15 @@ export default function useIXIAosWorkspaceRegistry({
     const registry = new Map();
 
     for (const [objectId, admittedObject] of admission.objectsById) {
-      if (!isIXIAosWorkspaceVisibleAdapter(admittedObject)) continue;
-      if (admittedObject?.presentation?.kind === "unresolved-presentation") continue;
+      const index = systemIndexesByObjectId.get(objectId);
+      const projectedIndex = index?.metadata?.adapterId === "ixi-owned-equipment" && equipmentWorkspaceIndex
+        ? equipmentWorkspaceIndex
+        : index;
+      if (!shouldRegisterAosWorkspaceObject({
+        admittedObject,
+        projectedIndex,
+        workspaceVisible: isIXIAosWorkspaceVisibleAdapter(admittedObject)
+      })) continue;
       const relationshipIds = getAosMembershipObjectIds({
         parentObjectId: objectId,
         relationships,
@@ -89,10 +97,6 @@ export default function useIXIAosWorkspaceRegistry({
         railProjections,
         admission
       });
-      const index = systemIndexesByObjectId.get(objectId);
-      const projectedIndex = index?.metadata?.adapterId === "ixi-owned-equipment" && equipmentWorkspaceIndex
-        ? equipmentWorkspaceIndex
-        : index;
       const systemIndexIds = projectedIndex
         ? indexMemberObjectIds(projectedIndex, admission)
         : [];
