@@ -202,7 +202,8 @@ test("persistence round-trip survives refresh and rejects scope crossover", () =
   });
   const hydrated = hydrateAosSessionPlacement(
     persisted.sessionPlacement,
-    personalSession()
+    personalSession(),
+    { now: T3 }
   );
 
   assert.deepEqual(hydrated, state);
@@ -210,7 +211,8 @@ test("persistence round-trip survives refresh and rejects scope crossover", () =
   assert.equal(persisted.nextRevision, 1);
   assert.throws(() => hydrateAosSessionPlacement(
     persisted.sessionPlacement,
-    personalSession({ workspaceId: "another-workspace" })
+    personalSession({ workspaceId: "another-workspace" }),
+    { now: T3 }
   ), /different AOS scope/);
 });
 

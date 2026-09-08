@@ -108,7 +108,11 @@ test("Star & Sons session story changes placement only", () => {
   const payload = createAosSessionPersistencePayload(recalled, {
     expectedRevision: 0
   });
-  const refreshed = hydrateAosSessionPlacement(payload.sessionPlacement, recalled);
+  const refreshed = hydrateAosSessionPlacement(
+    payload.sessionPlacement,
+    recalled,
+    { now: "2026-09-07T16:08:00.000Z" }
+  );
   assert.deepEqual(refreshed, recalled);
 
   // The session engine cannot receive or mutate durable identity/graph counts.
