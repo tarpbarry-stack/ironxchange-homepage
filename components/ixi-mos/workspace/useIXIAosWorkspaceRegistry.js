@@ -9,6 +9,7 @@ import {
   shouldRegisterAosWorkspaceObject
 } from "../../../lib/mos/ixiAosCanonicalAdmission.mjs";
 import {
+  getAosCorroboratedLegacyMembershipObjectIds,
   getAosMembershipObjectIds,
   getAosRailProjectionObjectIds
 } from "../../../lib/mos/IXIAosMembershipBridge.mjs";
@@ -92,6 +93,11 @@ export default function useIXIAosWorkspaceRegistry({
         relationships,
         admission
       });
+      const legacyRelationshipIds = getAosCorroboratedLegacyMembershipObjectIds({
+        parentObjectId: objectId,
+        relationships,
+        admission
+      });
       const railProjectionIds = getAosRailProjectionObjectIds({
         railOwnerObjectId: objectId,
         railProjections,
@@ -102,6 +108,7 @@ export default function useIXIAosWorkspaceRegistry({
         : [];
       const itemObjectIds = uniqueObjectIds([
         ...relationshipIds,
+        ...legacyRelationshipIds,
         ...railProjectionIds,
         ...systemIndexIds
       ]);

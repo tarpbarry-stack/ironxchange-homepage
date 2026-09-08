@@ -40,12 +40,17 @@ test("exact IX-Core admission envelope preserves only server-verified aliases an
     object: {
       objectId: "object-machine-1",
       entityId: "entity-1",
-      sourceBindings: [{ sourceType: "browser-invented", sourceId: "FAKE-1" }]
+      sourceBindings: [{
+        sourceType: "sharetribe-listing",
+        sourceId: "released-listing-2"
+      }]
     }
   };
   const admitted = normalizeIxCoreAdmissionEnvelope({
     response,
-    requestedObject: machine(),
+    requestedObject: machine({
+      sourceBindings: [{ sourceType: "browser-invented", sourceId: "FAKE-1" }]
+    }),
     expectedEntityId: "entity-1"
   });
   const admission = buildAosCanonicalAdmission({ aosObjects: [admitted] });
@@ -53,7 +58,8 @@ test("exact IX-Core admission envelope preserves only server-verified aliases an
   assert.deepEqual(admitted.aliases, [
     { sourceType: "sharetribe-listing", sourceId: "listing-1" },
     { sourceType: "historical-passport", sourceId: "IXIDEF2345" },
-    { sourceType: "erp-asset", sourceId: "ERP-41" }
+    { sourceType: "erp-asset", sourceId: "ERP-41" },
+    { sourceType: "sharetribe-listing", sourceId: "released-listing-2" }
   ]);
   assert.deepEqual(admitted.evidence, {
     matchedBy: ["objectId", "passportId"]
@@ -62,6 +68,7 @@ test("exact IX-Core admission envelope preserves only server-verified aliases an
   assert.equal(admission.resolveObjectId("listing-1"), "object-machine-1");
   assert.equal(admission.resolveObjectId("IXIDEF2345"), "object-machine-1");
   assert.equal(admission.resolveObjectId("ERP-41"), "object-machine-1");
+  assert.equal(admission.resolveObjectId("released-listing-2"), "object-machine-1");
   assert.equal(admission.resolveObjectId("FAKE-1"), "");
 });
 

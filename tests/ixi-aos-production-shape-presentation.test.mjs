@@ -13,6 +13,9 @@ import {
 import {
   isIXIAosWorkspaceVisibleAdapter
 } from "../lib/mos/IXIAosSystemAdapterRegistry.js";
+import {
+  getAosCorroboratedLegacyMembershipObjectIds
+} from "../lib/mos/IXIAosMembershipBridge.mjs";
 
 const alphabet = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
 
@@ -229,4 +232,52 @@ test("Locations consumes IX-Core's corroborated legacy rail projection without r
   assert.equal(locationsIndex.itemCount, 1);
   assert.deepEqual(locationsIndex.items.map(item => item.objectId), [yard.objectId]);
   assert.equal(locationsIndex.items[0].passportId, yard.passportId);
+});
+
+test("frontend migration bridge reads only corroborated legacy membership", () => {
+  const locations = {
+    objectId: "object_locations",
+    passportId: "IXI5F64883",
+    entityId: "entity-star-and-sons",
+    displayName: "LOCATIONS",
+    status: "active",
+    canonicalAdmissionVerified: true,
+    aliases: []
+  };
+  const admittedObject = (objectId, passportId, directContainerId) => ({
+    objectId,
+    passportId,
+    entityId: "entity-star-and-sons",
+    displayName: objectId,
+    status: "active",
+    canonicalAdmissionVerified: true,
+    aliases: [],
+    directContainerId
+  });
+  const wichita = admittedObject(
+    "object_wichita",
+    "IXIYRPT5YY",
+    locations.objectId
+  );
+  const unrelated = admittedObject(
+    "object_unrelated",
+    "IXIABC2345",
+    "object_somewhere_else"
+  );
+  const admission = buildAosCanonicalAdmission({
+    aosObjects: [locations, wichita, unrelated]
+  });
+  const relationships = [wichita, unrelated].map((object, index) => ({
+    relationshipId: `relationship_${index}`,
+    sourceObjectId: object.objectId,
+    targetObjectId: locations.objectId,
+    behaviorId: null,
+    status: "active"
+  }));
+
+  assert.deepEqual(getAosCorroboratedLegacyMembershipObjectIds({
+    parentObjectId: locations.objectId,
+    relationships,
+    admission
+  }), [wichita.objectId]);
 });
