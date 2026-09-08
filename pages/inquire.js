@@ -1,8 +1,11 @@
 import Head from "next/head";
 import { useRouter } from "next/router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 
 import { captureIXEvent } from "../lib/posthog";
+import {
+  loadIXIListingDetails
+} from "../lib/listings/IXIListingDetailClient";
 
 const BRAND_YELLOW = "#FFC400";
 const STAGING = "https://staging.ironxchange.com";
@@ -15,7 +18,9 @@ export default function InquirePage() {
   const router = useRouter();
   const { listingId } = router.query;
 
-  const [listings, setListings] = useState([]);
+  const [listing, setListing] = useState(null);
+  const [listingError, setListingError] = useState("");
+  const [listingLoadAttempt, setListingLoadAttempt] = useState(0);
   const [buyerName, setBuyerName] = useState("");
   const [buyerEmail, setBuyerEmail] = useState("");
   const [buyerPhone, setBuyerPhone] = useState("");
@@ -33,13 +38,27 @@ export default function InquirePage() {
 }, [listingId]);
 
   useEffect(() => {
-    fetch("/api/listings")
-      .then((res) => res.json())
-      .then((data) => {
-        if (Array.isArray(data)) setListings(data);
+    if (!listingId) return undefined;
+
+    let cancelled = false;
+    setListingError("");
+
+    loadIXIListingDetails(listingId)
+      .then(value => {
+        if (!cancelled) setListing(value);
       })
-      .catch(() => {});
-  }, []);
+      .catch(error => {
+        if (!cancelled) {
+          setListingError(
+            error?.message || "Machine details could not be loaded"
+          );
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [listingId, listingLoadAttempt]);
 
   useEffect(() => {
   async function checkAuth() {
@@ -60,11 +79,6 @@ export default function InquirePage() {
 
   checkAuth();
 }, []);
-
-  const listing = useMemo(() => {
-    if (!listingId || listings.length === 0) return null;
-    return listings.find((item) => item.id === listingId);
-  }, [listingId, listings]);
 
   const title = cleanText(listing?.title) || "Equipment Listing";
   const price = cleanText(listing?.price) || "Call for Price";
@@ -208,6 +222,21 @@ setStatus("success");
                 </div>
               </div>
             </div>
+
+            {listingError ? (
+              <div className="error-box" role="alert">
+                <strong>Machine details unavailable</strong>
+                <p>{listingError}</p>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setListingLoadAttempt(value => value + 1)
+                  }
+                >
+                  Try again
+                </button>
+              </div>
+            ) : null}
 
             <div className="divider" />
 

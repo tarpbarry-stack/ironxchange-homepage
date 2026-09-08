@@ -257,7 +257,7 @@ export default function IXIRelationshipControls({
 
       {hasAnyRelationship && (
         <div className="ixi-mobile-nav-row">
-          <a href="/browse" className="ixi-mobile-nav-link">
+          <a href="/browse-v2" className="ixi-mobile-nav-link">
             IXI MARKETPLACE
           </a>
 

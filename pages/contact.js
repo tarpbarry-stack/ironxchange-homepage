@@ -33,7 +33,7 @@ return (
         </a>
 
         <div className="nav-links">
-          <a href="/browse">SEARCH</a>
+          <a href="/browse-v2">SEARCH</a>
 
           <a href="/post-free" className="yellow-link">
             POST FREE
@@ -114,7 +114,7 @@ return (
           <div className="bottom-links">
             <a href="/terms">Terms</a>
             <a href="/privacy">Privacy</a>
-            <a href="/browse">Browse Equipment</a>
+            <a href="/browse-v2">Browse Equipment</a>
           </div>
         </div>
       </section>

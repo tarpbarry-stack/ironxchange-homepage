@@ -10,6 +10,11 @@ const nextConfig = {
         permanent: true
       },
       {
+        source: "/browse",
+        destination: "/browse-v2",
+        permanent: true
+      },
+      {
         source: "/postfree",
         destination: "/post-free",
         permanent: true

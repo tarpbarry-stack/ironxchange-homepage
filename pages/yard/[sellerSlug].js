@@ -305,7 +305,11 @@ const sensors = useSensors(
     try {
       const environment =
         await loadIXIListingsEnvironment({
-          includePrivateState: true
+          includePrivateState: true,
+          publicMarketplacePerformance: true,
+          publicMarketplaceSurface: "seller-yard",
+          progressiveMedia: true,
+          hydrateProgressiveMedia: false
         });
 
       if (cancelled) return;
@@ -1593,6 +1597,7 @@ toggleSearchSurfaceRevealed={toggleSearchSurfaceRevealed}
   ghostListingId={ghostListingId}
   enableCardScaling={true}
   cardScaleMode={cardScaleMode}
+  progressiveCardRendering={true}
     />
         </IXIBoardSurface>
 

@@ -34,6 +34,13 @@ import {
   toggleSavedListing
 } from "../../lib/savedListings";
 
+import {
+  fetchPublicMarketplaceListings
+} from "../../lib/listings/publicMarketplaceClient";
+import {
+  loadIXIListingDetails
+} from "../../lib/listings/IXIListingDetailClient";
+
 const BRAND_YELLOW = "#FFC400";
 
 function slugify(text = "") {
@@ -224,24 +231,21 @@ const [savedIds, setSavedIds] = useState([]);
 
       setSdkInstance(sdk);
 
-      try {
-        const currentUser =
-          await fetchCurrentUserWithSavedListings(
-            sdk
-          );
-
-        if (!cancelled) {
-          setSavedIds(
-            getSavedListingIdsFromUser(
-              currentUser
-            )
-          );
-        }
-      } catch {
-        if (!cancelled) {
-          setSavedIds([]);
-        }
-      }
+      fetchCurrentUserWithSavedListings(sdk)
+        .then(currentUser => {
+          if (!cancelled) {
+            setSavedIds(
+              getSavedListingIdsFromUser(
+                currentUser
+              )
+            );
+          }
+        })
+        .catch(() => {
+          if (!cancelled) {
+            setSavedIds([]);
+          }
+        });
 
       const parsed =
         parseMachineSlug(
@@ -293,28 +297,18 @@ const [savedIds, setSavedIds] = useState([]);
          * Public collection remains optional
          * navigation context only.
          */
-        try {
-          const listingsResponse =
-            await fetch(
-              "/api/listings"
-            );
-
-          const listingsPayload =
-            await listingsResponse.json();
-
-          if (
-            !cancelled &&
-            Array.isArray(
-              listingsPayload
-            )
-          ) {
-            setListings(
-              listingsPayload
-            );
-          }
-        } catch {
-          // Machine File still works.
-        }
+        fetchPublicMarketplaceListings({
+          surface: "listing-navigation",
+          projection: "directory"
+        })
+          .then(listingsPayload => {
+            if (!cancelled) {
+              setListings(listingsPayload);
+            }
+          })
+          .catch(() => {
+            // Machine File still works without adjacent navigation.
+          });
 
         return;
       }
@@ -325,13 +319,11 @@ const [savedIds, setSavedIds] = useState([]);
        * Temporary compatibility path:
        * /listing/2019-deere-844k-iii
        */
-      const listingsResponse =
-        await fetch(
-          "/api/listings"
-        );
-
       const listingsPayload =
-        await listingsResponse.json();
+        await fetchPublicMarketplaceListings({
+          surface: "listing-navigation",
+          projection: "directory"
+        });
 
       if (
         !Array.isArray(
@@ -363,9 +355,14 @@ const [savedIds, setSavedIds] = useState([]);
         );
       }
 
+      const legacyListingDetails =
+        await loadIXIListingDetails(
+          getListingId(legacyListing)
+        );
+
       if (!cancelled) {
         setMachineFileListing(
-          legacyListing
+          legacyListingDetails
         );
       }
 
@@ -582,7 +579,8 @@ const heroImage =
   const price = cleanText(listing.price) || "Call for Price";
   const hours = cleanText(listing.hours) || "Hours not listed";
   const location = cleanText(listing.location) || "Location not listed";
-  const cameFromBrowse = from === "browser";
+  const cameFromBrowse =
+    from === "browse" || from === "browser";
 
   const year = cleanText(listing.year) || title.match(/\b(19|20)\d{2}\b/)?.[0] || "—";
   const make = cleanText(listing.make) || "—";
@@ -987,7 +985,7 @@ function cycleSlugOutline(e) {
             <div className="mini-tool-tab slug-ixi-rail">
 
   <a
-    href="/browse"
+    href="/browse-v2"
     className="slug-rail-zone rail-half"
   />
 
@@ -1014,7 +1012,7 @@ function cycleSlugOutline(e) {
 
   {prevListing ? (
     <a
-      href={`${getMachineFilePath(prevListing) || `/listing/${slugify(prevListing.title)}`}?from=browser`}
+      href={`${getMachineFilePath(prevListing) || `/listing/${slugify(prevListing.title)}`}?from=browse`}
       className="slug-rail-zone"
     />
   ) : (
@@ -1027,7 +1025,7 @@ function cycleSlugOutline(e) {
 
   {nextListing ? (
     <a
-      href={`${getMachineFilePath(nextListing) || `/listing/${slugify(nextListing.title)}`}?from=browser`}
+      href={`${getMachineFilePath(nextListing) || `/listing/${slugify(nextListing.title)}`}?from=browse`}
       className="slug-rail-zone rail-half"
     />
   ) : (

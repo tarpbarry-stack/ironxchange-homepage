@@ -409,8 +409,8 @@ async function loadBrowseEnvironment({
     const environment =
       await loadIXIListingsEnvironment({
         includePrivateState: true,
-        marketplaceBrowsePerformance:
-          true,
+        publicMarketplacePerformance: true,
+        publicMarketplaceSurface: "browse-v2",
         progressiveMedia: true,
         hydrateProgressiveMedia: false,
         onListingsReady: nextListings => {
@@ -1592,7 +1592,7 @@ if (armedDestination === "stackBottom") {
 <IXIBoard
   cardContext="marketplace"
   listingOrigin="browse"
-  marketplaceBrowsePerformance={true}
+  progressiveCardRendering={true}
   enableMarketplaceDistribution={true}
   enableMarketplaceIntelligence={true}
   ConsoleRouterComponent={

@@ -5,12 +5,8 @@ import featureKeywords from "../../lib/featureKeywords";
 import { getListingId } from "../../lib/listingFormatters";
 
 import {
-  loadIXIListingsEnvironment
-} from "../../lib/listings/IXIListingsEngine";
-
-import {
-  loadIXIOwnedListings
-} from "../../lib/listings/loadIXIOwnedListings";
+  adaptMachineFilePayload
+} from "../../lib/machines/IXIMachineFileAdapter";
 
 import SellerLogoDecal from "../../components/SellerLogoDecal";
 
@@ -199,29 +195,39 @@ export default function ListingPage() {
 
       setSdkInstance(sdk);
 
-      try {
-        const currentUser = await fetchCurrentUserWithSavedListings(sdk);
-        setSavedIds(getSavedListingIdsFromUser(currentUser));
-      } catch {
-        setSavedIds([]);
-      }
+      fetchCurrentUserWithSavedListings(sdk)
+        .then(currentUser => {
+          setSavedIds(
+            getSavedListingIdsFromUser(currentUser)
+          );
+        })
+        .catch(() => {
+          setSavedIds([]);
+        });
 
       /*
-       * 1. Resolve permanent Passport identity.
+       * Resolve the permanent Passport and its exact machine in one
+       * canonical read. The server validates the Passport source binding
+       * and adds IXI Media when available.
        */
-      const passportResponse = await fetch(
-        `/api/passport/${encodeURIComponent(passportId)}`
+      const machineResponse = await fetch(
+        `/api/machines/by-passport/${encodeURIComponent(
+          passportId
+        )}`
       );
 
-      const passportPayload = await passportResponse.json();
+      const machinePayload =
+        await machineResponse.json();
 
-      if (!passportResponse.ok || !passportPayload?.ok) {
+      if (!machineResponse.ok || !machinePayload?.ok) {
         throw new Error(
-          passportPayload?.error || "Passport could not be found"
+          machinePayload?.error ||
+          "Machine could not be resolved from Passport"
         );
       }
 
-      const resolvedPassport = passportPayload.passport;
+      const resolvedPassport =
+        machinePayload?.machine?.passport;
 
       if (!resolvedPassport?.sourceId) {
         throw new Error("Passport does not contain a sourceId");
@@ -229,79 +235,14 @@ export default function ListingPage() {
 
       setPassport(resolvedPassport);
 
-      /*
-       * 2. Load current Sharetribe listings.
-       *
-       * This preserves the same normalized listing object that the slug page
-       * already uses. We are only changing how the correct machine is selected.
-       */
-    const environment =
-  await loadIXIListingsEnvironment({
-    includePrivateState: true
-  });
+      const resolvedListing =
+        adaptMachineFilePayload(machinePayload);
 
-let hydratedListings =
-  Array.isArray(environment.listings)
-    ? environment.listings
-    : [];
-
-/*
- * Passport may point to a Private or Auction
- * machine owned by the authenticated user.
- *
- * The normal IXI listing environment does not
- * represent the complete owner Inventory.
- */
-if (
-  environment.isAuthenticated &&
-  environment.userId
-) {
-  try {
-    const ownedListings =
-      await loadIXIOwnedListings(
-        environment.userId
+      setListings(
+        resolvedListing
+          ? [resolvedListing]
+          : []
       );
-
-    const listingsById = new Map();
-
-    [
-      ...hydratedListings,
-      ...(Array.isArray(ownedListings)
-        ? ownedListings
-        : [])
-    ].forEach(item => {
-      const id = String(
-        getListingId(item) ||
-        item?.id?.uuid ||
-        item?.id ||
-        ""
-      );
-
-      if (id) {
-        listingsById.set(id, item);
-      }
-    });
-
-    hydratedListings =
-      Array.from(
-        listingsById.values()
-      );
-  } catch (ownedListingsError) {
-    console.error(
-      "PASSPORT OWNED LISTINGS LOAD FAILED:",
-      ownedListingsError
-    );
-  }
-}
-
-setListings(hydratedListings);
-
-if (environment.errors?.publicListings) {
-  console.error(
-    "PASSPORT PUBLIC LISTINGS LOAD FAILED:",
-    environment.errors.publicListings
-  );
-}
     } catch (error) {
       console.error("Passport page load failed:", error);
 
@@ -460,7 +401,8 @@ const heroImage =
   const price = cleanText(listing.price) || "Call for Price";
   const hours = cleanText(listing.hours) || "Hours not listed";
   const location = cleanText(listing.location) || "";
-  const cameFromBrowse = from === "browser";
+  const cameFromBrowse =
+    from === "browse" || from === "browser";
 
   const year = cleanText(listing.year) || title.match(/\b(19|20)\d{2}\b/)?.[0] || "—";
   const make = cleanText(listing.make) || "—";

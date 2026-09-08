@@ -37,9 +37,14 @@ const BRAND_YELLOW = "#FFC400";
 
 const { Money, UUID } = sdkTypes;
 
-const sdk = createInstance({
-  clientId: process.env.NEXT_PUBLIC_SHARETRIBE_CLIENT_ID
-});
+const sharetribeClientId =
+  process.env.NEXT_PUBLIC_SHARETRIBE_CLIENT_ID;
+
+const sdk = sharetribeClientId
+  ? createInstance({
+      clientId: sharetribeClientId
+    })
+  : null;
 
 const taxonomyMap = {
   "AERIAL EQUIPMENT": aerialTaxonomy,

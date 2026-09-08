@@ -420,7 +420,8 @@ const sensors = useSensors(
       const environment =
         await loadIXIListingsEnvironment({
           includePrivateState: true,
-          marketplaceBrowsePerformance: true,
+          publicMarketplacePerformance: true,
+          publicMarketplaceSurface: "yard",
           progressiveMedia: true,
           hydrateProgressiveMedia: false,
           onListingsReady: nextListings => {
@@ -2041,6 +2042,7 @@ if (
   enableCardScaling={true}
   cardScaleMode={cardScaleMode}
   cardScaleMetrics={cardScaleMetrics}
+  progressiveCardRendering={true}
     />
         </IXIBoardSurface>
 

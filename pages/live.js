@@ -66,11 +66,6 @@ import {
 
 const BRAND_YELLOW = "#FFC400";
 
-const sdk = createInstance({
-  clientId:
-    process.env.NEXT_PUBLIC_SHARETRIBE_CLIENT_ID
-});
-
 const { UUID } = sdkTypes;
 
 const workflowOptions = [
@@ -501,6 +496,14 @@ export async function getServerSideProps() {
 export default function ListingLivePage() {
   const router = useRouter();
   const { id } = router.query;
+  const sdk = useMemo(() => {
+    const clientId =
+      process.env.NEXT_PUBLIC_SHARETRIBE_CLIENT_ID;
+
+    return clientId
+      ? createInstance({ clientId })
+      : null;
+  }, []);
 
   const [loading, setLoading] = useState(true);
   const [listings, setListings] = useState([]);
@@ -635,6 +638,12 @@ useEffect(() => {
 
   async function loadRequestedListing() {
     if (!router.isReady || !id) {
+      return;
+    }
+
+    if (!sdk) {
+      setDirectListing(null);
+      setDirectListingLoading(false);
       return;
     }
 
