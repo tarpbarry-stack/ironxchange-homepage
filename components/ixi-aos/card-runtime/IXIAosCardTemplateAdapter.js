@@ -30,8 +30,7 @@ function normalizeCapabilities(template = {}) {
     canCreate: Boolean(
       source.canCreate ||
       source.canCreateChild ||
-      source.canAdd ||
-      source.canContain
+      source.canAdd
     ),
     canReceiveDrop: Boolean(
       source.canContain ||

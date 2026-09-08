@@ -14,11 +14,11 @@ function clean(value) {
 
 function objectIdOf(object = {}) {
   return clean(
+    object?.canonicalIdentity?.objectId ||
     object?.objectId ||
     object?.id?.uuid ||
     object?.id ||
-    object?.uuid ||
-    object?.passportId
+    object?.uuid
   );
 }
 

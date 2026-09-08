@@ -3,10 +3,15 @@ import {
 } from "react";
 
 import {
-  placeMosObject,
+  createMosRelationship,
   updateMosObject,
   deleteMosObject
 } from "../../../lib/mos/ixiMosClient";
+
+import {
+  createAosMembershipRelationship,
+  createAosRailOrderKey
+} from "../../../lib/mos/IXIAosMembershipBridge.mjs";
 
 import {
   provisionAosObject
@@ -30,8 +35,7 @@ import {
 } from "../../../lib/mos/ixiAosSystemObjectTemplateContract.mjs";
 
 import {
-  getAosHierarchyDisplayName,
-  IXI_AOS_SYSTEM_INDEX_LABEL
+  getAosHierarchyDisplayName
 } from "../../../lib/mos/ixiAosHierarchyContract.mjs";
 
 
@@ -41,16 +45,13 @@ const IXI_SYSTEM_INDEX_TEMPLATE_ID =
 const DRAFT_DISPLAY_NAME =
   "NEW OBJECT";
 
-const UNIVERSAL_AOS_OPERATING_CAPABILITIES = Object.freeze({
+const UNIVERSAL_AOS_STRUCTURAL_CAPABILITIES = Object.freeze({
   canContain: true,
-  canCreate: true,
   canOpenStack: true,
   canMoveToBoard: true,
-  canTransact: true,
   canHaveDocuments: true,
   canHaveExpenses: true,
   canHaveWorkOrders: true,
-  editable: true,
   hasConsole: true,
   hasRail: true,
   hasRelationships: true
@@ -391,9 +392,6 @@ export default function useIXIMosObjectCreation({
       cardTemplateVersion:
         cardTemplateVersion ?? null,
 
-      directContainerId:
-        destinationContainerId || null,
-
       status:
         "draft",
 
@@ -402,7 +400,7 @@ export default function useIXIMosObjectCreation({
 
       capabilities: {
         canMove: true,
-        ...UNIVERSAL_AOS_OPERATING_CAPABILITIES
+        ...UNIVERSAL_AOS_STRUCTURAL_CAPABILITIES
       },
 
       metadata: {
@@ -414,10 +412,9 @@ export default function useIXIMosObjectCreation({
           destinationContainerId || null,
         rootContainer:
           Boolean(rootContainer),
-        transactEligible: true,
         capabilities: {
           ...safeObject(metadata?.capabilities),
-          ...UNIVERSAL_AOS_OPERATING_CAPABILITIES
+          ...UNIVERSAL_AOS_STRUCTURAL_CAPABILITIES
         }
       },
 
@@ -549,8 +546,6 @@ export default function useIXIMosObjectCreation({
           true,
         createdFrom:
           "aos-scoreboard-plus",
-        parentDisplayName:
-          IXI_AOS_SYSTEM_INDEX_LABEL,
         creationState:
           "naming",
         persistenceState:
@@ -649,6 +644,11 @@ export default function useIXIMosObjectCreation({
           destinationContainerId,
         parentObjectId:
           destinationContainerId,
+        parentPassportId:
+          clean(
+            container?.canonicalIdentity?.passportId ||
+            container?.passportId
+          ),
         parentDisplayName:
           getAosHierarchyDisplayName(
             container
@@ -665,30 +665,32 @@ export default function useIXIMosObjectCreation({
 
   async function placeProvisionedObject({
     objectId,
+    passportId,
     destinationContainerId,
+    destinationPassportId,
     draftId,
-    metadata = {}
+    orderKey = "000100"
   }) {
     if (!destinationContainerId) {
       return null;
     }
 
-    return placeMosObject({
-      objectId,
-      destinationContainerId,
-      actorId:
-        userId || null,
-      commandId:
-        `aos-place:${draftId}`,
-      metadata: {
-        source:
-          "aos-container",
-        parentObjectId:
-          destinationContainerId,
-        provisioningDraftId:
-          draftId,
-        ...safeObject(metadata)
-      }
+    if (!clean(passportId) || !clean(destinationPassportId)) {
+      const error = new Error(
+        "Canonical source and rail-owner Passports are required after Save."
+      );
+      error.code = "CANONICAL_IDENTITY_REPAIR_REQUIRED";
+      throw error;
+    }
+
+    return createAosMembershipRelationship({
+      createRelationship: createMosRelationship,
+      parentObjectId: destinationContainerId,
+      parentPassportId: destinationPassportId,
+      memberObjectId: objectId,
+      memberPassportId: passportId,
+      orderKey: clean(orderKey) || createAosRailOrderKey(0),
+      commandId: `aos-rail-membership:${draftId}`
     });
   }
 
@@ -759,10 +761,9 @@ export default function useIXIMosObjectCreation({
           resolvedDraftId,
         metadata: {
           ...safeObject(metadata),
-          transactEligible: true,
           capabilities: {
             ...safeObject(metadata?.capabilities),
-            ...UNIVERSAL_AOS_OPERATING_CAPABILITIES
+            ...UNIVERSAL_AOS_STRUCTURAL_CAPABILITIES
           },
           draftOnly: false,
           creationState:
@@ -807,10 +808,15 @@ export default function useIXIMosObjectCreation({
     await placeProvisionedObject({
       objectId:
         createdObjectId,
+      passportId:
+        response.identity.passportId,
       destinationContainerId,
+      destinationPassportId:
+        clean(metadata?.parentPassportId),
       draftId:
         resolvedDraftId,
-      metadata
+      orderKey:
+        clean(metadata?.orderKey) || createAosRailOrderKey(0)
     });
 
     return {
@@ -992,6 +998,11 @@ export default function useIXIMosObjectCreation({
         destinationContainerId,
       parentObjectId:
         destinationContainerId,
+      parentPassportId:
+        clean(
+          container?.canonicalIdentity?.passportId ||
+          container?.passportId
+        ),
       parentDisplayName:
         getAosHierarchyDisplayName(
           container
@@ -1044,8 +1055,7 @@ export default function useIXIMosObjectCreation({
     const destinationContainerId =
       clean(
         draft?.metadata
-          ?.destinationContainerId ||
-        draft?.directContainerId
+          ?.destinationContainerId
       ) || null;
 
     const {

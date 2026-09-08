@@ -3,25 +3,8 @@ function clean(value) {
 }
 
 function getIdentityAliases(object = {}) {
-  const aliases = new Set([
-    clean(object?.objectId),
-    clean(object?.id?.uuid),
-    clean(object?.id),
-    clean(object?.listingId),
-    clean(object?.metadata?.sourceListingId),
-    clean(object?.metadata?.passportIdentity?.passportId),
-    clean(object?.passportId)
-  ].filter(Boolean));
-
-  (Array.isArray(object?.identities) ? object.identities : [])
-    .forEach(identity => {
-      [identity?.sourceId, identity?.passportId, identity?.identityId]
-        .map(clean)
-        .filter(Boolean)
-        .forEach(value => aliases.add(value));
-    });
-
-  return aliases;
+  const objectId = clean(object?.objectId);
+  return new Set(objectId ? [objectId] : []);
 }
 
 function objectsShareIdentity(left = {}, right = {}) {
@@ -59,7 +42,9 @@ function mergePlacedPresentation(canonicalChild, placedChild) {
       Array.isArray(canonicalChild?.imageUrls) && canonicalChild.imageUrls.length
         ? canonicalChild.imageUrls
         : (placedChild?.imageUrls || canonicalChild?.imageUrls || []),
-    directContainerId: canonicalChild?.directContainerId
+    objectId: clean(canonicalChild?.objectId),
+    passportId: clean(canonicalChild?.passportId),
+    referenceOnly: true
   };
 }
 
@@ -68,10 +53,10 @@ export function projectAosContainerChildren({
   placedChildren = []
 } = {}) {
   const canonical = Array.isArray(canonicalChildren)
-    ? canonicalChildren.filter(Boolean)
+    ? canonicalChildren.filter(child => clean(child?.objectId))
     : [];
   const placed = Array.isArray(placedChildren)
-    ? placedChildren.filter(Boolean)
+    ? placedChildren.filter(child => clean(child?.objectId))
     : [];
 
   const consumedPlaced = new Set();

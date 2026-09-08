@@ -67,7 +67,6 @@ export function getIXIAosObjectId(object = {}) {
     object.objectId ||
     object.id?.uuid ||
     object.id ||
-    object.listingId ||
     ""
   );
 }
@@ -295,8 +294,7 @@ export function canIXICardContain(cardDefinition = {}) {
 }
 
 export function canIXICardCreate(cardDefinition = {}) {
-  const capabilities = getIXICardCapabilities(cardDefinition);
-  return Boolean(capabilities.canCreate || capabilities.canContain);
+  return Boolean(getIXICardCapabilities(cardDefinition).canCreate);
 }
 
 export function canIXICardTransact(cardDefinition = {}) {
