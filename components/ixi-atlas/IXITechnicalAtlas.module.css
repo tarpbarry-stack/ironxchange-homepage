@@ -1033,27 +1033,15 @@
   font-weight: 800;
   line-height: 13px;
   letter-spacing: 0.07em;
+  width: 158px;
+  min-height: 29px;
   padding: 3px 5px;
   cursor: pointer;
 }
-.liveCallout::after { content: ""; position: absolute; top: 50%; width: 60px; border-top: 1px dashed #435154; }
+.liveCallout::after { display: none; }
 .liveCallout i { width: 27px; height: 23px; display: grid; place-items: center; border: 1px solid rgba(0, 188, 231, 0.42); color: var(--cyan); font-style: normal; }
 .activeLiveCallout { color: #fff; }
 .activeLiveCallout i { background: var(--yellow); border-color: var(--yellow); color: #050606; }
-.liveCalloutIdentity { top: 30px; right: 2px; }
-.liveCalloutIdentity::after,
-.liveCalloutToolbar::after,
-.liveCalloutRail::after { right: 100%; }
-.liveCalloutFamily { top: 82px; left: 0; }
-.liveCalloutFace { top: 185px; left: 0; }
-.liveCalloutFaces { top: 330px; left: 0; }
-.liveCalloutConsole { top: 440px; left: 0; }
-.liveCalloutFamily::after,
-.liveCalloutFace::after,
-.liveCalloutFaces::after,
-.liveCalloutConsole::after { left: 100%; }
-.liveCalloutToolbar { top: 345px; right: 0; }
-.liveCalloutRail { top: 425px; right: 0; }
 .pulsePanel {
   min-height: 500px;
   border: 1px solid rgba(0, 188, 231, 0.2);
@@ -1932,6 +1920,20 @@
   justify-content: flex-end;
   gap: 7px;
 }
+.gearboxOpen {
+  min-height: 32px;
+  padding: 0 8px;
+  border: 1px solid rgba(0, 188, 231, .3);
+  background: rgba(0, 188, 231, .055);
+  color: var(--cyan);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: var(--type-micro);
+  font-weight: 800;
+  letter-spacing: .07em;
+  cursor: pointer;
+}
+.gearboxOpen:hover,
+.gearboxOpen:focus-visible { background: rgba(0, 188, 231, .14); outline: none; }
 .gearbox {
   height: 32px;
   display: grid;
@@ -1997,6 +1999,34 @@
 .consoleMount.consoleOpen { min-width: max-content; padding-right: 42px; padding-left: 42px; }
 .consoleMount > :global(.marketplace-listing-card) { width: 300px; min-width: 300px; max-width: 300px; }
 .consoleMount > :global(.ixi-marketplace-object-console) { margin: 0 auto; }
+.cardAnnotationRig {
+  position: relative;
+  width: 760px;
+  height: 570px;
+  overflow: visible;
+}
+.cardAnnotationObject {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  z-index: 2;
+}
+.cardAnnotationLines {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  overflow: visible;
+  pointer-events: none;
+}
+.cardAnnotationLines path {
+  fill: none;
+  stroke: rgba(0, 188, 231, .52);
+  stroke-width: 1;
+  stroke-dasharray: 4 4;
+  vector-effect: non-scaling-stroke;
+}
+.cardAnnotationRig .liveCallout { z-index: 6; }
 .consoleHint {
   min-height: 34px;
   display: flex;
@@ -2516,6 +2546,151 @@
 .consoleInspector h3 { margin-bottom: 5px; color: var(--yellow); letter-spacing: .09em; }
 .consoleInspector section p { color: #9ba4a5; }
 
+.gearDrilldown {
+  min-width: 0;
+  height: 602px;
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  border-right: 1px solid var(--line);
+  background:
+    radial-gradient(circle at 47% 45%, rgba(243, 196, 0, .07), transparent 34%),
+    linear-gradient(rgba(0, 188, 231, .025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 188, 231, .025) 1px, transparent 1px);
+  background-size: auto, 24px 24px, 24px 24px;
+  overflow: hidden;
+}
+.gearDrillHeader {
+  min-height: 50px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  padding: 7px 12px;
+  border-bottom: 1px solid var(--line);
+  background: rgba(8, 11, 12, .94);
+}
+.gearDrillHeader .drillBack {
+  min-height: 32px;
+  padding: 0 10px;
+  border: 1px solid rgba(0, 188, 231, .32);
+  background: rgba(0, 188, 231, .06);
+  color: var(--cyan);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: var(--type-micro);
+  font-weight: 800;
+  cursor: pointer;
+}
+.gearDrillHeader .drillBack:hover,
+.gearDrillHeader .drillBack:focus-visible { background: rgba(0, 188, 231, .16); outline: none; }
+.gearDrillHeader > div:nth-child(2) { min-width: 0; display: grid; gap: 2px; }
+.gearDrillHeader span,
+.gearDrillHeader b {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: var(--type-micro);
+  line-height: 13px;
+  letter-spacing: .08em;
+}
+.gearDrillHeader span { color: #6f7b7d; }
+.gearDrillHeader > div:nth-child(2) b { color: var(--yellow); }
+.gearTelemetry {
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  padding: 5px 12px;
+  border-bottom: 1px solid var(--line);
+  background: rgba(5, 7, 8, .78);
+  overflow-x: auto;
+}
+.gearTelemetry span,
+.gearTelemetry i {
+  min-width: max-content;
+  padding: 0 10px;
+  border-right: 1px solid rgba(255, 255, 255, .08);
+  color: #6f7a7c;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: var(--type-micro);
+  font-weight: 750;
+  line-height: 26px;
+  font-style: normal;
+}
+.gearTelemetry span:first-child { padding-left: 0; }
+.gearTelemetry span b { color: #e9eceb; }
+.gearTelemetry i { margin-left: auto; border-right: 0; color: #70c78a; }
+.gearStage {
+  min-width: 0;
+  min-height: 0;
+  position: relative;
+  display: grid;
+  place-items: center;
+  overflow: auto;
+  scrollbar-color: var(--cyan) #111719;
+  scrollbar-width: thin;
+}
+.gearCardMount {
+  min-width: 520px;
+  min-height: 330px;
+  display: grid;
+  place-items: center;
+  padding: 18px 72px;
+}
+.gearReadout {
+  position: sticky;
+  right: 12px;
+  bottom: 10px;
+  justify-self: end;
+  display: grid;
+  grid-template-columns: auto auto;
+  gap: 1px 10px;
+  min-width: 150px;
+  padding: 8px 10px;
+  border: 1px solid rgba(243, 196, 0, .35);
+  background: rgba(6, 8, 9, .94);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+.gearReadout span { grid-column: 1 / -1; color: #687477; font-size: 10px; letter-spacing: .1em; }
+.gearReadout b { color: var(--yellow); font-size: 13px; }
+.gearReadout i { color: var(--cyan); font-size: 10px; font-style: normal; text-align: right; }
+.gearSelector {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 1px;
+  padding: 1px;
+  border-top: 1px solid var(--line);
+  background: rgba(255, 255, 255, .07);
+}
+.gearSelector button {
+  min-width: 0;
+  min-height: 82px;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: auto 1fr;
+  gap: 3px 7px;
+  padding: 10px;
+  border: 0;
+  background: #090c0d;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.gearSelector button:hover,
+.gearSelector button:focus-visible { background: rgba(0, 188, 231, .1); outline: 1px solid rgba(0, 188, 231, .35); outline-offset: -1px; }
+.gearSelector button b { grid-row: 1 / span 2; color: var(--yellow); font-size: 19px; line-height: 19px; }
+.gearSelector button span { color: #eef1f0; font-size: 10px; font-weight: 850; line-height: 13px; }
+.gearSelector button small { color: #727e80; font-size: 10px; line-height: 12px; }
+.gearSelector .gearSelected { background: linear-gradient(145deg, rgba(243, 196, 0, .16), #090c0d 64%); box-shadow: inset 0 2px var(--yellow); }
+.gearInspector { padding: 14px 16px 18px; }
+.gearInspector h2 { margin: 0; font-size: 24px; line-height: 26px; }
+.gearInspector section { padding: 11px 0; border-top: 1px solid rgba(255, 255, 255, .07); }
+.gearInspector h3,
+.gearInspector section p {
+  margin: 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: var(--type-micro);
+  line-height: 15px;
+}
+.gearInspector h3 { margin-bottom: 5px; color: var(--yellow); letter-spacing: .09em; }
+.gearInspector section p { color: #9ba4a5; }
+
 @media (max-width: 1180px) {
   .workbenchBody { grid-template-columns: minmax(0, 1fr) clamp(250px, 27vw, 300px); }
   .benchControls { grid-template-columns: 1fr auto; }
@@ -2530,6 +2705,9 @@
   .railFunctionGrid button { min-height: 106px; }
   .consoleDrilldown { height: 634px; }
   .consoleFunctionGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .gearDrilldown { height: 634px; }
+  .gearSelector { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .gearSelector button { min-height: 68px; }
 }
 @media (max-width: 760px) {
   .workbenchBody { grid-template-columns: minmax(0, 1fr) 240px; }
@@ -2545,6 +2723,9 @@
   .consoleDrillHeader { grid-template-columns: auto 1fr; }
   .consoleDrillHeader .gearbox { grid-column: 1 / -1; justify-self: end; }
   .consoleDrillMount { padding-right: 18px; padding-left: 18px; }
+  .gearDrillHeader { grid-template-columns: auto 1fr; }
+  .gearDrillHeader .gearbox { grid-column: 1 / -1; justify-self: end; }
+  .gearSelector { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 @media (max-width: 620px) {
   .workbenchHeader { align-items: flex-start; flex-direction: column; }
@@ -2560,4 +2741,7 @@
   .railFunctionGrid { grid-template-columns: 1fr 1fr; }
   .consoleDrilldown { height: 620px; border-right: 0; border-bottom: 1px solid var(--line); }
   .consoleTelemetry span:first-child { display: none; }
+  .gearDrilldown { height: 620px; border-right: 0; border-bottom: 1px solid var(--line); }
+  .gearTelemetry span:nth-child(2) { display: none; }
+  .gearSelector { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }

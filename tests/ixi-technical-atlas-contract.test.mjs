@@ -166,6 +166,49 @@ test("Console callout opens a scaled production console drill-down", () => {
   assert.doesNotMatch(drilldown, /fetch\s*\(/);
 });
 
+test("card annotations lock to live production geometry and leave Operate clean", () => {
+  const testCell = fs.readFileSync(
+    new URL("../components/ixi-atlas/IXIAtlasLiveTestCell.jsx", import.meta.url),
+    "utf8",
+  );
+
+  assert.match(testCell, /function CardAnnotationRig/);
+  assert.match(testCell, /getBoundingClientRect/);
+  assert.match(testCell, /ResizeObserver/);
+  assert.match(testCell, /\.marketplace-listing-card/);
+  assert.match(testCell, /\.card-photo/);
+  assert.match(testCell, /\.title-row/);
+  assert.match(testCell, /\.rail-flip/);
+  assert.match(testCell, /\.board-command-rail/);
+  assert.match(testCell, /\.ixi-object-card-actuator\.right/);
+  assert.match(testCell, /mode === "INSPECT" && consoleDepth === 1/);
+  assert.doesNotMatch(testCell, /label: "OBJECT TOOLBAR"/);
+});
+
+test("Gearbox opens its own seven-speed live card screen", () => {
+  const testCell = fs.readFileSync(
+    new URL("../components/ixi-atlas/IXIAtlasLiveTestCell.jsx", import.meta.url),
+    "utf8",
+  );
+  const drilldown = fs.readFileSync(
+    new URL("../components/ixi-atlas/IXIAtlasGearboxDrilldown.jsx", import.meta.url),
+    "utf8",
+  );
+  const gearbox = getAtlasPart("gearbox");
+
+  assert.equal(gearbox.index, "09");
+  assert.match(testCell, /selected === "gearbox"/);
+  assert.match(testCell, /IXIAtlasGearboxDrilldown/);
+  assert.match(drilldown, /const GEARS/);
+  assert.match(drilldown, /IXIBrowseObjectConsoleRouter/);
+  assert.match(drilldown, /enableCardScaling/);
+  assert.match(drilldown, /Make card larger/);
+  assert.match(drilldown, /Make card smaller/);
+  assert.match(drilldown, /\+ LARGER · − SMALLER/);
+  assert.match(drilldown, /GEARS\.map/);
+  assert.doesNotMatch(drilldown, /fetch\s*\(/);
+});
+
 test("the System Index is an accessible assembly navigator", () => {
   const atlas = fs.readFileSync(
     new URL("../components/ixi-atlas/IXITechnicalAtlas.jsx", import.meta.url),

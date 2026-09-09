@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
 import IXIBrowseObjectConsoleRouter from "../ixi-marketplace/IXIBrowseObjectConsoleRouter";
 import IXIMachineCard from "../ixi-machine-card/IXIMachineCard";
 import {
@@ -9,6 +9,7 @@ import {
   normalizeConsoleSlots,
 } from "../ixi-chassis/IXIObjectConsoleEngine";
 import IXIAtlasConsoleDrilldown, { IXIAtlasConsoleInspector } from "./IXIAtlasConsoleDrilldown";
+import IXIAtlasGearboxDrilldown, { IXIAtlasGearboxInspector } from "./IXIAtlasGearboxDrilldown";
 import IXIAtlasMachineRailDrilldown, { IXIAtlasMachineRailInspector } from "./IXIAtlasMachineRailDrilldown";
 import styles from "./IXITechnicalAtlas.module.css";
 
@@ -38,15 +39,14 @@ const FIXTURE = Object.freeze({
   },
 });
 
-const CALLOUTS = [
-  ["identity", "02", "PASSPORT", "liveCalloutIdentity"],
-  ["family", "03", "FAMILY ROUTER", "liveCalloutFamily"],
-  ["face", "04", "PRIMARY FACE", "liveCalloutFace"],
-  ["toolbar", "05", "OBJECT TOOLBAR", "liveCalloutToolbar"],
-  ["faces", "06", "FACES", "liveCalloutFaces"],
-  ["rail", "07", "MACHINE RAIL", "liveCalloutRail"],
-  ["console", "08", "CONSOLE", "liveCalloutConsole"],
-];
+const CALLOUTS = Object.freeze([
+  { id: "family", index: "03", label: "MARKETPLACE FAMILY", side: "left", selector: ".marketplace-listing-card", anchor: "top" },
+  { id: "face", index: "04", label: "PRIMARY FACE", side: "left", selector: ".card-photo", anchor: "center" },
+  { id: "identity", index: "02", label: "MACHINE IDENTITY", side: "right", selector: ".title-row", anchor: "center" },
+  { id: "faces", index: "06", label: "FACE CONTROL", side: "left", selector: ".rail-flip", anchor: "center" },
+  { id: "rail", index: "07", label: "MACHINE RAIL", side: "right", selector: ".board-command-rail", anchor: "center" },
+  { id: "console", index: "08", label: "CONSOLE ACTUATOR", side: "right", selector: ".ixi-object-card-actuator.right", anchor: "center" },
+]);
 
 const FACE_NAMES = ["PHOTO", "BUYER", "RELATION", "WORKFLOW"];
 const RELATIONSHIP_COLORS = ["none", "green", "yellow", "red", "cyan", "white", "blue", "orange"];
@@ -72,6 +72,98 @@ const AUTO_GEAR_BY_CONSOLE_DEPTH = Object.freeze({
 
 function clock() {
   return new Date().toISOString().slice(11, 23);
+}
+
+function CardAnnotationRig({ selected, onSelect, onOpenConsole, children, revisionKey }) {
+  const rigRef = useRef(null);
+  const labelRefs = useRef(new Map());
+  const [geometry, setGeometry] = useState({ width: 0, height: 0, points: {} });
+
+  useLayoutEffect(() => {
+    const rig = rigRef.current;
+    if (!rig) return undefined;
+
+    let frame = 0;
+    const measure = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        const rigRect = rig.getBoundingClientRect();
+        const points = {};
+        const desired = { left: [], right: [] };
+
+        CALLOUTS.forEach((callout) => {
+          const target = rig.querySelector(callout.selector);
+          if (!target) return;
+          const rect = target.getBoundingClientRect();
+          const x = callout.anchor === "top" ? rect.left + rect.width * 0.22 - rigRect.left : rect.left + rect.width / 2 - rigRect.left;
+          const y = callout.anchor === "top" ? rect.top + 2 - rigRect.top : rect.top + rect.height / 2 - rigRect.top;
+          desired[callout.side].push({ ...callout, x, y });
+        });
+
+        ["left", "right"].forEach((side) => {
+          const ordered = desired[side].sort((a, b) => a.y - b.y);
+          let previous = 8;
+          ordered.forEach((item) => {
+            const label = labelRefs.current.get(item.id);
+            const labelHeight = label?.offsetHeight || 29;
+            const labelWidth = label?.offsetWidth || 138;
+            const maxTop = Math.max(8, rigRect.height - labelHeight - 8);
+            const top = Math.min(maxTop, Math.max(previous, item.y - labelHeight / 2));
+            const left = side === "left" ? 8 : Math.max(8, rigRect.width - labelWidth - 8);
+            points[item.id] = {
+              targetX: item.x,
+              targetY: item.y,
+              labelX: side === "left" ? left + labelWidth : left,
+              labelY: top + labelHeight / 2,
+              left,
+              top,
+            };
+            previous = top + labelHeight + 5;
+          });
+        });
+
+        setGeometry({ width: rig.scrollWidth, height: rig.clientHeight, points });
+      });
+    };
+
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(rig);
+    const shell = rig.querySelector(".ixi-scaled-object-shell");
+    if (shell) observer.observe(shell);
+    window.addEventListener("resize", measure);
+    return () => {
+      cancelAnimationFrame(frame);
+      observer.disconnect();
+      window.removeEventListener("resize", measure);
+    };
+  }, [revisionKey]);
+
+  return (
+    <div ref={rigRef} className={styles.cardAnnotationRig}>
+      <div className={styles.cardAnnotationObject}>{children}</div>
+      <svg className={styles.cardAnnotationLines} width={geometry.width} height={geometry.height} aria-hidden="true">
+        {CALLOUTS.map((callout) => {
+          const point = geometry.points[callout.id];
+          if (!point) return null;
+          const elbowX = callout.side === "left" ? point.labelX + 22 : point.labelX - 22;
+          return <path key={callout.id} d={`M ${point.labelX} ${point.labelY} H ${elbowX} L ${point.targetX} ${point.targetY}`} />;
+        })}
+      </svg>
+      {CALLOUTS.map((callout) => {
+        const point = geometry.points[callout.id];
+        if (!point) return null;
+        return (
+          <button type="button" key={callout.id} ref={(node) => node ? labelRefs.current.set(callout.id, node) : labelRefs.current.delete(callout.id)}
+            className={`${styles.liveCallout} ${selected === callout.id ? styles.activeLiveCallout : ""}`}
+            style={{ left: point.left, top: point.top }}
+            onClick={() => callout.id === "console" ? onOpenConsole() : onSelect(callout.id)} aria-pressed={selected === callout.id}>
+            <i>{callout.index}</i><span>{callout.label}</span>
+          </button>
+        );
+      })}
+    </div>
+  );
 }
 
 function FieldInspector({ part, detail, onDetailChange }) {
@@ -167,6 +259,12 @@ export default function IXIAtlasLiveTestCell({ selected, onSelect, part }) {
       record("GEARBOX", "scale.changed", `GEAR ${next}`);
     }
   }, [gear, record]);
+
+  const selectGear = useCallback((nextGear) => {
+    const normalized = Math.max(1, Math.min(7, Number(nextGear) || 3));
+    setGear(normalized);
+    record("GEARBOX", "scale.selected", `GEAR ${normalized}`);
+  }, [record]);
 
   const changeRelationship = useCallback((_id, patch) => {
     setCardState((current) => ({ ...current, ...patch }));
@@ -293,6 +391,19 @@ export default function IXIAtlasLiveTestCell({ selected, onSelect, part }) {
             consoleDepth={consoleDepth}
             onBack={() => onSelect("object")}
           />
+        ) : selected === "gearbox" ? (
+          <IXIAtlasGearboxDrilldown
+            objectId={MACHINE_ID}
+            item={FIXTURE}
+            ixiCardState={ixiCardState}
+            updateIxiCardState={updateCardState}
+            renderParentCard={renderCard}
+            cardScaleMode={GEAR_TO_SCALE_MODE[gear]}
+            gear={gear}
+            onShiftGear={shiftGear}
+            onSetGear={selectGear}
+            onBack={() => onSelect("object")}
+          />
         ) : (
         <div className={styles.machineBench}>
           <div className={styles.benchControls}>
@@ -310,7 +421,8 @@ export default function IXIAtlasLiveTestCell({ selected, onSelect, part }) {
                 </button>
               ))}
             </div>
-            <div className={styles.benchUtilities}>
+              <div className={styles.benchUtilities}>
+              <button type="button" className={styles.gearboxOpen} onClick={() => onSelect("gearbox")}>GEARBOX</button>
               <div className={styles.gearbox} role="group" aria-label="Card and console size gearbox">
                 <button type="button" onClick={() => shiftGear(-1)} disabled={gear === 1} aria-label="Make card and console larger">+</button>
                 <strong aria-live="polite" aria-label={`Gear ${gear}`}>{gear}</strong>
@@ -333,22 +445,30 @@ export default function IXIAtlasLiveTestCell({ selected, onSelect, part }) {
             }
           }}>
             <div className={`${styles.consoleMount} ${consoleDepth > 1 ? styles.consoleOpen : ""}`}>
-              <IXIBrowseObjectConsoleRouter
-                objectId={MACHINE_ID}
-                item={FIXTURE}
-                ixiCardState={ixiCardState}
-                updateIxiCardState={updateCardState}
-                enableCardScaling
-                cardScaleMode={GEAR_TO_SCALE_MODE[gear]}
-                renderParentCard={renderCard}
-              />
-              {mode === "INSPECT" && consoleDepth === 1 && CALLOUTS.map(([id, index, label, className]) => (
-                <button type="button" key={id}
-                  className={`${styles.liveCallout} ${styles[className]} ${selected === id ? styles.activeLiveCallout : ""}`}
-                  onClick={() => id === "console" ? openConsoleDrilldown() : onSelect(id)} aria-pressed={selected === id}>
-                  <i>{index}</i><span>{label}</span>
-                </button>
-              ))}
+              {mode === "INSPECT" && consoleDepth === 1 ? (
+                <CardAnnotationRig selected={selected} onSelect={onSelect} onOpenConsole={openConsoleDrilldown}
+                  revisionKey={`${gear}-${machineFace}-${cardState.color}-${cardState.outline}`}>
+                  <IXIBrowseObjectConsoleRouter
+                    objectId={MACHINE_ID}
+                    item={FIXTURE}
+                    ixiCardState={ixiCardState}
+                    updateIxiCardState={updateCardState}
+                    enableCardScaling
+                    cardScaleMode={GEAR_TO_SCALE_MODE[gear]}
+                    renderParentCard={renderCard}
+                  />
+                </CardAnnotationRig>
+              ) : (
+                <IXIBrowseObjectConsoleRouter
+                  objectId={MACHINE_ID}
+                  item={FIXTURE}
+                  ixiCardState={ixiCardState}
+                  updateIxiCardState={updateCardState}
+                  enableCardScaling
+                  cardScaleMode={GEAR_TO_SCALE_MODE[gear]}
+                  renderParentCard={renderCard}
+                />
+              )}
             </div>
           </div>
           <div className={styles.consoleHint}>
@@ -371,6 +491,8 @@ export default function IXIAtlasLiveTestCell({ selected, onSelect, part }) {
                 <IXIAtlasMachineRailInspector detail={detail} onDetailChange={setDetail} />
               ) : selected === "console" ? (
                 <IXIAtlasConsoleInspector detail={detail} onDetailChange={setDetail} />
+              ) : selected === "gearbox" ? (
+                <IXIAtlasGearboxInspector detail={detail} onDetailChange={setDetail} />
               ) : (
                 <FieldInspector part={part} detail={detail} onDetailChange={setDetail} />
               )
