@@ -107,17 +107,12 @@ import {
 
 import { getListingId } from "../../lib/listingFormatters";
 import {
-  fetchIxiMachineState,
   saveIxiMachinePatch,
 } from "../../lib/ixiMachineStateClient";
 
 import {
   hydrateIXIListingCollection
 } from "../../lib/listings/hydrateIXIListingMedia";
-
-import {
-  filterAosOwnedMachines
-} from "../../lib/listings/IXIAosOwnedInventoryPolicy.mjs";
 
 import { captureIXEvent } from "../../lib/posthog";
 
@@ -196,8 +191,6 @@ import {
 } from "../../components/ixi-chassis/IXIDndEngineHelpers";
 
 import {
-  fetchCurrentUserWithSavedListings,
-  getSavedListingIdsFromUser,
   filterSavedListings,
   toggleSavedListing
 } from "../../lib/savedListings";
@@ -211,8 +204,6 @@ import {
 } from "../../components/ixi-object-system/IXIActionNoticeEngine";
 
 export default function IXIAosWorkPage() {
-  console.log("IXI AOS WORK PAGE IS RUNNING");
-  
   const [listings, setListings] = useState([]);
 
 const [aosEntity, setAosEntity] =
@@ -419,197 +410,71 @@ const sensors = useSensors(
     });
   }, []);
 
-  useEffect(() => {
-    async function loadSavedPage() {
-      try {
-        const SharetribeSdk = await import("sharetribe-flex-sdk");
-
-        const sdkInstance = SharetribeSdk.createInstance({
-          clientId: process.env.NEXT_PUBLIC_SHARETRIBE_CLIENT_ID
-        });
-
-        setSdk(sdkInstance);
-
-        const currentUser =
-          await fetchCurrentUserWithSavedListings(sdkInstance);
-
-        const userId =
-  currentUser?.id?.uuid ||
-  currentUser?.id ||
-  "guest";
-
-setIxiUserId(String(userId));
-
-const remoteIxiResponse =
-  await fetchIxiMachineState(String(userId));
-
-const remoteIxiState =
-  remoteIxiResponse?.state || remoteIxiResponse || {};
-
-const workspaceSettings =
-  remoteIxiState?.[IXI_AOS_WORK_SETTINGS_ID] || {};
-
-setWorkspaceSettings(workspaceSettings);
-
-setBoardSkinId(
-  workspaceSettings.boardSkinId
-    ? writeIXIAosBoardSkinId(
-        workspaceSettings.boardSkinId
-      )
-    : readIXIAosBoardSkinId()
-);
-
-setIxiCardState(Object.fromEntries(
-  Object.entries(remoteIxiState).map(([id, record]) => [
-    id,
-    stripAosSessionOnlyCardState(record)
-  ])
-));
-
-setCardScaleMode(
-  resolveSitewideCardScaleMode(
-    workspaceSettings.cardScaleMode
-  )
-);
-        
-setSavedIds(
-  getSavedListingIdsFromUser(currentUser)
-);
-
-const res = await fetch(
-  `/api/account-listings?scope=aos-owned&authorId=${encodeURIComponent(String(userId))}`
-);
-
-const data = await res.json();
-
-      const firstIXIListing = Array.isArray(data)
-  ? data.find(item =>
-      item.ixiMedia ||
-      item.publicData?.ixiMedia ||
-      item.attributes?.publicData?.ixiMedia
-    )
-  : null;
-
-console.log(
-  "FIRST INVENTORY PASSPORT DEBUG",
-  JSON.stringify(
-    {
-      title:
-        firstIXIListing?.title ||
-        firstIXIListing?.attributes?.title ||
-        "",
-
-      passportId:
-        firstIXIListing?.passportId ||
-        firstIXIListing?.publicData?.passportId ||
-        firstIXIListing?.attributes?.publicData?.passportId ||
-        "",
-
-      passportUrl:
-        firstIXIListing?.passportUrl ||
-        firstIXIListing?.publicData?.passportUrl ||
-        firstIXIListing?.attributes?.publicData?.passportUrl ||
-        "",
-
-      ixiMediaPassportId:
-        firstIXIListing?.ixiMedia?.passportId ||
-        firstIXIListing?.publicData?.ixiMedia?.passportId ||
-        firstIXIListing?.attributes?.publicData?.ixiMedia?.passportId ||
-        ""
-    },
-    null,
-    2
-  )
-);
-
-if (Array.isArray(data)) {
-  const hydratedListings =
-  await hydrateIXIListingCollection(filterAosOwnedMachines(data));
-
-const firstHydratedIXIListing =
-  hydratedListings.find(item =>
-    item.ixiMediaSource === "ixi"
-  );
-
-console.log(
-  "INVENTORY HYDRATED LISTING RESULT",
-  {
-    title: firstHydratedIXIListing?.title,
-    imageObjectsLength:
-      firstHydratedIXIListing?.imageObjects?.length,
-    imageUrlsLength:
-      firstHydratedIXIListing?.imageUrls?.length,
-    imagesLength:
-      firstHydratedIXIListing?.images?.length,
-    firstImageUrl:
-      firstHydratedIXIListing?.imageUrls?.[0],
-    source:
-      firstHydratedIXIListing?.ixiMediaSource
-  }
-);
-
-setListings(hydratedListings);
-}
-
-      } catch (err) {
-        console.error("Saved page load failed:", err);
-        setSavedIds([]);
-      }
-    }
-
-    loadSavedPage();
-  }, []);
-
 useEffect(() => {
   let cancelled = false;
 
-  async function loadAosIdentity() {
+  async function loadAosWorkEnvironment() {
     try {
-      const SharetribeSdk =
-        await import("sharetribe-flex-sdk");
-
-      const aosSdk =
-        SharetribeSdk.createInstance({
-          clientId:
-            process.env
-              .NEXT_PUBLIC_SHARETRIBE_CLIENT_ID
+      const environment =
+        await loadIXIMosEnvironment({
+          includeObjects: true
         });
 
-      const currentUserResponse =
-        await aosSdk.currentUser.show({
-          include: ["profileImage"]
-        });
+      if (cancelled) {
+        return;
+      }
 
-      if (cancelled) return;
+      const listingEnvironment =
+        environment?.listingEnvironment || {};
 
-      setAosCurrentUser({
-        ...currentUserResponse.data.data,
-        included:
-          currentUserResponse.data.included || []
-      });
-    } catch (error) {
-      console.error(
-        "IXI AOS IDENTITY LOAD FAILED:",
-        error
+      const currentUser =
+        listingEnvironment?.currentUser || null;
+
+      const userId =
+        String(environment?.userId || "guest");
+
+      const remoteIxiState =
+        listingEnvironment?.ixiState || {};
+
+      const nextWorkspaceSettings =
+        listingEnvironment?.workspaceSettings || {};
+
+      const ownedListings =
+        Array.isArray(environment?.ownedListings)
+          ? environment.ownedListings
+          : [];
+
+      setSdk(listingEnvironment?.sdk || null);
+      setAosCurrentUser(currentUser);
+      setIxiUserId(userId);
+      setSavedIds(
+        Array.isArray(listingEnvironment?.savedIds)
+          ? listingEnvironment.savedIds
+          : []
       );
-    }
-  }
+      setListings(ownedListings);
+      setWorkspaceSettings(nextWorkspaceSettings);
 
-  async function loadAosScoreboardEnvironment() {
-    try {
-     const environment =
-  await loadIXIMosEnvironment({
-    includeObjects: true
-  });
+      setBoardSkinId(
+        nextWorkspaceSettings.boardSkinId
+          ? writeIXIAosBoardSkinId(
+              nextWorkspaceSettings.boardSkinId
+            )
+          : readIXIAosBoardSkinId()
+      );
 
-console.log(
-  "AOS OBJECTS AFTER LOAD",
-  environment?.objects
-);
+      setIxiCardState(Object.fromEntries(
+        Object.entries(remoteIxiState).map(([id, record]) => [
+          id,
+          stripAosSessionOnlyCardState(record)
+        ])
+      ));
 
-if (cancelled) {
-  return;
-}
+      setCardScaleMode(
+        resolveSitewideCardScaleMode(
+          nextWorkspaceSettings.cardScaleMode
+        )
+      );
 
       setAosEntity(
         environment?.entity || null
@@ -651,16 +516,39 @@ setSystemIndexes(
     ? environment.systemIndexes
     : []
 );
+
+      /*
+       * Machine cards are already usable from the account-listings payload.
+       * Enrich their media once, in the background, without delaying AOS.
+       */
+      void hydrateIXIListingCollection(
+        ownedListings,
+        {
+          dedupeRequests: true,
+          concurrency: 4
+        }
+      ).then(hydratedListings => {
+        if (!cancelled) {
+          setListings(hydratedListings);
+        }
+      }).catch(error => {
+        console.warn(
+          "IXI AOS BACKGROUND MEDIA HYDRATION FAILED:",
+          error
+        );
+      });
     } catch (error) {
       console.error(
-        "IXI AOS WORK SCOREBOARD LOAD FAILED:",
+        "IXI AOS WORK ENVIRONMENT LOAD FAILED:",
         error
       );
+      if (!cancelled) {
+        setSavedIds([]);
+      }
     }
   }
 
-  loadAosIdentity();
-  loadAosScoreboardEnvironment();
+  void loadAosWorkEnvironment();
 
   return () => {
     cancelled = true;

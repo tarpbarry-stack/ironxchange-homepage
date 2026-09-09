@@ -5,8 +5,7 @@ import path from "node:path";
 import test from "node:test";
 
 const FRONTEND_BASE = "8aac4cc65d5c04d9c0714b07cb10b3b6272581b7";
-const CORE_COMMIT = "0912d552f47551f8c0b40b10956c323eab5a16c5";
-const CORE_TREE = "29207bb7e8bedc2295993f6e547f322bf79da8e8";
+const CORE_BASE = "0912d552f47551f8c0b40b10956c323eab5a16c5";
 const frontendRoot = path.resolve(new URL("..", import.meta.url).pathname);
 const coreRoot = process.env.IXI_CORE_CONTRACT_ROOT || "";
 
@@ -14,20 +13,15 @@ function read(root, relative) {
   return fs.readFileSync(path.join(root, relative), "utf8");
 }
 
-test("exact frontend and IX-Core commits expose one governed session contract", t => {
+test("current frontend and IX-Core descend from and expose the governed session contract", t => {
   if (!coreRoot) {
     t.skip("Set IXI_CORE_CONTRACT_ROOT for the paired cross-repository gate.");
     return;
   }
 
-  assert.equal(
-    execFileSync("git", ["rev-parse", "HEAD"], { cwd: coreRoot, encoding: "utf8" }).trim(),
-    CORE_COMMIT
-  );
-  assert.equal(
-    execFileSync("git", ["rev-parse", "HEAD^{tree}"], { cwd: coreRoot, encoding: "utf8" }).trim(),
-    CORE_TREE
-  );
+  execFileSync("git", ["merge-base", "--is-ancestor", CORE_BASE, "HEAD"], {
+    cwd: coreRoot
+  });
   execFileSync("git", ["merge-base", "--is-ancestor", FRONTEND_BASE, "HEAD"], {
     cwd: frontendRoot
   });
@@ -65,6 +59,11 @@ test("exact frontend and IX-Core commits expose one governed session contract", 
   assert.match(controller, /WORKSPACE_SESSION_ORIGIN_MUTATED/u);
   assert.match(controller, /function rollbackLocal\(operationId\)/u);
   assert.match(controller, /commandId: operationId/u);
+  assert.match(controller, /surfaceOrders/u);
+  assert.match(service, /applyCompleteSurfaceOrders/u);
+  assert.match(service, /surfaceOrders: payload\.surfaceOrders/u);
+  assert.match(gateway, /resolveExistingIxCoreAosContext/u);
+  assert.match(router, /"\/aos\/context"/u);
 
   const relationshipEvidence = read(
     coreRoot,
