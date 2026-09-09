@@ -2,52 +2,48 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import test from "node:test";
 
-const homepage = fs.readFileSync(
-  "components/homepage/ConnectedHomepage.js",
-  "utf8"
-);
-const styles = fs.readFileSync(
-  "components/homepage/ConnectedHomepage.module.css",
-  "utf8"
-);
+const homepage = fs.readFileSync("components/homepage/ConnectedHomepage.js", "utf8");
+const styles = fs.readFileSync("components/homepage/ConnectedHomepage.module.css", "utf8");
 const index = fs.readFileSync("pages/index.js", "utf8");
-const browse = fs.readFileSync("pages/browse-v2.js", "utf8");
 
-test("homepage is the connected Marketplace, AOS, and TRAN$ACT gateway", () => {
+test("homepage is the benefits-led Marketplace, AOS, and TRAN$ACT gateway", () => {
   assert.match(index, /ConnectedHomepage/u);
-  assert.match(homepage, /MOVE<br\/>MACHINES/u);
-  assert.match(homepage, /MARKETPLACE/u);
-  assert.match(homepage, /RUN THE WORK/u);
-  assert.match(homepage, /CONTROL THE MONEY/u);
-  assert.match(homepage, /THE MACHINE IS THE CENTER<br\/>OF THE SYSTEM/u);
+  assert.match(homepage, /YOUR MACHINE<br \/>IS THE BEGINNING/u);
+  assert.match(homepage, /LIST ONCE\. DISTRIBUTE EVERYWHERE/u);
+  assert.match(homepage, /OPERATE THE WHOLE BUSINESS/u);
+  assert.match(homepage, /CONTROL THE ENTIRE ENTITY/u);
+  assert.match(homepage, /ONE MACHINE\. ONE PASSPORT/u);
   assert.doesNotMatch(homepage, /AUCTION/u);
 });
 
-test("the same Passport-backed machine connects all three product zones", () => {
-  assert.match(homepage, /<HeroMarketplace machine=\{machine\}/u);
-  assert.match(homepage, /<HeroAos machine=\{machine\}/u);
-  assert.match(homepage, /<HeroTransact machine=\{machine\}/u);
-  assert.match(homepage, /<MarketplaceZone machine=\{machine\}/u);
-  assert.match(homepage, /<AosZone machine=\{machine\}/u);
-  assert.match(homepage, /<TransactZone machine=\{machine\}/u);
+test("one live Passport-backed machine enters and distributes through the system", () => {
+  assert.match(homepage, /<PassportCard machine=\{machine\} compact/u);
+  assert.match(homepage, /<MarketplaceVisual machine=\{machine\}/u);
+  assert.match(homepage, /fetch\("\/api\/listings"/u);
   assert.match(homepage, /passportId/u);
 });
 
-test("homepage search carries query and category into the real Marketplace", () => {
-  assert.match(homepage, /params\.set\("q", q\)/u);
-  assert.match(homepage, /params\.set\("category", category\)/u);
-  assert.match(homepage, /router\.push\(suffix \? `\/browse-v2\?\$\{suffix\}` : "\/browse-v2"\)/u);
-  assert.match(browse, /params\.get\("q"\)/u);
-  assert.match(browse, /params\.get\("category"\)/u);
-  assert.match(browse, /setSearchQuery\(homepageQuery\)/u);
-  assert.match(browse, /category: homepageCategory/u);
+test("homepage routes every benefit and conversion into the real product", () => {
+  assert.match(homepage, /href="\/browse-v2"/u);
+  assert.match(homepage, /href="\/aos\/work"/u);
+  assert.match(homepage, /href="\/transact"/u);
+  assert.match(homepage, /href="\/post-free"/u);
+  assert.match(homepage, /POST A MACHINE — FREE/u);
+});
+
+test("homepage provides a complete distribution, operations, and finance story", () => {
+  for (const channel of ["MARKETPLACE", "SELLER YARD", "EMAIL", "SMS", "WHATSAPP"]) assert.match(homepage, new RegExp(channel, "u"));
+  for (const stage of ["ACQUISITION", "WORK", "EXPENSES", "INVOICE", "SOLD", "SETTLEMENT"]) assert.match(homepage, new RegExp(stage, "u"));
+  assert.match(homepage, /THE BUSINESS AROUND THE MACHINE/u);
+  assert.match(homepage, /EVERY DOLLAR FOLLOWS THE MACHINE/u);
 });
 
 test("homepage preserves desktop fidelity and explicitly supports mobile", () => {
-  assert.match(styles, /\.hero\s*\{[\s\S]*?min-height:\s*910px/u);
-  assert.match(styles, /\.platformGrid\s*\{[\s\S]*?grid-template-columns:\s*1\.02fr 1\.08fr 1fr/u);
-  assert.match(styles, /@media\s*\(max-width:\s*900px\)/u);
-  assert.match(styles, /@media\s*\(max-width:\s*560px\)/u);
-  assert.match(styles, /@media\s*\(prefers-reduced-motion:\s*reduce\)/u);
+  assert.match(styles, /\.hero\{[\s\S]*?min-height:760px/u);
+  assert.match(styles, /\.gatewayJourney\{[\s\S]*?grid-template-columns:1\.16fr \.98fr \.9fr/u);
+  assert.match(styles, /@media\(max-width:900px\)/u);
+  assert.match(styles, /@media\(max-width:560px\)/u);
+  assert.match(styles, /@media\(prefers-reduced-motion:reduce\)/u);
   assert.match(homepage, /viewport-fit=cover/u);
+  assert.match(homepage, /fetchPriority="high"/u);
 });

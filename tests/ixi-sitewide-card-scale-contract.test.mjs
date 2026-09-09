@@ -10,7 +10,6 @@ function read(path) {
 }
 
 const sharedControlPages = [
-  "pages/index.js",
   "pages/browse-v2.js",
   "pages/saved.js",
   "pages/account/my-listings-v2.js",
@@ -53,7 +52,6 @@ test("standard boards center complete rows using scaled footprints", () => {
     "pages/yard/[sellerSlug].js",
     "pages/auction-work/index.js",
     "pages/auction-market/index.js",
-    "pages/index.js",
     "components/ixi-mos/workspace/IXIAosWorkspaceBoard.jsx"
   ];
 
