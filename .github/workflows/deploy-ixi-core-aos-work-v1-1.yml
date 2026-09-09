@@ -20,6 +20,7 @@ jobs:
     env:
       AWS_REGION: ${{ secrets.AWS_REGION }}
       AWS_INSTANCE_ID: ${{ secrets.AWS_INSTANCE_ID }}
+      GITHUB_TOKEN: ${{ github.token }}
       IXI_CORE_SHA: 705e1c0185767ee89e8d0f7d011d4bb6f1902f81
 
     steps:
@@ -30,6 +31,7 @@ jobs:
           resolved_sha="$(curl -fsSL \
             -H 'Accept: application/vnd.github+json' \
             -H 'X-GitHub-Api-Version: 2022-11-28' \
+            -H "Authorization: Bearer $GITHUB_TOKEN" \
             "https://api.github.com/repos/tarpbarry-stack/ixi-core/commits/$IXI_CORE_SHA" \
             | jq -r '.sha')"
           test "$resolved_sha" = "$IXI_CORE_SHA"
