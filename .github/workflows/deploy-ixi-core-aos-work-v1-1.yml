@@ -315,6 +315,27 @@ jobs:
                 );
               })();
             });
+            if (matches.length !== 1) {
+              console.error(JSON.stringify({
+                ambiguousCustomerName: name,
+                candidates: matches.map(object => ({
+                  objectId: object.objectId,
+                  objectType: object.objectType,
+                  displayName: object.displayName,
+                  directContainerId: object.directContainerId || null,
+                  passportIds: (object.identities || [])
+                    .map(identity => identity.passportId)
+                    .filter(Boolean),
+                  locationMemberships: locationsMembers
+                    .filter(member => member.objectId === object.objectId)
+                    .map(member => ({
+                      relationshipId: member.relationshipId,
+                      behaviorId: member.behaviorId,
+                      migrationEvidence: member.migrationEvidence || null
+                    }))
+                }))
+              }, null, 2));
+            }
             assert.equal(matches.length, 1, `${name} must resolve to one active customer-named Object`);
             return matches[0];
           };
