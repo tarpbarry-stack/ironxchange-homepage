@@ -24,8 +24,8 @@ test("authenticated browser gateway exposes only governed session placement rout
   );
   assert.match(gateway, /path === "\/aos\/environment"/u);
   assert.match(internalClient, /path: "\/aos\/context"/u);
-  assert.match(internalClient, /path: "\/aos\/environment"/u);
-  assert.match(internalClient, /resolutionMode: "existing-environment"/u);
+  assert.match(internalClient, /path: "\/aos\/work-bootstrap"/u);
+  assert.match(internalClient, /resolutionMode: "single-work-bootstrap"/u);
   assert.match(
     internalClient,
     /if \(Number\(error\?\.status\) === 404\) \{\s*return resolveIxCoreAosContext/u,

@@ -245,7 +245,13 @@ test("AOS startup skips the public Marketplace census and loads governed reads c
 
   assert.match(environment, /includePublicListings:\s*false/u);
   assert.match(environment, /hydrateMedia:\s*false/u);
+  assert.match(environment, /const listingEnvironmentRequest\s*=\s*loadIXIListingsEnvironment/u);
+  assert.match(environment, /const environmentRequest = fetchAosEnvironment/u);
+  assert.match(environment, /const listingEnvironment = await listingEnvironmentRequest/u);
   assert.match(environment, /Promise\.all\(\[\s*ownedListingsRequest,\s*environmentRequest/u);
+  assert.match(environment, /response\?\.workBootstrapVersion === "ixi\.aos-work-bootstrap\.v1"/u);
+  assert.match(environment, /response\.definitions/u);
+  assert.match(environment, /response\.admissions/u);
   assert.match(environment, /Promise\.all\(\[\s*definitionsRequest,\s*admissionRequest/u);
   assert.match(listings, /includePublicListings = true/u);
   assert.match(listings, /includePublicListings\s*\?\s*loadPublicListingCollection/u);

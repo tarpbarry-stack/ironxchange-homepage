@@ -64,6 +64,8 @@ test("current frontend and IX-Core descend from and expose the governed session 
   assert.match(service, /surfaceOrders: payload\.surfaceOrders/u);
   assert.match(gateway, /resolveExistingIxCoreAosContext/u);
   assert.match(router, /"\/aos\/context"/u);
+  assert.match(router, /"\/aos\/work-bootstrap"/u);
+  assert.match(router, /ixi\.aos-work-bootstrap\.v1/u);
 
   const relationshipEvidence = read(
     coreRoot,
