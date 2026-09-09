@@ -5,6 +5,7 @@ import IXIAosCardHeaderControls from "../../card-runtime/modules/IXIAosCardHeade
 import IXIAosCardHeaderIdentity from "../../card-runtime/modules/IXIAosCardHeaderIdentity";
 import IXIAosCommercialEditorBridge from "../../card-runtime/modules/IXIAosCommercialEditorBridge";
 import IXIAosFace1CardRuntime from "../../card-runtime/modules/IXIAosFace1CardRuntime";
+import IXIAosContainerCommandStrip from "../../card-runtime/modules/IXIAosContainerCommandStrip";
 
 export const CARD_018 = Object.freeze({
   cardNumber: 18,
@@ -92,6 +93,16 @@ function IXIAosCard018Presentation({
         }}
       />
 
+      <div className="c018-command-overlay">
+        <IXIAosContainerCommandStrip
+          object={object}
+          onRecall={onRecall}
+          onBoard={onBoard}
+          onReturn={onReturn}
+          disabled={Boolean(ixiState?.editing)}
+        />
+      </div>
+
       {isContainerFace ? (
         <header className="c018-head">
           <div className="c018-identity">
@@ -119,6 +130,8 @@ function IXIAosCard018Presentation({
         :global(.ixi-card-018 .system-index-card){border-color:#454b47!important;border-radius:13px!important;background:radial-gradient(circle at 84% 12%,rgba(23,73,94,.11),transparent 26%),linear-gradient(180deg,#111412,#080a09)!important;box-shadow:inset 0 1px rgba(255,255,255,.07),0 18px 40px rgba(0,0,0,.53)!important}
         :global(.ixi-card-018 .system-index-card.ixi-container-drop-accepting){border-color:rgba(255,196,0,1)!important;outline:2px solid rgba(255,196,0,.80);box-shadow:0 0 0 2px rgba(255,196,0,.42),0 0 24px rgba(255,196,0,.68),0 0 56px rgba(255,196,0,.38),inset 0 0 28px rgba(255,196,0,.12),inset 0 1px 0 rgba(255,255,255,.12)!important}
         :global(.ixi-card-018 .index-topline){display:none!important}
+        :global(.ixi-card-018 .system-index-command-strip){display:none!important}
+        .c018-command-overlay :global(.ixi-aos-container-command-strip){display:flex!important}
         :global(.ixi-card-018 .system-index-identity){padding-top:49px!important}
         .c018-head{position:absolute;inset:0 0 auto;height:43px;padding:7px 10px;border-bottom:1px solid #303531;background:linear-gradient(180deg,#181b19,#101210);z-index:120}.c018-identity{max-width:188px}.c018-identity>span{display:block;color:#ffc400;font-size:6px;font-weight:950;letter-spacing:.07em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.c018-identity h2{margin:4px 0 0;color:#f7f8f7;font-size:14px;font-weight:950;line-height:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
       `}</style>

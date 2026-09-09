@@ -542,6 +542,7 @@ export default function IXIAosCardRenderer({
         onAddObject,
         onBoard,
         onRecall,
+        onReturn,
         onExposeObject
       });
 

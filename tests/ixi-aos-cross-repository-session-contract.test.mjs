@@ -5,8 +5,8 @@ import path from "node:path";
 import test from "node:test";
 
 const FRONTEND_BASE = "8aac4cc65d5c04d9c0714b07cb10b3b6272581b7";
-const CORE_COMMIT = "705e1c0185767ee89e8d0f7d011d4bb6f1902f81";
-const CORE_TREE = "3c072e7cbbe0215ab279713f20f2eb28210f5a9b";
+const CORE_COMMIT = "b0bebf91051fd51fe1b232e8130433d0df69a802";
+const CORE_TREE = "caef1cb19b556f2278009377be07b3db4bcd0ae2";
 const frontendRoot = path.resolve(new URL("..", import.meta.url).pathname);
 const coreRoot = process.env.IXI_CORE_CONTRACT_ROOT || "";
 
@@ -42,11 +42,11 @@ test("exact frontend and IX-Core commits expose one governed session contract", 
   );
 
   for (const operation of [
-    "object.admit",
-    "object.move",
-    "object.recall",
-    "object.snapshot.capture",
-    "object.undo",
+    "objects.admit",
+    "objects.move",
+    "objects.recall",
+    "objects.undo",
+    "objects.summon.set",
     "surface.reorder",
     "summon.set"
   ]) {
