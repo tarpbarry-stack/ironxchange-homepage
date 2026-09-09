@@ -40,12 +40,22 @@ const objects = [
 const ownedListings = [
   {
     id: "machine-1",
+    objectId: "object-machine-1",
     title: "2017 Deere 544K II",
     passportId: "IXI-MACHINE-1",
     publicData: { machineLocation: "DFW Airport Yard", hours: 4500 },
     price: { amount: 4150000, currency: "USD" }
   }
 ];
+
+test("desktop machine scope rejects a listing without canonical object identity", () => {
+  const contexts = buildIXIAosCommandContexts({
+    entity,
+    ownedListings: [{ id: "listing-only", title: "Unadmitted listing", passportId: "IXI-ALIAS" }]
+  });
+
+  assert.equal(contexts.some(item => item.kind === "machine"), false);
+});
 
 test("command contexts preserve recursive company, location, machine, person and work perspectives", () => {
   const contexts = buildIXIAosCommandContexts({ entity, aosObjects: objects, ownedListings });
@@ -96,8 +106,15 @@ test("recursive command center owns transact while the detailed ledger remains a
 
   assert.match(transactPage, /IXITransactCommandCenter/u);
   assert.match(ledgerPage, /IXITransactDashboardApp/u);
-  assert.match(commandCenter, /"Sales \/ A\/R"/u);
-  assert.match(commandCenter, /"Buy \/ A\/P"/u);
-  assert.match(commandCenter, /"GL \/ Close"/u);
+  assert.match(commandCenter, /\["today", "TODAY", "01"\]/u);
+  assert.match(commandCenter, /\["purchasing", "PURCHASING", "03"\]/u);
+  assert.match(commandCenter, /\["sales", "SALES", "04"\]/u);
+  assert.match(commandCenter, /\["ar", "A\/R", "05"\]/u);
+  assert.match(commandCenter, /\["ap", "A\/P", "06"\]/u);
+  assert.match(commandCenter, /\["gl", "GL \/ CLOSE", "08"\]/u);
+  assert.match(commandCenter, /\["reporting", "REPORTING", "10"\]/u);
+  assert.match(commandCenter, /TRAN\$ACT will not claim a clean state/u);
+  assert.match(commandCenter, /VIEWS NEVER CHANGE POSTED TRUTH/u);
+  assert.doesNotMatch(commandCenter, /createIXI|provision|passport\/ensure/u);
   assert.doesNotMatch(commandCenter, /returnTo=.*dashboard/u);
 });
