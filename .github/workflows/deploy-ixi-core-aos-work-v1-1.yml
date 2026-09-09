@@ -1,4 +1,4 @@
-name: Deploy IX-Core Equipment membership repair
+name: Audit IX-Core Equipment identity aliases
 
 on:
   push:
@@ -9,33 +9,15 @@ on:
 permissions:
   contents: read
 
-concurrency:
-  group: ixi-core-production
-  cancel-in-progress: false
-
 jobs:
-  deploy:
+  audit:
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    timeout-minutes: 15
     env:
       AWS_REGION: ${{ secrets.AWS_REGION }}
       AWS_INSTANCE_ID: ${{ secrets.AWS_INSTANCE_ID }}
-      GITHUB_TOKEN: ${{ github.token }}
-      IXI_CORE_SHA: b33a75836bf7550ae2043c3b7c0d49689e889c61
 
     steps:
-      - name: Validate immutable release
-        shell: bash
-        run: |
-          set -euo pipefail
-          resolved_sha="$(curl -fsSL \
-            -H 'Accept: application/vnd.github+json' \
-            -H 'X-GitHub-Api-Version: 2022-11-28' \
-            -H "Authorization: Bearer $GITHUB_TOKEN" \
-            "https://api.github.com/repos/tarpbarry-stack/ixi-core/commits/$IXI_CORE_SHA" \
-            | jq -r '.sha')"
-          test "$resolved_sha" = "$IXI_CORE_SHA"
-
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -43,201 +25,22 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Deploy guarded Equipment repair
-        id: deploy
+      - name: Run immutable identity census
+        id: audit
         shell: bash
         run: |
           set -euo pipefail
 
           remote_script="$(cat <<'REMOTE_SCRIPT'
           set -euo pipefail
+          cd /var/www/ix-core
 
-          APP=/var/www/ix-core
-          RELEASE_SHA=b33a75836bf7550ae2043c3b7c0d49689e889c61
-          LIVE_SHA=c7c55345ffd8e8ea4b90ff6a97433a7083f7efbb
-          ENTITY_ID=entity_4d78e9fb-92e4-4cc2-a8cb-1a2f19e097d0
-          EXPECTED_MACHINES=23
-          REPAIR_ACTOR=deployment:aos-equipment-membership-v1
-          STAGE=/tmp/ixi-core-equipment-repair-$RELEASE_SHA
-          BACKUP_ROOT=/var/backups/ixi-core-aos-work
-          BACKUP=$BACKUP_ROOT/pre-$RELEASE_SHA-$(date -u +%Y%m%dT%H%M%SZ)
-          DATABASE=/var/lib/ixi-core/mos/ixi-aos.sqlite
-          PASSPORTS=/var/www/ix-core/passport/passports.json
-          SUCCESS=0
-          DATA_BACKED_UP=0
-          CORE_STOPPED=0
-
-          FILES='mos/migrations/equipmentMembershipRepairService.js
-          mos/tests/equipmentMembershipRepair.test.js
-          ops/repair-aos-equipment-membership.js'
-
-          run_pm2() {
-            if [ "$PM2_USER" = root ]; then
-              pm2 "$@"
-            else
-              sudo -u ubuntu -H pm2 "$@"
-            fi
-          }
-
-          rollback() {
-            if [ "$SUCCESS" -eq 1 ]; then
-              return
-            fi
-            echo 'Equipment repair failed; restoring verified code and canonical data backups.' >&2
-            if [ -n "${PM2_USER:-}" ]; then
-              run_pm2 stop IX-Core >/dev/null 2>&1 || true
-            fi
-            if [ "$DATA_BACKED_UP" -eq 1 ]; then
-              rm -f -- "$DATABASE-wal" "$DATABASE-shm"
-              cp -a "$BACKUP/ixi-aos.sqlite" "$DATABASE"
-              cp -a "$BACKUP/passports.json" "$PASSPORTS"
-            fi
-            if [ -f "$BACKUP/files.txt" ]; then
-              while IFS= read -r file; do
-                [ -n "$file" ] && rm -f -- "$APP/$file"
-              done < "$BACKUP/files.txt"
-            fi
-            if [ -s "$BACKUP/existing-files.txt" ]; then
-              tar -xzf "$BACKUP/source.tgz" -C "$APP"
-            fi
-            if [ -n "${PM2_USER:-}" ]; then
-              run_pm2 restart IX-Core --update-env >/dev/null 2>&1 || true
-            fi
-          }
-          trap rollback EXIT
-
-          test -d "$APP"
-          test -f "$APP/index.js"
-          test -f "$DATABASE"
-          test -f "$PASSPORTS"
-
-          if pm2 describe IX-Core >/dev/null 2>&1; then
-            PM2_USER=root
-          elif sudo -u ubuntu -H pm2 describe IX-Core >/dev/null 2>&1; then
-            PM2_USER=ubuntu
-          else
-            echo 'PM2 process IX-Core was not found.' >&2
-            exit 1
-          fi
-
-          mkdir -p "$BACKUP"
-          curl -fsS http://127.0.0.1:4100/health > "$BACKUP/preflight-health.json"
-
-          rm -rf -- "$STAGE"
-          git clone --quiet https://github.com/tarpbarry-stack/ixi-core.git "$STAGE"
-          git -C "$STAGE" checkout --quiet --detach "$RELEASE_SHA"
-          test "$(git -C "$STAGE" rev-parse HEAD)" = "$RELEASE_SHA"
-
-          cd "$STAGE"
-          npm ci
-          IXI_MOS_INTERNAL_AUTH_ENFORCE=true npm test
-          node --check mos/migrations/equipmentMembershipRepairService.js
-          node --check ops/repair-aos-equipment-membership.js
-
-          printf '%s\n' "$FILES" | sed 's/^[[:space:]]*//' > "$BACKUP/files.txt"
-          while IFS= read -r file; do
-            [ -n "$file" ] || continue
-            test -f "$STAGE/$file"
-            if [ -f "$APP/$file" ]; then
-              live_hash="$(sha256sum "$APP/$file" | cut -d' ' -f1)"
-              release_hash="$(sha256sum "$STAGE/$file" | cut -d' ' -f1)"
-              test "$live_hash" = "$release_hash"
-            elif git -C "$STAGE" cat-file -e "$LIVE_SHA:$file" 2>/dev/null; then
-              echo "Expected existing live file is missing: $file" >&2
-              exit 1
-            fi
-          done < "$BACKUP/files.txt"
-
-          cd "$APP"
-          while IFS= read -r file; do
-            [ -f "$APP/$file" ] && printf '%s\n' "$file"
-          done < "$BACKUP/files.txt" > "$BACKUP/existing-files.txt"
-          tar -czf "$BACKUP/source.tgz" -T "$BACKUP/existing-files.txt"
-
-          while IFS= read -r file; do
-            install -D -m 0644 "$STAGE/$file" "$APP/$file"
-          done < "$BACKUP/files.txt"
-          while IFS= read -r file; do
-            test "$(sha256sum "$APP/$file" | cut -d' ' -f1)" = \
-              "$(sha256sum "$STAGE/$file" | cut -d' ' -f1)"
-          done < "$BACKUP/files.txt"
-
-          run_pm2 stop IX-Core
-          CORE_STOPPED=1
-
-          NODE_PATH="$APP/node_modules" DATABASE="$DATABASE" node - <<'NODE'
-          const assert = require("node:assert/strict");
-          const Database = require("better-sqlite3");
-          const database = new Database(process.env.DATABASE);
-          assert.deepEqual(database.pragma("integrity_check"), [{ integrity_check: "ok" }]);
-          database.pragma("wal_checkpoint(TRUNCATE)");
-          database.close();
-          NODE
-
-          cp -a "$DATABASE" "$BACKUP/ixi-aos.sqlite"
-          cp -a "$PASSPORTS" "$BACKUP/passports.json"
-          sha256sum "$PASSPORTS" > "$BACKUP/passports.sha256"
-          DATA_BACKED_UP=1
-
-          DATABASE="$DATABASE" PASSPORTS="$PASSPORTS" SNAPSHOT="$BACKUP/immutable-before.json" \
-          NODE_PATH="$APP/node_modules" node - <<'NODE'
-          const fs = require("node:fs");
-          const crypto = require("node:crypto");
-          const Database = require("better-sqlite3");
-          const db = new Database(process.env.DATABASE, { readonly: true });
-          const rows = db.prepare(`
-            SELECT collection_key, version, payload_sha256
-            FROM mos_collections
-            WHERE collection_key IN ('objects.json','workspace-sessions.json')
-            ORDER BY collection_key
-          `).all();
-          db.close();
-          fs.writeFileSync(process.env.SNAPSHOT, JSON.stringify({
-            rows,
-            passportSha256: crypto.createHash("sha256")
-              .update(fs.readFileSync(process.env.PASSPORTS)).digest("hex")
-          }));
-          NODE
-
-          cd "$APP"
-          COMMON_ENV="IXI_MOS_STORAGE_PROVIDER=sqlite IXI_MOS_SQLITE_PATH=$DATABASE IXI_MOS_DATA_ROOT=/var/lib/ixi-core/mos IXI_PASSPORT_DATA_FILE=$PASSPORTS NODE_PATH=$APP/node_modules"
-
-          env $COMMON_ENV node ops/repair-aos-equipment-membership.js \
-            --entity="$ENTITY_ID" \
-            --expected-machines="$EXPECTED_MACHINES" \
-            > "$BACKUP/repair-dry-run.json"
-
-          DRY_RUN="$BACKUP/repair-dry-run.json" node - <<'NODE'
-          const assert = require("node:assert/strict");
-          const report = require(process.env.DRY_RUN);
-          assert.equal(report.ok, true);
-          assert.equal(report.mode, "dry-run");
-          assert.equal(report.expectedMachineCount, 23);
-          assert.equal(report.projectedMachineCountBefore, 1);
-          assert.equal(
-            report.governedMembershipCountBefore + report.missingMembershipCountBefore,
-            23
-          );
-          NODE
-
-          env $COMMON_ENV node ops/repair-aos-equipment-membership.js \
-            --entity="$ENTITY_ID" \
-            --actor="$REPAIR_ACTOR" \
-            --expected-machines="$EXPECTED_MACHINES" \
-            --apply \
-            > "$BACKUP/repair-apply.json"
-
-          APPLY_REPORT="$BACKUP/repair-apply.json" node - <<'NODE'
-          const assert = require("node:assert/strict");
-          const report = require(process.env.APPLY_REPORT);
-          assert.equal(report.ok, true);
-          assert.equal(report.mode, "apply");
-          assert.equal(report.projectedMachineCount, 23);
-          assert.equal(report.projectionMemberCount, 23);
-          assert.equal(report.createdMembershipCount, report.missingMembershipCountBefore);
-          NODE
-
-          env $COMMON_ENV BEFORE="$BACKUP/immutable-before.json" node - <<'NODE'
+          IXI_MOS_STORAGE_PROVIDER=sqlite \
+          IXI_MOS_SQLITE_PATH=/var/lib/ixi-core/mos/ixi-aos.sqlite \
+          IXI_MOS_DATA_ROOT=/var/lib/ixi-core/mos \
+          IXI_PASSPORT_DATA_FILE=/var/www/ix-core/passport/passports.json \
+          NODE_PATH=/var/www/ix-core/node_modules \
+          node - <<'NODE'
           const assert = require("node:assert/strict");
           const crypto = require("node:crypto");
           const fs = require("node:fs");
@@ -247,106 +50,73 @@ jobs:
           const { resolveCanonicalObjectIdentity } = require("./mos/identity/canonicalObjectAdmissionService");
           const { buildRailProjectionMap } = require("./mos/accounts/aosEnvironmentService");
 
-          const before = require(process.env.BEFORE);
-          const db = new Database(process.env.IXI_MOS_SQLITE_PATH, { readonly: true });
-          assert.deepEqual(db.pragma("integrity_check"), [{ integrity_check: "ok" }]);
-          const afterRows = db.prepare(`
-            SELECT collection_key, version, payload_sha256
-            FROM mos_collections
-            WHERE collection_key IN ('objects.json','workspace-sessions.json')
-            ORDER BY collection_key
-          `).all();
-          assert.deepEqual(afterRows, before.rows, "Repair changed Object or workspace-session state");
-          assert.equal(
-            crypto.createHash("sha256").update(fs.readFileSync(process.env.IXI_PASSPORT_DATA_FILE)).digest("hex"),
-            before.passportSha256,
-            "Repair changed the permanent Passport registry"
-          );
-
+          const entityId = "entity_4d78e9fb-92e4-4cc2-a8cb-1a2f19e097d0";
+          const databasePath = process.env.IXI_MOS_SQLITE_PATH;
+          const passportPath = process.env.IXI_PASSPORT_DATA_FILE;
+          const db = new Database(databasePath, { readonly: true });
+          const state = () => ({
+            rows: db.prepare(`
+              SELECT collection_key, version, payload_sha256
+              FROM mos_collections
+              WHERE collection_key IN ('objects.json','relationships.json','workspace-sessions.json')
+              ORDER BY collection_key
+            `).all(),
+            passportSha256: crypto.createHash("sha256")
+              .update(fs.readFileSync(passportPath)).digest("hex")
+          });
+          const before = state();
           const objects = Object.values(readJsonFile(MOS_PATHS.objects, {}))
-            .filter(object => object.entityId === "entity_4d78e9fb-92e4-4cc2-a8cb-1a2f19e097d0" && object.status === "active");
+            .filter(object => object.entityId === entityId && object.status === "active");
           const relationships = Object.values(readJsonFile(MOS_PATHS.relationships, {}))
-            .filter(item => item.entityId === "entity_4d78e9fb-92e4-4cc2-a8cb-1a2f19e097d0" && item.status === "active");
-          const equipmentMatches = objects.filter(object =>
+            .filter(item => item.entityId === entityId && item.status === "active");
+          const rows = objects.map(object => {
+            const identity = resolveCanonicalObjectIdentity({ entityId, objectId: object.objectId });
+            const listingAliases = (identity.aliases || [])
+              .filter(alias => alias.sourceType === "sharetribe-listing")
+              .map(alias => alias.sourceId);
+            return {
+              objectId: object.objectId,
+              objectType: object.objectType,
+              displayName: object.displayName,
+              passportId: identity.passportId,
+              listingAliases
+            };
+          });
+          const machines = rows.filter(row => row.objectType === "machine");
+          const machineListingAliases = machines.flatMap(row => row.listingAliases);
+          const duplicateAliasObjects = machines.filter(row => row.listingAliases.length > 1);
+          const nonMachineListingAliases = rows.filter(row =>
+            row.objectType !== "machine" && row.listingAliases.length
+          );
+          const equipment = objects.filter(object =>
             object.objectType === "system-index" &&
             object.metadata?.adapterId === "ixi-owned-equipment" &&
             object.metadata?.systemIndexPresentation === true
           );
-          assert.equal(equipmentMatches.length, 1, "One governed Equipment System Index is required");
-          const equipment = equipmentMatches[0];
-          const machines = objects.filter(object => object.objectType === "machine");
-          assert.equal(machines.length, 23, "Approved active machine census changed");
+          assert.equal(equipment.length, 1);
           const projection = buildRailProjectionMap(relationships, objects);
-          const members = projection[equipment.objectId]?.members || [];
-          assert.equal(members.length, 23, "Equipment must project all 23 active machines");
-          assert.deepEqual(
-            new Set(members.map(member => member.objectId)),
-            new Set(machines.map(machine => machine.objectId)),
-            "Equipment projection must equal the active machine census"
-          );
-          members.forEach(member => {
-            assert.equal(member.behaviorId, "aos.rail-membership.v1");
-            assert.ok(resolveCanonicalObjectIdentity({
-              entityId: equipment.entityId,
-              objectId: member.objectId
-            }).passport?.passportId);
-          });
-          assert.ok(resolveCanonicalObjectIdentity({
-            entityId: equipment.entityId,
-            objectId: equipment.objectId
-          }).passport?.passportId);
+          const after = state();
+          assert.deepEqual(after, before, "Read-only identity census mutated canonical state");
+          assert.deepEqual(db.pragma("integrity_check"), [{ integrity_check: "ok" }]);
           db.close();
+
           console.log(JSON.stringify({
             ok: true,
-            equipmentObjectId: equipment.objectId,
-            activeMachineCount: machines.length,
-            equipmentProjectionCount: members.length,
-            objectAndWorkspaceStateUnchanged: true,
-            passportRegistryUnchanged: true
+            entityId,
+            activeObjectCount: rows.length,
+            activeMachineObjectCount: machines.length,
+            machineListingAliasCount: machineListingAliases.length,
+            distinctMachineListingAliasCount: new Set(machineListingAliases).size,
+            duplicateAliasObjects,
+            nonMachineListingAliases,
+            machines,
+            equipmentObjectId: equipment[0].objectId,
+            equipmentProjectionCount: projection[equipment[0].objectId]?.members?.length || 0,
+            immutable: true
           }, null, 2));
           NODE
 
-          sha256sum -c "$BACKUP/passports.sha256"
-          run_pm2 restart IX-Core --update-env
-          CORE_STOPPED=0
-
-          attempt=0
-          until curl -fsS http://127.0.0.1:4100/health > "$BACKUP/health.json"; do
-            attempt=$((attempt + 1))
-            if [ "$attempt" -ge 20 ]; then
-              echo 'IX-Core failed its post-repair health check.' >&2
-              exit 1
-            fi
-            sleep 2
-          done
-
-          HEALTH="$BACKUP/health.json" node - <<'NODE'
-          const assert = require("node:assert/strict");
-          const health = require(process.env.HEALTH);
-          assert.equal(health.ok, true);
-          assert.equal(health.service, "ix-core");
-          assert.equal(health.mosStorage?.ok, true);
-          assert.equal(health.mosStorage?.provider, "sqlite");
-          assert.equal(health.mosStorage?.integrity, "ok");
-          NODE
-
-          auth_status="$(curl -sS -o "$BACKUP/strict-auth.json" -w '%{http_code}' \
-            http://127.0.0.1:4100/mos/v1/aos/environment)"
-          case "$auth_status" in
-            401|403) ;;
-            *)
-              echo "Strict AOS environment probe returned HTTP $auth_status" >&2
-              exit 1
-              ;;
-          esac
-
-          SUCCESS=1
-          trap - EXIT
-          rm -rf -- "$STAGE"
-          cat "$BACKUP/repair-dry-run.json"
-          cat "$BACKUP/repair-apply.json"
-          printf 'IX-Core Equipment repair %s deployed; projection=23/23; health=200; strict-auth=%s; backup=%s\n' \
-            "$RELEASE_SHA" "$auth_status" "$BACKUP"
+          curl -fsS http://127.0.0.1:4100/health
           REMOTE_SCRIPT
           )"
 
@@ -357,7 +127,7 @@ jobs:
             --region "$AWS_REGION" \
             --instance-ids "$AWS_INSTANCE_ID" \
             --document-name AWS-RunShellScript \
-            --comment "Deploy immutable IX-Core Equipment repair $IXI_CORE_SHA" \
+            --comment 'Read-only IX-Core Equipment identity alias census' \
             --parameters "$parameters" \
             --query 'Command.CommandId' \
             --output text)"
@@ -377,26 +147,3 @@ jobs:
           printf '%s' "$invocation" | jq -r '.StandardOutputContent'
           printf '%s' "$invocation" | jq -r '.StandardErrorContent' >&2
           test "$(printf '%s' "$invocation" | jq -r '.Status')" = Success
-
-      - name: Record deployment evidence
-        if: always()
-        shell: bash
-        run: |
-          command_id="${{ steps.deploy.outputs.command_id }}"
-          {
-            echo '## IX-Core Equipment membership production repair'
-            echo "- Commit: \`$IXI_CORE_SHA\`"
-            echo "- Instance: \`$AWS_INSTANCE_ID\`"
-            echo "- SSM command: \`${command_id:-not-created}\`"
-            if [ -n "$command_id" ]; then
-              invocation="$(aws ssm get-command-invocation \
-                --region "$AWS_REGION" \
-                --command-id "$command_id" \
-                --instance-id "$AWS_INSTANCE_ID")"
-              echo "- Status: \`$(printf '%s' "$invocation" | jq -r '.Status')\`"
-              echo '```text'
-              printf '%s\n' "$invocation" | jq -r '.StandardOutputContent'
-              printf '%s\n' "$invocation" | jq -r '.StandardErrorContent'
-              echo '```'
-            fi
-          } >> "$GITHUB_STEP_SUMMARY"
