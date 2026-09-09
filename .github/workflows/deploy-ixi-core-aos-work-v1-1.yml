@@ -1,4 +1,4 @@
-name: Audit IX-Core Equipment identity aliases
+name: Audit unbound Ripper Passport
 
 on:
   push:
@@ -25,8 +25,7 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Run immutable identity census
-        id: audit
+      - name: Audit immutable Passport binding
         shell: bash
         run: |
           set -euo pipefail
@@ -47,71 +46,50 @@ jobs:
           const Database = require("better-sqlite3");
           const { MOS_PATHS } = require("./mos/storage/mosPaths");
           const { readJsonFile } = require("./mos/storage/jsonStore");
-          const { resolveCanonicalObjectIdentity } = require("./mos/identity/canonicalObjectAdmissionService");
-          const { buildRailProjectionMap } = require("./mos/accounts/aosEnvironmentService");
+          const { readPassportRecords, passportSources } = require("./passport/passportRegistry");
 
           const entityId = "entity_4d78e9fb-92e4-4cc2-a8cb-1a2f19e097d0";
-          const databasePath = process.env.IXI_MOS_SQLITE_PATH;
-          const passportPath = process.env.IXI_PASSPORT_DATA_FILE;
-          const db = new Database(databasePath, { readonly: true });
-          const state = () => ({
-            rows: db.prepare(`
-              SELECT collection_key, version, payload_sha256
-              FROM mos_collections
-              WHERE collection_key IN ('objects.json','relationships.json','workspace-sessions.json')
-              ORDER BY collection_key
-            `).all(),
-            passportSha256: crypto.createHash("sha256")
-              .update(fs.readFileSync(passportPath)).digest("hex")
-          });
-          const before = state();
-          const objects = Object.values(readJsonFile(MOS_PATHS.objects, {}))
-            .filter(object => object.entityId === entityId && object.status === "active");
-          const relationships = Object.values(readJsonFile(MOS_PATHS.relationships, {}))
-            .filter(item => item.entityId === entityId && item.status === "active");
-          const rows = objects.map(object => {
-            const identity = resolveCanonicalObjectIdentity({ entityId, objectId: object.objectId });
-            const listingAliases = (identity.aliases || [])
-              .filter(alias => alias.sourceType === "sharetribe-listing")
-              .map(alias => alias.sourceId);
-            return {
-              objectId: object.objectId,
-              objectType: object.objectType,
-              displayName: object.displayName,
-              passportId: identity.passportId,
-              listingAliases
-            };
-          });
-          const machines = rows.filter(row => row.objectType === "machine");
-          const machineListingAliases = machines.flatMap(row => row.listingAliases);
-          const duplicateAliasObjects = machines.filter(row => row.listingAliases.length > 1);
-          const nonMachineListingAliases = rows.filter(row =>
-            row.objectType !== "machine" && row.listingAliases.length
+          const passportId = "IXIK7C87AQ";
+          const listingId = "6a763a34-1657-4b3c-822d-9ac6763e7411";
+          const db = new Database(process.env.IXI_MOS_SQLITE_PATH, { readonly: true });
+          const before = {
+            collections: db.prepare("SELECT collection_key, version, payload_sha256 FROM mos_collections ORDER BY collection_key").all(),
+            passportSha256: crypto.createHash("sha256").update(fs.readFileSync(process.env.IXI_PASSPORT_DATA_FILE)).digest("hex")
+          };
+
+          const passports = readPassportRecords().filter(item => item.passportId === passportId);
+          assert.equal(passports.length, 1, "Expected exactly one issued Passport");
+          const passport = passports[0];
+          assert.equal(passport.entityId, entityId, "Passport Entity mismatch");
+          const sources = passportSources(passport);
+          assert.equal(sources.filter(source => source.sourceType === "sharetribe-listing" && source.sourceId === listingId).length, 1, "Expected exact Sharetribe listing source");
+
+          const objects = Object.values(readJsonFile(MOS_PATHS.objects, {}));
+          const activeOwners = objects.filter(object =>
+            object.status === "active" &&
+            object.entityId === entityId &&
+            (object.identities || []).some(identity =>
+              identity?.passportId === passportId ||
+              (identity?.sourceType === "sharetribe-listing" && identity?.sourceId === listingId)
+            )
           );
-          const equipment = objects.filter(object =>
-            object.objectType === "system-index" &&
-            object.metadata?.adapterId === "ixi-owned-equipment" &&
-            object.metadata?.systemIndexPresentation === true
-          );
-          assert.equal(equipment.length, 1);
-          const projection = buildRailProjectionMap(relationships, objects);
-          const after = state();
-          assert.deepEqual(after, before, "Read-only identity census mutated canonical state");
+          assert.equal(activeOwners.length, 0, "Passport/listing is already bound to an active Object");
+
+          const after = {
+            collections: db.prepare("SELECT collection_key, version, payload_sha256 FROM mos_collections ORDER BY collection_key").all(),
+            passportSha256: crypto.createHash("sha256").update(fs.readFileSync(process.env.IXI_PASSPORT_DATA_FILE)).digest("hex")
+          };
+          assert.deepEqual(after, before, "Read-only Passport audit mutated canonical state");
           assert.deepEqual(db.pragma("integrity_check"), [{ integrity_check: "ok" }]);
           db.close();
 
           console.log(JSON.stringify({
             ok: true,
-            entityId,
-            activeObjectCount: rows.length,
-            activeMachineObjectCount: machines.length,
-            machineListingAliasCount: machineListingAliases.length,
-            distinctMachineListingAliasCount: new Set(machineListingAliases).size,
-            duplicateAliasObjects,
-            nonMachineListingAliases,
-            machines,
-            equipmentObjectId: equipment[0].objectId,
-            equipmentProjectionCount: projection[equipment[0].objectId]?.members?.length || 0,
+            passportId,
+            entityId: passport.entityId,
+            exactListingSource: true,
+            sourceTypes: sources.map(source => source.sourceType).sort(),
+            activeObjectBindings: activeOwners.length,
             immutable: true
           }, null, 2));
           NODE
@@ -127,11 +105,10 @@ jobs:
             --region "$AWS_REGION" \
             --instance-ids "$AWS_INSTANCE_ID" \
             --document-name AWS-RunShellScript \
-            --comment 'Read-only IX-Core Equipment identity alias census' \
+            --comment 'Read-only audit of unbound Ripper Passport' \
             --parameters "$parameters" \
             --query 'Command.CommandId' \
             --output text)"
-          echo "command_id=$command_id" >> "$GITHUB_OUTPUT"
 
           if ! aws ssm wait command-executed \
             --region "$AWS_REGION" \
