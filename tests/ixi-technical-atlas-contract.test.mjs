@@ -6,6 +6,10 @@ import {
   getAtlasPart,
   machineCardParts,
 } from "../lib/ixi-atlas/machineCardRegistry.mjs";
+import {
+  chassisParts,
+  getChassisPart,
+} from "../lib/ixi-atlas/chassisRegistry.mjs";
 
 test("Machine Card is the first technical assembly", () => {
   assert.equal(atlasModules[0].id, "TA-001");
@@ -37,6 +41,34 @@ test("the Machine Rail exposes all seven production command zones", () => {
 
 test("unknown component selection safely returns the Machine Object", () => {
   assert.equal(getAtlasPart("not-real").id, "object");
+});
+
+test("TA-002 documents the production Chassis as an active build sheet", () => {
+  assert.equal(atlasModules[1].id, "TA-002");
+  assert.equal(atlasModules[1].state, "ACTIVE");
+  assert.ok(chassisParts.length >= 7);
+  assert.equal(
+    new Set(chassisParts.map(({ id }) => id)).size,
+    chassisParts.length,
+  );
+  for (const part of chassisParts) {
+    assert.equal(part.status, "PRODUCTION");
+    assert.ok(part.sources.length > 0);
+    assert.ok(part.specs.length > 2);
+  }
+});
+
+test("the Chassis sheet records its real placement geometry", () => {
+  assert.match(getChassisPart("chassis").specs.join(" "), /150 × 102px/);
+  assert.match(
+    getChassisPart("pockets").specs.join(" "),
+    /24px action targets/,
+  );
+  assert.match(
+    getChassisPart("mount").specs.join(" "),
+    /24-card progressive batches/,
+  );
+  assert.match(getChassisPart("responsive").specs.join(" "), /851–1254px/);
 });
 
 test("Atlas uses the current IXI V12 readability contract", () => {

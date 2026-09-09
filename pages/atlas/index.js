@@ -6,7 +6,10 @@ export default function AtlasPage() {
     <>
       <Head>
         <title>IXI Technical Atlas — Machine Card</title>
-        <meta name="description" content="Interactive build sheets for the IronXchange operating system." />
+        <meta
+          name="description"
+          content="Interactive build sheets for the IronXchange operating system."
+        />
       </Head>
       <IXITechnicalAtlas />
     </>

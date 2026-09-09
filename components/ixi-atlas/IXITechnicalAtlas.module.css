@@ -15,8 +15,13 @@
   --type-title: 15px;
   --type-result: 20px;
   font-family:
-    "Inter Variable", Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont,
-    "Segoe UI", sans-serif;
+    "Inter Variable",
+    Inter,
+    ui-sans-serif,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
   font-optical-sizing: auto;
   font-synthesis: none;
   font-variant-numeric: tabular-nums lining-nums;
@@ -736,7 +741,10 @@
   letter-spacing: 0.1em;
 }
 .dossierHead strong {
-  font: 850 26px / 28px "Inter Variable", Inter, sans-serif;
+  font:
+    850 26px / 28px "Inter Variable",
+    Inter,
+    sans-serif;
   color: var(--yellow);
   font-weight: 400;
 }
@@ -1025,6 +1033,321 @@
   display: flex;
   justify-content: space-between;
 }
+.chassisViewport {
+  height: 660px;
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(
+      circle at 50% 47%,
+      rgba(0, 188, 231, 0.045),
+      transparent 40%
+    ),
+    linear-gradient(rgba(0, 188, 231, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 188, 231, 0.035) 1px, transparent 1px);
+  background-size:
+    auto,
+    24px 24px,
+    24px 24px;
+}
+.chassisViewport::before {
+  content: "IXI / SPATIAL OPERATING SYSTEM / TA-002";
+  position: absolute;
+  left: 18px;
+  bottom: 16px;
+  color: #354144;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: var(--type-micro);
+  font-weight: 700;
+  line-height: 13px;
+  letter-spacing: 0.12em;
+}
+.chassisDrawing {
+  position: absolute;
+  width: 900px;
+  height: 520px;
+  left: 50%;
+  top: 78px;
+  transform: translateX(-50%);
+  transition: 0.35s ease;
+}
+.boardFrame {
+  position: absolute;
+  left: 250px;
+  top: 92px;
+  width: 400px;
+  height: 330px;
+  border: 1px solid #536164;
+  border-radius: 6px;
+  background: rgba(7, 9, 10, 0.82);
+  color: #dce1e0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  align-content: center;
+  gap: 11px;
+  padding: 42px 18px 22px;
+  cursor: pointer;
+  box-shadow:
+    inset 0 0 38px rgba(0, 188, 231, 0.025),
+    0 25px 55px #000;
+}
+.boardFrame:hover,
+.selectedDiagram {
+  border-color: var(--yellow);
+}
+.boardLabel {
+  position: absolute;
+  left: 14px;
+  top: 13px;
+  color: var(--cyan);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: var(--type-micro);
+  font-weight: 750;
+  line-height: 13px;
+  letter-spacing: 0.1em;
+}
+.miniCard {
+  height: 166px;
+  border: 1px solid #303a3c;
+  background: linear-gradient(150deg, #15191a, #090b0c);
+  position: relative;
+  text-align: left;
+  padding: 13px 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+.miniCard::before {
+  content: "";
+  position: absolute;
+  inset: 31px 9px 56px;
+  border: 1px dashed #263033;
+  background: repeating-linear-gradient(
+    135deg,
+    transparent 0 8px,
+    rgba(255, 255, 255, 0.018) 8px 9px
+  );
+}
+.miniCard small,
+.consolePanel small {
+  color: var(--yellow);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: var(--type-micro);
+  font-weight: 750;
+  line-height: 13px;
+}
+.miniCard b,
+.consolePanel b {
+  margin-top: 4px;
+  font-size: var(--type-control);
+  line-height: 16px;
+  font-weight: 800;
+}
+.miniCard em {
+  position: absolute;
+  right: 8px;
+  top: 8px;
+  color: #465255;
+  font-size: var(--type-result);
+  font-weight: 850;
+  font-style: normal;
+}
+.activeMiniCard {
+  border-color: rgba(0, 188, 231, 0.5);
+}
+.consolePanel {
+  position: absolute;
+  left: 261px;
+  top: 76px;
+  width: 112px;
+  height: 166px;
+  border: 1px solid rgba(0, 188, 231, 0.4);
+  background: #071014;
+  text-align: left;
+  padding: 13px 10px;
+  display: flex;
+  flex-direction: column;
+}
+.consolePanel small {
+  color: var(--cyan);
+}
+.consolePanel span {
+  height: 1px;
+  margin-top: 18px;
+  background: #304045;
+}
+.leftStations,
+.rightStations {
+  position: absolute;
+  top: 152px;
+  display: flex;
+  gap: 16px;
+  transition: 0.35s ease;
+}
+.leftStations {
+  right: 682px;
+}
+.rightStations {
+  left: 682px;
+}
+.leftStations button,
+.rightStations button {
+  width: 126px;
+  height: 102px;
+  border: 1px solid #394548;
+  border-radius: 5px;
+  background: rgba(8, 10, 11, 0.86);
+  color: #7e898b;
+  position: relative;
+  text-align: left;
+  padding: 12px;
+  cursor: pointer;
+}
+.leftStations button:hover,
+.rightStations button:hover {
+  border-color: var(--yellow);
+  color: #fff;
+}
+.leftStations span,
+.rightStations span {
+  color: var(--yellow);
+  font-size: var(--type-title);
+  line-height: 18px;
+  font-weight: 850;
+}
+.leftStations b,
+.rightStations b {
+  display: block;
+  margin-top: 8px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: var(--type-micro);
+  line-height: 13px;
+  font-weight: 650;
+}
+.leftStations i,
+.rightStations i {
+  position: relative;
+  display: inline-block;
+  width: 15px;
+  height: 4px;
+  margin: 24px 3px 0 0;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.14);
+}
+.stackStation {
+  position: absolute;
+  left: 421px;
+  width: 58px;
+  height: 52px;
+  border: 0;
+  background: transparent;
+  color: #778285;
+  cursor: pointer;
+}
+.stackStation span {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: var(--type-micro);
+  line-height: 13px;
+  font-weight: 700;
+}
+.stackStation i {
+  position: absolute;
+  left: 12px;
+  top: 28px;
+  width: 34px;
+  height: 3px;
+  background: rgba(243, 196, 0, 0.55);
+  box-shadow: 0 0 10px rgba(243, 196, 0, 0.12);
+}
+.stackTop {
+  top: 26px;
+}
+.stackBottom {
+  top: 435px;
+}
+.stackBottom span {
+  top: 30px;
+}
+.stackBottom i {
+  top: 13px;
+}
+.chassisCallout {
+  position: absolute;
+  border: 0;
+  background: transparent;
+  color: #758184;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 4px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: var(--type-label);
+  font-weight: 750;
+  line-height: 14px;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  z-index: 5;
+}
+.chassisCallout i {
+  width: 29px;
+  height: 24px;
+  border: 1px solid rgba(0, 188, 231, 0.38);
+  color: var(--cyan);
+  display: grid;
+  place-items: center;
+  font-style: normal;
+}
+.chassisCallout:hover {
+  color: #fff;
+}
+.chassisDimension {
+  position: absolute;
+  left: 50%;
+  bottom: 38px;
+  transform: translateX(-50%);
+  color: #465356;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: var(--type-micro);
+  font-weight: 650;
+  line-height: 13px;
+  letter-spacing: 0.1em;
+  white-space: nowrap;
+}
+.chassisStacked .leftStations,
+.chassisStacked .rightStations {
+  flex-direction: column;
+  top: 104px;
+}
+.chassisStacked .leftStations {
+  right: 670px;
+}
+.chassisStacked .rightStations {
+  left: 670px;
+}
+.chassisStacked .leftStations button,
+.chassisStacked .rightStations button {
+  width: 126px;
+  height: 92px;
+}
+.chassisExploded .boardFrame {
+  transform: scale(0.92);
+}
+.chassisExploded .leftStations {
+  transform: translateX(-24px);
+}
+.chassisExploded .rightStations {
+  transform: translateX(24px);
+}
+.chassisExploded .stackTop {
+  transform: translateY(-18px);
+}
+.chassisExploded .stackBottom {
+  transform: translateY(18px);
+}
 .moduleCards svg {
   width: 11px;
 }
@@ -1092,6 +1415,9 @@
   .blueprintScale {
     transform-origin: 50% 45%;
   }
+  .chassisDrawing {
+    transform: translateX(-50%) scale(0.82);
+  }
 }
 @media (max-width: 700px) {
   .topbar {
@@ -1117,6 +1443,21 @@
   .moduleRail.indexOpen {
     height: 162px;
     border-bottom: 1px solid var(--line);
+  }
+  .chassisViewport {
+    height: 540px;
+  }
+  .chassisDrawing {
+    top: 18px;
+    transform: translateX(-50%) scale(0.58);
+  }
+  .chassisCallout {
+    display: none;
+  }
+  .chassisDimension {
+    white-space: normal;
+    width: 80%;
+    text-align: center;
   }
   .commandBar {
     padding: 7px 14px;
