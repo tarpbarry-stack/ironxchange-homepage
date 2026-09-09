@@ -1,0 +1,183 @@
+name: Reconcile current AOS Equipment production
+
+on:
+  push:
+    branches:
+      - ops/reconcile-current-equipment-20260909
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ixi-core-production
+  cancel-in-progress: false
+
+jobs:
+  reconcile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+      AWS_INSTANCE_ID: ${{ secrets.AWS_INSTANCE_ID }}
+
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Deploy exact reconciler and apply approved manifest
+        shell: bash
+        run: |
+          set -euo pipefail
+          remote_script="$(cat <<'REMOTE_SCRIPT'
+          set -euo pipefail
+          APP=/var/www/ix-core
+          CORE_SHA=2b7b1db6f1d0fd6e0862931ac956d98da90360bc
+          CORE_PARENT=0912d552f47551f8c0b40b10956c323eab5a16c5
+          ENTITY=entity_4d78e9fb-92e4-4cc2-a8cb-1a2f19e097d0
+          ACTOR=6a760f5e-4165-4970-ad5d-e20f278dfa34
+          DATABASE=/var/lib/ixi-core/mos/ixi-aos.sqlite
+          PASSPORTS=/var/www/ix-core/passport/passports.json
+          MANIFEST=/tmp/ixi-equipment-current-manifest.json
+          MANIFEST_SHA=e251523bc359b4a6789914d777c7873c02b00507f7f22e2a53176d175e8bca3f
+          STAGE=/tmp/ixi-core-current-equipment-$CORE_SHA
+          BACKUP=/var/backups/ixi-core-equipment/pre-$CORE_SHA-$(date -u +%Y%m%dT%H%M%SZ)
+          BACKUP_READY=0
+          SUCCESS=0
+
+          run_pm2() {
+            if [ "$PM2_USER" = root ]; then pm2 "$@"; else sudo -u ubuntu -H pm2 "$@"; fi
+          }
+
+          rollback() {
+            if [ "$SUCCESS" -eq 1 ] || [ "$BACKUP_READY" -ne 1 ]; then return; fi
+            echo 'Equipment reconciliation failed; restoring exact preflight state.' >&2
+            run_pm2 stop IX-Core >/dev/null 2>&1 || true
+            install -m 0640 "$BACKUP/ixi-aos.sqlite" "$DATABASE"
+            rm -f -- "$DATABASE-wal" "$DATABASE-shm"
+            install -m 0640 "$BACKUP/passports.json" "$PASSPORTS"
+            install -m 0644 "$BACKUP/repair-aos-equipment-membership.js" "$APP/ops/repair-aos-equipment-membership.js"
+            rm -f -- "$APP/mos/migrations/equipmentInventoryReconciliationService.js"
+            rm -f -- "$APP/ops/reconcile-aos-equipment-inventory.js"
+            run_pm2 restart IX-Core --update-env || true
+          }
+          trap rollback EXIT
+
+          test -d "$APP"
+          test -f "$DATABASE"
+          test -f "$PASSPORTS"
+          if pm2 describe IX-Core >/dev/null 2>&1; then PM2_USER=root;
+          elif sudo -u ubuntu -H pm2 describe IX-Core >/dev/null 2>&1; then PM2_USER=ubuntu;
+          else echo 'IX-Core PM2 process not found.' >&2; exit 1; fi
+
+          rm -rf -- "$STAGE"
+          git clone --quiet https://github.com/tarpbarry-stack/ixi-core.git "$STAGE"
+          git -C "$STAGE" checkout --quiet --detach "$CORE_SHA"
+          test "$(git -C "$STAGE" rev-parse HEAD)" = "$CORE_SHA"
+          cd "$STAGE"
+          npm ci
+          npm test
+
+          live_old_hash="$(sha256sum "$APP/ops/repair-aos-equipment-membership.js" | cut -d' ' -f1)"
+          expected_old_hash="$(git show "$CORE_PARENT:ops/repair-aos-equipment-membership.js" | sha256sum | cut -d' ' -f1)"
+          test "$live_old_hash" = "$expected_old_hash"
+          test ! -e "$APP/mos/migrations/equipmentInventoryReconciliationService.js"
+          test ! -e "$APP/ops/reconcile-aos-equipment-inventory.js"
+
+          curl -fsS 'https://preview.ironxchange.com/api/account-listings?authorId=6a760f5e-4165-4970-ad5d-e20f278dfa34&scope=aos-owned' |
+            jq -S '[.[] | {listingId:.id, displayName:.title, value:(.publicData.price // null), currency:"USD", channel:(.machineAccess // .publicData.machineAccess // "private"), state:.sharetribeState, fields:{serialNumber:(.serialNumber // .publicData.serialNumber // ""), year:(.year // .publicData.year // ""), make:(.make // .publicData.make // ""), model:(.model // .publicData.model // ""), hours:(.hours // .publicData.hours // ""), location:(.location // .publicData.location // "")}}]' > "$MANIFEST"
+          test "$(jq length "$MANIFEST")" = 23
+          test "$(sha256sum "$MANIFEST" | cut -d' ' -f1)" = "$MANIFEST_SHA"
+
+          run_pm2 stop IX-Core
+          mkdir -p "$BACKUP"
+          cp -a "$PASSPORTS" "$BACKUP/passports.json"
+          cp -a "$APP/ops/repair-aos-equipment-membership.js" "$BACKUP/repair-aos-equipment-membership.js"
+          NODE_PATH="$APP/node_modules" DATABASE="$DATABASE" BACKUP_DB="$BACKUP/ixi-aos.sqlite" node - <<'NODE'
+          const assert = require("node:assert/strict");
+          const Database = require("better-sqlite3");
+          (async () => {
+            const source = new Database(process.env.DATABASE, { readonly: true });
+            assert.deepEqual(source.pragma("integrity_check"), [{ integrity_check: "ok" }]);
+            await source.backup(process.env.BACKUP_DB);
+            source.close();
+            const backup = new Database(process.env.BACKUP_DB, { readonly: true });
+            assert.deepEqual(backup.pragma("integrity_check"), [{ integrity_check: "ok" }]);
+            backup.close();
+          })().catch(error => { console.error(error); process.exit(1); });
+          NODE
+          BACKUP_READY=1
+
+          install -D -m 0644 "$STAGE/mos/migrations/equipmentInventoryReconciliationService.js" "$APP/mos/migrations/equipmentInventoryReconciliationService.js"
+          install -D -m 0644 "$STAGE/ops/reconcile-aos-equipment-inventory.js" "$APP/ops/reconcile-aos-equipment-inventory.js"
+          install -D -m 0644 "$STAGE/ops/repair-aos-equipment-membership.js" "$APP/ops/repair-aos-equipment-membership.js"
+
+          export IXI_MOS_STORAGE_PROVIDER=sqlite
+          export IXI_MOS_SQLITE_PATH="$DATABASE"
+          export IXI_MOS_DATA_ROOT=/var/lib/ixi-core/mos
+          export IXI_PASSPORT_DATA_FILE="$PASSPORTS"
+          export NODE_PATH="$APP/node_modules"
+          cd "$APP"
+          PASSPORT_COUNT_BEFORE="$(node -e 'console.log(require("./passport/passportRegistry").readPassportRecords().length)')"
+          ACTIVE_MACHINE_COUNT_BEFORE="$(node -e 'console.log(require("./mos/objects/objectService").listObjects({entityId:process.argv[1],status:"active"}).filter(x=>x.objectType==="machine").length)' "$ENTITY")"
+          test "$ACTIVE_MACHINE_COUNT_BEFORE" = 23
+
+          node ops/reconcile-aos-equipment-inventory.js --entity="$ENTITY" --actor="$ACTOR" --expected-listings=23 --manifest="$MANIFEST" --manifest-sha256="$MANIFEST_SHA" > "$BACKUP/dry-run.json"
+          test "$(jq -r .existingCanonicalListingCount "$BACKUP/dry-run.json")" = 4
+          test "$(jq -r .missingCanonicalObjectCount "$BACKUP/dry-run.json")" = 19
+          test "$(jq -r .staleMembershipCount "$BACKUP/dry-run.json")" = 19
+
+          node ops/reconcile-aos-equipment-inventory.js --entity="$ENTITY" --actor="$ACTOR" --expected-listings=23 --manifest="$MANIFEST" --manifest-sha256="$MANIFEST_SHA" --apply > "$BACKUP/apply.json"
+          test "$(jq -r .provisionedObjectCount "$BACKUP/apply.json")" = 19
+          test "$(jq -r .endedMembershipCount "$BACKUP/apply.json")" = 19
+          test "$(jq -r .createdMembershipCount "$BACKUP/apply.json")" = 19
+          test "$(jq -r .projectionMemberCount "$BACKUP/apply.json")" = 23
+          test "$(jq -r .passportCountBefore "$BACKUP/apply.json")" = "$PASSPORT_COUNT_BEFORE"
+          test "$(jq -r .passportCountAfter "$BACKUP/apply.json")" = "$PASSPORT_COUNT_BEFORE"
+
+          node ops/reconcile-aos-equipment-inventory.js --entity="$ENTITY" --actor="$ACTOR" --expected-listings=23 --manifest="$MANIFEST" --manifest-sha256="$MANIFEST_SHA" > "$BACKUP/verified-replay.json"
+          test "$(jq -r .existingCanonicalListingCount "$BACKUP/verified-replay.json")" = 23
+          test "$(jq -r .missingCanonicalObjectCount "$BACKUP/verified-replay.json")" = 0
+          test "$(jq -r .staleMembershipCount "$BACKUP/verified-replay.json")" = 0
+          test "$(jq -r .projectionMemberCount "$BACKUP/verified-replay.json")" = 23
+          ACTIVE_MACHINE_COUNT_AFTER="$(node -e 'console.log(require("./mos/objects/objectService").listObjects({entityId:process.argv[1],status:"active"}).filter(x=>x.objectType==="machine").length)' "$ENTITY")"
+          test "$ACTIVE_MACHINE_COUNT_AFTER" = 42
+
+          NODE_PATH="$APP/node_modules" DATABASE="$DATABASE" node - <<'NODE'
+          const assert = require("node:assert/strict");
+          const Database = require("better-sqlite3");
+          const db = new Database(process.env.DATABASE, { readonly: true });
+          assert.deepEqual(db.pragma("integrity_check"), [{ integrity_check: "ok" }]);
+          db.close();
+          NODE
+
+          run_pm2 restart IX-Core --update-env
+          for attempt in $(seq 1 20); do
+            if curl -fsS http://127.0.0.1:4100/health > "$BACKUP/health.json"; then break; fi
+            sleep 2
+          done
+          test "$(jq -r .ok "$BACKUP/health.json")" = true
+          test "$(jq -r .mosStorage.integrity "$BACKUP/health.json")" = ok
+          auth_status="$(curl -sS -o "$BACKUP/strict-auth.json" -w '%{http_code}' http://127.0.0.1:4100/mos/v1/aos/environment)"
+          case "$auth_status" in 401|403) ;; *) exit 1 ;; esac
+
+          SUCCESS=1
+          cat "$BACKUP/dry-run.json"
+          cat "$BACKUP/apply.json"
+          cat "$BACKUP/verified-replay.json"
+          cat "$BACKUP/health.json"
+          REMOTE_SCRIPT
+          )"
+
+          remote_script_b64="$(printf '%s' "$remote_script" | base64 -w 0)"
+          ssm_command="printf '%s' '$remote_script_b64' | base64 -d | bash"
+          parameters="$(jq -cn --arg command "$ssm_command" '{commands:[$command]}')"
+          command_id="$(aws ssm send-command --region "$AWS_REGION" --instance-ids "$AWS_INSTANCE_ID" --document-name AWS-RunShellScript --comment 'Reconcile exact current AOS Equipment' --parameters "$parameters" --query 'Command.CommandId' --output text)"
+          if ! aws ssm wait command-executed --region "$AWS_REGION" --command-id "$command_id" --instance-id "$AWS_INSTANCE_ID"; then true; fi
+          invocation="$(aws ssm get-command-invocation --region "$AWS_REGION" --command-id "$command_id" --instance-id "$AWS_INSTANCE_ID")"
+          printf '%s' "$invocation" | jq -r '.StandardOutputContent'
+          printf '%s' "$invocation" | jq -r '.StandardErrorContent' >&2
+          test "$(printf '%s' "$invocation" | jq -r '.Status')" = Success
