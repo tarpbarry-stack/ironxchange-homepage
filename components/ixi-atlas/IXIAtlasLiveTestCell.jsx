@@ -41,6 +41,24 @@ const CALLOUTS = [
 
 const FACE_NAMES = ["PHOTO", "BUYER", "RELATION", "WORKFLOW"];
 
+const GEAR_TO_SCALE_MODE = Object.freeze({
+  1: "focus",
+  2: "work",
+  3: "xl",
+  4: "large",
+  5: "medium",
+  6: "compact",
+  7: "micro",
+});
+
+const AUTO_GEAR_BY_CONSOLE_DEPTH = Object.freeze({
+  1: 3,
+  2: 4,
+  3: 5,
+  4: 6,
+  5: 7,
+});
+
 function clock() {
   return new Date().toISOString().slice(11, 23);
 }
@@ -105,6 +123,7 @@ export default function IXIAtlasLiveTestCell({ selected, onSelect, part }) {
   const [bayTab, setBayTab] = useState("OBJECT");
   const [detail, setDetail] = useState("FIELD");
   const [machineFace, setMachineFace] = useState(1);
+  const [gear, setGear] = useState(3);
   const [cardState, setCardState] = useState({ color: "none", outline: 1 });
   const [sequence, setSequence] = useState(1);
   const [events, setEvents] = useState([
@@ -122,9 +141,20 @@ export default function IXIAtlasLiveTestCell({ selected, onSelect, part }) {
   const updateCardState = useCallback((_id, patch) => {
     setCardState((current) => ({ ...current, ...patch }));
     if (patch.consoleSlots) {
-      record("CONSOLE", "console.layout", `${patch.consoleSlots.length} PANEL${patch.consoleSlots.length === 1 ? "" : "S"}`);
+      const nextDepth = patch.consoleSlots.length;
+      const automaticGear = AUTO_GEAR_BY_CONSOLE_DEPTH[nextDepth] || 7;
+      setGear((current) => Math.max(current, automaticGear));
+      record("CONSOLE", "console.layout", `${nextDepth} PANELS / AUTO GEAR ${automaticGear}`);
     }
   }, [record]);
+
+  const shiftGear = useCallback((direction) => {
+    const next = Math.max(1, Math.min(7, gear + direction));
+    if (next !== gear) {
+      setGear(next);
+      record("GEARBOX", "scale.changed", `GEAR ${next}`);
+    }
+  }, [gear, record]);
 
   const changeRelationship = useCallback((_id, patch) => {
     setCardState((current) => ({ ...current, ...patch }));
@@ -142,6 +172,7 @@ export default function IXIAtlasLiveTestCell({ selected, onSelect, part }) {
 
   const resetFixture = useCallback(() => {
     setMachineFace(1);
+    setGear(3);
     setCardState({ color: "none", outline: 1 });
     setEvents([{ id: sequence, time: clock(), source: "ATLAS", event: "fixture.reset", result: "BASELINE RESTORED" }]);
   }, [sequence]);
@@ -189,7 +220,14 @@ export default function IXIAtlasLiveTestCell({ selected, onSelect, part }) {
                 </button>
               ))}
             </div>
-            <button type="button" className={styles.resetCell} onClick={resetFixture}>RESET</button>
+            <div className={styles.benchUtilities}>
+              <div className={styles.gearbox} role="group" aria-label="Card and console size gearbox">
+                <button type="button" onClick={() => shiftGear(-1)} disabled={gear === 1} aria-label="Make card and console larger">+</button>
+                <strong aria-live="polite" aria-label={`Gear ${gear}`}>{gear}</strong>
+                <button type="button" onClick={() => shiftGear(1)} disabled={gear === 7} aria-label="Make card and console smaller">−</button>
+              </div>
+              <button type="button" className={styles.resetCell} onClick={resetFixture}>RESET</button>
+            </div>
           </div>
 
           <div className={styles.consoleViewport} onClickCapture={(event) => {
@@ -210,6 +248,8 @@ export default function IXIAtlasLiveTestCell({ selected, onSelect, part }) {
                 item={FIXTURE}
                 ixiCardState={ixiCardState}
                 updateIxiCardState={updateCardState}
+                enableCardScaling
+                cardScaleMode={GEAR_TO_SCALE_MODE[gear]}
                 renderParentCard={renderCard}
               />
               {mode === "INSPECT" && consoleDepth === 1 && CALLOUTS.map(([id, index, label, className]) => (
@@ -223,7 +263,7 @@ export default function IXIAtlasLiveTestCell({ selected, onSelect, part }) {
           </div>
           <div className={styles.consoleHint}>
             <span>{consoleDepth === 1 ? "USE SIDE ACTUATORS TO OPEN CONSOLE" : "SCROLL HORIZONTALLY · BOTTOM CONTROL CHANGES CONSOLE FACE"}</span>
-            <b>{consoleDepth} / 4 PANELS</b>
+            <b>GEAR {gear} · {consoleDepth} / 5 PANELS</b>
           </div>
         </div>
 

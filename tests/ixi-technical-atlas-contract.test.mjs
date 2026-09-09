@@ -109,6 +109,11 @@ test("TA-001 mounts the production Machine Card in a zero-write live fixture", (
   assert.match(testCell, /IXIBrowseObjectConsoleRouter/);
   assert.match(testCell, /role="tablist"/);
   assert.match(testCell, /FACE_NAMES/);
+  assert.match(testCell, /GEAR_TO_SCALE_MODE/);
+  assert.match(testCell, /AUTO_GEAR_BY_CONSOLE_DEPTH/);
+  assert.match(testCell, /enableCardScaling/);
+  assert.match(testCell, /Make card and console larger/);
+  assert.match(testCell, /Make card and console smaller/);
   assert.doesNotMatch(testCell, /fetch\s*\(/);
 });
 
