@@ -13,6 +13,7 @@ test("authenticated browser gateway exposes only governed session placement rout
   assert.ok(gateway.includes('pattern: /^\\/aos\\/workspace-sessions\\/[^/]+\\/end$/'));
   assert.match(gateway, /resolveAosBrowserSession/u);
   assert.match(gateway, /resolveIxCoreAosContext/u);
+  assert.match(gateway, /resolveExistingIxCoreAosEnvironment/u);
   assert.match(gateway, /resolveExistingIxCoreAosContext/u);
   assert.match(gateway, /Number\(error\?\.status\) !== 404/u);
   assert.match(gateway, /return resolveIxCoreAosContext\(\{/u);
@@ -22,6 +23,14 @@ test("authenticated browser gateway exposes only governed session placement rout
     "authority failures must never enter the rolling-release fallback"
   );
   assert.match(gateway, /path === "\/aos\/environment"/u);
+  assert.match(internalClient, /path: "\/aos\/context"/u);
+  assert.match(internalClient, /path: "\/aos\/environment"/u);
+  assert.match(internalClient, /resolutionMode: "existing-environment"/u);
+  assert.match(
+    internalClient,
+    /if \(Number\(error\?\.status\) === 404\) \{\s*return resolveIxCoreAosContext/u,
+    "only a missing existing context may enter governed onboarding"
+  );
   assert.match(
     internalClient,
     /AbortSignal\.timeout\(timeoutMs\)/u
