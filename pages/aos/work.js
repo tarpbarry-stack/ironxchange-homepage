@@ -1583,11 +1583,17 @@ async function returnContainerChildren(container) {
 async function boardContainerChildren(container) {
   const containerId = getContainerObjectId(container);
   const childIds = getContainerRequestedChildIds(container);
-  if (!containerId || !childIds.length || hasContainerReturnSnapshot(container)) {
+  const controller = workspaceSessionControllerRef.current;
+  if (
+    !containerId ||
+    !childIds.length ||
+    !controller ||
+    hasContainerReturnSnapshot(container)
+  ) {
     return;
   }
 
-  let nextPlacements = workspacePlacements;
+  let nextPlacements = controller.readPlacements();
   childIds.forEach(objectId => {
     nextPlacements = moveObjectToWorkspaceSurface({
       placements: nextPlacements,
@@ -1601,17 +1607,15 @@ async function boardContainerChildren(container) {
     operationId,
     childIds: [...childIds]
   };
-  setWorkspacePlacements(nextPlacements);
+
+  const boarded = controller.persistLayout(nextPlacements, {
+    operationId,
+    objectIds: childIds,
+    activeSummonedContext: containerId
+  });
 
   try {
-    await saveWorkspaceLayout(nextPlacements, {
-      operationId,
-      objectIds: childIds
-    });
-    await workspaceSessionControllerRef.current?.summonMany(
-      childIds,
-      containerId
-    );
+    await boarded.completion;
   } catch (error) {
     delete containerReturnSnapshotsRef.current[containerId];
     throw error;
