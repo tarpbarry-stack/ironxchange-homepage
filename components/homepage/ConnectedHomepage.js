@@ -127,18 +127,25 @@ function toPrivateListing(listing) {
 function HomepagePrivateAosCard({ listing }) {
   const [ixiState, setIxiState] = useState({ color: "none", outline: 1 });
   const [machineFace, setMachineFace] = useState(1);
+  const [placement, setPlacement] = useState({
+    machineAccess: "private",
+    machineChannel: "none",
+  });
   const privateListing = toPrivateListing(listing);
 
   return <div className={styles.privateObjectViewport}>
     <div className={styles.privateObjectNative}>
       <IXIMachineCard
         listing={privateListing}
-        cardContext="workspace"
+        cardContext="inventory"
         from="homepage-aos"
         showListingManagementActions={false}
         showSave={false}
         showMachineRail
         suppressFamilyLog
+        machineAccess={placement.machineAccess}
+        machineChannel={placement.machineChannel}
+        onMachinePlacementChange={(_machine, nextPlacement) => setPlacement(nextPlacement)}
         machineFace={machineFace}
         onCycleMachineFace={() => setMachineFace(current => current >= 4 ? 1 : current + 1)}
         ixiState={ixiState}
