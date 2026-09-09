@@ -7,14 +7,16 @@ import { fileURLToPath } from "node:url";
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const read = file => fs.readFileSync(path.join(root, file), "utf8");
 
-test("signup and login establish the commercial AOS identity before navigation", () => {
+test("signup establishes identity while returning users are never blocked by repair work", () => {
   const signup = read("pages/signup.js");
   const login = read("pages/login.js");
 
   assert.match(signup, /await ensureCommercialOnboarding\(\)/u);
   assert.match(signup, /\/aos\?welcome=1/u);
-  assert.match(login, /await ensureCommercialOnboarding\(\)/u);
-  assert.match(login, /await backfillOwnedMachines\(\)/u);
+  assert.match(login, /await sdk\.login\(/u);
+  assert.match(login, /window\.location\.assign\(destination\)/u);
+  assert.doesNotMatch(login, /ensureCommercialOnboarding/u);
+  assert.doesNotMatch(login, /backfillOwnedMachines/u);
 });
 
 test("browser bootstrap derives identity from the Sharetribe session and IX-Core", () => {

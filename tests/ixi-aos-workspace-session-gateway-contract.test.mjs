@@ -23,6 +23,9 @@ test("authenticated browser gateway exposes only governed session placement rout
     "authority failures must never enter the rolling-release fallback"
   );
   assert.match(gateway, /path === "\/aos\/environment"/u);
+  assert.match(gateway, /ixi-aos-session;dur=\$\{sessionMs\}/u);
+  assert.match(gateway, /ixi-aos-core;dur=\$\{ixCoreMs\}/u);
+  assert.match(gateway, /currentUserMs: session\?\.timing\?\.currentUserMs/u);
   assert.match(internalClient, /path: "\/aos\/context"/u);
   assert.match(internalClient, /path: "\/aos\/work-bootstrap"/u);
   assert.match(internalClient, /resolutionMode: "single-work-bootstrap"/u);
