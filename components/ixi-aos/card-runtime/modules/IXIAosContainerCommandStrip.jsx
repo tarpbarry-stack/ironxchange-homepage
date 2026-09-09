@@ -62,22 +62,23 @@ export default function IXIAosContainerCommandStrip({
       <style jsx>{`
         .ixi-aos-container-command-strip {
           position: absolute;
-          left: 6px;
-          right: 6px;
-          bottom: 81px;
-          height: 23px;
+          left: 5px;
+          right: 5px;
+          bottom: 79px;
+          height: 27px;
           display: flex;
           align-items: center;
           justify-content: center;
-          gap: 6px;
+          gap: 4px;
           background: transparent;
           z-index: 260;
         }
 
         button {
-          width: 77px;
-          min-width: 77px;
-          height: 19px;
+          flex: 1 1 0;
+          width: auto;
+          min-width: 0;
+          height: 23px;
           display: flex;
           align-items: center;
           justify-content: center;
