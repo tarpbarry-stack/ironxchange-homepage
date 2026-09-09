@@ -35,19 +35,7 @@ export default function IXIAosContainerDeckDock({
   const children =
     useMemo(
       () => {
-        const containerId =
-          clean(
-            container?.objectId ||
-            container?.id
-          );
-
-        return Array.isArray(objects)
-          ? objects.filter(child =>
-              clean(
-                child?.directContainerId
-              ) === containerId
-            )
-          : [];
+        return Array.isArray(objects) ? objects : [];
       },
       [container, objects]
     );

@@ -108,8 +108,9 @@ test("AOS creation and rendering share the recursive parent contract", async () 
   assert.doesNotMatch(creation, /IXI_AOS_SYSTEM_INDEX_LABEL/u);
   assert.match(creation, /parentObjectId:\s*destinationContainerId/u);
   assert.match(creation, /parentDisplayName:\s*getAosHierarchyDisplayName\(\s*container\s*\)/u);
-  assert.match(board, /resolveAosWorkspaceParentName\(\{\s*object:\s*item,\s*parentObject\s*\}\)/u);
-  assert.match(page, /resolveAosWorkspaceParentName\(\{\s*object,\s*parentObject\s*\}\)/u);
+  assert.match(board, /resolveAosWorkspaceParentName\(\{\s*object:\s*item\s*\}\)/u);
+  assert.match(page, /resolveAosWorkspaceParentName\(\{\s*object\s*\}\)/u);
+  assert.doesNotMatch(board, /directContainerId/u);
   assert.doesNotMatch(page, /parentDisplayName:\s*String\(\s*aosEntity/u);
   assert.match(legacyCard, /resolveAosWorkspaceParentName/u);
 });

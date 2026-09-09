@@ -37,7 +37,6 @@ export default function IXIAosCardIdentityFace({
     ? objects.length
     : 0;
   const canClearToParent = Boolean(
-    object?.directContainerId &&
     typeof onClearToParent === "function"
   );
 

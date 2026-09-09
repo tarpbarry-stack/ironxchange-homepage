@@ -640,7 +640,6 @@ export default function IXISystemIndexCard({
               ixiState={activeItemIxiState}
               ixiCardState={ixiCardState}
               onIxiStateChange={onIxiStateChange}
-              forceMachineCard={childCardMode === "machine"}
             />
           </div>
         ) : (

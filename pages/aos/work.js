@@ -989,54 +989,11 @@ const equipmentIndex =
 
   const equipmentWorkspaceIndex =
   useMemo(() => {
-    if (!equipmentIndex) {
-      return null;
-    }
-
-    const tuckedIds =
-      new Set(
-        (
-          machineContainers
-            .indexEquipment ||
-          []
-        ).map(String)
-      );
-
-    const tuckedItems =
-      (
-        equipmentIndex.items ||
-        []
-      ).filter(item => {
-        const machineId =
-          aosCanonicalAdmission.resolveObjectId(
-            item?.objectId || getListingId(item) || item?.passportId
-          );
-
-        /*
-         * A listing whose IX-Core join is unresolved remains visible in the
-         * established Private-card deck.  It is not admitted to session
-         * placement and cannot execute a governed move until repaired.
-         */
-        return !machineId || tuckedIds.has(machineId);
-      });
-
-    return {
-      ...equipmentIndex,
-
-      /*
-       * Canonical membership remains
-       * represented by itemCount.
-       *
-       * items is the current visible
-       * workspace deck only.
-       */
-      items:
-        tuckedItems
-    };
+    /* Durable relationship previews remain visible while the one operating
+     * card moves between workspace surfaces. */
+    return equipmentIndex;
   }, [
-    equipmentIndex,
-    machineContainers,
-    aosCanonicalAdmission
+    equipmentIndex
   ]);
 
   const {
@@ -2970,24 +2927,11 @@ workspaceDropSurface={
  */
 if (
   object?.objectId &&
-  String(
-    object?.objectType || ""
-  )
-    .trim()
-    .toLowerCase() !==
-    "machine"
+  object?.presentation?.kind !== "ixi-private-machine"
 ) {
-  const parentObject =
-    object?.directContainerId
-      ? getAosWorkspaceObjectById?.(
-          object.directContainerId
-        )
-      : null;
-
   const parentLabel =
     resolveAosWorkspaceParentName({
-      object,
-      parentObject
+      object
     });
 
   const projectedChildren =

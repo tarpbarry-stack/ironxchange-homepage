@@ -1190,19 +1190,7 @@ export function renderIXIAosContainerModule({
     }
 
     children={
-      Array.isArray(objects)
-        ? objects.filter(child =>
-            String(
-              child?.directContainerId ||
-              ""
-            ) ===
-            String(
-              object?.objectId ||
-              object?.id ||
-              ""
-            )
-          )
-        : []
+      Array.isArray(objects) ? objects : []
     }
 
     selectedChildIndex={

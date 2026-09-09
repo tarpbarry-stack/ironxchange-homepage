@@ -94,19 +94,9 @@ export function getIXIDirectContainerId(
   object = {}
 ) {
   return clean(
-    object.directContainerId ||
-
-    object.containerId ||
-
     object.parentObjectId ||
-
-    object.relationships
-      ?.containment
-      ?.directContainerId ||
-
-    object.metadata
-      ?.directContainerId ||
-
+    object.parent?.objectId ||
+    object.metadata?.parentObjectId ||
     ""
   );
 }
@@ -153,12 +143,8 @@ export function getIXIDirectContainerChildren({
         }
 
 
-        return (
-          getIXIDirectContainerId(
-            object
-          ) ===
-          containerId
-        );
+        /* objects is an already-governed rail projection. */
+        return true;
       }
     );
 }
