@@ -41,6 +41,17 @@ test("the gateway doors contain three product-faithful marketing tableaux", () =
   assert.doesNotMatch(homepage, /IXITransactObjectConsole/u);
 });
 
+test("each complete gateway bay is one outlined product link", () => {
+  assert.match(homepage, /function GatewayHitAreas/u);
+  assert.match(homepage, /aria-label="Enter the IXI Marketplace"/u);
+  assert.match(homepage, /aria-label="Enter IXI AOS"/u);
+  assert.match(homepage, /aria-label="Enter IXI TRAN\$ACT"/u);
+  assert.match(homepage, /className=\{styles\.gatewayHitAreas\}/u);
+  assert.match(styles, /\.gatewayHitArea\{[\s\S]*?border:1px solid/u);
+  assert.match(styles, /\.gatewayHitArea:hover/u);
+  assert.match(styles, /\.gatewayHitArea:focus-visible/u);
+});
+
 test("homepage routes every benefit and conversion into the real product", () => {
   assert.match(homepage, /href="\/browse-v2"/u);
   assert.match(homepage, /href="\/aos\/work"/u);
