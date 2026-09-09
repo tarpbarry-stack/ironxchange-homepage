@@ -1,6 +1,7 @@
 import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 
 import IXIMachineCard from "../ixi-machine-card/IXIMachineCard";
@@ -9,6 +10,11 @@ import ListingShareProvider from "../ixi-marketplace/ListingShareProvider";
 import { getListingId } from "../../lib/listingFormatters";
 import { captureIXEvent } from "../../lib/posthog";
 import styles from "./ConnectedHomepage.module.css";
+
+const IXITransactApp = dynamic(
+  () => import("../ixi-aos/transact/IXITransactApp"),
+  { ssr: false },
+);
 
 const FALLBACK_LISTING = Object.freeze({
   id: "69f9042e-bd3d-4a6e-a78c-05b0b806d6b7",
@@ -103,6 +109,64 @@ function HomepageListingObject({ listing, consoleOpen = false, location = "benef
   </div>;
 }
 
+function toPrivateListing(listing) {
+  const publicData = listing.publicData || listing.attributes?.publicData || {};
+
+  return {
+    ...listing,
+    machineAccess: "private",
+    machineChannel: "none",
+    publicData: {
+      ...publicData,
+      machineAccess: "private",
+      machineChannel: "none",
+    },
+  };
+}
+
+function HomepagePrivateAosCard({ listing }) {
+  const [ixiState, setIxiState] = useState({ color: "none", outline: 1 });
+  const [machineFace, setMachineFace] = useState(1);
+  const privateListing = toPrivateListing(listing);
+
+  return <div className={styles.privateObjectViewport}>
+    <div className={styles.privateObjectNative}>
+      <IXIMachineCard
+        listing={privateListing}
+        cardContext="workspace"
+        from="homepage-aos"
+        showListingManagementActions={false}
+        showSave={false}
+        showMachineRail
+        suppressFamilyLog
+        machineFace={machineFace}
+        onCycleMachineFace={() => setMachineFace(current => current >= 4 ? 1 : current + 1)}
+        ixiState={ixiState}
+        onIxiStateChange={(_id, patch) => setIxiState(current => ({ ...current, ...patch }))}
+      />
+    </div>
+  </div>;
+}
+
+function HomepageTransactScreen({ listing }) {
+  const publicData = listing.publicData || listing.attributes?.publicData || {};
+  const transactObject = {
+    ...listing,
+    objectType: "machine",
+    displayName: listing.title || "EQUIPMENT",
+    passportId: listing.passportId || publicData.passportId || "",
+  };
+
+  return <div className={styles.transactDoorViewport}>
+    <div className={styles.transactDoorNative}>
+      <IXITransactApp
+        object={transactObject}
+        onClose={() => { window.location.href = "/transact"; }}
+      />
+    </div>
+  </div>;
+}
+
 function GatewayBay({ number, title, headline, detail, tone, icon }) {
   return <article className={`${styles.gatewayBay} ${styles[tone]}`}><div className={styles.bayHead}><Icon name={icon} /><span>{number}</span><b>{title}</b></div><strong>{headline}</strong><small>{detail}</small></article>;
 }
@@ -141,7 +205,7 @@ export default function ConnectedHomepage() {
     <Head><title>IronXchange — Your Machine Is the Beginning</title><meta name="description" content="One Passport connects the marketplace, the work, and the money." /><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" /><link rel="preload" as="image" href="/images/ixi-homepage-bay-gateway.webp" fetchPriority="high" /></Head>
     <header className={styles.siteHeader}><Link href="/" className={styles.brand} aria-label="IronXchange home"><Image src="/images/ironxchange-logo.png" width={1807} height={396} priority alt="IronXchange" /></Link><nav aria-label="IronXchange products">{NAV.map(([href, label]) => <Link href={href} key={label}>{label}</Link>)}</nav><div className={styles.headerActions}><Link href="/browse-v2"><Icon name="search" /><span>SEARCH</span></Link><Link href="/login">SIGN IN</Link><Link href="/post-free" className={styles.postMachine}>POST A MACHINE</Link></div></header>
     <main>
-      <section className={styles.hero} aria-labelledby="hero-title"><Image className={styles.heroImage} src="/images/ixi-homepage-bay-gateway.webp" alt="" fill priority fetchPriority="high" sizes="100vw" /><div className={styles.heroShade} /><div className={styles.blueprintGrid} /><div className={styles.sideDoctrine}>BUILT FOR<br />THE PEOPLE<br />WHO MOVE IRON.</div><div className={styles.heroCopy}><h1 id="hero-title">YOUR MACHINE<br />IS THE BEGINNING<span>.</span></h1><p>One Passport connects the marketplace,<br />the work, and the money.</p><div className={styles.heroActions}><ButtonLink href="/post-free">BRING A MACHINE INTO IXI</ButtonLink><ButtonLink href="#system" tone="secondary">SEE HOW IXI WORKS</ButtonLink></div></div><div className={styles.gatewayJourney}><div className={styles.gatewayRail} aria-hidden="true"><i /><i /><i /></div><GatewayBay number="01" title="MARKETPLACE" headline="LIST ONCE. DISTRIBUTE EVERYWHERE." detail="Reach buyers without rebuilding the listing." tone="marketTone" icon="cart" /><GatewayBay number="02" title="AOS" headline="OPERATE THE WHOLE BUSINESS." detail="Machines. People. Locations. Work." tone="aosTone" icon="gear" /><GatewayBay number="03" title="TRAN$ACT" headline="CONTROL THE ENTIRE ENTITY." detail="Every cost. Every document. Every dollar." tone="transactTone" icon="money" /></div><div className={styles.heroPassport}><HomepageListingObject listing={listing} location="hero" /></div><div className={styles.heroStatement}><b>ONE MACHINE. ONE PASSPORT<span>.</span> ONE OPERATING SYSTEM<span>.</span></b><small>BUILT FOR THE PEOPLE WHO MOVE IRON.</small></div></section>
+      <section className={styles.hero} aria-labelledby="hero-title"><Image className={styles.heroImage} src="/images/ixi-homepage-bay-gateway.webp" alt="" fill priority fetchPriority="high" sizes="100vw" /><div className={styles.heroShade} /><div className={styles.blueprintGrid} /><div className={styles.sideDoctrine}>BUILT FOR<br />THE PEOPLE<br />WHO MOVE IRON.</div><div className={styles.heroCopy}><h1 id="hero-title">YOUR MACHINE<br />IS THE BEGINNING<span>.</span></h1><p>One Passport connects the marketplace,<br />the work, and the money.</p><div className={styles.heroActions}><ButtonLink href="/post-free">BRING A MACHINE INTO IXI</ButtonLink><ButtonLink href="#system" tone="secondary">SEE HOW IXI WORKS</ButtonLink></div></div><div className={styles.gatewayJourney}><div className={styles.gatewayRail} aria-hidden="true"><i /><i /><i /></div><GatewayBay number="01" title="MARKETPLACE" headline="LIST ONCE. DISTRIBUTE EVERYWHERE." detail="Reach buyers without rebuilding the listing." tone="marketTone" icon="cart" /><GatewayBay number="02" title="AOS" headline="OPERATE THE WHOLE BUSINESS." detail="Machines. People. Locations. Work." tone="aosTone" icon="gear" /><GatewayBay number="03" title="TRAN$ACT" headline="CONTROL THE ENTIRE ENTITY." detail="Every cost. Every document. Every dollar." tone="transactTone" icon="money" /></div><div className={styles.heroDoorObjects}><div className={styles.heroDoorObject}><HomepageListingObject listing={listing} location="hero" /></div><div className={styles.heroDoorObject}><HomepagePrivateAosCard listing={listing} /></div><div className={styles.heroDoorObject}><HomepageTransactScreen listing={listing} /></div></div><div className={styles.heroStatement}><b>ONE MACHINE. ONE PASSPORT<span>.</span> ONE OPERATING SYSTEM<span>.</span></b><small>BUILT FOR THE PEOPLE WHO MOVE IRON.</small></div></section>
       <section className={styles.systemIntro} id="system"><span>IXI / THE CONNECTED MACHINE SYSTEM</span><h2>BRING THE MACHINE IN.<br /><em>IXI CARRIES IT FORWARD.</em></h2><p>Create the record once. Every system adds value without making you start over.</p></section>
       <BenefitSection number="01" product="MARKETPLACE" headline="DISTRIBUTE WITHOUT REBUILDING" body="Create the machine once. Publish it, share it, and move it everywhere." benefit="ONE RECORD. EVERY CHANNEL." href="/browse-v2" tone="marketTone" image="/images/ixi-homepage-bay-marketplace.webp"><MarketplaceVisual listing={listing} /></BenefitSection>
       <BenefitSection number="02" product="AOS" headline="OPERATE WHAT YOU OWN" body="Connect machines, people, locations, and work around the same Passport." benefit="THE BUSINESS AROUND THE MACHINE." href="/aos/work" tone="aosTone" image="/images/ixi-homepage-bay-aos.webp"><AosVisual /></BenefitSection>

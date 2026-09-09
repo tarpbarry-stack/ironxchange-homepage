@@ -30,6 +30,16 @@ test("one real IXI Marketplace object enters and distributes through the system"
   assert.doesNotMatch(homepage, /function PassportCard/u);
 });
 
+test("the gateway doors contain the three real IXI product surfaces", () => {
+  assert.match(homepage, /className=\{styles\.heroDoorObjects\}/u);
+  assert.match(homepage, /<HomepageListingObject listing=\{listing\} location="hero"/u);
+  assert.match(homepage, /<HomepagePrivateAosCard listing=\{listing\}/u);
+  assert.match(homepage, /<HomepageTransactScreen listing=\{listing\}/u);
+  assert.match(homepage, /machineAccess: "private"/u);
+  assert.match(homepage, /showMachineRail/u);
+  assert.match(homepage, /import\("\.\.\/ixi-aos\/transact\/IXITransactApp"\)/u);
+});
+
 test("homepage routes every benefit and conversion into the real product", () => {
   assert.match(homepage, /href="\/browse-v2"/u);
   assert.match(homepage, /href="\/aos\/work"/u);
