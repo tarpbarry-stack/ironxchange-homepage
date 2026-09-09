@@ -209,6 +209,24 @@ test("Gearbox opens its own seven-speed live card screen", () => {
   assert.doesNotMatch(drilldown, /fetch\s*\(/);
 });
 
+test("the card scales around a fixed environment center", () => {
+  const testCell = fs.readFileSync(
+    new URL("../components/ixi-atlas/IXIAtlasLiveTestCell.jsx", import.meta.url),
+    "utf8",
+  );
+  const css = fs.readFileSync(
+    new URL("../components/ixi-atlas/IXITechnicalAtlas.module.css", import.meta.url),
+    "utf8",
+  );
+
+  assert.match(testCell, /styles\.consoleClosed/);
+  assert.match(testCell, /styles\.cardCenterRig/);
+  assert.match(css, /\.consoleMount\.consoleClosed[\s\S]*?width:\s*100%/);
+  assert.match(css, /\.cardCenterRig[\s\S]*?place-items:\s*center/);
+  assert.match(css, /\.cardAnnotationObject[\s\S]*?place-items:\s*center/);
+  assert.match(css, /\.gearCardMount[\s\S]*?inset:\s*0[\s\S]*?place-items:\s*center/);
+});
+
 test("the System Index is an accessible assembly navigator", () => {
   const atlas = fs.readFileSync(
     new URL("../components/ixi-atlas/IXITechnicalAtlas.jsx", import.meta.url),

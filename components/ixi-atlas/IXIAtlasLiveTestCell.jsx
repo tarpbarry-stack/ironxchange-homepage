@@ -444,7 +444,7 @@ export default function IXIAtlasLiveTestCell({ selected, onSelect, part }) {
               record("RAIL / 05", "machine.send", "COMMAND CAPTURED");
             }
           }}>
-            <div className={`${styles.consoleMount} ${consoleDepth > 1 ? styles.consoleOpen : ""}`}>
+            <div className={`${styles.consoleMount} ${consoleDepth > 1 ? styles.consoleOpen : styles.consoleClosed}`}>
               {mode === "INSPECT" && consoleDepth === 1 ? (
                 <CardAnnotationRig selected={selected} onSelect={onSelect} onOpenConsole={openConsoleDrilldown}
                   revisionKey={`${gear}-${machineFace}-${cardState.color}-${cardState.outline}`}>
@@ -458,6 +458,18 @@ export default function IXIAtlasLiveTestCell({ selected, onSelect, part }) {
                     renderParentCard={renderCard}
                   />
                 </CardAnnotationRig>
+              ) : consoleDepth === 1 ? (
+                <div className={styles.cardCenterRig}>
+                  <IXIBrowseObjectConsoleRouter
+                    objectId={MACHINE_ID}
+                    item={FIXTURE}
+                    ixiCardState={ixiCardState}
+                    updateIxiCardState={updateCardState}
+                    enableCardScaling
+                    cardScaleMode={GEAR_TO_SCALE_MODE[gear]}
+                    renderParentCard={renderCard}
+                  />
+                </div>
               ) : (
                 <IXIBrowseObjectConsoleRouter
                   objectId={MACHINE_ID}
