@@ -39,7 +39,7 @@ function HeroSystem({ machine }) {
   return <div className={styles.heroSystem} aria-label="One machine connected across Marketplace, AOS, and Tran$act">
     <div className={styles.systemTop}><span>IXI / CONNECTED MACHINE SYSTEM</span><Status tone="online">NETWORK ONLINE</Status></div>
     <div className={styles.systemRail}><i/><i/><i/></div>
-    <div className={styles.machineViewport}><div className={styles.machineNumber}>IXI / 001</div><div className={styles.machineField}/><Image src="/images/ixi-homepage-komatsu-wa475-cutout.png" alt={`${machine.year} ${machine.make} ${machine.model} wheel loader`} fill priority sizes="(max-width: 900px) 94vw, 58vw" className={styles.machineCutout}/><div className={styles.machineSpecs}><span>{machine.year}</span><b>{machine.make} {machine.model}</b><span>{machine.hours}</span></div></div>
+    <div className={styles.machineViewport}><div className={styles.machineNumber}>IXI / 001</div><div className={styles.machineField}/><div className={styles.machineSpecs}><span>{machine.year}</span><b>{machine.make} {machine.model}</b><span>{machine.hours}</span></div></div>
     <div className={styles.passportStrip}><div><Icon name="passport"/><span><small>PERMANENT MACHINE IDENTITY</small><b>IXI PASSPORT</b></span></div><strong>{machine.passportId}</strong><span className={styles.passportLine}/><small>ONE RECORD / EVERY MOVE</small></div>
     <div className={styles.systemColumns}><HeroMarketplace machine={machine}/><HeroAos machine={machine}/><HeroTransact machine={machine}/></div>
   </div>;
