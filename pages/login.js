@@ -5,6 +5,7 @@ import {
   ensureCommercialOnboarding,
   backfillOwnedMachines
 } from "../lib/onboarding/ixiCommercialOnboardingClient";
+import { getSafeIXILoginReturnTarget } from "../lib/auth/ixiLoginReturn";
 
 const BRAND_YELLOW = "#FFC400";
 const STAGING = "https://staging.ironxchange.com";
@@ -45,11 +46,8 @@ async function handleLogin(e) {
       console.error("IXI MACHINE BACKFILL ERROR:", backfillError);
     }
 
-   const params = new URLSearchParams(window.location.search);
-
-const next = params.get("next") || "/";
-
-window.location.href = next;
+    const destination = getSafeIXILoginReturnTarget(window.location.search);
+    window.location.assign(destination);
   } catch (err) {
     console.error("LOGIN ERROR FULL:", err);
 
