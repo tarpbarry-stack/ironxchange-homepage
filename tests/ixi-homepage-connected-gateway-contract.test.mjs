@@ -30,21 +30,18 @@ test("one real IXI Marketplace object enters and distributes through the system"
   assert.doesNotMatch(homepage, /function PassportCard/u);
 });
 
-test("the gateway doors contain the three real IXI product surfaces", () => {
+test("the gateway doors contain three product-faithful marketing tableaux", () => {
   assert.match(homepage, /className=\{styles\.heroDoorObjects\}/u);
-  assert.match(homepage, /<HomepageListingObject listing=\{listing\} location="hero"/u);
-  assert.match(homepage, /<HomepagePrivateAosCard listing=\{listing\}/u);
-  assert.match(homepage, /<HomepageTransactScreen listing=\{listing\}/u);
-  assert.match(homepage, /machineAccess: "private"/u);
-  assert.match(homepage, /cardContext="inventory"/u);
-  assert.match(homepage, /onMachinePlacementChange/u);
-  assert.match(homepage, /showMachineRail/u);
-  assert.match(homepage, /import IXIPrivateObjectConsole/u);
-  assert.match(homepage, /<IXIPrivateObjectConsole/u);
-  assert.match(homepage, /consoleRightOpen: true/u);
-  assert.match(homepage, /import IXITransactObjectConsole/u);
-  assert.match(homepage, /<IXITransactObjectConsole/u);
-  assert.match(homepage, /homepage-transact-workspace/u);
+  assert.match(homepage, /<HeroMarketplaceTableau listing=\{listing\}/u);
+  assert.match(homepage, /<HeroAosTableau listing=\{listing\}/u);
+  assert.match(homepage, /<HeroTransactTableau listing=\{listing\}/u);
+  assert.match(homepage, /IXI CONSOLE/u);
+  assert.match(homepage, /AOS CONSOLE/u);
+  assert.match(homepage, /FINANCIAL CONSOLE/u);
+  assert.match(homepage, /LIVE<\/span><b>PRIV<\/b><span>AUCT/u);
+  assert.match(homepage, /ACQUIRE/u);
+  assert.doesNotMatch(homepage, /IXIPrivateObjectConsole/u);
+  assert.doesNotMatch(homepage, /IXITransactObjectConsole/u);
 });
 
 test("homepage routes every benefit and conversion into the real product", () => {

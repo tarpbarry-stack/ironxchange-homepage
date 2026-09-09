@@ -5,8 +5,6 @@ import { useEffect, useState } from "react";
 
 import IXIMachineCard from "../ixi-machine-card/IXIMachineCard";
 import IXIBrowseObjectConsoleRouter from "../ixi-marketplace/IXIBrowseObjectConsoleRouter";
-import IXIPrivateObjectConsole from "../ixi-private-object/IXIPrivateObjectConsole";
-import IXITransactObjectConsole from "../ixi-aos/transact/IXITransactObjectConsole";
 import ListingShareProvider from "../ixi-marketplace/ListingShareProvider";
 import { getListingId } from "../../lib/listingFormatters";
 import { captureIXEvent } from "../../lib/posthog";
@@ -105,119 +103,66 @@ function HomepageListingObject({ listing, consoleOpen = false, location = "benef
   </div>;
 }
 
-function toPrivateListing(listing) {
-  const publicData = listing.publicData || listing.attributes?.publicData || {};
-
-  return {
-    ...listing,
-    machineAccess: "private",
-    machineChannel: "none",
-    publicData: {
-      ...publicData,
-      machineAccess: "private",
-      machineChannel: "none",
-    },
-  };
+function HeroIxiRail({ active = 4 }) {
+  return <div className={styles.heroIxiRail} aria-hidden="true">
+    {[1, 2, 3, 4, 5, 6, 7].map(number => <i className={number === active ? styles.railActive : ""} key={number} />)}
+  </div>;
 }
 
-function HomepagePrivateAosCard({ listing }) {
-  const objectId = String(getListingId(listing) || FALLBACK_LISTING.id);
-  const [ixiCardState, setIxiCardState] = useState(() => ({
-    [objectId]: {
-      color: "none",
-      outline: 1,
-      consoleRightOpen: true,
-      consoleRightFace: 3,
-    },
-  }));
-  const [machineFace, setMachineFace] = useState(1);
-  const [placement, setPlacement] = useState({
-    machineAccess: "private",
-    machineChannel: "none",
-  });
-  const privateListing = toPrivateListing(listing);
+function HeroMachinePhoto() {
+  return <div className={styles.heroMachinePhoto}>
+    <Image src="/images/2023-komatsu-wa475-10.jpg" alt="" fill sizes="240px" />
+    <span>IXI VERIFIED</span>
+  </div>;
+}
 
-  useEffect(() => {
-    setIxiCardState(current => current[objectId] ? current : {
-      ...current,
-      [objectId]: {
-        color: "none",
-        outline: 1,
-        consoleRightOpen: true,
-        consoleRightFace: 3,
-      },
-    });
-  }, [objectId]);
-
-  function updateIxiCardState(id, patch) {
-    setIxiCardState(current => ({
-      ...current,
-      [id]: { ...(current[id] || {}), ...patch },
-    }));
-  }
-
-  return <div className={styles.privateObjectViewport}>
-    <div className={styles.privateObjectNative}>
-      <IXIPrivateObjectConsole
-        objectId={objectId}
-        item={privateListing}
-        sellerCardProps={{}}
-        ixiCardState={ixiCardState}
-        updateIxiCardState={updateIxiCardState}
-        enableCardScaling={false}
-        renderParentCard={consoleProps => <IXIMachineCard
-          listing={privateListing}
-          cardContext="inventory"
-          from="homepage-aos"
-          showListingManagementActions={false}
-          showSave={false}
-          showMachineRail
-          suppressFamilyLog
-          machineAccess={placement.machineAccess}
-          machineChannel={placement.machineChannel}
-          onMachinePlacementChange={(_machine, nextPlacement) => setPlacement(nextPlacement)}
-          machineFace={machineFace}
-          onCycleMachineFace={() => setMachineFace(current => current >= 4 ? 1 : current + 1)}
-          ixiState={ixiCardState[objectId]}
-          onIxiStateChange={updateIxiCardState}
-          {...consoleProps}
-        />}
-      />
+function HeroMarketplaceTableau({ listing }) {
+  return <div className={`${styles.heroProductTableau} ${styles.heroMarketplaceTableau}`} aria-label="Marketplace listing and distribution Console preview">
+    <div className={styles.heroMockCard}>
+      <header><small>MARKETPLACE</small><b>{clean(listing.passportId, "IXI-10472")}</b></header>
+      <HeroMachinePhoto />
+      <div className={styles.heroMachineIdentity}><b>{clean(listing.title, "2021 KOMATSU WA470-8")}</b><span>{clean(listing.hours, "4,892")} HRS</span></div>
+      <div className={styles.heroMachineValue}><b>{clean(listing.price, "$315,000")}</b><span>{clean(listing.location, "DENVER, CO")}</span></div>
+      <HeroIxiRail active={5} />
+    </div>
+    <div className={styles.heroMockConsole}>
+      <header><span>IXI CONSOLE</span><b>DISTRIBUTE</b></header>
+      <div className={styles.distributionMap}><strong>ONE LISTING</strong><i /><span>MARKETPLACE</span><span>SELLER YARD</span><span>EMAIL · SMS</span><span>WHATSAPP</span></div>
+      <footer>5 CHANNELS <b>READY</b></footer>
     </div>
   </div>;
 }
 
-function HomepageTransactScreen({ listing }) {
-  const publicData = listing.publicData || listing.attributes?.publicData || {};
-  const transactObject = {
-    ...listing,
-    objectType: "machine",
-    displayName: listing.title || "EQUIPMENT",
-    passportId: listing.passportId || publicData.passportId || "",
-  };
-  const transactObjectId = String(
-    transactObject.objectId || transactObject.passportId || getListingId(listing) || FALLBACK_LISTING.id,
-  );
-  const [transactState, setTransactState] = useState(() => ({
-    transactConsoleSlots: [
-      { slotId: "listing", type: "listing", face: 1 },
-      { slotId: "homepage-transact-workspace", type: "module", face: 2 },
-    ],
-  }));
+function HeroAosTableau({ listing }) {
+  return <div className={`${styles.heroProductTableau} ${styles.heroAosTableau}`} aria-label="Private AOS machine and operations Console preview">
+    <div className={`${styles.heroMockCard} ${styles.heroPrivateCard}`}>
+      <header><small>PRIVATE · MACHINE</small><b>+ &nbsp; EDIT &nbsp; $ &nbsp; ⋮</b></header>
+      <HeroMachinePhoto />
+      <div className={styles.heroMachineIdentity}><b>{clean(listing.title, "2021 KOMATSU WA470-8")}</b><span>PRIMARY</span></div>
+      <div className={styles.heroAosRelationships}><span>PEOPLE</span><span>LOCATIONS</span><span>ACTIVE WORK</span></div>
+      <div className={styles.heroPlacement}><span>LIVE</span><b>PRIV</b><span>AUCT</span></div>
+      <HeroIxiRail active={4} />
+    </div>
+    <div className={`${styles.heroMockConsole} ${styles.heroOperationsConsole}`}>
+      <header><span>AOS CONSOLE</span><b>OPERATE</b></header>
+      <div className={styles.operationsGrid}><span>ENTITY</span><span>PEOPLE</span><span>LOCATIONS</span><span>WORK</span><i>ONE PASSPORT SYSTEM</i></div>
+      <footer>RELATIONSHIPS <b>CONNECTED</b></footer>
+    </div>
+  </div>;
+}
 
-  function updateTransactState(_id, patch) {
-    setTransactState(current => ({ ...current, ...patch }));
-  }
-
-  return <div className={styles.transactDoorViewport}>
-    <div className={styles.transactDoorNative}>
-      <IXITransactObjectConsole
-        object={transactObject}
-        layoutObjectId={transactObjectId}
-        ixiState={transactState}
-        onIxiStateChange={updateTransactState}
-        onClose={() => { window.location.href = "/transact"; }}
-      />
+function HeroTransactTableau({ listing }) {
+  return <div className={`${styles.heroProductTableau} ${styles.heroTransactTableau}`} aria-label="TRAN$ACT machine and financial Console preview">
+    <div className={`${styles.heroMockCard} ${styles.heroTransactCard}`}>
+      <header><small>TRAN$ACT</small><b>{clean(listing.passportId, "IXI-10472")}</b></header>
+      <div className={styles.transactMark}>TRAN<span>$</span>ACT<small>MACHINE FINANCIAL FILE</small></div>
+      <div className={styles.transactTiles}><span>ACQUIRE</span><span>WORK</span><span>EXPENSE</span><span>INVOICE</span><span>SOLD</span><span>SETTLE</span></div>
+      <HeroIxiRail active={6} />
+    </div>
+    <div className={`${styles.heroMockConsole} ${styles.heroLedgerConsole}`}>
+      <header><span>FINANCIAL CONSOLE</span><b>CONTROL</b></header>
+      <div className={styles.ledgerRows}><span><b>COST BASIS</b><i>$247,800</i></span><span><b>OPEN WORK</b><i>$18,420</i></span><span><b>MARKET VALUE</b><i>$315,000</i></span><strong>POSITION <b>+$48,780</b></strong></div>
+      <footer>PASSPORT LEDGER <b>LIVE</b></footer>
     </div>
   </div>;
 }
@@ -260,7 +205,7 @@ export default function ConnectedHomepage() {
     <Head><title>IronXchange — Your Machine Is the Beginning</title><meta name="description" content="One Passport connects the marketplace, the work, and the money." /><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" /><link rel="preload" as="image" href="/images/ixi-homepage-bay-gateway.webp" fetchPriority="high" /></Head>
     <header className={styles.siteHeader}><Link href="/" className={styles.brand} aria-label="IronXchange home"><Image src="/images/ironxchange-logo.png" width={1807} height={396} priority alt="IronXchange" /></Link><nav aria-label="IronXchange products">{NAV.map(([href, label]) => <Link href={href} key={label}>{label}</Link>)}</nav><div className={styles.headerActions}><Link href="/browse-v2"><Icon name="search" /><span>SEARCH</span></Link><Link href="/login">SIGN IN</Link><Link href="/post-free" className={styles.postMachine}>POST A MACHINE</Link></div></header>
     <main>
-      <section className={styles.hero} aria-labelledby="hero-title"><Image className={styles.heroImage} src="/images/ixi-homepage-bay-gateway.webp" alt="" fill priority fetchPriority="high" sizes="100vw" /><div className={styles.heroShade} /><div className={styles.blueprintGrid} /><div className={styles.sideDoctrine}>BUILT FOR<br />THE PEOPLE<br />WHO MOVE IRON.</div><div className={styles.heroCopy}><h1 id="hero-title">YOUR MACHINE<br />IS THE BEGINNING<span>.</span></h1><p>One Passport connects the marketplace,<br />the work, and the money.</p><div className={styles.heroActions}><ButtonLink href="/post-free">BRING A MACHINE INTO IXI</ButtonLink><ButtonLink href="#system" tone="secondary">SEE HOW IXI WORKS</ButtonLink></div></div><div className={styles.gatewayJourney}><div className={styles.gatewayRail} aria-hidden="true"><i /><i /><i /></div><GatewayBay number="01" title="MARKETPLACE" headline="LIST ONCE. DISTRIBUTE EVERYWHERE." detail="Reach buyers without rebuilding the listing." tone="marketTone" icon="cart" /><GatewayBay number="02" title="AOS" headline="OPERATE THE WHOLE BUSINESS." detail="Machines. People. Locations. Work." tone="aosTone" icon="gear" /><GatewayBay number="03" title="TRAN$ACT" headline="CONTROL THE ENTIRE ENTITY." detail="Every cost. Every document. Every dollar." tone="transactTone" icon="money" /></div><div className={styles.heroDoorObjects}><div className={styles.heroDoorObject}><HomepageListingObject listing={listing} location="hero" /></div><div className={styles.heroDoorObject}><HomepagePrivateAosCard listing={listing} /></div><div className={styles.heroDoorObject}><HomepageTransactScreen listing={listing} /></div></div><div className={styles.heroStatement}><b>ONE MACHINE. ONE PASSPORT<span>.</span> ONE OPERATING SYSTEM<span>.</span></b><small>BUILT FOR THE PEOPLE WHO MOVE IRON.</small></div></section>
+      <section className={styles.hero} aria-labelledby="hero-title"><Image className={styles.heroImage} src="/images/ixi-homepage-bay-gateway.webp" alt="" fill priority fetchPriority="high" sizes="100vw" /><div className={styles.heroShade} /><div className={styles.blueprintGrid} /><div className={styles.sideDoctrine}>BUILT FOR<br />THE PEOPLE<br />WHO MOVE IRON.</div><div className={styles.heroCopy}><h1 id="hero-title">YOUR MACHINE<br />IS THE BEGINNING<span>.</span></h1><p>One Passport connects the marketplace,<br />the work, and the money.</p><div className={styles.heroActions}><ButtonLink href="/post-free">BRING A MACHINE INTO IXI</ButtonLink><ButtonLink href="#system" tone="secondary">SEE HOW IXI WORKS</ButtonLink></div></div><div className={styles.gatewayJourney}><div className={styles.gatewayRail} aria-hidden="true"><i /><i /><i /></div><GatewayBay number="01" title="MARKETPLACE" headline="LIST ONCE. DISTRIBUTE EVERYWHERE." detail="Reach buyers without rebuilding the listing." tone="marketTone" icon="cart" /><GatewayBay number="02" title="AOS" headline="OPERATE THE WHOLE BUSINESS." detail="Machines. People. Locations. Work." tone="aosTone" icon="gear" /><GatewayBay number="03" title="TRAN$ACT" headline="CONTROL THE ENTIRE ENTITY." detail="Every cost. Every document. Every dollar." tone="transactTone" icon="money" /></div><div className={styles.heroDoorObjects}><div className={styles.heroDoorObject}><HeroMarketplaceTableau listing={listing} /></div><div className={styles.heroDoorObject}><HeroAosTableau listing={listing} /></div><div className={styles.heroDoorObject}><HeroTransactTableau listing={listing} /></div></div><div className={styles.heroStatement}><b>ONE MACHINE. ONE PASSPORT<span>.</span> ONE OPERATING SYSTEM<span>.</span></b><small>BUILT FOR THE PEOPLE WHO MOVE IRON.</small></div></section>
       <section className={styles.systemIntro} id="system"><span>IXI / THE CONNECTED MACHINE SYSTEM</span><h2>BRING THE MACHINE IN.<br /><em>IXI CARRIES IT FORWARD.</em></h2><p>Create the record once. Every system adds value without making you start over.</p></section>
       <BenefitSection number="01" product="MARKETPLACE" headline="DISTRIBUTE WITHOUT REBUILDING" body="Create the machine once. Publish it, share it, and move it everywhere." benefit="ONE RECORD. EVERY CHANNEL." href="/browse-v2" tone="marketTone" image="/images/ixi-homepage-bay-marketplace.webp"><MarketplaceVisual listing={listing} /></BenefitSection>
       <BenefitSection number="02" product="AOS" headline="OPERATE WHAT YOU OWN" body="Connect machines, people, locations, and work around the same Passport." benefit="THE BUSINESS AROUND THE MACHINE." href="/aos/work" tone="aosTone" image="/images/ixi-homepage-bay-aos.webp"><AosVisual /></BenefitSection>
