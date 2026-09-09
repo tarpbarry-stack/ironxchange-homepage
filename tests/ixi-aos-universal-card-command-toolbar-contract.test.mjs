@@ -87,3 +87,19 @@ test("container Recall gathers every canonical member into that container and Re
     /async function recallContainerChildren\(container\)[\s\S]{0,900}?controller\.recall\(childIds\)/u
   );
 });
+test("container Board exposes every canonical member from authoritative session state in one governed operation", async () => {
+  const work = await read("pages/aos/work.js");
+
+  assert.match(
+    work,
+    /async function boardContainerChildren\(container\)[\s\S]*?getContainerRequestedChildIds\(container\)[\s\S]*?controller\.readPlacements\(\)[\s\S]*?targetSurface: "board"/u
+  );
+  assert.match(
+    work,
+    /controller\.persistLayout\(nextPlacements, \{[\s\S]*?objectIds: childIds,[\s\S]*?activeSummonedContext: containerId/u
+  );
+  assert.doesNotMatch(
+    work,
+    /async function boardContainerChildren\(container\)[\s\S]{0,1400}?summonMany\(/u
+  );
+});

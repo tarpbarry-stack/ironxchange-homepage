@@ -291,6 +291,30 @@ test("sortable placement persists one complete canonical surface order", async (
   assert.equal(server.current().objects[A].currentPlacement.visualOrder, 1);
 });
 
+test("batch placement carries one summoned-container context without a second command", async () => {
+  const { controller, server } = await readyController();
+  const operation = controller.persistLayout(
+    { board: [B], indexEquipment: [A] },
+    {
+      objectIds: [A],
+      activeSummonedContext: LOCATION
+    }
+  );
+  await operation.completion;
+
+  const move = server.calls.find(call =>
+    call.type === "command" &&
+    call.commandType === "objects.move"
+  );
+  const summon = server.calls.find(call =>
+    call.type === "command" &&
+    call.commandType === "objects.summon.set"
+  );
+  assert.equal(move?.payload?.objects?.[0]?.activeSummonedContext, LOCATION);
+  assert.equal(server.current().objects[A].activeSummonedContext, LOCATION);
+  assert.equal(summon, undefined);
+});
+
 test("durable-connect retry uses one operation ID as relationship idempotency ID", async () => {
   const requests = [];
   let first = true;
