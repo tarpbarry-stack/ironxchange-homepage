@@ -154,11 +154,9 @@ function getObjectType(object = {}) {
 
 function getPassportId(object = {}) {
   return clean(
+    object?.canonicalIdentity?.passportId ||
     object?.passportId ||
-    object?.ixiPassportId ||
-    object?.passport?.passportId ||
-    object?.passport?.id ||
-    object?.metadata?.passportId
+    object?.ixiPassportId
   );
 }
 

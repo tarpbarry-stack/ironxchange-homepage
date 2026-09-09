@@ -11,10 +11,15 @@ import loadIXIMosEnvironment from "../../lib/mos/loadIXIMosEnvironment";
 import {
   createMosCommandId,
   createMosObject,
+  createMosRelationship,
   fetchMosContainer,
-  fetchMosObjects,
-  placeMosObject
+  fetchMosObjects
 } from "../../lib/mos/ixiMosClient";
+
+import {
+  createAosMembershipRelationship,
+  createAosRailOrderKey
+} from "../../lib/mos/IXIAosMembershipBridge.mjs";
 
 const OBJECT_TYPE_OPTIONS = [
   {
@@ -481,23 +486,22 @@ setContainerPath([]);
       if (
         currentContainer?.objectId
       ) {
-        await placeMosObject({
-          objectId:
-            createdObject.objectId,
-
-          destinationContainerId:
-            currentContainer.objectId,
-
-          actorId: userId,
-
-          commandId:
-            createMosCommandId(
-              "place-created-object"
-            ),
-
-          metadata: {
-            source: "mos-create-panel"
-          }
+        await createAosMembershipRelationship({
+          createRelationship: createMosRelationship,
+          parentObjectId: currentContainer.objectId,
+          parentPassportId:
+            currentContainer?.canonicalIdentity?.passportId ||
+            currentContainer?.passportId,
+          memberObjectId: createdObject.objectId,
+          memberPassportId:
+            createResponse?.identity?.passportId ||
+            createdObject?.passportId,
+          orderKey: createAosRailOrderKey(
+            Array.isArray(currentContainer?.items)
+              ? currentContainer.items.length
+              : 0
+          ),
+          commandId: createMosCommandId("create-object-rail-membership")
         });
       }
 

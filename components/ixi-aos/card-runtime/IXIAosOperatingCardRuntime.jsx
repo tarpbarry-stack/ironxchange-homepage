@@ -87,26 +87,7 @@ export default function IXIAosOperatingCardRuntime({
   workspaceDropPolicy = null,
   workspaceDropSurface = ""
 }) {
-  /*
-   * A card number chooses presentation only. Every durable AOS card carries
-   * Console + TRAN$ACT at the operating-runtime boundary, including legacy
-   * objects created before universal capabilities were persisted by IX-Core.
-   */
-  const runtimeObject = {
-    ...object,
-    capabilities: {
-      ...(object?.capabilities || {}),
-      canContain: true,
-      canCreate: true,
-      canTransact: true,
-      hasConsole: true,
-      canOpenConsole: true
-    },
-    metadata: {
-      ...(object?.metadata || {}),
-      transactEligible: true
-    }
-  };
+  const runtimeObject = object;
   const cardNumber = resolveIXIAosOperatingCardNumber(runtimeObject);
   const objectId = clean(runtimeObject?.objectId || runtimeObject?.id?.uuid || runtimeObject?.id);
   const children = Array.isArray(items) ? items : [];
@@ -141,6 +122,7 @@ export default function IXIAosOperatingCardRuntime({
     if (objectId) onIxiStateChange?.(objectId, { outline: nextOutline });
   };
   const openTransact = () => {
+    if (runtimeObject?.actorAuthority?.canTransact !== true) return;
     if (objectId) onIxiStateChange?.(objectId, { transactVisible: true });
     onOpenTransact?.(runtimeObject);
   };
@@ -155,14 +137,29 @@ export default function IXIAosOperatingCardRuntime({
     parentLabel,
     ixiState,
     onIxiStateChange,
-    onSaveObject,
-    onAddObject,
-    onHideObject,
-    onDeleteObject,
+    onSaveObject:
+      runtimeObject?.actorAuthority?.canEdit === true
+        ? onSaveObject
+        : null,
+    onAddObject:
+      runtimeObject?.actorAuthority?.canCreateChild === true
+        ? onAddObject
+        : null,
+    onHideObject:
+      runtimeObject?.actorAuthority?.canHide === true
+        ? onHideObject
+        : null,
+    onDeleteObject:
+      runtimeObject?.actorAuthority?.canDelete === true
+        ? onDeleteObject
+        : null,
     onRecall,
     onBoard,
     onReturn,
-    onClearToParent,
+    onClearToParent:
+      runtimeObject?.actorAuthority?.canRelate === true
+        ? onClearToParent
+        : null,
     onExposeObject,
     onOpenTransact: openTransact,
     onCycleFace: cycleFace,
@@ -182,7 +179,10 @@ export default function IXIAosOperatingCardRuntime({
   };
 
   let rendered;
-  if (ixiState?.transactVisible === true) {
+  if (
+    ixiState?.transactVisible === true &&
+    runtimeObject?.actorAuthority?.canTransact === true
+  ) {
     rendered = (
       <IXIOwnedPrivateTransactRuntime
         object={runtimeObject}
@@ -254,7 +254,10 @@ export default function IXIAosOperatingCardRuntime({
 
   const usesEmbeddedDropTarget =
     cardNumber === 18 &&
-    ixiState?.transactVisible !== true;
+    !(
+      ixiState?.transactVisible === true &&
+      runtimeObject?.actorAuthority?.canTransact === true
+    );
 
   if (
     workspaceDropPolicy?.enabled !== true ||

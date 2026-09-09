@@ -9,6 +9,8 @@ test("browser gateway exposes only the governed relationship commands and reads"
 
   assert.match(gateway, /pattern: \/\^\\\/relationships\$\//u);
   assert.match(gateway, /pattern: \/\^\\\/relationships\\\/\[\^\/\]\+\\\/end\$\//u);
+  assert.match(gateway, /pattern: \/\^\\\/relationships\\\/\[\^\/\]\+\\\/order\$\//u);
+  assert.match(gateway, /pattern: \/\^\\\/identity\\\/admit\$\//u);
   assert.match(gateway, /relationship-graph/u);
   assert.match(gateway, /Idempotency-Key/u);
   assert.match(gateway, /If-Match/u);
@@ -18,9 +20,12 @@ test("relationship client requires IX Core canonical readback", () => {
   const client = read("lib/mos/ixiMosBrowserGatewayClient.js");
 
   assert.match(client, /createMosRelationship/u);
-  assert.match(client, /fetchMosObjectRelationships\(sourceObjectId/u);
+  assert.match(client, /fetchMosObjectRelationships\(targetObjectId/u);
   assert.match(client, /IXI_AOS_RELATIONSHIP_READBACK_REQUIRED/u);
   assert.match(client, /X-IXI-Expected-Revision/u);
+  assert.match(client, /sourcePassportId/u);
+  assert.match(client, /targetPassportId/u);
+  assert.match(client, /orderMosRelationship/u);
 });
 
 test("AOS operational drops preserve one visual identity and create a non-exclusive relationship", () => {
@@ -34,20 +39,27 @@ test("AOS operational drops preserve one visual identity and create a non-exclus
   assert.doesNotMatch(work, /IXIRelationshipDropDialog/u);
   assert.doesNotMatch(work, /setPendingRelationship/u);
   assert.doesNotMatch(work, /RELATIONSHIP NOT CREATED/u);
-  assert.match(work, /void \(async \(\) => \{[\s\S]*?await createMosRelationship\(\{/u);
+  assert.match(work, /const operation = controller\.connect\(\{/u);
+  assert.match(work, /relationshipTransport: request => createAosMembershipRelationship\(\{/u);
+  assert.match(
+    read("components/ixi-mos/workspace/IXIAosWorkspaceSessionController.mjs"),
+    /relationshipTransport\(\{[\s\S]*?commandId: operationId/u
+  );
   assert.match(work, /ONE OBJECT \/ MANY RELATIONSHIPS \/ ONE VISUAL PLACEMENT/u);
   assert.match(work, /setWorkspacePlacements\([\s\S]*?nextPlacements/u);
-  assert.match(work, /sourceObjectId:\s*targetWorkspaceObjectId/u);
-  assert.match(work, /targetObjectId:\s*sourceObject\.objectId/u);
-  assert.match(work, /relationshipType: "contains"/u);
+  assert.match(work, /parentObjectId:\s*targetWorkspaceObjectId/u);
+  assert.match(work, /parentPassportId/u);
+  assert.match(work, /memberObjectId:\s*sourceObject\.objectId/u);
+  assert.match(work, /memberPassportId/u);
+  assert.match(work, /createAosRailOrderKey/u);
   assert.match(work, /targetWorkspaceObject\?\.entityId/u);
-  assert.match(work, /getAosWorkspaceObjectById\(id\)/u);
-  assert.match(work, /!isAosDraftId\(id\)/u);
+  assert.match(work, /aosWorkspaceAdmission\.resolveObject\(id\)/u);
+  assert.match(work, /isAosDraftId\(dragId\)/u);
   assert.match(work, /SAVE THIS CARD BEFORE MOVING IT INTO ANOTHER CONTAINER/u);
-  assert.match(work, /createdFrom: "aos-work-drop"/u);
-  assert.match(work, /getCanonicalAosPassportId\(object\) === workspacePassportId/u);
+  assert.match(work, /getCanonicalMosObjectForWorkspaceId\(dragId\)/u);
   assert.doesNotMatch(dropBranch, /directContainerId/u);
   assert.doesNotMatch(dropBranch, /setAosObjects/u);
+  assert.doesNotMatch(dropBranch, /previousPlacements/u);
 });
 
 test("container drops can never provision or append a Machine", () => {
@@ -57,22 +69,26 @@ test("container drops can never provision or append a Machine", () => {
   assert.doesNotMatch(work, /sourceIsOwnedListing/u);
   assert.doesNotMatch(work, /IXI_AOS_MACHINE_PROVISIONING_READBACK_REQUIRED/u);
   assert.match(work, /MOVE BLOCKED · THE EXISTING IX CORE OBJECT COULD NOT BE RESOLVED/u);
-  assert.match(work, /IXI_AOS_CANONICAL_PASSPORT_CONFLICT/u);
+  assert.match(read("lib/mos/ixiAosCanonicalAdmission.mjs"), /IXI_AOS_ALIAS_COLLISION/u);
 });
 
-test("contains relationships hydrate container decks without replacing legacy read compatibility", () => {
+test("governed rail membership replaces the emergency bridge atomically", () => {
   const loader = read("lib/mos/loadIXIMosEnvironment.js");
   const registry = read("components/ixi-mos/workspace/useIXIAosWorkspaceRegistry.js");
   const work = read("pages/aos/work.js");
+  const bridge = read("lib/mos/IXIAosMembershipBridge.mjs");
 
   assert.match(loader, /Array\.isArray\(environment\.relationships\)/u);
-  assert.match(registry, /buildRelationshipChildrenMap/u);
-  assert.match(registry, /relationshipChildrenByParent\.get\(objectId\)/u);
-  assert.match(registry, /relationshipKey/u);
-  assert.match(registry, /=== "contains"/u);
-  assert.match(registry, /directChildrenByParent\.get\(objectId\)/u);
+  assert.match(loader, /environment\.railProjections/u);
+  assert.match(registry, /getAosMembershipObjectIds/u);
+  assert.match(registry, /getAosRailProjectionObjectIds/u);
+  assert.doesNotMatch(registry, /legacyChildObjectIds/u);
+  assert.match(bridge, /aos\.rail-membership\.v1/u);
+  assert.match(bridge, /neutralContractAvailable:\s*true/u);
   assert.match(work, /setAosRelationships/u);
-  assert.match(work, /getWorkspaceIdForCanonicalObject/u);
+  for (const source of [loader, registry, work, bridge]) {
+    assert.doesNotMatch(source, /["']contains["']/u);
+  }
 });
 
 test("Private listing Passport fields participate in canonical identity resolution", () => {
