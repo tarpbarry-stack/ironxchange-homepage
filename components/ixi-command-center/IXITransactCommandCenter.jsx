@@ -215,18 +215,36 @@ export default function IXITransactCommandCenter() {
     async function load() {
       setLoading(true);
       setError("");
+      setFinancialError("");
       try {
-        const [aosResult, accessResult] = await Promise.all([
-          loadIXIMosEnvironment({ includeObjects: true }),
-          loadIXIFinancialAccessContext({ signal: controller.signal })
-        ]);
+        const accessRequest = loadIXIFinancialAccessContext({ signal: controller.signal }).then(
+          value => ({ value, error: null }),
+          accessError => ({ value: null, error: accessError })
+        );
+        const aosResult = await loadIXIMosEnvironment({ includeObjects: true });
         if (controller.signal.aborted) return;
         if (!aosResult?.isAuthenticated) {
           window.location.assign(TRANSACT_LOGIN_HREF);
           return;
         }
         setEnvironment(aosResult);
-        setAccess(accessResult);
+        setLoading(false);
+
+        let accessResult = await accessRequest;
+        if (accessResult.error?.status === 401 && !controller.signal.aborted) {
+          accessResult = await loadIXIFinancialAccessContext({ signal: controller.signal }).then(
+            value => ({ value, error: null }),
+            accessError => ({ value: null, error: accessError })
+          );
+        }
+        if (controller.signal.aborted) return;
+        if (accessResult.error) {
+          setAccess(null);
+          setFinancialError(accessResult.error.message || "IXI Financial access could not be verified.");
+        } else {
+          setAccess(accessResult.value);
+          setFinancialError("");
+        }
       } catch (loadError) {
         if (loadError?.name !== "AbortError") setError(loadError?.message || "IXI TRAN$ACT could not be loaded.");
       } finally {

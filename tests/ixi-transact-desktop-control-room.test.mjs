@@ -46,6 +46,9 @@ test("desktop remains an authenticated read surface over governed financial cont
   assert.match(source, /accountingPeriod: period/u);
   assert.match(source, /No financial values have been fabricated/u);
   assert.match(source, /Queue completion never substitutes/u);
+  assert.match(source, /accessResult\.error\?\.status === 401/u);
+  assert.match(source, /setEnvironment\(aosResult\);[\s\S]*setLoading\(false\);[\s\S]*await accessRequest/u);
+  assert.doesNotMatch(source, /const \[aosResult, accessResult\] = await Promise\.all/u);
   assert.doesNotMatch(source, /localStorage|sessionStorage/u);
   assert.doesNotMatch(source, /directContainerId\s*=/u);
   assert.doesNotMatch(source, /method:\s*"(?:POST|PUT|PATCH|DELETE)"/u);
