@@ -343,9 +343,16 @@ jobs:
           const locations = namedObject("LOCATIONS");
           const railProjections = buildRailProjectionMap(relationships, objects);
           const locationsMembers = railProjections[locations.objectId]?.members || [];
+          const operatingLocationIds = new Set(
+            locationsMembers
+              .map(member => member.objectId)
+              .filter(objectId =>
+                (railProjections[objectId]?.members || []).length >= 1
+              )
+          );
           const wichitaFalls = namedObject("WICHITA FALLS", {
             allowCustomerSuffix: true,
-            candidateIds: new Set(locationsMembers.map(member => member.objectId))
+            candidateIds: operatingLocationIds
           });
           const identities = [equipment, locations, wichitaFalls].map(object =>
             resolveCanonicalObjectIdentity({ entityId: object.entityId, objectId: object.objectId })
