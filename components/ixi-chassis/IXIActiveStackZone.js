@@ -53,6 +53,14 @@ export default function IXIActiveStackZone({
         <button
           type="button"
           className="active-stack-dash"
+          aria-label={`${
+            activeStacksOpen[stackKey]
+              ? "Close"
+              : "Open"
+          } ${stackKey} active stack`}
+          aria-expanded={
+            activeStacksOpen[stackKey]
+          }
           onClick={() => toggleActiveStack(stackKey)}
         />
 

@@ -53,11 +53,17 @@ outline: "none"
   (machineContainers.pocketRight || []).length === 0 ? "is-empty" : "has-machines"
 } pocket-mode-${rightPocketMode}`}
 >
-<button type="button" className="ixi-pocket-rail-action send" data-label="SEND" />
+<button
+  type="button"
+  className="ixi-pocket-rail-action send"
+  aria-label="Send Pocket II machines"
+  data-label="SEND"
+/>
 
 <button
   type="button"
   className="ixi-pocket-rail-action board"
+  aria-label="Return Pocket II machines to the board"
   data-label="BOARD"
   onClick={(e) => {
     e.preventDefault();
@@ -69,6 +75,7 @@ outline: "none"
 <button
   type="button"
   className="ixi-pocket-rail-action stack"
+  aria-label="Move Pocket II machines to the top active stack"
   data-label="ACTIVE STACK"
   onClick={(e) => {
     e.preventDefault();
@@ -84,6 +91,7 @@ outline: "none"
 <button
   type="button"
   className="ixi-pocket-rail-action theater"
+  aria-label="Send Pocket II machines to IXI Theater"
   data-label="IXI THEATER"
   onClick={(e) => {
     e.preventDefault();
@@ -238,7 +246,7 @@ return (
   --station-gap: clamp(24px, 2.1vw, 40px);
 
   width: 100%;
-  margin: -14 auto 20px;
+  margin: 0 auto;
 
   position: relative;
 
