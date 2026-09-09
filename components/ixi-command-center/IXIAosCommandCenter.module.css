@@ -15,6 +15,13 @@
   font-family: 'Inter Variable', Inter, ui-sans-serif, system-ui, Arial, sans-serif;
 }
 
+.shell button,
+.shell input,
+.shell select,
+.shell textarea {
+  font-family: inherit;
+}
+
 .topbar {
   position: sticky;
   z-index: 50;
