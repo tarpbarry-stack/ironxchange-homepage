@@ -5,8 +5,8 @@ import path from "node:path";
 import test from "node:test";
 
 const FRONTEND_BASE = "8aac4cc65d5c04d9c0714b07cb10b3b6272581b7";
-const CORE_COMMIT = "b0bebf91051fd51fe1b232e8130433d0df69a802";
-const CORE_TREE = "caef1cb19b556f2278009377be07b3db4bcd0ae2";
+const CORE_COMMIT = "8f59cfe5d6e62f169022a4deba7b2d66861fe03d";
+const CORE_TREE = "18dc5e8ae0bbdf3a88075c502296e2d498e6b57e";
 const frontendRoot = path.resolve(new URL("..", import.meta.url).pathname);
 const coreRoot = process.env.IXI_CORE_CONTRACT_ROOT || "";
 
