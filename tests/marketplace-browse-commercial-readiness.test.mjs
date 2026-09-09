@@ -175,6 +175,36 @@ test("Park Brake is persisted and guards mechanical commands without pointer blo
   assert.doesNotMatch(page, /parkBrake[\s\S]{0,100}pointer-events:\s*none/u);
 });
 
+test("Theater and active-stack controls cannot overlap relationship filters", () => {
+  const controls = fs.readFileSync(
+    "components/IXIRelationshipControls.js",
+    "utf8"
+  );
+
+  assert.match(
+    controls,
+    /className=\{`ixi-theater-button[\s\S]*?disabled=\{!railRevealed\}/u
+  );
+  assert.match(
+    controls,
+    /className=\{`ixi-active-stack-button[\s\S]*?disabled=\{!railRevealed\}/u
+  );
+
+  for (const selector of ["ixi-theater-button", "ixi-active-stack-button"]) {
+    const rule = new RegExp(
+      `\\.${selector}\\s*\\{[\\s\\S]*?top:\\s*0;[\\s\\S]*?width:\\s*24px;[\\s\\S]*?height:\\s*24px;[\\s\\S]*?pointer-events:\\s*none;[\\s\\S]*?visibility:\\s*hidden;`,
+      "u"
+    );
+    const revealedRule = new RegExp(
+      `\\.ixi-relationship-shell\\.revealed \\.${selector}\\s*\\{[\\s\\S]*?visibility:\\s*visible;[\\s\\S]*?pointer-events:\\s*auto;`,
+      "u"
+    );
+
+    assert.match(controls, rule);
+    assert.match(controls, revealedRule);
+  }
+});
+
 test("public Marketplace catalogue has durable cache, stale serving, and timing headers", () => {
   const api = fs.readFileSync("pages/api/listings.js", "utf8");
 
