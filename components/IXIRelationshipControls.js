@@ -132,6 +132,7 @@ export default function IXIRelationshipControls({
     armedDestination === "theater" ? "armed" : ""
   }`}
   onClick={() => onToggleArmedDestination("theater")}
+  disabled={!railRevealed}
   aria-label="Arm IXI Theater"
   title="Arm IXI Theater"
 >
@@ -159,6 +160,7 @@ export default function IXIRelationshipControls({
 
     onToggleArmedDestination("stackTop");
   }}
+  disabled={!railRevealed}
   aria-label="Cycle active stack destination"
   title={
     armedDestination === "stackTop"
@@ -257,7 +259,7 @@ export default function IXIRelationshipControls({
 
       {hasAnyRelationship && (
         <div className="ixi-mobile-nav-row">
-          <a href="/browse" className="ixi-mobile-nav-link">
+          <a href="/browse-v2" className="ixi-mobile-nav-link">
             IXI MARKETPLACE
           </a>
 
@@ -359,16 +361,18 @@ export default function IXIRelationshipControls({
 
         .ixi-theater-button {
           position: relative;
-          top: 13px;
+          top: 0;
           left: 10px;
-          width: 12px;
-          height: 12px;
+          width: 24px;
+          height: 24px;
+          margin-right: -12px;
           border: 1px solid rgba(255,255,255,0);
           background: transparent;
           color: rgba(255,255,255,0);
           padding: 0;
-          cursor: pointer;
-          pointer-events: auto;
+          cursor: default;
+          pointer-events: none;
+          visibility: hidden;
           opacity: 0;
           display: flex;
           align-items: center;
@@ -384,13 +388,14 @@ export default function IXIRelationshipControls({
             transform .18s ease;
         }
 
-        .ixi-active-stack-button {
+.ixi-active-stack-button {
   position: relative;
-  top: 13px;
+  top: 0;
   left: 18px;
  
-  width: 12px;
-  height: 12px;
+  width: 24px;
+  height: 24px;
+  margin-right: -12px;
 
   border: 1px solid rgba(255,255,255,0);
   background: transparent;
@@ -398,8 +403,9 @@ export default function IXIRelationshipControls({
   color: rgba(255,255,255,0);
 
   padding: 0;
-  cursor: pointer;
-  pointer-events: auto;
+  cursor: default;
+  pointer-events: none;
+  visibility: hidden;
 
   opacity: 0;
 
@@ -421,6 +427,9 @@ export default function IXIRelationshipControls({
 
 .ixi-relationship-shell.revealed .ixi-active-stack-button {
   opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  cursor: pointer;
   color: rgba(255,255,255,.12);
   border-color: rgba(255,255,255,.10);
 }
@@ -436,6 +445,9 @@ export default function IXIRelationshipControls({
 
         .ixi-relationship-shell.revealed .ixi-theater-button {
           opacity: 1;
+          visibility: visible;
+          pointer-events: auto;
+          cursor: pointer;
           color: rgba(255,255,255,.12);
           border-color: rgba(255,255,255,.10);
         }

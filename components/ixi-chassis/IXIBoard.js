@@ -25,7 +25,7 @@ export default function IXIBoard({
   items = [],
   cardContext = "workspace",
   listingOrigin = "saved",
-  marketplaceBrowsePerformance = false,
+  progressiveCardRendering = false,
   enableMarketplaceDistribution = false,
   enableMarketplaceIntelligence = false,
   ConsoleRouterComponent =
@@ -159,18 +159,18 @@ const sortableItemIds = useMemo(
 
 const renderedItems = useMemo(
   () =>
-    marketplaceBrowsePerformance
+    progressiveCardRendering
       ? items.slice(0, renderLimit)
       : items,
   [
     items,
     renderLimit,
-    marketplaceBrowsePerformance
+    progressiveCardRendering
   ]
 );
 
 useEffect(() => {
-  if (!marketplaceBrowsePerformance) {
+  if (!progressiveCardRendering) {
     return;
   }
 
@@ -188,11 +188,11 @@ useEffect(() => {
   );
 }, [
   items.length,
-  marketplaceBrowsePerformance
+  progressiveCardRendering
 ]);
 
 useEffect(() => {
-  if (!marketplaceBrowsePerformance) {
+  if (!progressiveCardRendering) {
     return undefined;
   }
 
@@ -235,7 +235,7 @@ useEffect(() => {
 }, [
   items.length,
   renderLimit,
-  marketplaceBrowsePerformance
+  progressiveCardRendering
 ]);
   
 const resolvedConsolePanelWidth =
@@ -602,12 +602,12 @@ consoleActuatorVariant={
               from={listingOrigin}
 
               imagePriority={
-                marketplaceBrowsePerformance &&
+                progressiveCardRendering &&
                 itemIndex < 2
               }
 
               suppressFamilyLog={
-                marketplaceBrowsePerformance
+                progressiveCardRendering
               }
 
               enableMarketplaceDistribution={
@@ -683,7 +683,7 @@ consoleActuatorVariant={
   </IXISortableMachineCard>
 );
 })}
-{marketplaceBrowsePerformance &&
+{progressiveCardRendering &&
 renderLimit < items.length ? (
   <div
     ref={loadMoreRef}

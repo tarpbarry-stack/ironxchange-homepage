@@ -39,6 +39,10 @@ import {
   toggleSavedListing
 } from "../lib/savedListings";
 
+import {
+  fetchPublicMarketplaceListings
+} from "../lib/listings/publicMarketplaceClient";
+
 const BRAND_YELLOW = "#FFC400";
 
 const categories = [
@@ -225,12 +229,22 @@ function handleWorkspaceDragCancel() {
 }, []);
 
   useEffect(() => {
-    fetch("/api/listings")
-      .then((res) => res.json())
-      .then((data) => {
-        if (Array.isArray(data)) setLiveListings(data);
+    let cancelled = false;
+
+    fetchPublicMarketplaceListings({
+      surface: "home",
+      projection: "card"
+    })
+      .then(data => {
+        if (!cancelled) setLiveListings(data);
       })
-      .catch(() => {});
+      .catch(error => {
+        console.error("HOMEPAGE MARKETPLACE LOAD FAILED:", error);
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   useEffect(() => {
@@ -641,6 +655,7 @@ return (
         ghostListingId={ghostListingId}
         enableCardScaling={true}
         cardScaleMode={cardScaleMode}
+        progressiveCardRendering={true}
       />
     </IXIBoardSurface>
     <IXICardScaleControl

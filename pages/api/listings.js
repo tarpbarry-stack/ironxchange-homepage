@@ -3,8 +3,12 @@ import {
   normalizeMachineChannel
 } from "../../lib/machine-access/IXIMachineAccess";
 import {
+  compactMarketplaceDirectoryEntry,
   compactMarketplaceListing
 } from "../../lib/listings/compactMarketplaceListing";
+import {
+  resolvePublicMarketplaceProjection
+} from "../../lib/listings/publicMarketplaceCatalogue.mjs";
 import {
   getCache,
   waitUntil
@@ -635,24 +639,26 @@ keywords: Array.isArray(publicData.keywords)
     };
 }
 
-const BROWSE_CACHE_KEY = "card-catalogue-v3";
-const BROWSE_CACHE_FRESH_MS = 60 * 1000;
-const BROWSE_CACHE_TTL_SECONDS = 7 * 24 * 60 * 60;
-const BROWSE_CACHE_MAX_BYTES = 1_800_000;
+const PUBLIC_CATALOGUE_CACHE_KEY = "card-catalogue-v4";
+const PUBLIC_CATALOGUE_CACHE_FRESH_MS = 60 * 1000;
+const PUBLIC_CATALOGUE_CACHE_TTL_SECONDS = 7 * 24 * 60 * 60;
+const PUBLIC_CATALOGUE_CACHE_MAX_BYTES = 1_800_000;
 
-let browseRefreshPromise = null;
-let browseMemoryFallback = null;
+let publicCatalogueRefreshPromise = null;
+let publicCatalogueMemoryFallback = null;
 
-function getBrowseRuntimeCache() {
+function getPublicCatalogueRuntimeCache() {
   return getCache({
     namespace: "ixi-marketplace"
   });
 }
 
-async function readBrowseCatalogueCache() {
+async function readPublicCatalogueCache() {
   try {
-    const cached = await getBrowseRuntimeCache().get(BROWSE_CACHE_KEY);
-    return cached || browseMemoryFallback;
+    const cached = await getPublicCatalogueRuntimeCache().get(
+      PUBLIC_CATALOGUE_CACHE_KEY
+    );
+    return cached || publicCatalogueMemoryFallback;
   } catch (error) {
     console.warn(JSON.stringify({
       level: "warn",
@@ -660,19 +666,19 @@ async function readBrowseCatalogueCache() {
       error: error?.message || String(error)
     }));
 
-    return browseMemoryFallback;
+    return publicCatalogueMemoryFallback;
   }
 }
 
-async function writeBrowseCatalogueCache(entry) {
-  browseMemoryFallback = entry;
+async function writePublicCatalogueCache(entry) {
+  publicCatalogueMemoryFallback = entry;
 
   const bytes = Buffer.byteLength(
     JSON.stringify(entry.listings),
     "utf8"
   );
 
-  if (bytes > BROWSE_CACHE_MAX_BYTES) {
+  if (bytes > PUBLIC_CATALOGUE_CACHE_MAX_BYTES) {
     console.warn(JSON.stringify({
       level: "warn",
       message: "marketplace_runtime_cache_item_too_large",
@@ -682,11 +688,11 @@ async function writeBrowseCatalogueCache(entry) {
   }
 
   try {
-    await getBrowseRuntimeCache().set(
-      BROWSE_CACHE_KEY,
+    await getPublicCatalogueRuntimeCache().set(
+      PUBLIC_CATALOGUE_CACHE_KEY,
       entry,
       {
-        ttl: BROWSE_CACHE_TTL_SECONDS,
+        ttl: PUBLIC_CATALOGUE_CACHE_TTL_SECONDS,
         tags: ["marketplace-listings"],
         name: "IXI marketplace compact card catalogue"
       }
@@ -700,10 +706,12 @@ async function writeBrowseCatalogueCache(entry) {
   }
 }
 
-function refreshBrowseCatalogue() {
-  if (browseRefreshPromise) return browseRefreshPromise;
+function refreshPublicCatalogue() {
+  if (publicCatalogueRefreshPromise) {
+    return publicCatalogueRefreshPromise;
+  }
 
-  browseRefreshPromise = buildListingsCatalogue()
+  publicCatalogueRefreshPromise = buildListingsCatalogue()
     .then(async result => {
       const entry = {
         listings: result.listings.map(compactMarketplaceListing),
@@ -711,18 +719,18 @@ function refreshBrowseCatalogue() {
         timings: result.timings
       };
 
-      await writeBrowseCatalogueCache(entry);
+      await writePublicCatalogueCache(entry);
       return entry;
     })
     .finally(() => {
-      browseRefreshPromise = null;
+      publicCatalogueRefreshPromise = null;
     });
 
-  return browseRefreshPromise;
+  return publicCatalogueRefreshPromise;
 }
 
-function scheduleBrowseRefresh() {
-  const refresh = refreshBrowseCatalogue().catch(error => {
+function schedulePublicCatalogueRefresh() {
+  const refresh = refreshPublicCatalogue().catch(error => {
     console.error(JSON.stringify({
       level: "error",
       message: "marketplace_background_refresh_failed",
@@ -771,6 +779,13 @@ function setCatalogueResponseHeaders(res, {
 }
 
 export default async function handler(req, res) {
+  if (req.method !== "GET") {
+    res.setHeader("Allow", "GET");
+    return res.status(405).json({
+      error: "Method not allowed"
+    });
+  }
+
   const requestStartedAt = Date.now();
   const requestId = String(
     req.headers["x-vercel-id"] ||
@@ -779,17 +794,25 @@ export default async function handler(req, res) {
   );
 
   try {
-    const isBrowseCardProjection =
-      req.query.surface === "browse-v2" &&
-      req.query.projection === "card";
+    const publicProjection =
+      resolvePublicMarketplaceProjection(req.query);
+
+    if (
+      !publicProjection &&
+      (req.query.surface || req.query.projection)
+    ) {
+      return res.status(400).json({
+        error: "Unsupported Marketplace catalogue projection"
+      });
+    }
 
     let responseListings;
     let timings = {};
     let cacheStatus = "bypass";
 
-    if (isBrowseCardProjection) {
+    if (publicProjection) {
       const cacheReadStartedAt = Date.now();
-      const cached = await readBrowseCatalogueCache();
+      const cached = await readPublicCatalogueCache();
       const cacheReadMs = Date.now() - cacheReadStartedAt;
       const cacheAgeMs = cached?.cachedAt
         ? Date.now() - Number(cached.cachedAt)
@@ -798,21 +821,27 @@ export default async function handler(req, res) {
       if (Array.isArray(cached?.listings)) {
         responseListings = cached.listings;
         timings = { cacheReadMs };
-        cacheStatus = cacheAgeMs <= BROWSE_CACHE_FRESH_MS
+        cacheStatus = cacheAgeMs <= PUBLIC_CATALOGUE_CACHE_FRESH_MS
           ? "hit"
           : "stale";
 
         if (cacheStatus === "stale") {
-          scheduleBrowseRefresh();
+          schedulePublicCatalogueRefresh();
         }
       } else {
-        const refreshed = await refreshBrowseCatalogue();
+        const refreshed = await refreshPublicCatalogue();
         responseListings = refreshed.listings;
         timings = {
           ...(refreshed.timings || {}),
           cacheReadMs
         };
         cacheStatus = "miss";
+      }
+
+      if (publicProjection.projection === "directory") {
+        responseListings = responseListings.map(
+          compactMarketplaceDirectoryEntry
+        );
       }
     } else {
       const result = await buildListingsCatalogue();
@@ -821,7 +850,7 @@ export default async function handler(req, res) {
     }
 
     setCatalogueResponseHeaders(res, {
-      projection: isBrowseCardProjection ? "card" : "full",
+      projection: publicProjection?.projection || "full",
       cacheStatus,
       timings
     });
@@ -831,7 +860,8 @@ export default async function handler(req, res) {
       message: "marketplace_catalogue_served",
       requestId,
       cacheStatus,
-      projection: isBrowseCardProjection ? "card" : "full",
+      projection: publicProjection?.projection || "full",
+      surface: publicProjection?.surface || "legacy-full",
       count: responseListings.length,
       durationMs: Date.now() - requestStartedAt,
       timings

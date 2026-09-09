@@ -29,6 +29,9 @@ import {
 import {
   loadIXIListingsEnvironment
 } from "../lib/listings/IXIListingsEngine";
+import {
+  loadIXIListingDetails
+} from "../lib/listings/IXIListingDetailClient";
 
 import IXIEnvironmentRail from "../components/IXIEnvironmentRail";
 import IXISortableMachineCard from "../components/ixi-chassis/IXISortableMachineCard";
@@ -225,7 +228,11 @@ useEffect(() => {
     try {
       const environment =
         await loadIXIListingsEnvironment({
-          includePrivateState: true
+          includePrivateState: true,
+          publicMarketplacePerformance: true,
+          publicMarketplaceSurface: "theater",
+          progressiveMedia: true,
+          hydrateProgressiveMedia: false
         });
 
       if (cancelled) return;
@@ -582,9 +589,43 @@ function formatFactHours(value) {
   return `${Number(raw).toLocaleString()} HRS`;
 }
 
-function nextPhotoForMachine(machine) {
+async function loadTheaterMachineDetails(machine) {
   const id = String(getListingId(machine));
-  const images = getMachineImages(machine);
+
+  try {
+    const detail = await loadIXIListingDetails(id);
+
+    if (detail) {
+      setListings(current =>
+        current.map(item =>
+          String(getListingId(item)) === id
+            ? { ...item, ...detail }
+            : item
+        )
+      );
+    }
+
+    return detail || machine;
+  } catch (error) {
+    console.warn(
+      "THEATER MACHINE DETAIL UNAVAILABLE:",
+      id,
+      error
+    );
+
+    return machine;
+  }
+}
+
+async function nextPhotoForMachine(machine) {
+  const id = String(getListingId(machine));
+  const knownImages = getMachineImages(machine);
+  const needsDetail =
+    Number(machine?.imageCount || 0) > knownImages.length;
+  const resolvedMachine = needsDetail
+    ? await loadTheaterMachineDetails(machine)
+    : machine;
+  const images = getMachineImages(resolvedMachine);
 
   setSlotPhotoIndexes(current => ({
     ...current,
@@ -594,9 +635,15 @@ function nextPhotoForMachine(machine) {
   }));
 }
 
-function prevPhotoForMachine(machine) {
+async function prevPhotoForMachine(machine) {
   const id = String(getListingId(machine));
-  const images = getMachineImages(machine);
+  const knownImages = getMachineImages(machine);
+  const needsDetail =
+    Number(machine?.imageCount || 0) > knownImages.length;
+  const resolvedMachine = needsDetail
+    ? await loadTheaterMachineDetails(machine)
+    : machine;
+  const images = getMachineImages(resolvedMachine);
 
   setSlotPhotoIndexes(current => ({
     ...current,

@@ -22,18 +22,18 @@ test.afterEach(() => {
   resetMarketplaceDistributionControlsForTests();
 });
 
-test("Browse V2 alone opts into centering, batching, distribution, and intelligence", () => {
+test("Browse V2 opts into public batching, distribution, and intelligence", () => {
   const browse = read("pages/browse-v2.js");
   const board = read("components/ixi-chassis/IXIBoard.js");
   const surface = read("components/ixi-chassis/IXIBoardSurface.jsx");
   const stack = read("components/ixi-chassis/IXIActiveStack.js");
 
   assert.match(browse, /centerRows=\{true\}/u);
-  assert.match(browse, /marketplaceBrowsePerformance=\{true\}/u);
+  assert.match(browse, /progressiveCardRendering=\{true\}/u);
   assert.match(browse, /enableMarketplaceDistribution=\{true\}/u);
   assert.match(browse, /enableMarketplaceIntelligence=\{true\}/u);
   assert.match(browse, /listingOrigin="browse"/u);
-  assert.match(board, /marketplaceBrowsePerformance = false/u);
+  assert.match(board, /progressiveCardRendering = false/u);
   assert.match(board, /enableMarketplaceDistribution = false/u);
   assert.match(board, /enableMarketplaceIntelligence = false/u);
   assert.match(surface, /centerRows = false/u);
@@ -90,8 +90,11 @@ test("Marketplace loads secondary photos only after the photo controls are used"
     "components/ixi-machine-card/marketplace/MarketplaceListingCard.js"
   );
   const engine = read("lib/listings/IXIListingsEngine.js");
+  const publicClient = read(
+    "lib/listings/publicMarketplaceClient.js"
+  );
 
-  assert.match(engine, /projection=card/u);
+  assert.match(publicClient, /projection = "card"/u);
   assert.match(engine, /hydrateProgressiveMedia/u);
   assert.match(card, /loadIXIListingDetails/u);
   assert.match(card, /imageCount > 1/u);

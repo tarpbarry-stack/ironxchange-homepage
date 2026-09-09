@@ -51,6 +51,10 @@ import {
   sendMachineToTheater
 } from "../../lib/ixiTheaterQueue";
 
+import {
+  fetchPublicMarketplaceListings
+} from "../../lib/listings/publicMarketplaceClient";
+
 function WorkspaceDropZone({ id, className, children, ...props }) {
   const { setNodeRef } = useDroppable({ id });
 
@@ -396,14 +400,20 @@ export default function SellerYardV2Page() {
   useEffect(() => {
     async function loadSellerYardV2() {
       try {
-        const listingsRes = await fetch("/api/listings");
-        const listingsData = await listingsRes.json();
+        const [
+          listingsData,
+          SharetribeSdk
+        ] = await Promise.all([
+          fetchPublicMarketplaceListings({
+            surface: "seller-yard-v2",
+            projection: "card"
+          }),
+          import("sharetribe-flex-sdk")
+        ]);
 
         if (Array.isArray(listingsData)) {
           setListings(listingsData);
         }
-
-        const SharetribeSdk = await import("sharetribe-flex-sdk");
 
         const sdkInstance = SharetribeSdk.createInstance({
           clientId: process.env.NEXT_PUBLIC_SHARETRIBE_CLIENT_ID
@@ -1173,7 +1183,7 @@ export default function SellerYardV2Page() {
           </p>
 
           <div className="not-found-actions">
-            <a href="/browse">Browse Equipment</a>
+            <a href="/browse-v2">Browse Equipment</a>
             <a href="/">Back to IronXchange</a>
           </div>
         </div>
@@ -1798,6 +1808,7 @@ export default function SellerYardV2Page() {
                       sendMachineToArmedDestination={sendMachineToArmedDestination}
                       draggingListingId={draggingListingId}
                       ghostListingId={ghostListingId}
+                      progressiveCardRendering={true}
                     />
                   </section>
 
@@ -2736,5 +2747,3 @@ export default function SellerYardV2Page() {
     </>
   );
 }
-
-

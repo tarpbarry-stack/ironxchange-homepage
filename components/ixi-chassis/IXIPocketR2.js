@@ -57,12 +57,14 @@ outline: "none"
     <button
       type="button"
       className="ixi-pocket-rail-action send"
+      aria-label="Send Pocket IV machines"
       data-label="SEND"
     />
 
     <button
       type="button"
       className="ixi-pocket-rail-action board"
+      aria-label="Return Pocket IV machines to the board"
       data-label="BOARD"
       onClick={(e) => {
         e.preventDefault();
@@ -74,6 +76,7 @@ outline: "none"
    <button
   type="button"
   className="ixi-pocket-rail-action stack"
+  aria-label="Move Pocket IV machines to the bottom active stack"
   data-label="ACTIVE STACK"
   onClick={(e) => {
     e.preventDefault();
@@ -89,6 +92,7 @@ outline: "none"
     <button
   type="button"
   className="ixi-pocket-rail-action theater"
+  aria-label="Send Pocket IV machines to IXI Theater"
   data-label="IXI THEATER"
   onClick={(e) => {
     e.preventDefault();
@@ -243,7 +247,7 @@ onClick={(e) => {
   --station-gap: clamp(24px, 2.1vw, 40px);
 
   width: 100%;
-  margin: -14 auto 20px;
+  margin: 0 auto;
 
   position: relative;
 

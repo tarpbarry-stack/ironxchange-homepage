@@ -27,6 +27,37 @@ test("NEWEST means newest model year, with unknown years last and stable ties", 
   );
 });
 
+test("unknown commercial values sort last and never satisfy an active range", () => {
+  const listings = [
+    { id: "unknown", price: "Call", hours: "" },
+    { id: "low", price: "$25,000", hours: "1,000 Hrs" },
+    { id: "high", price: "$75,000", hours: "5,000 Hrs" }
+  ];
+
+  assert.deepEqual(
+    sortMarketplaceListings(listings, "price-low").map(item => item.id),
+    ["low", "high", "unknown"]
+  );
+  assert.deepEqual(
+    sortMarketplaceListings(listings, "hours-high").map(item => item.id),
+    ["high", "low", "unknown"]
+  );
+  assert.equal(
+    matchesMarketplaceRanges(
+      listings[0],
+      {
+        yearMin: null,
+        yearMax: null,
+        priceMin: null,
+        priceMax: 100000,
+        hoursMin: null,
+        hoursMax: null
+      }
+    ),
+    false
+  );
+});
+
 test("commercial range parser accepts dealer-formatted price values", () => {
   const validation = validateMarketplaceRangeFilters({
     priceMin: "$100,000",
@@ -144,7 +175,37 @@ test("Park Brake is persisted and guards mechanical commands without pointer blo
   assert.doesNotMatch(page, /parkBrake[\s\S]{0,100}pointer-events:\s*none/u);
 });
 
-test("Browse catalogue has durable cache, stale serving, and timing headers", () => {
+test("Theater and active-stack controls cannot overlap relationship filters", () => {
+  const controls = fs.readFileSync(
+    "components/IXIRelationshipControls.js",
+    "utf8"
+  );
+
+  assert.match(
+    controls,
+    /className=\{`ixi-theater-button[\s\S]*?disabled=\{!railRevealed\}/u
+  );
+  assert.match(
+    controls,
+    /className=\{`ixi-active-stack-button[\s\S]*?disabled=\{!railRevealed\}/u
+  );
+
+  for (const selector of ["ixi-theater-button", "ixi-active-stack-button"]) {
+    const rule = new RegExp(
+      `\\.${selector}\\s*\\{[\\s\\S]*?top:\\s*0;[\\s\\S]*?width:\\s*24px;[\\s\\S]*?height:\\s*24px;[\\s\\S]*?pointer-events:\\s*none;[\\s\\S]*?visibility:\\s*hidden;`,
+      "u"
+    );
+    const revealedRule = new RegExp(
+      `\\.ixi-relationship-shell\\.revealed \\.${selector}\\s*\\{[\\s\\S]*?visibility:\\s*visible;[\\s\\S]*?pointer-events:\\s*auto;`,
+      "u"
+    );
+
+    assert.match(controls, rule);
+    assert.match(controls, revealedRule);
+  }
+});
+
+test("public Marketplace catalogue has durable cache, stale serving, and timing headers", () => {
   const api = fs.readFileSync("pages/api/listings.js", "utf8");
 
   assert.match(api, /getCache/u);
@@ -153,4 +214,5 @@ test("Browse catalogue has durable cache, stale serving, and timing headers", ()
   assert.match(api, /Server-Timing/u);
   assert.match(api, /stale-while-revalidate=604800/u);
   assert.match(api, /marketplace_catalogue_served/u);
+  assert.match(api, /resolvePublicMarketplaceProjection/u);
 });
