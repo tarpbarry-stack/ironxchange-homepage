@@ -36,7 +36,7 @@
 }
 .atlas button,
 .atlas input {
-  font: inherit;
+  font-family: inherit;
 }
 .atlas :focus-visible {
   outline: 2px solid var(--cyan);
