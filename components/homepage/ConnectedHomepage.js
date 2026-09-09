@@ -1,20 +1,16 @@
 import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
-import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 
 import IXIMachineCard from "../ixi-machine-card/IXIMachineCard";
 import IXIBrowseObjectConsoleRouter from "../ixi-marketplace/IXIBrowseObjectConsoleRouter";
+import IXIPrivateObjectConsole from "../ixi-private-object/IXIPrivateObjectConsole";
+import IXITransactObjectConsole from "../ixi-aos/transact/IXITransactObjectConsole";
 import ListingShareProvider from "../ixi-marketplace/ListingShareProvider";
 import { getListingId } from "../../lib/listingFormatters";
 import { captureIXEvent } from "../../lib/posthog";
 import styles from "./ConnectedHomepage.module.css";
-
-const IXITransactApp = dynamic(
-  () => import("../ixi-aos/transact/IXITransactApp"),
-  { ssr: false },
-);
 
 const FALLBACK_LISTING = Object.freeze({
   id: "69f9042e-bd3d-4a6e-a78c-05b0b806d6b7",
@@ -125,7 +121,15 @@ function toPrivateListing(listing) {
 }
 
 function HomepagePrivateAosCard({ listing }) {
-  const [ixiState, setIxiState] = useState({ color: "none", outline: 1 });
+  const objectId = String(getListingId(listing) || FALLBACK_LISTING.id);
+  const [ixiCardState, setIxiCardState] = useState(() => ({
+    [objectId]: {
+      color: "none",
+      outline: 1,
+      consoleRightOpen: true,
+      consoleRightFace: 3,
+    },
+  }));
   const [machineFace, setMachineFace] = useState(1);
   const [placement, setPlacement] = useState({
     machineAccess: "private",
@@ -133,23 +137,51 @@ function HomepagePrivateAosCard({ listing }) {
   });
   const privateListing = toPrivateListing(listing);
 
+  useEffect(() => {
+    setIxiCardState(current => current[objectId] ? current : {
+      ...current,
+      [objectId]: {
+        color: "none",
+        outline: 1,
+        consoleRightOpen: true,
+        consoleRightFace: 3,
+      },
+    });
+  }, [objectId]);
+
+  function updateIxiCardState(id, patch) {
+    setIxiCardState(current => ({
+      ...current,
+      [id]: { ...(current[id] || {}), ...patch },
+    }));
+  }
+
   return <div className={styles.privateObjectViewport}>
     <div className={styles.privateObjectNative}>
-      <IXIMachineCard
-        listing={privateListing}
-        cardContext="inventory"
-        from="homepage-aos"
-        showListingManagementActions={false}
-        showSave={false}
-        showMachineRail
-        suppressFamilyLog
-        machineAccess={placement.machineAccess}
-        machineChannel={placement.machineChannel}
-        onMachinePlacementChange={(_machine, nextPlacement) => setPlacement(nextPlacement)}
-        machineFace={machineFace}
-        onCycleMachineFace={() => setMachineFace(current => current >= 4 ? 1 : current + 1)}
-        ixiState={ixiState}
-        onIxiStateChange={(_id, patch) => setIxiState(current => ({ ...current, ...patch }))}
+      <IXIPrivateObjectConsole
+        objectId={objectId}
+        item={privateListing}
+        sellerCardProps={{}}
+        ixiCardState={ixiCardState}
+        updateIxiCardState={updateIxiCardState}
+        enableCardScaling={false}
+        renderParentCard={consoleProps => <IXIMachineCard
+          listing={privateListing}
+          cardContext="inventory"
+          from="homepage-aos"
+          showListingManagementActions={false}
+          showSave={false}
+          showMachineRail
+          suppressFamilyLog
+          machineAccess={placement.machineAccess}
+          machineChannel={placement.machineChannel}
+          onMachinePlacementChange={(_machine, nextPlacement) => setPlacement(nextPlacement)}
+          machineFace={machineFace}
+          onCycleMachineFace={() => setMachineFace(current => current >= 4 ? 1 : current + 1)}
+          ixiState={ixiCardState[objectId]}
+          onIxiStateChange={updateIxiCardState}
+          {...consoleProps}
+        />}
       />
     </div>
   </div>;
@@ -163,11 +195,27 @@ function HomepageTransactScreen({ listing }) {
     displayName: listing.title || "EQUIPMENT",
     passportId: listing.passportId || publicData.passportId || "",
   };
+  const transactObjectId = String(
+    transactObject.objectId || transactObject.passportId || getListingId(listing) || FALLBACK_LISTING.id,
+  );
+  const [transactState, setTransactState] = useState(() => ({
+    transactConsoleSlots: [
+      { slotId: "listing", type: "listing", face: 1 },
+      { slotId: "homepage-transact-workspace", type: "module", face: 2 },
+    ],
+  }));
+
+  function updateTransactState(_id, patch) {
+    setTransactState(current => ({ ...current, ...patch }));
+  }
 
   return <div className={styles.transactDoorViewport}>
     <div className={styles.transactDoorNative}>
-      <IXITransactApp
+      <IXITransactObjectConsole
         object={transactObject}
+        layoutObjectId={transactObjectId}
+        ixiState={transactState}
+        onIxiStateChange={updateTransactState}
         onClose={() => { window.location.href = "/transact"; }}
       />
     </div>

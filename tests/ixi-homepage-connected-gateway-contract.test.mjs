@@ -39,7 +39,12 @@ test("the gateway doors contain the three real IXI product surfaces", () => {
   assert.match(homepage, /cardContext="inventory"/u);
   assert.match(homepage, /onMachinePlacementChange/u);
   assert.match(homepage, /showMachineRail/u);
-  assert.match(homepage, /import\("\.\.\/ixi-aos\/transact\/IXITransactApp"\)/u);
+  assert.match(homepage, /import IXIPrivateObjectConsole/u);
+  assert.match(homepage, /<IXIPrivateObjectConsole/u);
+  assert.match(homepage, /consoleRightOpen: true/u);
+  assert.match(homepage, /import IXITransactObjectConsole/u);
+  assert.match(homepage, /<IXITransactObjectConsole/u);
+  assert.match(homepage, /homepage-transact-workspace/u);
 });
 
 test("homepage routes every benefit and conversion into the real product", () => {
