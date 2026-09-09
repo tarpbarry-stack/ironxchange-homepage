@@ -9,6 +9,7 @@ import {
   normalizeConsoleSlots,
 } from "../ixi-chassis/IXIObjectConsoleEngine";
 import IXIAtlasConsoleDrilldown, { IXIAtlasConsoleInspector } from "./IXIAtlasConsoleDrilldown";
+import IXIAtlasFacesDrilldown, { IXIAtlasFacesInspector } from "./IXIAtlasFacesDrilldown";
 import IXIAtlasGearboxDrilldown, { IXIAtlasGearboxInspector } from "./IXIAtlasGearboxDrilldown";
 import IXIAtlasMachineRailDrilldown, { IXIAtlasMachineRailInspector } from "./IXIAtlasMachineRailDrilldown";
 import styles from "./IXITechnicalAtlas.module.css";
@@ -48,7 +49,7 @@ const CALLOUTS = Object.freeze([
   { id: "console", index: "08", label: "CONSOLE ACTUATOR", side: "right", selector: ".ixi-object-card-actuator.right", anchor: "center" },
 ]);
 
-const FACE_NAMES = ["PHOTO", "BUYER", "RELATION", "WORKFLOW"];
+const FACE_NAMES = ["PHOTO", "BUYER", "DEAL SHEET", "NETWORK"];
 const RELATIONSHIP_COLORS = ["none", "green", "yellow", "red", "cyan", "white", "blue", "orange"];
 const RELATIONSHIP_STRENGTHS = [1, 3, 5];
 
@@ -404,6 +405,19 @@ export default function IXIAtlasLiveTestCell({ selected, onSelect, part }) {
             onSetGear={selectGear}
             onBack={() => onSelect("object")}
           />
+        ) : selected === "faces" ? (
+          <IXIAtlasFacesDrilldown
+            item={FIXTURE}
+            renderParentCard={renderCard}
+            cardScaleMode={GEAR_TO_SCALE_MODE[gear]}
+            gear={gear}
+            onShiftGear={shiftGear}
+            machineFace={machineFace}
+            onSelectFace={selectFace}
+            mode={mode}
+            onModeChange={setMode}
+            onBack={() => onSelect("object")}
+          />
         ) : (
         <div className={styles.machineBench}>
           <div className={styles.benchControls}>
@@ -505,6 +519,8 @@ export default function IXIAtlasLiveTestCell({ selected, onSelect, part }) {
                 <IXIAtlasConsoleInspector detail={detail} onDetailChange={setDetail} />
               ) : selected === "gearbox" ? (
                 <IXIAtlasGearboxInspector detail={detail} onDetailChange={setDetail} />
+              ) : selected === "faces" ? (
+                <IXIAtlasFacesInspector machineFace={machineFace} detail={detail} onDetailChange={setDetail} />
               ) : (
                 <FieldInspector part={part} detail={detail} onDetailChange={setDetail} />
               )

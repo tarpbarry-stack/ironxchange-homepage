@@ -2060,7 +2060,9 @@
 .consoleHint b { color: var(--cyan); }
 .controlBay {
   min-width: 0;
-  height: 602px;
+  min-height: 602px;
+  height: auto;
+  align-self: stretch;
   display: grid;
   grid-template-rows: auto minmax(0, 1fr) auto;
   background: linear-gradient(145deg, rgba(17, 21, 22, 0.96), rgba(7, 9, 9, 0.99));
@@ -2705,6 +2707,179 @@
 .gearInspector h3 { margin-bottom: 5px; color: var(--yellow); letter-spacing: .09em; }
 .gearInspector section p { color: #9ba4a5; }
 
+.facesDrilldown {
+  min-width: 0;
+  height: 780px;
+  display: grid;
+  grid-template-rows: auto auto auto minmax(0, 1fr) auto;
+  border-right: 1px solid var(--line);
+  background:
+    radial-gradient(circle at 50% 45%, rgba(0, 188, 231, .07), transparent 38%),
+    linear-gradient(rgba(0, 188, 231, .025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 188, 231, .025) 1px, transparent 1px);
+  background-size: auto, 24px 24px, 24px 24px;
+  overflow: hidden;
+}
+.facesDrillHeader {
+  min-height: 50px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  padding: 7px 12px;
+  border-bottom: 1px solid var(--line);
+  background: rgba(8, 11, 12, .94);
+}
+.facesDrillHeader .drillBack {
+  min-height: 32px;
+  padding: 0 10px;
+  border: 1px solid rgba(0, 188, 231, .32);
+  background: rgba(0, 188, 231, .06);
+  color: var(--cyan);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: var(--type-micro);
+  font-weight: 800;
+  cursor: pointer;
+}
+.facesDrillHeader .drillBack:hover,
+.facesDrillHeader .drillBack:focus-visible { background: rgba(0, 188, 231, .16); outline: none; }
+.facesDrillHeader > div:nth-child(2) { min-width: 0; display: grid; gap: 2px; }
+.facesDrillHeader span,
+.facesDrillHeader b {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: var(--type-micro);
+  line-height: 13px;
+  letter-spacing: .08em;
+}
+.facesDrillHeader span { color: #6f7b7d; }
+.facesDrillHeader > div:nth-child(2) b { color: var(--yellow); }
+.facesTelemetry {
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  padding: 5px 12px;
+  border-bottom: 1px solid var(--line);
+  background: rgba(5, 7, 8, .78);
+  overflow-x: auto;
+}
+.facesTelemetry span,
+.facesTelemetry i {
+  min-width: max-content;
+  padding: 0 10px;
+  border-right: 1px solid rgba(255, 255, 255, .08);
+  color: #6f7a7c;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: var(--type-micro);
+  font-weight: 750;
+  line-height: 26px;
+  font-style: normal;
+}
+.facesTelemetry span:first-child { padding-left: 0; }
+.facesTelemetry span b { color: #e9eceb; }
+.facesTelemetry i { margin-left: auto; border-right: 0; color: #70c78a; }
+.facesModeBar {
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 5px 12px;
+  border-bottom: 1px solid var(--line);
+  background: rgba(8, 11, 12, .88);
+}
+.facesModeBar .modeSwitch { flex: 0 0 auto; }
+.facesModeBar > span {
+  color: #6d797b;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: var(--type-micro);
+  font-weight: 750;
+  line-height: 13px;
+  letter-spacing: .07em;
+  text-align: right;
+}
+.facesStage {
+  min-width: 0;
+  min-height: 0;
+  position: relative;
+  overflow: auto;
+  scrollbar-color: var(--cyan) #111719;
+  scrollbar-width: thin;
+}
+.facesCardMount {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  display: grid;
+  place-items: center;
+  padding: 12px 72px;
+}
+.faceInspectionPlate {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  z-index: 8;
+  width: 190px;
+  padding: 11px 12px;
+  border: 1px solid rgba(0, 188, 231, .28);
+  background: rgba(6, 9, 10, .94);
+  box-shadow: inset 2px 0 rgba(0, 188, 231, .2), 0 18px 32px rgba(0, 0, 0, .35);
+  transform: translateY(-50%);
+}
+.faceInspectionPlate > span,
+.faceInspectionPlate > b,
+.faceInspectionPlate p,
+.faceInspectionPlate i {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+.faceInspectionPlate > span { display: block; color: var(--cyan); font-size: 10px; font-weight: 850; letter-spacing: .1em; }
+.faceInspectionPlate > b { display: block; margin-top: 5px; color: var(--yellow); font-size: 12px; line-height: 15px; }
+.faceInspectionPlate p { margin: 7px 0 10px; color: #919b9d; font-size: 10px; line-height: 14px; }
+.faceInspectionPlate div { display: grid; gap: 1px; }
+.faceInspectionPlate i { padding: 4px 5px; background: rgba(255, 255, 255, .035); color: #707c7e; font-size: 10px; font-style: normal; line-height: 12px; }
+.faceRegister {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1px;
+  padding: 1px;
+  border-top: 1px solid var(--line);
+  background: rgba(255, 255, 255, .07);
+}
+.faceRegister button {
+  min-width: 0;
+  min-height: 92px;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: auto 1fr;
+  gap: 4px 8px;
+  padding: 11px 12px;
+  border: 0;
+  background: #090c0d;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.faceRegister button:hover,
+.faceRegister button:focus-visible { background: rgba(0, 188, 231, .1); outline: 1px solid rgba(0, 188, 231, .35); outline-offset: -1px; }
+.faceRegister button b { grid-row: 1 / span 2; color: var(--yellow); font-size: 18px; line-height: 19px; }
+.faceRegister button span { color: #eef1f0; font-size: 11px; font-weight: 850; line-height: 14px; }
+.faceRegister button small { color: #758082; font-size: 10px; line-height: 13px; }
+.faceRegister .faceSelected { background: linear-gradient(145deg, rgba(243, 196, 0, .16), #090c0d 64%); box-shadow: inset 0 2px var(--yellow); }
+.facesInspector { padding: 14px 16px 18px; }
+.facesInspector h2 { margin: 0; font-size: 24px; line-height: 26px; }
+.facesInspector section { padding: 11px 0; border-top: 1px solid rgba(255, 255, 255, .07); }
+.facesInspector h3,
+.facesInspector section p {
+  margin: 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: var(--type-micro);
+  line-height: 15px;
+}
+.facesInspector h3 { margin-bottom: 5px; color: var(--yellow); letter-spacing: .09em; }
+.facesInspector section p { color: #9ba4a5; }
+
 @media (max-width: 1180px) {
   .workbenchBody { grid-template-columns: minmax(0, 1fr) clamp(250px, 27vw, 300px); }
   .benchControls { grid-template-columns: 1fr auto; }
@@ -2713,7 +2888,7 @@
   .benchUtilities { grid-column: 2; grid-row: 1; }
   .faceControls button { padding: 0 4px; }
   .machineBench { grid-template-rows: auto minmax(470px, 1fr) auto; }
-  .controlBay { height: 634px; }
+  .controlBay { min-height: 634px; height: auto; }
   .railDrilldown { height: 634px; }
   .railFunctionGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .railFunctionGrid button { min-height: 106px; }
@@ -2722,6 +2897,8 @@
   .gearDrilldown { height: 634px; }
   .gearSelector { grid-template-columns: repeat(4, minmax(0, 1fr)); }
   .gearSelector button { min-height: 68px; }
+  .facesDrilldown { height: 720px; }
+  .faceInspectionPlate { width: 170px; }
 }
 @media (max-width: 760px) {
   .workbenchBody { grid-template-columns: minmax(0, 1fr) 240px; }
@@ -2740,12 +2917,16 @@
   .gearDrillHeader { grid-template-columns: auto 1fr; }
   .gearDrillHeader .gearbox { grid-column: 1 / -1; justify-self: end; }
   .gearSelector { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .facesDrillHeader { grid-template-columns: auto 1fr; }
+  .facesDrillHeader .gearbox { grid-column: 1 / -1; justify-self: end; }
+  .faceInspectionPlate { display: none; }
+  .faceRegister { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 620px) {
   .workbenchHeader { align-items: flex-start; flex-direction: column; }
   .workbenchBody { grid-template-columns: minmax(0, 1fr); }
   .machineBench { border-right: 0; border-bottom: 1px solid var(--line); }
-  .controlBay { width: 100%; height: 520px; }
+  .controlBay { width: 100%; min-height: 520px; height: 520px; }
   .controlBayTabs { grid-template-columns: 1fr 1fr; }
   .consoleViewport { min-height: 450px; }
   .consoleMount { transform: scale(.9); transform-origin: left top; min-height: 450px; }
@@ -2759,4 +2940,8 @@
   .gearDrilldown { height: 620px; border-right: 0; border-bottom: 1px solid var(--line); }
   .gearTelemetry span:nth-child(2) { display: none; }
   .gearSelector { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .facesDrilldown { height: 690px; border-right: 0; border-bottom: 1px solid var(--line); }
+  .facesTelemetry span:first-child { display: none; }
+  .facesModeBar > span { display: none; }
+  .facesModeBar .modeSwitch { width: 100%; }
 }

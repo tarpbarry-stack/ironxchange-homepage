@@ -227,6 +227,31 @@ test("the card scales around a fixed environment center", () => {
   assert.match(css, /\.gearCardMount[\s\S]*?inset:\s*0[\s\S]*?place-items:\s*center/);
 });
 
+test("Machine Faces opens the four real Marketplace faces", () => {
+  const testCell = fs.readFileSync(
+    new URL("../components/ixi-atlas/IXIAtlasLiveTestCell.jsx", import.meta.url),
+    "utf8",
+  );
+  const drilldown = fs.readFileSync(
+    new URL("../components/ixi-atlas/IXIAtlasFacesDrilldown.jsx", import.meta.url),
+    "utf8",
+  );
+
+  assert.match(testCell, /selected === "faces"/);
+  assert.match(testCell, /IXIAtlasFacesDrilldown/);
+  assert.match(testCell, /\["PHOTO", "BUYER", "DEAL SHEET", "NETWORK"\]/);
+  assert.match(drilldown, /IXIScaledCardShell/);
+  assert.match(drilldown, /renderParentCard\(\)/);
+  assert.match(drilldown, /MACHINE RECOGNITION/);
+  assert.match(drilldown, /BUYER DECISION FACE/);
+  assert.match(drilldown, /PURCHASE WORKSHEET/);
+  assert.match(drilldown, /MARKETPLACE ENTRY/);
+  assert.match(drilldown, /RAIL 04 CYCLES THE LIVE CARD/);
+  assert.match(drilldown, /IDENTITY \+ STATE PRESERVED/);
+  assert.match(drilldown, /mode === "INSPECT"/);
+  assert.doesNotMatch(drilldown, /fetch\s*\(/);
+});
+
 test("the System Index is an accessible assembly navigator", () => {
   const atlas = fs.readFileSync(
     new URL("../components/ixi-atlas/IXITechnicalAtlas.jsx", import.meta.url),
