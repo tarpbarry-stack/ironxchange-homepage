@@ -15,10 +15,36 @@ import {
 } from "../lib/mos/IXIAosMembershipBridge.mjs";
 import {
   admitMosCanonicalIdentity,
+  admitMosCanonicalIdentities,
   createMosRelationship,
   findVerifiedMosRelationship,
   hasMosCanonicalAdmissionEvidence
 } from "../lib/mos/ixiMosBrowserGatewayClient.js";
+
+test("environment hydration batches canonical identity admission into one authenticated request", async () => {
+  const originalFetch = globalThis.fetch;
+  const calls = [];
+  globalThis.fetch = async (url, options = {}) => {
+    calls.push({ url, options });
+    return {
+      ok: true,
+      json: async () => ({ ok: true, admissions: [] })
+    };
+  };
+  try {
+    await admitMosCanonicalIdentities({
+      requests: [
+        { objectId: "object-one", passportId: "IXIONE2345" },
+        { objectId: "object-two", passportId: "IXITWO2345" }
+      ]
+    });
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].url, "/api/aos/mos/identity/admit-batch");
+  assert.equal(JSON.parse(calls[0].options.body).requests.length, 2);
+});
 
 function canonicalObject({ objectId, passportId, displayName, objectType = "customer-defined" }) {
   return {

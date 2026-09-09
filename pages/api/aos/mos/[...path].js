@@ -29,6 +29,7 @@ const ROUTES = [
   { methods: ["GET", "PATCH", "DELETE"], pattern: /^\/objects\/[^/]+$/ },
 
   { methods: ["POST"], pattern: /^\/identity\/admit$/ },
+  { methods: ["POST"], pattern: /^\/identity\/admit-batch$/ },
 
   { methods: ["POST"], pattern: /^\/aos\/workspace-sessions$/ },
   { methods: ["GET"], pattern: /^\/aos\/workspace-sessions\/[^/]+$/ },

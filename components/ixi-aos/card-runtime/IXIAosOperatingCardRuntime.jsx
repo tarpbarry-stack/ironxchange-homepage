@@ -3,6 +3,7 @@ import dynamic from "next/dynamic";
 import { resolveIXIAosOperatingCardNumber } from "./IXIAosOperatingCardResolver.mjs";
 import IXIAosCardIdentityFace from "./IXIAosCardIdentityFace";
 import IXIContainerDropTarget from "../../ixi-chassis/IXIContainerDropTarget";
+import IXIAosContainerCommandStrip from "./modules/IXIAosContainerCommandStrip";
 import {
   getNextIXIRelationshipColor,
   getNextIXIRelationshipOutline
@@ -230,6 +231,16 @@ export default function IXIAosOperatingCardRuntime({
     >
       {rendered}
 
+      <div className="ixi-aos-canonical-command-overlay">
+        <IXIAosContainerCommandStrip
+          object={runtimeObject}
+          onRecall={onRecall}
+          onBoard={onBoard}
+          onReturn={onReturn}
+          disabled={Boolean(ixiState?.editing)}
+        />
+      </div>
+
       <style jsx>{`
         .ixi-aos-operating-card-runtime {
           position: relative;
@@ -247,6 +258,17 @@ export default function IXIAosOperatingCardRuntime({
           border: 1px solid rgba(255, 255, 255, .08);
           border-radius: 13px;
           background: #0b0d0c;
+        }
+
+        :global(.ixi-aos-operating-card-runtime .actions),
+        :global(.ixi-aos-operating-card-runtime .system-index-command-strip),
+        :global(.ixi-aos-operating-card-runtime [class*="-commands"]),
+        :global(.ixi-aos-operating-card-runtime .ixi-aos-container-command-strip) {
+          display: none !important;
+        }
+
+        .ixi-aos-canonical-command-overlay :global(.ixi-aos-container-command-strip) {
+          display: flex !important;
         }
       `}</style>
     </div>

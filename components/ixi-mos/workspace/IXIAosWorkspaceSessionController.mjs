@@ -309,23 +309,24 @@ export function createAosWorkspaceSessionController({
 
   function admitObjects(descriptors = []) {
     return enqueue(async () => {
-      for (let index = 0; index < descriptors.length; index += 1) {
-        const descriptor = descriptors[index];
+      const pending = descriptors.flatMap(descriptor => {
         const objectId = canonicalObjectId(descriptor?.objectId);
-        if (session?.objects?.[objectId]) continue;
-        const commandId = clean(descriptor.commandId) ||
-          createCommandId(`aos-admit-${index}`);
+        if (session?.objects?.[objectId]) return [];
+        return [{
+          objectId,
+          surfaceId: clean(descriptor.surfaceId),
+          visualOrder: Number(descriptor.visualOrder || 0),
+          operatingState: clean(descriptor.operatingState || "preview"),
+          activeSummonedContext:
+            clean(descriptor.activeSummonedContext) || null
+        }];
+      });
+
+      if (pending.length) {
         await applyCommand({
-          commandId,
-          commandType: "object.admit",
-          payload: {
-            objectId,
-            surfaceId: clean(descriptor.surfaceId),
-            visualOrder: Number(descriptor.visualOrder || 0),
-            operatingState: clean(descriptor.operatingState || "preview"),
-            activeSummonedContext:
-              clean(descriptor.activeSummonedContext) || null
-          }
+          commandId: createCommandId("aos-admit-batch"),
+          commandType: "objects.admit",
+          payload: { objects: pending }
         });
       }
       placements = workspacePlacementsFromSession(session, initialSurfaces);
@@ -352,13 +353,12 @@ export function createAosWorkspaceSessionController({
   }
 
   async function undoServerOperation(operationId, objectIds) {
-    for (let index = 0; index < objectIds.length; index += 1) {
-      await applyCommand({
-        commandId: `${commandIdPart(operationId)}:undo:${index}`,
-        commandType: "object.undo",
-        payload: { objectId: objectIds[index], operationId }
-      });
-    }
+    if (!objectIds.length) return;
+    await applyCommand({
+      commandId: `${commandIdPart(operationId)}:undo`,
+      commandType: "objects.undo",
+      payload: { objectIds, operationId }
+    });
   }
 
   function persistLayout(nextPlacements, {
@@ -390,49 +390,55 @@ export function createAosWorkspaceSessionController({
     const completion = enqueue(async () => {
       try {
         const destinationSurfaces = new Set();
+        const admissions = [];
+        const moves = [];
         for (let index = 0; index < changed.length; index += 1) {
           const objectId = changed[index];
           const destination = locateWorkspaceObject(next, objectId);
           if (!destination) continue;
           destinationSurfaces.add(destination.surfaceId);
           if (!session?.objects?.[objectId]) {
-            await applyCommand({
-              commandId: `${commandIdPart(operationId)}:admit:${index}`,
-              commandType: "object.admit",
-              payload: {
-                objectId,
-                surfaceId: destination.surfaceId,
-                visualOrder: destination.visualOrder,
-                operatingState:
-                  destination.surfaceId.startsWith("container:") ||
-                  destination.surfaceId === "indexEquipment"
-                    ? "tucked"
-                    : "operating"
-              }
+            admissions.push({
+              objectId,
+              surfaceId: destination.surfaceId,
+              visualOrder: destination.visualOrder,
+              operatingState:
+                destination.surfaceId.startsWith("container:") ||
+                destination.surfaceId === "indexEquipment"
+                  ? "tucked"
+                  : "operating"
             });
           } else {
-            if (captureUndo) {
-              await applyCommand({
-                commandId: `${commandIdPart(operationId)}:snapshot:${index}`,
-                commandType: "object.snapshot.capture",
-                payload: { objectId, operationId }
-              });
-            }
-            await applyCommand({
-              commandId: `${commandIdPart(operationId)}:move:${index}`,
-              commandType: "object.move",
-              payload: {
-                objectId,
-                surfaceId: destination.surfaceId,
-                visualOrder: destination.visualOrder,
-                operatingState:
-                  destination.surfaceId.startsWith("container:") ||
-                  destination.surfaceId === "indexEquipment"
-                    ? "tucked"
-                    : "operating"
-              }
+            moves.push({
+              objectId,
+              surfaceId: destination.surfaceId,
+              visualOrder: destination.visualOrder,
+              operatingState:
+                destination.surfaceId.startsWith("container:") ||
+                destination.surfaceId === "indexEquipment"
+                  ? "tucked"
+                  : "operating"
             });
           }
+        }
+
+        if (admissions.length) {
+          await applyCommand({
+            commandId: `${commandIdPart(operationId)}:admit`,
+            commandType: "objects.admit",
+            payload: { objects: admissions }
+          });
+        }
+
+        if (moves.length) {
+          await applyCommand({
+            commandId: `${commandIdPart(operationId)}:move`,
+            commandType: "objects.move",
+            payload: {
+              objects: moves,
+              operationId: captureUndo ? operationId : null
+            }
+          });
         }
 
         /*
@@ -538,19 +544,11 @@ export function createAosWorkspaceSessionController({
     onPlacements(clone(placements));
 
     return enqueue(async () => {
-      for (let index = 0; index < ids.length; index += 1) {
-        const objectId = ids[index];
-        await applyCommand({
-          commandId: `${commandIdPart(operationId)}:snapshot:${index}`,
-          commandType: "object.snapshot.capture",
-          payload: { objectId, operationId }
-        });
-        await applyCommand({
-          commandId: `${commandIdPart(operationId)}:recall:${index}`,
-          commandType: "object.recall",
-          payload: { objectId }
-        });
-      }
+      await applyCommand({
+        commandId: `${commandIdPart(operationId)}:recall`,
+        commandType: "objects.recall",
+        payload: { objectIds: ids, operationId }
+      });
       placements = workspacePlacementsFromSession(session, initialSurfaces);
       onPlacements(clone(placements));
       return { operationId, session: clone(session) };
@@ -605,6 +603,19 @@ export function createAosWorkspaceSessionController({
     }));
   }
 
+  function summonMany(objectIds, activeSummonedContext) {
+    const objects = objectIds.map(objectId => ({
+      objectId: canonicalObjectId(objectId),
+      activeSummonedContext: clean(activeSummonedContext) || null
+    }));
+    if (!objects.length) return Promise.resolve(null);
+    return enqueue(() => applyCommand({
+      commandId: createCommandId("aos-summon-batch"),
+      commandType: "objects.summon.set",
+      payload: { objects }
+    }));
+  }
+
   function end() {
     return enqueue(async () => {
       if (!session) return null;
@@ -632,6 +643,7 @@ export function createAosWorkspaceSessionController({
     undo,
     reorder,
     summon,
+    summonMany,
     end,
     readSession: () => clone(session),
     readPlacements: () => clone(placements),

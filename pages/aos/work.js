@@ -1608,9 +1608,10 @@ async function boardContainerChildren(container) {
       operationId,
       objectIds: childIds
     });
-    await Promise.all(childIds.map(objectId =>
-      workspaceSessionControllerRef.current?.summon(objectId, containerId)
-    ));
+    await workspaceSessionControllerRef.current?.summonMany(
+      childIds,
+      containerId
+    );
   } catch (error) {
     delete containerReturnSnapshotsRef.current[containerId];
     throw error;

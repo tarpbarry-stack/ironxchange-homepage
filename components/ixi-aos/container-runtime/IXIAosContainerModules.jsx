@@ -1153,6 +1153,8 @@ export function renderIXIAosContainerModule({
 
   onRecall = null,
 
+  onReturn = null,
+
   onExposeObject = null
 }) {
 
@@ -1224,7 +1226,7 @@ export function renderIXIAosContainerModule({
     }
 
     onReturn={
-      onRecall
+      onReturn
     }
 
     showHeader={

@@ -7,9 +7,6 @@ import IXIBoardSurface
 import IXISortableMachineCard
   from "../../ixi-chassis/IXISortableMachineCard";
 
-import IXISystemIndexCard
-  from "../IXISystemIndexCard";
-
 import IXIAosCard018
   from "../../ixi-aos/cards/018/IXIAosCard018";
 
@@ -377,25 +374,27 @@ export default function IXIAosWorkspaceBoard({
                     });
                   };
 
-                  const systemIndexCard =
-                    Number(item?.presentation?.templateNumber) === 18
-                      ? {
-                          Card: IXIAosCard018,
-                          displayName: cleanId(item?.displayName || item?.title || item?.name),
-                          templateSlug: cleanId(item?.presentation?.templateSlug),
-                          cardNumber: 18,
-                          childCardMode:
-                            systemAdapter?.adapterId === "ixi-owned-equipment"
-                              ? "machine"
-                              : "object",
-                          loopChildDeck: true
-                        }
-                      : null;
+                  /*
+                   * A governed System Index is always presented by Card 018.
+                   * Card number is presentation, never identity: this branch is
+                   * selected only by explicit System Index metadata/adapter
+                   * identity and never by a customer-visible label.
+                   */
+                  const systemIndexCard = {
+                    Card: IXIAosCard018,
+                    displayName: cleanId(item?.displayName || item?.title || item?.name),
+                    templateSlug: cleanId(item?.presentation?.templateSlug),
+                    cardNumber: 18,
+                    childCardMode:
+                      systemAdapter?.adapterId === "ixi-owned-equipment"
+                        ? "machine"
+                        : "object",
+                    loopChildDeck: true
+                  };
 
-                  if (systemIndexCard) {
-                    const NumberedSystemIndexCard = systemIndexCard.Card;
+                  const NumberedSystemIndexCard = systemIndexCard.Card;
 
-                    return (
+                  return (
                       <NumberedSystemIndexCard
                         object={{
                           ...item,
@@ -427,6 +426,8 @@ export default function IXIAosWorkspaceBoard({
                         childCardMode={systemIndexCard.childCardMode}
                         loopChildDeck={systemIndexCard.loopChildDeck}
                         onOpenTransact={onOpenTransact}
+                        onSaveObject={onSaveObject}
+                        onDeleteObject={onDeleteObject}
                         onAddObject={
                           canCreateChild
                             ? onAddObject
@@ -456,68 +457,6 @@ export default function IXIAosWorkspaceBoard({
                           )
                         }
                       />
-                    );
-                  }
-
-                  return (
-                    <IXISystemIndexCard
-                    index={item}
-                    objectId={id}
-                    dragHandleProps={dragHandleProps}
-
-                    workspaceDropPolicy={
-                      getSystemIndexDropPolicy(item)
-                    }
-
-                    workspaceDropSurface={
-                      item?.workspace?.surfaceId ||
-                      systemAdapter?.workspaceSurfaceId ||
-                      ""
-                    }
-
-                    ixiState={indexState}
-
-                    ixiCardState={ixiCardState}
-                    onIxiStateChange={updateIxiCardState}
-                    armedDestination={armedDestination}
-                    onSendFront={sendListingToFront}
-                    onSendBack={sendListingToBack}
-                    onCycleColor={cycleObjectColor}
-                    onCycleOutline={cycleObjectOutline}
-                    onSendToArmedDestination={sendMachineToArmedDestination}
-
-                    onExposeObject={exposeObject}
-
-                    onOpenConsole={onOpenConsole}
-
-                    onExposeContents={() =>
-                      onExposeContainerChildren?.(
-                        commandTarget
-                      )
-                    }
-
-                    onGatherContents={() =>
-                      onGatherContainerChildren?.(
-                        commandTarget
-                      )
-                    }
-
-                    onReturnContents={() =>
-                      onReturnContainerChildren?.(
-                        commandTarget
-                      )
-                    }
-
-                    onAddObject={
-                      canCreateChild
-                        ? onAddObject
-                        : null
-                    }
-
-                    onSavePresentation={
-                      onSaveContainerPresentation
-                    }
-                    />
                   );
                 }}
               />

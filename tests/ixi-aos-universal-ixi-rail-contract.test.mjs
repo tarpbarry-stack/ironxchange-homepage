@@ -51,8 +51,9 @@ test("AOS Work wires relationship color and strength into every custom-card path
 
   assert.match(board, /const cycleObjectColor = event =>/u);
   assert.match(board, /const cycleObjectOutline = event =>/u);
-  assert.equal((board.match(/onCycleColor=\{cycleObjectColor\}/g) || []).length, 4);
-  assert.equal((board.match(/onCycleOutline=\{cycleObjectOutline\}/g) || []).length, 4);
+  assert.equal((board.match(/onCycleColor=\{cycleObjectColor\}/g) || []).length, 3);
+  assert.equal((board.match(/onCycleOutline=\{cycleObjectOutline\}/g) || []).length, 3);
+  assert.doesNotMatch(board, /from "\.\.\/IXISystemIndexCard"/u);
 });
 
 test("Cards 001 through 018 retain a canonical IXI rail renderer", async () => {

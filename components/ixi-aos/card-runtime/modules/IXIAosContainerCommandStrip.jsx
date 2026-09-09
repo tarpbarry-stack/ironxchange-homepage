@@ -1,110 +1,122 @@
+import { useState } from "react";
+
 export default function IXIAosContainerCommandStrip({
   object = {},
   onRecall = null,
   onBoard = null,
-  onReturn = null
+  onReturn = null,
+  disabled = false
 }) {
-  function fire(event, handler) {
+  const [pending, setPending] = useState("");
+
+  async function fire(event, action, handler) {
     event.preventDefault();
     event.stopPropagation();
-    handler?.(object);
+    if (disabled || pending || typeof handler !== "function") return;
+    setPending(action);
+    try {
+      await handler(object);
+    } finally {
+      setPending("");
+    }
   }
 
   return (
     <div className="ixi-aos-container-command-strip">
       <button
         type="button"
+        aria-label="Recall direct children"
+        title="Recall direct children"
+        disabled={disabled || Boolean(pending) || typeof onRecall !== "function"}
         onPointerDown={event => event.stopPropagation()}
-        onClick={event => fire(event, onRecall)}
+        onClick={event => fire(event, "recall", onRecall)}
       >
-        <span>↻</span>
-        RECALL
+        <span className="command-symbol">↻</span>
+        <span className="command-label">{pending === "recall" ? "RECALLING" : "RECALL"}</span>
       </button>
 
       <button
         type="button"
+        aria-label="Put direct children on Board"
+        title="Put direct children on Board"
+        disabled={disabled || Boolean(pending) || typeof onBoard !== "function"}
         onPointerDown={event => event.stopPropagation()}
-        onClick={event => fire(event, onBoard)}
+        onClick={event => fire(event, "board", onBoard)}
       >
-        <span>▦</span>
-        BOARD
+        <span className="command-symbol">▦</span>
+        <span className="command-label">{pending === "board" ? "BOARDING" : "BOARD"}</span>
       </button>
 
       <button
         type="button"
+        aria-label="Return previous workspace arrangement"
+        title="Return previous workspace arrangement"
+        disabled={disabled || Boolean(pending) || typeof onReturn !== "function"}
         onPointerDown={event => event.stopPropagation()}
-        onClick={event => fire(event, onReturn || onRecall)}
+        onClick={event => fire(event, "return", onReturn)}
       >
-        <span>↩</span>
-        RETURN
+        <span className="command-symbol">↩</span>
+        <span className="command-label">{pending === "return" ? "RETURNING" : "RETURN"}</span>
       </button>
 
       <style jsx>{`
         .ixi-aos-container-command-strip {
           position: absolute;
-          left: 0;
-          right: 0;
-          bottom: 54px;
-
-          width: auto;
-          height: 27px;
-          min-height: 27px;
-
-          display: grid;
-          grid-template-columns: repeat(3, 1fr);
-
-          border-top: 1px solid rgba(255,255,255,.045);
-          border-bottom: 1px solid rgba(0,194,255,.10);
-
-          background: rgba(10,10,10,.98);
-
-          z-index: 45;
-        }
-
-        button {
-          min-width: 0;
-
+          left: 6px;
+          right: 6px;
+          bottom: 81px;
+          height: 23px;
           display: flex;
           align-items: center;
           justify-content: center;
-
-          gap: 5px;
-          padding: 0 4px;
-
-          border: 0;
-          border-right:
-            1px solid
-            rgba(255,255,255,.045);
-
+          gap: 6px;
           background: transparent;
+          z-index: 260;
+        }
 
-          color:
-            rgba(255,255,255,.58);
-
+        button {
+          width: 77px;
+          min-width: 77px;
+          height: 19px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 4px;
+          padding: 0 7px;
+          border: 1px solid rgba(255,255,255,.07);
+          border-radius: 4px;
+          background: rgba(255,255,255,.018);
+          color: rgba(255,255,255,.62);
           font-size: 7px;
           font-weight: 950;
           letter-spacing: .04em;
-
           cursor: pointer;
+          transition: color 120ms ease, border-color 120ms ease, background 120ms ease, box-shadow 120ms ease;
         }
 
-        button:last-child {
-          border-right: 0;
+        button:not(:disabled):hover,
+        button:not(:disabled):focus-visible {
+          border-color: rgba(0,194,255,.72);
+          background: rgba(0,194,255,.10);
+          color: #00c2ff;
+          box-shadow: 0 0 0 1px rgba(0,194,255,.08);
+          outline: none;
         }
 
-        button:hover {
-          background:
-            rgba(0,194,255,.045);
-
-          color:
-            rgba(255,255,255,.94);
+        button:disabled {
+          cursor: default;
+          opacity: .42;
         }
 
-        span {
-          color:
-            rgba(0,194,255,.82);
-
+        .command-symbol {
+          color: #00c2ff;
           font-size: 11px;
+          font-weight: 950;
+        }
+
+        .command-label {
+          color: inherit;
+          font-size: 6px;
           font-weight: 950;
         }
       `}</style>

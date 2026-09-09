@@ -90,7 +90,68 @@ function createServer({ placementScope = "personal", principalId = "user_1" } = 
       const payload = request.payload || {};
       const objectId = payload.objectId;
       const now = stamp();
-      if (request.commandType === "object.admit") {
+      if (request.commandType === "objects.admit") {
+        payload.objects.forEach(item => {
+          session.objects[item.objectId] = {
+            objectId: item.objectId,
+            sessionOrigin: {
+              surfaceId: item.surfaceId,
+              visualOrder: item.visualOrder,
+              operatingState: item.operatingState
+            },
+            currentPlacement: {
+              surfaceId: item.surfaceId,
+              visualOrder: item.visualOrder,
+              operatingState: item.operatingState
+            },
+            activeSummonedContext: item.activeSummonedContext || null,
+            returnSnapshot: null,
+            admittedAt: now,
+            updatedAt: now
+          };
+        });
+      } else if (request.commandType === "objects.move") {
+        payload.objects.forEach(item => {
+          const record = session.objects[item.objectId];
+          if (payload.operationId) {
+            record.returnSnapshot = {
+              operationId: payload.operationId,
+              placement: clone(record.currentPlacement),
+              capturedAt: now
+            };
+          }
+          record.currentPlacement = {
+            surfaceId: item.surfaceId,
+            visualOrder: item.visualOrder,
+            operatingState: item.operatingState
+          };
+          if (Object.prototype.hasOwnProperty.call(item, "activeSummonedContext")) {
+            record.activeSummonedContext = item.activeSummonedContext || null;
+          }
+        });
+      } else if (request.commandType === "objects.undo") {
+        payload.objectIds.forEach(id => {
+          const record = session.objects[id];
+          assert.equal(record.returnSnapshot.operationId, payload.operationId);
+          record.currentPlacement = clone(record.returnSnapshot.placement);
+          record.returnSnapshot = null;
+        });
+      } else if (request.commandType === "objects.recall") {
+        payload.objectIds.forEach(id => {
+          const record = session.objects[id];
+          record.returnSnapshot = {
+            operationId: payload.operationId,
+            placement: clone(record.currentPlacement),
+            capturedAt: now
+          };
+          record.currentPlacement = clone(record.sessionOrigin);
+        });
+      } else if (request.commandType === "objects.summon.set") {
+        payload.objects.forEach(item => {
+          session.objects[item.objectId].activeSummonedContext =
+            item.activeSummonedContext || null;
+        });
+      } else if (request.commandType === "object.admit") {
         session.objects[objectId] = {
           objectId,
           sessionOrigin: {

@@ -46,3 +46,23 @@ test("every durable numbered AOS card receives the universal command handlers", 
   assert.match(runtime, /const Card = NUMBERED_CARDS\[cardNumber\]/u);
   assert.match(runtime, /<Card \{\.\.\.consoleProps\} \/>/u);
 });
+
+test("every operating card uses the Wichita Falls command geometry and exact handlers", async () => {
+  const [strip, runtime, card018, modules] = await Promise.all([
+    read("components/ixi-aos/card-runtime/modules/IXIAosContainerCommandStrip.jsx"),
+    read("components/ixi-aos/card-runtime/IXIAosOperatingCardRuntime.jsx"),
+    read("components/ixi-aos/cards/018/IXIAosCard018.jsx"),
+    read("components/ixi-aos/container-runtime/IXIAosContainerModules.jsx")
+  ]);
+
+  assert.match(strip, /width: 77px/u);
+  assert.match(strip, /height: 19px/u);
+  assert.match(strip, /bottom: 81px/u);
+  assert.match(strip, /color: #00c2ff/u);
+  assert.match(strip, /onReturn\)/u);
+  assert.doesNotMatch(strip, /onReturn \|\| onRecall/u);
+  assert.match(runtime, /<IXIAosContainerCommandStrip[\s\S]*?onRecall=\{onRecall\}[\s\S]*?onBoard=\{onBoard\}[\s\S]*?onReturn=\{onReturn\}/u);
+  assert.match(card018, /<IXIAosContainerCommandStrip[\s\S]*?onReturn=\{onReturn\}/u);
+  assert.match(modules, /onReturn=\{\s*onReturn\s*\}/u);
+  assert.doesNotMatch(modules, /onReturn=\{\s*onRecall\s*\}/u);
+});
