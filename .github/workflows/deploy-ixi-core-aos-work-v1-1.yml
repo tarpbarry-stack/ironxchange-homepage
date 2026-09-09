@@ -150,10 +150,11 @@ jobs:
             exit 1
           fi
 
+          mkdir -p "$BACKUP"
           curl -fsS http://127.0.0.1:4100/health > "$BACKUP/preflight-health.json"
 
           rm -rf -- "$STAGE"
-          mkdir -p "$STAGE" "$BACKUP"
+          mkdir -p "$STAGE"
           git clone --quiet https://github.com/tarpbarry-stack/ixi-core.git "$STAGE"
           git -C "$STAGE" checkout --quiet --detach "$RELEASE_SHA"
           test "$(git -C "$STAGE" rev-parse HEAD)" = "$RELEASE_SHA"
