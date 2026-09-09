@@ -322,6 +322,7 @@
 .contextTitle strong { font-size: 10px; letter-spacing: 0.04em; }
 .identityCard { margin-top: 14px; overflow: hidden; border: 1px solid var(--line-strong); border-radius: 4px; background: #0f1210; }
 .identityMark { min-height: 108px; display: grid; place-items: center; color: rgba(255, 196, 0, 0.22); background: linear-gradient(145deg, rgba(255, 196, 0, 0.06), transparent 46%), repeating-linear-gradient(90deg, #101310 0, #101310 28px, #141714 29px); font-size: 30px; font-weight: 950; letter-spacing: 0.15em; }
+.identityMedia { min-height: 132px; background-color: #0a0c0a; background-position: center; background-repeat: no-repeat; background-size: cover; }
 .identityCard > div:last-child { padding: 12px; border-top: 1px solid var(--line); }
 .identityCard h2 { margin: 5px 0 3px; overflow: hidden; text-overflow: ellipsis; font-size: 13px; white-space: nowrap; }
 .identityCard p { margin: 0; color: var(--muted); font-size: 9px; }

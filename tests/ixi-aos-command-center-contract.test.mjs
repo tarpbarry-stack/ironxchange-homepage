@@ -44,7 +44,8 @@ const ownedListings = [
     title: "2017 Deere 544K II",
     passportId: "IXI-MACHINE-1",
     publicData: { machineLocation: "DFW Airport Yard", hours: 4500 },
-    price: { amount: 4150000, currency: "USD" }
+    price: { amount: 4150000, currency: "USD" },
+    imageUrl: "https://images.example.com/544k.jpg"
   }
 ];
 
@@ -55,6 +56,43 @@ test("desktop machine scope rejects a listing without canonical object identity"
   });
 
   assert.equal(contexts.some(item => item.kind === "machine"), false);
+});
+
+test("one canonical Object produces one command context and keeps machine presentation", () => {
+  const contexts = buildIXIAosCommandContexts({
+    entity,
+    aosObjects: [{
+      objectId: "object-machine-1",
+      objectType: "machine",
+      displayName: "Canonical 544K",
+      passportId: "IXI-MACHINE-1"
+    }],
+    ownedListings
+  });
+  const matching = contexts.filter(item => item.sourceId === "object-machine-1");
+  assert.equal(matching.length, 1);
+  assert.equal(matching[0].kind, "machine");
+  assert.equal(matching[0].passportId, "IXI-MACHINE-1");
+  assert.equal(matching[0].imageUrl, "https://images.example.com/544k.jpg");
+});
+
+test("a canonical IX-Core machine remains selectable when Sharetribe returns zero listings", () => {
+  const contexts = buildIXIAosCommandContexts({
+    entity,
+    aosObjects: [{
+      objectId: "object-544k",
+      objectType: "equipment",
+      displayName: "2017 DEERE 544K II",
+      passportId: "IXIMZFWCE7",
+      media: [{ imageUrl: "https://images.example.com/canonical-544k.jpg" }]
+    }],
+    ownedListings: []
+  });
+
+  const machine = contexts.find(context => context.sourceId === "object-544k");
+  assert.equal(machine.kind, "machine");
+  assert.equal(machine.passportId, "IXIMZFWCE7");
+  assert.equal(machine.imageUrl, "https://images.example.com/canonical-544k.jpg");
 });
 
 test("command contexts preserve recursive company, location, machine, person and work perspectives", () => {
