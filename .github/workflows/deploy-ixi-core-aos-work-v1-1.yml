@@ -300,23 +300,32 @@ jobs:
             .filter(object => object.status === "active");
           const relationships = Object.values(readJsonFile(MOS_PATHS.relationships, {}))
             .filter(relationship => relationship.status === "active");
-          const namedObject = (name, { allowCustomerSuffix = false } = {}) => {
-            const matches = objects.filter(object =>
-              (() => {
+          const namedObject = (
+            name,
+            { allowCustomerSuffix = false, candidateIds = null } = {}
+          ) => {
+            const matches = objects.filter(object => {
+              if (candidateIds && !candidateIds.has(object.objectId)) return false;
+              return (() => {
                 const value = String(object.displayName || "").trim().toUpperCase();
                 return value === name || (
                   allowCustomerSuffix && (
                     value.startsWith(`${name} `) || value.startsWith(`${name},`)
                   )
                 );
-              })()
-            );
+              })();
+            });
             assert.equal(matches.length, 1, `${name} must resolve to one active customer-named Object`);
             return matches[0];
           };
           const equipment = namedObject("EQUIPMENT");
           const locations = namedObject("LOCATIONS");
-          const wichitaFalls = namedObject("WICHITA FALLS", { allowCustomerSuffix: true });
+          const railProjections = buildRailProjectionMap(relationships, objects);
+          const locationsMembers = railProjections[locations.objectId]?.members || [];
+          const wichitaFalls = namedObject("WICHITA FALLS", {
+            allowCustomerSuffix: true,
+            candidateIds: new Set(locationsMembers.map(member => member.objectId))
+          });
           const identities = [equipment, locations, wichitaFalls].map(object =>
             resolveCanonicalObjectIdentity({ entityId: object.entityId, objectId: object.objectId })
           );
@@ -324,8 +333,6 @@ jobs:
             assert.ok(identity.object?.objectId);
             assert.ok(identity.passport?.passportId);
           });
-          const railProjections = buildRailProjectionMap(relationships, objects);
-          const locationsMembers = railProjections[locations.objectId]?.members || [];
           assert.ok(
             locationsMembers.some(member => member.objectId === wichitaFalls.objectId),
             "LOCATIONS must project Wichita Falls"
