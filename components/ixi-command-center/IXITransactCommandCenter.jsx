@@ -45,6 +45,8 @@ const WORKSPACES = [
   ["reporting", "REPORTING", "10"]
 ];
 
+const TRANSACT_LOGIN_HREF = `/login?returnTo=${encodeURIComponent("/transact")}`;
+
 const clean = value => String(value ?? "").trim();
 const safeArray = value => Array.isArray(value) ? value : [];
 
@@ -220,7 +222,7 @@ export default function IXITransactCommandCenter() {
         ]);
         if (controller.signal.aborted) return;
         if (!aosResult?.isAuthenticated) {
-          window.location.assign(`/login?returnTo=${encodeURIComponent("/transact")}`);
+          window.location.assign(TRANSACT_LOGIN_HREF);
           return;
         }
         setEnvironment(aosResult);
@@ -427,8 +429,8 @@ export default function IXITransactCommandCenter() {
 
           <div className={styles.scopeStrip} aria-label="Financial story scope">{SCOPE_OPTIONS.map(([kind, code, label]) => <button type="button" key={kind} data-active={selectedKind === kind} disabled={!groups[kind]?.length} onClick={() => { setSelectedKind(kind); setSelectedId(groups[kind]?.[0]?.id || ""); }}><span>{code}</span><strong>{label}</strong><b>{groups[kind]?.length || 0}</b></button>)}</div>
 
-          {loading ? <div className={styles.loadingState}>LOADING CANONICAL AOS AND TRAN$ACT ENVIRONMENT…</div> : null}
-          {!loading && error ? <div className={styles.errorBanner} role="alert"><strong>TRAN$ACT UNAVAILABLE</strong><span>{error}</span><small>No financial values have been fabricated.</small></div> : null}
+          {loading ? <div className={styles.loadingState}><strong>TRAN$ACT ACCESS</strong><span>Loading your authenticated financial workspace…</span><a className={styles.loginAction} href={TRANSACT_LOGIN_HREF}>LOG IN TO TRAN$ACT</a><small>After authentication, IXI returns you directly to TRAN$ACT.</small></div> : null}
+          {!loading && error ? <div className={styles.errorBanner} role="alert"><strong>TRAN$ACT UNAVAILABLE</strong><span>{error}</span><small>No financial values have been fabricated.</small><a className={styles.loginAction} href={TRANSACT_LOGIN_HREF}>LOG IN AND RETURN TO TRAN$ACT</a></div> : null}
           {financialError ? <div className={styles.errorBanner} role="alert"><strong>FINANCIAL PROJECTION UNAVAILABLE</strong><span>{financialError}</span><small>Operating context remains visible; accounting completeness is not asserted.</small></div> : null}
           {!loading && !error && selectedContext ? renderWorkspace() : null}
         </main>

@@ -51,6 +51,15 @@ test("desktop remains an authenticated read surface over governed financial cont
   assert.doesNotMatch(source, /method:\s*"(?:POST|PUT|PATCH|DELETE)"/u);
 });
 
+test("TRAN$ACT login returns the authenticated operator to the desktop", () => {
+  const source = read("components/ixi-command-center/IXITransactCommandCenter.jsx");
+
+  assert.match(source, /const TRANSACT_LOGIN_HREF = `\/login\?returnTo=\$\{encodeURIComponent\("\/transact"\)\}`/u);
+  assert.match(source, /LOG IN TO TRAN\$ACT/u);
+  assert.match(source, /LOG IN AND RETURN TO TRAN\$ACT/u);
+  assert.match(source, /window\.location\.assign\(TRANSACT_LOGIN_HREF\)/u);
+});
+
 test("desktop styling preserves the permanent professional shell and responsive safety", () => {
   const styles = read("components/ixi-command-center/IXIAosCommandCenter.module.css");
 

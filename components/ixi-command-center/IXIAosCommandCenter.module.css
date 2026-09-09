@@ -208,6 +208,10 @@
 .errorBanner strong { font-size: 9px; letter-spacing: 0.08em; }
 .errorBanner span { color: rgba(255, 255, 255, 0.74); font-size: 11px; }
 .errorBanner small { color: rgba(255, 255, 255, 0.42); }
+.loadingState strong { color: var(--gold); font-size: 9px; letter-spacing: 0.09em; }
+.loadingState span { color: rgba(255, 255, 255, 0.74); font-size: 11px; }
+.loadingState small { color: rgba(255, 255, 255, 0.42); }
+.loginAction { width: max-content; min-height: 34px; margin-top: 8px; display: inline-flex; align-items: center; justify-content: center; padding: 0 12px; border: 1px solid var(--gold); border-radius: 3px; color: #080908; background: var(--gold); font-size: 8px; font-weight: 950; letter-spacing: 0.07em; text-decoration: none; }
 
 .todayGrid { margin-top: 17px; display: grid; grid-template-columns: minmax(0, 1fr) 260px; gap: 14px; }
 .queuePanel,
