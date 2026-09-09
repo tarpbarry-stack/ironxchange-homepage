@@ -102,10 +102,13 @@ test("TA-001 mounts the production Machine Card in a zero-write live fixture", (
   assert.match(testCell, /import IXIMachineCard/);
   assert.match(testCell, /<IXIMachineCard/);
   assert.match(testCell, /ZERO WRITES/);
-  assert.match(testCell, /SEE IT/);
-  assert.match(testCell, /TOUCH IT/);
-  assert.match(testCell, /FOLLOW IT/);
+  assert.match(testCell, /INSPECT/);
+  assert.match(testCell, /OPERATE/);
+  assert.match(testCell, /OBJECT/);
   assert.match(testCell, /PASSPORT PULSE/);
+  assert.match(testCell, /IXIBrowseObjectConsoleRouter/);
+  assert.match(testCell, /role="tablist"/);
+  assert.match(testCell, /FACE_NAMES/);
   assert.doesNotMatch(testCell, /fetch\s*\(/);
 });
 

@@ -61,74 +61,6 @@ function Icon({ name }) {
   );
 }
 
-function Dossier({ part }) {
-  const [view, setView] = useState("FIELD");
-  return (
-    <aside className={styles.dossier} aria-live="polite">
-      <div className={styles.dossierHead}>
-        <div>
-          <span>SELECTED ASSEMBLY</span>
-          <strong>{part.index}</strong>
-        </div>
-        <span className={styles.status}>{part.status}</span>
-      </div>
-      <p className={styles.partCode}>
-        {part.code} / REV {part.version}
-      </p>
-      <h2>{part.name}</h2>
-      <p className={styles.short}>{part.short}</p>
-      <div className={styles.dossierView} aria-label="Dossier detail level">
-        <button type="button" className={view === "FIELD" ? styles.dossierViewActive : ""} onClick={() => setView("FIELD")}>FIELD VIEW</button>
-        <button type="button" className={view === "ENGINEERING" ? styles.dossierViewActive : ""} onClick={() => setView("ENGINEERING")}>ENGINEERING</button>
-      </div>
-      <section>
-        <h3>PURPOSE</h3>
-        <p>{part.purpose}</p>
-      </section>
-      <section>
-        <h3>CUSTOMER VALUE</h3>
-        <p>{part.benefit}</p>
-      </section>
-      {view === "ENGINEERING" && <section>
-        <h3>OPERATING SPECIFICATION</h3>
-        <ul>
-          {part.specs.map((spec) => (
-            <li key={spec}>{spec}</li>
-          ))}
-        </ul>
-      </section>}
-      {view === "ENGINEERING" && <div className={styles.flowSpec}>
-        <section>
-          <h3>INPUTS</h3>
-          {part.inputs.map((value) => (
-            <span key={value}>{value}</span>
-          ))}
-        </section>
-        <section>
-          <h3>OUTPUTS</h3>
-          {part.outputs.map((value) => (
-            <span key={value}>{value}</span>
-          ))}
-        </section>
-      </div>}
-      <section>
-        <h3>FIELD USE</h3>
-        <p>{part.use}</p>
-      </section>
-      {view === "ENGINEERING" && <section className={styles.sources}>
-        <h3>SOURCE OF TRUTH</h3>
-        {part.sources.map((source) => (
-          <code key={source}>{source}</code>
-        ))}
-      </section>}
-      <div className={styles.recordFoot}>
-        <span>INTRODUCED {part.introduced}</span>
-        <span>VERIFIED {ATLAS_REVISION}</span>
-      </div>
-    </aside>
-  );
-}
-
 export default function IXITechnicalAtlas() {
   const [activeModule, setActiveModule] = useState("TA-001");
   const [selectedId, setSelectedId] = useState("object");
@@ -259,7 +191,7 @@ export default function IXITechnicalAtlas() {
             </p>
           </section>
 
-          <section className={styles.workspace}>
+          <section className={`${styles.workspace} ${styles.liveWorkspace}`}>
             <div className={styles.drawingPanel}>
               <div className={styles.panelHead}>
                 <div>
@@ -274,6 +206,7 @@ export default function IXITechnicalAtlas() {
               <IXIAtlasLiveTestCell
                 selected={selectedId}
                 onSelect={setSelectedId}
+                part={part}
               />
               <div className={styles.layerBar}>
                 <span>
@@ -294,7 +227,6 @@ export default function IXITechnicalAtlas() {
                 </i>
               </div>
             </div>
-            <Dossier part={part} />
           </section>
 
           <section className={styles.componentIndex}>
