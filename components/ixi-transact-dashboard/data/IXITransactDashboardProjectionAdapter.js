@@ -31,6 +31,15 @@ export function normalizeIXITransactDashboardProjection(payload = {}) {
   const treasury = safeObject(root.treasury);
   const gl = safeObject(root.gl);
   const reports = safeObject(root.reports);
+  const domains = safeObject(root.domains);
+  const attentionSource = root.attention;
+  const attention = Array.isArray(attentionSource)
+    ? attentionSource
+    : [
+        ...safeArray(attentionSource?.recentActivity),
+        ...safeArray(attentionSource?.warnings),
+        ...safeArray(root.recentActivity)
+      ];
 
   return {
     generatedAt: clean(root.generatedAt),
@@ -40,8 +49,8 @@ export function normalizeIXITransactDashboardProjection(payload = {}) {
     scope: safeObject(root.scope),
     period: safeObject(root.period),
     executive: {
-      revenue: moneyMetric(executive, "revenue", "revenueCurrentPeriod"),
-      netIncome: moneyMetric(executive, "netIncome"),
+      revenue: moneyMetric(executive, "revenue", "revenueCurrentPeriod", "inflow"),
+      netIncome: moneyMetric(executive, "netIncome", "net"),
       cash: moneyMetric(executive, "cash", "cashBalance"),
       openAr: moneyMetric(executive, "openAr", "accountsReceivable"),
       overdueAr: moneyMetric(executive, "overdueAr"),
@@ -53,11 +62,11 @@ export function normalizeIXITransactDashboardProjection(payload = {}) {
     },
     ar: {
       ...ar,
-      records: safeArray(ar.records || ar.items || ar.receivables)
+      records: safeArray(ar.records || ar.items || ar.receivables || domains?.receivables?.records)
     },
     ap: {
       ...ap,
-      records: safeArray(ap.records || ap.items || ap.payables)
+      records: safeArray(ap.records || ap.items || ap.payables || domains?.payables?.records)
     },
     treasury: {
       ...treasury,
@@ -71,7 +80,11 @@ export function normalizeIXITransactDashboardProjection(payload = {}) {
       close: safeObject(gl.close)
     },
     reports,
-    attention: safeArray(root.attention || root.alerts),
+    attention,
+    financialSnapshot: safeObject(root.financialSnapshot),
+    lifecycleSnapshot: safeObject(root.lifecycleSnapshot),
+    domains,
+    lineageVersion: clean(root.lineageVersion || root.lineage?.sourceContractVersion),
     raw: root
   };
 }

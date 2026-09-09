@@ -91,6 +91,27 @@ function getMoneyValue(record = {}) {
   return Number.isFinite(number) ? number : 0;
 }
 
+function getImageUrl(record = {}) {
+  const publicData = getPublicData(record);
+  const candidates = [
+    record?.logoUrl,
+    record?.imageUrl,
+    typeof record?.image === "string" ? record.image : "",
+    record?.image?.url,
+    record?.image?.attributes?.variants?.default?.url,
+    safeArray(record?.imageUrls)[0],
+    publicData?.imageUrl,
+    safeArray(publicData?.imageUrls)[0],
+    record?.media?.[0]?.url,
+    record?.media?.[0]?.imageUrl,
+    record?.media?.[0]?.attributes?.variants?.default?.url,
+    record?.images?.[0]?.url,
+    record?.images?.[0]?.attributes?.variants?.default?.url
+  ];
+
+  return candidates.map(clean).find(Boolean) || "";
+}
+
 function getDateValue(record = {}) {
   const raw = record?.updatedAt || record?.createdAt || record?.attributes?.updatedAt ||
     record?.attributes?.createdAt || record?.metadata?.updatedAt || "";
@@ -112,6 +133,7 @@ function getObjectKind(record = {}) {
   if (/work-order|workorder|service-order|repair-order/.test(identity)) return "work";
   if (/person|employee|technician|operator|driver/.test(identity)) return "person";
   if (/location|yard|facility|branch|site/.test(identity)) return "location";
+  if (/machine|equipment|vehicle|asset|excavator|loader|dozer|truck|pump/.test(identity)) return "machine";
   return "object";
 }
 
@@ -130,6 +152,7 @@ function buildEntityContext(entity = {}) {
     location: firstText(entity?.officeLocation),
     hours: null,
     value: 0,
+    imageUrl: getImageUrl(entity),
     source: entity,
     updatedAt: getDateValue(entity)
   };
@@ -160,6 +183,7 @@ function buildMosContext(object = {}) {
     location: firstText(object?.location, object?.fields?.location),
     hours: null,
     value: getMoneyValue(object),
+    imageUrl: getImageUrl(object),
     source: object,
     updatedAt: getDateValue(object)
   };
@@ -186,6 +210,7 @@ function buildMachineContext(listing = {}) {
     location,
     hours,
     value: getMoneyValue(listing),
+    imageUrl: getImageUrl(listing),
     source: listing,
     updatedAt: getDateValue(listing)
   };
@@ -196,20 +221,32 @@ export function buildIXIAosCommandContexts({
   aosObjects = [],
   ownedListings = []
 } = {}) {
-  const contexts = [
-    buildEntityContext(entity),
-    ...safeArray(aosObjects).map(buildMosContext).filter(Boolean),
-    ...safeArray(ownedListings).map(buildMachineContext).filter(Boolean)
-  ];
+  const company = buildEntityContext(entity);
+  const byObjectId = new Map();
 
-  const seen = new Set();
+  safeArray(aosObjects)
+    .map(buildMosContext)
+    .filter(Boolean)
+    .forEach(context => byObjectId.set(context.sourceId, context));
 
-  return contexts.filter(context => {
-    const identity = `${context.kind}:${context.sourceId}`;
-    if (seen.has(identity)) return false;
-    seen.add(identity);
-    return true;
-  });
+  safeArray(ownedListings)
+    .map(buildMachineContext)
+    .filter(Boolean)
+    .forEach(machine => {
+      const canonical = byObjectId.get(machine.sourceId);
+      byObjectId.set(machine.sourceId, canonical
+        ? {
+            ...canonical,
+            ...machine,
+            parentId: canonical.parentId || machine.parentId,
+            passportId: canonical.passportId || machine.passportId,
+            imageUrl: machine.imageUrl || canonical.imageUrl,
+            source: { canonical: canonical.source, presentation: machine.source }
+          }
+        : machine);
+    });
+
+  return [company, ...byObjectId.values()];
 }
 
 function sameText(a, b) {

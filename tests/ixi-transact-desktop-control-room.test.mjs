@@ -43,6 +43,9 @@ test("desktop remains an authenticated read surface over governed financial cont
   assert.match(source, /loadIXIMosEnvironment/u);
   assert.match(source, /loadIXIFinancialAccessContext/u);
   assert.match(source, /loadIXITransactDashboard/u);
+  assert.match(source, /loadIXIAosPassportFinancialDocuments/u);
+  assert.match(source, /LIFETIME PASSPORT HISTORY/u);
+  assert.match(source, /PASSPORT RECORDS/u);
   assert.match(source, /entityPassportId/u);
   assert.match(source, /accountingPeriod: period/u);
   assert.match(source, /No financial values have been fabricated/u);
