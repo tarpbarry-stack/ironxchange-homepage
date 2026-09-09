@@ -250,7 +250,7 @@ jobs:
           const result = provisionSharetribeMachine({
             entityId,
             principalId: principalIds[0],
-            commandId: `sharetribe-listing:${listingId}`,
+            commandId: `migration:released-passport-admission-v1:${listingId}`,
             creationBoundary: "authenticated-listing-admission.v1",
             listing: {
               listingId,
@@ -512,9 +512,17 @@ jobs:
         if: always()
         shell: bash
         run: |
+          set -u
           command_id="${{ steps.deploy.outputs.command_id }}"
-          {
-            echo '## IX-Core Equipment membership production repair'
-            echo "- Commit: \`$IXI_CORE_SHA\`"
-            echo "- Instance: \`$AWS_INSTANCE_ID\`"
-            echo "- SSM command: \`${command_id:-not-created}\`"
+          echo '## IX-Core Equipment membership production repair' >> "$GITHUB_STEP_SUMMARY"
+          echo "- Commit: $IXI_CORE_SHA" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Instance: $AWS_INSTANCE_ID" >> "$GITHUB_STEP_SUMMARY"
+          echo "- SSM command: ${command_id:-not-created}" >> "$GITHUB_STEP_SUMMARY"
+          if [ -n "$command_id" ]; then
+            aws ssm get-command-invocation \
+              --region "$AWS_REGION" \
+              --command-id "$command_id" \
+              --instance-id "$AWS_INSTANCE_ID" \
+              --query '{Status:Status,Output:StandardOutputContent,Error:StandardErrorContent}' \
+              --output json >> "$GITHUB_STEP_SUMMARY" || true
+          fi
