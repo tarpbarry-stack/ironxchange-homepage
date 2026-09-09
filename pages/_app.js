@@ -66,7 +66,7 @@ export default function App({ Component, pageProps }) {
 
       <IXIMarketplaceFaceTypography />
       <Component {...pageProps} />
-      <IXIGlobalTicketLauncher />
+      {!Component.hideGlobalTicketLauncher && <IXIGlobalTicketLauncher />}
     </IXITicketProvider>
   );
 }

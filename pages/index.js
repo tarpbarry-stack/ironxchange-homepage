@@ -1,5 +1,7 @@
-import ConnectedHomepage from "../components/homepage/ConnectedHomepage";
+import SoftLaunchCover from "../components/homepage/SoftLaunchCover";
 
 export default function HomePage() {
-  return <ConnectedHomepage />;
+  return <SoftLaunchCover />;
 }
+
+HomePage.hideGlobalTicketLauncher = true;

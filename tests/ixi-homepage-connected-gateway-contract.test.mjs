@@ -5,9 +5,33 @@ import test from "node:test";
 const homepage = fs.readFileSync("components/homepage/ConnectedHomepage.js", "utf8");
 const styles = fs.readFileSync("components/homepage/ConnectedHomepage.module.css", "utf8");
 const index = fs.readFileSync("pages/index.js", "utf8");
+const gateway = fs.readFileSync("pages/gateway.js", "utf8");
+const cover = fs.readFileSync("components/homepage/SoftLaunchCover.js", "utf8");
+const coverStyles = fs.readFileSync("components/homepage/SoftLaunchCover.module.css", "utf8");
+const entry = fs.readFileSync("pages/api/soft-launch-entry.js", "utf8");
+const middleware = fs.readFileSync("middleware.js", "utf8");
 
-test("homepage is the benefits-led Marketplace, AOS, and TRAN$ACT gateway", () => {
-  assert.match(index, /ConnectedHomepage/u);
+test("root is a black soft-launch cover and gateway holds the connected homepage", () => {
+  assert.match(index, /SoftLaunchCover/u);
+  assert.match(gateway, /ConnectedHomepage/u);
+  assert.match(cover, /ironxchange-logo\.png/u);
+  assert.match(cover, /action="\/api\/soft-launch-entry" method="post"/u);
+  assert.match(cover, /noindex, nofollow, noarchive/u);
+  assert.match(coverStyles, /background:#000/u);
+  assert.match(coverStyles, /\.entry\{[\s\S]*?position:absolute/u);
+});
+
+test("hidden entry opens a thirty-day session and the route veil protects pages", () => {
+  assert.match(entry, /ixi_soft_launch/u);
+  assert.match(entry, /HttpOnly/u);
+  assert.match(entry, /SameSite=Lax/u);
+  assert.match(entry, /res\.redirect\(303, "\/gateway"\)/u);
+  assert.match(middleware, /request\.cookies\.get\(ENTRY_COOKIE\)/u);
+  assert.match(middleware, /NextResponse\.redirect\(cover\)/u);
+  assert.match(middleware, /X-Robots-Tag/u);
+});
+
+test("gateway is the benefits-led Marketplace, AOS, and TRAN$ACT experience", () => {
   assert.match(homepage, /YOUR MACHINE<br \/>IS THE BEGINNING/u);
   assert.match(homepage, /LIST ONCE\. DISTRIBUTE EVERYWHERE/u);
   assert.match(homepage, /OPERATE THE WHOLE BUSINESS/u);
