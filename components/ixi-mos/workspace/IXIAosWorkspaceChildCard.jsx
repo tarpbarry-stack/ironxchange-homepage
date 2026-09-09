@@ -23,12 +23,8 @@ function isDurableMosObject(object = {}) {
  *
  * This is deliberately technical, not semantic.
  *
- * Durable MOS/AOS Object:
- *   persisted entityId + objectId -> MOS/AOS card runtime.
- *
- * IronXchange listing/machine:
- *   everything else -> IXIMachineCard, whose current family router
- *   selects Private / Marketplace / Auction presentation.
+ * Presentation is selected only by the admitted technical adapter. A parent
+ * container, customer noun, or raw objectType can never change card family.
  *
  * No customer-facing word, object name, parent name, definition label
  * or business noun participates in this decision.
@@ -38,11 +34,15 @@ export default function IXIAosWorkspaceChildCard({
   parentLabel = "",
   ixiState = {},
   ixiCardState = {},
-  onIxiStateChange = null,
-  forceMachineCard = false
+  onIxiStateChange = null
 }) {
+  const isPrivateMachinePresentation =
+    clean(object?.presentation?.sourceAdapterId) ===
+      "ixi.sharetribe-owned-machine.v1" ||
+    clean(object?.presentation?.kind) === "ixi-private-machine";
+
   if (
-    !forceMachineCard &&
+    !isPrivateMachinePresentation &&
     isDurableMosObject(
       object
     )

@@ -464,18 +464,9 @@ export default function IXIAosWorkspaceBoard({
           }
 
           if (isMosWorkspaceObject(item)) {
-            const parentObject =
-              item?.directContainerId &&
-              typeof getWorkspaceObjectById === "function"
-                ? getWorkspaceObjectById(
-                    item.directContainerId
-                  )
-                : null;
-
             const parentLabel =
               resolveAosWorkspaceParentName({
-                object: item,
-                parentObject
+                object: item
               });
 
             const directChildren =

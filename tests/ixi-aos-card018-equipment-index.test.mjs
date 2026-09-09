@@ -51,8 +51,10 @@ test("Card 018 always renders owned equipment through the current inventory mach
 
   assert.match(card, /childCardMode = "machine"/);
   assert.match(card, /childCardMode=\{childCardMode\}/);
-  assert.match(systemIndex, /forceMachineCard=\{childCardMode === "machine"\}/);
-  assert.match(childRouter, /!forceMachineCard &&\s*isDurableMosObject/);
+  assert.doesNotMatch(systemIndex, /forceMachineCard/);
+  assert.match(childRouter, /presentation\?\.sourceAdapterId/);
+  assert.match(childRouter, /"ixi\.sharetribe-owned-machine\.v1"/);
+  assert.match(childRouter, /!isPrivateMachinePresentation &&\s*isDurableMosObject/);
   assert.match(childRouter, /<IXIMachineCard/);
   assert.match(childRouter, /cardContext="inventory"/);
   assert.match(childRouter, /showListingManagementActions=\{false\}/);
@@ -87,7 +89,7 @@ test("Card 018 machine browsing removes the container header and loops without a
   assert.match(card, /loopChildDeck=\{loopChildDeck\}/);
   assert.match(systemIndex, /loopChildDeck &&\s*activeItemIndex === items\.length - 1/);
   assert.match(systemIndex, /loopChildDeck\s*\? lastChildFace\s*:\s*getLastCollectionFace/);
-  assert.match(systemIndex, /forceMachineCard=\{childCardMode === "machine"\}/);
+  assert.doesNotMatch(systemIndex, /forceMachineCard/);
 });
 
 test("AOS Work renders every governed System Index through Card 018 without platform vocabulary", async () => {

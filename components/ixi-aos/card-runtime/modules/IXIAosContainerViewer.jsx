@@ -21,21 +21,7 @@ export default function IXIAosContainerViewer({
   const children =
     useMemo(
       () => {
-        const containerId =
-          String(
-            container?.objectId ||
-            container?.id ||
-            ""
-          );
-
-        return Array.isArray(objects)
-          ? objects.filter(child =>
-              String(
-                child?.directContainerId ||
-                ""
-              ) === containerId
-            )
-          : [];
+        return Array.isArray(objects) ? objects : [];
       },
       [container, objects]
     );

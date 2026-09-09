@@ -156,6 +156,59 @@ test("persisted System Index membership comes from canonical rail projections on
   assert.equal(result.itemCount, 1);
 });
 
+test("Equipment membership is governed by its rail projection while Sharetribe supplies presentation only", () => {
+  const equipment = {
+    objectId: "object-equipment-governed",
+    entityId: "entity-1",
+    objectType: "system-index",
+    displayName: "MY EQUIPMENT",
+    status: "active",
+    identities: [passportIdentity("object-equipment-governed", "IXIEQP2345")],
+    metadata: { systemIndex: true, adapterId: "ixi-owned-equipment" }
+  };
+  const projected = {
+    objectId: "object-current-machine",
+    entityId: "entity-1",
+    objectType: "machine",
+    displayName: "Canonical title",
+    status: "active",
+    identities: [
+      passportIdentity("object-current-machine", "IXIMCH2345"),
+      {
+        identityType: "external-record",
+        sourceType: "sharetribe-listing",
+        sourceId: "listing-current"
+      }
+    ]
+  };
+  const currentListing = {
+    id: "listing-current",
+    title: "Current private presentation",
+    attributes: { state: "published", price: { amount: 2500000 } }
+  };
+  const unrelatedListing = {
+    id: "listing-not-a-member",
+    title: "Must not enter Equipment",
+    attributes: { state: "published" }
+  };
+
+  const [index] = buildAosSystemIndexes({
+    aosObjects: [equipment, projected],
+    ownedListings: [currentListing, unrelatedListing],
+    railProjections: {
+      [equipment.objectId]: {
+        members: [{ objectId: projected.objectId, passportId: "IXIMCH2345" }]
+      }
+    }
+  });
+
+  assert.equal(index.itemCount, 1);
+  assert.deepEqual(index.items.map(item => item.objectId), [projected.objectId]);
+  assert.equal(index.items[0].presentation.kind, "ixi-private-machine");
+  assert.equal(index.items[0].presentation.sourceAdapterId, "ixi.sharetribe-owned-machine.v1");
+  assert.equal(index.items[0].presentationSource, currentListing);
+});
+
 test("AOS/Work fails closed before rendering an active record without Passport", () => {
   const source = fs.readFileSync(
     new URL("../lib/mos/loadIXIMosEnvironment.js", import.meta.url),
