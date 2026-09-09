@@ -1,0 +1,65 @@
+name: AOS Commercial Browser Gate
+
+on:
+  push:
+    branches:
+      - qa/aos-commercial-browser-20260909
+
+permissions:
+  contents: read
+
+jobs:
+  commercial-browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout merged frontend
+        uses: actions/checkout@v4
+        with:
+          path: frontend
+
+      - name: Checkout exact merged IX-Core
+        uses: actions/checkout@v4
+        with:
+          repository: tarpbarry-stack/ixi-core
+          ref: 2b7b1db6f1d0fd6e0862931ac956d98da90360bc
+          path: ix-core
+          token: ${{ github.token }}
+
+      - name: Set up Node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Install exact Core dependencies
+        working-directory: ix-core
+        run: npm ci
+
+      - name: Install commercial browser runtime
+        working-directory: frontend
+        run: |
+          npm install --no-save --package-lock=false playwright
+          npx playwright install --with-deps chromium
+          echo "IXI_BROWSER_EXECUTABLE_PATH=$(node -e "process.stdout.write(require('playwright').chromium.executablePath())")" >> "$GITHUB_ENV"
+
+      - name: Run AOS commercial browser gate
+        working-directory: frontend
+        env:
+          IXI_CORE_CONTRACT_ROOT: ${{ github.workspace }}/ix-core
+          IXI_CORE_NODE_MODULES: ${{ github.workspace }}/ix-core/node_modules
+          IXI_FRONTEND_COMMIT: 3b336f2c7f281645cd23660c690143ca08163c76
+          IXI_CORE_COMMIT: 2b7b1db6f1d0fd6e0862931ac956d98da90360bc
+        run: node --test tests/browser/ixi-aos-session-commercial.browser.mjs
+
+      - name: Publish immutable gate evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aos-commercial-browser-evidence
+          path: frontend/test-results/browser-commercial
+          if-no-files-found: warn
+          retention-days: 30
