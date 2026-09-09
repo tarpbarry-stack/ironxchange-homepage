@@ -12,7 +12,7 @@
   overflow-x: hidden;
   color: #f2f5f3;
   background: radial-gradient(circle at 70% -15%, rgba(255, 196, 0, 0.055), transparent 31%), #080a09;
-  font-family: Inter, Arial, sans-serif;
+  font-family: 'Inter Variable', Inter, ui-sans-serif, system-ui, Arial, sans-serif;
 }
 
 .topbar {
@@ -75,7 +75,7 @@
 .navFooter > span,
 .statusbar {
   color: var(--muted);
-  font-size: 8px;
+  font-size: 9px;
   font-weight: 850;
   letter-spacing: 0.11em;
   text-transform: uppercase;
@@ -149,11 +149,11 @@
 .searchResults small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .searchResults strong { font-size: 11px; }
 .searchResults small,
-.searchResults b { color: var(--muted); font-size: 8px; letter-spacing: 0.07em; }
+.searchResults b { color: var(--muted); font-size: 9px; letter-spacing: 0.07em; }
 
 .newAction,
 .aosAction {
-  display: inline-flex; align-items: center; justify-content: center; padding: 0 13px; font-size: 9px; font-weight: 950;
+  display: inline-flex; align-items: center; justify-content: center; padding: 0 13px; font-size: 10px; font-weight: 950;
   letter-spacing: 0.07em; text-decoration: none; white-space: nowrap;
 }
 .newAction { border-color: var(--gold); color: #070807; background: var(--gold); }
@@ -163,23 +163,23 @@
 .navigation { min-width: 0; padding: 16px 11px 22px; display: flex; flex-direction: column; border-right: 1px solid var(--line); background: #0b0e0c; }
 .operator { margin: 0 6px 15px; padding: 2px 4px 14px; display: grid; gap: 4px; border-bottom: 1px solid var(--line); }
 .operator strong { overflow: hidden; color: rgba(255, 255, 255, 0.8); text-overflow: ellipsis; white-space: nowrap; font-size: 10px; }
-.operator small { font-size: 7px; }
+.operator small { font-size: 9px; }
 .navigation nav { display: grid; gap: 2px; }
 
 .navigation nav button {
   width: 100%; min-height: 39px; display: grid; grid-template-columns: 24px minmax(0, 1fr) auto; align-items: center; gap: 7px;
   padding: 0 9px; border: 1px solid transparent; border-radius: 3px; color: rgba(255, 255, 255, 0.52); background: transparent; text-align: left; cursor: pointer;
 }
-.navigation nav button > span { color: rgba(255, 255, 255, 0.25); font-size: 7px; letter-spacing: 0.06em; }
-.navigation nav button > strong { font-size: 9px; font-weight: 900; letter-spacing: 0.055em; }
-.navigation nav button > b { min-width: 22px; height: 20px; display: grid; place-items: center; border-radius: 10px; color: #080908; background: var(--gold); font-size: 8px; }
+.navigation nav button > span { color: rgba(255, 255, 255, 0.25); font-size: 9px; letter-spacing: 0.06em; }
+.navigation nav button > strong { font-size: 10px; font-weight: 900; letter-spacing: 0.055em; }
+.navigation nav button > b { min-width: 22px; height: 20px; display: grid; place-items: center; border-radius: 10px; color: #080908; background: var(--gold); font-size: 9px; }
 .navigation nav button:hover { color: #fff; background: rgba(255, 255, 255, 0.025); }
 .navigation nav button[data-active="true"] { border-color: rgba(255, 196, 0, 0.26); color: var(--gold); background: var(--gold-soft); box-shadow: inset 3px 0 0 var(--gold); }
 .navigation nav button[data-active="true"] > span { color: var(--gold); }
 
 .navFooter { margin: auto 6px 0; padding: 16px 5px 0; border-top: 1px solid var(--line); }
-.navFooter p { margin: 8px 0 13px; color: rgba(255, 255, 255, 0.43); font-size: 9px; line-height: 1.48; }
-.navFooter a { color: var(--gold); font-size: 8px; font-weight: 900; letter-spacing: 0.06em; text-decoration: none; }
+.navFooter p { margin: 8px 0 13px; color: rgba(255, 255, 255, 0.43); font-size: 10px; line-height: 1.48; }
+.navFooter a { color: var(--gold); font-size: 9px; font-weight: 900; letter-spacing: 0.06em; text-decoration: none; }
 
 .main { min-width: 0; padding: 20px 22px 46px; }
 .pageHeader { min-height: 70px; display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; }
@@ -189,29 +189,29 @@
 .headerActions { display: flex; align-items: flex-end; gap: 7px; }
 .headerActions label { min-width: 190px; display: grid; gap: 5px; }
 .headerActions select { min-width: 0; width: 100%; padding: 0 9px; font-size: 10px; }
-.headerActions button { min-width: 72px; padding: 0 10px; color: var(--gold); font-size: 8px; font-weight: 900; letter-spacing: 0.06em; cursor: pointer; }
+.headerActions button { min-width: 72px; padding: 0 10px; color: var(--gold); font-size: 10px; font-weight: 900; letter-spacing: 0.06em; cursor: pointer; }
 
 .scopeStrip { margin-top: 11px; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); border: 1px solid var(--line); border-radius: 4px; background: #0d100e; }
 .scopeStrip button { min-width: 0; min-height: 43px; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 6px; padding: 0 9px; border: 0; border-right: 1px solid var(--line); color: rgba(255, 255, 255, 0.48); background: transparent; cursor: pointer; }
 .scopeStrip button:last-child { border-right: 0; }
 .scopeStrip button > span,
-.scopeStrip button > b { color: rgba(255, 255, 255, 0.28); font-size: 7px; }
-.scopeStrip button > strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 8px; letter-spacing: 0.04em; }
+.scopeStrip button > b { color: rgba(255, 255, 255, 0.28); font-size: 9px; }
+.scopeStrip button > strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 10px; letter-spacing: 0.04em; }
 .scopeStrip button[data-active="true"] { color: var(--gold); background: var(--gold-soft); box-shadow: inset 0 -2px 0 var(--gold); }
 .scopeStrip button[data-active="true"] > span,
 .scopeStrip button[data-active="true"] > b { color: var(--gold); }
 .scopeStrip button:disabled { opacity: 0.28; cursor: not-allowed; }
 
 .loadingState,
-.errorBanner { margin-top: 15px; min-height: 62px; padding: 13px 15px; display: grid; align-content: center; gap: 3px; border: 1px solid var(--line); border-radius: 4px; color: var(--muted); background: #0d100e; font-size: 9px; letter-spacing: 0.06em; }
+.errorBanner { margin-top: 15px; min-height: 62px; padding: 13px 15px; display: grid; align-content: center; gap: 3px; border: 1px solid var(--line); border-radius: 4px; color: var(--muted); background: #0d100e; font-size: 10px; letter-spacing: 0.06em; }
 .errorBanner { border-color: rgba(255, 88, 88, 0.32); color: #ff9696; background: rgba(255, 70, 70, 0.045); }
-.errorBanner strong { font-size: 9px; letter-spacing: 0.08em; }
+.errorBanner strong { font-size: 10px; letter-spacing: 0.08em; }
 .errorBanner span { color: rgba(255, 255, 255, 0.74); font-size: 11px; }
 .errorBanner small { color: rgba(255, 255, 255, 0.42); }
-.loadingState strong { color: var(--gold); font-size: 9px; letter-spacing: 0.09em; }
+.loadingState strong { color: var(--gold); font-size: 10px; letter-spacing: 0.09em; }
 .loadingState span { color: rgba(255, 255, 255, 0.74); font-size: 11px; }
 .loadingState small { color: rgba(255, 255, 255, 0.42); }
-.loginAction { width: max-content; min-height: 34px; margin-top: 8px; display: inline-flex; align-items: center; justify-content: center; padding: 0 12px; border: 1px solid var(--gold); border-radius: 3px; color: #080908; background: var(--gold); font-size: 8px; font-weight: 950; letter-spacing: 0.07em; text-decoration: none; }
+.loginAction { width: max-content; min-height: 34px; margin-top: 8px; display: inline-flex; align-items: center; justify-content: center; padding: 0 12px; border: 1px solid var(--gold); border-radius: 3px; color: #080908; background: var(--gold); font-size: 10px; font-weight: 950; letter-spacing: 0.07em; text-decoration: none; }
 
 .todayGrid { margin-top: 17px; display: grid; grid-template-columns: minmax(0, 1fr) 260px; gap: 14px; }
 .queuePanel,
@@ -220,17 +220,17 @@
 .closeCard { min-width: 0; border: 1px solid var(--line); border-radius: 5px; background: linear-gradient(180deg, rgba(255, 255, 255, 0.016), transparent 45%), #0d100e; }
 .workspaceHeader { min-height: 74px; padding: 13px 14px; display: flex; align-items: center; justify-content: space-between; gap: 16px; border-bottom: 1px solid var(--line); }
 .workspaceHeader h2 { margin: 3px 0 3px; font-size: 15px; letter-spacing: -0.015em; }
-.workspaceHeader p { max-width: 690px; margin: 0; color: var(--muted); font-size: 9px; line-height: 1.38; }
+.workspaceHeader p { max-width: 690px; margin: 0; color: var(--muted); font-size: 10px; line-height: 1.38; }
 .workspaceHeaderActions { flex: 0 0 auto; display: flex; align-items: center; gap: 8px; }
-.workspaceHeaderActions b { color: var(--gold); font-size: 8px; letter-spacing: 0.05em; }
+.workspaceHeaderActions b { color: var(--gold); font-size: 10px; letter-spacing: 0.05em; }
 .workspaceHeaderActions a,
 .focusCard a,
-.closeCard a { min-height: 34px; display: inline-flex; align-items: center; justify-content: center; padding: 0 10px; border: 1px solid rgba(255, 196, 0, 0.32); border-radius: 3px; color: var(--gold); background: rgba(255, 196, 0, 0.035); font-size: 8px; font-weight: 900; letter-spacing: 0.055em; text-decoration: none; }
+.closeCard a { min-height: 34px; display: inline-flex; align-items: center; justify-content: center; padding: 0 10px; border: 1px solid rgba(255, 196, 0, 0.32); border-radius: 3px; color: var(--gold); background: rgba(255, 196, 0, 0.035); font-size: 10px; font-weight: 900; letter-spacing: 0.055em; text-decoration: none; }
 
 .queueBands { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); border-bottom: 1px solid var(--line); }
 .queueBands > div { min-width: 0; min-height: 54px; padding: 9px 10px; display: grid; gap: 4px; border-right: 1px solid var(--line); }
 .queueBands > div:last-child { border-right: 0; }
-.queueBands span { overflow: hidden; color: var(--muted); text-overflow: ellipsis; white-space: nowrap; font-size: 7px; font-weight: 850; letter-spacing: 0.055em; }
+.queueBands span { overflow: hidden; color: var(--muted); text-overflow: ellipsis; white-space: nowrap; font-size: 9px; font-weight: 850; letter-spacing: 0.055em; }
 .queueBands strong { font-size: 17px; }
 .queueBands > div[data-band="BLOCKED"] strong,
 .queueBands > div[data-band="MONEY EXPOSED"] strong { color: #ff8282; }
@@ -254,9 +254,9 @@
 .queueMeta small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .queueCopy b { font-size: 10px; }
 .queueCopy small,
-.queueMeta small { color: var(--muted); font-size: 8px; }
+.queueMeta small { color: var(--muted); font-size: 9px; }
 .queueMeta { max-width: 118px; text-align: right; }
-.queueMeta b { color: rgba(255, 255, 255, 0.7); font-size: 9px; }
+.queueMeta b { color: rgba(255, 255, 255, 0.7); font-size: 10px; }
 .chevron { color: rgba(255, 255, 255, 0.24); font-size: 20px; }
 
 .todaySide { display: grid; align-content: start; gap: 12px; }
@@ -267,7 +267,7 @@
 .detailCard h3 { margin: 12px 0 7px; font-size: 14px; line-height: 1.18; }
 .focusCard p,
 .closeCard p,
-.detailCard p { margin: 0; color: var(--muted); font-size: 9px; line-height: 1.52; }
+.detailCard p { margin: 0; color: var(--muted); font-size: 10px; line-height: 1.52; }
 .focusCard .badge { margin-top: 10px; }
 .focusCard a,
 .closeCard a { width: 100%; margin-top: 15px; justify-content: space-between; }
@@ -277,13 +277,13 @@
 
 .emptyState { min-height: 230px; padding: 30px; display: grid; place-content: center; gap: 7px; text-align: center; }
 .emptyState strong { color: rgba(255, 255, 255, 0.72); font-size: 10px; letter-spacing: 0.08em; }
-.emptyState span { max-width: 440px; color: var(--muted); font-size: 9px; line-height: 1.5; }
+.emptyState span { max-width: 440px; color: var(--muted); font-size: 10px; line-height: 1.5; }
 .emptyState[data-proof="true"] strong { color: #73dfa0; }
 
 .workPanel { margin-top: 17px; overflow: hidden; }
 .tableWrap { max-height: calc(100vh - 275px); min-height: 280px; overflow: auto; }
-.dataTable { width: 100%; border-collapse: collapse; font-size: 9px; }
-.dataTable th { position: sticky; z-index: 2; top: 0; height: 36px; padding: 0 10px; border-bottom: 1px solid var(--line-strong); color: rgba(255, 255, 255, 0.36); background: #101310; text-align: left; font-size: 7px; letter-spacing: 0.08em; }
+.dataTable { width: 100%; border-collapse: collapse; font-size: 10px; }
+.dataTable th { position: sticky; z-index: 2; top: 0; height: 36px; padding: 0 10px; border-bottom: 1px solid var(--line-strong); color: rgba(255, 255, 255, 0.36); background: #101310; text-align: left; font-size: 9px; letter-spacing: 0.08em; }
 .dataTable th:nth-last-child(2),
 .dataTable td.money { text-align: right; }
 .dataTable td { height: 54px; padding: 7px 10px; border-bottom: 1px solid rgba(255, 255, 255, 0.052); color: rgba(255, 255, 255, 0.68); white-space: nowrap; }
@@ -291,24 +291,24 @@
 .dataTable td:first-child { max-width: 230px; }
 .dataTable td strong,
 .dataTable td small { display: block; overflow: hidden; text-overflow: ellipsis; }
-.dataTable td strong { color: #f2f5f3; font-size: 9px; }
-.dataTable td small { margin-top: 3px; color: rgba(255, 255, 255, 0.31); font-size: 7px; }
+.dataTable td strong { color: #f2f5f3; font-size: 10px; }
+.dataTable td small { margin-top: 3px; color: rgba(255, 255, 255, 0.31); font-size: 9px; }
 .money { color: #fff !important; font-variant-numeric: tabular-nums; font-weight: 800; }
-.rowAction { min-height: 29px; padding: 0 9px; border: 1px solid rgba(255, 196, 0, 0.28); border-radius: 3px; color: var(--gold); background: transparent; font-size: 7px; font-weight: 900; cursor: pointer; }
+.rowAction { min-height: 29px; padding: 0 9px; border: 1px solid rgba(255, 196, 0, 0.28); border-radius: 3px; color: var(--gold); background: transparent; font-size: 10px; font-weight: 900; cursor: pointer; }
 
-.badge { width: fit-content; max-width: 100%; min-height: 20px; display: inline-flex; align-items: center; padding: 0 7px; border: 1px solid rgba(255, 255, 255, 0.13); border-radius: 10px; color: rgba(255, 255, 255, 0.6); background: rgba(255, 255, 255, 0.025); font-size: 7px; font-weight: 900; letter-spacing: 0.045em; white-space: nowrap; }
+.badge { width: fit-content; max-width: 100%; min-height: 20px; display: inline-flex; align-items: center; padding: 0 7px; border: 1px solid rgba(255, 255, 255, 0.13); border-radius: 10px; color: rgba(255, 255, 255, 0.6); background: rgba(255, 255, 255, 0.025); font-size: 9px; font-weight: 900; letter-spacing: 0.045em; white-space: nowrap; }
 .badge[data-tone="verified"] { border-color: rgba(95, 225, 142, 0.25); color: #73dfa0; background: rgba(95, 225, 142, 0.055); }
 .badge[data-tone="danger"] { border-color: rgba(255, 105, 105, 0.28); color: #ff8989; background: rgba(255, 105, 105, 0.05); }
 
 .storyList { min-height: 280px; }
 .storyRow { min-height: 62px; display: grid; grid-template-columns: 32px minmax(0, 1fr) auto; align-items: center; gap: 11px; padding: 8px 14px; border-bottom: 1px solid rgba(255, 255, 255, 0.052); }
-.storyGlyph { width: 30px; height: 30px; display: grid; place-items: center; border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 3px; color: var(--gold); font-size: 7px; font-weight: 900; }
+.storyGlyph { width: 30px; height: 30px; display: grid; place-items: center; border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 3px; color: var(--gold); font-size: 9px; font-weight: 900; }
 .storyRow > div { min-width: 0; display: grid; gap: 4px; }
 .storyRow strong,
 .storyRow span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .storyRow strong { font-size: 10px; }
 .storyRow span,
-.storyRow time { color: var(--muted); font-size: 8px; }
+.storyRow time { color: var(--muted); font-size: 9px; }
 
 .contextPanel { min-width: 0; padding: 18px 14px 36px; border-left: 1px solid var(--line); background: #0a0d0b; }
 .contextTitle { padding: 0 2px 12px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--line); }
@@ -317,22 +317,22 @@
 .identityMark { min-height: 108px; display: grid; place-items: center; color: rgba(255, 196, 0, 0.22); background: linear-gradient(145deg, rgba(255, 196, 0, 0.06), transparent 46%), repeating-linear-gradient(90deg, #101310 0, #101310 28px, #141714 29px); font-size: 30px; font-weight: 950; letter-spacing: 0.15em; }
 .identityCard > div:last-child { padding: 12px; border-top: 1px solid var(--line); }
 .identityCard h2 { margin: 5px 0 3px; overflow: hidden; text-overflow: ellipsis; font-size: 13px; white-space: nowrap; }
-.identityCard p { margin: 0; color: var(--muted); font-size: 8px; }
-.identityCard code { margin-top: 10px; padding-top: 9px; display: block; overflow: hidden; border-top: 1px solid var(--line); color: var(--gold); text-overflow: ellipsis; white-space: nowrap; font-family: Inter, Arial, sans-serif; font-size: 8px; font-weight: 850; }
+.identityCard p { margin: 0; color: var(--muted); font-size: 9px; }
+.identityCard code { margin-top: 10px; padding-top: 9px; display: block; overflow: hidden; border-top: 1px solid var(--line); color: var(--gold); text-overflow: ellipsis; white-space: nowrap; font-family: 'Inter Variable', Inter, ui-sans-serif, system-ui, Arial, sans-serif; font-size: 9px; font-weight: 850; }
 
 .proofCard,
 .detailCard,
 .connectionCard { margin-top: 14px; border-top: 1px solid var(--line-strong); }
 .proofCard > div { min-height: 40px; display: flex; align-items: center; justify-content: space-between; gap: 9px; border-bottom: 1px solid rgba(255, 255, 255, 0.052); }
-.proofCard > div > strong { overflow: hidden; color: rgba(255, 255, 255, 0.67); text-overflow: ellipsis; white-space: nowrap; font-size: 8px; }
+.proofCard > div > strong { overflow: hidden; color: rgba(255, 255, 255, 0.67); text-overflow: ellipsis; white-space: nowrap; font-size: 10px; }
 .detailCard { padding: 13px 2px 0; }
 .detailCard h3 { margin-top: 8px; }
 .detailCard .badge { margin-top: 10px; }
 .connectionCard > div { min-height: 46px; display: flex; align-items: center; justify-content: space-between; }
 .connectionCard > div > strong { color: var(--gold); font-size: 16px; }
-.connectionCard p { min-height: 35px; margin: 0; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(255, 255, 255, 0.05); color: var(--muted); font-size: 8px; }
+.connectionCard p { min-height: 35px; margin: 0; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(255, 255, 255, 0.05); color: var(--muted); font-size: 10px; }
 .connectionCard p b { color: rgba(255, 255, 255, 0.72); }
-.connectionCard > small { color: var(--muted); font-size: 8px; }
+.connectionCard > small { color: var(--muted); font-size: 9px; }
 
 .statusbar { position: fixed; z-index: 60; right: 0; bottom: 0; left: 0; min-height: 34px; display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 0 18px; border-top: 1px solid var(--line-strong); background: rgba(8, 10, 9, 0.98); }
 .statusbar span:first-child { color: #ff9191; }

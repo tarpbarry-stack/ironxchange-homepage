@@ -86,4 +86,10 @@ test("desktop styling preserves the permanent professional shell and responsive 
   assert.match(styles, /@media \(max-width: 1220px\)/u);
   assert.match(styles, /overflow-x:\s*hidden/u);
   assert.match(styles, /--gold:\s*#ffc400/u);
+  assert.match(styles, /font-family:\s*'Inter Variable', Inter, ui-sans-serif/u);
+  assert.doesNotMatch(
+    styles,
+    /font-size:\s*(?:[5-8](?:\.\d+)?)px/u,
+    "TRAN$ACT desktop must preserve the commercial 10px/9px type floor"
+  );
 });
