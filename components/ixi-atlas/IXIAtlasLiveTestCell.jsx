@@ -1,6 +1,7 @@
 import { useCallback, useMemo, useState } from "react";
 import IXIBrowseObjectConsoleRouter from "../ixi-marketplace/IXIBrowseObjectConsoleRouter";
 import IXIMachineCard from "../ixi-machine-card/IXIMachineCard";
+import IXIAtlasMachineRailDrilldown, { IXIAtlasMachineRailInspector } from "./IXIAtlasMachineRailDrilldown";
 import styles from "./IXITechnicalAtlas.module.css";
 
 const MACHINE_ID = "IXI-ATLAS-WA475";
@@ -40,6 +41,8 @@ const CALLOUTS = [
 ];
 
 const FACE_NAMES = ["PHOTO", "BUYER", "RELATION", "WORKFLOW"];
+const RELATIONSHIP_COLORS = ["none", "green", "yellow", "red", "cyan", "white", "blue", "orange"];
+const RELATIONSHIP_STRENGTHS = [1, 3, 5];
 
 const GEAR_TO_SCALE_MODE = Object.freeze({
   1: "focus",
@@ -124,6 +127,7 @@ export default function IXIAtlasLiveTestCell({ selected, onSelect, part }) {
   const [detail, setDetail] = useState("FIELD");
   const [machineFace, setMachineFace] = useState(1);
   const [gear, setGear] = useState(3);
+  const [railDestinationArmed, setRailDestinationArmed] = useState(false);
   const [cardState, setCardState] = useState({ color: "none", outline: 1 });
   const [sequence, setSequence] = useState(1);
   const [events, setEvents] = useState([
@@ -170,9 +174,39 @@ export default function IXIAtlasLiveTestCell({ selected, onSelect, part }) {
 
   const cycleFace = useCallback(() => selectFace(machineFace === 4 ? 1 : machineFace + 1), [machineFace, selectFace]);
 
+  const sendFront = useCallback(() => record("RAIL / 01", "depth.forward", "MOVED TO FRONT"), [record]);
+  const sendBack = useCallback(() => record("RAIL / 07", "depth.backward", "MOVED TO BACK"), [record]);
+
+  const cycleRailColor = useCallback(() => {
+    const current = RELATIONSHIP_COLORS.indexOf(cardState.color);
+    const next = RELATIONSHIP_COLORS[(current + 1) % RELATIONSHIP_COLORS.length];
+    changeRelationship(MACHINE_ID, { color: next });
+  }, [cardState.color, changeRelationship]);
+
+  const cycleRailOutline = useCallback(() => {
+    const current = RELATIONSHIP_STRENGTHS.indexOf(cardState.outline);
+    const next = RELATIONSHIP_STRENGTHS[(current + 1) % RELATIONSHIP_STRENGTHS.length];
+    changeRelationship(MACHINE_ID, { outline: next });
+  }, [cardState.outline, changeRelationship]);
+
+  const distributePassport = useCallback((channel) => {
+    record("RAIL / 05", "distribution.opened", channel === "COMPOSER" ? "CHANNEL SELECTOR OPEN" : `${channel} DEMO CAPTURED`);
+  }, [record]);
+
+  const deliverToArmedDestination = useCallback(() => {
+    record("RAIL / 06", "destination.sync", railDestinationArmed ? "SENT TO TOP ACTIVE STACK" : "NO DESTINATION ARMED");
+  }, [railDestinationArmed, record]);
+
+  const toggleRailDestination = useCallback(() => {
+    const next = !railDestinationArmed;
+    setRailDestinationArmed(next);
+    record("ENVIRONMENT", "destination.armed", next ? "TOP ACTIVE STACK" : "OFF");
+  }, [railDestinationArmed, record]);
+
   const resetFixture = useCallback(() => {
     setMachineFace(1);
     setGear(3);
+    setRailDestinationArmed(false);
     setCardState({ color: "none", outline: 1 });
     setEvents([{ id: sequence, time: clock(), source: "ATLAS", event: "fixture.reset", result: "BASELINE RESTORED" }]);
   }, [sequence]);
@@ -189,12 +223,12 @@ export default function IXIAtlasLiveTestCell({ selected, onSelect, part }) {
       enableMarketplaceDistribution={false}
       onCycleMachineFace={cycleFace}
       onIxiStateChange={changeRelationship}
-      onSendFront={() => record("RAIL / 01", "depth.forward", "COMMAND CAPTURED")}
-      onSendBack={() => record("RAIL / 07", "depth.backward", "COMMAND CAPTURED")}
-      onSendToArmedDestination={() => record("RAIL / 06", "destination.sync", "NO DESTINATION ARMED")}
+      onSendFront={sendFront}
+      onSendBack={sendBack}
+      onSendToArmedDestination={deliverToArmedDestination}
       {...consoleProps}
     />
-  ), [cardState, changeRelationship, cycleFace, machineFace, record]);
+  ), [cardState, changeRelationship, cycleFace, deliverToArmedDestination, machineFace, sendBack, sendFront]);
 
   return (
     <div className={styles.objectWorkbench}>
@@ -204,6 +238,23 @@ export default function IXIAtlasLiveTestCell({ selected, onSelect, part }) {
       </div>
 
       <div className={styles.workbenchBody}>
+        {selected === "rail" ? (
+          <IXIAtlasMachineRailDrilldown
+            listing={FIXTURE}
+            relationship={cardState}
+            machineFace={machineFace}
+            destinationArmed={railDestinationArmed}
+            onToggleDestination={toggleRailDestination}
+            onBack={() => onSelect("object")}
+            onSendFront={sendFront}
+            onSendBack={sendBack}
+            onCycleColor={cycleRailColor}
+            onCycleOutline={cycleRailOutline}
+            onCycleFace={cycleFace}
+            onDistribution={distributePassport}
+            onArmedDelivery={deliverToArmedDestination}
+          />
+        ) : (
         <div className={styles.machineBench}>
           <div className={styles.benchControls}>
             <div className={styles.modeSwitch} aria-label="Workbench mode">
@@ -266,6 +317,7 @@ export default function IXIAtlasLiveTestCell({ selected, onSelect, part }) {
             <b>GEAR {gear} · {consoleDepth} / 5 PANELS</b>
           </div>
         </div>
+        )}
 
         <aside className={styles.controlBay}>
           <div className={styles.controlBayTabs} role="tablist" aria-label="Object Workbench data">
@@ -276,7 +328,11 @@ export default function IXIAtlasLiveTestCell({ selected, onSelect, part }) {
           </div>
           <div className={styles.controlBayBody} role="tabpanel">
             {bayTab === "OBJECT" ? (
-              <FieldInspector part={part} detail={detail} onDetailChange={setDetail} />
+              selected === "rail" ? (
+                <IXIAtlasMachineRailInspector detail={detail} onDetailChange={setDetail} />
+              ) : (
+                <FieldInspector part={part} detail={detail} onDetailChange={setDetail} />
+              )
             ) : (
               <PassportPulse events={events} machineFace={machineFace} relationship={cardState} consoleDepth={consoleDepth} />
             )}

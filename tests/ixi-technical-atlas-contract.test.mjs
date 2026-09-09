@@ -117,6 +117,31 @@ test("TA-001 mounts the production Machine Card in a zero-write live fixture", (
   assert.doesNotMatch(testCell, /fetch\s*\(/);
 });
 
+test("Machine Rail callout opens an interactive production drill-down", () => {
+  const testCell = fs.readFileSync(
+    new URL("../components/ixi-atlas/IXIAtlasLiveTestCell.jsx", import.meta.url),
+    "utf8",
+  );
+  const drilldown = fs.readFileSync(
+    new URL("../components/ixi-atlas/IXIAtlasMachineRailDrilldown.jsx", import.meta.url),
+    "utf8",
+  );
+
+  assert.match(testCell, /selected === "rail"/);
+  assert.match(testCell, /IXIAtlasMachineRailDrilldown/);
+  assert.match(drilldown, /import IXIMachineRail/);
+  assert.match(drilldown, /<IXIMachineRail/);
+  assert.match(drilldown, /BACK TO MACHINE CARD/);
+  assert.match(drilldown, /TO FRONT/);
+  assert.match(drilldown, /COLOR/);
+  assert.match(drilldown, /THICKNESS/);
+  assert.match(drilldown, /FACE CHANGE/);
+  assert.match(drilldown, /SEND/);
+  assert.match(drilldown, /ARMED DELIVERY/);
+  assert.match(drilldown, /TO BACK/);
+  assert.doesNotMatch(drilldown, /fetch\s*\(/);
+});
+
 test("the System Index is an accessible assembly navigator", () => {
   const atlas = fs.readFileSync(
     new URL("../components/ixi-atlas/IXITechnicalAtlas.jsx", import.meta.url),
