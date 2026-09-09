@@ -16,11 +16,18 @@ test("homepage is the benefits-led Marketplace, AOS, and TRAN$ACT gateway", () =
   assert.doesNotMatch(homepage, /AUCTION/u);
 });
 
-test("one live Passport-backed machine enters and distributes through the system", () => {
-  assert.match(homepage, /<PassportCard machine=\{machine\} compact/u);
-  assert.match(homepage, /<MarketplaceVisual machine=\{machine\}/u);
+test("one real IXI Marketplace object enters and distributes through the system", () => {
+  assert.match(homepage, /import IXIMachineCard/u);
+  assert.match(homepage, /import IXIBrowseObjectConsoleRouter/u);
+  assert.match(homepage, /import ListingShareProvider/u);
+  assert.match(homepage, /<IXIMachineCard/u);
+  assert.match(homepage, /<IXIBrowseObjectConsoleRouter/u);
+  assert.match(homepage, /enableMarketplaceDistribution/u);
+  assert.match(homepage, /consoleRightOpen: true/u);
+  assert.match(homepage, /<MarketplaceVisual listing=\{listing\}/u);
   assert.match(homepage, /fetch\("\/api\/listings"/u);
   assert.match(homepage, /passportId/u);
+  assert.doesNotMatch(homepage, /function PassportCard/u);
 });
 
 test("homepage routes every benefit and conversion into the real product", () => {
