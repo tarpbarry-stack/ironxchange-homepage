@@ -129,6 +129,11 @@ function createServer({ placementScope = "personal", principalId = "user_1" } = 
             record.activeSummonedContext = item.activeSummonedContext || null;
           }
         });
+        (payload.surfaceOrders || []).forEach(order => {
+          order.orderedObjectIds.forEach((id, index) => {
+            session.objects[id].currentPlacement.visualOrder = index;
+          });
+        });
       } else if (request.commandType === "objects.undo") {
         payload.objectIds.forEach(id => {
           const record = session.objects[id];
@@ -271,7 +276,7 @@ test("network retry reuses the identical session command ID", async () => {
   assert.deepEqual(retries[0].payload, retries[1].payload);
 });
 
-test("sortable placement persists one complete canonical surface order", async () => {
+test("sortable placement persists complete canonical order in the atomic move", async () => {
   const { controller, server } = await readyController();
   const operation = controller.persistLayout(
     { board: [B, A], indexEquipment: [] },
@@ -279,14 +284,21 @@ test("sortable placement persists one complete canonical surface order", async (
   );
   await operation.completion;
 
-  const reorder = server.calls.find(call =>
+  const move = server.calls.find(call =>
     call.type === "command" &&
-    call.commandType === "surface.reorder"
+    call.commandType === "objects.move"
   );
-  assert.deepEqual(reorder?.payload, {
+  assert.deepEqual(move?.payload?.surfaceOrders?.[0], {
     surfaceId: "board",
     orderedObjectIds: [B, A]
   });
+  assert.equal(
+    server.calls.some(call =>
+      call.type === "command" &&
+      call.commandType === "surface.reorder"
+    ),
+    false
+  );
   assert.equal(server.current().objects[B].currentPlacement.visualOrder, 0);
   assert.equal(server.current().objects[A].currentPlacement.visualOrder, 1);
 });

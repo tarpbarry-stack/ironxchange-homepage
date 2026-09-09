@@ -6,12 +6,26 @@ const read = path => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 
 test("authenticated browser gateway exposes only governed session placement routes", async () => {
   const gateway = await read("pages/api/aos/mos/[...path].js");
+  const internalClient = await read("lib/server/aos/ixiMosInternalClient.js");
   assert.ok(gateway.includes('pattern: /^\\/aos\\/workspace-sessions$/'));
   assert.ok(gateway.includes('pattern: /^\\/aos\\/workspace-sessions\\/[^/]+$/'));
   assert.ok(gateway.includes('pattern: /^\\/aos\\/workspace-sessions\\/[^/]+\\/commands$/'));
   assert.ok(gateway.includes('pattern: /^\\/aos\\/workspace-sessions\\/[^/]+\\/end$/'));
   assert.match(gateway, /resolveAosBrowserSession/u);
   assert.match(gateway, /resolveIxCoreAosContext/u);
+  assert.match(gateway, /resolveExistingIxCoreAosContext/u);
+  assert.match(gateway, /Number\(error\?\.status\) !== 404/u);
+  assert.match(gateway, /return resolveIxCoreAosContext\(\{/u);
+  assert.doesNotMatch(
+    gateway,
+    /\[401,\s*403,\s*404\]/u,
+    "authority failures must never enter the rolling-release fallback"
+  );
+  assert.match(gateway, /path === "\/aos\/environment"/u);
+  assert.match(
+    internalClient,
+    /AbortSignal\.timeout\(timeoutMs\)/u
+  );
   assert.match(gateway, /headers\["If-Match"\]/u);
 });
 

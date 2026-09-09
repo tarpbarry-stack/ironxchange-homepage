@@ -4,6 +4,7 @@ import {
 
 import {
   requestIxCoreMos,
+  resolveExistingIxCoreAosContext,
   resolveIxCoreAosContext
 } from "../../../../lib/server/aos/ixiMosInternalClient";
 
@@ -61,6 +62,31 @@ const ROUTES = [
 
 function clean(value) {
   return String(value ?? "").trim();
+}
+
+async function resolveCommandContext(session) {
+  try {
+    return await resolveExistingIxCoreAosContext({
+      session
+    });
+  } catch (error) {
+    /*
+     * Rolling-release compatibility only: the frontend can be deployed while
+     * an older IX-Core process is still running. Never fall back for an
+     * authority, signature, tenant, or network failure.
+     */
+    if (Number(error?.status) !== 404) {
+      throw error;
+    }
+
+    console.warn(
+      "IXI AOS CONTEXT ENDPOINT NOT YET DEPLOYED; USING COMPATIBILITY BOOTSTRAP."
+    );
+
+    return resolveIxCoreAosContext({
+      session
+    });
+  }
 }
 
 function safeObject(value) {
@@ -314,9 +340,13 @@ export default async function handler(req, res) {
       );
 
     const context =
-      await resolveIxCoreAosContext({
-        session
-      });
+      path === "/aos/environment"
+        ? await resolveIxCoreAosContext({
+            session
+          })
+        : await resolveCommandContext(
+            session
+          );
 
     if (path === "/aos/environment") {
       return res.status(200).json(

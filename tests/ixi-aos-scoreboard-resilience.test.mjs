@@ -2,19 +2,24 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
-test("scoreboard identity loads independently from the MOS environment", async () => {
+test("AOS Work uses one startup orchestrator for identity, state, inventory and MOS", async () => {
   const source = await readFile(
     new URL("../pages/aos/work.js", import.meta.url),
     "utf8"
   );
 
-  const identityStart = source.indexOf("async function loadAosIdentity");
-  const environmentStart = source.indexOf("async function loadAosScoreboardEnvironment");
-
-  assert.ok(identityStart > -1);
-  assert.ok(environmentStart > identityStart);
-  assert.match(source.slice(identityStart, environmentStart), /currentUser\.show/u);
-  assert.match(source, /loadAosIdentity\(\);\s*loadAosScoreboardEnvironment\(\);/u);
+  assert.match(source, /async function loadAosWorkEnvironment/u);
+  assert.match(source, /await loadIXIMosEnvironment/u);
+  assert.match(source, /listingEnvironment\?\.currentUser/u);
+  assert.match(source, /environment\?\.ownedListings/u);
+  assert.match(source, /listingEnvironment\?\.ixiState/u);
+  assert.match(source, /IXI AOS BACKGROUND MEDIA HYDRATION FAILED/u);
+  assert.match(source, /dedupeRequests:\s*true/u);
+  assert.match(source, /concurrency:\s*4/u);
+  assert.doesNotMatch(source, /async function loadAosIdentity/u);
+  assert.doesNotMatch(source, /async function loadSavedPage/u);
+  assert.doesNotMatch(source, /currentUser\.show/u);
+  assert.doesNotMatch(source, /scope=aos-owned/u);
 });
 
 test("AOS gateway records upstream conflict diagnostics", async () => {

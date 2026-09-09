@@ -444,24 +444,31 @@ export function createAosWorkspaceSessionController({
         }
 
         if (moves.length) {
+          const surfaceOrders = [...destinationSurfaces].map(surfaceId => ({
+            surfaceId,
+            orderedObjectIds: (next[surfaceId] || [])
+              .map(canonicalObjectId)
+              .filter(objectId => session?.objects?.[objectId])
+          }));
+
           await applyCommand({
             commandId: `${commandIdPart(operationId)}:move`,
             commandType: "objects.move",
             payload: {
               objects: moves,
-              operationId: captureUndo ? operationId : null
+              operationId: captureUndo ? operationId : null,
+              surfaceOrders
             }
           });
         }
 
         /*
-         * IX-Core object.move intentionally changes only one placement. Finish
-         * each destination with its complete canonical order so an insertion
-         * cannot leave duplicate visualOrder values. This remains workspace
-         * state; no durable rail ordering or relationship mutation is invoked.
+         * Current IX-Core applies complete affected-surface order atomically
+         * inside objects.move. The fallback below exists only for an admission-
+         * only operation, where no move command carries the surface order.
          */
         let reorderIndex = 0;
-        for (const surfaceId of destinationSurfaces) {
+        for (const surfaceId of moves.length ? [] : destinationSurfaces) {
           const orderedObjectIds = (next[surfaceId] || [])
             .map(canonicalObjectId)
             .filter(objectId => session?.objects?.[objectId]);

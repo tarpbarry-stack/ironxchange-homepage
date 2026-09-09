@@ -68,7 +68,7 @@ test("legacy auction work, non-owner, reference, archived and deleted records ar
   assert.equal(filterAosOwnedMachines(records).length, 0);
 });
 
-test("AOS requests the owned scope and defends again after transport", async () => {
+test("AOS requests owned inventory once through its environment loader", async () => {
   const [loader, work, endpoint] = await Promise.all([
     readFile(new URL("../lib/listings/loadIXIOwnedListings.js", import.meta.url), "utf8"),
     readFile(new URL("../pages/aos/work.js", import.meta.url), "utf8"),
@@ -77,7 +77,8 @@ test("AOS requests the owned scope and defends again after transport", async () 
 
   assert.match(loader, /scope=aos-owned/u);
   assert.match(loader, /filterAosOwnedMachines\(listings\)/u);
-  assert.match(work, /scope=aos-owned/u);
-  assert.match(work, /filterAosOwnedMachines\(data\)/u);
+  assert.match(work, /environment\?\.ownedListings/u);
+  assert.doesNotMatch(work, /scope=aos-owned/u);
+  assert.doesNotMatch(work, /filterAosOwnedMachines/u);
   assert.match(endpoint, /req\.query\.scope === "aos-owned"/u);
 });
