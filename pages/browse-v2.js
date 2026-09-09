@@ -151,6 +151,30 @@ const [appliedWorkspaceRanges, setAppliedWorkspaceRanges] = useState(
   validateMarketplaceRangeFilters(initialWorkspaceFilters).values
 );
 
+useEffect(() => {
+  const params = new URLSearchParams(window.location.search);
+  const homepageQuery = String(params.get("q") || "").trim();
+  const homepageCategory = String(
+    params.get("category") || "ALL CATEGORIES"
+  ).trim();
+
+  if (homepageQuery) {
+    setSearchQuery(homepageQuery);
+  }
+
+  if (homepageCategory && homepageCategory !== "ALL CATEGORIES") {
+    const nextFilters = {
+      ...initialWorkspaceFilters,
+      category: homepageCategory
+    };
+
+    setWorkspaceFiltersState(nextFilters);
+    setAppliedWorkspaceRanges(
+      validateMarketplaceRangeFilters(nextFilters).values
+    );
+  }
+}, []);
+
 const workspaceRangeValidation = useMemo(
   () => validateMarketplaceRangeFilters(workspaceFilters),
   [workspaceFilters]

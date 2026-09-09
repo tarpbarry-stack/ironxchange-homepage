@@ -19,7 +19,6 @@ function read(path) {
 }
 
 const PUBLIC_BOARD_SURFACES = [
-  ["pages/index.js", "home"],
   ["pages/browse-v2.js", "browse-v2"],
   ["pages/saved.js", "saved"],
   ["pages/yard/index.js", "yard"],
@@ -110,7 +109,7 @@ test("every public card board uses compact reads and progressive rendering", () 
       `${path} must batch card rendering`
     );
 
-    if (path === "pages/index.js" || path.includes("yard-v2")) {
+    if (path.includes("yard-v2")) {
       assert.match(
         source,
         new RegExp(`surface:\\s*"${surface}"`, "u")

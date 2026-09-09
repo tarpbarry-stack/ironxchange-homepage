@@ -1,0 +1,71 @@
+.cover{
+  position:fixed;
+  inset:0;
+  display:grid;
+  place-items:center;
+  min-height:100dvh;
+  overflow:hidden;
+  background:#000;
+  isolation:isolate;
+}
+.cover::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background:radial-gradient(circle at 50% 49%,rgba(255,255,255,.018),transparent 24%);
+}
+.mark{
+  position:relative;
+  width:min(280px,58vw);
+  line-height:0;
+  animation:markIn 1.1s cubic-bezier(.2,.75,.2,1) both;
+}
+.mark img{
+  display:block;
+  width:100%;
+  height:auto;
+  filter:brightness(.92) contrast(1.05);
+}
+.entry{
+  position:absolute;
+  top:0;
+  bottom:0;
+  left:38%;
+  width:24%;
+  margin:0;
+}
+.entry button{
+  width:100%;
+  height:100%;
+  margin:0;
+  padding:0;
+  border:0;
+  border-radius:0;
+  color:transparent;
+  background:transparent;
+  cursor:default;
+  appearance:none;
+}
+.entry button span{
+  position:absolute;
+  width:1px;
+  height:1px;
+  padding:0;
+  margin:-1px;
+  overflow:hidden;
+  clip:rect(0,0,0,0);
+  white-space:nowrap;
+  border:0;
+}
+.entry button:focus-visible{
+  outline:1px solid rgba(255,196,0,.7);
+  outline-offset:5px;
+}
+@keyframes markIn{
+  from{opacity:0;transform:translateY(4px)}
+  to{opacity:1;transform:translateY(0)}
+}
+@media(prefers-reduced-motion:reduce){
+  .mark{animation:none}
+}
