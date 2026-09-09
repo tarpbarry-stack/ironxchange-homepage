@@ -93,6 +93,8 @@ jobs:
               objectId: identity.objectId,
               passportId: identity.passportId,
               displayName: identity.object.displayName,
+              serialNumber: identity.object.fields?.serialNumber || identity.object.serialNumber || null,
+              stockNumber: identity.object.fields?.stockNumber || identity.object.stockNumber || null,
               listingAliases
             };
           }).sort((left, right) => left.objectId.localeCompare(right.objectId));
