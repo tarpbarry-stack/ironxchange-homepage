@@ -1631,11 +1631,36 @@ async function recallContainerChildren(container) {
     return;
   }
 
-  const recalled = await controller.recall(childIds);
+  const targetSurface =
+    String(container?.indexId || "").trim() === "equipment"
+      ? "indexEquipment"
+      : `container:${containerId}`;
+  let recalledPlacements = controller.readPlacements();
+  childIds.forEach(objectId => {
+    recalledPlacements = moveObjectToWorkspaceSurface({
+      placements: recalledPlacements,
+      objectId,
+      targetSurface
+    });
+  });
+
+  const operationId = createMosCommandId("aos-container-recall");
   containerReturnSnapshotsRef.current[containerId] = {
-    operationId: recalled.operationId,
+    operationId,
     childIds: [...childIds]
   };
+
+  const recalled = controller.persistLayout(recalledPlacements, {
+    operationId,
+    objectIds: childIds
+  });
+
+  try {
+    await recalled.completion;
+  } catch (error) {
+    delete containerReturnSnapshotsRef.current[containerId];
+    throw error;
+  }
 }
   
 function moveMachineToContainer(machineId, targetContainer) {

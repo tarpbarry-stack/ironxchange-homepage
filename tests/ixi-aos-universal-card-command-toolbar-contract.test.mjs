@@ -66,3 +66,24 @@ test("every operating card uses the Wichita Falls command geometry and exact han
   assert.match(modules, /onReturn=\{\s*onReturn\s*\}/u);
   assert.doesNotMatch(modules, /onReturn=\{\s*onRecall\s*\}/u);
 });
+
+test("container Recall gathers every canonical member into that container and Return owns the operation snapshot", async () => {
+  const work = await read("pages/aos/work.js");
+
+  assert.match(
+    work,
+    /async function recallContainerChildren\(container\)[\s\S]*?getContainerRequestedChildIds\(container\)[\s\S]*?targetSurface[\s\S]*?"indexEquipment"[\s\S]*?`container:\$\{containerId\}`/u
+  );
+  assert.match(
+    work,
+    /moveObjectToWorkspaceSurface\(\{[\s\S]*?objectId,[\s\S]*?targetSurface[\s\S]*?controller\.persistLayout\(recalledPlacements,[\s\S]*?objectIds: childIds/u
+  );
+  assert.match(
+    work,
+    /containerReturnSnapshotsRef\.current\[containerId\] = \{[\s\S]*?operationId,[\s\S]*?childIds: \[\.\.\.childIds\]/u
+  );
+  assert.doesNotMatch(
+    work,
+    /async function recallContainerChildren\(container\)[\s\S]{0,900}?controller\.recall\(childIds\)/u
+  );
+});
