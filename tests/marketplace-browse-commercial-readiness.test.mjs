@@ -201,11 +201,15 @@ test("workspace routes share the centered commercial recovery state", () => {
   assert.match(page, /onAction=\{resetMarketplaceView\}/u);
   assert.match(
     emptyState,
-    /\.ixi-workspace-empty-zone\s*\{[\s\S]*?width:\s*100%;[\s\S]*?display:\s*grid;[\s\S]*?place-items:\s*center;/u
+    /\.ixi-workspace-empty-zone\s*\{[\s\S]*?box-sizing:\s*border-box;[\s\S]*?width:\s*100%;[\s\S]*?display:\s*grid;[\s\S]*?place-items:\s*center;/u
   );
   assert.match(
     emptyState,
-    /\.ixi-workspace-empty-state[\s\S]*?min-height:\s*44px;/u
+    /className="ixi-workspace-empty-action"/u
+  );
+  assert.match(
+    emptyState,
+    /:global\(\.ixi-workspace-empty-action\)[\s\S]*?min-height:\s*44px;/u
   );
 
   for (const route of workspaceRoutes) {

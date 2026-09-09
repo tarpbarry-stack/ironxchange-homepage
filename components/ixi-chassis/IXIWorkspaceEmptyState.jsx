@@ -11,9 +11,9 @@ export default function IXIWorkspaceEmptyState({
 }) {
   const action = actionLabel
     ? actionHref
-      ? <Link href={actionHref}>{actionLabel}</Link>
+      ? <Link className="ixi-workspace-empty-action" href={actionHref}>{actionLabel}</Link>
       : typeof onAction === "function"
-        ? <button type="button" onClick={onAction}>{actionLabel}</button>
+        ? <button className="ixi-workspace-empty-action" type="button" onClick={onAction}>{actionLabel}</button>
         : null
     : null;
 
@@ -49,6 +49,7 @@ export default function IXIWorkspaceEmptyState({
 
       <style jsx>{`
         .ixi-workspace-empty-zone {
+          box-sizing: border-box;
           width: 100%;
           min-height: clamp(360px, 48vh, 680px);
           display: grid;
@@ -57,6 +58,7 @@ export default function IXIWorkspaceEmptyState({
         }
 
         .ixi-workspace-empty-state {
+          box-sizing: border-box;
           width: min(100%, 560px);
           display: flex;
           flex-direction: column;
@@ -145,8 +147,8 @@ export default function IXIWorkspaceEmptyState({
           line-height: 1.6;
         }
 
-        .ixi-workspace-empty-state :global(a),
-        .ixi-workspace-empty-state button {
+        .ixi-workspace-empty-state :global(.ixi-workspace-empty-action) {
+          box-sizing: border-box;
           min-width: 164px;
           min-height: 44px;
           display: inline-flex;
@@ -168,10 +170,8 @@ export default function IXIWorkspaceEmptyState({
           transition: background .16s ease, color .16s ease, box-shadow .16s ease;
         }
 
-        .ixi-workspace-empty-state :global(a:hover),
-        .ixi-workspace-empty-state :global(a:focus-visible),
-        .ixi-workspace-empty-state button:hover,
-        .ixi-workspace-empty-state button:focus-visible {
+        .ixi-workspace-empty-state :global(.ixi-workspace-empty-action:hover),
+        .ixi-workspace-empty-state :global(.ixi-workspace-empty-action:focus-visible) {
           background: #ffc400;
           color: #111;
           outline: none;
