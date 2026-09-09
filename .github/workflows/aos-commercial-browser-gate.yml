@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - qa/aos-commercial-browser-20260909
+  pull_request:
+    branches:
+      - main
 
 permissions:
   contents: read
