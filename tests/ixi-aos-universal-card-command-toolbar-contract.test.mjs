@@ -73,6 +73,9 @@ test("every operating card uses the full-width command geometry and exact handle
 
 test("container Recall gathers every canonical member into that container and Return owns the operation snapshot", async () => {
   const work = await read("pages/aos/work.js");
+  const recallImplementation = work.match(
+    /async function recallContainerChildren\(container\)([\s\S]*?)\n\}\n\s*\nfunction moveMachineToContainer/u
+  )?.[1] || "";
 
   assert.match(
     work,
@@ -89,6 +92,11 @@ test("container Recall gathers every canonical member into that container and Re
   assert.doesNotMatch(
     work,
     /async function recallContainerChildren\(container\)[\s\S]{0,900}?controller\.recall\(childIds\)/u
+  );
+  assert.doesNotMatch(
+    recallImplementation,
+    /hasContainerReturnSnapshot/u,
+    "Recall must replace the Board snapshot; an existing Return snapshot cannot suppress the command"
   );
 });
 test("container Board exposes every canonical member from authoritative session state in one governed operation", async () => {
