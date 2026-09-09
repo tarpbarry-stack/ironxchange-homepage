@@ -47,10 +47,10 @@ test("desktop remains an authenticated read surface over governed financial cont
   assert.match(source, /accountingPeriod: period/u);
   assert.match(source, /No financial values have been fabricated/u);
   assert.match(source, /Queue completion never substitutes/u);
-  assert.match(source, /accessResult\.error\?\.status === 401/u);
-  assert.match(source, /onAuthenticatedEnvironment: authenticatedEnvironment/u);
-  assert.match(source, /setEnvironment\(authenticatedEnvironment\);[\s\S]*setLoading\(false\);[\s\S]*setContextLoading\(true\)/u);
-  assert.match(source, /setEnvironment\(aosResult\);[\s\S]*setContextLoading\(false\);[\s\S]*await accessRequest/u);
+  assert.match(source, /accessError\?\.status !== 401/u);
+  assert.match(source, /buildIXITransactFastEnvironment\(accessPayload\)/u);
+  assert.match(source, /contextHydrationStarted\.current = true;[\s\S]*await loadIXIMosEnvironment/u);
+  assert.match(source, /financialLoading \|\| \(!projectionPayload && !financialError\)/u);
   assert.match(source, /COMPANY CONNECTED/u);
   assert.match(source, /Only IX-Core-admitted Objects and permanent Passports will appear/u);
   assert.match(environmentSource, /admitMosCanonicalIdentities\(\{ requests \}\)/u);
@@ -87,6 +87,11 @@ test("desktop styling preserves the permanent professional shell and responsive 
   assert.match(styles, /overflow-x:\s*hidden/u);
   assert.match(styles, /--gold:\s*#ffc400/u);
   assert.match(styles, /font-family:\s*'Inter Variable', Inter, ui-sans-serif/u);
+  assert.match(
+    styles,
+    /\.shell button,[\s\S]*\.shell input,[\s\S]*\.shell select,[\s\S]*\.shell textarea\s*\{[\s\S]*font-family:\s*inherit/u,
+    "native controls must inherit the approved TRAN$ACT type system"
+  );
   assert.doesNotMatch(
     styles,
     /font-size:\s*(?:[5-8](?:\.\d+)?)px/u,

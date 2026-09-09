@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { loadIXIMosEnvironment } from "../../lib/mos/loadIXIMosEnvironment";
 import {
@@ -10,6 +10,7 @@ import {
   getDefaultIXITransactAccountingPeriod
 } from "../ixi-transact-dashboard/data/IXITransactDashboardQueryContract";
 import { normalizeIXITransactDashboardProjection } from "../ixi-transact-dashboard/data/IXITransactDashboardProjectionAdapter";
+import { buildIXITransactFastEnvironment } from "../ixi-transact-dashboard/data/IXITransactFastBootstrap.mjs";
 import {
   buildIXIAosCommandContexts,
   buildIXIAosRecentStory,
@@ -211,69 +212,40 @@ export default function IXITransactCommandCenter() {
   const [financialLoading, setFinancialLoading] = useState(false);
   const [error, setError] = useState("");
   const [financialError, setFinancialError] = useState("");
+  const contextHydrationStarted = useRef(false);
 
   useEffect(() => {
     const controller = new AbortController();
-    let authenticatedBootstrapPublished = false;
     async function load() {
       setLoading(true);
-      setContextLoading(false);
-      setContextError("");
       setError("");
       setFinancialError("");
       try {
-        const accessRequest = loadIXIFinancialAccessContext({ signal: controller.signal }).then(
-          value => {
-            if (!controller.signal.aborted) setAccess(value);
-            return { value, error: null };
-          },
-          accessError => ({ value: null, error: accessError })
-        );
-        const aosResult = await loadIXIMosEnvironment({
-          includeObjects: true,
-          // Canonical admission is read-only. A bounded one-wave read keeps a
-          // normal TRAN$ACT workspace from waiting on three serial batches.
-          onAuthenticatedEnvironment: authenticatedEnvironment => {
-            if (controller.signal.aborted) return;
-            authenticatedBootstrapPublished = true;
-            setEnvironment(authenticatedEnvironment);
-            setLoading(false);
-            setContextLoading(true);
-          }
-        });
-        if (controller.signal.aborted) return;
-        if (!aosResult?.isAuthenticated) {
-          window.location.assign(TRANSACT_LOGIN_HREF);
-          return;
+        let accessPayload;
+        try {
+          accessPayload = await loadIXIFinancialAccessContext({ signal: controller.signal });
+        } catch (accessError) {
+          if (accessError?.status !== 401 || controller.signal.aborted) throw accessError;
+          accessPayload = await loadIXIFinancialAccessContext({ signal: controller.signal });
         }
-        setEnvironment(aosResult);
-        setLoading(false);
-        setContextLoading(false);
-        setContextError("");
+        if (controller.signal.aborted) return;
 
-        let accessResult = await accessRequest;
-        if (accessResult.error?.status === 401 && !controller.signal.aborted) {
-          accessResult = await loadIXIFinancialAccessContext({ signal: controller.signal }).then(
-            value => ({ value, error: null }),
-            accessError => ({ value: null, error: accessError })
-          );
+        const fastEnvironment = buildIXITransactFastEnvironment(accessPayload);
+        if (!fastEnvironment) {
+          const bootstrapError = new Error("IXI Financial did not return a canonical Entity and permanent Passport.");
+          bootstrapError.code = "IXI_TRANSACT_FAST_CONTEXT_INCOMPLETE";
+          throw bootstrapError;
         }
-        if (controller.signal.aborted) return;
-        if (accessResult.error) {
-          setAccess(null);
-          setFinancialError(accessResult.error.message || "IXI Financial access could not be verified.");
-        } else {
-          setAccess(accessResult.value);
-          setFinancialError("");
-        }
+
+        setAccess(accessPayload);
+        setEnvironment(fastEnvironment);
       } catch (loadError) {
         if (loadError?.name !== "AbortError") {
-          if (authenticatedBootstrapPublished) {
-            setContextError(loadError?.message || "Canonical operating context could not be loaded.");
-            setContextLoading(false);
-          } else {
-            setError(loadError?.message || "IXI TRAN$ACT could not be loaded.");
+          if (loadError?.status === 401) {
+            window.location.assign(TRANSACT_LOGIN_HREF);
+            return;
           }
+          setError(loadError?.message || "IXI TRAN$ACT could not be loaded.");
         }
       } finally {
         if (!controller.signal.aborted) setLoading(false);
@@ -282,6 +254,35 @@ export default function IXITransactCommandCenter() {
     load();
     return () => controller.abort();
   }, []);
+
+  useEffect(() => {
+    if (!access || contextHydrationStarted.current || environment?.hydration?.canonicalObjects !== "deferred") return undefined;
+    if (financialLoading || (!projectionPayload && !financialError)) return undefined;
+
+    const controller = new AbortController();
+    contextHydrationStarted.current = true;
+    async function loadOperatingContext() {
+      setContextLoading(true);
+      setContextError("");
+      try {
+        const aosResult = await loadIXIMosEnvironment({ includeObjects: true });
+        if (controller.signal.aborted) return;
+        if (!aosResult?.isAuthenticated) {
+          window.location.assign(TRANSACT_LOGIN_HREF);
+          return;
+        }
+        setEnvironment(aosResult);
+      } catch (loadError) {
+        if (loadError?.name !== "AbortError") {
+          setContextError(loadError?.message || "Canonical operating context could not be loaded.");
+        }
+      } finally {
+        if (!controller.signal.aborted) setContextLoading(false);
+      }
+    }
+    loadOperatingContext();
+    return () => controller.abort();
+  }, [access, environment?.hydration?.canonicalObjects, financialError, financialLoading, projectionPayload]);
 
   const contexts = useMemo(() => buildIXIAosCommandContexts({
     entity: environment?.entity || {},
