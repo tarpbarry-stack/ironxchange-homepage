@@ -66,6 +66,9 @@ jobs:
             .filter(object => object.entityId === entityId && object.status === "active");
           const relationships = Object.values(readJsonFile(MOS_PATHS.relationships, {}))
             .filter(item => item.entityId === entityId && item.status === "active");
+          const account = Object.values(readJsonFile(MOS_PATHS.accounts, {}))
+            .find(item => item.primaryEntityId === entityId && item.status === "active");
+          assert.ok(account?.ownerUserId);
           const machines = objects.filter(object => object.objectType === "machine");
           const equipment = objects.filter(object =>
             object.objectType === "system-index" &&
@@ -98,6 +101,7 @@ jobs:
           db.close();
           console.log(JSON.stringify({
             ok: true,
+            ownerUserId: account.ownerUserId,
             activeMachineCount: machines.length,
             equipmentProjectionCount: members.length,
             machinesWithListingAlias: lineage.filter(item => item.listingAliases.length > 0).length,
