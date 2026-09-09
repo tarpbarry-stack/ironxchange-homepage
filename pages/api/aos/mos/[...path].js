@@ -335,12 +335,15 @@ export default async function handler(req, res) {
       return res.status(response.status).json(payload);
     }
 
+    const sessionStartedAt = Date.now();
     const session =
       await resolveAosBrowserSession(
         req,
         res
       );
+    const sessionMs = Date.now() - sessionStartedAt;
 
+    const ixCoreStartedAt = Date.now();
     const context =
       path === "/aos/environment"
         ? await resolveExistingIxCoreAosEnvironment({
@@ -349,15 +352,24 @@ export default async function handler(req, res) {
         : await resolveCommandContext(
             session
           );
+    const ixCoreMs = Date.now() - ixCoreStartedAt;
 
     if (path === "/aos/environment") {
       const durationMs = Date.now() - requestStartedAt;
       res.setHeader(
         "Server-Timing",
-        `ixi-aos-environment;dur=${durationMs}`
+        [
+          `ixi-aos-session;dur=${sessionMs}`,
+          `ixi-aos-core;dur=${ixCoreMs}`,
+          `ixi-aos-environment;dur=${durationMs}`
+        ].join(", ")
       );
       console.info("IXI AOS ENVIRONMENT READY", {
         durationMs,
+        sessionMs,
+        authInfoMs: session?.timing?.authInfoMs ?? null,
+        currentUserMs: session?.timing?.currentUserMs ?? null,
+        ixCoreMs,
         resolutionMode:
           context?.resolutionMode || "governed-onboarding"
       });

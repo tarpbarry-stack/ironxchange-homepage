@@ -1,10 +1,6 @@
 import Head from "next/head";
 import { useState } from "react";
 
-import {
-  ensureCommercialOnboarding,
-  backfillOwnedMachines
-} from "../lib/onboarding/ixiCommercialOnboardingClient";
 import { getSafeIXILoginReturnTarget } from "../lib/auth/ixiLoginReturn";
 
 const BRAND_YELLOW = "#FFC400";
@@ -37,14 +33,6 @@ async function handleLogin(e) {
     });
 
     console.log("LOGIN SUCCESS:", result);
-
-    await ensureCommercialOnboarding();
-
-    try {
-      await backfillOwnedMachines();
-    } catch (backfillError) {
-      console.error("IXI MACHINE BACKFILL ERROR:", backfillError);
-    }
 
     const destination = getSafeIXILoginReturnTarget(window.location.search);
     window.location.assign(destination);
