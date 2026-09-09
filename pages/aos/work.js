@@ -1474,8 +1474,7 @@ async function recallContainerChildren(container) {
   if (
     !containerId ||
     !childIds.length ||
-    !controller ||
-    hasContainerReturnSnapshot(container)
+    !controller
   ) {
     return;
   }
