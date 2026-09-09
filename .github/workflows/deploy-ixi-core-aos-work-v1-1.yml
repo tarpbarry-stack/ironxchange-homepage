@@ -110,6 +110,7 @@ jobs:
           1a4820f01bf4d1b57c1c6fe2b94c6b67cf156eb4
           980e292d76cc0758ea4552c498a6d17301bf89e4
           c539e4a175563042e027a0cb8f58ad3aa3c5a242
+          b0bebf91051fd51fe1b232e8130433d0df69a802
           $RELEASE_SHA"
 
           run_pm2() {
