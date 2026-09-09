@@ -48,6 +48,7 @@ jobs:
           const Database = require("better-sqlite3");
           const { MOS_PATHS } = require("./mos/storage/mosPaths");
           const { readJsonFile } = require("./mos/storage/jsonStore");
+          const { readPassportRecords, passportSources } = require("./passport/passportRegistry");
           const { resolveCanonicalObjectIdentity } = require("./mos/identity/canonicalObjectAdmissionService");
           const { buildRailProjectionMap } = require("./mos/accounts/aosEnvironmentService");
 
@@ -62,8 +63,9 @@ jobs:
           const before = state();
           assert.deepEqual(db.pragma("integrity_check"), [{ integrity_check: "ok" }]);
 
-          const objects = Object.values(readJsonFile(MOS_PATHS.objects, {}))
-            .filter(object => object.entityId === entityId && object.status === "active");
+          const allObjects = Object.values(readJsonFile(MOS_PATHS.objects, {}))
+            .filter(object => object.entityId === entityId);
+          const objects = allObjects.filter(object => object.status === "active");
           const relationships = Object.values(readJsonFile(MOS_PATHS.relationships, {}))
             .filter(item => item.entityId === entityId && item.status === "active");
           const account = Object.values(readJsonFile(MOS_PATHS.accounts, {}))
@@ -80,6 +82,39 @@ jobs:
 
           const members = buildRailProjectionMap(relationships, objects)[equipment[0].objectId]?.members || [];
           assert.equal(members.length, 23);
+
+          const currentOwnedListings = [{"listingId":"6a9b2cc3-e7ab-4267-aed0-138cba998dfa","title":"2017 DEERE 544K II - 4,500 Hrs","serialNumber":"1DW544KZCHF681737","stockNumber":null},{"listingId":"6a78ab3e-e164-4bdb-821d-7460923dbb63","title":"2019 KOMATSU WA480-8 - 5,500 Hrs","serialNumber":"KMTWA129JNA48031","stockNumber":null},{"listingId":"6a78aa8a-4c2d-4b49-b237-ede60a640adf","title":"2019 DEERE 844K III - 5,500 Hrs","serialNumber":"1DW844KCCF691559","stockNumber":null},{"listingId":"6a78aa43-98c1-45fa-b69d-4290e23c7f70","title":"2019 KOMATSU WA320 - 5,500 Hrs","serialNumber":"KMTWA135AHA085307","stockNumber":null},{"listingId":"6a763c7e-945a-4417-831b-577deae86a81","title":"2019 DEERE 844K III - 6,747 Hrs","serialNumber":"1DW844KCLJF692876","stockNumber":null},{"listingId":"6a763a55-bfc0-4eb5-8dcd-bee83da48178","title":"2019 RIPPER OTHER - 2 Hrs","serialNumber":"872GP772GP02","stockNumber":null},{"listingId":"6a763a34-1657-4b3c-822d-9ac6763e7411","title":"2019 RIPPER OTHER - 2 Hrs","serialNumber":"872GP772GP01","stockNumber":null},{"listingId":"6a76392b-51c3-425a-9c66-b369228666ec","title":"2019 PUMPS GORMAN-RUPP - 5,555 Hrs","serialNumber":"888888","stockNumber":null},{"listingId":"6a7638cc-83fa-4b78-ae52-a57e5c7dca87","title":"2019 AIR COMPRESSORS DOOSAN - 2,850 Hrs","serialNumber":"10270940","stockNumber":null},{"listingId":"6a7636c6-48d0-4d78-b7d7-a1963f1f8c07","title":"2018 HAMMER/BREAKER OTHER - 500 Hrs","serialNumber":"THH3000BD","stockNumber":null},{"listingId":"6a763643-ca3b-4a00-b05b-d924a2af5186","title":"2018 MCCLOSKEY I54Rv3 - 6,100 Hrs","serialNumber":"88761","stockNumber":null},{"listingId":"6a763503-edbf-4337-97f0-01f9710d1235","title":"2021 JOHN DEERE 1025R - 1,200 Hrs","serialNumber":"1LV1025RAMM832121","stockNumber":null},{"listingId":"6a763456-578c-40f1-8221-db1007c50696","title":"2020 DEERE 844K III - 6,500 Hrs","serialNumber":"1DW844KALJF687630","stockNumber":null},{"listingId":"6a76341a-8da5-4f33-934a-84f4bff084f7","title":"2020 DEERE 824K - 4,536 Hrs","serialNumber":"","stockNumber":null},{"listingId":"6a7631b2-7138-4843-bea0-63a9077bfd21","title":"2018 KOMATSU PC210LC-11 - 4,956 Hrs","serialNumber":"KMTPC257PFC500154","stockNumber":null},{"listingId":"6a762fd1-7cfe-493d-9539-e790ff755dea","title":"2019 DEERE 872GP - 5,018 Hrs","serialNumber":"1DW872GPEJF691334","stockNumber":null},{"listingId":"6a762f0c-d042-46db-a2b3-f496db67ee15","title":"2016 DEERE 872GP - 5,018 Hrs","serialNumber":"1DW872GPKFF667399","stockNumber":null},{"listingId":"6a762e1d-ba7a-498d-a8f0-829a01fe12bb","title":"2021 DEERE 750L LGP - 4,025 Hrs","serialNumber":"1T0750LXLLF383695","stockNumber":null},{"listingId":"6a762ca3-d029-4790-87a1-3d0f202f94c7","title":"2018 VOLVO L90G - 9,138 Hrs","serialNumber":"VCE0L90GC03380","stockNumber":null},{"listingId":"6a762a43-8cb4-42cf-99dd-143703ccf4dd","title":"2019 VOLVO L90H - 4,802 Hrs","serialNumber":"624763","stockNumber":null},{"listingId":"6a762936-6cac-430a-84ae-92baacd4e332","title":"2017 DEERE 85G - 3,280 Hrs","serialNumber":"1FF085GXPGJG018491","stockNumber":null},{"listingId":"6a7627ff-2937-444d-8062-beff9d27528b","title":"2017 DEERE 744K II - 6,879 Hrs","serialNumber":"1DW744KXJGF676288","stockNumber":null},{"listingId":"6a761850-15b8-4d39-b7fb-c7854864971c","title":"2019 DEERE 724K","serialNumber":"1DW724KZAF688458","stockNumber":null}];
+          const passports = readPassportRecords();
+          const currentIdentityProbes = currentOwnedListings.map(listing => {
+            let resolution = null;
+            try {
+              const identity = resolveCanonicalObjectIdentity({
+                entityId,
+                aliases: [{ sourceType: "sharetribe-listing", sourceId: listing.listingId }]
+              });
+              resolution = {
+                ok: true,
+                objectId: identity.objectId,
+                passportId: identity.passportId,
+                objectStatus: identity.object.status
+              };
+            } catch (error) {
+              resolution = { ok: false, code: error.code };
+            }
+            const serial = String(listing.serialNumber || "").trim().toUpperCase();
+            const rawSerialMatches = serial
+              ? allObjects.filter(object =>
+                  String(object.fields?.serialNumber || object.serialNumber || "").trim().toUpperCase() === serial
+                ).map(object => ({ objectId: object.objectId, status: object.status, passportId: object.passportId }))
+              : [];
+            const passportListingMatches = passports.filter(passport =>
+              passportSources(passport).some(source =>
+                source.sourceType === "sharetribe-listing" &&
+                source.sourceId === listing.listingId
+              )
+            ).map(passport => passport.passportId);
+            return { ...listing, resolution, rawSerialMatches, passportListingMatches };
+          });
 
           const lineage = machines.map(machine => {
             const identity = resolveCanonicalObjectIdentity({
@@ -108,6 +143,7 @@ jobs:
             equipmentProjectionCount: members.length,
             machinesWithListingAlias: lineage.filter(item => item.listingAliases.length > 0).length,
             machinesWithoutListingAlias: lineage.filter(item => item.listingAliases.length === 0).length,
+            currentIdentityProbes,
             lineage,
             immutableAudit: true
           }, null, 2));
