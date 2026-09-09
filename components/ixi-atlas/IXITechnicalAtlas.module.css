@@ -157,8 +157,10 @@
 }
 .moduleRail span,
 .moduleRail small {
-  font: 650 var(--type-micro) / 13px ui-monospace, SFMono-Regular, Menlo,
-    Consolas, monospace;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: var(--type-micro);
+  font-weight: 650;
+  line-height: 13px;
   letter-spacing: 0.08em;
 }
 .moduleRail b {
@@ -188,8 +190,10 @@
   align-items: center;
   gap: 10px;
   color: #707a7d;
-  font: 650 var(--type-micro) / 13px ui-monospace, SFMono-Regular, Menlo,
-    Consolas, monospace;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: var(--type-micro);
+  font-weight: 650;
+  line-height: 13px;
   letter-spacing: 0.12em;
 }
 .breadcrumb b {
@@ -216,13 +220,17 @@
   outline: 0;
   background: transparent;
   color: #e8eceb;
-  font: 650 var(--type-label) / 14px ui-monospace, SFMono-Regular, Menlo,
-    Consolas, monospace;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: var(--type-label);
+  font-weight: 650;
+  line-height: 14px;
   letter-spacing: 0.08em;
 }
 .search kbd {
-  font: 650 var(--type-micro) / 13px ui-monospace, SFMono-Regular, Menlo,
-    Consolas, monospace;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: var(--type-micro);
+  font-weight: 650;
+  line-height: 13px;
   border: 1px solid var(--line);
   padding: 3px;
   color: #656d70;
@@ -236,8 +244,10 @@
   align-items: flex-end;
 }
 .eyebrow {
-  font: 750 var(--type-label) / 14px ui-monospace, SFMono-Regular, Menlo,
-    Consolas, monospace;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: var(--type-label);
+  font-weight: 750;
+  line-height: 14px;
   color: var(--yellow);
   letter-spacing: 0.13em;
 }
@@ -293,8 +303,10 @@
 }
 .panelHead span,
 .panelHead b {
-  font: 650 var(--type-micro) / 13px ui-monospace, SFMono-Regular, Menlo,
-    Consolas, monospace;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: var(--type-micro);
+  font-weight: 650;
+  line-height: 13px;
   letter-spacing: 0.12em;
   color: #707a7c;
 }
@@ -311,8 +323,10 @@
   border-left: 0;
   background: #080a0b;
   color: #6f797b;
-  font: 750 var(--type-micro) / 13px ui-monospace, SFMono-Regular, Menlo,
-    Consolas, monospace;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: var(--type-micro);
+  font-weight: 750;
+  line-height: 13px;
   padding: 0 10px;
   cursor: pointer;
 }
@@ -395,8 +409,10 @@
   display: flex;
   justify-content: space-around;
   color: #384548;
-  font: 650 var(--type-micro) / 13px ui-monospace, SFMono-Regular, Menlo,
-    Consolas, monospace;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: var(--type-micro);
+  font-weight: 650;
+  line-height: 13px;
 }
 .cardSpecimen {
   position: absolute;
@@ -445,8 +461,10 @@
   align-items: center;
   justify-content: space-between;
   padding: 0 7px;
-  font: 700 var(--type-micro) / 13px ui-monospace, SFMono-Regular, Menlo,
-    Consolas, monospace;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: var(--type-micro);
+  font-weight: 700;
+  line-height: 13px;
   letter-spacing: 0.08em;
   color: #a4acad;
 }
@@ -492,8 +510,10 @@
   background: rgba(0, 0, 0, 0.75);
   border: 1px solid rgba(0, 188, 231, 0.4);
   color: var(--cyan);
-  font: 750 var(--type-micro) / 13px ui-monospace, SFMono-Regular, Menlo,
-    Consolas, monospace;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: var(--type-micro);
+  font-weight: 750;
+  line-height: 13px;
   padding: 4px;
 }
 .machineCopy {
@@ -501,8 +521,10 @@
   transition: 0.35s;
 }
 .machineCopy > span {
-  font: 750 var(--type-micro) / 13px ui-monospace, SFMono-Regular, Menlo,
-    Consolas, monospace;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: var(--type-micro);
+  font-weight: 750;
+  line-height: 13px;
   color: var(--yellow);
 }
 .machineCopy h3 {
@@ -516,8 +538,10 @@
   display: flex;
   justify-content: space-between;
   color: #899294;
-  font: 650 var(--type-micro) / 13px ui-monospace, SFMono-Regular, Menlo,
-    Consolas, monospace;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: var(--type-micro);
+  font-weight: 650;
+  line-height: 13px;
 }
 .objectToolbar {
   height: 31px;
@@ -528,8 +552,10 @@
   justify-content: flex-end;
   gap: 17px;
   color: #9ba3a4;
-  font: 800 var(--type-micro) / 13px ui-monospace, SFMono-Regular, Menlo,
-    Consolas, monospace;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: var(--type-micro);
+  font-weight: 800;
+  line-height: 13px;
   transition: 0.35s;
 }
 .objectToolbar b:first-child,
@@ -579,8 +605,10 @@
   display: flex;
   gap: 7px;
   align-items: center;
-  font: 750 var(--type-label) / 14px ui-monospace, SFMono-Regular, Menlo,
-    Consolas, monospace;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: var(--type-label);
+  font-weight: 750;
+  line-height: 14px;
   letter-spacing: 0.08em;
   cursor: pointer;
   padding: 4px;
@@ -621,8 +649,10 @@
 .dimensionH {
   position: absolute;
   color: #475457;
-  font: 650 var(--type-micro) / 13px ui-monospace, SFMono-Regular, Menlo,
-    Consolas, monospace;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: var(--type-micro);
+  font-weight: 650;
+  line-height: 13px;
   letter-spacing: 0.1em;
 }
 .dimensionV {
@@ -643,8 +673,10 @@
   gap: 7px;
 }
 .layerBar > span {
-  font: 750 var(--type-label) / 14px ui-monospace, SFMono-Regular, Menlo,
-    Consolas, monospace;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: var(--type-label);
+  font-weight: 750;
+  line-height: 14px;
   color: #818a8c;
   display: flex;
   gap: 6px;
@@ -656,8 +688,10 @@
   border: 1px solid rgba(255, 255, 255, 0.1);
   background: transparent;
   color: #697376;
-  font: 750 var(--type-micro) / 13px ui-monospace, SFMono-Regular, Menlo,
-    Consolas, monospace;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: var(--type-micro);
+  font-weight: 750;
+  line-height: 13px;
   cursor: pointer;
 }
 .layerBar .layerActive {
@@ -666,8 +700,10 @@
 }
 .layerBar > i {
   margin-left: auto;
-  font: 650 var(--type-micro) / 13px ui-monospace, SFMono-Regular, Menlo,
-    Consolas, monospace;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: var(--type-micro);
+  font-weight: 650;
+  line-height: 13px;
   color: #5e686a;
 }
 .dossier {
@@ -692,8 +728,10 @@
   gap: 14px;
 }
 .dossierHead span {
-  font: 700 var(--type-micro) / 13px ui-monospace, SFMono-Regular, Menlo,
-    Consolas, monospace;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: var(--type-micro);
+  font-weight: 700;
+  line-height: 13px;
   color: #747e80;
   letter-spacing: 0.1em;
 }
@@ -708,8 +746,10 @@
   padding: 6px 8px;
 }
 .partCode {
-  font: 750 var(--type-micro) / 13px ui-monospace, SFMono-Regular, Menlo,
-    Consolas, monospace;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: var(--type-micro);
+  font-weight: 750;
+  line-height: 13px;
   color: var(--cyan);
   margin: 17px 0 7px;
 }
@@ -732,8 +772,10 @@
   padding: 13px 0;
 }
 .dossier h3 {
-  font: 800 var(--type-label) / 14px ui-monospace, SFMono-Regular, Menlo,
-    Consolas, monospace;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: var(--type-label);
+  font-weight: 800;
+  line-height: 14px;
   color: var(--yellow);
   letter-spacing: 0.11em;
   margin: 0 0 7px;
@@ -771,24 +813,30 @@
 }
 .flowSpec span {
   display: block;
-  font: 650 var(--type-micro) / 13px ui-monospace, SFMono-Regular, Menlo,
-    Consolas, monospace;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: var(--type-micro);
+  font-weight: 650;
+  line-height: 13px;
   color: #929b9d;
   padding: 3px 0;
 }
 .sources code {
   display: block;
   color: #718083;
-  font: 650 var(--type-micro) / 13px ui-monospace, SFMono-Regular, Menlo,
-    Consolas, monospace;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: var(--type-micro);
+  font-weight: 650;
+  line-height: 13px;
   white-space: normal;
   padding: 2px 0;
 }
 .recordFoot {
   display: flex;
   justify-content: space-between;
-  font: 650 var(--type-micro) / 13px ui-monospace, SFMono-Regular, Menlo,
-    Consolas, monospace;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: var(--type-micro);
+  font-weight: 650;
+  line-height: 13px;
   color: #515b5d;
   margin-top: 8px;
 }
@@ -809,8 +857,10 @@
 }
 .sectionHead span,
 .sectionHead p {
-  font: 750 var(--type-label) / 14px ui-monospace, SFMono-Regular, Menlo,
-    Consolas, monospace;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: var(--type-label);
+  font-weight: 750;
+  line-height: 14px;
   color: var(--yellow);
   letter-spacing: 0.12em;
 }
@@ -856,12 +906,17 @@
   box-shadow: inset 0 2px var(--cyan);
 }
 .componentGrid > button > span {
-  font: 850 var(--type-result) / 22px "Inter Variable", Inter, sans-serif;
+  font-family: "Inter Variable", Inter, sans-serif;
+  font-size: var(--type-result);
+  font-weight: 850;
+  line-height: 22px;
   color: #566164;
 }
 .componentGrid small {
-  font: 750 var(--type-micro) / 13px ui-monospace, SFMono-Regular, Menlo,
-    Consolas, monospace;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: var(--type-micro);
+  font-weight: 750;
+  line-height: 13px;
   color: var(--cyan);
 }
 .componentGrid b {
@@ -898,8 +953,10 @@
   padding-left: 17px;
 }
 .flowLine span {
-  font: 750 var(--type-micro) / 13px ui-monospace, SFMono-Regular, Menlo,
-    Consolas, monospace;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: var(--type-micro);
+  font-weight: 750;
+  line-height: 13px;
   color: var(--cyan);
 }
 .flowLine b {
@@ -929,8 +986,10 @@
 }
 .moduleCards article > span,
 .moduleCards article > small {
-  font: 750 var(--type-micro) / 13px ui-monospace, SFMono-Regular, Menlo,
-    Consolas, monospace;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: var(--type-micro);
+  font-weight: 750;
+  line-height: 13px;
   color: var(--cyan);
 }
 .moduleCards article > small {
@@ -958,8 +1017,10 @@
   bottom: 14px;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
   padding-top: 9px;
-  font: 700 var(--type-micro) / 13px ui-monospace, SFMono-Regular, Menlo,
-    Consolas, monospace;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: var(--type-micro);
+  font-weight: 700;
+  line-height: 13px;
   color: #565f61;
   display: flex;
   justify-content: space-between;
@@ -976,8 +1037,10 @@
   padding: 0 30px;
   background: #050606;
   color: #596264;
-  font: 650 var(--type-micro) / 13px ui-monospace, SFMono-Regular, Menlo,
-    Consolas, monospace;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: var(--type-micro);
+  font-weight: 650;
+  line-height: 13px;
   letter-spacing: 0.1em;
 }
 .footer > span:last-child {

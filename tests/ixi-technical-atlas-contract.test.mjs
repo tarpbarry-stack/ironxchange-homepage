@@ -57,4 +57,5 @@ test("Atlas uses the current IXI V12 readability contract", () => {
   assert.match(css, /"Inter Variable"/);
   assert.match(css, /font-variant-numeric:\s*tabular-nums lining-nums/);
   assert.doesNotMatch(css, /font(?:-size)?:\s*[6-9]px/);
+  assert.doesNotMatch(css, /font:\s*[^;]*var\(--type-/);
 });
