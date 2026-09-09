@@ -21,7 +21,7 @@ jobs:
       AWS_REGION: ${{ secrets.AWS_REGION }}
       AWS_INSTANCE_ID: ${{ secrets.AWS_INSTANCE_ID }}
       GITHUB_TOKEN: ${{ github.token }}
-      IXI_CORE_SHA: 8f59cfe5d6e62f169022a4deba7b2d66861fe03d
+      IXI_CORE_SHA: c6177a9acc1ac79d819b4a1b37bf5da8385072d1
 
     steps:
       - name: Validate immutable release
@@ -53,7 +53,7 @@ jobs:
           set -euo pipefail
 
           APP=/var/www/ix-core
-          RELEASE_SHA=8f59cfe5d6e62f169022a4deba7b2d66861fe03d
+          RELEASE_SHA=c6177a9acc1ac79d819b4a1b37bf5da8385072d1
           BASE_SHA=fe5eb2a2cbb0150156dbc1087a534104dd4ff8d7
           STAGE=/tmp/ixi-core-aos-work-$RELEASE_SHA
           BACKUP_ROOT=/var/backups/ixi-core-aos-work
@@ -111,6 +111,7 @@ jobs:
           980e292d76cc0758ea4552c498a6d17301bf89e4
           c539e4a175563042e027a0cb8f58ad3aa3c5a242
           b0bebf91051fd51fe1b232e8130433d0df69a802
+          8f59cfe5d6e62f169022a4deba7b2d66861fe03d
           $RELEASE_SHA"
 
           run_pm2() {
