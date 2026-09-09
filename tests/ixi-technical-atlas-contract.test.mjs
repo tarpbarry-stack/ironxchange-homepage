@@ -92,3 +92,30 @@ test("Atlas uses the current IXI V12 readability contract", () => {
   assert.doesNotMatch(css, /font:\s*[^;]*var\(--type-/);
   assert.doesNotMatch(css, /\.atlas button,[\s\S]*?font:\s*inherit/);
 });
+
+test("TA-001 mounts the production Machine Card in a zero-write live fixture", () => {
+  const testCell = fs.readFileSync(
+    new URL("../components/ixi-atlas/IXIAtlasLiveTestCell.jsx", import.meta.url),
+    "utf8",
+  );
+
+  assert.match(testCell, /import IXIMachineCard/);
+  assert.match(testCell, /<IXIMachineCard/);
+  assert.match(testCell, /ZERO WRITES/);
+  assert.match(testCell, /SEE IT/);
+  assert.match(testCell, /TOUCH IT/);
+  assert.match(testCell, /FOLLOW IT/);
+  assert.match(testCell, /PASSPORT PULSE/);
+  assert.doesNotMatch(testCell, /fetch\s*\(/);
+});
+
+test("the System Index is an accessible assembly navigator", () => {
+  const atlas = fs.readFileSync(
+    new URL("../components/ixi-atlas/IXITechnicalAtlas.jsx", import.meta.url),
+    "utf8",
+  );
+
+  assert.match(atlas, /aria-expanded=\{indexOpen\}/);
+  assert.match(atlas, /aria-controls="atlas-system-index"/);
+  assert.match(atlas, /SYSTEM HANGAR/);
+});

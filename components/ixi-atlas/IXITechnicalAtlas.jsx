@@ -1,4 +1,3 @@
-import Image from "next/image";
 import { useMemo, useState } from "react";
 import {
   ATLAS_REVISION,
@@ -7,6 +6,7 @@ import {
   machineCardParts,
 } from "../../lib/ixi-atlas/machineCardRegistry.mjs";
 import IXIChassisAtlas from "./IXIChassisAtlas";
+import IXIAtlasLiveTestCell from "./IXIAtlasLiveTestCell";
 import styles from "./IXITechnicalAtlas.module.css";
 
 const layerNames = ["ALL", "STRUCTURE", "DATA", "COMMANDS"];
@@ -61,113 +61,8 @@ function Icon({ name }) {
   );
 }
 
-function BlueprintCard({ selected, onSelect, exploded, zoom }) {
-  const tags = [
-    { id: "identity", label: "PASSPORT", x: "72%", y: "8%" },
-    { id: "family", label: "FAMILY ROUTER", x: "9%", y: "18%" },
-    { id: "face", label: "PRIMARY FACE", x: "4%", y: "39%" },
-    { id: "toolbar", label: "OBJECT TOOLBAR", x: "73%", y: "69%" },
-    { id: "faces", label: "FACES", x: "6%", y: "76%" },
-    { id: "rail", label: "MACHINE RAIL", x: "70%", y: "88%" },
-    { id: "console", label: "CONSOLE COUPLING", x: "4%", y: "91%" },
-  ];
-
-  return (
-    <div
-      className={`${styles.blueprintViewport} ${exploded ? styles.exploded : ""}`}
-    >
-      <div className={styles.gridLabels} aria-hidden="true">
-        <span>A</span>
-        <span>B</span>
-        <span>C</span>
-        <span>D</span>
-      </div>
-      <div
-        className={styles.blueprintScale}
-        style={{ transform: `scale(${zoom})` }}
-      >
-        <button
-          className={`${styles.cardSpecimen} ${selected === "object" ? styles.selectedPart : ""}`}
-          onClick={() => onSelect("object")}
-          type="button"
-        >
-          <div className={styles.cardMeta}>
-            <span>PRIVATE / LIVE</span>
-            <b>IXI-7F3A9C2D</b>
-          </div>
-          <div className={styles.machineImage}>
-            <Image
-              src="/images/2023-komatsu-wa475-10.jpg"
-              alt="Komatsu WA475-10 wheel loader"
-              fill
-              sizes="300px"
-              priority
-            />
-            <span className={styles.imageScan} />
-            <span className={styles.faceStamp}>FACE 01 / 04</span>
-          </div>
-          <div className={styles.machineCopy}>
-            <span>2023 WHEEL LOADER</span>
-            <h3>KOMATSU WA475-10</h3>
-            <div>
-              <span>4,812 HOURS</span>
-              <span>ABILENE, TX</span>
-            </div>
-          </div>
-          <div className={styles.objectToolbar}>
-            <b>+</b>
-            <span>EDIT</span>
-            <b>$</b>
-            <b>⋮</b>
-          </div>
-          <div
-            className={styles.machineRail}
-            aria-label="Seven-zone IXI Machine Rail"
-          >
-            {Array.from({ length: 7 }, (_, i) => (
-              <i
-                key={i}
-                className={
-                  i === 4 ? styles.cyanRail : i === 1 ? styles.yellowRail : ""
-                }
-              />
-            ))}
-          </div>
-        </button>
-        {tags.map((tag, i) => (
-          <button
-            type="button"
-            key={tag.id}
-            className={`${styles.callout} ${styles[`callout${i}`]} ${selected === tag.id ? styles.activeCallout : ""}`}
-            style={{ left: tag.x, top: tag.y }}
-            onClick={() => onSelect(tag.id)}
-          >
-            <i>{String(i + 2).padStart(2, "0")}</i>
-            <span>{tag.label}</span>
-          </button>
-        ))}
-        <svg
-          className={styles.calloutLines}
-          viewBox="0 0 900 660"
-          preserveAspectRatio="none"
-          aria-hidden="true"
-        >
-          <path d="M650 65H565L525 99" />
-          <path d="M165 130h120l54 45" />
-          <path d="M124 275h165l48-18" />
-          <path d="M657 457H560l-47-24" />
-          <path d="M130 505h170l37-50" />
-          <path d="M635 578H535l-38-42" />
-          <path d="M170 602h142l40-51" />
-        </svg>
-        <span className={styles.dimensionV}>475 PX / WORKSPACE</span>
-        <span className={styles.dimensionH}>300 PX / NATIVE</span>
-      </div>
-    </div>
-  );
-}
-
 function Dossier({ part }) {
+  const [view, setView] = useState("FIELD");
   return (
     <aside className={styles.dossier} aria-live="polite">
       <div className={styles.dossierHead}>
@@ -182,6 +77,10 @@ function Dossier({ part }) {
       </p>
       <h2>{part.name}</h2>
       <p className={styles.short}>{part.short}</p>
+      <div className={styles.dossierView} aria-label="Dossier detail level">
+        <button type="button" className={view === "FIELD" ? styles.dossierViewActive : ""} onClick={() => setView("FIELD")}>FIELD VIEW</button>
+        <button type="button" className={view === "ENGINEERING" ? styles.dossierViewActive : ""} onClick={() => setView("ENGINEERING")}>ENGINEERING</button>
+      </div>
       <section>
         <h3>PURPOSE</h3>
         <p>{part.purpose}</p>
@@ -190,15 +89,15 @@ function Dossier({ part }) {
         <h3>CUSTOMER VALUE</h3>
         <p>{part.benefit}</p>
       </section>
-      <section>
+      {view === "ENGINEERING" && <section>
         <h3>OPERATING SPECIFICATION</h3>
         <ul>
           {part.specs.map((spec) => (
             <li key={spec}>{spec}</li>
           ))}
         </ul>
-      </section>
-      <div className={styles.flowSpec}>
+      </section>}
+      {view === "ENGINEERING" && <div className={styles.flowSpec}>
         <section>
           <h3>INPUTS</h3>
           {part.inputs.map((value) => (
@@ -211,17 +110,17 @@ function Dossier({ part }) {
             <span key={value}>{value}</span>
           ))}
         </section>
-      </div>
+      </div>}
       <section>
         <h3>FIELD USE</h3>
         <p>{part.use}</p>
       </section>
-      <section className={styles.sources}>
+      {view === "ENGINEERING" && <section className={styles.sources}>
         <h3>SOURCE OF TRUTH</h3>
         {part.sources.map((source) => (
           <code key={source}>{source}</code>
         ))}
-      </section>
+      </section>}
       <div className={styles.recordFoot}>
         <span>INTRODUCED {part.introduced}</span>
         <span>VERIFIED {ATLAS_REVISION}</span>
@@ -234,8 +133,6 @@ export default function IXITechnicalAtlas() {
   const [activeModule, setActiveModule] = useState("TA-001");
   const [selectedId, setSelectedId] = useState("object");
   const [layer, setLayer] = useState("ALL");
-  const [exploded, setExploded] = useState(false);
-  const [zoom, setZoom] = useState(1);
   const [query, setQuery] = useState("");
   const [indexOpen, setIndexOpen] = useState(false);
   const part = getAtlasPart(selectedId);
@@ -267,15 +164,35 @@ export default function IXITechnicalAtlas() {
           className={styles.indexButton}
           type="button"
           onClick={() => setIndexOpen(!indexOpen)}
+          aria-expanded={indexOpen}
+          aria-controls="atlas-system-index"
         >
           <Icon name="book" /> SYSTEM INDEX
         </button>
       </header>
 
-      <nav
-        className={`${styles.moduleRail} ${indexOpen ? styles.indexOpen : ""}`}
-        aria-label="Technical Atlas modules"
-      >
+      {indexOpen && (
+        <section id="atlas-system-index" className={styles.systemIndex}>
+          <div className={styles.systemIndexLead}>
+            <span>SYSTEM HANGAR / 06 ASSEMBLIES</span>
+            <h2>START WITH THE MACHINE.</h2>
+            <p>Move outward from the customer’s object into the surfaces, controls and routes that operate around it.</p>
+          </div>
+          <div className={styles.systemIndexGrid}>
+            {atlasModules.map((module, index) => (
+              <button key={module.id} type="button" disabled={module.state !== "ACTIVE"}
+                onClick={() => { setActiveModule(module.id); setIndexOpen(false); setQuery(""); }}>
+                <small>{String(index + 1).padStart(2, "0")} / {module.state}</small>
+                <b>{module.name}</b>
+                <span>{module.detail}</span>
+                <i>{module.state === "ACTIVE" ? "OPEN →" : "QUEUED"}</i>
+              </button>
+            ))}
+          </div>
+        </section>
+      )}
+
+      <nav className={styles.moduleRail} aria-label="Technical Atlas modules">
         {atlasModules.map((module) => (
           <button
             key={module.id}
@@ -346,52 +263,17 @@ export default function IXITechnicalAtlas() {
             <div className={styles.drawingPanel}>
               <div className={styles.panelHead}>
                 <div>
-                  <span>ASSEMBLY VIEW</span>
-                  <b>IXI MACHINE CARD / WORKSPACE CONFIGURATION</b>
+                  <span>LIVE TEST CELL</span>
+                  <b>IXI MACHINE CARD / MARKETPLACE PRODUCTION FAMILY</b>
                 </div>
                 <div className={styles.viewControls}>
-                  <button
-                    type="button"
-                    className={!exploded ? styles.controlActive : ""}
-                    onClick={() => setExploded(false)}
-                  >
-                    ASSEMBLED
-                  </button>
-                  <button
-                    type="button"
-                    className={exploded ? styles.controlActive : ""}
-                    onClick={() => setExploded(true)}
-                  >
-                    EXPLODED
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setZoom(Math.max(0.82, +(zoom - 0.08).toFixed(2)))
-                    }
-                    aria-label="Zoom out"
-                  >
-                    −
-                  </button>
-                  <button type="button" onClick={() => setZoom(1)}>
-                    {Math.round(zoom * 100)}%
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setZoom(Math.min(1.18, +(zoom + 0.08).toFixed(2)))
-                    }
-                    aria-label="Zoom in"
-                  >
-                    +
-                  </button>
+                  <span>PRODUCTION UI</span>
+                  <span>NO PERSISTENCE</span>
                 </div>
               </div>
-              <BlueprintCard
+              <IXIAtlasLiveTestCell
                 selected={selectedId}
                 onSelect={setSelectedId}
-                exploded={exploded}
-                zoom={zoom}
               />
               <div className={styles.layerBar}>
                 <span>

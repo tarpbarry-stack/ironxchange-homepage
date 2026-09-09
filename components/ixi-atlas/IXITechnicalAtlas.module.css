@@ -848,6 +848,264 @@
   color: #515b5d;
   margin-top: 8px;
 }
+.dossierView {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border: 1px solid var(--line);
+  margin-bottom: 16px;
+}
+.dossierView button {
+  min-height: 34px;
+  border: 0;
+  background: transparent;
+  color: #667174;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: var(--type-micro);
+  font-weight: 800;
+  line-height: 13px;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+}
+.dossierView button + button { border-left: 1px solid var(--line); }
+.dossierView .dossierViewActive { color: #050606; background: var(--yellow); }
+.systemIndex {
+  position: relative;
+  z-index: 40;
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 28px;
+  padding: 28px 30px 30px;
+  border-bottom: 1px solid rgba(0, 188, 231, 0.36);
+  background: linear-gradient(120deg, rgba(0, 188, 231, 0.08), transparent 34%), #070a0b;
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.58);
+}
+.systemIndexLead > span,
+.systemIndexLead p {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: var(--type-micro);
+  font-weight: 700;
+  line-height: 15px;
+  letter-spacing: 0.1em;
+}
+.systemIndexLead > span { color: var(--cyan); }
+.systemIndexLead h2 { margin: 10px 0; font-size: 27px; line-height: 28px; letter-spacing: -0.02em; }
+.systemIndexLead p { margin: 0; color: #7f8a8c; letter-spacing: 0.02em; }
+.systemIndexGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border-top: 1px solid var(--line);
+  border-left: 1px solid var(--line);
+}
+.systemIndexGrid button {
+  min-height: 116px;
+  display: grid;
+  align-content: start;
+  gap: 5px;
+  padding: 13px;
+  border: 0;
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  background: rgba(10, 13, 14, 0.8);
+  color: #d9dedd;
+  text-align: left;
+  cursor: pointer;
+}
+.systemIndexGrid button:disabled { cursor: not-allowed; opacity: 0.45; }
+.systemIndexGrid button:not(:disabled):hover { background: rgba(0, 188, 231, 0.09); box-shadow: inset 0 2px var(--cyan); }
+.systemIndexGrid small,
+.systemIndexGrid span,
+.systemIndexGrid i {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: var(--type-micro);
+  font-weight: 700;
+  line-height: 13px;
+  font-style: normal;
+}
+.systemIndexGrid small { color: var(--cyan); }
+.systemIndexGrid b { font-size: var(--type-title); line-height: 18px; text-transform: uppercase; }
+.systemIndexGrid span { color: #737e80; }
+.systemIndexGrid i { color: var(--yellow); margin-top: 3px; }
+
+.testCell {
+  min-height: 660px;
+  position: relative;
+  overflow: hidden;
+  background: radial-gradient(circle at 38% 42%, rgba(0, 188, 231, 0.055), transparent 32%), linear-gradient(rgba(0, 188, 231, 0.034) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 188, 231, 0.034) 1px, transparent 1px);
+  background-size: auto, 24px 24px, 24px 24px;
+}
+.testCell::after {
+  content: "";
+  position: absolute;
+  inset: 50px 15px 18px;
+  border: 1px solid rgba(0, 188, 231, 0.09);
+  pointer-events: none;
+}
+.testCellTopline {
+  position: relative;
+  z-index: 8;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 7px 15px;
+  border-bottom: 1px solid var(--line);
+  background: rgba(5, 7, 8, 0.86);
+}
+.modeSwitch { display: flex; }
+.modeSwitch button {
+  min-height: 32px;
+  padding: 0 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-right: 0;
+  background: #080a0b;
+  color: #6f797b;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: var(--type-micro);
+  font-weight: 800;
+  line-height: 13px;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+}
+.modeSwitch button:last-child { border-right: 1px solid rgba(255, 255, 255, 0.1); }
+.modeSwitch .modeActive { color: #070909; border-color: var(--yellow); background: var(--yellow); }
+.safetySeal {
+  color: #70c78a;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: var(--type-micro);
+  font-weight: 750;
+  line-height: 13px;
+  letter-spacing: 0.08em;
+}
+.testCellStage {
+  min-height: 560px;
+  display: grid;
+  grid-template-columns: minmax(520px, 1fr) 292px;
+  align-items: center;
+  gap: 12px;
+  padding: 26px 24px 12px;
+  position: relative;
+  z-index: 3;
+}
+.stageCoordinate {
+  position: absolute;
+  left: 28px;
+  top: 14px;
+  color: #3f4c4f;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: var(--type-micro);
+  font-weight: 700;
+  line-height: 13px;
+  letter-spacing: 0.12em;
+}
+.liveSpecimen { width: 520px; height: 500px; margin: 0 auto; position: relative; }
+.productionCard {
+  position: absolute;
+  width: 300px;
+  height: 400px;
+  left: 110px;
+  top: 49px;
+  filter: drop-shadow(0 26px 34px rgba(0, 0, 0, 0.72));
+  z-index: 3;
+}
+.productionCard::before {
+  content: "PRODUCTION";
+  position: absolute;
+  left: -1px;
+  top: -25px;
+  color: var(--yellow);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: var(--type-micro);
+  font-weight: 800;
+  line-height: 13px;
+  letter-spacing: 0.12em;
+}
+.liveCallout {
+  position: absolute;
+  z-index: 6;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  border: 0;
+  background: rgba(7, 9, 10, 0.82);
+  color: #849093;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: var(--type-micro);
+  font-weight: 800;
+  line-height: 13px;
+  letter-spacing: 0.07em;
+  padding: 3px 5px;
+  cursor: pointer;
+}
+.liveCallout::after { content: ""; position: absolute; top: 50%; width: 60px; border-top: 1px dashed #435154; }
+.liveCallout i { width: 27px; height: 23px; display: grid; place-items: center; border: 1px solid rgba(0, 188, 231, 0.42); color: var(--cyan); font-style: normal; }
+.activeLiveCallout { color: #fff; }
+.activeLiveCallout i { background: var(--yellow); border-color: var(--yellow); color: #050606; }
+.liveCalloutIdentity { top: 30px; right: 2px; }
+.liveCalloutIdentity::after,
+.liveCalloutToolbar::after,
+.liveCalloutRail::after { right: 100%; }
+.liveCalloutFamily { top: 82px; left: 0; }
+.liveCalloutFace { top: 185px; left: 0; }
+.liveCalloutFaces { top: 330px; left: 0; }
+.liveCalloutConsole { top: 440px; left: 0; }
+.liveCalloutFamily::after,
+.liveCalloutFace::after,
+.liveCalloutFaces::after,
+.liveCalloutConsole::after { left: 100%; }
+.liveCalloutToolbar { top: 345px; right: 0; }
+.liveCalloutRail { top: 425px; right: 0; }
+.pulsePanel {
+  min-height: 500px;
+  border: 1px solid rgba(0, 188, 231, 0.2);
+  background: rgba(6, 9, 10, 0.92);
+  box-shadow: inset 3px 0 rgba(0, 188, 231, 0.08);
+  padding: 14px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.pulseLive { border-color: rgba(243, 196, 0, 0.48); box-shadow: inset 3px 0 var(--yellow), 0 0 28px rgba(243, 196, 0, 0.06); }
+.pulseHead { display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 12px; border-bottom: 1px solid var(--line); }
+.pulseHead > div { display: grid; gap: 4px; }
+.pulseHead span,
+.pulseHead b,
+.pulseHead i,
+.pulsePanel > p,
+.fixtureState dt,
+.fixtureState dd,
+.eventStream span,
+.eventStream b,
+.eventStream code,
+.eventStream small,
+.resetCell { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: var(--type-micro); line-height: 13px; }
+.pulseHead span { color: var(--yellow); font-weight: 800; letter-spacing: 0.1em; }
+.pulseHead b { color: #d5dbda; font-weight: 750; }
+.pulseHead i { color: #70c78a; font-style: normal; font-weight: 850; }
+.pulsePanel > p { min-height: 44px; color: #7f8a8c; line-height: 15px; }
+.fixtureState { margin: 0 0 12px; border-top: 1px solid var(--line); }
+.fixtureState > div { display: flex; justify-content: space-between; gap: 10px; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,.05); }
+.fixtureState dt { color: #596568; font-weight: 700; }
+.fixtureState dd { margin: 0; color: #c5cccb; font-weight: 750; text-align: right; }
+.eventStream { min-height: 190px; display: grid; align-content: start; }
+.eventStream > div { display: grid; grid-template-columns: 48px 67px 1fr; gap: 5px; padding: 7px 0; border-bottom: 1px solid rgba(255,255,255,.05); }
+.eventStream span { color: #526063; }
+.eventStream b { color: var(--cyan); font-weight: 750; }
+.eventStream code { color: #bdc5c5; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.eventStream small { grid-column: 2 / -1; color: #596467; }
+.resetCell { width: 100%; min-height: 32px; border: 1px solid var(--line); background: transparent; color: #7d888a; font-weight: 800; letter-spacing: 0.09em; cursor: pointer; }
+.resetCell:hover { color: var(--yellow); border-color: rgba(243,196,0,.38); }
+.nativeDimension {
+  height: 34px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 0 24px;
+  color: #465356;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: var(--type-micro);
+  font-weight: 700;
+  line-height: 13px;
+  letter-spacing: 0.08em;
+}
+.nativeDimension i { width: 300px; border-top: 1px solid #354144; }
 .componentIndex,
 .systemFlow,
 .nextModules {
@@ -1418,6 +1676,10 @@
   .chassisDrawing {
     transform: translateX(-50%) scale(0.82);
   }
+  .systemIndex { grid-template-columns: 1fr; }
+  .testCellStage { grid-template-columns: 1fr; }
+  .pulsePanel { min-height: 0; }
+  .testCell { min-height: 990px; }
 }
 @media (max-width: 700px) {
   .topbar {
@@ -1444,6 +1706,8 @@
     height: 162px;
     border-bottom: 1px solid var(--line);
   }
+  .systemIndex { padding: 20px 14px; }
+  .systemIndexGrid { grid-template-columns: 1fr 1fr; }
   .chassisViewport {
     height: 540px;
   }
@@ -1501,6 +1765,11 @@
   .blueprintViewport {
     height: 535px;
   }
+  .testCellTopline { align-items: stretch; flex-direction: column; gap: 8px; }
+  .safetySeal { padding: 2px 0; }
+  .testCellStage { padding: 24px 8px 12px; }
+  .liveSpecimen { transform: scale(.82); margin: -35px auto; }
+  .nativeDimension { display: none; }
   .blueprintScale {
     transform: scale(0.73) !important;
     top: -55px;
@@ -1568,4 +1837,7 @@
   .dossier ul {
     grid-template-columns: 1fr;
   }
+  .systemIndexGrid { grid-template-columns: 1fr; }
+  .liveSpecimen { transform: scale(.69); margin: -70px -68px; }
+  .testCell { min-height: 900px; }
 }
