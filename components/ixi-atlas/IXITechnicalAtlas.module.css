@@ -2356,6 +2356,166 @@
 .railInspectorList b { color: var(--cyan); }
 .railInspectorList span { color: #a4acad; }
 
+.consoleDrilldown {
+  min-width: 0;
+  height: 602px;
+  display: grid;
+  grid-template-rows: auto auto minmax(340px, 1fr) auto;
+  border-right: 1px solid var(--line);
+  background:
+    radial-gradient(circle at 50% 44%, rgba(0, 188, 231, .075), transparent 40%),
+    linear-gradient(rgba(0, 188, 231, .025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 188, 231, .025) 1px, transparent 1px);
+  background-size: auto, 24px 24px, 24px 24px;
+  overflow: hidden;
+}
+.consoleDrillHeader {
+  min-height: 50px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  padding: 7px 12px;
+  border-bottom: 1px solid var(--line);
+  background: rgba(8, 11, 12, .94);
+}
+.consoleDrillHeader .drillBack {
+  min-height: 32px;
+  padding: 0 10px;
+  border: 1px solid rgba(0, 188, 231, .32);
+  background: rgba(0, 188, 231, .06);
+  color: var(--cyan);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: var(--type-micro);
+  font-weight: 800;
+  cursor: pointer;
+}
+.consoleDrillHeader .drillBack:hover,
+.consoleDrillHeader .drillBack:focus-visible { background: rgba(0, 188, 231, .16); outline: none; }
+.consoleDrillHeader > div:nth-child(2) { min-width: 0; display: grid; gap: 2px; }
+.consoleDrillHeader span,
+.consoleDrillHeader b {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: var(--type-micro);
+  line-height: 13px;
+  letter-spacing: .08em;
+}
+.consoleDrillHeader span { color: #6f7b7d; }
+.consoleDrillHeader > div:nth-child(2) b { color: var(--yellow); }
+.consoleTelemetry {
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  padding: 5px 12px;
+  border-bottom: 1px solid var(--line);
+  background: rgba(5, 7, 8, .78);
+  overflow-x: auto;
+}
+.consoleTelemetry span,
+.consoleTelemetry i {
+  min-width: max-content;
+  padding: 0 10px;
+  border-right: 1px solid rgba(255, 255, 255, .08);
+  color: #6f7a7c;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: var(--type-micro);
+  font-weight: 750;
+  line-height: 26px;
+  font-style: normal;
+}
+.consoleTelemetry span:first-child { padding-left: 0; }
+.consoleTelemetry span b { color: #e9eceb; }
+.consoleTelemetry i { margin-left: auto; border-right: 0; color: #70c78a; }
+.consoleDrillStage {
+  min-width: 0;
+  min-height: 340px;
+  display: grid;
+  grid-template-rows: auto minmax(300px, 1fr) auto;
+  overflow: hidden;
+}
+.consoleDrillGuide {
+  min-height: 28px;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 14px;
+  padding: 0 14px;
+  color: #687477;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: var(--type-micro);
+  font-weight: 800;
+  letter-spacing: .07em;
+}
+.consoleDrillGuide b { color: var(--yellow); text-align: center; }
+.consoleDrillGuide span:last-child { text-align: right; }
+.consoleDrillViewport {
+  min-width: 0;
+  min-height: 300px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-color: var(--cyan) #111719;
+  scrollbar-width: thin;
+  overscroll-behavior-x: contain;
+}
+.consoleDrillViewport::-webkit-scrollbar { height: 8px; }
+.consoleDrillViewport::-webkit-scrollbar-track { background: #111719; }
+.consoleDrillViewport::-webkit-scrollbar-thumb { background: #236071; border: 2px solid #111719; }
+.consoleDrillMount {
+  box-sizing: border-box;
+  width: max-content;
+  min-width: 100%;
+  min-height: 300px;
+  display: grid;
+  place-items: center;
+  padding: 14px 52px;
+}
+.consoleDrillHint {
+  min-height: 28px;
+  display: grid;
+  place-items: center;
+  padding: 4px 10px;
+  border-top: 1px solid rgba(255, 255, 255, .06);
+  color: #758083;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: var(--type-micro);
+  font-weight: 750;
+  line-height: 14px;
+  text-align: center;
+}
+.consoleFunctionGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1px;
+  padding: 1px;
+  border-top: 1px solid var(--line);
+  background: rgba(255, 255, 255, .07);
+}
+.consoleFunctionGrid > div {
+  min-width: 0;
+  min-height: 76px;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: auto 1fr;
+  gap: 4px 8px;
+  padding: 10px 12px;
+  background: #090c0d;
+}
+.consoleFunctionGrid b { grid-row: 1 / span 2; color: var(--yellow); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 16px; line-height: 18px; }
+.consoleFunctionGrid span { color: #eef1f0; font-size: 11px; font-weight: 850; line-height: 14px; }
+.consoleFunctionGrid p { margin: 0; color: #7e898b; font-size: 10px; line-height: 13px; }
+.consoleInspector { padding: 14px 16px 18px; }
+.consoleInspector h2 { margin: 0; font-size: 24px; line-height: 26px; }
+.consoleInspector section { padding: 11px 0; border-top: 1px solid rgba(255, 255, 255, .07); }
+.consoleInspector h3,
+.consoleInspector section p {
+  margin: 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: var(--type-micro);
+  line-height: 15px;
+}
+.consoleInspector h3 { margin-bottom: 5px; color: var(--yellow); letter-spacing: .09em; }
+.consoleInspector section p { color: #9ba4a5; }
+
 @media (max-width: 1180px) {
   .workbenchBody { grid-template-columns: minmax(0, 1fr) clamp(250px, 27vw, 300px); }
   .benchControls { grid-template-columns: 1fr auto; }
@@ -2368,6 +2528,8 @@
   .railDrilldown { height: 634px; }
   .railFunctionGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .railFunctionGrid button { min-height: 106px; }
+  .consoleDrilldown { height: 634px; }
+  .consoleFunctionGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 760px) {
   .workbenchBody { grid-template-columns: minmax(0, 1fr) 240px; }
@@ -2380,6 +2542,9 @@
   .railLabels { width: min(465px, 96%); }
   .railDrillHeader i { display: none; }
   .railDrillHeader { grid-template-columns: auto 1fr; }
+  .consoleDrillHeader { grid-template-columns: auto 1fr; }
+  .consoleDrillHeader .gearbox { grid-column: 1 / -1; justify-self: end; }
+  .consoleDrillMount { padding-right: 18px; padding-left: 18px; }
 }
 @media (max-width: 620px) {
   .workbenchHeader { align-items: flex-start; flex-direction: column; }
@@ -2393,4 +2558,6 @@
   .railDrilldown { height: 620px; border-right: 0; border-bottom: 1px solid var(--line); }
   .railTelemetry span:first-child { display: none; }
   .railFunctionGrid { grid-template-columns: 1fr 1fr; }
+  .consoleDrilldown { height: 620px; border-right: 0; border-bottom: 1px solid var(--line); }
+  .consoleTelemetry span:first-child { display: none; }
 }

@@ -1,6 +1,14 @@
 import { useCallback, useMemo, useState } from "react";
 import IXIBrowseObjectConsoleRouter from "../ixi-marketplace/IXIBrowseObjectConsoleRouter";
 import IXIMachineCard from "../ixi-machine-card/IXIMachineCard";
+import {
+  IXI_CONSOLE_SLOT_TYPES,
+  createConsoleSlot,
+  createConsoleSlotsPatch,
+  insertConsoleSlot,
+  normalizeConsoleSlots,
+} from "../ixi-chassis/IXIObjectConsoleEngine";
+import IXIAtlasConsoleDrilldown, { IXIAtlasConsoleInspector } from "./IXIAtlasConsoleDrilldown";
 import IXIAtlasMachineRailDrilldown, { IXIAtlasMachineRailInspector } from "./IXIAtlasMachineRailDrilldown";
 import styles from "./IXITechnicalAtlas.module.css";
 
@@ -203,6 +211,24 @@ export default function IXIAtlasLiveTestCell({ selected, onSelect, part }) {
     record("ENVIRONMENT", "destination.armed", next ? "TOP ACTIVE STACK" : "OFF");
   }, [railDestinationArmed, record]);
 
+  const openConsoleDrilldown = useCallback(() => {
+    const savedSlots = Array.isArray(cardState.consoleSlots) && cardState.consoleSlots.length
+      ? normalizeConsoleSlots(cardState.consoleSlots)
+      : [createConsoleSlot({ type: IXI_CONSOLE_SLOT_TYPES.LISTING })];
+    let nextSlots = savedSlots;
+    if (nextSlots.length < 2) {
+      nextSlots = insertConsoleSlot({ slots: nextSlots, side: "left", face: 2 });
+    }
+    if (nextSlots.length < 3) {
+      nextSlots = insertConsoleSlot({ slots: nextSlots, side: "right", face: 3 });
+    }
+    if (nextSlots.length !== savedSlots.length) {
+      updateCardState(MACHINE_ID, createConsoleSlotsPatch(nextSlots));
+    }
+    setBayTab("OBJECT");
+    onSelect("console");
+  }, [cardState.consoleSlots, onSelect, updateCardState]);
+
   const resetFixture = useCallback(() => {
     setMachineFace(1);
     setGear(3);
@@ -253,6 +279,19 @@ export default function IXIAtlasLiveTestCell({ selected, onSelect, part }) {
             onCycleFace={cycleFace}
             onDistribution={distributePassport}
             onArmedDelivery={deliverToArmedDestination}
+          />
+        ) : selected === "console" ? (
+          <IXIAtlasConsoleDrilldown
+            objectId={MACHINE_ID}
+            item={FIXTURE}
+            ixiCardState={ixiCardState}
+            updateIxiCardState={updateCardState}
+            renderParentCard={renderCard}
+            cardScaleMode={GEAR_TO_SCALE_MODE[gear]}
+            gear={gear}
+            onShiftGear={shiftGear}
+            consoleDepth={consoleDepth}
+            onBack={() => onSelect("object")}
           />
         ) : (
         <div className={styles.machineBench}>
@@ -306,7 +345,7 @@ export default function IXIAtlasLiveTestCell({ selected, onSelect, part }) {
               {mode === "INSPECT" && consoleDepth === 1 && CALLOUTS.map(([id, index, label, className]) => (
                 <button type="button" key={id}
                   className={`${styles.liveCallout} ${styles[className]} ${selected === id ? styles.activeLiveCallout : ""}`}
-                  onClick={() => onSelect(id)} aria-pressed={selected === id}>
+                  onClick={() => id === "console" ? openConsoleDrilldown() : onSelect(id)} aria-pressed={selected === id}>
                   <i>{index}</i><span>{label}</span>
                 </button>
               ))}
@@ -330,6 +369,8 @@ export default function IXIAtlasLiveTestCell({ selected, onSelect, part }) {
             {bayTab === "OBJECT" ? (
               selected === "rail" ? (
                 <IXIAtlasMachineRailInspector detail={detail} onDetailChange={setDetail} />
+              ) : selected === "console" ? (
+                <IXIAtlasConsoleInspector detail={detail} onDetailChange={setDetail} />
               ) : (
                 <FieldInspector part={part} detail={detail} onDetailChange={setDetail} />
               )

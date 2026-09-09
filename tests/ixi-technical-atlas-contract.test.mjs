@@ -142,6 +142,30 @@ test("Machine Rail callout opens an interactive production drill-down", () => {
   assert.doesNotMatch(drilldown, /fetch\s*\(/);
 });
 
+test("Console callout opens a scaled production console drill-down", () => {
+  const testCell = fs.readFileSync(
+    new URL("../components/ixi-atlas/IXIAtlasLiveTestCell.jsx", import.meta.url),
+    "utf8",
+  );
+  const drilldown = fs.readFileSync(
+    new URL("../components/ixi-atlas/IXIAtlasConsoleDrilldown.jsx", import.meta.url),
+    "utf8",
+  );
+
+  assert.match(testCell, /openConsoleDrilldown/);
+  assert.match(testCell, /createConsoleSlotsPatch/);
+  assert.match(testCell, /selected === "console"/);
+  assert.match(drilldown, /IXIBrowseObjectConsoleRouter/);
+  assert.match(drilldown, /enableCardScaling/);
+  assert.match(drilldown, /BACK TO MACHINE CARD/);
+  assert.match(drilldown, /5 PANELS/);
+  assert.match(drilldown, /PROTECTED PRIMARY/);
+  assert.match(drilldown, /STABLE SLOTS/);
+  assert.match(drilldown, /FACE CYCLE/);
+  assert.match(drilldown, /SCALE AS ONE/);
+  assert.doesNotMatch(drilldown, /fetch\s*\(/);
+});
+
 test("the System Index is an accessible assembly navigator", () => {
   const atlas = fs.readFileSync(
     new URL("../components/ixi-atlas/IXITechnicalAtlas.jsx", import.meta.url),
