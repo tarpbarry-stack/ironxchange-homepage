@@ -252,6 +252,33 @@ test("Machine Faces opens the four real Marketplace faces", () => {
   assert.doesNotMatch(drilldown, /fetch\s*\(/);
 });
 
+test("IXI Passport proves one identity across four commercial envelopes", () => {
+  const testCell = fs.readFileSync(
+    new URL("../components/ixi-atlas/IXIAtlasLiveTestCell.jsx", import.meta.url),
+    "utf8",
+  );
+  const drilldown = fs.readFileSync(
+    new URL("../components/ixi-atlas/IXIAtlasPassportDrilldown.jsx", import.meta.url),
+    "utf8",
+  );
+  const passport = getAtlasPart("identity");
+
+  assert.match(testCell, /selected === "identity"/);
+  assert.match(testCell, /IXIAtlasPassportDrilldown/);
+  assert.match(testCell, /passportEnvelope/);
+  assert.match(drilldown, /ONE OBJECT ↔ ONE PASSPORT/);
+  assert.match(drilldown, /MARKETPLACE/);
+  assert.match(drilldown, /AUCTION/);
+  assert.match(drilldown, /PRIVATE/);
+  assert.match(drilldown, /URL WORK/);
+  assert.match(drilldown, /NON-OWNED/);
+  assert.match(drilldown, /Resolve before admission/);
+  assert.match(drilldown, /No ownership implied/);
+  assert.match(drilldown, /THE PASSPORT NUMBER NEVER CHANGES/);
+  assert.match(passport.specs.join(" "), /One Object ↔ One Passport/);
+  assert.doesNotMatch(drilldown, /fetch\s*\(/);
+});
+
 test("the System Index is an accessible assembly navigator", () => {
   const atlas = fs.readFileSync(
     new URL("../components/ixi-atlas/IXITechnicalAtlas.jsx", import.meta.url),

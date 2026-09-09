@@ -12,6 +12,7 @@ import IXIAtlasConsoleDrilldown, { IXIAtlasConsoleInspector } from "./IXIAtlasCo
 import IXIAtlasFacesDrilldown, { IXIAtlasFacesInspector } from "./IXIAtlasFacesDrilldown";
 import IXIAtlasGearboxDrilldown, { IXIAtlasGearboxInspector } from "./IXIAtlasGearboxDrilldown";
 import IXIAtlasMachineRailDrilldown, { IXIAtlasMachineRailInspector } from "./IXIAtlasMachineRailDrilldown";
+import IXIAtlasPassportDrilldown, { IXIAtlasPassportInspector } from "./IXIAtlasPassportDrilldown";
 import styles from "./IXITechnicalAtlas.module.css";
 
 const MACHINE_ID = "IXI-ATLAS-WA475";
@@ -227,6 +228,7 @@ export default function IXIAtlasLiveTestCell({ selected, onSelect, part }) {
   const [bayTab, setBayTab] = useState("OBJECT");
   const [detail, setDetail] = useState("FIELD");
   const [machineFace, setMachineFace] = useState(1);
+  const [passportEnvelope, setPassportEnvelope] = useState("marketplace");
   const [gear, setGear] = useState(3);
   const [railDestinationArmed, setRailDestinationArmed] = useState(false);
   const [cardState, setCardState] = useState({ color: "none", outline: 1 });
@@ -277,6 +279,11 @@ export default function IXIAtlasLiveTestCell({ selected, onSelect, part }) {
   const selectFace = useCallback((face) => {
     setMachineFace(face);
     record("RAIL / 04", "face.changed", `FACE ${String(face).padStart(2, "0")}`);
+  }, [record]);
+
+  const selectPassportEnvelope = useCallback((envelope) => {
+    setPassportEnvelope(envelope);
+    record("PASSPORT", "envelope.changed", envelope.toUpperCase());
   }, [record]);
 
   const cycleFace = useCallback(() => selectFace(machineFace === 4 ? 1 : machineFace + 1), [machineFace, selectFace]);
@@ -330,6 +337,7 @@ export default function IXIAtlasLiveTestCell({ selected, onSelect, part }) {
 
   const resetFixture = useCallback(() => {
     setMachineFace(1);
+    setPassportEnvelope("marketplace");
     setGear(3);
     setRailDestinationArmed(false);
     setCardState({ color: "none", outline: 1 });
@@ -414,6 +422,15 @@ export default function IXIAtlasLiveTestCell({ selected, onSelect, part }) {
             onShiftGear={shiftGear}
             machineFace={machineFace}
             onSelectFace={selectFace}
+            mode={mode}
+            onModeChange={setMode}
+            onBack={() => onSelect("object")}
+          />
+        ) : selected === "identity" ? (
+          <IXIAtlasPassportDrilldown
+            item={FIXTURE}
+            envelope={passportEnvelope}
+            onSelectEnvelope={selectPassportEnvelope}
             mode={mode}
             onModeChange={setMode}
             onBack={() => onSelect("object")}
@@ -521,6 +538,8 @@ export default function IXIAtlasLiveTestCell({ selected, onSelect, part }) {
                 <IXIAtlasGearboxInspector detail={detail} onDetailChange={setDetail} />
               ) : selected === "faces" ? (
                 <IXIAtlasFacesInspector machineFace={machineFace} detail={detail} onDetailChange={setDetail} />
+              ) : selected === "identity" ? (
+                <IXIAtlasPassportInspector envelope={passportEnvelope} detail={detail} onDetailChange={setDetail} />
               ) : (
                 <FieldInspector part={part} detail={detail} onDetailChange={setDetail} />
               )
