@@ -4,6 +4,7 @@ import {
 
 import {
   requestIxCoreMos,
+  resolveExistingIxCoreAosEnvironment,
   resolveExistingIxCoreAosContext,
   resolveIxCoreAosContext
 } from "../../../../lib/server/aos/ixiMosInternalClient";
@@ -289,6 +290,7 @@ function sendError(res, error) {
 }
 
 export default async function handler(req, res) {
+  const requestStartedAt = Date.now();
   res.setHeader("Cache-Control", "no-store");
 
   const method =
@@ -341,7 +343,7 @@ export default async function handler(req, res) {
 
     const context =
       path === "/aos/environment"
-        ? await resolveIxCoreAosContext({
+        ? await resolveExistingIxCoreAosEnvironment({
             session
           })
         : await resolveCommandContext(
@@ -349,6 +351,16 @@ export default async function handler(req, res) {
           );
 
     if (path === "/aos/environment") {
+      const durationMs = Date.now() - requestStartedAt;
+      res.setHeader(
+        "Server-Timing",
+        `ixi-aos-environment;dur=${durationMs}`
+      );
+      console.info("IXI AOS ENVIRONMENT READY", {
+        durationMs,
+        resolutionMode:
+          context?.resolutionMode || "governed-onboarding"
+      });
       return res.status(200).json(
         context.response
       );

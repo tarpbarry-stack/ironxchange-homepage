@@ -246,6 +246,7 @@ test("AOS startup skips the public Marketplace census and loads governed reads c
   assert.match(environment, /includePublicListings:\s*false/u);
   assert.match(environment, /hydrateMedia:\s*false/u);
   assert.match(environment, /Promise\.all\(\[\s*ownedListingsRequest,\s*environmentRequest/u);
+  assert.match(environment, /Promise\.all\(\[\s*definitionsRequest,\s*admissionRequest/u);
   assert.match(listings, /includePublicListings = true/u);
   assert.match(listings, /includePublicListings\s*\?\s*loadPublicListingCollection/u);
 });
