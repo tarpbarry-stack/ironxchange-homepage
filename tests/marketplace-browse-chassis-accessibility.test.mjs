@@ -113,6 +113,23 @@ test("chassis hit targets are 24px while visual rail marks retain their dimensio
   assert.match(chassis, /\.active-stack-zone\s*\{\s*gap:\s*16px;/u);
 });
 
+test("pocket states never paint the enlarged hit surfaces", () => {
+  const chassis = read("components/ixi-chassis/IXIChassis.js");
+
+  assert.match(
+    chassis,
+    /\.ixi-pocket-left\.destination-armed[\s\S]*?button\.ixi-pocket-rail-action[\s\S]*?background:\s*transparent !important;[\s\S]*?box-shadow:\s*none !important;/u
+  );
+  assert.match(
+    chassis,
+    /\.ixi-pocket-action-rail button\.ixi-pocket-rail-action:hover/u
+  );
+  assert.match(
+    chassis,
+    /\.ixi-pocket-left\.destination-armed \.ixi-pocket-rail-action::before[\s\S]*?background:\s*rgba\(0,194,255,\.38\);/u
+  );
+});
+
 test("no active chassis stylesheet retains the invalid unitless margin", () => {
   const paths = [
     "components/ixi-chassis/IXIChassis.js",

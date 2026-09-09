@@ -155,6 +155,21 @@ export default function IXIChassis({ children }) {
           cursor: pointer;
         }
 
+        /* State colors belong to the thin ::before mark, never the hit surface. */
+        .ixi-command-chassis .ixi-pocket-action-rail.is-empty button.ixi-pocket-rail-action,
+        .ixi-command-chassis .ixi-pocket-action-rail.has-machines.pocket-mode-closed button.ixi-pocket-rail-action,
+        .ixi-command-chassis .ixi-pocket-action-rail.has-machines.pocket-mode-peek button.ixi-pocket-rail-action,
+        .ixi-command-chassis .ixi-pocket-action-rail.has-machines.pocket-mode-open button.ixi-pocket-rail-action,
+        .ixi-command-chassis .ixi-pocket-action-rail button.ixi-pocket-rail-action:hover,
+        .ixi-command-chassis .ixi-pocket-left.destination-armed .ixi-pocket-action-rail button.ixi-pocket-rail-action,
+        .ixi-command-chassis .ixi-pocket-right.destination-armed .ixi-pocket-action-rail button.ixi-pocket-rail-action {
+          appearance: none;
+          -webkit-appearance: none;
+          background: transparent !important;
+          background-image: none !important;
+          box-shadow: none !important;
+        }
+
         .ixi-pocket-action-rail .ixi-pocket-rail-action::before {
           content: "";
           position: absolute;
