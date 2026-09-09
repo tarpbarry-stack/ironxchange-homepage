@@ -232,3 +232,19 @@ test("AOS TRAN$ACT resolves the same canonical Passport shown on the card", () =
   assert.match(source, /const passportId = getCanonicalAosPassportId\(object\)/u);
   assert.doesNotMatch(source, /const passportId = clean\(object\?\.passportId\)/u);
 });
+
+test("AOS startup skips the public Marketplace census and loads governed reads concurrently", () => {
+  const environment = fs.readFileSync(
+    new URL("../lib/mos/loadIXIMosEnvironment.js", import.meta.url),
+    "utf8"
+  );
+  const listings = fs.readFileSync(
+    new URL("../lib/listings/IXIListingsEngine.js", import.meta.url),
+    "utf8"
+  );
+
+  assert.match(environment, /includePublicListings:\s*false/u);
+  assert.match(environment, /Promise\.all\(\[\s*ownedListingsRequest,\s*environmentRequest/u);
+  assert.match(listings, /includePublicListings = true/u);
+  assert.match(listings, /includePublicListings\s*\?\s*loadPublicListingCollection/u);
+});
