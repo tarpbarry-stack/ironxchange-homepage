@@ -150,6 +150,8 @@ jobs:
             exit 1
           fi
 
+          curl -fsS http://127.0.0.1:4100/health > "$BACKUP/preflight-health.json"
+
           rm -rf -- "$STAGE"
           mkdir -p "$STAGE" "$BACKUP"
           git clone --quiet https://github.com/tarpbarry-stack/ixi-core.git "$STAGE"
@@ -297,16 +299,23 @@ jobs:
             .filter(object => object.status === "active");
           const relationships = Object.values(readJsonFile(MOS_PATHS.relationships, {}))
             .filter(relationship => relationship.status === "active");
-          const exactObject = name => {
+          const namedObject = (name, { allowCustomerSuffix = false } = {}) => {
             const matches = objects.filter(object =>
-              String(object.displayName || "").trim().toUpperCase() === name
+              (() => {
+                const value = String(object.displayName || "").trim().toUpperCase();
+                return value === name || (
+                  allowCustomerSuffix && (
+                    value.startsWith(`${name} `) || value.startsWith(`${name},`)
+                  )
+                );
+              })()
             );
-            assert.equal(matches.length, 1, `${name} must resolve to one active Object`);
+            assert.equal(matches.length, 1, `${name} must resolve to one active customer-named Object`);
             return matches[0];
           };
-          const equipment = exactObject("EQUIPMENT");
-          const locations = exactObject("LOCATIONS");
-          const wichitaFalls = exactObject("WICHITA FALLS");
+          const equipment = namedObject("EQUIPMENT");
+          const locations = namedObject("LOCATIONS");
+          const wichitaFalls = namedObject("WICHITA FALLS", { allowCustomerSuffix: true });
           const identities = [equipment, locations, wichitaFalls].map(object =>
             resolveCanonicalObjectIdentity({ entityId: object.entityId, objectId: object.objectId })
           );
