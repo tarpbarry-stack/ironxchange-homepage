@@ -364,7 +364,8 @@ export function createAosWorkspaceSessionController({
   function persistLayout(nextPlacements, {
     operationId = createCommandId("aos-workspace-operation"),
     captureUndo = true,
-    objectIds = null
+    objectIds = null,
+    activeSummonedContext
   } = {}) {
     const previous = clone(placements);
     const next = clone(nextPlacements);
@@ -406,7 +407,13 @@ export function createAosWorkspaceSessionController({
                 destination.surfaceId.startsWith("container:") ||
                 destination.surfaceId === "indexEquipment"
                   ? "tucked"
-                  : "operating"
+                  : "operating",
+              ...(activeSummonedContext === undefined
+                ? {}
+                : {
+                    activeSummonedContext:
+                      clean(activeSummonedContext) || null
+                  })
             });
           } else {
             moves.push({
@@ -417,7 +424,13 @@ export function createAosWorkspaceSessionController({
                 destination.surfaceId.startsWith("container:") ||
                 destination.surfaceId === "indexEquipment"
                   ? "tucked"
-                  : "operating"
+                  : "operating",
+              ...(activeSummonedContext === undefined
+                ? {}
+                : {
+                    activeSummonedContext:
+                      clean(activeSummonedContext) || null
+                  })
             });
           }
         }
