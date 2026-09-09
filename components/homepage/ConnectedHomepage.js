@@ -3,10 +3,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-import IXIMachineCard from "../ixi-machine-card/IXIMachineCard";
-import IXIBrowseObjectConsoleRouter from "../ixi-marketplace/IXIBrowseObjectConsoleRouter";
-import ListingShareProvider from "../ixi-marketplace/ListingShareProvider";
-import { getListingId } from "../../lib/listingFormatters";
 import { captureIXEvent } from "../../lib/posthog";
 import styles from "./ConnectedHomepage.module.css";
 
@@ -58,50 +54,6 @@ function Icon({ name }) {
 }
 
 function ButtonLink({ href, children, tone = "primary" }) { return <Link className={styles[tone]} href={href}>{children}<Icon name="arrow" /></Link>; }
-
-function HomepageListingObject({ listing, consoleOpen = false, location = "benefit" }) {
-  const objectId = String(getListingId(listing) || FALLBACK_LISTING.id);
-  const openState = consoleOpen ? { consoleRightOpen: true, consoleRightFace: 2 } : {};
-  const [ixiCardState, setIxiCardState] = useState(() => ({ [objectId]: openState }));
-
-  useEffect(() => {
-    setIxiCardState(current => current[objectId] ? current : { ...current, [objectId]: openState });
-  }, [consoleOpen, objectId]);
-
-  function updateIxiCardState(id, patch) {
-    setIxiCardState(current => ({
-      ...current,
-      [id]: { ...(current[id] || {}), ...patch },
-    }));
-  }
-
-  const machineFace = Number(ixiCardState[objectId]?.machineFace || 1);
-
-  return <div className={`${styles.listingObjectViewport} ${consoleOpen ? styles.listingObjectConsole : styles.listingObjectCard}`} data-homepage-listing-location={location}>
-    <div className={styles.listingObjectNative}>
-      <IXIBrowseObjectConsoleRouter
-        objectId={objectId}
-        item={listing}
-        ixiCardState={ixiCardState}
-        updateIxiCardState={updateIxiCardState}
-        renderParentCard={consoleProps => <IXIMachineCard
-          listing={listing}
-          cardContext="marketplace"
-          from="homepage"
-          imagePriority={location === "hero"}
-          enableMarketplaceDistribution
-          showSave={false}
-          suppressFamilyLog
-          machineFace={machineFace}
-          onCycleMachineFace={() => updateIxiCardState(objectId, { machineFace: machineFace >= 4 ? 1 : machineFace + 1 })}
-          ixiState={ixiCardState[objectId]}
-          onIxiStateChange={updateIxiCardState}
-          {...consoleProps}
-        />}
-      />
-    </div>
-  </div>;
-}
 
 function HeroIxiRail({ active = 4 }) {
   return <div className={styles.heroIxiRail} aria-hidden="true">
@@ -172,7 +124,7 @@ function GatewayBay({ number, title, headline, detail, tone, icon }) {
 }
 
 function MarketplaceVisual({ listing }) {
-  return <div className={styles.marketplaceVisual}><HomepageListingObject listing={listing} consoleOpen /><div className={styles.channelSpine} aria-hidden="true" /><div className={styles.channelList}>{CHANNELS.map(([name, detail]) => <div className={styles.channel} key={name}><i /><span><b>{name}</b><small>{detail}</small></span></div>)}</div></div>;
+  return <div className={styles.marketplaceVisual}><HeroMarketplaceTableau listing={listing} /><div className={styles.channelSpine} aria-hidden="true" /><div className={styles.channelList}>{CHANNELS.map(([name, detail]) => <div className={styles.channel} key={name}><i /><span><b>{name}</b><small>{detail}</small></span></div>)}</div></div>;
 }
 
 function AosVisual() {
@@ -181,7 +133,7 @@ function AosVisual() {
 }
 
 function TransactVisual() {
-  return <div className={styles.transactVisual}><div className={styles.financeLine} aria-hidden="true" />{FINANCIAL_STAGES.map(([name, detail], index) => <div className={styles.financeStage} key={name}><span>{String(index + 1).padStart(2, "0")}</span><i>{index + 1}</i><b>{name}</b><small>{detail}</small></div>)}</div>;
+  return <div className={styles.transactVisual}><div className={styles.transactIdentity} aria-hidden="true"><span>IXI</span> TRAN<b>$</b>ACT<small>ONE PASSPORT · COMPLETE FINANCIAL CONTROL</small></div><div className={styles.financeLine} aria-hidden="true" />{FINANCIAL_STAGES.map(([name, detail], index) => <div className={styles.financeStage} key={name}><span>{String(index + 1).padStart(2, "0")}</span><i>{index + 1}</i><b>{name}</b><small>{detail}</small></div>)}</div>;
 }
 
 function BenefitSection({ number, product, headline, body, benefit, href, tone, image, children }) {
@@ -201,7 +153,7 @@ export default function ConnectedHomepage() {
     return () => controller.abort();
   }, []);
 
-  return <ListingShareProvider><div className={styles.page}>
+  return <div className={styles.page}>
     <Head><title>IronXchange — Your Machine Is the Beginning</title><meta name="description" content="One Passport connects the marketplace, the work, and the money." /><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" /><link rel="preload" as="image" href="/images/ixi-homepage-bay-gateway.webp" fetchPriority="high" /></Head>
     <header className={styles.siteHeader}><Link href="/" className={styles.brand} aria-label="IronXchange home"><Image src="/images/ironxchange-logo.png" width={1807} height={396} priority alt="IronXchange" /></Link><nav aria-label="IronXchange products">{NAV.map(([href, label]) => <Link href={href} key={label}>{label}</Link>)}</nav><div className={styles.headerActions}><Link href="/browse-v2"><Icon name="search" /><span>SEARCH</span></Link><Link href="/login">SIGN IN</Link><Link href="/post-free" className={styles.postMachine}>POST A MACHINE</Link></div></header>
     <main>
@@ -213,5 +165,5 @@ export default function ConnectedHomepage() {
       <section className={styles.finalCta}><span>THE GATEWAY TO IRONXCHANGE</span><h2>BRING YOUR FIRST MACHINE INTO IXI<span>.</span></h2><p>Start free. Build the record once. Let IXI carry it forward.</p><div><ButtonLink href="/post-free">POST A MACHINE — FREE</ButtonLink><ButtonLink href="/browse-v2" tone="secondary">BROWSE MACHINES</ButtonLink></div><small>NO LISTING FEES. NO CREDIT CARD. NO REBUILDING THE RECORD.</small></section>
     </main>
     <footer className={styles.footer}><Image src="/images/ironxchange-logo.png" width={1807} height={396} alt="IronXchange" /><nav>{[["/browse-v2", "MARKETPLACE"], ["/aos/work", "AOS"], ["/transact", "TRAN$ACT"], ["/contact", "CONTACT"], ["/terms", "TERMS"], ["/privacy", "PRIVACY"]].map(([href, label]) => <Link href={href} key={label}>{label}</Link>)}</nav><span>BUILT FOR THE PEOPLE WHO MOVE IRON.</span></footer>
-  </div></ListingShareProvider>;
+  </div>;
 }

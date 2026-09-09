@@ -16,18 +16,15 @@ test("homepage is the benefits-led Marketplace, AOS, and TRAN$ACT gateway", () =
   assert.doesNotMatch(homepage, /AUCTION/u);
 });
 
-test("one real IXI Marketplace object enters and distributes through the system", () => {
-  assert.match(homepage, /import IXIMachineCard/u);
-  assert.match(homepage, /import IXIBrowseObjectConsoleRouter/u);
-  assert.match(homepage, /import ListingShareProvider/u);
-  assert.match(homepage, /<IXIMachineCard/u);
-  assert.match(homepage, /<IXIBrowseObjectConsoleRouter/u);
-  assert.match(homepage, /enableMarketplaceDistribution/u);
-  assert.match(homepage, /consoleRightOpen: true/u);
+test("one product-faithful IXI Marketplace tableau distributes through the system", () => {
+  assert.match(homepage, /function HeroMarketplaceTableau/u);
+  assert.match(homepage, /IXI CONSOLE/u);
+  assert.match(homepage, /DISTRIBUTE/u);
   assert.match(homepage, /<MarketplaceVisual listing=\{listing\}/u);
   assert.match(homepage, /fetch\("\/api\/listings"/u);
   assert.match(homepage, /passportId/u);
-  assert.doesNotMatch(homepage, /function PassportCard/u);
+  assert.doesNotMatch(homepage, /IXIBrowseObjectConsoleRouter/u);
+  assert.doesNotMatch(homepage, /ListingShareProvider/u);
 });
 
 test("the gateway doors contain three product-faithful marketing tableaux", () => {
@@ -57,6 +54,8 @@ test("homepage provides a complete distribution, operations, and finance story",
   for (const stage of ["ACQUISITION", "WORK", "EXPENSES", "INVOICE", "SOLD", "SETTLEMENT"]) assert.match(homepage, new RegExp(stage, "u"));
   assert.match(homepage, /THE BUSINESS AROUND THE MACHINE/u);
   assert.match(homepage, /EVERY DOLLAR FOLLOWS THE MACHINE/u);
+  assert.match(homepage, /className=\{styles\.transactIdentity\}/u);
+  assert.match(homepage, /ONE PASSPORT · COMPLETE FINANCIAL CONTROL/u);
 });
 
 test("homepage preserves desktop fidelity and explicitly supports mobile", () => {
