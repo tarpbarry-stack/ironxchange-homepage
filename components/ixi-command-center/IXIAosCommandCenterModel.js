@@ -166,7 +166,7 @@ function buildMosContext(object = {}) {
 }
 
 function buildMachineContext(listing = {}) {
-  const id = getObjectId(listing);
+  const id = firstText(listing?.objectId, listing?.canonicalObjectId);
   if (!id) return null;
 
   const location = getMachineLocation(listing);
@@ -319,3 +319,72 @@ export function formatIXIMoney(value, currency = "USD") {
     maximumFractionDigits: 0
   }).format(Number(value));
 }
+
+const ATTENTION_BANDS = Object.freeze([
+  "BLOCKED",
+  "MONEY EXPOSED",
+  "WAITING",
+  "RECONCILE",
+  "CLOSE",
+  "REVIEW"
+]);
+
+function attentionText(item = {}) {
+  return [
+    item?.severity,
+    item?.status,
+    item?.state,
+    item?.type,
+    item?.title,
+    item?.detail,
+    item?.description,
+    item?.message
+  ].map(clean).join(" ").toUpperCase();
+}
+
+export function getIXITransactAttentionBand(item = {}) {
+  const text = attentionText(item);
+
+  if (/BLOCK|FAIL|DENY|CONFLICT|MISSING AUTH|IDENTITY|REVISION/.test(text)) {
+    return "BLOCKED";
+  }
+  if (/OVERDUE|PAST DUE|EXPOS|DUPLICATE|UNAPPROVED|UNSETTLED|CASH RISK/.test(text)) {
+    return "MONEY EXPOSED";
+  }
+  if (/RECONCIL|UNMATCH|BANK FEED|STATEMENT|VARIANCE/.test(text)) {
+    return "RECONCILE";
+  }
+  if (/CLOSE|UNPOSTED|JOURNAL|PERIOD|TASK/.test(text)) {
+    return "CLOSE";
+  }
+  if (/WAIT|PENDING|APPROVAL|RECEIPT|DOCUMENT|RESPONSE|DELIVERY/.test(text)) {
+    return "WAITING";
+  }
+  return "REVIEW";
+}
+
+export function groupIXITransactAttention(items = []) {
+  const groups = Object.fromEntries(ATTENTION_BANDS.map(band => [band, []]));
+
+  safeArray(items).forEach((item, index) => {
+    const band = getIXITransactAttentionBand(item);
+    groups[band].push({
+      ...item,
+      attentionBand: band,
+      attentionKey: firstText(item?.alertId, item?.id, `attention-${index}`)
+    });
+  });
+
+  return groups;
+}
+
+export function getIXITransactControlCounts(items = []) {
+  const groups = groupIXITransactAttention(items);
+
+  return ATTENTION_BANDS.reduce((counts, band) => {
+    counts[band] = groups[band].length;
+    return counts;
+  }, {});
+}
+
+export { ATTENTION_BANDS as IXI_TRANSACT_ATTENTION_BANDS };
