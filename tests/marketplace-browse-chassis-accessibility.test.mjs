@@ -113,6 +113,27 @@ test("chassis hit targets are 24px while visual rail marks retain their dimensio
   assert.match(chassis, /\.active-stack-zone\s*\{\s*gap:\s*16px;/u);
 });
 
+test("stacked tablet pockets keep top-edge actions inside the chassis hit boundary", () => {
+  const chassis = read("components/ixi-chassis/IXIChassis.js");
+  const tabletRules = chassis.match(
+    /@media \(max-width: 1254px\) and \(min-width: 851px\) \{[\s\S]*?\n        \}/u
+  )?.[0] || "";
+
+  assert.match(tabletRules, /\.ixi-command-left,[\s\S]*?top:\s*-5px;/u);
+  assert.match(
+    tabletRules,
+    /\.ixi-command-chassis \.ixi-pocket-action-rail \.ixi-pocket-rail-action\s*\{\s*top:\s*0;/u
+  );
+  assert.match(
+    tabletRules,
+    /\.ixi-pocket-rail-action::before[\s\S]*?translateY\(-10px\)/u
+  );
+  assert.match(
+    tabletRules,
+    /\.ixi-pocket-rail-action::after[\s\S]*?translate\(-50%, -10px\)/u
+  );
+});
+
 test("pocket states never paint the enlarged hit surfaces", () => {
   const chassis = read("components/ixi-chassis/IXIChassis.js");
 

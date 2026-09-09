@@ -127,6 +127,24 @@ export default function IXIChassis({ children }) {
             grid-column: 1;
             grid-row: 2;
           }
+
+          /* The stacked stations begin five pixels above the chassis. Keep the
+             24px action targets inside its hit-test boundary while leaving the
+             four-pixel marks and their hover labels at the approved position. */
+          .ixi-command-chassis .ixi-pocket-action-rail .ixi-pocket-rail-action {
+            top: 0;
+          }
+
+          .ixi-command-chassis .ixi-pocket-action-rail .ixi-pocket-rail-action::before {
+            transform:
+              translate(-50%, -50%)
+              translateY(-10px)
+              translateX(var(--ixi-pocket-mark-shift, 0));
+          }
+
+          .ixi-command-chassis .ixi-pocket-action-rail .ixi-pocket-rail-action::after {
+            transform: translate(-50%, -10px);
+          }
         }
 
         /* Keep the four-pixel marks, with 24px pointer/focus targets. */
