@@ -38,6 +38,7 @@ test("TODAY classifies financial work into explicit operating bands", () => {
 
 test("desktop remains an authenticated read surface over governed financial contracts", () => {
   const source = read("components/ixi-command-center/IXITransactCommandCenter.jsx");
+  const environmentSource = read("lib/mos/loadIXIMosEnvironment.js");
 
   assert.match(source, /loadIXIMosEnvironment/u);
   assert.match(source, /loadIXIFinancialAccessContext/u);
@@ -47,7 +48,16 @@ test("desktop remains an authenticated read surface over governed financial cont
   assert.match(source, /No financial values have been fabricated/u);
   assert.match(source, /Queue completion never substitutes/u);
   assert.match(source, /accessResult\.error\?\.status === 401/u);
-  assert.match(source, /setEnvironment\(aosResult\);[\s\S]*setLoading\(false\);[\s\S]*await accessRequest/u);
+  assert.match(source, /onAuthenticatedEnvironment: authenticatedEnvironment/u);
+  assert.match(source, /setEnvironment\(authenticatedEnvironment\);[\s\S]*setLoading\(false\);[\s\S]*setContextLoading\(true\)/u);
+  assert.match(source, /setEnvironment\(aosResult\);[\s\S]*setContextLoading\(false\);[\s\S]*await accessRequest/u);
+  assert.match(source, /COMPANY CONNECTED/u);
+  assert.match(source, /Only IX-Core-admitted Objects and permanent Passports will appear/u);
+  assert.match(source, /canonicalAdmissionBatchSize: 32/u);
+  assert.match(environmentSource, /Math\.min\(32, Number\(batchSize\) \|\| 12\)/u);
+  assert.match(environmentSource, /typeof onAuthenticatedEnvironment === "function"/u);
+  assert.match(environmentSource, /canonicalObjects: "pending"/u);
+  assert.match(environmentSource, /ownedListings: \[\],[\s\S]*objects: \[\]/u);
   assert.doesNotMatch(source, /const \[aosResult, accessResult\] = await Promise\.all/u);
   assert.doesNotMatch(source, /localStorage|sessionStorage/u);
   assert.doesNotMatch(source, /directContainerId\s*=/u);
@@ -58,9 +68,14 @@ test("TRAN$ACT login returns the authenticated operator to the desktop", () => {
   const source = read("components/ixi-command-center/IXITransactCommandCenter.jsx");
 
   assert.match(source, /const TRANSACT_LOGIN_HREF = `\/login\?returnTo=\$\{encodeURIComponent\("\/transact"\)\}`/u);
-  assert.match(source, /LOG IN TO TRAN\$ACT/u);
   assert.match(source, /LOG IN AND RETURN TO TRAN\$ACT/u);
   assert.match(source, /window\.location\.assign\(TRANSACT_LOGIN_HREF\)/u);
+  const loadingState = source.slice(
+    source.indexOf("{loading ?"),
+    source.indexOf(": null}", source.indexOf("{loading ?"))
+  );
+  assert.match(loadingState, /VERIFYING TRAN\$ACT SESSION/u);
+  assert.doesNotMatch(loadingState, /LOG IN/u);
 });
 
 test("desktop styling preserves the permanent professional shell and responsive safety", () => {

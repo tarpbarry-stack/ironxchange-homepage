@@ -206,22 +206,42 @@ export default function IXITransactCommandCenter() {
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [refreshKey, setRefreshKey] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [contextLoading, setContextLoading] = useState(false);
+  const [contextError, setContextError] = useState("");
   const [financialLoading, setFinancialLoading] = useState(false);
   const [error, setError] = useState("");
   const [financialError, setFinancialError] = useState("");
 
   useEffect(() => {
     const controller = new AbortController();
+    let authenticatedBootstrapPublished = false;
     async function load() {
       setLoading(true);
+      setContextLoading(false);
+      setContextError("");
       setError("");
       setFinancialError("");
       try {
         const accessRequest = loadIXIFinancialAccessContext({ signal: controller.signal }).then(
-          value => ({ value, error: null }),
+          value => {
+            if (!controller.signal.aborted) setAccess(value);
+            return { value, error: null };
+          },
           accessError => ({ value: null, error: accessError })
         );
-        const aosResult = await loadIXIMosEnvironment({ includeObjects: true });
+        const aosResult = await loadIXIMosEnvironment({
+          includeObjects: true,
+          // Canonical admission is read-only. A bounded one-wave read keeps a
+          // normal TRAN$ACT workspace from waiting on three serial batches.
+          canonicalAdmissionBatchSize: 32,
+          onAuthenticatedEnvironment: authenticatedEnvironment => {
+            if (controller.signal.aborted) return;
+            authenticatedBootstrapPublished = true;
+            setEnvironment(authenticatedEnvironment);
+            setLoading(false);
+            setContextLoading(true);
+          }
+        });
         if (controller.signal.aborted) return;
         if (!aosResult?.isAuthenticated) {
           window.location.assign(TRANSACT_LOGIN_HREF);
@@ -229,6 +249,8 @@ export default function IXITransactCommandCenter() {
         }
         setEnvironment(aosResult);
         setLoading(false);
+        setContextLoading(false);
+        setContextError("");
 
         let accessResult = await accessRequest;
         if (accessResult.error?.status === 401 && !controller.signal.aborted) {
@@ -246,7 +268,14 @@ export default function IXITransactCommandCenter() {
           setFinancialError("");
         }
       } catch (loadError) {
-        if (loadError?.name !== "AbortError") setError(loadError?.message || "IXI TRAN$ACT could not be loaded.");
+        if (loadError?.name !== "AbortError") {
+          if (authenticatedBootstrapPublished) {
+            setContextError(loadError?.message || "Canonical operating context could not be loaded.");
+            setContextLoading(false);
+          } else {
+            setError(loadError?.message || "IXI TRAN$ACT could not be loaded.");
+          }
+        }
       } finally {
         if (!controller.signal.aborted) setLoading(false);
       }
@@ -447,8 +476,10 @@ export default function IXITransactCommandCenter() {
 
           <div className={styles.scopeStrip} aria-label="Financial story scope">{SCOPE_OPTIONS.map(([kind, code, label]) => <button type="button" key={kind} data-active={selectedKind === kind} disabled={!groups[kind]?.length} onClick={() => { setSelectedKind(kind); setSelectedId(groups[kind]?.[0]?.id || ""); }}><span>{code}</span><strong>{label}</strong><b>{groups[kind]?.length || 0}</b></button>)}</div>
 
-          {loading ? <div className={styles.loadingState}><strong>TRAN$ACT ACCESS</strong><span>Loading your authenticated financial workspace…</span><a className={styles.loginAction} href={TRANSACT_LOGIN_HREF}>LOG IN TO TRAN$ACT</a><small>After authentication, IXI returns you directly to TRAN$ACT.</small></div> : null}
+          {loading ? <div className={styles.loadingState}><strong>VERIFYING TRAN$ACT SESSION</strong><span>Connecting to your authenticated operating company…</span><small>Unauthenticated sessions return to the secure sign-in automatically.</small></div> : null}
           {!loading && error ? <div className={styles.errorBanner} role="alert"><strong>TRAN$ACT UNAVAILABLE</strong><span>{error}</span><small>No financial values have been fabricated.</small><a className={styles.loginAction} href={TRANSACT_LOGIN_HREF}>LOG IN AND RETURN TO TRAN$ACT</a></div> : null}
+          {contextLoading ? <div className={styles.loadingState} role="status"><strong>COMPANY CONNECTED</strong><span>Loading canonical machines and operating records…</span><small>Only IX-Core-admitted Objects and permanent Passports will appear.</small></div> : null}
+          {contextError ? <div className={styles.errorBanner} role="alert"><strong>OPERATING CONTEXT INCOMPLETE</strong><span>{contextError}</span><small>The authenticated company remains available; unresolved Objects are not displayed.</small></div> : null}
           {financialError ? <div className={styles.errorBanner} role="alert"><strong>FINANCIAL PROJECTION UNAVAILABLE</strong><span>{financialError}</span><small>Operating context remains visible; accounting completeness is not asserted.</small></div> : null}
           {!loading && !error && selectedContext ? renderWorkspace() : null}
         </main>
