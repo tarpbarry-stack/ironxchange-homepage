@@ -34,6 +34,7 @@ import IXIPocketR1 from "../../components/ixi-chassis/IXIPocketR1";
 import IXIPocketR2 from "../../components/ixi-chassis/IXIPocketR2";
 import IXIChassis from "../../components/ixi-chassis/IXIChassis";
 import IXIWorkspaceEngine from "../../components/ixi-chassis/IXIWorkspaceEngine";
+import IXIWorkspaceEmptyState from "../../components/ixi-chassis/IXIWorkspaceEmptyState";
 
 import { getListingId } from "../../lib/listingFormatters";
 import {
@@ -1813,10 +1814,13 @@ export default function SellerYardV2Page() {
                   </section>
 
                   {visibleSellerYardListings.length === 0 ? (
-                    <div className="empty">
-                      <h3>No machines found.</h3>
-                      <p>Try another search or filter inside this yard.</p>
-                    </div>
+                    <IXIWorkspaceEmptyState
+                      surface="IXI SELLER YARD"
+                      title="NO MACHINES IN THIS SELLER VIEW"
+                      message="This seller has no machines matching the current yard search and filter controls."
+                      actionLabel="BROWSE MARKETPLACE"
+                      actionHref="/browse-v2"
+                    />
                   ) : null}
                 </section>
               </main>
@@ -2605,32 +2609,6 @@ export default function SellerYardV2Page() {
     max-width: 300px;
     pointer-events: none;
     z-index: 999999;
-  }
-
-  .empty {
-    max-width: 520px;
-    margin: 38px auto 0;
-    padding: 38px 28px;
-    text-align: center;
-    border: 1px solid rgba(255,255,255,.06);
-    border-radius: 14px;
-    background:
-      linear-gradient(180deg, rgba(255,255,255,.018), rgba(255,255,255,0)),
-      #111;
-    box-shadow: 0 14px 34px rgba(0,0,0,.18);
-  }
-
-  .empty h3 {
-    margin: 0 0 8px;
-    color: #f2f2f2;
-    font-size: 16px;
-    font-weight: 950;
-  }
-
-  .empty p {
-    margin: 0;
-    color: rgba(255,255,255,.42);
-    font-size: 12px;
   }
 
   @media (max-width: 1250px) and (min-width: 851px) {

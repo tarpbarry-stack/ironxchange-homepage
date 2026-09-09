@@ -89,6 +89,8 @@ import IXICardScaleControl
   from "../../components/ixi-chassis/IXICardScaleControl";
 import IXIBoardSurface
   from "../../components/ixi-chassis/IXIBoardSurface";
+import IXIWorkspaceEmptyState
+  from "../../components/ixi-chassis/IXIWorkspaceEmptyState";
 
 import {
   workspaceCollisionDetection,
@@ -2035,13 +2037,14 @@ if (
   surfaceLabel="Auction Market"
 />
 
-        {visibleSellerListings.length === 0 && (
-  <div className="empty">
-    <h3>IXI AUCTION MKT</h3>
-<p>
-  Auction companies and events will appear here.
-</p>
-  </div>
+{visibleSellerListings.length === 0 && (
+  <IXIWorkspaceEmptyState
+    surface="IXI AUCTION MARKET"
+    title="NO LIVE AUCTION MACHINES IN THIS VIEW"
+    message="Auction machines and events will appear here when they enter the live market."
+    actionLabel="BROWSE MARKETPLACE"
+    actionHref="/browse-v2"
+  />
 )}
 </main>
   </IXIDragEngine>
@@ -3587,36 +3590,6 @@ outline: none;
 :global(.ixi-board-sortable-card > *) {
   width: auto;
 }
-        .empty {
-          max-width: 520px;
-          margin: 38px auto 0;
-          padding: 38px 28px;
-
-          text-align: center;
-
-          border: 1px solid rgba(255,255,255,.06);
-          border-radius: 14px;
-
-          background:
-            linear-gradient(180deg, rgba(255,255,255,.018), rgba(255,255,255,0)),
-            #111;
-
-          box-shadow:
-            0 14px 34px rgba(0,0,0,.18);
-        }
-
-        .empty h3 {
-          margin: 0 0 8px;
-          color: #f2f2f2;
-          font-size: 16px;
-          font-weight: 950;
-        }
-
-        .empty p {
-          margin: 0;
-          color: rgba(255,255,255,.42);
-          font-size: 12px;
-        }
 .mobile-search-surface {
   display: none;
 }

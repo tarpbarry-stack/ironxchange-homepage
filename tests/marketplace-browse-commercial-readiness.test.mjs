@@ -175,23 +175,45 @@ test("Park Brake is persisted and guards mechanical commands without pointer blo
   assert.doesNotMatch(page, /parkBrake[\s\S]{0,100}pointer-events:\s*none/u);
 });
 
-test("empty Marketplace views use the centered commercial recovery state", () => {
+test("workspace routes share the centered commercial recovery state", () => {
   const page = fs.readFileSync("pages/browse-v2.js", "utf8");
+  const emptyState = fs.readFileSync(
+    "components/ixi-chassis/IXIWorkspaceEmptyState.jsx",
+    "utf8"
+  );
+  const workspaceRoutes = [
+    "pages/browse-v2.js",
+    "pages/saved.js",
+    "pages/account/my-listings-v2.js",
+    "pages/account/my-listings-v1.2.js",
+    "pages/yard/index.js",
+    "pages/yard/[sellerSlug].js",
+    "pages/yard-v2/[sellerSlug].js",
+    "pages/auction-market/index.js",
+    "pages/auction-work/index.js"
+  ];
 
-  assert.match(page, /className="marketplace-empty-zone"/u);
-  assert.match(page, /IXI MARKETPLACE[\s\S]*?CURRENT VIEW/u);
+  assert.match(page, /<IXIWorkspaceEmptyState/u);
+  assert.match(page, /surface="IXI MARKETPLACE"/u);
   assert.match(page, /NO MACHINES MATCH THIS VIEW/u);
   assert.match(page, /YOUR MARKETPLACE BOARD IS CLEAR/u);
   assert.match(page, /NO LIVE MACHINES AVAILABLE/u);
-  assert.match(page, /onClick=\{resetMarketplaceView\}/u);
+  assert.match(page, /onAction=\{resetMarketplaceView\}/u);
   assert.match(
-    page,
-    /\.marketplace-empty-zone\s*\{[\s\S]*?width:\s*100%;[\s\S]*?display:\s*grid;[\s\S]*?place-items:\s*center;/u
+    emptyState,
+    /\.ixi-workspace-empty-zone\s*\{[\s\S]*?width:\s*100%;[\s\S]*?display:\s*grid;[\s\S]*?place-items:\s*center;/u
   );
   assert.match(
-    page,
-    /\.marketplace-empty-state button,[\s\S]*?min-height:\s*44px;/u
+    emptyState,
+    /\.ixi-workspace-empty-state[\s\S]*?min-height:\s*44px;/u
   );
+
+  for (const route of workspaceRoutes) {
+    const source = fs.readFileSync(route, "utf8");
+    assert.match(source, /IXIWorkspaceEmptyState/u, `${route} must use the shared state`);
+    assert.doesNotMatch(source, /className="empty"/u, `${route} retains the old empty box`);
+    assert.doesNotMatch(source, /HELP US BUILD OUR MARKETPLACE/u, `${route} retains generic copy`);
+  }
 });
 
 test("Theater and active-stack controls cannot overlap relationship filters", () => {

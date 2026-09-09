@@ -41,6 +41,8 @@ import IXIBoardSurface
   from "../../components/ixi-chassis/IXIBoardSurface";
 import IXICardScaleControl
   from "../../components/ixi-chassis/IXICardScaleControl";
+import IXIWorkspaceEmptyState
+  from "../../components/ixi-chassis/IXIWorkspaceEmptyState";
 import IXIChassisControls from "../../components/ixi-chassis/IXIChassisControls";
 import IXIPocketL1 from "../../components/ixi-chassis/IXIPocketL1";
 import IXIPocketL2 from "../../components/ixi-chassis/IXIPocketL2";
@@ -1486,13 +1488,14 @@ toggleSearchSurfaceRevealed
   surfaceLabel="Inventory"
 />
 
-        {visibleSavedListings.length === 0 && (
-  <div className="empty">
-    <h3>HELP US BUILD OUR MARKETPLACE</h3>
-    <p>
-      Touch a machine. Create a relationship. Machines will appear here.
-    </p>
-  </div>
+{visibleSavedListings.length === 0 && (
+  <IXIWorkspaceEmptyState
+    surface="IXI INVENTORY"
+    title="NO MACHINES IN THIS INVENTORY VIEW"
+    message="Post a machine to establish its IXI Passport and bring it into your inventory workspace."
+    actionLabel="POST A MACHINE"
+    actionHref="/post-free"
+  />
 )}
 </main>
   </IXIDragEngine>
@@ -2922,36 +2925,6 @@ outline: none;
 :global(.ixi-board-sortable-card > *) {
   width: 100%;
 }
-        .empty {
-          max-width: 520px;
-          margin: 38px auto 0;
-          padding: 38px 28px;
-
-          text-align: center;
-
-          border: 1px solid rgba(255,255,255,.06);
-          border-radius: 14px;
-
-          background:
-            linear-gradient(180deg, rgba(255,255,255,.018), rgba(255,255,255,0)),
-            #111;
-
-          box-shadow:
-            0 14px 34px rgba(0,0,0,.18);
-        }
-
-        .empty h3 {
-          margin: 0 0 8px;
-          color: #f2f2f2;
-          font-size: 16px;
-          font-weight: 950;
-        }
-
-        .empty p {
-          margin: 0;
-          color: rgba(255,255,255,.42);
-          font-size: 12px;
-        }
 .mobile-search-surface {
   display: none;
 }

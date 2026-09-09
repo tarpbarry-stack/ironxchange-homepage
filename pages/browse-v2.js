@@ -39,6 +39,8 @@ import IXIBoardSurface
   from "../components/ixi-chassis/IXIBoardSurface";
 import IXICardScaleControl
   from "../components/ixi-chassis/IXICardScaleControl";
+import IXIWorkspaceEmptyState
+  from "../components/ixi-chassis/IXIWorkspaceEmptyState";
 import IXIBrowseObjectConsoleRouter
   from "../components/ixi-marketplace/IXIBrowseObjectConsoleRouter";
 import ListingShareProvider
@@ -1735,53 +1737,32 @@ if (armedDestination === "stackBottom") {
 
 {inventoryRequestState.status === "ready" &&
 visibleBrowseListings.length === 0 && (
-  <section
-    className="marketplace-empty-zone"
-    aria-labelledby="marketplace-empty-title"
-  >
-    <div className="marketplace-empty-state" role="status">
-      <div className="marketplace-empty-rail" aria-hidden="true">
-        <span />
-        <i />
-        <span />
-      </div>
-
-      <p className="marketplace-empty-kicker">
-        IXI MARKETPLACE <b aria-hidden="true">/</b> CURRENT VIEW
-      </p>
-
-      <div className="marketplace-empty-count" aria-hidden="true">
-        <strong>0</strong>
-        <span>MACHINES</span>
-      </div>
-
-      <h2 id="marketplace-empty-title">
-        {marketplaceListings.length
-          ? hasActiveMarketplaceView
-            ? "NO MACHINES MATCH THIS VIEW"
-            : "YOUR MARKETPLACE BOARD IS CLEAR"
-          : "NO LIVE MACHINES AVAILABLE"}
-      </h2>
-
-      <p className="marketplace-empty-copy">
-        {marketplaceListings.length
-          ? hasActiveMarketplaceView
-            ? "Reset the current search and filters to return to the complete marketplace."
-            : "Machines placed in stacks or pockets remain exactly where you left them."
-          : "New equipment will appear here as soon as it enters the live marketplace."}
-      </p>
-
-      {marketplaceListings.length && hasActiveMarketplaceView ? (
-        <button type="button" onClick={resetMarketplaceView}>
-          RESET VIEW
-        </button>
-      ) : !marketplaceListings.length ? (
-        <a href="/post-free">POST A MACHINE</a>
-      ) : null}
-
-      <div className="marketplace-empty-rule" aria-hidden="true" />
-    </div>
-  </section>
+  <IXIWorkspaceEmptyState
+    surface="IXI MARKETPLACE"
+    title={
+      marketplaceListings.length
+        ? hasActiveMarketplaceView
+          ? "NO MACHINES MATCH THIS VIEW"
+          : "YOUR MARKETPLACE BOARD IS CLEAR"
+        : "NO LIVE MACHINES AVAILABLE"
+    }
+    message={
+      marketplaceListings.length
+        ? hasActiveMarketplaceView
+          ? "Reset the current search and filters to return to the complete marketplace."
+          : "Machines placed in stacks or pockets remain exactly where you left them."
+        : "New equipment will appear here as soon as it enters the live marketplace."
+    }
+    actionLabel={
+      marketplaceListings.length && hasActiveMarketplaceView
+        ? "RESET VIEW"
+        : !marketplaceListings.length
+          ? "POST A MACHINE"
+          : ""
+    }
+    actionHref={!marketplaceListings.length ? "/post-free" : ""}
+    onAction={resetMarketplaceView}
+  />
 )}
 </main>
   </IXIDragEngine>
@@ -1885,142 +1866,6 @@ visibleBrowseListings.length === 0 && (
 
 
 
-        .marketplace-empty-zone {
-          width: 100%;
-          min-height: clamp(360px, 48vh, 680px);
-          display: grid;
-          place-items: center;
-          padding: 48px 20px 72px;
-        }
-
-        .marketplace-empty-state {
-          width: min(100%, 560px);
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          padding: 0 28px;
-          text-align: center;
-        }
-
-        .marketplace-empty-rail {
-          width: min(100%, 360px);
-          display: grid;
-          grid-template-columns: 1fr 8px 1fr;
-          align-items: center;
-          gap: 13px;
-          margin-bottom: 20px;
-        }
-
-        .marketplace-empty-rail span {
-          height: 1px;
-          background: linear-gradient(90deg, transparent, rgba(255, 196, 0, .62));
-        }
-
-        .marketplace-empty-rail span:last-child {
-          transform: rotate(180deg);
-        }
-
-        .marketplace-empty-rail i {
-          width: 8px;
-          height: 8px;
-          border: 1px solid #ffc400;
-          transform: rotate(45deg);
-          box-shadow: 0 0 14px rgba(255, 196, 0, .28);
-        }
-
-        .marketplace-empty-kicker {
-          margin: 0 0 16px;
-          color: #ffc400;
-          font-size: 11px;
-          font-weight: 900;
-          line-height: 1.4;
-          letter-spacing: .18em;
-        }
-
-        .marketplace-empty-kicker b {
-          margin: 0 6px;
-          color: rgba(255, 255, 255, .28);
-          font-weight: 700;
-        }
-
-        .marketplace-empty-count {
-          display: flex;
-          align-items: baseline;
-          gap: 10px;
-          margin-bottom: 10px;
-          color: rgba(255, 255, 255, .20);
-        }
-
-        .marketplace-empty-count strong {
-          color: rgba(255, 255, 255, .94);
-          font-size: clamp(44px, 4vw, 62px);
-          font-weight: 800;
-          line-height: .9;
-          letter-spacing: -.05em;
-        }
-
-        .marketplace-empty-count span {
-          font-size: 11px;
-          font-weight: 900;
-          letter-spacing: .2em;
-        }
-
-        .marketplace-empty-state h2 {
-          margin: 0;
-          color: #f4f4f2;
-          font-size: clamp(20px, 2vw, 28px);
-          font-weight: 850;
-          line-height: 1.15;
-          letter-spacing: -.025em;
-        }
-
-        .marketplace-empty-copy {
-          max-width: 460px;
-          margin: 13px 0 0;
-          color: rgba(255, 255, 255, .52);
-          font-size: 14px;
-          line-height: 1.6;
-        }
-
-        .marketplace-empty-state button,
-        .marketplace-empty-state a {
-          min-width: 164px;
-          min-height: 44px;
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          margin-top: 24px;
-          padding: 0 22px;
-          border: 1px solid rgba(255, 196, 0, .78);
-          border-radius: 4px;
-          background: rgba(255, 196, 0, .05);
-          color: #ffc400;
-          font-family: inherit;
-          font-size: 12px;
-          font-weight: 900;
-          line-height: 1;
-          letter-spacing: .13em;
-          text-decoration: none;
-          cursor: pointer;
-          transition: background .16s ease, color .16s ease, box-shadow .16s ease;
-        }
-
-        .marketplace-empty-state button:hover,
-        .marketplace-empty-state button:focus-visible,
-        .marketplace-empty-state a:hover,
-        .marketplace-empty-state a:focus-visible {
-          background: #ffc400;
-          color: #111;
-          outline: none;
-          box-shadow: 0 0 0 4px rgba(255, 196, 0, .12);
-        }
-
-        .marketplace-empty-rule {
-          width: 56px;
-          height: 2px;
-          margin-top: 28px;
-          background: rgba(255, 255, 255, .18);
-        }
 @media (max-width: 850px) {
   main {
     padding: 18px 4% 48px;
@@ -2039,18 +1884,6 @@ visibleBrowseListings.length === 0 && (
     font-size: 25px;
   }
 
-  .marketplace-empty-zone {
-    min-height: 420px;
-    padding: 38px 0 54px;
-  }
-
-  .marketplace-empty-state {
-    padding: 0 12px;
-  }
-
-  .marketplace-empty-copy {
-    font-size: 13px;
-  }
 }
        
       `}</style>

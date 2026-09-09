@@ -5,6 +5,8 @@ import IXIBoardSurface
   from "../../components/ixi-chassis/IXIBoardSurface";
 import IXICardScaleControl
   from "../../components/ixi-chassis/IXICardScaleControl";
+import IXIWorkspaceEmptyState
+  from "../../components/ixi-chassis/IXIWorkspaceEmptyState";
 
 import useIXIAuctionObjectOps
   from "../../components/ixi-auction-object/useIXIAuctionObjectOps";
@@ -1921,13 +1923,14 @@ if (armedDestination === "stackTop") {
   surfaceLabel="Auction Work"
 />
 
-        {visibleSavedListings.length === 0 && (
-  <div className="empty">
-    <h3>NO AUCTION MACHINES IN YOUR WORKSPACE</h3>
-<p>
-  Import an auction machine to begin your private auction workflow.
-</p>
-  </div>
+{visibleSavedListings.length === 0 && (
+  <IXIWorkspaceEmptyState
+    surface="IXI AUCTION WORK"
+    title="NO AUCTION MACHINES IN THIS WORKSPACE"
+    message="Import an auction machine to begin a private auction workflow."
+    actionLabel="IMPORT A MACHINE"
+    actionHref="/url-import"
+  />
 )}
 </main>
   </IXIDragEngine>
@@ -3343,36 +3346,6 @@ outline: none;
   z-index: 999999;
 }
 
-        .empty {
-          max-width: 520px;
-          margin: 38px auto 0;
-          padding: 38px 28px;
-
-          text-align: center;
-
-          border: 1px solid rgba(255,255,255,.06);
-          border-radius: 14px;
-
-          background:
-            linear-gradient(180deg, rgba(255,255,255,.018), rgba(255,255,255,0)),
-            #111;
-
-          box-shadow:
-            0 14px 34px rgba(0,0,0,.18);
-        }
-
-        .empty h3 {
-          margin: 0 0 8px;
-          color: #f2f2f2;
-          font-size: 16px;
-          font-weight: 950;
-        }
-
-        .empty p {
-          margin: 0;
-          color: rgba(255,255,255,.42);
-          font-size: 12px;
-        }
 .mobile-search-surface {
   display: none;
 }

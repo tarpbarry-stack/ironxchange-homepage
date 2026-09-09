@@ -41,6 +41,7 @@ import IXIPocketR1 from "../../components/ixi-chassis/IXIPocketR1";
 import IXIPocketR2 from "../../components/ixi-chassis/IXIPocketR2";
 import IXIChassis from "../../components/ixi-chassis/IXIChassis";
 import IXIWorkspaceEngine from "../../components/ixi-chassis/IXIWorkspaceEngine";
+import IXIWorkspaceEmptyState from "../../components/ixi-chassis/IXIWorkspaceEmptyState";
 import useIXISellerMachineOps from "../../components/ixi-chassis/useIXISellerMachineOps";
 
 import {
@@ -1479,12 +1480,13 @@ export default function MyListingsV2() {
                 </section>
 
                 {visibleSellerListings.length === 0 && (
-                  <div className="empty">
-                    <h3>NO MACHINES FOUND</h3>
-                    <p>
-                      Adjust your inventory search filters.
-                    </p>
-                  </div>
+                  <IXIWorkspaceEmptyState
+                    surface="IXI INVENTORY"
+                    title="NO MACHINES IN THIS INVENTORY VIEW"
+                    message="Post a machine to establish its IXI Passport and bring it into your inventory workspace."
+                    actionLabel="POST A MACHINE"
+                    actionHref="/post-free"
+                  />
                 )}
               </main>
             );
@@ -2853,37 +2855,6 @@ outline: none;
 
 :global(.ixi-board-sortable-card > *) {
   width: 100%;
-}
-
-.empty {
-  max-width: 520px;
-  margin: 38px auto 0;
-  padding: 38px 28px;
-
-  text-align: center;
-
-  border: 1px solid rgba(255,255,255,.06);
-  border-radius: 14px;
-
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.018), rgba(255,255,255,0)),
-    #111;
-
-  box-shadow:
-    0 14px 34px rgba(0,0,0,.18);
-}
-
-.empty h3 {
-  margin: 0 0 8px;
-  color: #f2f2f2;
-  font-size: 16px;
-  font-weight: 950;
-}
-
-.empty p {
-  margin: 0;
-  color: rgba(255,255,255,.42);
-  font-size: 12px;
 }
 
 .mobile-search-surface {
