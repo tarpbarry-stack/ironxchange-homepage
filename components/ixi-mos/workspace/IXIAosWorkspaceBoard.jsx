@@ -360,14 +360,6 @@ export default function IXIAosWorkspaceBoard({
 
                 renderSystemIndexCard={({ onOpenConsole, onOpenTransact }) => {
                   const exposeObject = child => {
-                    if (
-                      systemAdapter?.adapterId ===
-                      "ixi-owned-equipment"
-                    ) {
-                      exposeEquipmentMachineToBoard?.(child);
-                      return;
-                    }
-
                     onExposeContainerChildren?.({
                       container: commandTarget,
                       child
