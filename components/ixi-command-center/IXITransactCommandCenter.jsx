@@ -22,6 +22,7 @@ import {
   buildIXIAosRecentStory,
   formatIXIMoney,
   getIXIAosContextGroups,
+  getIXIAosRelationshipEvidence,
   getIXIAosRelatedContexts,
   getIXIFinancialQueryScope,
   getIXITransactAttentionBand,
@@ -311,7 +312,8 @@ export default function IXITransactCommandCenter() {
   const contexts = useMemo(() => buildIXIAosCommandContexts({
     entity: environment?.entity || {},
     aosObjects: environment?.objects || [],
-    ownedListings: environment?.ownedListings || []
+    ownedListings: environment?.ownedListings || [],
+    systemIndexes: environment?.systemIndexes || []
   }), [environment]);
   const groups = useMemo(() => getIXIAosContextGroups(contexts), [contexts]);
 
@@ -323,7 +325,17 @@ export default function IXITransactCommandCenter() {
   const selectedContext = useMemo(() => (
     contexts.find(item => item.id === selectedId) || groups.company[0] || contexts[0] || null
   ), [contexts, groups.company, selectedId]);
-  const related = useMemo(() => getIXIAosRelatedContexts(selectedContext, contexts), [contexts, selectedContext]);
+  const relationships = environment?.relationships || [];
+  const relationshipEvidence = useMemo(() => getIXIAosRelationshipEvidence(
+    selectedContext,
+    contexts,
+    relationships
+  ), [contexts, relationships, selectedContext]);
+  const related = useMemo(() => getIXIAosRelatedContexts(
+    selectedContext,
+    contexts,
+    relationships
+  ), [contexts, relationships, selectedContext]);
   const accessData = access?.data || {};
   const entityPassportId = clean(accessData.defaults?.entityPassportId || accessData.entities?.[0]?.passportId || environment?.entity?.passportId);
 
@@ -391,7 +403,12 @@ export default function IXITransactCommandCenter() {
   const currency = projection?.currency || "USD";
   const queue = useMemo(() => buildQueue({ projection, context: selectedContext, related, currency, passportRecords }), [currency, passportRecords, projection, related, selectedContext]);
   const controlCounts = useMemo(() => getIXITransactControlCounts(queue.map(item => ({ ...item, status: item.band }))), [queue]);
-  const story = useMemo(() => buildIXIAosRecentStory(selectedContext, contexts, 12), [contexts, selectedContext]);
+  const story = useMemo(() => buildIXIAosRecentStory(
+    selectedContext,
+    contexts,
+    relationships,
+    12
+  ), [contexts, relationships, selectedContext]);
   const connections = useMemo(() => connectionSummary(related), [related]);
   const currentGroup = groups[selectedKind] || [];
   const selectedQueueItem = queue.find(item => item.id === selectedQueueId) || queue[0] || null;
@@ -542,7 +559,7 @@ export default function IXITransactCommandCenter() {
 
           {loading ? <div className={styles.loadingState}><strong>VERIFYING TRAN$ACT SESSION</strong><span>Connecting to your authenticated operating company…</span><small>Unauthenticated sessions return to the secure sign-in automatically.</small></div> : null}
           {!loading && error ? <div className={styles.errorBanner} role="alert"><strong>TRAN$ACT UNAVAILABLE</strong><span>{error}</span><small>No financial values have been fabricated.</small><a className={styles.loginAction} href={TRANSACT_LOGIN_HREF}>LOG IN AND RETURN TO TRAN$ACT</a></div> : null}
-          {contextLoading ? <div className={styles.loadingState} role="status"><strong>COMPANY CONNECTED</strong><span>Loading canonical machines and operating records…</span><small>Only IX-Core-admitted Objects and permanent Passports will appear.</small></div> : null}
+          {contextLoading ? <div className={styles.loadingState} role="status"><strong>COMPANY CONNECTED</strong><span>Loading governed financial operating context…</span><small>Machines appear only through the authoritative company Equipment projection.</small></div> : null}
           {contextError ? <div className={styles.errorBanner} role="alert"><strong>OPERATING CONTEXT INCOMPLETE</strong><span>{contextError}</span><small>The authenticated company remains available; unresolved Objects are not displayed.</small></div> : null}
           {financialError ? <div className={styles.errorBanner} role="alert"><strong>FINANCIAL PROJECTION UNAVAILABLE</strong><span>{financialError}</span><small>Operating context remains visible; accounting completeness is not asserted.</small></div> : null}
           {passportRecordsError ? <div className={styles.errorBanner} role="alert"><strong>PASSPORT RECORDS UNAVAILABLE</strong><span>{passportRecordsError}</span><small>No substitute records or financial values have been created.</small></div> : null}
@@ -562,7 +579,7 @@ export default function IXITransactCommandCenter() {
             <div><span>PASSPORT RECORDS</span><strong>{passportRecordsLoading ? "LOADING" : normalizedPassportRecords.length}</strong></div>
           </section>
           {selectedDetail ? <section className={styles.detailCard}><span>SELECTED WORK</span><h3>{selectedDetail.title}</h3><p>{selectedDetail.detail || selectedDetail.party || "Authoritative record selected for review."}</p>{selectedDetail.status ? <StatusBadge value={selectedDetail.status} /> : null}</section> : null}
-          <section className={styles.connectionCard}><div><span>CANONICAL RELATIONSHIPS</span><strong>{related.length}</strong></div>{connections.length ? connections.slice(0, 6).map(item => <p key={item.kind}><span>{item.label}</span><b>{item.count}</b></p>) : <small>No direct relationships returned.</small>}</section>
+          <section className={styles.connectionCard}><div><span>CANONICAL RELATIONSHIPS</span><strong>{relationshipEvidence.length}</strong></div>{connections.length ? connections.slice(0, 6).map(item => <p key={item.kind}><span>{item.label}</span><b>{item.count}</b></p>) : <small>No active IX-Core relationships returned.</small>}</section>
         </aside>
       </div>
 
