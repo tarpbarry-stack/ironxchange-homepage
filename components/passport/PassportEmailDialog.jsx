@@ -30,7 +30,8 @@ export default function PassportEmailDialog({
   onClose,
   listingId,
   passportId,
-  title
+  title,
+  unavailableReason = ""
 }) {
   const [recipientText, setRecipientText] = useState("");
   const [message, setMessage] = useState("");
@@ -61,7 +62,7 @@ export default function PassportEmailDialog({
 
   async function handleSubmit(event) {
     event.preventDefault();
-    if (status === "sending") return;
+    if (status === "sending" || unavailableReason) return;
 
     const recipients = parseRecipients(recipientText);
     if (
@@ -180,7 +181,11 @@ export default function PassportEmailDialog({
             onChange={event => setRecipientText(event.target.value)}
             placeholder="buyer@example.com"
             rows={2}
-            disabled={status === "sending" || status === "sent"}
+            disabled={
+              Boolean(unavailableReason) ||
+              status === "sending" ||
+              status === "sent"
+            }
             aria-describedby="passport-email-recipient-help"
           />
           <small id="passport-email-recipient-help">
@@ -196,11 +201,19 @@ export default function PassportEmailDialog({
             onChange={event => setMessage(event.target.value.slice(0, 500))}
             placeholder="Add a short note for the recipient."
             rows={4}
-            disabled={status === "sending" || status === "sent"}
+            disabled={
+              Boolean(unavailableReason) ||
+              status === "sending" ||
+              status === "sent"
+            }
           />
           <small>{message.length}/500</small>
 
-          {feedback ? (
+          {unavailableReason ? (
+            <p className="feedback notice" role="status">
+              {unavailableReason}
+            </p>
+          ) : feedback ? (
             <p
               className={status === "sent" ? "feedback sent" : "feedback error"}
               role="status"
@@ -222,9 +235,13 @@ export default function PassportEmailDialog({
               <button
                 type="submit"
                 className="send"
-                disabled={status === "sending"}
+                disabled={status === "sending" || Boolean(unavailableReason)}
               >
-                {status === "sending" ? "Sending…" : "Send Passport"}
+                {unavailableReason
+                  ? "Post machine first"
+                  : status === "sending"
+                    ? "Sending…"
+                    : "Send Passport"}
               </button>
             ) : null}
           </footer>
@@ -352,6 +369,11 @@ export default function PassportEmailDialog({
           color: #ffaaaa;
           background: rgba(210, 56, 56, 0.1);
           border: 1px solid rgba(210, 56, 56, 0.36);
+        }
+        .feedback.notice {
+          color: #ffe07a;
+          background: rgba(255, 196, 0, 0.08);
+          border: 1px solid rgba(255, 196, 0, 0.3);
         }
         footer {
           display: flex;
