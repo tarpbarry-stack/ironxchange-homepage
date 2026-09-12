@@ -6,6 +6,10 @@ on:
       commit_sha:
         description: Immutable IX-Core commit SHA
         required: true
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/deploy-ixi-core-passport-email-production.yml'
 
 permissions:
   contents: read
@@ -21,7 +25,7 @@ jobs:
     env:
       AWS_REGION: ${{ secrets.AWS_REGION }}
       AWS_INSTANCE_ID: ${{ secrets.AWS_INSTANCE_ID }}
-      IXI_CORE_SHA: ${{ inputs.commit_sha }}
+      IXI_CORE_SHA: ${{ inputs.commit_sha || 'c958e9cf58e38bfdb379afffdbbd19e0aa410370' }}
 
     steps:
       - name: Validate immutable release
