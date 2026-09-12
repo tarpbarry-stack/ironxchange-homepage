@@ -454,10 +454,7 @@ function handleCardClick() {
 }
 
 function openMarketplaceDistribution(listingToShare) {
-  if (
-    !enableMarketplaceDistribution ||
-    typeof window === "undefined"
-  ) {
+  if (typeof window === "undefined") {
     return;
   }
 
@@ -903,11 +900,7 @@ style={getFrameStyle(currentImageObject, "card")}
   onCycleColor={cycleBoardColor}
   onCycleOutline={cycleBoardOutline}
   onToggleSaved={onToggleSaved}
-  onRailSend={
-    enableMarketplaceDistribution
-      ? openMarketplaceDistribution
-      : undefined
-  }
+  onRailSend={openMarketplaceDistribution}
   armedDestination={armedDestination}
   onSendToArmedDestination={onSendToArmedDestination}
 />
