@@ -55,7 +55,7 @@ test("desktop remains an authenticated read surface over governed financial cont
   assert.match(source, /contextHydrationStarted\.current = true;[\s\S]*await loadIXIMosEnvironment/u);
   assert.match(source, /financialLoading \|\| \(!projectionPayload && !financialError\)/u);
   assert.match(source, /COMPANY CONNECTED/u);
-  assert.match(source, /Only IX-Core-admitted Objects and permanent Passports will appear/u);
+  assert.match(source, /Machines appear only through the authoritative company Equipment projection/u);
   assert.match(environmentSource, /admitMosCanonicalIdentities\(\{ requests \}\)/u);
   assert.match(environmentSource, /AOS_IDENTITY_BATCH_INCOMPLETE/u);
   assert.match(environmentSource, /typeof onAuthenticatedEnvironment === "function"/u);

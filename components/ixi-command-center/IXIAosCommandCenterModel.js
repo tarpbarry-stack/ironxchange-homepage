@@ -1,6 +1,10 @@
+import { getIXIAosEquipmentAdapter } from "../../lib/mos/IXIAosSystemAdapterRegistry.js";
+
 const clean = value => String(value ?? "").trim();
 
 const safeArray = value => Array.isArray(value) ? value : [];
+
+const IXI_OWNED_EQUIPMENT_ADAPTER_ID = getIXIAosEquipmentAdapter().adapterId;
 
 function compactKey(value) {
   return clean(value).toLowerCase().replace(/[^a-z0-9]+/g, "-");
@@ -16,6 +20,72 @@ function getPublicData(record = {}) {
 
 function getObjectId(record = {}) {
   return firstText(record?.objectId, record?.id?.uuid, record?.id);
+}
+
+function relationshipRecord(value = {}) {
+  return value?.relationship || value?.edge || value;
+}
+
+function isActiveRelationship(value = {}) {
+  const relationship = relationshipRecord(value);
+  return clean(relationship?.status || "active").toLowerCase() === "active";
+}
+
+function getRelationshipIdentity(value = {}) {
+  const relationship = relationshipRecord(value);
+  const relationshipId = firstText(relationship?.relationshipId, relationship?.id);
+  if (relationshipId) return relationshipId;
+
+  return [
+    clean(relationship?.sourceObjectId),
+    clean(relationship?.targetObjectId),
+    clean(relationship?.behaviorId),
+    clean(relationship?.definitionId)
+  ].join(":");
+}
+
+function normalizeRelationships(relationships = []) {
+  const unique = new Map();
+
+  safeArray(relationships)
+    .map(relationshipRecord)
+    .filter(isActiveRelationship)
+    .forEach(relationship => {
+      const sourceObjectId = clean(relationship?.sourceObjectId);
+      const targetObjectId = clean(relationship?.targetObjectId);
+      if (!sourceObjectId || !targetObjectId) return;
+
+      const identity = getRelationshipIdentity(relationship);
+      if (!unique.has(identity)) unique.set(identity, relationship);
+    });
+
+  return [...unique.values()];
+}
+
+function getOwnedEquipmentIndex(systemIndexes = []) {
+  return safeArray(systemIndexes).find(index =>
+    clean(index?.metadata?.adapterId) === IXI_OWNED_EQUIPMENT_ADAPTER_ID
+  ) || null;
+}
+
+function getProjectedItemObjectId(item = {}) {
+  return firstText(
+    item?.objectId,
+    item?.sourceObjectId,
+    item?.identity?.objectId,
+    typeof item === "string" ? item : ""
+  );
+}
+
+export function getIXITransactOwnedEquipmentObjectIds(systemIndexes = []) {
+  const equipmentIndex = getOwnedEquipmentIndex(systemIndexes);
+  if (!equipmentIndex) return [];
+
+  return [...new Set(
+    safeArray(equipmentIndex?.items)
+      .map(getProjectedItemObjectId)
+      .filter(Boolean)
+  )];
 }
 
 function getPassportId(record = {}) {
@@ -120,6 +190,18 @@ function getDateValue(record = {}) {
 }
 
 function getObjectKind(record = {}) {
+  const metadata = record?.metadata || {};
+  const objectType = compactKey(record?.objectType);
+
+  if (
+    objectType === "system-index" ||
+    metadata?.systemIndex === true ||
+    metadata?.isSystemIndex === true ||
+    metadata?.systemIndexPresentation === true
+  ) {
+    return "object";
+  }
+
   const identity = compactKey([
     record?.objectFamily,
     record?.objectType,
@@ -127,7 +209,12 @@ function getObjectKind(record = {}) {
     record?.definition?.definitionKey,
     record?.singularLabel,
     record?.cardTemplateSlug,
-    record?.templateId
+    record?.templateId,
+    record?.presentation?.kind,
+    record?.presentation?.sourceAdapterId,
+    record?.presentation?.renderer,
+    record?.selectedPresentation?.kind,
+    record?.selectedPresentation?.sourceAdapterId
   ].filter(Boolean).join(" "));
 
   if (/work-order|workorder|service-order|repair-order/.test(identity)) return "work";
@@ -219,63 +306,109 @@ function buildMachineContext(listing = {}) {
 export function buildIXIAosCommandContexts({
   entity = {},
   aosObjects = [],
-  ownedListings = []
+  ownedListings = [],
+  systemIndexes = []
 } = {}) {
   const company = buildEntityContext(entity);
   const byObjectId = new Map();
+  /*
+   * The Entity environment is an authority envelope, not an ownership list.
+   * Machine admission therefore fails closed against the IX-Core-derived
+   * Equipment projection. Sharetribe records may enrich an admitted machine,
+   * but they can neither create nor admit a TRAN$ACT context.
+   */
+  const ownedEquipmentIds = new Set(
+    getIXITransactOwnedEquipmentObjectIds(systemIndexes)
+  );
 
   safeArray(aosObjects)
     .map(buildMosContext)
     .filter(Boolean)
+    .filter(context =>
+      context.kind !== "machine" || ownedEquipmentIds.has(context.sourceId)
+    )
     .forEach(context => byObjectId.set(context.sourceId, context));
 
   safeArray(ownedListings)
     .map(buildMachineContext)
     .filter(Boolean)
+    .filter(machine => ownedEquipmentIds.has(machine.sourceId))
     .forEach(machine => {
       const canonical = byObjectId.get(machine.sourceId);
-      byObjectId.set(machine.sourceId, canonical
-        ? {
-            ...canonical,
-            ...machine,
-            parentId: canonical.parentId || machine.parentId,
-            passportId: canonical.passportId || machine.passportId,
-            imageUrl: machine.imageUrl || canonical.imageUrl,
-            source: { canonical: canonical.source, presentation: machine.source }
-          }
-        : machine);
+      if (!canonical) return;
+
+      byObjectId.set(machine.sourceId, {
+        ...canonical,
+        ...machine,
+        parentId: canonical.parentId || machine.parentId,
+        passportId: canonical.passportId || machine.passportId,
+        imageUrl: machine.imageUrl || canonical.imageUrl,
+        source: { canonical: canonical.source, presentation: machine.source }
+      });
     });
 
   return [company, ...byObjectId.values()];
 }
 
-function sameText(a, b) {
-  return compactKey(a) && compactKey(a) === compactKey(b);
-}
-
-export function getIXIAosRelatedContexts(context, contexts = []) {
+export function getIXIAosRelationshipEvidence(
+  context,
+  contexts = [],
+  relationships = []
+) {
   if (!context) return [];
   const all = safeArray(contexts);
+  const admittedObjectIds = new Set(
+    all.map(item => clean(item?.sourceId)).filter(Boolean)
+  );
+  const activeRelationships = normalizeRelationships(relationships)
+    /* Never turn broad environment visibility into a relationship. */
+    .filter(relationship =>
+      admittedObjectIds.has(clean(relationship?.sourceObjectId)) &&
+      admittedObjectIds.has(clean(relationship?.targetObjectId))
+    );
 
   if (context.kind === "company") {
-    return all.filter(item => item.id !== context.id);
+    return activeRelationships;
   }
 
-  return all.filter(candidate => {
-    if (candidate.id === context.id) return false;
+  const sourceId = clean(context.sourceId);
+  return activeRelationships.filter(relationship =>
+    clean(relationship?.sourceObjectId) === sourceId ||
+    clean(relationship?.targetObjectId) === sourceId
+  );
+}
 
-    const directRelation =
-      candidate.parentId === context.sourceId ||
-      context.parentId === candidate.sourceId;
+export function getIXIAosRelatedContexts(
+  context,
+  contexts = [],
+  relationships = []
+) {
+  if (!context) return [];
+  const all = safeArray(contexts);
+  const contextsByObjectId = new Map(
+    all.map(item => [clean(item?.sourceId), item]).filter(([objectId]) => objectId)
+  );
+  const evidence = getIXIAosRelationshipEvidence(context, all, relationships);
+  const relatedIds = new Set();
 
-    const locationRelation =
-      context.kind === "location" && sameText(candidate.location, context.title);
+  evidence.forEach(relationship => {
+    const sourceObjectId = clean(relationship?.sourceObjectId);
+    const targetObjectId = clean(relationship?.targetObjectId);
 
-    const reverseLocationRelation =
-      candidate.kind === "location" && sameText(context.location, candidate.title);
+    if (context.kind === "company") {
+      relatedIds.add(sourceObjectId);
+      relatedIds.add(targetObjectId);
+      return;
+    }
 
-    return directRelation || locationRelation || reverseLocationRelation;
+    if (sourceObjectId === context.sourceId) relatedIds.add(targetObjectId);
+    if (targetObjectId === context.sourceId) relatedIds.add(sourceObjectId);
   });
+
+  relatedIds.delete(clean(context.sourceId));
+  return [...relatedIds]
+    .map(objectId => contextsByObjectId.get(objectId))
+    .filter(Boolean);
 }
 
 export function getIXIAosContextGroups(contexts = []) {
@@ -327,10 +460,17 @@ export function getIXIFinancialQueryScope(context, entityPassportId = "") {
   return null;
 }
 
-export function buildIXIAosRecentStory(context, contexts = [], limit = 6) {
-  const candidates = context?.kind === "company"
-    ? safeArray(contexts).filter(item => item.id !== context.id)
-    : getIXIAosRelatedContexts(context, contexts);
+export function buildIXIAosRecentStory(
+  context,
+  contexts = [],
+  relationships = [],
+  limit = 6
+) {
+  const candidates = getIXIAosRelatedContexts(
+    context,
+    contexts,
+    relationships
+  );
 
   return candidates
     .filter(item => item.updatedAt)

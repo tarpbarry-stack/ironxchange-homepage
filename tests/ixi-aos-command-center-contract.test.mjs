@@ -5,7 +5,9 @@ import test from "node:test";
 import {
   buildIXIAosCommandContexts,
   getIXIAosContextGroups,
+  getIXIAosRelationshipEvidence,
   getIXIAosRelatedContexts,
+  getIXITransactOwnedEquipmentObjectIds,
   getIXIFinancialQueryScope
 } from "../components/ixi-command-center/IXIAosCommandCenterModel.js";
 
@@ -49,10 +51,42 @@ const ownedListings = [
   }
 ];
 
+const canonicalMachine = {
+  objectId: "object-machine-1",
+  objectType: "machine",
+  displayName: "Canonical 544K",
+  passportId: "IXI-MACHINE-1"
+};
+
+function equipmentIndex(items = []) {
+  return {
+    objectId: "equipment-index",
+    indexId: "equipment",
+    metadata: { adapterId: "ixi-owned-equipment" },
+    items
+  };
+}
+
 test("desktop machine scope rejects a listing without canonical object identity", () => {
   const contexts = buildIXIAosCommandContexts({
     entity,
-    ownedListings: [{ id: "listing-only", title: "Unadmitted listing", passportId: "IXI-ALIAS" }]
+    ownedListings: [{
+      id: "listing-only",
+      objectId: "object-machine-1",
+      title: "Unadmitted listing",
+      passportId: "IXI-ALIAS"
+    }],
+    systemIndexes: [equipmentIndex([{ objectId: "object-machine-1" }])]
+  });
+
+  assert.equal(contexts.some(item => item.kind === "machine"), false);
+});
+
+test("canonical machines fail closed without the governed Equipment projection", () => {
+  const contexts = buildIXIAosCommandContexts({
+    entity,
+    aosObjects: [canonicalMachine],
+    ownedListings
   });
 
   assert.equal(contexts.some(item => item.kind === "machine"), false);
@@ -67,7 +101,8 @@ test("one canonical Object produces one command context and keeps machine presen
       displayName: "Canonical 544K",
       passportId: "IXI-MACHINE-1"
     }],
-    ownedListings
+    ownedListings,
+    systemIndexes: [equipmentIndex([{ objectId: "object-machine-1" }])]
   });
   const matching = contexts.filter(item => item.sourceId === "object-machine-1");
   assert.equal(matching.length, 1);
@@ -86,7 +121,8 @@ test("a canonical IX-Core machine remains selectable when Sharetribe returns zer
       passportId: "IXIMZFWCE7",
       media: [{ imageUrl: "https://images.example.com/canonical-544k.jpg" }]
     }],
-    ownedListings: []
+    ownedListings: [],
+    systemIndexes: [equipmentIndex([{ objectId: "object-544k" }])]
   });
 
   const machine = contexts.find(context => context.sourceId === "object-544k");
@@ -96,7 +132,12 @@ test("a canonical IX-Core machine remains selectable when Sharetribe returns zer
 });
 
 test("command contexts preserve recursive company, location, machine, person and work perspectives", () => {
-  const contexts = buildIXIAosCommandContexts({ entity, aosObjects: objects, ownedListings });
+  const contexts = buildIXIAosCommandContexts({
+    entity,
+    aosObjects: [...objects, canonicalMachine],
+    ownedListings,
+    systemIndexes: [equipmentIndex([{ objectId: "object-machine-1" }])]
+  });
   const groups = getIXIAosContextGroups(contexts);
 
   assert.equal(groups.company.length, 1);
@@ -106,12 +147,127 @@ test("command contexts preserve recursive company, location, machine, person and
   assert.equal(groups.work.length, 1);
 });
 
-test("location perspective resolves direct children and machines sharing the location", () => {
-  const contexts = buildIXIAosCommandContexts({ entity, aosObjects: objects, ownedListings });
+test("location perspective resolves only active canonical IX-Core edges", () => {
+  const contexts = buildIXIAosCommandContexts({
+    entity,
+    aosObjects: [...objects, canonicalMachine],
+    ownedListings,
+    systemIndexes: [equipmentIndex([{ objectId: "object-machine-1" }])]
+  });
   const location = contexts.find(item => item.kind === "location");
-  const related = getIXIAosRelatedContexts(location, contexts);
+  const relationships = [
+    {
+      relationshipId: "rel-work",
+      sourceObjectId: "work-1",
+      targetObjectId: "location-1",
+      status: "active"
+    },
+    {
+      relationshipId: "rel-person",
+      sourceObjectId: "person-1",
+      targetObjectId: "location-1",
+      status: "active"
+    },
+    {
+      relationshipId: "rel-machine",
+      sourceObjectId: "object-machine-1",
+      targetObjectId: "location-1",
+      status: "active"
+    },
+    {
+      relationshipId: "rel-ended",
+      sourceObjectId: "object-ended",
+      targetObjectId: "location-1",
+      status: "ended"
+    }
+  ];
+  const related = getIXIAosRelatedContexts(location, contexts, relationships);
 
   assert.deepEqual(new Set(related.map(item => item.kind)), new Set(["work", "person", "machine"]));
+  assert.equal(getIXIAosRelationshipEvidence(location, contexts, relationships).length, 3);
+});
+
+test("parent fields and matching location text cannot fabricate a relationship", () => {
+  const contexts = buildIXIAosCommandContexts({
+    entity,
+    aosObjects: [...objects, canonicalMachine],
+    ownedListings,
+    systemIndexes: [equipmentIndex([{ objectId: "object-machine-1" }])]
+  });
+  const location = contexts.find(item => item.kind === "location");
+
+  assert.deepEqual(getIXIAosRelatedContexts(location, contexts, []), []);
+  assert.deepEqual(getIXIAosRelationshipEvidence(location, contexts, []), []);
+});
+
+test("TRAN$ACT admits 23 governed Equipment machines and rejects 19 unowned work machines", () => {
+  const machines = Array.from({ length: 42 }, (_, index) => ({
+    objectId: `machine-${index + 1}`,
+    objectType: index < 23 ? "machine" : undefined,
+    displayName: `Machine ${index + 1}`,
+    passportId: `IXI-MACHINE-${index + 1}`,
+    presentation: index < 23 ? undefined : { kind: "auction-work-machine" }
+  }));
+  const owned = machines.slice(0, 23);
+  const unowned = machines.slice(23);
+  const equipment = {
+    objectId: "equipment-index",
+    objectType: "system-index",
+    displayName: "Company Equipment",
+    passportId: "IXI-EQUIPMENT",
+    metadata: { systemIndex: true, adapterId: "ixi-owned-equipment" }
+  };
+  const systemIndexes = [equipmentIndex(
+    owned.map(machine => ({
+      objectId: machine.objectId,
+      passportId: machine.passportId
+    }))
+  )];
+  const governedRelationships = owned.map((machine, index) => ({
+    relationshipId: `equipment-rel-${index + 1}`,
+    sourceObjectId: machine.objectId,
+    targetObjectId: equipment.objectId,
+    behaviorId: "aos.rail-membership.v1",
+    status: "active"
+  }));
+  const relationships = [
+    ...governedRelationships,
+    { ...governedRelationships[0] },
+    {
+      relationshipId: "unowned-ended-rel",
+      sourceObjectId: unowned[0].objectId,
+      targetObjectId: equipment.objectId,
+      behaviorId: "aos.rail-membership.v1",
+      status: "ended"
+    }
+  ];
+  const contexts = buildIXIAosCommandContexts({
+    entity,
+    aosObjects: [equipment, ...machines],
+    ownedListings: machines.map(machine => ({
+      objectId: machine.objectId,
+      title: `${machine.displayName} presentation`,
+      passportId: machine.passportId
+    })),
+    systemIndexes
+  });
+  const groups = getIXIAosContextGroups(contexts);
+  const company = groups.company[0];
+
+  assert.equal(new Set(machines.map(machine => machine.objectId)).size, 42);
+  assert.equal(new Set(machines.map(machine => machine.passportId)).size, 42);
+  assert.equal(getIXITransactOwnedEquipmentObjectIds(systemIndexes).length, 23);
+  assert.equal(groups.machine.length, 23);
+  assert.equal(
+    unowned.some(machine => contexts.some(context => context.sourceId === machine.objectId)),
+    false
+  );
+  assert.equal(getIXIAosRelationshipEvidence(company, contexts, relationships).length, 23);
+  assert.equal(
+    getIXIAosRelatedContexts(company, contexts, relationships)
+      .filter(context => context.kind === "machine").length,
+    23
+  );
 });
 
 test("financial scope is explicit and never invents unsupported person or work mappings", () => {
@@ -141,6 +297,10 @@ test("recursive command center owns transact while the detailed ledger remains a
     new URL("../components/ixi-command-center/IXITransactCommandCenter.jsx", import.meta.url),
     "utf8"
   );
+  const commandModel = fs.readFileSync(
+    new URL("../components/ixi-command-center/IXIAosCommandCenterModel.js", import.meta.url),
+    "utf8"
+  );
 
   assert.match(transactPage, /IXITransactCommandCenter/u);
   assert.match(ledgerPage, /IXITransactDashboardApp/u);
@@ -155,4 +315,8 @@ test("recursive command center owns transact while the detailed ledger remains a
   assert.match(commandCenter, /VIEWS NEVER CHANGE POSTED TRUTH/u);
   assert.doesNotMatch(commandCenter, /createIXI|provision|passport\/ensure/u);
   assert.doesNotMatch(commandCenter, /returnTo=.*dashboard/u);
+  assert.match(commandModel, /getIXITransactOwnedEquipmentObjectIds/u);
+  assert.match(commandModel, /getIXIAosRelationshipEvidence/u);
+  assert.doesNotMatch(commandModel, /all\.filter\(item => item\.id !== context\.id\)/u);
+  assert.doesNotMatch(commandModel, /sameText|locationRelation|reverseLocationRelation/u);
 });
