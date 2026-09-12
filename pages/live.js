@@ -769,18 +769,21 @@ useEffect(() => {
 useEffect(() => {
   if (!router.isReady) return;
   if (id) return;
-
-  if (
-    !Array.isArray(listings) ||
-    listings.length === 0
-  ) {
-    return;
-  }
+  if (loading) return;
+  if (!isAuthenticated) return;
 
   const firstListingId =
-    getListingId(listings[0]);
+    Array.isArray(listings) &&
+    listings.length > 0
+      ? getListingId(listings[0])
+      : null;
 
-  if (!firstListingId) return;
+  if (!firstListingId) {
+    router.replace(
+      "/account/my-listings-v2"
+    );
+    return;
+  }
 
   router.replace(
     `/live?id=${encodeURIComponent(
@@ -790,6 +793,8 @@ useEffect(() => {
 }, [
   router.isReady,
   id,
+  loading,
+  isAuthenticated,
   listings
 ]);
   
@@ -1994,9 +1999,15 @@ async function saveExternalLinks() {
     await copyText("Share Message", message);
   }
 
+ const isResolvingBareLaunch =
+  router.isReady &&
+  !id &&
+  isAuthenticated;
+
  if (
   loading ||
-  directListingLoading
+  directListingLoading ||
+  isResolvingBareLaunch
 ) {
     return (
       <main className="loading">
