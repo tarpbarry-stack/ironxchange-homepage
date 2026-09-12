@@ -147,23 +147,40 @@ test("command contexts preserve recursive company, location, machine, person and
   assert.equal(groups.work.length, 1);
 });
 
-test("all six Locations survive normalized selected-presentation storage", () => {
-  const locations = Array.from({ length: 6 }, (_, index) => ({
+test("a mixed Locations projection keeps five Locations and one machine distinct", () => {
+  const locations = Array.from({ length: 5 }, (_, index) => ({
     objectId: `location-${index + 1}`,
     objectType: "customer-defined-container",
     displayName: `Operating Location ${index + 1}`,
     passportId: `IXI-LOCATION-${index + 1}`,
     ...(index < 3
       ? { cardTemplateSlug: `location-standard${index ? `-00${index + 1}` : ""}` }
-      : { selectedPresentation: { templateSlug: `location-standard-00${index - 1}` } })
+      : { selectedPresentation: { templateSlug: "aos-card-007" } })
   }));
+  const projectedMachine = {
+    objectId: "projected-machine-1",
+    objectType: "machine",
+    displayName: "2019 RIPPER OTHER - 2 Hrs",
+    passportId: "IXI-PROJECTED-MACHINE-1"
+  };
+  const locationsIndex = {
+    objectId: "locations-index",
+    metadata: { systemIndexPresentation: true },
+    items: [...locations, projectedMachine]
+  };
   const contexts = buildIXIAosCommandContexts({
     entity,
-    aosObjects: locations
+    aosObjects: [...locations, projectedMachine],
+    systemIndexes: [
+      equipmentIndex([{ objectId: projectedMachine.objectId }]),
+      locationsIndex
+    ]
   });
   const groups = getIXIAosContextGroups(contexts);
 
-  assert.equal(groups.location.length, 6);
+  assert.equal(locationsIndex.items.length, 6);
+  assert.equal(groups.location.length, 5);
+  assert.equal(groups.machine.length, 1);
   assert.deepEqual(
     groups.location.map(context => context.sourceId).sort(),
     locations.map(location => location.objectId).sort()
