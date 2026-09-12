@@ -497,20 +497,42 @@ test("shared scope denial is server authoritative", async () => {
   );
 });
 
-test("revision conflict reads authority and rolls back only the affected object", async () => {
+test("revision conflict rebases once and preserves unrelated authoritative movement", async () => {
   const { controller, server } = await readyController();
+  const concurrent = server.current();
+  concurrent.revision += 1;
+  concurrent.objects[B].currentPlacement = {
+    surfaceId: "pocketRight",
+    visualOrder: 0,
+    operatingState: "operating"
+  };
+  server.replaceSession(concurrent);
   server.conflictOnce();
-  const operation = controller.persistLayout({ board: [B], indexEquipment: [A] });
-  await assert.rejects(operation.completion, /revision conflict/);
-  assert.deepEqual(controller.readPlacements().board, [A, B]);
+
+  const operation = controller.persistLayout(
+    { board: [B], indexEquipment: [A] },
+    { objectIds: [A] }
+  );
+  await operation.completion;
+
+  assert.deepEqual(controller.readPlacements().indexEquipment, [A]);
+  assert.deepEqual(controller.readPlacements().pocketRight, [B]);
+  assert.equal(server.current().objects[B].currentPlacement.surfaceId, "pocketRight");
   assert.equal(server.calls.some(call => call.type === "read"), true);
+  const moveCalls = server.calls.filter(call =>
+    call.type === "command" &&
+    call.commandType === "objects.move"
+  );
+  assert.equal(moveCalls.length, 2);
+  assert.equal(moveCalls[0].commandId, moveCalls[1].commandId);
+  assert.notEqual(moveCalls[0].expectedRevision, moveCalls[1].expectedRevision);
   assert.equal(
     server.calls.some(call =>
       call.type === "command" &&
       call.commandType === "objects.undo"
     ),
     false,
-    "a rejected move must never trigger a blind server-side undo"
+    "a conflicted move must never trigger a blind server-side undo"
   );
 });
 
