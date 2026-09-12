@@ -147,6 +147,29 @@ test("command contexts preserve recursive company, location, machine, person and
   assert.equal(groups.work.length, 1);
 });
 
+test("all six Locations survive normalized selected-presentation storage", () => {
+  const locations = Array.from({ length: 6 }, (_, index) => ({
+    objectId: `location-${index + 1}`,
+    objectType: "customer-defined-container",
+    displayName: `Operating Location ${index + 1}`,
+    passportId: `IXI-LOCATION-${index + 1}`,
+    ...(index < 3
+      ? { cardTemplateSlug: `location-standard${index ? `-00${index + 1}` : ""}` }
+      : { selectedPresentation: { templateSlug: `location-standard-00${index - 1}` } })
+  }));
+  const contexts = buildIXIAosCommandContexts({
+    entity,
+    aosObjects: locations
+  });
+  const groups = getIXIAosContextGroups(contexts);
+
+  assert.equal(groups.location.length, 6);
+  assert.deepEqual(
+    groups.location.map(context => context.sourceId).sort(),
+    locations.map(location => location.objectId).sort()
+  );
+});
+
 test("location perspective resolves only active canonical IX-Core edges", () => {
   const contexts = buildIXIAosCommandContexts({
     entity,
