@@ -211,7 +211,19 @@ function sameObjectSet(left = [], right = []) {
 }
 
 function retryable(error) {
-  return !Number(error?.status) || RETRYABLE_CODES.has(clean(error?.code));
+  const status = Number(error?.status || 0);
+  const code = clean(error?.code);
+  const message = clean(error?.message).toLowerCase();
+
+  return (
+    RETRYABLE_CODES.has(code) ||
+    status === 408 ||
+    status === 429 ||
+    status >= 500 ||
+    error?.name === "AbortError" ||
+    message === "failed to fetch" ||
+    message.includes("network request failed")
+  );
 }
 
 export function createAosWorkspaceSessionController({
@@ -265,31 +277,61 @@ export function createAosWorkspaceSessionController({
     return running;
   }
 
+  async function readAuthoritativeSession({ hydratePlacements = false } = {}) {
+    if (!session) throw new Error("Workspace session is not open.");
+    const sessionId = clean(session.sessionId);
+    const placementScope = clean(session.placementScope);
+    const response = await transport.read({ sessionId, placementScope });
+    const next = sessionFromResponse(response);
+    if (!next) throw new Error("IX-Core did not return the authoritative workspace session.");
+    if (
+      clean(next.sessionId) !== sessionId ||
+      clean(next.placementScope) !== placementScope
+    ) {
+      const error = new Error("Workspace session changed before readback was applied.");
+      error.code = "WORKSPACE_SESSION_IDENTITY_CHANGED";
+      throw error;
+    }
+    publishSession(next, { hydratePlacements });
+    return clone(session);
+  }
+
   async function applyCommand({ commandId, commandType, payload }) {
     if (!session) throw new Error("Workspace session is not open.");
+
+    /*
+     * Freeze the complete command identity. A network retry must never combine
+     * an old revision with a newly opened session or a different scope.
+     */
+    const commandSessionId = clean(session.sessionId);
+    const commandPlacementScope = clean(session.placementScope);
     const expectedRevision = Number(session.revision);
     const request = () => transport.command({
-      sessionId: session.sessionId,
-      placementScope: session.placementScope,
+      sessionId: commandSessionId,
+      placementScope: commandPlacementScope,
       commandId,
       expectedRevision,
       commandType,
       payload
     });
+
     try {
       const response = await withStableRetry(request);
       const next = sessionFromResponse(response);
       if (!next) throw new Error("IX-Core did not return the authoritative workspace session.");
+      if (
+        clean(next.sessionId) !== commandSessionId ||
+        clean(next.placementScope) !== commandPlacementScope
+      ) {
+        const error = new Error("Workspace session changed before this command was applied.");
+        error.code = "WORKSPACE_SESSION_IDENTITY_CHANGED";
+        throw error;
+      }
       publishSession(next);
       return response;
     } catch (error) {
       if (error?.code === "WORKSPACE_SESSION_REVISION_CONFLICT") {
-        const readback = await transport.read({
-          sessionId: session.sessionId,
-          placementScope: session.placementScope
-        });
-        const next = sessionFromResponse(readback);
-        if (next) publishSession(next);
+        await readAuthoritativeSession();
       }
       throw error;
     }
@@ -485,14 +527,13 @@ export function createAosWorkspaceSessionController({
         }
         return { ok: true, operationId, changedObjectIds: changed };
       } catch (error) {
-        const eligible = rollbackLocal(operationId);
-        if (captureUndo && eligible.length) {
-          try {
-            await undoServerOperation(operationId, eligible);
-          } catch (undoError) {
-            onError(undoError);
-          }
-        }
+        /*
+         * A rejected placement command has no proven server snapshot to undo.
+         * Roll back only this operation's still-current local objects. IX-Core
+         * idempotency resolves lost-success responses; a blind objects.undo
+         * here can only target a stale or unrelated returnSnapshot.
+         */
+        rollbackLocal(operationId);
         throw error;
       }
     });
@@ -665,6 +706,9 @@ export function createAosWorkspaceSessionController({
     summon,
     summonMany,
     end,
+    refresh: () => enqueue(() =>
+      readAuthoritativeSession({ hydratePlacements: true })
+    ),
     readSession: () => clone(session),
     readPlacements: () => clone(placements),
     readOperation: operationId => clone(operations.get(operationId) || null),
