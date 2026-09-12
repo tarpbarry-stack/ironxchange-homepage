@@ -2,6 +2,9 @@ import { useRef, useState } from "react";
 import dynamic from "next/dynamic";
 
 import { captureIXEvent } from "../../../lib/posthog";
+import {
+  openIXIPassportEmail
+} from "../../../lib/marketplace/passportEmailEvents";
 
 import IXIObjectCardActuator
   from "../../ixi-chassis/IXIObjectCardActuator";
@@ -567,6 +570,7 @@ onCycleMachineFace={onCycleMachineFace}
   onCycleColor={cycleBoardColor}
   onCycleOutline={cycleBoardOutline}
   onToggleSaved={onToggleSaved}
+  onRailSend={openIXIPassportEmail}
   armedDestination={armedDestination}
   onSendToArmedDestination={onSendToArmedDestination}
 />

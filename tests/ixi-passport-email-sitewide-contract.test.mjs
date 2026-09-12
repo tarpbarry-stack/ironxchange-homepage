@@ -34,12 +34,23 @@ test("Passport delivery telemetry completes only after confirmed success", () =>
   assert.ok(failed > completed);
 });
 
-test("every IXI machine-card rail falls back to Passport email", () => {
+test("only machine-card families wire their rails to Passport email", () => {
   const rail = read("components/IXIMachineRail.js");
+  const marketplace = read(
+    "components/ixi-machine-card/marketplace/MarketplaceListingCard.js"
+  );
+  const privateCard = read(
+    "components/ixi-machine-card/private/PrivateListingCard.js"
+  );
+  const auction = read(
+    "components/ixi-machine-card/auction/AuctionListingCard.js"
+  );
 
-  assert.match(rail, /openIXIPassportEmail\(listing\)/u);
-  assert.match(rail, /if \(onRailSend\)/u);
-  assert.match(rail, /aria-label="Email machine Passport"/u);
+  assert.doesNotMatch(rail, /openIXIPassportEmail/u);
+  assert.match(rail, /onRailSend\?\.\(listing\)/u);
+  assert.match(marketplace, /onRailSend=\{openMarketplaceDistribution\}/u);
+  assert.match(privateCard, /onRailSend=\{openIXIPassportEmail\}/u);
+  assert.match(auction, /onRailSend=\{openIXIPassportEmail\}/u);
 });
 
 test("Marketplace cards use the shared Passport email event", () => {

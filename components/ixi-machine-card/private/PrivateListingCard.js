@@ -3,6 +3,9 @@ import dynamic from "next/dynamic";
 // DnD is owned by IXISortableMachineCard wrapper.
 
 import { captureIXEvent } from "../../../lib/posthog";
+import {
+  openIXIPassportEmail
+} from "../../../lib/marketplace/passportEmailEvents";
 
 import {
   cleanMachineTitle,
@@ -806,6 +809,7 @@ onMachinePlacementChange ? (
     onCycleColor={cycleBoardColor}
     onCycleOutline={cycleBoardOutline}
     onToggleSaved={onToggleSaved}
+    onRailSend={openIXIPassportEmail}
     armedDestination={armedDestination}
     onSendToArmedDestination={onSendToArmedDestination}
 
