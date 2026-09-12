@@ -71,34 +71,24 @@ test("every operating card uses the full-width command geometry and exact handle
   assert.doesNotMatch(modules, /onReturn=\{\s*onRecall\s*\}/u);
 });
 
-test("container Recall gathers every canonical member into that container and Return owns the operation snapshot", async () => {
+test("container Recall uses immutable session origin and Return owns only its snapshot", async () => {
   const work = await read("pages/aos/work.js");
   const recallImplementation = work.match(
     /async function recallContainerChildren\(container\)([\s\S]*?)\n\}\n\s*\nfunction moveMachineToContainer/u
   )?.[1] || "";
 
   assert.match(
-    work,
-    /async function recallContainerChildren\(container\)[\s\S]*?getContainerRequestedChildIds\(container\)[\s\S]*?targetSurface[\s\S]*?"indexEquipment"[\s\S]*?`container:\$\{containerId\}`/u
-  );
-  assert.match(
-    work,
-    /moveObjectToWorkspaceSurface\(\{[\s\S]*?objectId,[\s\S]*?targetSurface[\s\S]*?controller\.persistLayout\(recalledPlacements,[\s\S]*?objectIds: childIds/u
-  );
-  assert.match(
-    work,
-    /containerReturnSnapshotsRef\.current\[containerId\] = \{[\s\S]*?operationId,[\s\S]*?childIds: \[\.\.\.childIds\]/u
-  );
-  assert.doesNotMatch(
-    work,
-    /async function recallContainerChildren\(container\)[\s\S]{0,900}?controller\.recall\(childIds\)/u
-  );
-  assert.doesNotMatch(
     recallImplementation,
-    /hasContainerReturnSnapshot/u,
-    "Recall must replace the Board snapshot; an existing Return snapshot cannot suppress the command"
+    /getContainerRequestedChildIds\(container\)[\s\S]*?controller\.recall\(childIds\)/u
   );
+  assert.match(
+    recallImplementation,
+    /operationId: recalled\.operationId[\s\S]*?childIds: \[\.\.\.childIds\]/u
+  );
+  assert.doesNotMatch(recallImplementation, /targetSurface/u);
+  assert.doesNotMatch(recallImplementation, /persistLayout/u);
 });
+
 test("container Board exposes every canonical member from authoritative session state in one governed operation", async () => {
   const work = await read("pages/aos/work.js");
 
@@ -113,5 +103,10 @@ test("container Board exposes every canonical member from authoritative session 
   assert.doesNotMatch(
     work,
     /async function boardContainerChildren\(container\)[\s\S]{0,1400}?summonMany\(/u
+  );
+  assert.doesNotMatch(
+    work,
+    /async function boardContainerChildren\(container\)[\s\S]{0,500}?hasContainerReturnSnapshot/u,
+    "an older Return snapshot cannot silently disable Board or OUT"
   );
 });
