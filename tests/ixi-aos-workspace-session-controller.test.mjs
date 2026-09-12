@@ -504,6 +504,50 @@ test("revision conflict reads authority and rolls back only the affected object"
   await assert.rejects(operation.completion, /revision conflict/);
   assert.deepEqual(controller.readPlacements().board, [A, B]);
   assert.equal(server.calls.some(call => call.type === "read"), true);
+  assert.equal(
+    server.calls.some(call =>
+      call.type === "command" &&
+      call.commandType === "objects.undo"
+    ),
+    false,
+    "a rejected move must never trigger a blind server-side undo"
+  );
+});
+
+test("application errors are not retried as network failures", async () => {
+  const server = createServer();
+  const originalCommand = server.transport.command;
+  let rejectedMoveAttempts = 0;
+  server.transport.command = async request => {
+    if (request.commandType === "objects.move") {
+      rejectedMoveAttempts += 1;
+      const error = new Error("Return snapshot does not match this operation.");
+      error.code = "WORKSPACE_RETURN_SNAPSHOT_MISMATCH";
+      error.status = 409;
+      throw error;
+    }
+    return originalCommand(request);
+  };
+
+  const { controller } = await readyController({ server });
+  const operation = controller.persistLayout(
+    { board: [B], indexEquipment: [A] },
+    { operationId: "application-error-operation", objectIds: [A] }
+  );
+
+  await assert.rejects(
+    operation.completion,
+    error => error.code === "WORKSPACE_RETURN_SNAPSHOT_MISMATCH"
+  );
+  assert.equal(rejectedMoveAttempts, 1);
+  assert.equal(
+    server.calls.some(call =>
+      call.type === "command" &&
+      call.commandType === "objects.undo"
+    ),
+    false
+  );
+  assert.deepEqual(controller.readPlacements().board, [A, B]);
 });
 
 test("session validation rejects origin mutation and alias placement keys", () => {
