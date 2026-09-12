@@ -1393,14 +1393,30 @@ function getContainerRequestedChildIds(request) {
 
 function getContainerReturnSnapshot(container) {
   const containerId = getContainerObjectId(container);
+  const controller = workspaceSessionControllerRef.current;
+  const authoritativeSession =
+    controller?.readSession?.() ||
+    aosWorkspaceSession;
   const local = containerReturnSnapshotsRef.current[containerId];
-  if (local?.operationId) return local;
+
+  if (local?.operationId) {
+    const localChildIds = Array.isArray(local.childIds) ? local.childIds : [];
+    const localStillAuthoritative =
+      localChildIds.length > 0 &&
+      localChildIds.every(objectId =>
+        String(
+          authoritativeSession?.objects?.[objectId]?.returnSnapshot?.operationId || ""
+        ).trim() === local.operationId
+      );
+    if (localStillAuthoritative) return local;
+    delete containerReturnSnapshotsRef.current[containerId];
+  }
 
   const childIds = getDirectContainerChildIds(container?.container || container);
   const byOperation = new Map();
   childIds.forEach(objectId => {
     const operationId = String(
-      aosWorkspaceSession?.objects?.[objectId]?.returnSnapshot?.operationId || ""
+      authoritativeSession?.objects?.[objectId]?.returnSnapshot?.operationId || ""
     ).trim();
     if (!operationId) return;
     if (!byOperation.has(operationId)) byOperation.set(operationId, []);
@@ -1411,15 +1427,14 @@ function getContainerReturnSnapshot(container) {
   return { operationId, childIds: snapshotChildIds };
 }
 
-function hasContainerReturnSnapshot(container) {
-  return Boolean(getContainerReturnSnapshot(container)?.operationId);
-}
-
 async function returnContainerChildren(container) {
   const containerId = getContainerObjectId(container);
-  const snapshot = getContainerReturnSnapshot(container);
   const controller = workspaceSessionControllerRef.current;
-  if (!containerId || !snapshot?.operationId || !controller) return;
+  if (!containerId || !controller) return;
+
+  await controller.refresh();
+  const snapshot = getContainerReturnSnapshot(container);
+  if (!snapshot?.operationId) return;
 
   await controller.undo(snapshot.operationId);
   delete containerReturnSnapshotsRef.current[containerId];
@@ -1429,14 +1444,7 @@ async function boardContainerChildren(container) {
   const containerId = getContainerObjectId(container);
   const childIds = getContainerRequestedChildIds(container);
   const controller = workspaceSessionControllerRef.current;
-  if (
-    !containerId ||
-    !childIds.length ||
-    !controller ||
-    hasContainerReturnSnapshot(container)
-  ) {
-    return;
-  }
+  if (!containerId || !childIds.length || !controller) return;
 
   let nextPlacements = controller.readPlacements();
   childIds.forEach(objectId => {
@@ -1448,11 +1456,6 @@ async function boardContainerChildren(container) {
   });
 
   const operationId = createMosCommandId("aos-board");
-  containerReturnSnapshotsRef.current[containerId] = {
-    operationId,
-    childIds: [...childIds]
-  };
-
   const boarded = controller.persistLayout(nextPlacements, {
     operationId,
     objectIds: childIds,
@@ -1461,6 +1464,12 @@ async function boardContainerChildren(container) {
 
   try {
     await boarded.completion;
+    if (boarded.changedObjectIds.length) {
+      containerReturnSnapshotsRef.current[containerId] = {
+        operationId,
+        childIds: [...boarded.changedObjectIds]
+      };
+    }
   } catch (error) {
     delete containerReturnSnapshotsRef.current[containerId];
     throw error;
@@ -1471,44 +1480,13 @@ async function recallContainerChildren(container) {
   const containerId = getContainerObjectId(container);
   const childIds = getContainerRequestedChildIds(container);
   const controller = workspaceSessionControllerRef.current;
-  if (
-    !containerId ||
-    !childIds.length ||
-    !controller
-  ) {
-    return;
-  }
+  if (!containerId || !childIds.length || !controller) return;
 
-  const targetSurface =
-    String(container?.indexId || "").trim() === "equipment"
-      ? "indexEquipment"
-      : `container:${containerId}`;
-  let recalledPlacements = controller.readPlacements();
-  childIds.forEach(objectId => {
-    recalledPlacements = moveObjectToWorkspaceSurface({
-      placements: recalledPlacements,
-      objectId,
-      targetSurface
-    });
-  });
-
-  const operationId = createMosCommandId("aos-container-recall");
+  const recalled = await controller.recall(childIds);
   containerReturnSnapshotsRef.current[containerId] = {
-    operationId,
+    operationId: recalled.operationId,
     childIds: [...childIds]
   };
-
-  const recalled = controller.persistLayout(recalledPlacements, {
-    operationId,
-    objectIds: childIds
-  });
-
-  try {
-    await recalled.completion;
-  } catch (error) {
-    delete containerReturnSnapshotsRef.current[containerId];
-    throw error;
-  }
 }
   
 function moveMachineToContainer(machineId, targetContainer) {
