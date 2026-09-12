@@ -226,6 +226,57 @@ function retryable(error) {
   );
 }
 
+function rebaseCommandPayload(session, commandType, payload = {}) {
+  if (commandType === "objects.move") {
+    let rebasedPlacements = workspacePlacementsFromSession(session, {});
+    const affectedSurfaces = new Set();
+
+    (payload.objects || []).forEach(item => {
+      const objectId = canonicalObjectId(item?.objectId);
+      const before = locateWorkspaceObject(rebasedPlacements, objectId);
+      if (before?.surfaceId) affectedSurfaces.add(before.surfaceId);
+      if (item?.surfaceId) affectedSurfaces.add(clean(item.surfaceId));
+      rebasedPlacements = placeOneObject(rebasedPlacements, objectId, item);
+    });
+
+    return {
+      ...payload,
+      surfaceOrders: [...affectedSurfaces].filter(Boolean).map(surfaceId => ({
+        surfaceId,
+        orderedObjectIds: (rebasedPlacements[surfaceId] || [])
+          .map(canonicalObjectId)
+          .filter(objectId => session?.objects?.[objectId])
+      }))
+    };
+  }
+
+  if (commandType === "objects.admit") {
+    return {
+      ...payload,
+      objects: (payload.objects || []).filter(item =>
+        !session?.objects?.[canonicalObjectId(item?.objectId)]
+      )
+    };
+  }
+
+  if (commandType === "objects.undo") {
+    (payload.objectIds || []).forEach(value => {
+      const objectId = canonicalObjectId(value);
+      const snapshotOperationId = clean(
+        session?.objects?.[objectId]?.returnSnapshot?.operationId
+      );
+      if (snapshotOperationId !== clean(payload.operationId)) {
+        const error = new Error("Return snapshot is stale for this operation.");
+        error.code = "WORKSPACE_RETURN_SNAPSHOT_STALE";
+        error.status = 409;
+        throw error;
+      }
+    });
+  }
+
+  return clone(payload);
+}
+
 export function createAosWorkspaceSessionController({
   transport,
   relationshipTransport = null,
@@ -330,10 +381,36 @@ export function createAosWorkspaceSessionController({
       publishSession(next);
       return response;
     } catch (error) {
-      if (error?.code === "WORKSPACE_SESSION_REVISION_CONFLICT") {
-        await readAuthoritativeSession();
+      if (error?.code !== "WORKSPACE_SESSION_REVISION_CONFLICT") throw error;
+
+      await readAuthoritativeSession();
+      const retryPayload = rebaseCommandPayload(session, commandType, payload);
+
+      if (
+        commandType === "objects.admit" &&
+        (!retryPayload.objects || retryPayload.objects.length === 0)
+      ) {
+        return {
+          ok: true,
+          result: { changed: false, session: clone(session) },
+          replayedAfterReadback: true
+        };
       }
-      throw error;
+
+      const retryResponse = await withStableRetry(() => transport.command({
+        sessionId: commandSessionId,
+        placementScope: commandPlacementScope,
+        commandId,
+        expectedRevision: Number(session.revision),
+        commandType,
+        payload: retryPayload
+      }));
+      const retrySession = sessionFromResponse(retryResponse);
+      if (!retrySession) {
+        throw new Error("IX-Core did not return the authoritative workspace session.");
+      }
+      publishSession(retrySession, { hydratePlacements: true });
+      return retryResponse;
     }
   }
 
