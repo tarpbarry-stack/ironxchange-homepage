@@ -1,3 +1,8 @@
+import {
+  getPocketFrontMachine,
+  openIXIPassportEmail
+} from "../../lib/marketplace/passportEmailEvents";
+
 export default function IXIPocketR2({
   rightPocket2Mode,
   machineContainers,
@@ -58,7 +63,19 @@ outline: "none"
       type="button"
       className="ixi-pocket-rail-action send"
       aria-label="Send Pocket IV machines"
+      title="Email the front machine Passport"
       data-label="SEND"
+      disabled={(machineContainers.pocketRight2 || []).length === 0}
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        openIXIPassportEmail(
+          getPocketFrontMachine({
+            machineIds: machineContainers.pocketRight2 || [],
+            getListingById
+          })
+        );
+      }}
     />
 
     <button

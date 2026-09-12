@@ -1,4 +1,7 @@
 import { useEffect, useRef, useState } from "react";
+import {
+  captureMarketplaceIntelligence
+} from "../../lib/marketplace/cardIntelligence";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/u;
 
@@ -73,6 +76,11 @@ export default function PassportEmailDialog({
 
     setStatus("sending");
     setFeedback("");
+    captureMarketplaceIntelligence("listing_share_email_requested", {
+      listing_id: listingId,
+      channel: "email",
+      result: "requested"
+    });
 
     try {
       const response = await fetch("/api/marketplace/share-email", {
@@ -103,6 +111,12 @@ export default function PassportEmailDialog({
       setFeedback(
         `Passport sent to ${payload.recipientCount} ${payload.recipientCount === 1 ? "recipient" : "recipients"}.`
       );
+      captureMarketplaceIntelligence("listing_share_completed", {
+        listing_id: listingId,
+        channel: "email",
+        result: "email_delivered",
+        replayed: Boolean(payload.replayed)
+      });
     } catch (error) {
       setStatus("error");
       setFeedback(
@@ -110,6 +124,12 @@ export default function PassportEmailDialog({
         "IXI Machine Passport email could not be delivered."
       );
       setSendToken(createSendToken());
+      captureMarketplaceIntelligence("listing_share_failed", {
+        listing_id: listingId,
+        channel: "email",
+        result: "failed",
+        error_code: error?.code || "email_send_failed"
+      });
     }
   }
 

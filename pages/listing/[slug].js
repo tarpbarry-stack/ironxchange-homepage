@@ -40,6 +40,9 @@ import {
 import {
   loadIXIListingDetails
 } from "../../lib/listings/IXIListingDetailClient";
+import {
+  openIXIPassportEmail
+} from "../../lib/marketplace/passportEmailEvents";
 
 const BRAND_YELLOW = "#FFC400";
 
@@ -1042,6 +1045,14 @@ function cycleSlugOutline(e) {
                   <h2>Send This Machine</h2>
 
                   <div className="buyer-launch-stack">
+                    <button
+                      type="button"
+                      onClick={() => openIXIPassportEmail(listing)}
+                    >
+                      <i className="fa-solid fa-envelope"></i>
+                      <span>Email Passport</span>
+                    </button>
+
                     <button type="button" onClick={openWhatsApp}>
                       <i className="fa-brands fa-whatsapp whatsapp-icon"></i>
                       <span>WhatsApp</span>

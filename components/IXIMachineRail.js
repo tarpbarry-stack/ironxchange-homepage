@@ -3,6 +3,10 @@
 // One half of IXI Machine Controls™.
 // The other half is IXIEnvironmentRail.
 
+import {
+  openIXIPassportEmail
+} from "../lib/marketplace/passportEmailEvents";
+
 export default function IXIMachineRail({
   listing,
   saved,
@@ -72,9 +76,13 @@ export default function IXIMachineRail({
   onClick={e => {
     e.preventDefault();
     e.stopPropagation();
-    onRailSend?.(listing);
+    if (onRailSend) {
+      onRailSend?.(listing);
+      return;
+    }
+    openIXIPassportEmail(listing);
   }}
-  aria-label="Send machine"
+  aria-label="Email machine Passport"
 />
     
 <button

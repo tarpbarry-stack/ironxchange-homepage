@@ -4,6 +4,9 @@ import dynamic from "next/dynamic";
 
 import { captureIXEvent } from "../../../lib/posthog";
 import { loadIXIListingDetails } from "../../../lib/listings/IXIListingDetailClient";
+import {
+  openIXIPassportEmail
+} from "../../../lib/marketplace/passportEmailEvents";
 
 import {
   cleanMachineTitle,
@@ -458,14 +461,7 @@ function openMarketplaceDistribution(listingToShare) {
     return;
   }
 
-  window.dispatchEvent(
-    new CustomEvent(
-      "ixi:marketplace-distribution-open",
-      {
-        detail: { listing: listingToShare }
-      }
-    )
-  );
+  openIXIPassportEmail(listingToShare);
 }
 
   function getSmartPhotoFit(photoUrl) {
