@@ -1,11 +1,6 @@
 import { createHash, randomUUID } from "node:crypto";
 
 import {
-  SESv2Client,
-  SendEmailCommand
-} from "@aws-sdk/client-sesv2";
-
-import {
   buildPassportPresentation
 } from "../../../lib/passport/buildPassportPresentation";
 import renderPassportEmailHtml
@@ -20,6 +15,10 @@ import loadDistributionListing
 import {
   getMarketplaceDistributionUrl
 } from "../../../lib/marketplace/distributionLinks";
+import resolveAosBrowserSession
+  from "../../../lib/server/aos/resolveAosBrowserSession";
+import requestIxCorePassportEmail
+  from "../../../lib/server/email/ixiPassportEmailClient.mjs";
 
 const MAX_RECIPIENTS = 5;
 const MAX_MESSAGE_LENGTH = 500;
@@ -181,13 +180,6 @@ function addPersonalNote(email, message) {
   };
 }
 
-function createSesClient() {
-  return new SESv2Client({
-    region:
-      process.env.SES_REGION || process.env.AWS_REGION || "us-east-2"
-  });
-}
-
 export default async function handler(req, res) {
   const requestId = randomUUID();
   res.setHeader("X-Request-ID", requestId);
@@ -206,6 +198,7 @@ export default async function handler(req, res) {
 
   try {
     assertSameOrigin(req);
+    const session = await resolveAosBrowserSession(req, res);
     const baseUrl = String(
       process.env.MARKETPLACE_CANONICAL_ORIGIN ||
         process.env.NEXT_PUBLIC_MARKETPLACE_CANONICAL_ORIGIN ||
@@ -224,11 +217,11 @@ export default async function handler(req, res) {
 
     const { value, replayed } =
       await runMarketplaceDistributionIdempotently({
-        key: `marketplace-share:${clientFingerprint}:${idempotencyKey}`,
+        key: `marketplace-share:${session.userId}:${clientFingerprint}:${idempotencyKey}`,
         fingerprint,
         task: async () => {
           consumeMarketplaceDistributionRate({
-            key: `marketplace-share:${clientFingerprint}`,
+            key: `marketplace-share:${session.userId}:${clientFingerprint}`,
             limit: 30,
             windowMs: 15 * 60 * 1000
           });
@@ -247,32 +240,41 @@ export default async function handler(req, res) {
             renderPassportEmailHtml({ presentation, baseUrl }),
             message
           );
-          const fromEmail = String(
-            process.env.SES_FROM_EMAIL || "passport@ironxchange.com"
+          const passportId = String(
+            listing.passportId ||
+            presentation.passportId ||
+            ""
           ).trim();
-          const replyTo = String(
-            process.env.SES_REPLY_TO_EMAIL || fromEmail
-          ).trim();
-          const result = await createSesClient().send(
-            new SendEmailCommand({
-              FromEmailAddress: fromEmail,
-              Destination: { ToAddresses: recipients },
-              ReplyToAddresses: [replyTo],
-              Content: {
-                Simple: {
-                  Subject: { Data: email.subject, Charset: "UTF-8" },
-                  Body: {
-                    Html: { Data: email.html, Charset: "UTF-8" },
-                    Text: { Data: email.text, Charset: "UTF-8" }
-                  }
-                }
-              }
-            })
-          );
+
+          if (!passportId) {
+            const error = new Error(
+              "This listing does not have an IXI Machine Passport."
+            );
+            error.code = "PASSPORT_NOT_AVAILABLE";
+            error.status = 409;
+            throw error;
+          }
+
+          const result = await requestIxCorePassportEmail({
+            passportId,
+            principalId: session.userId,
+            idempotencyKey,
+            body: {
+              listingId,
+              recipients,
+              subject: email.subject,
+              text: email.text,
+              html: email.html,
+              idempotencyKey
+            }
+          });
 
           return {
-            recipientCount: recipients.length,
-            messageId: result.MessageId || ""
+            recipientCount:
+              Number(result?.delivery?.recipientCount) ||
+              recipients.length,
+            replayed:
+              Boolean(result?.delivery?.replayed)
           };
         }
       });
