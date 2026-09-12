@@ -314,6 +314,48 @@ function buildMachineContext(listing = {}) {
   };
 }
 
+function getProjectedKindOverrides(systemIndexes = []) {
+  const overrides = new Map();
+
+  safeArray(systemIndexes).forEach(index => {
+    if (clean(index?.metadata?.adapterId) === IXI_OWNED_EQUIPMENT_ADAPTER_ID) {
+      return;
+    }
+
+    const projectedItems = safeArray(index?.items);
+    const kindCounts = new Map();
+
+    projectedItems.forEach(item => {
+      const kind = getObjectKind(item);
+      if (kind === "object") return;
+      kindCounts.set(kind, (kindCounts.get(kind) || 0) + 1);
+    });
+
+    const rankedKinds = [...kindCounts.entries()]
+      .sort((left, right) => right[1] - left[1]);
+    const [dominantKind, dominantCount] = rankedKinds[0] || [];
+    const runnerUpCount = rankedKinds[1]?.[1] || 0;
+
+    /*
+     * A persisted System Index is governed projection evidence. When legacy
+     * members have only the neutral Object presentation, inherit the unique
+     * dominant canonical member kind from that projection. Never overwrite an
+     * explicit kind: a machine related to Locations remains a machine.
+     */
+    if (!dominantKind || dominantCount < 2 || dominantCount <= runnerUpCount) {
+      return;
+    }
+
+    projectedItems.forEach(item => {
+      if (getObjectKind(item) !== "object") return;
+      const objectId = getObjectId(item);
+      if (objectId) overrides.set(objectId, dominantKind);
+    });
+  });
+
+  return overrides;
+}
+
 export function buildIXIAosCommandContexts({
   entity = {},
   aosObjects = [],
@@ -331,10 +373,14 @@ export function buildIXIAosCommandContexts({
   const ownedEquipmentIds = new Set(
     getIXITransactOwnedEquipmentObjectIds(systemIndexes)
   );
+  const projectedKindOverrides = getProjectedKindOverrides(systemIndexes);
 
   safeArray(aosObjects)
     .map(buildMosContext)
     .filter(Boolean)
+    .map(context => context.kind === "object" && projectedKindOverrides.has(context.sourceId)
+      ? { ...context, kind: projectedKindOverrides.get(context.sourceId) }
+      : context)
     .filter(context =>
       context.kind !== "machine" || ownedEquipmentIds.has(context.sourceId)
     )
