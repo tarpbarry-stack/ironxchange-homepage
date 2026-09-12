@@ -91,6 +91,21 @@ test("Live and the public slug expose the exact Passport email dialog", () => {
   assert.match(postFree, /<IXIMachineCard/u);
 });
 
+test("Post Free preview cannot claim delivery before a Passport exists", () => {
+  const provider = read(
+    "components/ixi-marketplace/ListingShareProvider.jsx"
+  );
+  const dialog = read("components/passport/PassportEmailDialog.jsx");
+
+  assert.match(provider, /post-free-preview/u);
+  assert.match(
+    provider,
+    /Post this machine to create its Passport before emailing\./u
+  );
+  assert.match(dialog, /Post machine first/u);
+  assert.match(dialog, /status === "sending" \|\| unavailableReason/u);
+});
+
 test("Pocket Send emails the front visible machine without changing placement", () => {
   const helper = read("lib/marketplace/passportEmailEvents.js");
   const pockets = [

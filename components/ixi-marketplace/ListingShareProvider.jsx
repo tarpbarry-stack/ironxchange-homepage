@@ -19,12 +19,20 @@ const PassportEmailDialog = dynamic(
 function snapshotListing(listing = {}) {
   const publicData =
     listing.publicData || listing.attributes?.publicData || {};
+  const id = getMarketplaceDistributionListingId(listing);
+  const isCreationPreview = [
+    "post-free-preview",
+    "preview-listing"
+  ].includes(id);
 
   return {
-    id: getMarketplaceDistributionListingId(listing),
+    id,
     title:
       listing.title || listing.attributes?.title || "Equipment listing",
-    passportId: listing.passportId || publicData.passportId || ""
+    passportId: listing.passportId || publicData.passportId || "",
+    unavailableReason: isCreationPreview
+      ? "Post this machine to create its Passport before emailing."
+      : ""
   };
 }
 
@@ -70,6 +78,7 @@ export default function ListingShareProvider({ children }) {
         listingId={listing?.id || ""}
         passportId={listing?.passportId || ""}
         title={listing?.title || "Equipment listing"}
+        unavailableReason={listing?.unavailableReason || ""}
       />
     </>
   );
