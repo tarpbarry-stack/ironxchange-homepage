@@ -9,6 +9,8 @@ import {
 } from "../../lib/machines/IXIMachineFileAdapter";
 
 import SellerLogoDecal from "../../components/SellerLogoDecal";
+import PassportEmailDialog
+  from "../../components/passport/PassportEmailDialog";
 
 import Navbar from "../../components/Navbar";
 
@@ -171,6 +173,7 @@ export default function ListingPage() {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
   const [loggedIn, setLoggedIn] = useState(false);
+  const [emailOpen, setEmailOpen] = useState(false);
   const [copied, setCopied] = useState("");
   const [slugIxiState, setSlugIxiState] = useState({
   color: "none",
@@ -830,6 +833,21 @@ function cycleSlugOutline(e) {
 )}
 
   <div className="seller-actions">
+    <button
+      type="button"
+      className="email-btn"
+      onClick={() => {
+        if (!loggedIn) {
+          window.location.href =
+            `/login?next=${encodeURIComponent(router.asPath)}`;
+          return;
+        }
+        setEmailOpen(true);
+      }}
+    >
+      Email Passport
+    </button>
+
     <a
       href={
         loggedIn
@@ -873,6 +891,14 @@ function cycleSlugOutline(e) {
 </div>
   </div>
 </section>
+
+       <PassportEmailDialog
+  open={emailOpen}
+  onClose={() => setEmailOpen(false)}
+  listingId={String(getListingId(listing) || listing.id || "")}
+  passportId={passport?.passportId || ""}
+  title={title}
+/>
 
        <IXInspectLightbox
   open={lightboxOpen}
@@ -1534,6 +1560,7 @@ function cycleSlugOutline(e) {
   transform: translateY(-1px);
 }
 
+  .email-btn,
   .message-btn,
   .yard-btn,
   .call-btn {
@@ -1582,6 +1609,14 @@ function cycleSlugOutline(e) {
       box-shadow 0.14s ease;
   }
 
+  .email-btn {
+    min-width: 118px;
+    color: #111111;
+    background: #ffc400;
+    border: 1px solid #ffc400;
+    cursor: pointer;
+  }
+
   .message-btn {
     min-width: 91px;
 
@@ -1598,6 +1633,7 @@ function cycleSlugOutline(e) {
       #131313;
   }
 
+  .email-btn:hover,
   .message-btn:hover,
   .yard-btn:hover,
   .call-btn:hover {
@@ -1930,6 +1966,7 @@ function cycleSlugOutline(e) {
       transform: none;
     }
 
+    .email-btn,
     .message-btn,
     .yard-btn,
     .call-btn {
