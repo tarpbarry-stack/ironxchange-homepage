@@ -213,8 +213,19 @@ function getObjectKind(record = {}) {
     record?.presentation?.kind,
     record?.presentation?.sourceAdapterId,
     record?.presentation?.renderer,
+    record?.presentation?.templateSlug,
+    record?.presentation?.templateId,
     record?.selectedPresentation?.kind,
-    record?.selectedPresentation?.sourceAdapterId
+    record?.selectedPresentation?.sourceAdapterId,
+    record?.selectedPresentation?.templateSlug,
+    record?.selectedPresentation?.templateId,
+    record?.selectedCardTemplate?.templateSlug,
+    record?.selectedCardTemplate?.templateId,
+    record?.definition?.cardTemplateSlug,
+    record?.definition?.templateSlug,
+    record?.metadata?.cardTemplateSlug,
+    record?.metadata?.templateSlug,
+    record?.metadata?.cardDefinition?.templateSlug
   ].filter(Boolean).join(" "));
 
   if (/work-order|workorder|service-order|repair-order/.test(identity)) return "work";
