@@ -1,0 +1,157 @@
+name: Deploy IX-Core Passport email production
+
+on:
+  workflow_dispatch:
+    inputs:
+      commit_sha:
+        description: Immutable IX-Core commit SHA
+        required: true
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/deploy-ixi-core-passport-email-production.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ixi-core-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+      AWS_INSTANCE_ID: ${{ secrets.AWS_INSTANCE_ID }}
+      IXI_CORE_SHA: ${{ inputs.commit_sha || 'c958e9cf58e38bfdb379afffdbbd19e0aa410370' }}
+
+    steps:
+      - name: Validate immutable release
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! [[ "$IXI_CORE_SHA" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "IXI_CORE_SHA must be a full Git commit SHA" >&2
+            exit 1
+          fi
+          resolved_sha="$(curl -fsSL -H 'Accept: application/vnd.github+json' \
+            "https://api.github.com/repos/tarpbarry-stack/ixi-core/commits/$IXI_CORE_SHA" |
+            jq -r '.sha')"
+          test "$resolved_sha" = "$IXI_CORE_SHA"
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Deploy guarded Passport email release
+        shell: bash
+        run: |
+          set -euo pipefail
+          remote_script="$(cat <<'REMOTE_SCRIPT'
+          set -eu
+          APP=/var/www/ix-core
+          RELEASE_SHA=__IXI_CORE_SHA__
+          STAGE=/tmp/ixi-core-passport-email-__IXI_CORE_SHA__
+          ARCHIVE=/tmp/ixi-core-passport-email-__IXI_CORE_SHA__.tgz
+          BACKUP_ROOT=/var/backups/ixi-core-releases
+          BACKUP=$BACKUP_ROOT/pre-passport-email-__IXI_CORE_SHA__.tgz
+          SUCCESS=0
+          changed_files='identity/IXICommunicationsService.js index.js package.json'
+          added_files='communications/passportEmailStore.js communications/passportEmailRoutes.js communications/passportEmailRoutes.test.js communications/passportEmailStore.test.js'
+
+          rollback() {
+            if [ "$SUCCESS" -eq 1 ]; then return; fi
+            echo 'Deployment failed; restoring previous IX-Core source.' >&2
+            if [ -f "$BACKUP" ]; then
+              cd "$APP"
+              rm -f $added_files
+              tar -xzf "$BACKUP"
+              run_pm2 reload IX-Core --update-env ||
+                run_pm2 restart IX-Core --update-env ||
+                true
+            fi
+          }
+          trap rollback EXIT
+
+          test -d "$APP"
+          test -f "$APP/index.js"
+          if pm2 describe IX-Core >/dev/null 2>&1; then
+            PM2_USER=root
+          elif sudo -u ubuntu -H pm2 describe IX-Core >/dev/null 2>&1; then
+            PM2_USER=ubuntu
+          else
+            echo 'PM2 process IX-Core was not found.' >&2
+            exit 1
+          fi
+          run_pm2() {
+            if [ "$PM2_USER" = root ]; then pm2 "$@"; else sudo -u ubuntu -H pm2 "$@"; fi
+          }
+
+          rm -rf "$STAGE"
+          mkdir -p "$STAGE" "$BACKUP_ROOT"
+          curl -fsSL "https://github.com/tarpbarry-stack/ixi-core/archive/$RELEASE_SHA.tar.gz" -o "$ARCHIVE"
+          tar -xzf "$ARCHIVE" --strip-components=1 -C "$STAGE"
+
+          cd "$STAGE"
+          npm ci --ignore-scripts --no-audit --no-fund
+          node --check communications/passportEmailStore.js
+          node --check communications/passportEmailRoutes.js
+          node --check communications/passportEmailRoutes.test.js
+          node --check communications/passportEmailStore.test.js
+          node --check identity/IXICommunicationsService.js
+          node --check index.js
+          node --test communications/passportEmailRoutes.test.js communications/passportEmailStore.test.js
+
+          cd "$APP"
+          tar -czf "$BACKUP" $changed_files
+          for file in $changed_files $added_files; do
+            install -D -m 0644 "$STAGE/$file" "$APP/$file"
+          done
+
+          run_pm2 reload IX-Core --update-env
+          attempt=0
+          until curl -fsS http://127.0.0.1:4100/health >/dev/null; do
+            attempt=$((attempt + 1))
+            if [ "$attempt" -ge 15 ]; then
+              echo 'IX-Core failed its post-reload health check.' >&2
+              exit 1
+            fi
+            sleep 2
+          done
+
+          route_status="$(curl -sS -o "$STAGE/route-probe.json" -w '%{http_code}' \
+            -X POST -H 'Content-Type: application/json' \
+            -H 'Idempotency-Key: deployment_probe_123456' -d '{}' \
+            http://127.0.0.1:4100/communications/v1/passports/IXIWQMZWAE/email)"
+          test "$route_status" = "401"
+
+          SUCCESS=1
+          trap - EXIT
+          rm -rf "$STAGE" "$ARCHIVE"
+          echo "IX-Core $RELEASE_SHA deployed; health=200; unsigned-email-route=$route_status"
+          REMOTE_SCRIPT
+          )"
+
+          remote_script="${remote_script//__IXI_CORE_SHA__/$IXI_CORE_SHA}"
+          parameters="$(jq -cn --arg command "$remote_script" '{commands:[$command]}')"
+          command_id="$(aws ssm send-command \
+            --region "$AWS_REGION" --instance-ids "$AWS_INSTANCE_ID" \
+            --document-name AWS-RunShellScript \
+            --comment "Deploy IX-Core Passport email $IXI_CORE_SHA" \
+            --parameters "$parameters" --query 'Command.CommandId' --output text)"
+
+          if ! aws ssm wait command-executed --region "$AWS_REGION" \
+            --command-id "$command_id" --instance-id "$AWS_INSTANCE_ID"; then
+            true
+          fi
+
+          invocation="$(aws ssm get-command-invocation --region "$AWS_REGION" \
+            --command-id "$command_id" --instance-id "$AWS_INSTANCE_ID")"
+          printf '%s' "$invocation" | jq -r '.StandardOutputContent'
+          printf '%s' "$invocation" | jq -r '.StandardErrorContent' >&2
+          test "$(printf '%s' "$invocation" | jq -r '.Status')" = "Success"
