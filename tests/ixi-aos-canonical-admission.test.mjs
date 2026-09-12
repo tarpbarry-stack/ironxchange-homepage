@@ -306,6 +306,35 @@ test("one machine has one operating identity and multiple rail previews", () => 
   assert.equal(firstPreview.referenceOnly, true);
 });
 
+test("location rail preview preserves its creation-time governed photo", () => {
+  const location = {
+    objectId: "object-location-wichita-falls",
+    entityId: "entity-1",
+    objectType: "location",
+    passportId: "IXIABC2346",
+    displayName: "Wichita Falls Yard",
+    media: [
+      {
+        url: "https://images.example.test/wichita-falls-yard.jpg",
+        permissions: { canView: true }
+      }
+    ]
+  };
+  const admission = buildAosCanonicalAdmission({ aosObjects: [location] });
+  const preview = createAosObjectPreviewReference(location.objectId, admission);
+
+  assert.equal(preview.objectId, location.objectId);
+  assert.equal(preview.passportId, location.passportId);
+  assert.equal(
+    preview.imageUrl,
+    "https://images.example.test/wichita-falls-yard.jpg"
+  );
+  assert.deepEqual(preview.imageUrls, [
+    "https://images.example.test/wichita-falls-yard.jpg"
+  ]);
+  assert.equal(preview.referenceOnly, true);
+});
+
 test("machine presentation remains the established Private machine card", () => {
   const admitted = buildAosCanonicalAdmission({
     aosObjects: [machine({
