@@ -5,6 +5,7 @@ import { captureIXEvent } from "../lib/posthog";
 import { IXITicketProvider } from "../components/ixi-tickets/IXITicketProvider";
 import IXIGlobalTicketLauncher from "../components/ixi-tickets/IXIGlobalTicketLauncher";
 import IXIMarketplaceFaceTypography from "../components/ixi-marketplace/IXIMarketplaceFaceTypography";
+import ListingShareProvider from "../components/ixi-marketplace/ListingShareProvider";
 
 export default function App({ Component, pageProps }) {
   const router = useRouter();
@@ -64,9 +65,11 @@ export default function App({ Component, pageProps }) {
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
       </Head>
 
-      <IXIMarketplaceFaceTypography />
-      <Component {...pageProps} />
-      {!Component.hideGlobalTicketLauncher && <IXIGlobalTicketLauncher />}
+      <ListingShareProvider>
+        <IXIMarketplaceFaceTypography />
+        <Component {...pageProps} />
+        {!Component.hideGlobalTicketLauncher && <IXIGlobalTicketLauncher />}
+      </ListingShareProvider>
     </IXITicketProvider>
   );
 }

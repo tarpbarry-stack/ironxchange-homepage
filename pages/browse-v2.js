@@ -43,8 +43,6 @@ import IXIWorkspaceEmptyState
   from "../components/ixi-chassis/IXIWorkspaceEmptyState";
 import IXIBrowseObjectConsoleRouter
   from "../components/ixi-marketplace/IXIBrowseObjectConsoleRouter";
-import ListingShareProvider
-  from "../components/ixi-marketplace/ListingShareProvider";
 import MarketplaceCardIntelligence
   from "../components/ixi-marketplace/MarketplaceCardIntelligence";
 import IXIChassisControls from "../components/ixi-chassis/IXIChassisControls";
@@ -1346,7 +1344,7 @@ function updateCardScaleMode(nextMode) {
 }
   
   return (
-    <ListingShareProvider>
+    <>
       <MarketplaceCardIntelligence />
       <Head>
         <title>IXI Marketplace | IronXchange</title>
@@ -1887,6 +1885,6 @@ visibleBrowseListings.length === 0 && (
 }
        
       `}</style>
-    </ListingShareProvider>
+    </>
   );
 }

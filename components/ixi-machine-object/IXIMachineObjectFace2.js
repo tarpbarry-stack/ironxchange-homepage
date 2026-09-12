@@ -1,5 +1,8 @@
 import IXIMachineObjectActions from "./IXIMachineObjectActions";
 import { formatHours } from "../../lib/listingFormatters";
+import {
+  openIXIPassportEmail
+} from "../../lib/marketplace/passportEmailEvents";
 
 export default function IXIMachineObjectFace2({
   listing = {},
@@ -128,7 +131,9 @@ export default function IXIMachineObjectFace2({
 <div className="mof2-price">{price}</div>
       <p className="mof2-bio">{description}</p>
 
-     <IXIMachineObjectActions />
+     <IXIMachineObjectActions
+       onEmail={() => openIXIPassportEmail(listing)}
+     />
 
       <style jsx>{`
         .mof2 {

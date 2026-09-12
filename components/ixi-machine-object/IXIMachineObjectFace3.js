@@ -2,6 +2,9 @@ import { useEffect, useMemo, useState } from "react";
 
 import IXIMachineObjectActions from "./IXIMachineObjectActions";
 import {
+  openIXIPassportEmail
+} from "../../lib/marketplace/passportEmailEvents";
+import {
   calculateDealSheet,
   parseDealSheetNumber,
   sanitizeDealSheetDecimal
@@ -301,7 +304,9 @@ function money(value) {
       </div>
     </section>
 
-    <IXIMachineObjectActions />
+    <IXIMachineObjectActions
+      onEmail={() => openIXIPassportEmail(listing)}
+    />
 
 
       <style jsx>{`

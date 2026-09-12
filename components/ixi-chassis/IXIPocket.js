@@ -1,3 +1,8 @@
+import {
+  getPocketFrontMachine,
+  openIXIPassportEmail
+} from "../../lib/marketplace/passportEmailEvents";
+
 export default function IXIPocket({
   pocketId,
   pocketMode,
@@ -93,6 +98,18 @@ export default function IXIPocket({
             type="button"
             className="ixi-pocket-rail-action send"
             data-label="SEND"
+            aria-label={`Email front machine Passport from ${title}`}
+            disabled={!hasMachines}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              openIXIPassportEmail(
+                getPocketFrontMachine({
+                  machineIds: machines,
+                  getListingById
+                })
+              );
+            }}
           />
         )}
 
@@ -101,6 +118,18 @@ export default function IXIPocket({
             type="button"
             className="ixi-pocket-rail-action send"
             data-label="SEND"
+            aria-label={`Email front machine Passport from ${title}`}
+            disabled={!hasMachines}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              openIXIPassportEmail(
+                getPocketFrontMachine({
+                  machineIds: machines,
+                  getListingById
+                })
+              );
+            }}
           />
         )}
 

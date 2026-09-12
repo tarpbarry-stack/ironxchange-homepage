@@ -8,6 +8,9 @@ import {
 } from "sharetribe-flex-sdk";
 
 import { captureIXEvent } from "../lib/posthog";
+import {
+  openIXIPassportEmail
+} from "../lib/marketplace/passportEmailEvents";
 
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
@@ -2509,6 +2512,18 @@ onDescriptionChange={value =>
                   the IronXchange source page.
                 </p>
               </div>
+
+              <button
+                type="button"
+                className="launch-btn email"
+                onClick={() => openIXIPassportEmail(previewListing)}
+              >
+                <i className="fa-solid fa-envelope"></i>
+                <div>
+                  <strong>Email Passport</strong>
+                  <span>Send the complete IXI Machine Passport</span>
+                </div>
+              </button>
 
               <button
                 type="button"
