@@ -85,7 +85,7 @@ export default function IXITransactRecordWorkspace({ financialDocumentId, object
       </div>
     </div>
     {error ? <div className={styles.errorBanner} role="alert"><strong>RECORD UNAVAILABLE</strong><span>{error}</span><button type="button" className={styles.rowAction} onClick={() => setRefresh(value => value + 1)}>RETRY</button></div> : !record ? <div className={styles.loadingState} role="status">Loading the selected saved transaction…</div> : <>
-      <div className={styles.recordIdentity}><span>{summary.status}</span><span>REVISION {view.server.revision || "—"}</span><code>{financialDocumentId}</code></div>
+      <div className={styles.recordIdentity}><span>{exportRow?.paymentStatus || summary.status}</span><span>REVISION {view.server.revision || "—"}</span><code>{financialDocumentId}</code></div>
       {exportRow ? <IXITransactDocumentActions single rows={[exportRow]} context={exportContext} entity={entity} ledger={exportLedger} /> : null}
       {module ? <div className={styles.embeddedWorkspace} hidden={details} style={details ? { display: "none" } : undefined}>
         <IXITransactApp
@@ -103,7 +103,8 @@ export default function IXITransactRecordWorkspace({ financialDocumentId, object
       {showDetails ? <div className={styles.recordDetails} data-transact-read-only-controls>
         <dl className={styles.recordFields}>
           {field("TYPE", label(document.documentType))}
-          {field("STATUS", summary.status)}
+          {field("PAYMENT STATUS", exportRow?.paymentStatus || "—")}
+          {field("WORKFLOW STATUS", summary.status)}
           {field("AMOUNT", summary.amount == null ? "—" : moneyLabel(Math.round(summary.amount * 100), currency))}
           {field("TRANSACTION DATE", date(document.occurredAt))}
           {field("PARTY / SOURCE", summary.party)}

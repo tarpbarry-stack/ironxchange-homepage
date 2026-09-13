@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import IXIMoneyInput from "../IXIMoneyInput";
+import IXIPaymentDateInput from "./IXIPaymentDateInput";
 import { loadIXIAosFinancialAccessContext } from "../../financial-runtime/IXIAosFinancialReadClient";
 import { createPaymentCommandId, loadIXIPaymentRecords, saveIXIPayment, voidIXIPayment } from "./IXIPaymentCommands";
 import { isPaymentCharge, paymentAmount, paymentDocument, paymentSummary, uniquePaymentRecords, validatePaymentDraft } from "./IXIPaymentModel";
@@ -14,7 +15,7 @@ const COPY = {
 };
 const today = () => { const date = new Date(); return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,"0")}-${String(date.getDate()).padStart(2,"0")}`; };
 
-export default function IXIPaymentsPanel({ context = {}, object = {}, sourceIds = null, workOrder = null, language = "en", onChanged, initialOpenId = "", onClose, title = "" }) {
+export default function IXIPaymentsPanel({ context = {}, object = {}, sourceIds = null, workOrder = null, language = "en", onChanged, initialOpenId = "", onClose, title = "", readOnly = false }) {
   const t = COPY[language === "es" || language === "es-MX" ? "es" : "en"];
   const passportId = clean(context.primary?.passportId || object.passportId);
   const idKey = sourceIds === null ? "*" : JSON.stringify([...new Set(sourceIds.filter(Boolean))].sort());
@@ -39,12 +40,12 @@ export default function IXIPaymentsPanel({ context = {}, object = {}, sourceIds 
   useEffect(() => {
     const controller = new AbortController();
     setLoading(true); setLoadError("");
-    Promise.all([loadIXIPaymentRecords({ passportId, sourceIds: ids || [], signal: controller.signal }), loadIXIAosFinancialAccessContext({ signal: controller.signal })])
+    Promise.all([loadIXIPaymentRecords({ passportId, sourceIds: ids || [], signal: controller.signal }), readOnly ? Promise.resolve({ capabilities: {} }) : loadIXIAosFinancialAccessContext({ signal: controller.signal })])
       .then(([found, access]) => { if (!controller.signal.aborted) { setRecords(found); setCapabilities(access.capabilities || {}); } })
       .catch(problem => { if (!controller.signal.aborted) setLoadError(problem.message); })
       .finally(() => { if (!controller.signal.aborted) setLoading(false); });
     return () => controller.abort();
-  }, [passportId, idKey, attempt]);
+  }, [passportId, idKey, attempt, readOnly]);
   useEffect(() => { if (form || voiding) formHeading.current?.focus(); }, [form?.commandId, voiding]);
   function open(summary, payment = null) {
     if (busyRef.current) return;
@@ -53,11 +54,11 @@ export default function IXIPaymentsPanel({ context = {}, object = {}, sourceIds 
     setForm({ sourceId: summary.id, payment, commandId: createPaymentCommandId(), amount: String(d ? paymentAmount(d) : summary.paidAtEntry ? summary.total : summary.balance), paidDate: d ? clean(d.occurredAt).slice(0,10) : summary.paidAtEntry ? summary.paidDate : today(), method: d ? clean(d.paymentMethod).toUpperCase() || "OTHER" : summary.paidAtEntry ? summary.method : "ACH", reference: clean(d?.transactionReference || (summary.paidAtEntry ? summary.reference : "")), notes: clean(d?.memo || (summary.paidAtEntry ? summary.document.expensePayment?.notes : "")) });
   }
   useEffect(() => {
-    if (!loading && !loadError && initialOpenId && autoOpened.current !== initialOpenId) {
+    if (!readOnly && !loading && !loadError && initialOpenId && autoOpened.current !== initialOpenId) {
       const selected = summaries.find(item => item.id === initialOpenId);
       if (selected) { autoOpened.current = initialOpenId; if (selected.balance > 0 || selected.paidAtEntry) open(selected); else setExpanded(selected.id); }
     }
-  }, [loading, loadError, initialOpenId, summaries]);
+  }, [loading, loadError, initialOpenId, summaries, readOnly]);
   async function refreshAfterSave() {
     setForm(null); setVoiding(null); setNotice(t.recorded);
     try { const fresh = await loadIXIPaymentRecords({ passportId, sourceIds: ids || [] }); if (mounted.current) setRecords(fresh); }
@@ -101,14 +102,14 @@ export default function IXIPaymentsPanel({ context = {}, object = {}, sourceIds 
       {summary.credited > 0 ? <p>{t.credit}: {money(summary.credited, summary.currency)}</p> : null}
       {summary.creditBalance > 0 ? <p>{t.creditBalance}: {money(summary.creditBalance, summary.currency)}</p> : null}
       {summary.paid > 0 ? <p className={styles.hint}>{summary.paidDate || t.dateMissing}{summary.method ? ` · ${summary.method}` : ""}{summary.reference ? ` · ${summary.reference}` : ""}</p> : null}
-      {summary.balance > 0 && summary.active && form?.sourceId !== summary.id ? <><button className={styles.primary} type="button" disabled={busy || !allowed(summary)} onClick={() => open(summary)}>{t.mark}</button>{!allowed(summary) ? <p className={styles.hint}>{summary.hold ? t.hold : !summary.approved && !capabilities["financial.document.approve"] ? t.approvalNeeded : t.noAccess}</p> : null}</> : null}
-      {summary.paidAtEntry ? <><p className={styles.hint}>{t.entry}</p><button type="button" disabled={busy || !summary.active || !capabilities["financial.document.patch"]} onClick={() => open(summary)}>{t.details}</button></> : null}
-      {summary.allPayments.length ? <><button type="button" aria-expanded={expanded === summary.id} onClick={() => setExpanded(expanded === summary.id ? "" : summary.id)}>{t.history} ({summary.allPayments.length})</button>{expanded === summary.id ? <ol className={styles.history}>{summary.allPayments.map(payment => { const d = paymentDocument(payment); const inactive = ["void", "reversed"].includes(d.financialState); return <li key={d.financialDocumentId}><strong>{money(paymentAmount(d), summary.currency)}{inactive ? ` · ${t.status.VOID}` : ""}</strong><span>{clean(d.occurredAt).slice(0,10)} · {d.paymentMethod}{d.transactionReference ? ` · ${d.transactionReference}` : ""}</span>{d.memo ? <span>{d.memo}</span> : null}{!inactive && capabilities["financial.payment.create"] ? <div className={styles.actions}><button type="button" disabled={busy} onClick={() => open(summary, payment)}>{t.edit}</button><button type="button" disabled={busy} onClick={() => { setForm(null); setError(""); setVoiding({ payment, reason: "", commandId: createPaymentCommandId() }); }}>{t.void}</button></div> : null}</li>; })}</ol> : null}</> : null}
+      {!readOnly && summary.balance > 0 && summary.active && form?.sourceId !== summary.id ? <><button className={styles.primary} type="button" disabled={busy || !allowed(summary)} onClick={() => open(summary)}>{t.mark}</button>{!allowed(summary) ? <p className={styles.hint}>{summary.hold ? t.hold : !summary.approved && !capabilities["financial.document.approve"] ? t.approvalNeeded : t.noAccess}</p> : null}</> : null}
+      {summary.paidAtEntry ? <><p className={styles.hint}>{t.entry}</p>{!readOnly ? <button type="button" disabled={busy || !summary.active || !capabilities["financial.document.patch"]} onClick={() => open(summary)}>{t.details}</button> : null}</> : null}
+      {summary.allPayments.length ? <><button type="button" aria-expanded={expanded === summary.id} onClick={() => setExpanded(expanded === summary.id ? "" : summary.id)}>{t.history} ({summary.allPayments.length})</button>{expanded === summary.id ? <ol className={styles.history}>{summary.allPayments.map(payment => { const d = paymentDocument(payment); const inactive = ["void", "reversed"].includes(d.financialState); return <li key={d.financialDocumentId}><strong>{money(paymentAmount(d), summary.currency)}{inactive ? ` · ${t.status.VOID}` : ""}</strong><span>{clean(d.occurredAt).slice(0,10)} · {d.paymentMethod}{d.transactionReference ? ` · ${d.transactionReference}` : ""}</span>{d.memo ? <span>{d.memo}</span> : null}{!readOnly && !inactive && capabilities["financial.payment.create"] ? <div className={styles.actions}><button type="button" disabled={busy} onClick={() => open(summary, payment)}>{t.edit}</button><button type="button" disabled={busy} onClick={() => { setForm(null); setError(""); setVoiding({ payment, reason: "", commandId: createPaymentCommandId() }); }}>{t.void}</button></div> : null}</li>; })}</ol> : null}</> : null}
       {selected?.id === summary.id ? <form className={styles.form} onSubmit={save} aria-label={form.payment ? t.edit : summary.paidAtEntry ? t.details : t.mark}>
         <h3 ref={formHeading} tabIndex={-1}>{form.payment ? t.edit : summary.paidAtEntry ? t.details : t.mark}</h3>
         <p>{t.review}</p>
         <label><span>{t.amount}</span><IXIMoneyInput aria-label={t.amount} value={form.amount} onValueChange={value => field("amount", value)} disabled={busy || summary.paidAtEntry} /></label>
-        <label><span>{t.date}</span><input aria-label={t.date} type="date" value={form.paidDate} onChange={event => field("paidDate", event.target.value)} disabled={busy} required /></label>
+        <IXIPaymentDateInput key={form.commandId} label={t.date} language={language} value={form.paidDate} onValueChange={value => field("paidDate", value)} disabled={busy} />
         <p className={styles.hint}>{t.historical}</p>
         <label><span>{t.method}</span><select aria-label={t.method} value={form.method} onChange={event => field("method", event.target.value)} disabled={busy}>{["ACH", "CHECK", "WIRE", "CARD", "CASH", "OTHER"].map(method => <option key={method} value={method}>{language.startsWith("es") ? ({ CHECK:"CHEQUE", CARD:"TARJETA", CASH:"EFECTIVO", OTHER:"OTRO", WIRE:"TRANSFERENCIA" }[method] || method) : method}</option>)}</select></label>
         {!summary.approved ? <p>{t.approval}</p> : null}

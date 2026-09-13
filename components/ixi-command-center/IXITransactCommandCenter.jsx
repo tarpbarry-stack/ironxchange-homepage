@@ -1,5 +1,6 @@
+import { paymentHistorySummary } from "../ixi-aos/transact/payments/IXIPaymentHistory";
 import IXIPaymentsPanel from "../ixi-aos/transact/payments/IXIPaymentsPanel";
-import { paymentSummary, paymentDocument, paymentScopeObject } from "../ixi-aos/transact/payments/IXIPaymentModel";
+import { paymentDocument, paymentScopeObject } from "../ixi-aos/transact/payments/IXIPaymentModel";
 import { createIXITransactContext } from "../ixi-aos/transact/IXITransactContext";
 import { formatIXIAccountingMoney as formatIXIMoney } from "../ixi-aos/transact/IXIMoney";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -318,15 +319,15 @@ function RecordTable({ records, currency, emptyMessage, onSelect, paymentRecords
       <table className={styles.dataTable}>
         <thead><tr><th>RECORD</th><th>PARTY / SOURCE</th><th>STATUS</th><th>DUE / DATE</th><th>AMOUNT</th><th>PAYMENT</th><th aria-label="Open record" /></tr></thead>
         <tbody>
-          {records.map(record => { const paid = paymentSummary(paymentRecords.find(item => paymentDocument(item).financialDocumentId === record.id) || record.raw || record.document, paymentRecords); return (
+          {records.map(record => { const paid = paymentHistorySummary(paymentRecords.find(item => paymentDocument(item).financialDocumentId === record.id) || record.raw || record.document, paymentRecords); return (
             <tr key={record.id}>
               <td><strong>{record.title}</strong><small>{record.id}</small></td>
               <td>{record.party}</td>
-              <td><StatusBadge value={record.status} /></td>
+              <td><StatusBadge value={paid?.status || record.status} /></td>
               <td>{record.date}</td>
               <td className={styles.money}>{record.amount === null ? "—" : formatIXIMoney(record.amount, currency)}</td>
-              <td>{paid ? <><StatusBadge value={paid.status} /><small>{formatIXIMoney(paid.paid, paid.currency)} PAID · {formatIXIMoney(paid.balance, paid.currency)} DUE</small></> : "—"}</td>
-              <td>{paid && paid.active ? <button type="button" className={styles.rowAction} onClick={() => onMarkPaid?.(paid.id)}>{paid.balance > 0 ? "MARK PAID" : "PAYMENT DETAILS"}</button> : null}<button type="button" className={styles.rowAction} onClick={() => onSelect?.(record)}>VIEW</button></td>
+              <td>{paid ? <><StatusBadge value={paid.status} />{paid.currency ? <small>{formatIXIMoney(paid.paid, paid.currency)} PAID · {formatIXIMoney(paid.balance, paid.currency)} DUE</small> : null}</> : "—"}</td>
+              <td>{paid && !paid.aggregate && paid.active ? <button type="button" className={styles.rowAction} onClick={() => onMarkPaid?.(paid.id)}>{paid.balance > 0 ? "MARK PAID" : "PAYMENT DETAILS"}</button> : null}<button type="button" className={styles.rowAction} onClick={() => onSelect?.(record)}>VIEW</button></td>
             </tr>
           ); })}
         </tbody>
