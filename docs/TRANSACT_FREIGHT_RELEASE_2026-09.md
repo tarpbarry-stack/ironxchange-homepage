@@ -23,7 +23,7 @@ Select company workforce recipients for durable in-app Freight request updates.
 These updates are visible in Freight. Broker distribution and email sending are
 deferred; customer rebilling and cash refunds are separate explicit records.
 
-Shared money inputs cover 99 monetary controls across acquisition, Freight,
+Shared money inputs cover 101 monetary controls across acquisition, Freight,
 Bills, Payables, expenses, sales, rentals, collections, services, settlements,
 materials, purchases, ownership capital, Treasury and the general ledger.
 Inputs accept `$2,500.07`, show commas and two decimals on blur, and preserve the
