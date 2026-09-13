@@ -17,6 +17,24 @@ const { buildIXIPayablesProjection } = await load("modules/payables/IXIPayablesP
 const source = (id = "bill-1", type = "bill", extra = {}) => ({ server: { revision: 2, entityPassportId: "IXIENTITY001" }, financialDocument: { financialDocumentId: id, documentType: type, financialState: "incurred", occurredAt: "2026-02-01T12:00:00Z", currency: "USD", totals: { total: 1000 }, references: [{ role: "entity", passportId: "IXIENTITY001" }], billRecord: { approval: { status: "approved" } }, ...extra } });
 const pay = (id, amount, extra = {}) => source(id, "payment", { sourceFinancialDocumentId: "bill-1", financialState: "paid", paymentDirection: "outflow", occurredAt: "2026-03-15T12:00:00Z", paymentMethod: "CHECK", transactionReference: "CK-104", totals: { total: amount }, lines: [{ financialLineId: `${id}-line`, amount, quantity: 1, rate: amount }], ...extra });
 
+test("company payment scope reuses the authenticated Entity Passport without changing Object identity", () => {
+  const object = { objectId: "entity-1", passportId: "", displayName: "Company" };
+  assert.deepEqual(model.paymentScopeObject(object, "company", "IXIENTITY001"), { ...object, passportId: "IXIENTITY001" });
+  assert.equal(object.passportId, "");
+  assert.equal(model.paymentScopeObject(object, "machine", "IXIENTITY001"), object);
+  const machine = { objectId: "object-1", passportId: "IXIMACHINE1" };
+  assert.equal(model.paymentScopeObject(machine, "company", "IXIENTITY001"), machine);
+});
+
+test("Desktop identity changes retain the released common payment entry and row actions", async () => {
+  const desktop = await readFile(new URL("../../../ixi-command-center/IXITransactCommandCenter.jsx", new URL("payments/IXIPaymentModel.js", base)), "utf8");
+  assert.match(desktop, /<IXIPaymentsPanel\b/);
+  assert.match(desktop, />PAYMENTS · MARK PAID<\/button>/);
+  assert.match(desktop, /onMarkPaid=\{openPaymentRecord\}/);
+  assert.match(desktop, /paymentScopeObject\(buildTransactObject/);
+  assert.match(desktop, /STOCK NUMBER/);
+});
+
 test("one payment produces the same balance/date/method in every projection, without duplicate counting", () => {
   const bill = source(), payment = pay("pay-1", 250.07);
   const records = [bill, payment, payment];

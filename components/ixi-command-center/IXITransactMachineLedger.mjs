@@ -356,10 +356,12 @@ export function buildMachineLedger(
         row.costCents !== 0;
       if (shared && (row.type !== "expense" || knownExpenseMethod)) {
         row.openCents = eligible ? cents(shared.balance) : null;
-        row.paymentStatus = eligible
-          ? shared.status === "PARTIALLY PAID"
-            ? "PART PAID"
-            : shared.status
+        row.paymentStatus =
+          shared.status === "PARTIALLY PAID" ? "PART PAID" : shared.status;
+        row.paymentAction = shared.active
+          ? shared.balance > 0
+            ? "MARK PAID"
+            : "PAYMENT DETAILS"
           : "";
         row.payable =
           eligible &&

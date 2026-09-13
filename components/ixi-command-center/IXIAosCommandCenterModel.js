@@ -541,11 +541,21 @@ function getProjectedKindOverrides(systemIndexes = []) {
 
 export function buildIXIAosCommandContexts({
   entity = {},
+  entityPassportId = "",
   aosObjects = [],
   ownedListings = [],
   systemIndexes = []
 } = {}) {
-  const company = buildEntityContext(entity);
+  /*
+   * IX-Core's hydrated Entity envelope can omit the Passport even though the
+   * financial access contract already returned the verified Entity Passport.
+   * Preserve that authoritative identity across hydration instead of letting
+   * the company context regress to "NOT RECORDED".
+   */
+  const company = buildEntityContext({
+    ...entity,
+    passportId: getPassportId(entity) || clean(entityPassportId)
+  });
   const byObjectId = new Map();
   /*
    * The Entity environment is an authority envelope, not an ownership list.

@@ -16,6 +16,7 @@ export default function IXITransactMachineHistory({
   loading,
   error,
   onOpenRecord,
+  onMarkPaid,
   onRetry,
 }) {
   const [filters, setFilters] = useState({
@@ -331,6 +332,14 @@ export default function IXITransactMachineHistory({
                     </td>
                     <td>{moneyLabel(row.runningCostCents, row.currency)}</td>
                     <td>
+                      {row.paymentAction && onMarkPaid ? (
+                        <button
+                          type="button"
+                          onClick={() => onMarkPaid(row.id)}
+                        >
+                          {row.paymentAction}
+                        </button>
+                      ) : null}
                       <button type="button" onClick={() => onOpenRecord(row)}>
                         VIEW
                       </button>

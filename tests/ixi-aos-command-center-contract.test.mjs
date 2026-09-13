@@ -84,6 +84,28 @@ test("desktop machine scope rejects a listing without canonical object identity"
   assert.equal(contexts.some(item => item.kind === "machine"), false);
 });
 
+test("verified Entity Passport survives a hydrated Entity envelope that omits it", () => {
+  const contexts = buildIXIAosCommandContexts({
+    entity: {
+      entityId: "entity-star-and-sons",
+      displayName: "Star & Sons Unlimited LLC"
+    },
+    entityPassportId: "IXI-ENTITY-STAR-SONS"
+  });
+
+  assert.equal(contexts[0].kind, "company");
+  assert.equal(contexts[0].passportId, "IXI-ENTITY-STAR-SONS");
+});
+
+test("hydrated Entity Passport remains authoritative over the access fallback", () => {
+  const contexts = buildIXIAosCommandContexts({
+    entity,
+    entityPassportId: "IXI-STALE-FALLBACK"
+  });
+
+  assert.equal(contexts[0].passportId, "IXI-ENTITY-1");
+});
+
 test("canonical machines fail closed without the governed Equipment projection", () => {
   const contexts = buildIXIAosCommandContexts({
     entity,
@@ -539,7 +561,9 @@ test("recursive command center owns transact while the detailed ledger remains a
   assert.match(commandCenter, /\["reporting", "REPORTING", "10"\]/u);
   assert.match(commandCenter, /TRAN\$ACT will not claim a clean state/u);
   assert.match(commandCenter, /VIEWS NEVER CHANGE POSTED TRUTH/u);
-  assert.doesNotMatch(commandCenter, /createIXI|provision|passport\/ensure/u);
+  // Building a launch context does not provision an Object or Passport.
+  // Financial writes remain in the shared authenticated payment commands.
+  assert.doesNotMatch(commandCenter, /createIXI(?!TransactContext\b)|provision|passport\/ensure/u);
   assert.doesNotMatch(commandCenter, /returnTo=.*dashboard/u);
   assert.match(commandModel, /getIXITransactOwnedEquipmentObjectIds/u);
   assert.match(commandModel, /getIXIAosRelationshipEvidence/u);

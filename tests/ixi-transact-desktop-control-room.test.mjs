@@ -52,6 +52,7 @@ test("desktop remains an authenticated read surface over governed financial cont
   assert.match(source, /Queue completion never substitutes/u);
   assert.match(source, /accessError\?\.status !== 401/u);
   assert.match(source, /buildIXITransactFastEnvironment\(accessPayload\)/u);
+  assert.match(source, /buildIXIAosCommandContexts\(\{[\s\S]*entityPassportId,/u);
   assert.match(source, /contextHydrationStarted\.current = true;[\s\S]*await loadIXIMosEnvironment/u);
   assert.match(source, /financialLoading \|\| \(!projectionPayload && !financialError\)/u);
   assert.match(source, /COMPANY CONNECTED/u);
