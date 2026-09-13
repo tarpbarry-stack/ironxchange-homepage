@@ -63,3 +63,14 @@ test("the /live route does not redirect bare entry to Inventory or synthesize an
   );
   assert.match(source, /resolveIXILaunchSelection/u);
 });
+
+test("the /live entrance loads the governed owned inventory instead of filtering the public catalogue", () => {
+  const source = read("pages/live.js");
+
+  assert.match(source, /loadIXIOwnedListings/u);
+  assert.match(source, /includePublicListings:\s*false/u);
+  assert.doesNotMatch(
+    source,
+    /\(environment\.listings \|\| \[\]\)\.filter/u
+  );
+});
