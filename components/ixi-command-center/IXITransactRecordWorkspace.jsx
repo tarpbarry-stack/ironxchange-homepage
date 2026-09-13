@@ -4,7 +4,7 @@ import { loadIXIAosFinancialDocument, loadIXIAosFinancialHistory } from "../ixi-
 import { getIXITransactModules } from "../ixi-aos/transact/IXITransactModuleRegistry";
 import { normalizeIXITransactPassportRecords } from "../ixi-transact-dashboard/data/IXITransactPassportRecordProjection.mjs";
 import { buildIXITransactRecordView, linkedIXITransactRecordIds, recordDocument, verifyIXITransactSelectedRecord } from "./IXITransactRecordViewModel";
-import { formatIXIMoney } from "./IXIAosCommandCenterModel";
+import { formatIXIAccountingMoney as formatIXIMoney } from "../ixi-aos/transact/IXIMoney";
 import styles from "./IXIAosCommandCenter.module.css";
 
 const IXITransactApp = dynamic(() => import("../ixi-aos/transact/IXITransactApp"), {

@@ -1,6 +1,7 @@
 import IXIPaymentsPanel from "../ixi-aos/transact/payments/IXIPaymentsPanel";
 import { paymentSummary, paymentDocument, paymentScopeObject } from "../ixi-aos/transact/payments/IXIPaymentModel";
 import { createIXITransactContext } from "../ixi-aos/transact/IXITransactContext";
+import { formatIXIAccountingMoney as formatIXIMoney } from "../ixi-aos/transact/IXIMoney";
 import { useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 
@@ -26,7 +27,6 @@ import { getIXITransactModules } from "../ixi-aos/transact/IXITransactModuleRegi
 import {
   buildIXIAosCommandContexts,
   buildIXIAosRecentStory,
-  formatIXIMoney,
   getIXIAosContextGroups,
   getIXIAosRelationshipEvidence,
   getIXIAosRelatedContexts,
