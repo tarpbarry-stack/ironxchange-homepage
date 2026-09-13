@@ -4,6 +4,7 @@ import { readFile } from "node:fs/promises";
 
 const base = new URL("../components/ixi-aos/transact/", import.meta.url);
 async function sourceUrl(url) {
+  if (!url.pathname.endsWith(".js")) url = new URL(`${url.href}.js`);
   let source = await readFile(url, "utf8");
   for (const match of [...source.matchAll(/from ["'](\.[^"']+)["']/g)]) source = source.replace(match[0], `from "${await sourceUrl(new URL(match[1], url))}"`);
   return `data:text/javascript;base64,${Buffer.from(source).toString("base64")}`;
@@ -15,6 +16,8 @@ const { withIXIBillBalance } = await load("modules/bill/IXIBillBalance.js");
 const { getIXIWorkOrderCostProjection } = await load("modules/work-order/IXIWorkOrderProjectionEngine.js");
 const { classifyIXIFinancialDocument } = await load("modules/general-ledger/IXIGLPostingEngine.js");
 const { buildIXIPayablesProjection } = await load("modules/payables/IXIPayablesProjectionEngine.js");
+const billContract = await load("modules/bill/IXIBillContract.js");
+const { applyIXIBillAction } = await load("modules/bill/IXIBillRecordEngine.js");
 const source = (id = "bill-1", type = "bill", extra = {}) => ({ server: { revision: 2, entityPassportId: "IXIENTITY001" }, financialDocument: { financialDocumentId: id, documentType: type, financialState: "incurred", occurredAt: "2026-02-01T12:00:00Z", currency: "USD", totals: { total: 1000 }, references: [{ role: "entity", passportId: "IXIENTITY001" }], billRecord: { approval: { status: "approved" } }, ...extra } });
 const pay = (id, amount, extra = {}) => source(id, "payment", { sourceFinancialDocumentId: "bill-1", financialState: "paid", paymentDirection: "outflow", occurredAt: "2026-03-15T12:00:00Z", paymentMethod: "CHECK", transactionReference: "CK-104", totals: { total: amount }, lines: [{ financialLineId: `${id}-line`, amount, quantity: 1, rate: amount }], ...extra });
 
@@ -144,4 +147,51 @@ test("insufficient access and held payments never reach a write", async () => {
   const args = { source: source(), records: [], input: { amount: 100, paidDate: "2026-01-04", method: "ACH" }, context: {}, object: {}, commandId: "test", capabilities: {} };
   await assert.rejects(api.saveIXIPayment(args), /access/);
   await assert.rejects(api.saveIXIPayment({ ...args, capabilities: { "financial.payment.create": true }, records: [source("hold", "payables-control", { sourceFinancialDocumentId: "bill-1", payablesControl: { control: { hold: true } } })] }), /hold/);
+});
+
+test("Mark Paid approves a proven legacy Freight Bill and records its payment through the existing commands", async () => {
+  const freightOrderId = "FO-20260905-TEST1234";
+  const context = { primary: { passportId: "IXIMACHINE1" }, entity: { passportId: "IXIENTITY001" }, actor: { passportId: "IXIAPPROVER" } };
+  const billRecord = billContract.createIXIBillRecord({ context, input: { clientRequestId: `${freightOrderId}:FREIGHT-TEST`, invoiceNumber: "FREIGHT-TEST", vendorLabel: "Test Carrier", description: "Freight test", invoiceDate: "2026-02-01", dueDate: "2026-03-01", amount: 1600, purchaseOrderId: freightOrderId, purchaseOrderNumber: freightOrderId, poCommittedAmount: 0, receivedAmount: 1600 } });
+  const initial = source("bill-1", "bill", { billRecord, financialState: "submitted", totals: { total: 1600 }, lines: [{ financialLineId: "freight-line", amount: 1600 }], metadata: {} });
+  initial.server.storageMetadata = { source: "ixi-transact-freight", transactModule: "bill", freightOrderId };
+  let current = structuredClone(initial);
+  const writes = [];
+  const billCode = (await readFile(new URL("modules/bill/IXIBillCommands.js", base), "utf8")).replace(/^import[\s\S]*?;\n/gm, "").replace(/export default /g, "const defaultExport = ").replace(/export /g, "");
+  const updateIXIBill = new Function("patchIXIAosFinancialDocument", "createIXIBillInvoiceFingerprint", `${billCode}\nreturn updateIXIBill;`)(async args => {
+    writes.push({ type: "approval", args });
+    assert.equal(args.expectedRevision, 2);
+    assert.equal(args.patch.billRecord.approval.status, "approved");
+    assert.equal(args.patch.billRecord.approval.approvedById, "IXIAPPROVER");
+    assert.equal(args.patch.billRecord.purchaseMatch.status, "n/a");
+    assert.deepEqual(args.patch.billRecord.freight.legacyPurchaseMatch, initial.financialDocument.billRecord.purchaseMatch);
+    assert.equal(args.metadata.purchaseOrderNumber, "");
+    assert.equal(args.metadata.freightOrderId, freightOrderId);
+    assert.equal(args.patch.totals.total, 1600);
+    assert.equal(args.patch.lines[0].financialLineId, "freight-line");
+    current = { server: { ...current.server, revision: 3, storageMetadata: { ...current.server.storageMetadata, ...args.metadata } }, financialDocument: { ...current.financialDocument, ...args.patch } };
+    return { data: { record: current } };
+  }, billContract.createIXIBillInvoiceFingerprint);
+  const api = await commands({ hydrateIXIBillRecord: billContract.hydrateIXIBillRecord, applyIXIBillAction, updateIXIBill,
+    loadIXIAosFinancialDocument: async () => current,
+    createIXIAosObjectFinancialDocument: async args => {
+      assert.equal(current.financialDocument.financialState, "billed", "approval must finish before payment");
+      writes.push({ type: "payment", args }); return { ok: true };
+    } });
+  const args = { source: initial, records: [], context, object: context.primary, input: { amount: 1600, paidDate: "2026-02-04", method: "ACH" }, commandId: "freight-payment-test", capabilities: { "financial.payment.create": true, "financial.document.approve": true } };
+  await api.saveIXIPayment(args);
+  assert.deepEqual(writes.map(write => write.type), ["approval", "payment"]);
+  assert.equal(writes[1].args.input.sourceFinancialDocumentId, "bill-1");
+  assert.equal(writes[1].args.input.occurredAt, "2026-02-04T12:00:00.000Z");
+  await api.saveIXIPayment(args);
+  assert.deepEqual(writes.map(write => write.type), ["approval", "payment", "payment"]);
+  assert.equal(writes[1].args.idempotencyKey, writes[2].args.idempotencyKey, "retry does not invent a second payment identity");
+  assert.equal(billContract.hydrateIXIBillRecord(current).freight.legacyPurchaseMatch.variance, 1600);
+
+  writes.length = 0; current = structuredClone(initial);
+  await assert.rejects(api.saveIXIPayment({ ...args, capabilities: { "financial.payment.create": true } }), /needs approval/);
+  assert.equal(writes.length, 0);
+  current.financialDocument.sourceFinancialDocumentId = "ifd_real_purchase_order";
+  await assert.rejects(api.saveIXIPayment(args), /purchase-order difference/);
+  assert.equal(writes.length, 0, "real PO exceptions cannot approve or pay through the compatibility path");
 });
