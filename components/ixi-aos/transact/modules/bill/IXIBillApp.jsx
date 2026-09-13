@@ -133,6 +133,7 @@ export default function IXIBillApp({
   context = {},
   object = null,
   initialRecords = [],
+  selectedFinancialDocumentId = "",
   authority: suppliedAuthority = {},
   policy = undefined,
   language = "en",
@@ -155,13 +156,21 @@ export default function IXIBillApp({
   const originObject = object || context.primary || {};
 
   const selected = useMemo(
-    () => records.find(record => clean(record?.identity?.billRecordId || record?.identity?.billDocumentId) === selectedId) || null,
+    () => records.find(record => clean(record?.financialBinding?.financialDocumentId || record?.identity?.billDocumentId || record?.identity?.billRecordId) === selectedId) || null,
     [records, selectedId]
   );
 
   useEffect(() => {
     setRecords(Array.isArray(initialRecords) ? initialRecords : []);
   }, [initialRecords]);
+
+  useEffect(() => {
+    const documentId = clean(selectedFinancialDocumentId);
+    if (!documentId) return;
+    const record = initialRecords.find(item => clean(item?.financialBinding?.financialDocumentId) === documentId);
+    setSelectedId(clean(record?.financialBinding?.financialDocumentId || record?.identity?.billDocumentId || record?.identity?.billRecordId));
+    setMode(record ? "record" : "missing");
+  }, [initialRecords, selectedFinancialDocumentId]);
 
   const summary = useMemo(() => {
     let overdue = 0;
@@ -224,7 +233,7 @@ export default function IXIBillApp({
       const record = result.record;
       await onRecordChange?.(record, { action: "create", response: result.response });
       setRecords(current => [...current.filter(item => clean(item?.identity?.billDocumentId) !== clean(record?.identity?.billDocumentId)), record]);
-      setSelectedId(clean(record?.identity?.billRecordId || record?.identity?.billDocumentId));
+      setSelectedId(clean(record?.financialBinding?.financialDocumentId || record?.identity?.billDocumentId || record?.identity?.billRecordId));
       setMode("record");
       setInput(blankInput(context));
     } catch (err) {
@@ -253,13 +262,17 @@ export default function IXIBillApp({
       const persisted = await updateIXIBill({ record: local, action, metadata: { source: "ixi-transact-bill-card", paymentFinancialDocumentId: clean(paymentResponse?.data?.record?.financialDocument?.financialDocumentId || paymentResponse?.financialDocument?.financialDocumentId) } });
       const next = persisted.record;
       await onRecordChange?.(next, { action, paymentResponse, response: persisted.response, payload });
-      setRecords(current => current.map(item => clean(item?.identity?.billRecordId || item?.identity?.billDocumentId) === selectedId ? next : item));
+      setRecords(current => current.map(item => clean(item?.financialBinding?.financialDocumentId || item?.identity?.billDocumentId || item?.identity?.billRecordId) === selectedId ? next : item));
       return true;
     } catch (err) {
       setError(clean(err?.message) || "Bill action failed.");
     } finally {
       setBusy(false);
     }
+  }
+
+  if (mode === "missing") {
+    return <div className="ixi-bill-app"><p role="alert">The selected saved bill is unavailable.</p><button type="button" onClick={onBack}>BACK</button><IXIBillStyles /></div>;
   }
 
   if (mode === "record" && selected) {
@@ -300,7 +313,7 @@ export default function IXIBillApp({
           </div>
           <div className="bill-queue-list">
             {records.length ? records.map(record => {
-              const id = clean(record?.identity?.billRecordId || record?.identity?.billDocumentId);
+              const id = clean(record?.financialBinding?.financialDocumentId || record?.identity?.billDocumentId || record?.identity?.billRecordId);
               return <button className="bill-queue-item" key={id} onClick={() => { setSelectedId(id); setMode("record"); }}><div><strong>{record?.bill?.vendorLabel}</strong><span>{Number(record?.bill?.amount || 0).toLocaleString("en-US", { style: "currency", currency: record?.bill?.currency || "USD" })}</span><small>{record?.identity?.invoiceNumber} · {record?.bill?.dueDate || "No due date"}</small></div><b>{clean(record?.purchaseMatch?.status) === "exception" ? t.exception : clean(record?.approval?.status) === "pending" ? t.approval : clean(record?.payment?.status).toUpperCase()} ›</b></button>;
             }) : <div className="empty-row">{t.empty}</div>}
           </div>

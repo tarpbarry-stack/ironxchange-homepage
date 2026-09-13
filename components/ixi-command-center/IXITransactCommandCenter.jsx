@@ -33,6 +33,7 @@ import {
   getIXITransactObjectDirectories
 } from "./IXIAosCommandCenterModel";
 
+import IXITransactRecordWorkspace from "./IXITransactRecordWorkspace";
 import styles from "./IXIAosCommandCenter.module.css";
 
 const IXITransactApp = dynamic(
@@ -339,6 +340,7 @@ export default function IXITransactCommandCenter() {
   const [query, setQuery] = useState("");
   const [selectedQueueId, setSelectedQueueId] = useState("");
   const [selectedRecord, setSelectedRecord] = useState(null);
+  const [recordReturnWorkspace, setRecordReturnWorkspace] = useState("object-history");
   const [activeModuleId, setActiveModuleId] = useState("");
   const [selectedDirectoryId, setSelectedDirectoryId] = useState("");
   const [passportRefreshKey, setPassportRefreshKey] = useState(0);
@@ -565,6 +567,19 @@ export default function IXITransactCommandCenter() {
     setRefreshKey(value => value + 1);
   }
 
+  function openTransactionRecord(record) {
+    setSelectedRecord(record);
+    if (!clean(record?.document?.financialDocumentId)) return;
+    if (activeWorkspace !== "record-view") setRecordReturnWorkspace(activeWorkspace);
+    setActiveModuleId("");
+    setActiveWorkspace("record-view");
+  }
+
+  function returnFromRecord() {
+    setSelectedRecord(null);
+    setActiveWorkspace(recordReturnWorkspace);
+  }
+
   function openTransactModule(moduleId) {
     setActiveModuleId(moduleId);
     setSelectedRecord(null);
@@ -639,6 +654,21 @@ export default function IXITransactCommandCenter() {
   }
 
   function renderWorkspace() {
+    if (activeWorkspace === "record-view" && selectedRecord?.document?.financialDocumentId) {
+      return <IXITransactRecordWorkspace
+        key={`${selectedContext?.id}:${selectedRecord.document.financialDocumentId}`}
+        financialDocumentId={selectedRecord.document.financialDocumentId}
+        object={buildTransactObject(selectedContext, passportRecords)}
+        actor={accessData.actor || {}}
+        entity={environment?.entity || {}}
+        permissions={permissions}
+        financialRecords={passportRecords}
+        onBack={returnFromRecord}
+        onOpenRecord={openTransactionRecord}
+        onFinancialRecordsChange={() => setPassportRefreshKey(value => value + 1)}
+      />;
+    }
+
     if (activeWorkspace === "object-history") {
       return (
         <section className={styles.workPanel}>
@@ -652,7 +682,7 @@ export default function IXITransactCommandCenter() {
             records={normalizedPassportRecords}
             currency={currency}
             emptyMessage={passportRecordsLoading ? "Loading lifetime Passport records…" : passportRecordsError || "No governed financial records were returned for this Passport."}
-            onSelect={setSelectedRecord}
+            onSelect={openTransactionRecord}
           />
         </section>
       );
@@ -683,7 +713,7 @@ export default function IXITransactCommandCenter() {
       return (
         <section className={styles.workPanel}>
           <WorkspaceHeader eyebrow={activeWorkspace === "work" ? "OPERATING CONTEXT + FINANCIAL EVIDENCE" : "LIFETIME PASSPORT HISTORY"} title={activeWorkspace === "work" ? "WORK & ASSET STORY" : "RECORD CHRONOLOGY"} detail={activeWorkspace === "work" ? "The same canonical business object, connected to its work, people, locations and financial evidence." : "The complete authorized Passport record history remains visible independently of the selected accounting period."} count={normalizedPassportRecords.length + story.length} actionLabel={activeWorkspace === "work" ? "RETURN TO AOS" : "OPEN LEDGER"} href={activeWorkspace === "work" ? "/aos/work" : "/transact/ledger"} />
-          {normalizedPassportRecords.length || passportRecordsLoading || passportRecordsError ? <RecordTable records={normalizedPassportRecords} currency={currency} emptyMessage={passportRecordsLoading ? "Loading lifetime Passport records…" : passportRecordsError || "No governed financial records were returned for this Passport."} onSelect={setSelectedRecord} /> : null}
+          {normalizedPassportRecords.length || passportRecordsLoading || passportRecordsError ? <RecordTable records={normalizedPassportRecords} currency={currency} emptyMessage={passportRecordsLoading ? "Loading lifetime Passport records…" : passportRecordsError || "No governed financial records were returned for this Passport."} onSelect={openTransactionRecord} /> : null}
           {activeWorkspace === "work" ? <div className={styles.storyList}>{story.length ? story.map(item => <div className={styles.storyRow} key={item.id}><span className={styles.storyGlyph}>{contextLabel(item.kind).slice(0, 2)}</span><div><strong>{item.title}</strong><span>{item.detail}</span></div><time>{relativeTime(item.updatedAt)}</time></div>) : <div className={styles.emptyState}><strong>NO OPERATING CHRONOLOGY RETURNED</strong><span>No related AOS events were returned for this canonical context.</span></div>}</div> : null}
         </section>
       );
@@ -693,7 +723,7 @@ export default function IXITransactCommandCenter() {
       const reports = projection?.reports && typeof projection.reports === "object"
         ? Object.entries(projection.reports).map(([key, value]) => ({ id: `report-${key}`, title: clean(value?.title || value?.label || key.replace(/[-_]/g, " ")).toUpperCase(), party: clean(value?.description || "Authoritative financial projection"), date: displayTimestamp(value?.generatedAt || projection?.generatedAt), status: clean(value?.status || "AVAILABLE"), amount: null, raw: value }))
         : [];
-      return <section className={styles.workPanel}><WorkspaceHeader eyebrow="READ-ONLY PROJECTIONS" title="REPORTING & AUDIT" detail="Every report remains a view of canonical accounting truth and must retain drill-down lineage." count={reports.length} /><RecordTable records={reports} currency={currency} emptyMessage="No server-returned reports are available for this scope." onSelect={setSelectedRecord} /></section>;
+      return <section className={styles.workPanel}><WorkspaceHeader eyebrow="READ-ONLY PROJECTIONS" title="REPORTING & AUDIT" detail="Every report remains a view of canonical accounting truth and must retain drill-down lineage." count={reports.length} /><RecordTable records={reports} currency={currency} emptyMessage="No server-returned reports are available for this scope." onSelect={openTransactionRecord} /></section>;
     }
 
     const labels = {
@@ -706,7 +736,7 @@ export default function IXITransactCommandCenter() {
     };
     const [eyebrow, title, detail] = labels[activeWorkspace] || labels.gl;
     const records = recordsByWorkspace[activeWorkspace] || [];
-    return <section className={styles.workPanel}><WorkspaceHeader eyebrow={eyebrow} title={title} detail={`${detail} Passport history is not hidden by the reporting-period selector.`} count={records.length} /><RecordTable records={records} currency={currency} emptyMessage={passportRecordsLoading ? "Loading authoritative Passport records…" : passportRecordsError || "No server-returned records are available for this scope."} onSelect={setSelectedRecord} /></section>;
+    return <section className={styles.workPanel}><WorkspaceHeader eyebrow={eyebrow} title={title} detail={`${detail} Passport history is not hidden by the reporting-period selector.`} count={records.length} /><RecordTable records={records} currency={currency} emptyMessage={passportRecordsLoading ? "Loading authoritative Passport records…" : passportRecordsError || "No server-returned records are available for this scope."} onSelect={openTransactionRecord} /></section>;
   }
 
   const selectedDetail = selectedRecord || selectedQueueItem;
@@ -725,7 +755,9 @@ export default function IXITransactCommandCenter() {
     : connectionHealthy
       ? "IXI CORE CONNECTED · PASSPORT HISTORY"
       : "AUTHORITY / PROJECTION INCOMPLETE";
-  const workspaceTitle = activeWorkspace === "object-history"
+  const workspaceTitle = activeWorkspace === "record-view"
+    ? "TRANSACTION RECORD"
+    : activeWorkspace === "object-history"
     ? "TRANSACTION HISTORY"
     : activeWorkspace === "object-app"
       ? activeModule?.label || "TRAN$ACT APP"

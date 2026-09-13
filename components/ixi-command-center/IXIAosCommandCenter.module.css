@@ -22,6 +22,20 @@
   font-family: inherit;
 }
 
+.recordIdentity { display: flex; flex-wrap: wrap; gap: 16px; padding: 12px 16px; border-bottom: 1px solid var(--line); color: var(--gold); font-size: 11px; font-weight: 750; }
+.recordIdentity code { overflow-wrap: anywhere; color: var(--muted); font-family: inherit; }
+.recordDetails { padding: 18px; font-size: 12px; line-height: 1.5; }
+.recordDetails h3 { margin: 24px 0 12px; font-size: 11px; letter-spacing: .07em; }
+.recordDetails p { color: var(--muted); white-space: pre-wrap; }
+.recordFields { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin: 0; }
+.recordFields dt { font-size: 10px; color: var(--muted); font-weight: 750; }
+.recordFields dd { margin: 4px 0 0; overflow-wrap: anywhere; }
+.recordFields small { display: block; color: var(--muted); }
+.recordLinks { display: flex; flex-wrap: wrap; gap: 10px; }
+.recordHistory { padding-left: 18px; }
+.recordHistory li { margin-bottom: 12px; }
+.recordHistory span { display: block; color: var(--muted); }
+
 .topbar {
   position: sticky;
   z-index: 50;

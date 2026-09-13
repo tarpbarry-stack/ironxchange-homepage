@@ -638,6 +638,7 @@ export default function IXITransactApp({
         object?.financialRecords ||
         [];
     const records = candidates
+      .filter(item => !clean(selectedFinancialDocumentId) || financialDocumentIdOf(item) === clean(selectedFinancialDocumentId))
       .map(hydrateIXIPurchaseOrderRecord)
       .filter(Boolean);
     return (
@@ -647,7 +648,7 @@ export default function IXITransactApp({
         ),
       )[0] || null
     );
-  }, [object, financialRecords]);
+  }, [object, financialRecords, selectedFinancialDocumentId]);
 
   useEffect(() => {
     setModuleId(clean(initialModuleId));
@@ -959,6 +960,7 @@ export default function IXITransactApp({
         context={context}
         object={object}
         initialRecords={billRecords}
+        selectedFinancialDocumentId={selectedFinancialDocumentId}
         authority={
           actor?.billAuthority ||
           actor?.financialAuthority ||
