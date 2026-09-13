@@ -112,6 +112,7 @@ test("one canonical Object produces one command context and keeps machine presen
   assert.equal(matching[0].passportId, "IXI-MACHINE-1");
   assert.equal(matching[0].imageUrl, "https://images.example.com/544k.jpg");
   assert.equal(matching[0].serialNumber, "1DW544KZVHF123456");
+  assert.equal(matching[0].stockNumber, "SSU-544K-01");
   assert.equal(matching[0].assetId, "SSU-544K-01");
 });
 
@@ -538,9 +539,7 @@ test("recursive command center owns transact while the detailed ledger remains a
   assert.match(commandCenter, /\["reporting", "REPORTING", "10"\]/u);
   assert.match(commandCenter, /TRAN\$ACT will not claim a clean state/u);
   assert.match(commandCenter, /VIEWS NEVER CHANGE POSTED TRUTH/u);
-  // Building the existing read-only launch context does not provision an Object
-  // or Passport. Payment writes stay in the shared, authorized app command path.
-  assert.doesNotMatch(commandCenter, /createIXI(?!TransactContext\b)|provision|passport\/ensure/u);
+  assert.doesNotMatch(commandCenter, /createIXI|provision|passport\/ensure/u);
   assert.doesNotMatch(commandCenter, /returnTo=.*dashboard/u);
   assert.match(commandModel, /getIXITransactOwnedEquipmentObjectIds/u);
   assert.match(commandModel, /getIXIAosRelationshipEvidence/u);
