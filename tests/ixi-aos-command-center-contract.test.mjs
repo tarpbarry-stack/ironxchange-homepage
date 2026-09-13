@@ -298,10 +298,10 @@ test("TRAN$ACT Object directory follows customer-governed System Index names", (
 function containerDirectoryFixture() {
   let serial = 0;
   const canonical = (objectId, displayName, objectType = "person") => ({ objectId, displayName, objectType, entityId: entity.entityId, passportId: `IXIAAAAAA${"BCDEFGH"[serial++]}`, status: "active" });
-  const workforce = canonical("workforce-folder", "Field Team");
+  const workforce = { ...canonical("workforce-folder", "Field Team"), metadata: { rootContainer: true, createdFrom: "aos-scoreboard-plus" } };
   const matt = { ...canonical("matt", "Matt Tuley"), fields: { employeeId: "1-005" } };
   const cooper = canonical("cooper", "Cooper Liles");
-  const yard = canonical("yard", "West Yard", "location");
+  const yard = { ...canonical("yard", "West Yard", "location"), metadata: { rootContainer: false, parentObjectId: workforce.objectId, createdFrom: "aos-container-plus" } };
   const machine = { ...canonicalMachine, entityId: entity.entityId, passportId: "IXITEST999" };
   const foreignMachine = canonical("unowned-machine", "Visible external machine", "machine");
   const publication = { ...canonical("publication", "Retired publication adapter", "system-index"), metadata: { adapterId: "ixi-owned-for-sale" } };
@@ -316,11 +316,11 @@ function containerDirectoryFixture() {
   return { workforce, matt, cooper, yard, aosObjects, systemIndexes, railProjections, contexts };
 }
 
-test("TRAN$ACT includes governed container rails even when the container uses a Person card", () => {
+test("TRAN$ACT lists declared root indexes using any card and keeps nested containers inside them", () => {
   const fixture = containerDirectoryFixture();
   const before = structuredClone(fixture);
   const directories = getIXITransactObjectDirectories(fixture.contexts, fixture.systemIndexes, fixture);
-  assert.deepEqual(directories.map(directory => directory.menuLabel), ["ALL", "EQUIP", "Field Team", "West Yard"]);
+  assert.deepEqual(directories.map(directory => directory.menuLabel), ["ALL", "EQUIP", "Field Team"]);
   assert.deepEqual(directories.find(directory => directory.id === fixture.workforce.objectId).items.map(item => item.sourceId), ["matt", "cooper", "yard"]);
   const all = directories[0].items;
   assert.equal(all.filter(item => item.sourceId === "matt").length, 1, "multiple container memberships do not duplicate an employee in ALL");
@@ -334,14 +334,45 @@ test("container navigation follows renames and current rail members, not board p
   const fixture = containerDirectoryFixture();
   fixture.aosObjects[0].displayName = "Our People";
   fixture.matt.directContainerId = "a-different-old-parent";
-  fixture.railProjections[fixture.workforce.objectId].members = [fixture.cooper];
+  fixture.railProjections[fixture.workforce.objectId].members = [fixture.cooper, fixture.yard];
   fixture.railProjections[fixture.yard.objectId].members = [fixture.matt];
   const contexts = buildIXIAosCommandContexts({ entity, aosObjects: fixture.aosObjects, systemIndexes: fixture.systemIndexes });
   const directories = getIXITransactObjectDirectories(contexts, fixture.systemIndexes, fixture);
   const directory = directories.find(item => item.id === fixture.workforce.objectId);
   assert.equal(directory.label, "Our People");
-  assert.deepEqual(directory.items.map(item => item.sourceId), [fixture.cooper.objectId]);
-  assert.equal(directories.find(item => item.id === fixture.yard.objectId).items[0].sourceId, fixture.matt.objectId);
+  assert.deepEqual(directory.items.map(item => item.sourceId), [fixture.cooper.objectId, fixture.yard.objectId]);
+  assert.equal(directories.some(item => item.id === fixture.yard.objectId), false);
+  assert.equal(directories[0].items.some(item => item.sourceId === fixture.matt.objectId), true, "ALL still reaches an employee through a nested yard");
+});
+
+test("root directory role survives cross-membership and renaming without promoting ordinary rail owners", () => {
+  const fixture = containerDirectoryFixture();
+  fixture.workforce.displayName = "West Yard";
+  fixture.yard.displayName = "Workforce";
+  fixture.railProjections[fixture.cooper.objectId] = { members: [fixture.matt] };
+  // Being inside another rail is an additional relationship, not a change of
+  // the root index role. Having a rail does not give an ordinary person that role.
+  const contexts = buildIXIAosCommandContexts({ entity, aosObjects: fixture.aosObjects, systemIndexes: fixture.systemIndexes });
+  const directories = getIXITransactObjectDirectories(contexts, fixture.systemIndexes, fixture);
+  assert.deepEqual(directories.map(directory => directory.menuLabel), ["ALL", "EQUIP", "West Yard"]);
+  assert.equal(directories[0].items.filter(item => item.sourceId === fixture.matt.objectId).length, 1);
+});
+
+test("legacy explicit index hierarchy is supported without assuming every unparented container is an index", () => {
+  const fixture = containerDirectoryFixture();
+  fixture.workforce.metadata = { hierarchyRole: "index" };
+  fixture.yard.metadata = {};
+  const directories = getIXITransactObjectDirectories(fixture.contexts, fixture.systemIndexes, fixture);
+  assert.deepEqual(directories.map(directory => directory.menuLabel), ["ALL", "EQUIP", "Field Team"]);
+});
+
+test("Locations keeps its yard tile while Workforce retains its own index option and employee tiles", () => {
+  const fixture = containerDirectoryFixture();
+  fixture.systemIndexes.push({ objectId: "locations-index", displayName: "Locations", items: [fixture.yard, fixture.workforce] });
+  const directories = getIXITransactObjectDirectories(fixture.contexts, fixture.systemIndexes, fixture);
+  assert.deepEqual(directories.map(directory => directory.menuLabel), ["ALL", "EQUIP", "Locations", "Field Team"]);
+  assert.deepEqual(directories.find(item => item.id === "locations-index").items.map(item => item.sourceId), [fixture.yard.objectId, fixture.workforce.objectId]);
+  assert.equal(directories.find(item => item.id === fixture.workforce.objectId).items.some(item => item.sourceId === fixture.matt.objectId), true);
 });
 
 test("container directory rejects a mismatched Passport instead of attaching another employee's identity", () => {

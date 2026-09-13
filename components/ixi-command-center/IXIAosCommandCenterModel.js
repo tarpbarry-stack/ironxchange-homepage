@@ -294,14 +294,15 @@ export function getIXITransactObjectDirectories(
     }] : [];
   });
 
-  // A customer container can use any card presentation, including Person.
-  // Read its governed rail as a navigation folder without promoting it to a
-  // System Index or deriving membership from labels, types, or board placement.
+  // Root indexes can use any card presentation. Only their explicit saved
+  // hierarchy role adds a menu option; a nested container having a rail does not.
+  // Read every governed rail so ALL can still reach nested members.
   const indexIds = new Set(safeArray(systemIndexes).map(index => firstText(index?.objectId, index?.indexId)));
   const visibleObjects = safeArray(aosObjects).filter(isIXIAosWorkspaceVisibleAdapter);
-  const visibleIds = new Set(visibleObjects.map(getObjectId));
+  const visibleObjectsById = new Map(visibleObjects.map(object => [getObjectId(object), object]));
+  const membersByOwner = new Map(directories.map(directory => [directory.id, directory.items]));
   const ownerIds = (railProjections instanceof Map ? [...railProjections.keys()] : Object.keys(railProjections || {}))
-    .filter(objectId => visibleIds.has(objectId) && contextsByObjectId.has(objectId) && !indexIds.has(objectId));
+    .filter(objectId => visibleObjectsById.has(objectId) && contextsByObjectId.has(objectId) && !indexIds.has(objectId));
   if (ownerIds.length) {
     const admission = buildAosCanonicalAdmission({ aosObjects: visibleObjects });
     ownerIds.forEach(objectId => {
@@ -311,17 +312,26 @@ export function getIXITransactObjectDirectories(
         .filter(Boolean);
       // Contexts already enforce Equipment ownership admission. A different
       // container rail cannot make an unowned machine eligible for TRAN$ACT.
-      if (items.length) directories.push({ id: objectId, label: owner.title, menuLabel: owner.title, items });
+      membersByOwner.set(objectId, items);
+      const metadata = visibleObjectsById.get(objectId)?.metadata || {};
+      const isRootIndex = metadata.rootContainer === true || clean(metadata.hierarchyRole).toLowerCase() === "index";
+      if (isRootIndex && items.length) directories.push({ id: objectId, label: owner.title, menuLabel: owner.title, items });
     });
   }
 
   const seen = new Set();
-  const allItems = directories.flatMap(directory => directory.items.flatMap(item => {
+  const pending = directories.flatMap(directory => directory.items);
+  const allItems = [];
+  // Walk only members reachable from the indexes. Canonical IDs deduplicate
+  // shared membership and terminate cycles without changing any durable edge.
+  for (let cursor = 0; cursor < pending.length; cursor += 1) {
+    const item = pending[cursor];
     const objectId = clean(item?.sourceId);
-    if (!objectId || seen.has(objectId)) return [];
+    if (!objectId || seen.has(objectId)) continue;
     seen.add(objectId);
-    return [item];
-  }));
+    allItems.push(item);
+    pending.push(...(membersByOwner.get(objectId) || []));
+  }
 
   return [{ id: "all", label: "ALL", menuLabel: "ALL", items: allItems }, ...directories];
 }
