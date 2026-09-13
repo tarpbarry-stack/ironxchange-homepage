@@ -4,9 +4,10 @@ import fs from "node:fs/promises";
 import crypto from "node:crypto";
 import JSZip from "jszip";
 import ExcelJS from "exceljs";
-import { PDFDocument } from "pdf-lib";
+import { PDFDocument, PDFName, decodePDFRawStream } from "pdf-lib";
+import fontkit from "@pdf-lib/fontkit";
 import { buildMachineLedger } from "../components/ixi-command-center/IXITransactMachineLedger.mjs";
-import { createMachinePackage, fetchTransactionEvidence } from "../components/ixi-command-center/IXITransactDocumentDownload.js";
+import { createMachinePackage, createTransactionPdf, fetchTransactionEvidence } from "../components/ixi-command-center/IXITransactDocumentDownload.js";
 
 const context = { title: "Example machine", passportId: "TEST-PASSPORT", sourceId: "test-object" };
 const entity = { displayName: "Example Entity" };
@@ -15,6 +16,39 @@ const record = attachments => ({ server: { revision: 2 }, financialDocument: {
   currency: "USD", occurredAt: "2026-09-01", paymentMethod: "unpaid", totals: { total: 474.66 },
   expense: { vendor: "García, Inc." }, attachments
 } });
+
+test("PDF embedded glyph outlines preserve every printed English and Spanish character", async () => {
+  const fontBytes = await fs.readFile(new URL("../public/fonts/IXI-Document-Sans.ttf", import.meta.url));
+  const sourceFont = fontkit.create(fontBytes);
+  const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789$.,-ÁÉÍÓÚÜÑáéíóúüñ¿¡&";
+  const blob = await createTransactionPdf({
+    rows: buildMachineLedger([record([])]).rows,
+    context: { ...context, title: alphabet }, entity, fontBytes
+  });
+  const pdf = await PDFDocument.load(await blob.arrayBuffer());
+  const fonts = pdf.getPages()[0].node.Resources().lookup(PDFName.of("Font"));
+  const font = fonts.lookup(fonts.keys()[0]);
+  const descendant = font.lookup(PDFName.of("DescendantFonts")).lookup(0);
+  assert.equal(descendant.lookup(PDFName.of("CIDToGIDMap")).toString(), "/Identity");
+  const descriptor = descendant.lookup(PDFName.of("FontDescriptor"));
+  const embeddedBytes = decodePDFRawStream(descriptor.lookup(PDFName.of("FontFile2"))).decode();
+  const embeddedFont = fontkit.create(embeddedBytes);
+  const unicodeMap = new TextDecoder().decode(decodePDFRawStream(font.lookup(PDFName.of("ToUnicode"))).decode());
+  const characterIds = new Map();
+  for (const block of unicodeMap.matchAll(/beginbfchar([\s\S]*?)endbfchar/g)) {
+    for (const [, cid, unicode] of block[1].matchAll(/<([0-9a-f]+)>\s*<([0-9a-f]{4})>/gi)) {
+      characterIds.set(String.fromCharCode(parseInt(unicode, 16)), parseInt(cid, 16));
+    }
+  }
+  for (const character of alphabet) {
+    assert.ok(characterIds.has(character), `Missing character mapping: ${character}`);
+    // Text extraction can pass even when the actual glyph data is corrupt.
+    const outline = embeddedFont.getGlyph(characterIds.get(character)).path.commands;
+    assert.ok(outline.length > 0, `Blank glyph: ${character}`);
+    assert.deepEqual(outline, sourceFont.glyphForCodePoint(character.codePointAt(0)).path.commands,
+      `Malformed printed glyph: ${character}`);
+  }
+});
 
 test("a machine package contains reconciling PDFs, spreadsheets, records, history and checksummed contents", async t => {
   const original = global.fetch;

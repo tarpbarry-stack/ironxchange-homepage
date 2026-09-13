@@ -52,7 +52,10 @@ export async function createTransactionPdf({
   const pdf = await PDFDocument.create();
   pdf.registerFontkit(fontkit);
   const font = await pdf.embedFont(fontBytes || (await documentFont()), {
-    subset: true,
+    // Preserve the validated glyph offsets. Fontkit's subset encoder corrupts
+    // short loca offsets for this unhinted font, leaving readable text maps
+    // but missing or malformed letters in the rendered document.
+    subset: false,
   });
   const supported = new Set(font.getCharacterSet());
   const printable = (text) =>
