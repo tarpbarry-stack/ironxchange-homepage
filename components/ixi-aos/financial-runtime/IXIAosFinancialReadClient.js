@@ -15,8 +15,9 @@ async function request(path, options = {}, fallback = "IXI Financial request fai
   try {
     payload = text ? JSON.parse(text) : null;
   } catch {
-    const error = new Error("IXI Financial returned a non-JSON response.");
+    const error = new Error(`${fallback} Please retry.`);
     error.code = "IXI_FINANCIAL_BAD_RESPONSE";
+    error.status = response.status;
     throw error;
   }
   if (!response.ok || payload?.ok !== true) {
