@@ -11,6 +11,7 @@ import { createMachinePackage, createTransactionPdf, fetchTransactionEvidence } 
 
 const context = { title: "Example machine", passportId: "TEST-PASSPORT", sourceId: "test-object" };
 const entity = { displayName: "Example Entity" };
+const logoPng = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAFElEQVR42mP8z8Dwn4GBgYGJAQoAHgQCAftO1rMAAAAASUVORK5CYII=", "base64");
 const record = attachments => ({ server: { revision: 2 }, financialDocument: {
   financialDocumentId: "test-expense", documentNumber: "EXP-TEST", documentType: "expense", financialState: "incurred",
   currency: "USD", occurredAt: "2026-09-01", paymentMethod: "unpaid", totals: { total: 474.66 },
@@ -48,6 +49,39 @@ test("PDF embedded glyph outlines preserve every printed English and Spanish cha
     assert.deepEqual(outline, sourceFont.glyphForCodePoint(character.codePointAt(0)).path.commands,
       `Malformed printed glyph: ${character}`);
   }
+});
+
+
+test("a full machine PDF is a compact branded register instead of one raw-schema page per record", async t => {
+  const original = global.fetch;
+  t.after(() => { global.fetch = original; });
+  const signedLogoUrl = "https://sharetribe.imgix.net/entity/logo?s=signed-query";
+  global.fetch = async url => {
+    assert.equal(String(url), signedLogoUrl);
+    return new Response(logoPng, { headers: { "content-type": "image/png" } });
+  };
+  const fontBytes = await fs.readFile(new URL("../public/fonts/IXI-Document-Sans.ttf", import.meta.url));
+  const records = Array.from({ length: 19 }, (_, index) => ({
+    server: { revision: index + 1 },
+    financialDocument: {
+      ...record([]).financialDocument,
+      financialDocumentId: `expense-${index + 1}`,
+      documentNumber: `EXP-${String(index + 1).padStart(3, "0")}`,
+      occurredAt: `2026-09-${String((index % 9) + 1).padStart(2, "0")}`,
+      expense: { vendor: `Vendor ${index + 1}` },
+    },
+  }));
+  const ledger = buildMachineLedger(records);
+  const blob = await createTransactionPdf({
+    rows: ledger.rows, context, entity: { ...entity, logoUrl: signedLogoUrl }, ledger, fontBytes
+  });
+  const pdf = await PDFDocument.load(await blob.arrayBuffer());
+  assert.ok(pdf.getPageCount() <= 3, `Expected at most 3 pages, received ${pdf.getPageCount()}`);
+  const hasEmbeddedImage = pdf.getPages().some(page => {
+    const xObjects = page.node.Resources()?.lookup(PDFName.of("XObject"));
+    return Boolean(xObjects?.keys().length);
+  });
+  assert.equal(hasEmbeddedImage, true);
 });
 
 test("a machine package contains reconciling PDFs, spreadsheets, records, history and checksummed contents", async t => {
