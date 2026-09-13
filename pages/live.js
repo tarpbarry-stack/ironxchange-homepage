@@ -21,6 +21,10 @@ import {
   loadIXIListingsEnvironment
 } from "../lib/listings/IXIListingsEngine";
 
+import {
+  resolveIXILaunchSelection
+} from "../lib/listings/resolveIXILaunchSelection.mjs";
+
 import MachineBadges from "../components/MachineBadges";
 
 import categoryDnaKeywords from "../lib/categoryDnaKeywords";
@@ -769,41 +773,11 @@ useEffect(() => {
   listings
 ]);
 
-useEffect(() => {
-  if (!router.isReady) return;
-  if (id) return;
-  if (loading) return;
-  if (!isAuthenticated) return;
-
-  const firstListingId =
-    Array.isArray(listings) &&
-    listings.length > 0
-      ? getListingId(listings[0])
-      : null;
-
-  if (!firstListingId) {
-    router.replace(
-      "/account/my-listings-v2"
-    );
-    return;
-  }
-
-  router.replace(
-    `/live?id=${encodeURIComponent(
-      String(firstListingId)
-    )}`
-  );
-}, [
-  router.isReady,
-  id,
-  loading,
-  isAuthenticated,
-  listings
-]);
-  
   const listing = useMemo(() => {
-    if (!id || listings.length === 0) return null;
-    return listings.find(item => String(getListingId(item)) === String(id)) || null;
+    return resolveIXILaunchSelection({
+      requestedListingId: id,
+      listings
+    });
   }, [id, listings]);
 
   useEffect(() => {
@@ -2002,16 +1976,10 @@ async function saveExternalLinks() {
     await copyText("Share Message", message);
   }
 
- const isResolvingBareLaunch =
-  router.isReady &&
-  !id &&
-  isAuthenticated;
-
- if (
-  loading ||
-  directListingLoading ||
-  isResolvingBareLaunch
-) {
+  if (
+    loading ||
+    directListingLoading
+  ) {
     return (
       <main className="loading">
         Loading Launch Studio...
