@@ -292,8 +292,17 @@ export default function IXITransactStyles() {
       }
 
       /* Worksheet geometry only: the native 298 × 471 card stays unchanged. */
+      .worksheet-open .module-open .tx-body > .tx-payments-access {
+        height: 36px !important;
+        min-height: 36px !important;
+      }
+      .worksheet-open .module-open .tx-body > .tx-payments-access + * {
+        height: calc(100% - 44px) !important;
+        min-height: calc(100% - 44px) !important;
+      }
       .worksheet-open .ixi-bill-standalone,
       .worksheet-open .ixi-bill-standalone > .ixi-bill-app,
+      .worksheet-open .ixi-bill-standalone > .ixi-bill-card,
       .worksheet-open .ixi-bill-app > .ixi-bill-card {
         width: 100% !important;
         height: 100% !important;
@@ -303,12 +312,19 @@ export default function IXITransactStyles() {
         box-shadow: none;
       }
       .worksheet-open .ixi-bill-card .bill-scroll {
+        height: calc(100% - 152px);
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
         align-content: start;
         align-items: start;
         gap: 16px;
         padding: 18px;
+      }
+      .worksheet-open .ixi-bill-card .bill-toolbar { height: 44px; }
+      .worksheet-open .ixi-bill-card .bill-head { height: 64px; }
+      .worksheet-open .ixi-bill-card .bill-footer-actions { height: 44px; }
+      .worksheet-open .ixi-bill-card .bill-scroll > [data-ixi-payment-panel] {
+        grid-column: 1 / -1;
       }
       .worksheet-open .ixi-bill-card .identity-grid,
       .worksheet-open .ixi-bill-card .inline-form {
