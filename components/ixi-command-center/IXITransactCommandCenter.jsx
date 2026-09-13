@@ -37,6 +37,8 @@ import {
 } from "./IXIAosCommandCenterModel";
 
 import IXITransactRecordWorkspace from "./IXITransactRecordWorkspace";
+import IXITransactWorkingTabs, { UnfinishedWorksheetDialog, WorksheetPanel } from "./IXITransactWorkingTabs";
+import IXITransactMachineHistory from "./IXITransactMachineHistory";
 import styles from "./IXIAosCommandCenter.module.css";
 
 const IXITransactApp = dynamic(
@@ -316,7 +318,7 @@ function RecordTable({ records, currency, emptyMessage, onSelect, paymentRecords
       <table className={styles.dataTable}>
         <thead><tr><th>RECORD</th><th>PARTY / SOURCE</th><th>STATUS</th><th>DUE / DATE</th><th>AMOUNT</th><th>PAYMENT</th><th aria-label="Open record" /></tr></thead>
         <tbody>
-          {records.slice(0, 50).map(record => { const paid = paymentSummary(paymentRecords.find(item => paymentDocument(item).financialDocumentId === record.id) || record.raw || record.document, paymentRecords); return (
+          {records.map(record => { const paid = paymentSummary(paymentRecords.find(item => paymentDocument(item).financialDocumentId === record.id) || record.raw || record.document, paymentRecords); return (
             <tr key={record.id}>
               <td><strong>{record.title}</strong><small>{record.id}</small></td>
               <td>{record.party}</td>
@@ -356,7 +358,10 @@ export default function IXITransactCommandCenter() {
   const [query, setQuery] = useState("");
   const [selectedQueueId, setSelectedQueueId] = useState("");
   const [selectedRecord, setSelectedRecord] = useState(null);
-  const [recordReturnWorkspace, setRecordReturnWorkspace] = useState("object-history");
+  const [workingTabs, setWorkingTabs] = useState([]);
+  const [activeTabId, setActiveTabId] = useState("");
+  const [closingTab, setClosingTab] = useState(null);
+  const deepLinkOpened = useRef(false);
   const [activeModuleId, setActiveModuleId] = useState("");
   const [selectedDirectoryId, setSelectedDirectoryId] = useState("");
   const [passportRefreshKey, setPassportRefreshKey] = useState(0);
@@ -368,7 +373,6 @@ export default function IXITransactCommandCenter() {
   const [error, setError] = useState("");
   const [financialError, setFinancialError] = useState("");
   const [passportRecords, setPassportRecords] = useState([]);
-  const [paymentSelection, setPaymentSelection] = useState(null);
   const [passportRecordsLoading, setPassportRecordsLoading] = useState(false);
   const [passportRecordsError, setPassportRecordsError] = useState("");
   const contextHydrationStarted = useRef(false);
@@ -415,7 +419,7 @@ export default function IXITransactCommandCenter() {
   }, []);
 
   useEffect(() => {
-    if (!access || contextHydrationStarted.current || environment?.hydration?.canonicalObjects !== "deferred") return undefined;
+    if (!access || contextHydrationStarted.current || environment?.hydration?.canonicalObjects !== "deferred" && refreshKey === 0) return undefined;
     if (financialLoading || (!projectionPayload && !financialError)) return undefined;
 
     const controller = new AbortController();
@@ -571,44 +575,115 @@ export default function IXITransactCommandCenter() {
   }, [contexts, query]);
 
   function selectContext(context) {
-    setPaymentSelection(null);
+    if (selectedId !== context.id) { setPassportRecords([]); setPassportRecordsLoading(true); }
     setSelectedKind(context.kind);
     setSelectedId(context.id);
     setQuery("");
     setSelectedRecord(null);
     setActiveModuleId("");
+    setActiveTabId("");
     setActiveWorkspace(context.kind === "company" ? "today" : "object-history");
   }
 
   function refreshAuthoritativeContext() {
     contextHydrationStarted.current = false;
     setRefreshKey(value => value + 1);
+    setPassportRefreshKey(value => value + 1);
+  }
+
+  function activateTab(tab) {
+    if (selectedId !== tab.context.id) { setPassportRecords([]); setPassportRecordsLoading(true); }
+    setSelectedKind(tab.context.kind);
+    setSelectedId(tab.context.id);
+    setActiveTabId(tab.id);
+    setActiveModuleId(tab.moduleId || "");
+    setActiveWorkspace(tab.paymentTab ? "payments" : tab.financialDocumentId ? "record-view" : "object-app");
   }
 
   function openTransactionRecord(record) {
     setSelectedRecord(record);
-    if (!clean(record?.document?.financialDocumentId)) return;
-    if (activeWorkspace !== "record-view") setRecordReturnWorkspace(activeWorkspace);
-    setActiveModuleId("");
-    setActiveWorkspace("record-view");
-  }
-
-  function returnFromRecord() {
-    setSelectedRecord(null);
-    setActiveWorkspace(recordReturnWorkspace);
+    const financialDocumentId = clean(record?.document?.financialDocumentId);
+    if (!financialDocumentId || !selectedContext) return;
+    const existing = workingTabs.find(tab => tab.financialDocumentId === financialDocumentId);
+    if (existing) { activateTab(existing); return; }
+    const tab = { id: financialDocumentId, financialDocumentId, label: record.title || financialDocumentId,
+      context: selectedContext, object: buildTransactObject(selectedContext, passportRecords), financialRecords: passportRecords, dirty: false };
+    setWorkingTabs(tabs => [...tabs, tab]);
+    activateTab(tab);
   }
 
   function openTransactModule(moduleId) {
-    setActiveModuleId(moduleId);
-    setSelectedRecord(null);
-    setActiveWorkspace("object-app");
+    if (!selectedContext) return;
+    const id = `app-${selectedContext.id}-${moduleId}`;
+    const existing = workingTabs.find(tab => tab.id === id);
+    if (existing) { activateTab(existing); return; }
+    const tab = { id, moduleId, label: selectedModules.find(item => item.id === moduleId)?.label || moduleId,
+      context: selectedContext, object: buildTransactObject(selectedContext, passportRecords), financialRecords: passportRecords, dirty: false };
+    setWorkingTabs(tabs => [...tabs, tab]);
+    activateTab(tab);
   }
 
   function returnToObjectHistory() {
+    setActiveTabId("");
     setActiveModuleId("");
     setSelectedRecord(null);
     setActiveWorkspace("object-history");
   }
+
+  function closeTab(tab, discard = false) {
+    if (tab.dirty && !discard) { setClosingTab(tab); return; }
+    setWorkingTabs(tabs => tabs.filter(item => item.id !== tab.id));
+    setClosingTab(null);
+    if (activeTabId === tab.id) returnToObjectHistory();
+  }
+
+  function markTabDirty(id) {
+    setWorkingTabs(tabs => tabs.map(tab => tab.id === id && !tab.dirty ? { ...tab, dirty: true } : tab));
+  }
+
+  async function worksheetSaved(id) {
+    const savedTab = workingTabs.find(tab => tab.id === id);
+    setWorkingTabs(tabs => tabs.map(tab => tab.id === id ? { ...tab, dirty: false } : tab));
+    setPassportRefreshKey(value => value + 1);
+    if (!savedTab?.context?.passportId) return;
+    try {
+      const records = await loadIXIAosPassportFinancialDocuments({ passportId: savedTab.context.passportId });
+      setWorkingTabs(tabs => tabs.map(tab => tab.context.passportId === savedTab.context.passportId && (tab.id === id || !tab.dirty)
+        ? { ...tab, object: buildTransactObject(tab.context, records), financialRecords: records } : tab));
+    } catch {
+      // The save already succeeded. History owns the retryable read error;
+      // never turn a completed financial command into a second submission.
+    }
+  }
+
+  useEffect(() => {
+    if (!workingTabs.some(tab => tab.dirty)) return undefined;
+    const protect = event => { event.preventDefault(); event.returnValue = ""; };
+    const protectLink = event => {
+      const link = event.target.closest?.("a[href]");
+      if (!link || link.target === "_blank" || event.ctrlKey || event.metaKey || event.shiftKey || link.hasAttribute("download")) return;
+      const url = new URL(link.href, window.location.href);
+      if (url.pathname === "/transact" && url.origin === window.location.origin) return;
+      if (!window.confirm("There are unfinished worksheet edits. Leave TRAN$ACT and discard those edits? Saved transactions will remain.")) { event.preventDefault(); event.stopPropagation(); }
+    };
+    window.addEventListener("beforeunload", protect);
+    document.addEventListener("click", protectLink, true);
+    return () => { window.removeEventListener("beforeunload", protect); document.removeEventListener("click", protectLink, true); };
+  }, [workingTabs]);
+
+  useEffect(() => {
+    if (deepLinkOpened.current || !contexts.length || contextLoading) return;
+    const params = new URLSearchParams(window.location.search);
+    const passport = params.get("passport");
+    if (!passport) { deepLinkOpened.current = true; return; }
+    const context = contexts.find(item => item.passportId === passport);
+    if (!context) return;
+    if (selectedContext?.id !== context.id) { selectContext(context); return; }
+    if (passportRecordsLoading) return;
+    deepLinkOpened.current = true;
+    const id = params.get("record");
+    if (id) openTransactionRecord(normalizeIXITransactPassportRecords(passportRecords).find(item => item.id === id) || { title: "SHARED TRANSACTION", document: { financialDocumentId: id } });
+  }, [contexts, contextLoading, selectedContext, passportRecordsLoading, passportRecords]);
 
   const normalizedPassportRecords = useMemo(
     () => normalizeIXITransactPassportRecords(passportRecords),
@@ -671,66 +746,22 @@ export default function IXITransactCommandCenter() {
     );
   }
 
-  function openPaymentRecord(id = "") { setPaymentSelection({ id, contextId: selectedContext?.id }); }
+  function openPaymentRecord(sourceId = "") {
+    if (!selectedContext) return;
+    const id = `payments-${selectedContext.id}-${sourceId || "all"}`;
+    const existing = workingTabs.find(tab => tab.id === id);
+    if (existing) { activateTab(existing); return; }
+    const sourceObject = paymentScopeObject(buildTransactObject(selectedContext, passportRecords), selectedContext.kind, entityPassportId);
+    const source = normalizedPassportRecords.find(record => record.id === sourceId);
+    const tab = { id, paymentTab: true, paymentSourceId: sourceId, label: source ? `PAYMENT · ${source.title}` : "PAYMENTS",
+      context: selectedContext, object: sourceObject, financialRecords: passportRecords, dirty: false };
+    setWorkingTabs(tabs => [...tabs, tab]);
+    activateTab(tab);
+  }
 
   function renderWorkspace() {
-    if (paymentSelection?.contextId === selectedContext?.id) {
-      const sourceObject = paymentScopeObject(buildTransactObject(selectedContext, passportRecords), selectedContext.kind, entityPassportId);
-      const paymentContext = createIXITransactContext({ object: sourceObject, actor: accessData.actor || {}, entity: environment?.entity || {}, permissions });
-      return <section className={styles.workPanel}><IXIPaymentsPanel key={`${selectedContext.id}:${paymentSelection.id}`} context={paymentContext} object={sourceObject} sourceIds={paymentSelection.id ? [paymentSelection.id] : null} initialOpenId={paymentSelection.id} onClose={() => setPaymentSelection(null)} onChanged={() => setPassportRefreshKey(value => value + 1)} /></section>;
-    }
-    if (activeWorkspace === "record-view" && selectedRecord?.document?.financialDocumentId) {
-      return <IXITransactRecordWorkspace
-        key={`${selectedContext?.id}:${selectedRecord.document.financialDocumentId}`}
-        financialDocumentId={selectedRecord.document.financialDocumentId}
-        object={buildTransactObject(selectedContext, passportRecords)}
-        actor={accessData.actor || {}}
-        entity={environment?.entity || {}}
-        permissions={permissions}
-        financialRecords={passportRecords}
-        onBack={returnFromRecord}
-        onOpenRecord={openTransactionRecord}
-        onFinancialRecordsChange={() => setPassportRefreshKey(value => value + 1)}
-      />;
-    }
-
-    if (activeWorkspace === "object-history") {
-      return (
-        <section className={styles.workPanel}>
-          <WorkspaceHeader
-            eyebrow="PERMANENT PASSPORT RECORD"
-            title="TRANSACTION HISTORY"
-            detail={`Authorized financial history for ${selectedContext?.title || "the selected Object"}. The accounting-period selector does not hide lifetime Passport records.`}
-            count={normalizedPassportRecords.length}
-          />
-          <RecordTable
-            records={normalizedPassportRecords}
-            currency={currency}
-            emptyMessage={passportRecordsLoading ? "Loading lifetime Passport records…" : passportRecordsError || "No governed financial records were returned for this Passport."}
-            onSelect={openTransactionRecord} paymentRecords={passportRecords} onMarkPaid={openPaymentRecord}
-          />
-        </section>
-      );
-    }
-
-    if (activeWorkspace === "object-app" && activeModuleId) {
-      return (
-        <section className={styles.embeddedWorkspace} aria-label="Selected TRAN$ACT application">
-          <IXITransactApp
-            workspaceEmbedded
-            key={`${selectedContext?.id || "object"}:${activeModuleId}`}
-            object={buildTransactObject(selectedContext, passportRecords)}
-            initialModuleId={activeModuleId}
-            actor={accessData.actor || {}}
-            entity={environment?.entity || {}}
-            permissions={permissions}
-            financialRecords={passportRecords}
-            onFinancialRecordsChange={() => setPassportRefreshKey(value => value + 1)}
-            onClose={returnToObjectHistory}
-          />
-        </section>
-      );
-    }
+    if (["record-view", "object-app", "payments"].includes(activeWorkspace)) return null;
+    if (activeWorkspace === "object-history") return null;
 
     if (activeWorkspace === "today") return renderToday();
 
@@ -806,7 +837,7 @@ export default function IXITransactCommandCenter() {
       <div className={styles.desktop}>
         <aside className={styles.navigation}>
           <div className={styles.operator}><span>WORKING AS</span><strong>{operatorLabel(accessData)}</strong><small>{permissions.length} GRANTS · {denied.length} DENIES</small></div>
-          <nav aria-label="TRAN$ACT workspaces">{WORKSPACES.map(([id, label, number]) => <button type="button" key={id} data-active={activeWorkspace === id} onClick={() => { setPaymentSelection(null); setActiveWorkspace(id); setActiveModuleId(""); setSelectedRecord(null); }}><span>{number}</span><strong>{label}</strong>{id === "today" && queue.length ? <b>{queue.length}</b> : null}</button>)}</nav>
+          <nav aria-label="TRAN$ACT workspaces">{WORKSPACES.map(([id, label, number]) => <button type="button" key={id} data-active={activeWorkspace === id} onClick={() => { setActiveWorkspace(id); setActiveTabId(""); setActiveModuleId(""); setSelectedRecord(null); }}><span>{number}</span><strong>{label}</strong>{id === "today" && queue.length ? <b>{queue.length}</b> : null}</button>)}</nav>
           <section className={styles.objectDirectory} aria-label="Governed AOS Object directory">
             <header>
               <strong className={styles.objectDirectoryCount} aria-label={`${objectDirectory.length} objects`}>{objectDirectory.length}</strong>
@@ -850,7 +881,28 @@ export default function IXITransactCommandCenter() {
           {contextError ? <div className={styles.errorBanner} role="alert"><strong>OPERATING CONTEXT INCOMPLETE</strong><span>{contextError}</span><small>The authenticated company remains available; unresolved Objects are not displayed.</small></div> : null}
           {financialError ? <div className={styles.errorBanner} role="alert"><strong>FINANCIAL PROJECTION UNAVAILABLE</strong><span>{financialError}</span><small>Operating context remains visible; accounting completeness is not asserted.</small></div> : null}
           {passportRecordsError ? <div className={styles.errorBanner} role="alert"><strong>PASSPORT RECORDS UNAVAILABLE</strong><span>{passportRecordsError}</span><small>No substitute records or financial values have been created.</small></div> : null}
-          {!loading && !error && selectedContext ? renderWorkspace() : null}
+          {!loading && !error && selectedContext ? <>
+            <IXITransactWorkingTabs tabs={workingTabs} activeId={activeTabId} onSelect={activateTab} onHistory={returnToObjectHistory} onClose={closeTab} />
+            <div id="transact-history-panel" role="tabpanel" aria-labelledby="transact-tab-history" hidden={Boolean(activeTabId)}>
+              <div hidden={activeWorkspace !== "object-history"}><IXITransactMachineHistory key={selectedContext?.id} context={selectedContext} entity={environment?.entity}
+                records={passportRecords} loading={passportRecordsLoading} error={passportRecordsError} currency={currency}
+                onOpenRecord={openTransactionRecord} onMarkPaid={openPaymentRecord} onRetry={() => setPassportRefreshKey(value => value + 1)} /></div>
+              {renderWorkspace()}
+            </div>
+            {workingTabs.map(tab => <WorksheetPanel key={tab.id} tab={tab} active={activeTabId === tab.id} onDirty={markTabDirty}>
+              {tab.paymentTab ? <IXIPaymentsPanel
+                context={createIXITransactContext({ object: tab.object, actor: accessData.actor || {}, entity: environment?.entity || {}, permissions })}
+                object={tab.object} sourceIds={tab.paymentSourceId ? [tab.paymentSourceId] : null} initialOpenId={tab.paymentSourceId}
+                onClose={() => closeTab(tab)} onChanged={() => worksheetSaved(tab.id)} /> : tab.financialDocumentId ? <IXITransactRecordWorkspace financialDocumentId={tab.financialDocumentId}
+                object={tab.object} actor={accessData.actor || {}} entity={environment?.entity || {}} permissions={permissions}
+                financialRecords={tab.financialRecords} onBack={returnToObjectHistory} onOpenRecord={openTransactionRecord}
+                onFinancialRecordsChange={() => worksheetSaved(tab.id)} /> : <IXITransactApp workspaceEmbedded
+                  object={tab.object} initialModuleId={tab.moduleId} actor={accessData.actor || {}} entity={environment?.entity || {}}
+                  permissions={permissions} financialRecords={tab.financialRecords} onFinancialRecordsChange={() => worksheetSaved(tab.id)}
+                  onClose={() => closeTab(tab)} />}
+            </WorksheetPanel>)}
+          </> : null}
+          {closingTab ? <UnfinishedWorksheetDialog tab={closingTab} onCancel={() => setClosingTab(null)} onDiscard={() => closeTab(closingTab, true)} onReturn={() => { activateTab(closingTab); setClosingTab(null); }} /> : null}
         </main>
 
         <aside className={styles.contextPanel}>
