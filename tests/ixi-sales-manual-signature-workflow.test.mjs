@@ -39,12 +39,14 @@ test("saving a new Sales Order automatically ensures one linked Invoice", () => 
 });
 
 test("Signed stage provides a controlled outside-IXI attestation", () => {
-  assert.match(app, /MANUAL SIGNATURE CONTROL/u);
+  assert.match(app, /SIGNED OUTSIDE IXI/u);
   assert.match(
     app,
-    /I confirm the customer-signed Sales Order and Terms are on file/u,
+    /By clicking MARK SIGNED, you confirm the customer-signed Sales Order and Terms are on file/u,
   );
-  assert.match(app, /attestIXIEquipmentSaleSigned/u);
+  const manualControl = app.slice(app.indexOf("function ManualSignatureControl"), app.indexOf("function ManualSignatureControl") + 4000);
+  assert.doesNotMatch(manualControl, /type="checkbox"/u);
+  assert.match(app, /attestIXIEquipmentSaleSigned\(draft,\s*\{\s*\.\.\.manualSignature,\s*attestation: true/u);
   assert.match(commands, /postSalesOrderWorkflow\(record, "manual-signature"/u);
   assert.match(manualProxy, /\/manual-signature/u);
 });
