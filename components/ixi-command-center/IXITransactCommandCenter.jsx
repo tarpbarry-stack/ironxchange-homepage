@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 
 import { loadIXIMosEnvironment } from "../../lib/mos/loadIXIMosEnvironment";
+import { hydrateIXIListingMedia } from "../../lib/listings/hydrateIXIListingMedia";
 import {
   loadIXIFinancialAccessContext,
   loadIXITransactDashboard
@@ -219,15 +220,66 @@ function StatusBadge({ value }) {
   return <span className={styles.badge} data-tone={tone}>{normalized}</span>;
 }
 
+function IXIContextImage({
+  context,
+  mediaClassName,
+  fallbackClassName,
+  fallback = "IXI",
+  label = "",
+  eager = false,
+  as = "div"
+}) {
+  const Element = as;
+  const elementRef = useRef(null);
+  const [imageUrl, setImageUrl] = useState(context?.imageUrl || "");
+
+  useEffect(() => {
+    if (context?.kind !== "machine") return undefined;
+    const listing = context?.source?.presentation || context?.source?.presentationSource || context?.source;
+    let active = true;
+    let observer = null;
+
+    const loadImage = async () => {
+      const hydrated = await hydrateIXIListingMedia(listing, { dedupeRequests: true });
+      if (active && hydrated?.imageUrl) setImageUrl(hydrated.imageUrl);
+    };
+
+    if (eager || typeof IntersectionObserver === "undefined") {
+      loadImage();
+    } else if (elementRef.current) {
+      observer = new IntersectionObserver(entries => {
+        if (!entries.some(entry => entry.isIntersecting)) return;
+        observer?.disconnect();
+        loadImage();
+      }, { rootMargin: "160px 0px" });
+      observer.observe(elementRef.current);
+    }
+
+    return () => {
+      active = false;
+      observer?.disconnect();
+    };
+  }, [context?.id, context?.kind, context?.source, eager]);
+
+  return imageUrl
+    ? <Element ref={elementRef} className={mediaClassName} role="img" aria-label={label} style={{ backgroundImage: `url(${imageUrl})` }} />
+    : <Element ref={elementRef} className={fallbackClassName} aria-hidden="true">{fallback}</Element>;
+}
+
 function ContextIdentityCard({ context, interactive = false, onActivate }) {
   const Element = interactive ? "button" : "section";
   const interactionProps = interactive ? { type: "button", onClick: onActivate } : {};
 
   return (
     <Element className={styles.identityCard} data-interactive={interactive} {...interactionProps}>
-      {context.imageUrl
-        ? <div className={styles.identityMedia} role="img" aria-label={`${context.title} identity image`} style={{ backgroundImage: `url(${context.imageUrl})` }} />
-        : <div className={styles.identityMark}>IXI</div>}
+      <IXIContextImage
+        key={context.id}
+        context={context}
+        mediaClassName={styles.identityMedia}
+        fallbackClassName={styles.identityMark}
+        label={`${context.title} identity image`}
+        eager
+      />
       <div>
         <span>{contextLabel(context.kind)}</span>
         <h2>{context.title}</h2>
@@ -705,7 +757,15 @@ export default function IXITransactCommandCenter() {
             <div className={styles.objectDirectoryList} role="list">
               {objectDirectory.map(item => (
                 <div role="listitem" key={item.id}><button type="button" className={styles.objectTile} data-active={selectedContext?.id === item.id} onClick={() => selectContext(item)}>
-                  {item.imageUrl ? <span className={styles.objectTileMedia} role="img" aria-label="" style={{ backgroundImage: `url(${item.imageUrl})` }} /> : <span className={styles.objectTileMark}>{contextLabel(item.kind).slice(0, 2)}</span>}
+                  <IXIContextImage
+                    key={item.id}
+                    context={item}
+                    mediaClassName={styles.objectTileMedia}
+                    fallbackClassName={styles.objectTileMark}
+                    fallback={contextLabel(item.kind).slice(0, 2)}
+                    label={`${item.title} thumbnail`}
+                    as="span"
+                  />
                   <span className={styles.objectTileCopy}><strong>{item.title}</strong><small>SN · {item.serialNumber || "NOT RECORDED"}</small><small>ID · {item.assetId || shortIdentity(item.sourceId)}</small></span>
                 </button></div>
               ))}

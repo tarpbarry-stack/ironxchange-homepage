@@ -84,6 +84,17 @@ test("Object console is History-first and reuses the governed TRAN$ACT app bus",
   assert.match(app, /workspaceEmbedded[\s\S]*"RETURN TO TRANSACTION HISTORY"/u);
 });
 
+test("machine photos hydrate progressively from the deduplicated IXI Media bus", () => {
+  const source = read("components/ixi-command-center/IXITransactCommandCenter.jsx");
+
+  assert.match(source, /import \{ hydrateIXIListingMedia \} from "\.\.\/\.\.\/lib\/listings\/hydrateIXIListingMedia"/u);
+  assert.match(source, /hydrateIXIListingMedia\(listing, \{ dedupeRequests: true \}\)/u);
+  assert.match(source, /IntersectionObserver/u);
+  assert.match(source, /rootMargin: "160px 0px"/u);
+  assert.match(source, /label=`?\{?`?\$?\{?context\.title/u);
+  assert.match(source, /eager/u);
+});
+
 test("TRAN$ACT login returns the authenticated operator to the desktop", () => {
   const source = read("components/ixi-command-center/IXITransactCommandCenter.jsx");
 
