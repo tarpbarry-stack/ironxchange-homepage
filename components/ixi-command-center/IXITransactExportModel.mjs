@@ -177,37 +177,11 @@ export function documentPrintFields(row) {
       text(reference.role) || "Reference",
       [reference.label, reference.passportId].filter(Boolean).join(" · "),
     ]);
-  const embedded =
-    doc.workOrder ||
-    doc.technologyWorkOrder ||
-    doc.techWorkOrder ||
-    doc.assetAcquisition ||
-    doc.expenseRecord ||
-    doc.billRecord ||
-    doc.salesOrder ||
-    doc.assetSettlement ||
-    doc.rentalIncome ||
-    doc.rentalExpense ||
-    doc.timeEntry ||
-    doc.purchaseOrder ||
-    doc.serviceQuote;
-  const skip =
-    /^(metadata|audit|financialBinding|identity|context|attachments|documents|references|relatedFinancialRecords|financialRecords)$/;
-  function append(object, path = "Details", depth = 0) {
-    if (depth > 7 || object == null) return;
-    if (typeof object !== "object") {
-      if (text(object)) fields.push([path, String(object)]);
-      return;
-    }
-    for (const [key, value] of Object.entries(object))
-      if (!skip.test(key) && !privateKeys.test(key))
-        append(
-          value,
-          `${path} / ${key.replace(/([a-z])([A-Z])/g, "$1 $2")}`,
-          depth + 1,
-        );
-  }
-  append(embedded);
+  // PDFs are business-readable records, not serialized implementation data.
+  // The complete canonical document (including revision/signing snapshots) is
+  // preserved in the JSON and workbook exports inside the machine package.
+  // Recursively printing those nested objects duplicated whole documents and
+  // turned a 19-row register into a 35-page PDF.
   for (const evidence of recordEvidence(doc))
     fields.push([
       "Supporting evidence",
