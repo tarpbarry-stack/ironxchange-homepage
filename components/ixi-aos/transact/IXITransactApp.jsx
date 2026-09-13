@@ -148,6 +148,7 @@ export default function IXITransactApp({
   onSendToArmedDestination = null,
   moduleOrder = null,
   onModuleOrderChange = null,
+  workspaceEmbedded = false,
 }) {
   const dialogRef = useRef(null);
   const [worksheetOpen, setWorksheetOpen] = useState(false);
@@ -682,14 +683,19 @@ export default function IXITransactApp({
     setSaleSnapshot(saleFromFinancial);
   }, [saleFromFinancial]);
   const active = modules.find((item) => item.id === moduleId) || null;
-  const shellReturnLabel = worksheetOpen
+  const workspacePresentation = workspaceEmbedded || worksheetOpen;
+  const shellReturnLabel = workspaceEmbedded
+    ? "HISTORY"
+    : worksheetOpen
     ? "CARD"
     : acquisitionWorkflowIntent && ["freight", "work-order"].includes(moduleId)
       ? "ACQUISITION"
       : returnToClose
         ? "RECORDS"
         : "APPS";
-  const shellReturnTitle = worksheetOpen
+  const shellReturnTitle = workspaceEmbedded
+    ? "RETURN TO TRANSACTION HISTORY"
+    : worksheetOpen
     ? "RETURN TO CARD"
     : acquisitionWorkflowIntent && ["freight", "work-order"].includes(moduleId)
       ? "RETURN TO ACQUISITION"
@@ -699,6 +705,10 @@ export default function IXITransactApp({
   const back = () => {
     if (worksheetOpen) {
       closeWorksheet();
+      return;
+    }
+    if (workspaceEmbedded) {
+      onClose?.();
       return;
     }
     if (returnToClose) {
@@ -1903,8 +1913,12 @@ export default function IXITransactApp({
     <dialog
       ref={dialogRef}
       open
-      className={`ixi-transact-dialog ${worksheetOpen ? "worksheet-open" : "card-open"}`}
+      className={`ixi-transact-dialog ${workspacePresentation ? "worksheet-open" : "card-open"}${workspaceEmbedded ? " workspace-embedded" : ""}`}
       onCancel={(event) => {
+        if (workspaceEmbedded) {
+          event.preventDefault();
+          return;
+        }
         if (!worksheetOpen) return;
         event.preventDefault();
         closeWorksheet();
@@ -1915,7 +1929,7 @@ export default function IXITransactApp({
         <div
           lang={locale}
           data-ixi-transact-locale={locale}
-          data-ixi-transact-presentation={worksheetOpen ? "worksheet" : "card"}
+          data-ixi-transact-presentation={workspacePresentation ? "worksheet" : "card"}
           className={`ixi-transact-app ixi-transact-v13 board-color-none board-outline-1 ${active ? "module-open" : "home-open"}`}
         >
           <header className="tx-header">
@@ -1926,7 +1940,7 @@ export default function IXITransactApp({
                   <strong>{context.primary.label}</strong>
                   <small>{context.primary.objectType || "AOS CARD"}</small>
                 </>
-              ) : worksheetOpen ? (
+              ) : workspacePresentation ? (
                 <strong className="tx-worksheet-title">
                   {active.label} · {t("WORKSHEET")}
                 </strong>
@@ -1945,23 +1959,23 @@ export default function IXITransactApp({
                   >
                     ‹ {t(shellReturnLabel)}
                   </button>
-                  <button
-                    type="button"
-                    className="tx-expand"
-                    onClick={worksheetOpen ? closeWorksheet : openWorksheet}
-                    aria-label={
-                      worksheetOpen
-                        ? t("RETURN TO CARD")
-                        : t("EXPAND WORKSHEET")
-                    }
-                    title={
-                      worksheetOpen
-                        ? t("RETURN TO CARD")
-                        : t("EXPAND WORKSHEET")
-                    }
-                  >
-                    {worksheetOpen ? "↙" : "↗"}
-                  </button>
+                  {!workspaceEmbedded ? <button
+                      type="button"
+                      className="tx-expand"
+                      onClick={worksheetOpen ? closeWorksheet : openWorksheet}
+                      aria-label={
+                        worksheetOpen
+                          ? t("RETURN TO CARD")
+                          : t("EXPAND WORKSHEET")
+                      }
+                      title={
+                        worksheetOpen
+                          ? t("RETURN TO CARD")
+                          : t("EXPAND WORKSHEET")
+                      }
+                    >
+                      {worksheetOpen ? "↙" : "↗"}
+                    </button> : null}
                 </>
               ) : null}
               <button
@@ -1981,7 +1995,7 @@ export default function IXITransactApp({
             {body}
           </main>
           {!worksheetOpen ? (
-            <IXIMachineRail
+            !workspaceEmbedded ? <IXIMachineRail
               listing={object}
               saved={false}
               boardColor="none"
@@ -1993,7 +2007,7 @@ export default function IXITransactApp({
               onCycleOutline={onCycleOutline}
               armedDestination={armedDestination}
               onSendToArmedDestination={onSendToArmedDestination}
-            />
+            /> : null
           ) : null}
           {!active ? <IXITransactHomeTypography /> : null}
           <IXITransactStyles />

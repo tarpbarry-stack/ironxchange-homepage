@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import dynamic from "next/dynamic";
 
 import { loadIXIMosEnvironment } from "../../lib/mos/loadIXIMosEnvironment";
+import { hydrateIXIListingMedia } from "../../lib/listings/hydrateIXIListingMedia";
 import {
   loadIXIFinancialAccessContext,
   loadIXITransactDashboard
@@ -17,6 +19,7 @@ import {
   normalizeIXITransactPassportRecords
 } from "../ixi-transact-dashboard/data/IXITransactPassportRecordProjection.mjs";
 import { loadIXIAosPassportFinancialDocuments } from "../ixi-aos/financial-runtime/IXIAosFinancialReadClient";
+import { getIXITransactModules } from "../ixi-aos/transact/IXITransactModuleRegistry";
 import {
   buildIXIAosCommandContexts,
   buildIXIAosRecentStory,
@@ -26,10 +29,19 @@ import {
   getIXIAosRelatedContexts,
   getIXIFinancialQueryScope,
   getIXITransactAttentionBand,
-  getIXITransactControlCounts
+  getIXITransactControlCounts,
+  getIXITransactObjectDirectories
 } from "./IXIAosCommandCenterModel";
 
 import styles from "./IXIAosCommandCenter.module.css";
+
+const IXITransactApp = dynamic(
+  () => import("../ixi-aos/transact/IXITransactApp"),
+  {
+    ssr: false,
+    loading: () => <div className={styles.loadingState}><strong>OPENING TRAN$ACT APP</strong><span>Loading the selected governed worksheet…</span></div>
+  }
+);
 
 const SCOPE_OPTIONS = [
   ["company", "CO", "Company"],
@@ -169,6 +181,35 @@ function operatorLabel(accessData = {}) {
   return clean(actor.displayName || actor.name || actor.role || safeArray(actor.roles)[0] || "AUTHORIZED OPERATOR").toUpperCase();
 }
 
+function shortIdentity(value = "") {
+  const normalized = clean(value);
+  return normalized ? normalized.slice(-10).toUpperCase() : "—";
+}
+
+function buildTransactObject(context = {}, financialRecords = []) {
+  const canonical = context?.source?.canonical || context?.source || {};
+  const presentation = context?.source?.presentation || {};
+
+  return {
+    ...canonical,
+    ...presentation,
+    id: context.sourceId,
+    objectId: context.sourceId,
+    canonicalObjectId: context.sourceId,
+    objectType: context.kind,
+    displayName: context.title,
+    title: context.title,
+    passportId: context.passportId,
+    imageUrl: context.imageUrl,
+    serialNumber: context.serialNumber,
+    customerAssetId: context.assetId,
+    assetId: context.assetId,
+    financialRecords,
+    relatedFinancialRecords: financialRecords,
+    assetFinancialTransactions: financialRecords
+  };
+}
+
 function StatusBadge({ value }) {
   const normalized = clean(value || "ACTIVE").toUpperCase();
   const tone = /FAIL|BLOCK|DENY|OVERDUE|CONFLICT/.test(normalized)
@@ -177,6 +218,77 @@ function StatusBadge({ value }) {
       ? "verified"
       : "neutral";
   return <span className={styles.badge} data-tone={tone}>{normalized}</span>;
+}
+
+function IXIContextImage({
+  context,
+  mediaClassName,
+  fallbackClassName,
+  fallback = "IXI",
+  label = "",
+  eager = false,
+  as = "div"
+}) {
+  const Element = as;
+  const elementRef = useRef(null);
+  const [imageUrl, setImageUrl] = useState(context?.imageUrl || "");
+
+  useEffect(() => {
+    if (context?.kind !== "machine") return undefined;
+    const listing = context?.source?.presentation || context?.source?.presentationSource || context?.source;
+    let active = true;
+    let observer = null;
+
+    const loadImage = async () => {
+      const hydrated = await hydrateIXIListingMedia(listing, { dedupeRequests: true });
+      if (active && hydrated?.imageUrl) setImageUrl(hydrated.imageUrl);
+    };
+
+    if (eager || typeof IntersectionObserver === "undefined") {
+      loadImage();
+    } else if (elementRef.current) {
+      observer = new IntersectionObserver(entries => {
+        if (!entries.some(entry => entry.isIntersecting)) return;
+        observer?.disconnect();
+        loadImage();
+      }, { rootMargin: "160px 0px" });
+      observer.observe(elementRef.current);
+    }
+
+    return () => {
+      active = false;
+      observer?.disconnect();
+    };
+  }, [context?.id, context?.kind, context?.source, eager]);
+
+  return imageUrl
+    ? <Element ref={elementRef} className={mediaClassName} role="img" aria-label={label} style={{ backgroundImage: `url(${imageUrl})` }} />
+    : <Element ref={elementRef} className={fallbackClassName} aria-hidden="true">{fallback}</Element>;
+}
+
+function ContextIdentityCard({ context, interactive = false, onActivate }) {
+  const Element = interactive ? "button" : "section";
+  const interactionProps = interactive ? { type: "button", onClick: onActivate } : {};
+
+  return (
+    <Element className={styles.identityCard} data-interactive={interactive} {...interactionProps}>
+      <IXIContextImage
+        key={context.id}
+        context={context}
+        mediaClassName={styles.identityMedia}
+        fallbackClassName={styles.identityMark}
+        label={`${context.title} identity image`}
+        eager
+      />
+      <div>
+        <span>{contextLabel(context.kind)}</span>
+        <h2>{context.title}</h2>
+        <p>{context.location || context.subtitle}</p>
+        <dl><div><dt>SERIAL</dt><dd>{context.serialNumber || "NOT RECORDED"}</dd></div><div><dt>OBJECT ID</dt><dd>{context.assetId || shortIdentity(context.sourceId)}</dd></div></dl>
+        <code>{context.passportId ? `PASSPORT · ${context.passportId}` : `OBJECT · ${context.sourceId}`}</code>
+      </div>
+    </Element>
+  );
 }
 
 function RecordTable({ records, currency, emptyMessage, onSelect }) {
@@ -227,6 +339,9 @@ export default function IXITransactCommandCenter() {
   const [query, setQuery] = useState("");
   const [selectedQueueId, setSelectedQueueId] = useState("");
   const [selectedRecord, setSelectedRecord] = useState(null);
+  const [activeModuleId, setActiveModuleId] = useState("");
+  const [selectedDirectoryId, setSelectedDirectoryId] = useState("");
+  const [passportRefreshKey, setPassportRefreshKey] = useState(0);
   const [refreshKey, setRefreshKey] = useState(0);
   const [loading, setLoading] = useState(true);
   const [contextLoading, setContextLoading] = useState(false);
@@ -366,7 +481,7 @@ export default function IXITransactCommandCenter() {
       });
 
     return () => controller.abort();
-  }, [access, selectedContext?.id, selectedContext?.passportId]);
+  }, [access, passportRefreshKey, selectedContext?.id, selectedContext?.passportId]);
 
   useEffect(() => {
     if (!selectedContext || !access) return undefined;
@@ -411,6 +526,24 @@ export default function IXITransactCommandCenter() {
   ), [contexts, relationships, selectedContext]);
   const connections = useMemo(() => connectionSummary(related), [related]);
   const currentGroup = groups[selectedKind] || [];
+  const objectDirectories = useMemo(
+    () => getIXITransactObjectDirectories(contexts, environment?.systemIndexes || []),
+    [contexts, environment?.systemIndexes]
+  );
+  useEffect(() => {
+    if (!objectDirectories.length) {
+      setSelectedDirectoryId("");
+      return;
+    }
+    if (!objectDirectories.some(directory => directory.id === selectedDirectoryId)) {
+      setSelectedDirectoryId(objectDirectories[0].id);
+    }
+  }, [objectDirectories, selectedDirectoryId]);
+  const selectedDirectory = objectDirectories.find(directory => directory.id === selectedDirectoryId) || objectDirectories[0] || null;
+  const objectDirectory = useMemo(
+    () => [...safeArray(selectedDirectory?.items)].sort((left, right) => left.title.localeCompare(right.title)),
+    [selectedDirectory]
+  );
   const selectedQueueItem = queue.find(item => item.id === selectedQueueId) || queue[0] || null;
   const searchResults = useMemo(() => {
     const normalized = clean(query).toLowerCase();
@@ -423,11 +556,25 @@ export default function IXITransactCommandCenter() {
     setSelectedId(context.id);
     setQuery("");
     setSelectedRecord(null);
+    setActiveModuleId("");
+    setActiveWorkspace(context.kind === "company" ? "today" : "object-history");
   }
 
   function refreshAuthoritativeContext() {
     contextHydrationStarted.current = false;
     setRefreshKey(value => value + 1);
+  }
+
+  function openTransactModule(moduleId) {
+    setActiveModuleId(moduleId);
+    setSelectedRecord(null);
+    setActiveWorkspace("object-app");
+  }
+
+  function returnToObjectHistory() {
+    setActiveModuleId("");
+    setSelectedRecord(null);
+    setActiveWorkspace("object-history");
   }
 
   const normalizedPassportRecords = useMemo(
@@ -492,6 +639,44 @@ export default function IXITransactCommandCenter() {
   }
 
   function renderWorkspace() {
+    if (activeWorkspace === "object-history") {
+      return (
+        <section className={styles.workPanel}>
+          <WorkspaceHeader
+            eyebrow="PERMANENT PASSPORT RECORD"
+            title="TRANSACTION HISTORY"
+            detail={`Authorized financial history for ${selectedContext?.title || "the selected Object"}. The accounting-period selector does not hide lifetime Passport records.`}
+            count={normalizedPassportRecords.length}
+          />
+          <RecordTable
+            records={normalizedPassportRecords}
+            currency={currency}
+            emptyMessage={passportRecordsLoading ? "Loading lifetime Passport records…" : passportRecordsError || "No governed financial records were returned for this Passport."}
+            onSelect={setSelectedRecord}
+          />
+        </section>
+      );
+    }
+
+    if (activeWorkspace === "object-app" && activeModuleId) {
+      return (
+        <section className={styles.embeddedWorkspace} aria-label="Selected TRAN$ACT application">
+          <IXITransactApp
+            workspaceEmbedded
+            key={`${selectedContext?.id || "object"}:${activeModuleId}`}
+            object={buildTransactObject(selectedContext, passportRecords)}
+            initialModuleId={activeModuleId}
+            actor={accessData.actor || {}}
+            entity={environment?.entity || {}}
+            permissions={permissions}
+            financialRecords={passportRecords}
+            onFinancialRecordsChange={() => setPassportRefreshKey(value => value + 1)}
+            onClose={returnToObjectHistory}
+          />
+        </section>
+      );
+    }
+
     if (activeWorkspace === "today") return renderToday();
 
     if (activeWorkspace === "work" || activeWorkspace === "records") {
@@ -527,6 +712,24 @@ export default function IXITransactCommandCenter() {
   const selectedDetail = selectedRecord || selectedQueueItem;
   const permissions = safeArray(accessData.permissions);
   const denied = safeArray(accessData.deniedPermissions);
+  const selectedModules = getIXITransactModules({
+    objectType: selectedContext?.kind || "object",
+    permissions
+  });
+  const objectContextActive = Boolean(selectedContext && selectedContext.kind !== "company");
+  const activeModule = selectedModules.find(module => module.id === activeModuleId) || null;
+  const financialScopeSupported = Boolean(getIXIFinancialQueryScope(selectedContext, entityPassportId));
+  const connectionHealthy = Boolean(access && (projectionPayload || !financialScopeSupported));
+  const connectionLabel = access && projectionPayload
+    ? "IXI CORE + FINANCIAL CONNECTED"
+    : connectionHealthy
+      ? "IXI CORE CONNECTED · PASSPORT HISTORY"
+      : "AUTHORITY / PROJECTION INCOMPLETE";
+  const workspaceTitle = activeWorkspace === "object-history"
+    ? "TRANSACTION HISTORY"
+    : activeWorkspace === "object-app"
+      ? activeModule?.label || "TRAN$ACT APP"
+      : WORKSPACES.find(([id]) => id === activeWorkspace)?.[1] || "TRAN$ACT";
 
   return (
     <div className={styles.shell}>
@@ -545,17 +748,39 @@ export default function IXITransactCommandCenter() {
       <div className={styles.desktop}>
         <aside className={styles.navigation}>
           <div className={styles.operator}><span>WORKING AS</span><strong>{operatorLabel(accessData)}</strong><small>{permissions.length} GRANTS · {denied.length} DENIES</small></div>
-          <nav aria-label="TRAN$ACT workspaces">{WORKSPACES.map(([id, label, number]) => <button type="button" key={id} data-active={activeWorkspace === id} onClick={() => { setActiveWorkspace(id); setSelectedRecord(null); }}><span>{number}</span><strong>{label}</strong>{id === "today" && queue.length ? <b>{queue.length}</b> : null}</button>)}</nav>
+          <nav aria-label="TRAN$ACT workspaces">{WORKSPACES.map(([id, label, number]) => <button type="button" key={id} data-active={activeWorkspace === id} onClick={() => { setActiveWorkspace(id); setActiveModuleId(""); setSelectedRecord(null); }}><span>{number}</span><strong>{label}</strong>{id === "today" && queue.length ? <b>{queue.length}</b> : null}</button>)}</nav>
+          <section className={styles.objectDirectory} aria-label="Governed AOS Object directory">
+            <header>
+              <div><span>{selectedDirectory?.label || "AOS OBJECTS"}</span><strong>{objectDirectory.length}</strong></div>
+              <label><span>INDEX</span><select value={selectedDirectory?.id || ""} onChange={event => setSelectedDirectoryId(event.target.value)}>{objectDirectories.map(directory => <option value={directory.id} key={directory.id}>{directory.menuLabel.toUpperCase()}</option>)}</select></label>
+            </header>
+            <div className={styles.objectDirectoryList} role="list">
+              {objectDirectory.map(item => (
+                <div role="listitem" key={item.id}><button type="button" className={styles.objectTile} data-active={selectedContext?.id === item.id} onClick={() => selectContext(item)}>
+                  <IXIContextImage
+                    key={item.id}
+                    context={item}
+                    mediaClassName={styles.objectTileMedia}
+                    fallbackClassName={styles.objectTileMark}
+                    fallback={contextLabel(item.kind).slice(0, 2)}
+                    label={`${item.title} thumbnail`}
+                    as="span"
+                  />
+                  <span className={styles.objectTileCopy}><strong>{item.title}</strong><small>SN · {item.serialNumber || "NOT RECORDED"}</small><small>ID · {item.assetId || shortIdentity(item.sourceId)}</small></span>
+                </button></div>
+              ))}
+            </div>
+          </section>
           <div className={styles.navFooter}><span>BOUNDARY</span><p>AOS describes operating context. IXI Financial owns accounting truth.</p><a href="/transact/ledger">LEDGER CONTROL →</a></div>
         </aside>
 
         <main className={styles.main}>
           <div className={styles.pageHeader}>
-            <div><span className={styles.eyebrow}>{environment?.entity?.displayName || "IXI ENTITY"} · {contextLabel(selectedContext?.kind)}</span><h1>{WORKSPACES.find(([id]) => id === activeWorkspace)?.[1] || "TRAN$ACT"}</h1><p>{selectedContext ? `${selectedContext.title} · ${selectedContext.subtitle}` : "Resolving canonical operating context…"}</p></div>
-            <div className={styles.headerActions}><label><span>CURRENT {contextLabel(selectedKind)}</span><select value={selectedContext?.id || ""} onChange={event => setSelectedId(event.target.value)}>{currentGroup.map(item => <option value={item.id} key={item.id}>{item.title}</option>)}</select></label><button type="button" onClick={refreshAuthoritativeContext}>REFRESH</button></div>
+            <div><span className={styles.eyebrow}>{environment?.entity?.displayName || "IXI ENTITY"} · {contextLabel(selectedContext?.kind)}</span><h1>{workspaceTitle}</h1><p>{selectedContext ? `${selectedContext.title} · ${selectedContext.subtitle}` : "Resolving canonical operating context…"}</p></div>
+            <div className={styles.headerActions}><label><span>CURRENT {contextLabel(selectedKind)}</span><select value={selectedContext?.id || ""} onChange={event => { const context = currentGroup.find(item => item.id === event.target.value); if (context) selectContext(context); }}>{currentGroup.map(item => <option value={item.id} key={item.id}>{item.title}</option>)}</select></label><button type="button" onClick={refreshAuthoritativeContext}>REFRESH</button></div>
           </div>
 
-          <div className={styles.scopeStrip} aria-label="Financial story scope">{SCOPE_OPTIONS.map(([kind, code, label]) => <button type="button" key={kind} data-active={selectedKind === kind} disabled={!groups[kind]?.length} onClick={() => { setSelectedKind(kind); setSelectedId(groups[kind]?.[0]?.id || ""); }}><span>{code}</span><strong>{label}</strong><b>{groups[kind]?.length || 0}</b></button>)}</div>
+          <div className={styles.scopeStrip} aria-label="Financial story scope">{SCOPE_OPTIONS.map(([kind, code, label]) => <button type="button" key={kind} data-active={selectedKind === kind} disabled={!groups[kind]?.length} onClick={() => { const context = groups[kind]?.[0]; if (context) selectContext(context); }}><span>{code}</span><strong>{label}</strong><b>{groups[kind]?.length || 0}</b></button>)}</div>
 
           {loading ? <div className={styles.loadingState}><strong>VERIFYING TRAN$ACT SESSION</strong><span>Connecting to your authenticated operating company…</span><small>Unauthenticated sessions return to the secure sign-in automatically.</small></div> : null}
           {!loading && error ? <div className={styles.errorBanner} role="alert"><strong>TRAN$ACT UNAVAILABLE</strong><span>{error}</span><small>No financial values have been fabricated.</small><a className={styles.loginAction} href={TRANSACT_LOGIN_HREF}>LOG IN AND RETURN TO TRAN$ACT</a></div> : null}
@@ -567,9 +792,9 @@ export default function IXITransactCommandCenter() {
         </main>
 
         <aside className={styles.contextPanel}>
-          <div className={styles.contextTitle}><span>ACTIVE CONTEXT</span><strong>PROOF & LINEAGE</strong></div>
-          {selectedContext ? <section className={styles.identityCard}>{selectedContext.imageUrl ? <div className={styles.identityMedia} role="img" aria-label={`${selectedContext.title} identity image`} style={{ backgroundImage: `url(${selectedContext.imageUrl})` }} /> : <div className={styles.identityMark}>IXI</div>}<div><span>{contextLabel(selectedContext.kind)}</span><h2>{selectedContext.title}</h2><p>{selectedContext.status}</p><code>{selectedContext.passportId ? `PASSPORT · ${selectedContext.passportId}` : `OBJECT · ${selectedContext.sourceId}`}</code></div></section> : null}
-          <section className={styles.proofCard}>
+          <div className={styles.contextTitle}><span>ACTIVE CONTEXT</span><strong>{objectContextActive ? "TRAN$ACT APPS" : "PROOF & LINEAGE"}</strong></div>
+          {selectedContext ? <ContextIdentityCard context={selectedContext} interactive={objectContextActive} onActivate={returnToObjectHistory} /> : null}
+          {objectContextActive ? <section className={styles.appLauncher} aria-label="TRAN$ACT applications"><button type="button" className={styles.historyApp} data-active={activeWorkspace === "object-history"} onClick={returnToObjectHistory}><span>RECORD</span><strong>TRANSACTION HISTORY</strong><small>passport-history</small></button>{selectedModules.map(module => <button type="button" key={module.id} data-active={activeWorkspace === "object-app" && activeModuleId === module.id} onClick={() => openTransactModule(module.id)}><span>{module.group}</span><strong>{module.label}</strong><small>{module.documentType}</small></button>)}</section> : <section className={styles.proofCard}>
             <div><span>IDENTITY</span><StatusBadge value={access ? "VERIFIED" : "WAITING"} /></div>
             <div><span>FINANCIAL</span><StatusBadge value={projectionPayload ? "CURRENT" : "NOT PROVEN"} /></div>
             <div><span>SOURCE COVERAGE</span><strong>{projectionPayload ? "SERVER RETURNED" : "NOT RETURNED"}</strong></div>
@@ -577,13 +802,13 @@ export default function IXITransactCommandCenter() {
             <div><span>LINEAGE</span><strong>{projection?.lineageVersion || "NOT RETURNED"}</strong></div>
             <div><span>PERIOD</span><strong>{period}</strong></div>
             <div><span>PASSPORT RECORDS</span><strong>{passportRecordsLoading ? "LOADING" : normalizedPassportRecords.length}</strong></div>
-          </section>
-          {selectedDetail ? <section className={styles.detailCard}><span>SELECTED WORK</span><h3>{selectedDetail.title}</h3><p>{selectedDetail.detail || selectedDetail.party || "Authoritative record selected for review."}</p>{selectedDetail.status ? <StatusBadge value={selectedDetail.status} /> : null}</section> : null}
-          <section className={styles.connectionCard}><div><span>CANONICAL RELATIONSHIPS</span><strong>{relationshipEvidence.length}</strong></div>{connections.length ? connections.slice(0, 6).map(item => <p key={item.kind}><span>{item.label}</span><b>{item.count}</b></p>) : <small>No active IX-Core relationships returned.</small>}</section>
+          </section>}
+          {!objectContextActive && selectedDetail ? <section className={styles.detailCard}><span>SELECTED WORK</span><h3>{selectedDetail.title}</h3><p>{selectedDetail.detail || selectedDetail.party || "Authoritative record selected for review."}</p>{selectedDetail.status ? <StatusBadge value={selectedDetail.status} /> : null}</section> : null}
+          {!objectContextActive ? <section className={styles.connectionCard}><div><span>CANONICAL RELATIONSHIPS</span><strong>{relationshipEvidence.length}</strong></div>{connections.length ? connections.slice(0, 6).map(item => <p key={item.kind}><span>{item.label}</span><b>{item.count}</b></p>) : <small>No active IX-Core relationships returned.</small>}</section> : null}
         </aside>
       </div>
 
-      <footer className={styles.statusbar}><span data-live={Boolean(access && projectionPayload)}>● {access && projectionPayload ? "IXI CORE + FINANCIAL CONNECTED" : "AUTHORITY / PROJECTION INCOMPLETE"}</span><span>{financialLoading ? "REFRESHING AUTHORITATIVE PROJECTION" : `${contextLabel(selectedContext?.kind)} CONTEXT · ${period}`}</span><span>VIEWS NEVER CHANGE POSTED TRUTH</span></footer>
+      <footer className={styles.statusbar}><span data-live={connectionHealthy}>● {connectionLabel}</span><span>{financialLoading ? "REFRESHING AUTHORITATIVE PROJECTION" : `${contextLabel(selectedContext?.kind)} CONTEXT · ${period}`}</span><span>VIEWS NEVER CHANGE POSTED TRUTH</span></footer>
     </div>
   );
 }

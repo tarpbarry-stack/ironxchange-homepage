@@ -148,6 +148,40 @@ function getMachineHours(record = {}) {
   return Number.isFinite(number) ? number : null;
 }
 
+function getSerialNumber(record = {}) {
+  const publicData = getPublicData(record);
+  const fields = record?.fields || {};
+
+  return firstText(
+    record?.serialNumber,
+    record?.serial,
+    fields?.serialNumber,
+    fields?.serial,
+    publicData?.serialNumber,
+    publicData?.serial
+  );
+}
+
+function getAssetId(record = {}) {
+  const publicData = getPublicData(record);
+  const fields = record?.fields || {};
+
+  return firstText(
+    record?.customerAssetId,
+    record?.assetId,
+    record?.stockNumber,
+    record?.inventoryId,
+    fields?.customerAssetId,
+    fields?.assetId,
+    fields?.stockNumber,
+    fields?.inventoryId,
+    publicData?.customerAssetId,
+    publicData?.assetId,
+    publicData?.stockNumber,
+    publicData?.inventoryId
+  );
+}
+
 function getMoneyValue(record = {}) {
   const publicData = getPublicData(record);
   const raw = record?.price ?? record?.attributes?.price ?? record?.value ??
@@ -163,23 +197,86 @@ function getMoneyValue(record = {}) {
 
 function getImageUrl(record = {}) {
   const publicData = getPublicData(record);
+  const fields = record?.fields || {};
+  const metadata = record?.metadata || {};
+  const presentation = record?.presentation || record?.selectedPresentation || {};
+  const presentationSource = record?.presentationSource || record?.source?.presentation || {};
+  const presentationPublicData = getPublicData(presentationSource);
   const candidates = [
     record?.logoUrl,
+    record?.primaryImageUrl,
     record?.imageUrl,
     typeof record?.image === "string" ? record.image : "",
     record?.image?.url,
     record?.image?.attributes?.variants?.default?.url,
     safeArray(record?.imageUrls)[0],
+    fields?.primaryImageUrl,
+    metadata?.primaryImageUrl,
+    metadata?.presentation?.primaryImageUrl,
+    presentation?.primaryImageUrl,
     publicData?.imageUrl,
     safeArray(publicData?.imageUrls)[0],
     record?.media?.[0]?.url,
     record?.media?.[0]?.imageUrl,
     record?.media?.[0]?.attributes?.variants?.default?.url,
     record?.images?.[0]?.url,
-    record?.images?.[0]?.attributes?.variants?.default?.url
+    record?.images?.[0]?.attributes?.variants?.default?.url,
+    presentationSource?.primaryImageUrl,
+    presentationSource?.imageUrl,
+    typeof presentationSource?.image === "string" ? presentationSource.image : "",
+    presentationSource?.image?.url,
+    safeArray(presentationSource?.imageUrls)[0],
+    presentationPublicData?.imageUrl,
+    safeArray(presentationPublicData?.imageUrls)[0],
+    presentationSource?.media?.[0]?.url,
+    presentationSource?.media?.[0]?.imageUrl,
+    presentationSource?.images?.[0]?.url
   ];
 
   return candidates.map(clean).find(Boolean) || "";
+}
+
+export function getIXITransactObjectDirectories(
+  contexts = [],
+  systemIndexes = []
+) {
+  const contextsByObjectId = new Map(
+    safeArray(contexts)
+      .map(context => [clean(context?.sourceId), context])
+      .filter(([objectId]) => objectId)
+  );
+
+  const directories = safeArray(systemIndexes).flatMap(index => {
+    const id = firstText(index?.objectId, index?.indexId);
+    const label = firstText(index?.displayName, index?.label, index?.name);
+    if (!id || !label) return [];
+
+    const seen = new Set();
+    const items = safeArray(index?.items).flatMap(item => {
+      const objectId = getProjectedItemObjectId(item);
+      const context = contextsByObjectId.get(objectId);
+      if (!context || seen.has(objectId)) return [];
+      seen.add(objectId);
+      return [context];
+    });
+
+    return items.length ? [{
+      id,
+      label,
+      menuLabel: clean(label).toUpperCase() === "EQUIPMENT" ? "EQUIP" : label,
+      items
+    }] : [];
+  });
+
+  const seen = new Set();
+  const allItems = directories.flatMap(directory => directory.items.flatMap(item => {
+    const objectId = clean(item?.sourceId);
+    if (!objectId || seen.has(objectId)) return [];
+    seen.add(objectId);
+    return [item];
+  }));
+
+  return [{ id: "all", label: "ALL", menuLabel: "ALL", items: allItems }, ...directories];
 }
 
 function getDateValue(record = {}) {
@@ -251,6 +348,8 @@ function buildEntityContext(entity = {}) {
     hours: null,
     value: 0,
     imageUrl: getImageUrl(entity),
+    serialNumber: "",
+    assetId: firstText(entity?.customerId, entity?.accountId),
     source: entity,
     updatedAt: getDateValue(entity)
   };
@@ -282,6 +381,8 @@ function buildMosContext(object = {}) {
     hours: null,
     value: getMoneyValue(object),
     imageUrl: getImageUrl(object),
+    serialNumber: getSerialNumber(object),
+    assetId: getAssetId(object),
     source: object,
     updatedAt: getDateValue(object)
   };
@@ -309,9 +410,54 @@ function buildMachineContext(listing = {}) {
     hours,
     value: getMoneyValue(listing),
     imageUrl: getImageUrl(listing),
+    serialNumber: getSerialNumber(listing),
+    assetId: getAssetId(listing),
     source: listing,
     updatedAt: getDateValue(listing)
   };
+}
+
+function getListingAlias(listing = {}) {
+  return firstText(
+    listing?.listingId,
+    listing?.id?.uuid,
+    listing?.id,
+    listing?.uuid
+  );
+}
+
+function getVerifiedListingAliasMap(aosObjects = []) {
+  const aliases = new Map();
+  const collisions = new Set();
+
+  safeArray(aosObjects).forEach(object => {
+    const objectId = getObjectId(object);
+    if (!objectId) return;
+
+    // IX-Core admission returns typed aliases; the AOS presentation adapter
+    // groups those aliases into listingIds. Both refer to the same Object.
+    const listingAliases = Array.isArray(object?.aliases)
+      ? object.aliases
+        .filter(alias => ["sharetribe-listing", "sharetribe", "listing"].includes(
+          clean(alias?.sourceType).toLowerCase()
+        ))
+        .map(alias => alias?.sourceId)
+      : safeArray(object?.aliases?.listingIds);
+
+    listingAliases.forEach(rawAlias => {
+      const alias = clean(rawAlias);
+      if (!alias || collisions.has(alias)) return;
+      const existing = aliases.get(alias);
+      if (existing && existing !== objectId) {
+        aliases.delete(alias);
+        collisions.add(alias);
+        return;
+      }
+      aliases.set(alias, objectId);
+    });
+  });
+
+  return aliases;
 }
 
 function getProjectedKindOverrides(systemIndexes = []) {
@@ -385,6 +531,7 @@ export function buildIXIAosCommandContexts({
     getIXITransactOwnedEquipmentObjectIds(systemIndexes)
   );
   const projectedKindOverrides = getProjectedKindOverrides(systemIndexes);
+  const verifiedListingAliases = getVerifiedListingAliasMap(aosObjects);
 
   safeArray(aosObjects)
     .map(buildMosContext)
@@ -398,7 +545,12 @@ export function buildIXIAosCommandContexts({
     .forEach(context => byObjectId.set(context.sourceId, context));
 
   safeArray(ownedListings)
-    .map(buildMachineContext)
+    .map(listing => {
+      const verifiedObjectId = verifiedListingAliases.get(getListingAlias(listing));
+      return buildMachineContext(verifiedObjectId
+        ? { ...listing, objectId: verifiedObjectId }
+        : listing);
+    })
     .filter(Boolean)
     .filter(machine => ownedEquipmentIds.has(machine.sourceId))
     .forEach(machine => {
@@ -411,6 +563,8 @@ export function buildIXIAosCommandContexts({
         parentId: canonical.parentId || machine.parentId,
         passportId: canonical.passportId || machine.passportId,
         imageUrl: machine.imageUrl || canonical.imageUrl,
+        serialNumber: canonical.serialNumber || machine.serialNumber,
+        assetId: canonical.assetId || machine.assetId,
         source: { canonical: canonical.source, presentation: machine.source }
       });
     });
