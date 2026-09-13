@@ -304,11 +304,13 @@ function containerDirectoryFixture() {
   const yard = canonical("yard", "West Yard", "location");
   const machine = { ...canonicalMachine, entityId: entity.entityId, passportId: "IXITEST999" };
   const foreignMachine = canonical("unowned-machine", "Visible external machine", "machine");
-  const aosObjects = [workforce, matt, cooper, yard, machine, foreignMachine];
+  const publication = { ...canonical("publication", "Retired publication adapter", "system-index"), metadata: { adapterId: "ixi-owned-for-sale" } };
+  const aosObjects = [workforce, matt, cooper, yard, machine, foreignMachine, publication];
   const systemIndexes = [{ ...equipmentIndex([{ objectId: machine.objectId }]), displayName: "Equipment" }];
   const railProjections = {
     [workforce.objectId]: { members: [matt, cooper, matt, yard, foreignMachine] },
-    [yard.objectId]: { members: [matt, workforce] }
+    [yard.objectId]: { members: [matt, workforce] },
+    [publication.objectId]: { members: [machine] }
   };
   const contexts = buildIXIAosCommandContexts({ entity, aosObjects, systemIndexes });
   return { workforce, matt, cooper, yard, aosObjects, systemIndexes, railProjections, contexts };

@@ -1,4 +1,4 @@
-import { getIXIAosEquipmentAdapter } from "../../lib/mos/IXIAosSystemAdapterRegistry.js";
+import { getIXIAosEquipmentAdapter, isIXIAosWorkspaceVisibleAdapter } from "../../lib/mos/IXIAosSystemAdapterRegistry.js";
 import { buildAosCanonicalAdmission } from "../../lib/mos/ixiAosCanonicalAdmission.mjs";
 import { getAosRailProjectionObjectIds } from "../../lib/mos/IXIAosMembershipBridge.mjs";
 
@@ -298,10 +298,12 @@ export function getIXITransactObjectDirectories(
   // Read its governed rail as a navigation folder without promoting it to a
   // System Index or deriving membership from labels, types, or board placement.
   const indexIds = new Set(safeArray(systemIndexes).map(index => firstText(index?.objectId, index?.indexId)));
+  const visibleObjects = safeArray(aosObjects).filter(isIXIAosWorkspaceVisibleAdapter);
+  const visibleIds = new Set(visibleObjects.map(getObjectId));
   const ownerIds = (railProjections instanceof Map ? [...railProjections.keys()] : Object.keys(railProjections || {}))
-    .filter(objectId => contextsByObjectId.has(objectId) && !indexIds.has(objectId));
+    .filter(objectId => visibleIds.has(objectId) && contextsByObjectId.has(objectId) && !indexIds.has(objectId));
   if (ownerIds.length) {
-    const admission = buildAosCanonicalAdmission({ aosObjects });
+    const admission = buildAosCanonicalAdmission({ aosObjects: visibleObjects });
     ownerIds.forEach(objectId => {
       const owner = contextsByObjectId.get(objectId);
       const items = getAosRailProjectionObjectIds({ railOwnerObjectId: objectId, railProjections, admission })
