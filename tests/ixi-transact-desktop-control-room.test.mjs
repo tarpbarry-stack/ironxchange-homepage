@@ -72,6 +72,10 @@ test("Object console is History-first and reuses the governed TRAN$ACT app bus",
   const app = read("components/ixi-aos/transact/IXITransactApp.jsx");
 
   assert.match(source, /Governed AOS Object directory/u);
+  assert.match(source, /className=\{styles\.objectDirectoryCount\}[\s\S]*\{objectDirectory\.length\}/u);
+  assert.match(source, /className=\{styles\.objectDirectorySelect\}[\s\S]*aria-label="Object directory"/u);
+  assert.doesNotMatch(source, /selectedDirectory\?\.label \|\| "AOS OBJECTS"/u);
+  assert.doesNotMatch(source, /<span>INDEX<\/span>/u);
   assert.match(source, /SN · \{item\.serialNumber \|\| "NOT RECORDED"\}/u);
   assert.match(source, /setActiveWorkspace\(context\.kind === "company" \? "today" : "object-history"\)/u);
   assert.match(source, /title="TRANSACTION HISTORY"/u);
