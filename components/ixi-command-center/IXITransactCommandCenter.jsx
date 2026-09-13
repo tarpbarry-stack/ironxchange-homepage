@@ -285,13 +285,25 @@ function ContextIdentityCard({ context, interactive = false, onActivate }) {
         <h2>{context.title}</h2>
         <p>{context.location || context.subtitle}</p>
         <dl>
-          <div><dt>SERIAL NUMBER</dt><dd>{context.serialNumber || "NOT RECORDED"}</dd></div>
-          <div><dt>STOCK NUMBER</dt><dd>{context.stockNumber || "NOT RECORDED"}</dd></div>
-          <div><dt>PASSPORT NUMBER</dt><dd>{context.passportId || "NOT RECORDED"}</dd></div>
-          <div><dt>OBJECT ID</dt><dd>{context.sourceId || "NOT RECORDED"}</dd></div>
+          <ContextIdentityFields context={context} />
         </dl>
       </div>
     </Element>
+  );
+}
+
+function ContextIdentityFields({ context, compact = false }) {
+  const includeObjectIdentity = context?.kind !== "company";
+
+  return (
+    <>
+      {includeObjectIdentity ? <>
+        <div><dt>{compact ? "SN" : "SERIAL NUMBER"}</dt><dd>{context.serialNumber || "NOT RECORDED"}</dd></div>
+        <div><dt>{compact ? "STOCK" : "STOCK NUMBER"}</dt><dd>{context.stockNumber || "NOT RECORDED"}</dd></div>
+      </> : null}
+      <div><dt>{compact ? "PASSPORT" : "PASSPORT NUMBER"}</dt><dd>{context.passportId || "NOT RECORDED"}</dd></div>
+      {includeObjectIdentity ? <div><dt>OBJECT ID</dt><dd>{context.sourceId || "NOT RECORDED"}</dd></div> : null}
+    </>
   );
 }
 
@@ -826,7 +838,7 @@ export default function IXITransactCommandCenter() {
 
         <main className={styles.main}>
           <div className={styles.pageHeader}>
-            <div><span className={styles.eyebrow}>{environment?.entity?.displayName || "IXI ENTITY"} · {contextLabel(selectedContext?.kind)}</span><h1>{workspaceTitle}</h1><p>{selectedContext ? `${selectedContext.title} · ${selectedContext.subtitle}` : "Resolving canonical operating context…"}</p>{selectedContext ? <dl className={styles.headerIdentity}><div><dt>SN</dt><dd>{selectedContext.serialNumber || "NOT RECORDED"}</dd></div><div><dt>STOCK</dt><dd>{selectedContext.stockNumber || "NOT RECORDED"}</dd></div><div><dt>PASSPORT</dt><dd>{selectedContext.passportId || "NOT RECORDED"}</dd></div><div><dt>OBJECT ID</dt><dd>{selectedContext.sourceId || "NOT RECORDED"}</dd></div></dl> : null}</div>
+            <div><span className={styles.eyebrow}>{environment?.entity?.displayName || "IXI ENTITY"} · {contextLabel(selectedContext?.kind)}</span><h1>{workspaceTitle}</h1><p>{selectedContext ? `${selectedContext.title} · ${selectedContext.subtitle}` : "Resolving canonical operating context…"}</p>{selectedContext ? <dl className={styles.headerIdentity}><ContextIdentityFields context={selectedContext} compact /></dl> : null}</div>
             <div className={styles.headerActions}><label><span>CURRENT {contextLabel(selectedKind)}</span><select value={selectedContext?.id || ""} onChange={event => { const context = currentGroup.find(item => item.id === event.target.value); if (context) selectContext(context); }}>{currentGroup.map(item => <option value={item.id} key={item.id}>{item.title}</option>)}</select></label><button type="button" onClick={refreshAuthoritativeContext}>REFRESH</button></div>
           </div>
 
