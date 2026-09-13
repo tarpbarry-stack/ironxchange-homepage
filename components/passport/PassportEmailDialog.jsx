@@ -379,8 +379,8 @@ export default function PassportEmailDialog({
                   }
                 />
                 <span>
-                  I requested this one-time machine Passport text at the number
-                  entered above.
+                  I agree to receive one SMS/MMS from IronXchange at the number
+                  entered above containing the machine Passport I requested.
                 </span>
               </label>
               <p>
@@ -433,9 +433,7 @@ export default function PassportEmailDialog({
                   ? "Post machine first"
                   : status === "sending"
                     ? "Sending…"
-                    : channel === "text" && !textDeliveryEnabled
-                      ? "Carrier approval pending"
-                      : "Send Passport"}
+                    : "Send Passport"}
               </button>
             ) : null}
           </footer>

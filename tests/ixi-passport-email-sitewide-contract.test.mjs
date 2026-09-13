@@ -42,7 +42,8 @@ test("Text Passport presents explicit one-time consent before provider activatio
   const proof = read("pages/text-passport-consent.js");
 
   assert.match(dialog, /Recipient mobile number/u);
-  assert.match(dialog, /I requested this one-time machine Passport text/u);
+  assert.match(dialog, /I agree to receive one SMS\/MMS from IronXchange/u);
+  assert.doesNotMatch(dialog, /Carrier approval pending/u);
   assert.match(dialog, /One SMS\/MMS per request/u);
   assert.match(dialog, /Message and data rates may apply/u);
   assert.match(dialog, /Reply STOP to opt out or HELP for help/u);
