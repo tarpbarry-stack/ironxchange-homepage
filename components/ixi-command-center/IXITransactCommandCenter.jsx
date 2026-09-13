@@ -234,7 +234,11 @@ function IXIContextImage({
 }) {
   const Element = as;
   const elementRef = useRef(null);
-  const [imageUrl, setImageUrl] = useState(context?.imageUrl || "");
+  const [hydratedImage, setHydratedImage] = useState(null);
+  const imageUrl = context?.kind === "machine" &&
+    hydratedImage?.id === context?.id && hydratedImage?.source === context?.source
+    ? hydratedImage.imageUrl
+    : context?.imageUrl || "";
 
   useEffect(() => {
     if (context?.kind !== "machine") return undefined;
@@ -244,7 +248,7 @@ function IXIContextImage({
 
     const loadImage = async () => {
       const hydrated = await hydrateIXIListingMedia(listing, { dedupeRequests: true });
-      if (active && hydrated?.imageUrl) setImageUrl(hydrated.imageUrl);
+      if (active && hydrated?.imageUrl) setHydratedImage({ id: context.id, source: context.source, imageUrl: hydrated.imageUrl });
     };
 
     if (eager || typeof IntersectionObserver === "undefined") {
@@ -265,7 +269,7 @@ function IXIContextImage({
   }, [context?.id, context?.kind, context?.source, eager]);
 
   return imageUrl
-    ? <Element ref={elementRef} className={mediaClassName} role="img" aria-label={label} style={{ backgroundImage: `url(${imageUrl})` }} />
+    ? <Element ref={elementRef} className={mediaClassName} data-context-kind={context?.kind} role="img" aria-label={label} style={{ backgroundImage: `url(${imageUrl})` }} />
     : <Element ref={elementRef} className={fallbackClassName} aria-hidden="true">{fallback}</Element>;
 }
 
@@ -824,7 +828,10 @@ export default function IXITransactCommandCenter() {
     <div className={styles.shell}>
       <header className={styles.topbar}>
         <a className={styles.brand} href="/transact" aria-label="TRAN$ACT home"><span className={styles.mark}>IXI</span><span className={styles.brandCopy}><strong>TRAN$ACT</strong><small>FINANCIAL OPERATING SYSTEM</small></span></a>
-        <div className={styles.entityScope}><span>ENTITY</span><strong>{environment?.entity?.displayName || "AUTHENTICATED ENTITY"}</strong></div>
+        <div className={styles.entityScope}>
+          {environment?.entity?.logoUrl ? <img className={styles.entityLogo} src={environment.entity.logoUrl} alt={`${environment.entity.displayName || "Entity"} logo`} /> : null}
+          <span>ENTITY</span><strong>{environment?.entity?.displayName || "AUTHENTICATED ENTITY"}</strong>
+        </div>
         <label className={styles.periodControl}><span>ACCOUNTING PERIOD</span><input type="month" value={period} onChange={event => setPeriod(event.target.value)} /></label>
         <div className={styles.searchWrap}>
           <input id="ixi-transact-global-search" className={styles.search} type="search" value={query} onChange={event => setQuery(event.target.value)} placeholder="Search object, Passport, vendor, amount or document…" aria-label="Search TRAN$ACT" aria-controls="ixi-transact-search-results" aria-expanded={searchResults.length > 0} onKeyDown={event => { if (event.key === "Escape") setQuery(""); }} />

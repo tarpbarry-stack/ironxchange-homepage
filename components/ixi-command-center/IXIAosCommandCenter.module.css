@@ -114,6 +114,10 @@
 .entityScope,
 .periodControl { min-width: 0; display: grid; gap: 4px; }
 
+.entityScope { position: relative; }
+.entityScope:has(.entityLogo) { padding-left: 46px; }
+.entityLogo { position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 38px; height: 38px; object-fit: contain; }
+
 .entityScope strong {
   overflow: hidden;
   color: rgba(255, 255, 255, 0.83);
@@ -369,6 +373,7 @@
 .identityCard[data-interactive="true"] { cursor: pointer; }
 .identityCard[data-interactive="true"]:hover { border-color: rgba(255, 196, 0, 0.42); }
 .identityMark { min-height: 108px; display: grid; place-items: center; color: rgba(255, 196, 0, 0.22); background: linear-gradient(145deg, rgba(255, 196, 0, 0.06), transparent 46%), repeating-linear-gradient(90deg, #101310 0, #101310 28px, #141714 29px); font-size: 30px; font-weight: 950; letter-spacing: 0.15em; }
+.identityMedia[data-context-kind="company"] { background-size: contain; }
 .identityMedia { min-height: 132px; background-color: #0a0c0a; background-position: center; background-repeat: no-repeat; background-size: cover; }
 .identityCard > div:last-child { padding: 12px; border-top: 1px solid var(--line); }
 .identityCard h2 { margin: 5px 0 4px; overflow: hidden; text-overflow: ellipsis; font-size: var(--tx-type-section); line-height: var(--tx-leading-tight); white-space: nowrap; }
