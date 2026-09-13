@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { paymentHistorySummary } from "./payments/IXIPaymentHistory";
 
 import { getIXITransactModule } from "./IXITransactModuleRegistry";
 import { resolveIXITransactRecordModuleId } from "./IXITransactRecordRouting";
@@ -243,11 +244,12 @@ function formatDate(value = "") {
   }).format(new Date(parsed)).toUpperCase();
 }
 
-function formatMoney(value) {
+function formatMoney(value, currency = "USD") {
   return new Intl.NumberFormat("en-US", {
     style: "currency",
-    currency: "USD",
-    maximumFractionDigits: 0
+    currency,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
   }).format(money(value));
 }
 
@@ -310,6 +312,7 @@ export function getIXITransactRecordIndex(records = []) {
         category: mapped.category,
         moduleId,
         status: statusOf(document, embedded),
+        payment: paymentHistorySummary(item, sourceRecords),
         amount: documentType === "asset-acquisition" && packageAllocationByPassport.has(clean(embedded?.context?.primaryPassportId))
           ? packageAllocationByPassport.get(clean(embedded?.context?.primaryPassportId)).amount
           : amountOf(document, embedded),
@@ -492,7 +495,7 @@ export default function IXITransactRecordIndex({
           <article className="txri-detail">
             <div className="txri-state">
               <span className={record.open ? "open" : "closed"} />
-              {upper(record.status)}
+              {upper(record.payment?.status || record.status)}
             </div>
             <dl>
               <div>
@@ -511,6 +514,8 @@ export default function IXITransactRecordIndex({
                 <dt>AMOUNT</dt>
                 <dd>{record.amount ? formatMoney(record.amount) : "—"}</dd>
               </div>
+              {record.payment?.currency ? <><div><dt>PAID</dt><dd>{formatMoney(record.payment.paid, record.payment.currency)}</dd></div><div><dt>BALANCE DUE</dt><dd>{formatMoney(record.payment.balance, record.payment.currency)}</dd></div></> : null}
+              {record.payment?.paidDate ? <div><dt>PAYMENT DATE</dt><dd>{record.payment.paidDate}</dd></div> : null}
               <div className="wide">
                 <dt>DETAIL</dt>
                 <dd>{record.title || "TRAN$ACT RECORD"}</dd>
@@ -548,7 +553,7 @@ export default function IXITransactRecordIndex({
                 <div>
                   <strong>{item.number}</strong>
                   <small>
-                    {upper(item.status)} · {formatDate(item.occurredAt)}
+                    {upper(item.payment?.status || item.status)} · {formatDate(item.occurredAt)}
                   </small>
                 </div>
                 <b>{item.amount ? formatMoney(item.amount) : "—"}</b>

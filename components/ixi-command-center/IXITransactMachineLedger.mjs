@@ -1,3 +1,4 @@
+import { paymentHistorySummary } from "../ixi-aos/transact/payments/IXIPaymentHistory.js";
 import {
   paymentSummary,
   expensePaymentMethod,
@@ -413,6 +414,12 @@ export function buildMachineLedger(
           ? "PART PAID"
           : "UNPAID"
       : "";
+  }
+
+  for (const row of rows) {
+    if (["work-order", "technology-work-order", "service-order", "freight", "freight-order"].includes(row.type)) {
+      row.paymentStatus = paymentHistorySummary(row.raw, rows.map(item => item.raw))?.status.replace("PARTIALLY PAID", "PART PAID") || "";
+    }
   }
 
   rows.sort((a, b) => a.date.localeCompare(b.date) || a.id.localeCompare(b.id));
