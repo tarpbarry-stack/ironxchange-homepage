@@ -1,0 +1,49 @@
+name: Inspect IX-Core release and recovery
+on:
+  workflow_dispatch:
+  push:
+    branches: [ops/verify-owned-machine-release]
+    paths: [.github/workflows/verify-owned-machine-release.yml]
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      AWS_REGION: us-east-2
+      AWS_INSTANCE_ID: ${{ secrets.AWS_INSTANCE_ID }}
+    steps:
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-2
+      - name: Read installed release, health, and recovery failure
+        run: |
+          set -euo pipefail
+          test "$AWS_INSTANCE_ID" = i-06d9ae98889f6fdab
+          test "$(aws sts get-caller-identity --query Account --output text)" = 459212966383
+          python3 - <<'PY'
+          import json,os,pathlib
+          command = r'''set -eu
+          cd /var/www/ix-core
+          node ops/runtime-release.js verify /var/www/ix-core /var/www/ix-core/.ixi-release.json
+          curl --max-time 5 -fsS http://127.0.0.1:4100/live
+          curl --max-time 5 -fsS http://127.0.0.1:4100/ready
+          systemctl show ixi-core-recovery.service ixi-core-recovery.timer -p Id -p ActiveState -p SubState -p Result -p ExecMainStatus
+          journalctl -u ixi-core-recovery.service -n 45 --no-pager -o cat
+          python3 - <<'CHECK'
+          import json,pathlib
+          release=json.loads(pathlib.Path('.ixi-release.json').read_text())
+          receipt=json.loads(pathlib.Path('/var/backups/ixi-core-releases/latest-recovery.json').read_text())
+          print(json.dumps({'releaseCommit':release.get('commit') or release.get('sourceCommit'),'recovery':{k:receipt.get(k) for k in ['ok','createdAt','consistency','sha256','versionId']},'census':{k:receipt.get('census',{}).get(k) for k in ['objects','activeObjects','passports','activeIdentitySha256']}}))
+          CHECK'''
+          pathlib.Path(os.environ['RUNNER_TEMP'],'inspect.json').write_text(json.dumps({'commands':[command],'executionTimeout':['180']}))
+          PY
+          command_id="$(aws ssm send-command --instance-ids "$AWS_INSTANCE_ID" --document-name AWS-RunShellScript --comment 'Read-only IX-Core release and recovery inspection' --parameters "file://$RUNNER_TEMP/inspect.json" --query Command.CommandId --output text)"
+          echo "Inspection command: $command_id"
+          aws ssm wait command-executed --command-id "$command_id" --instance-id "$AWS_INSTANCE_ID" || true
+          aws ssm get-command-invocation --command-id "$command_id" --instance-id "$AWS_INSTANCE_ID" > "$RUNNER_TEMP/result.json"
+          jq -r '.StandardOutputContent,.StandardErrorContent' "$RUNNER_TEMP/result.json"
+          test "$(jq -r .Status "$RUNNER_TEMP/result.json")" = Success
