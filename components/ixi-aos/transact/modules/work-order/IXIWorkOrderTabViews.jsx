@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { paymentDocument, paymentSummary } from "../../payments/IXIPaymentModel";
 
 import {
   getIXIWorkOrderActivity,
@@ -7,6 +8,12 @@ import {
 } from "./IXIWorkOrderProjectionEngine";
 
 const clean = value => String(value ?? "").trim();
+function paymentStatus(source, records, lang) {
+  const status = paymentSummary(source, records)?.status;
+  if (!status) return "";
+  return lang === "es" ? ({ PAID: "PAGADO", UNPAID: "SIN PAGAR", "PARTIALLY PAID": "PAGO PARCIAL", CREDITED: "ACREDITADO", VOID: "ANULADO", "NO BALANCE DUE": "SIN SALDO PENDIENTE" }[status] || status) : status.replace("PARTIALLY PAID", "PART PAID");
+}
+
 
 const COPY = {
   en: {
@@ -77,7 +84,7 @@ function formatDate(value, lang) {
   }).format(date);
 }
 
-function RecordDetail({ row, lang, onClose }) {
+function RecordDetail({ row, financialRecords, lang, onClose }) {
   const t = COPY[lang];
   return (
     <section className="wo-record-detail">
@@ -86,7 +93,7 @@ function RecordDetail({ row, lang, onClose }) {
       <p>{row.label}</p>
       <dl>
         <div><dt>{t.type}</dt><dd>{row.type}</dd></div>
-        <div><dt>{t.status}</dt><dd>{row.status || "—"}</dd></div>
+        <div><dt>{t.status}</dt><dd>{paymentStatus(row.source, financialRecords, lang) || row.status || "—"}</dd></div>
         <div><dt>{t.date}</dt><dd>{formatDate(row.date, lang)}</dd></div>
         <div><dt>{t.amount}</dt><dd><Money value={row.amount} /></dd></div>
       </dl>
@@ -99,7 +106,7 @@ export function IXIWorkOrderCostView({ workOrder, financialRecords, language = "
   const t = COPY[lang];
   const cost = useMemo(() => getIXIWorkOrderCostProjection(workOrder, financialRecords), [workOrder, financialRecords]);
   const [selected, setSelected] = useState(null);
-  if (selected) return <RecordDetail row={selected} lang={lang} onClose={() => setSelected(null)} />;
+  if (selected) return <RecordDetail row={selected} financialRecords={financialRecords} lang={lang} onClose={() => setSelected(null)} />;
   return (
     <div className="wo-tab-panel">
       <div className="wo-cost-hero"><small>{t.actual}</small><strong><Money value={cost.actual} /></strong></div>
@@ -117,7 +124,7 @@ export function IXIWorkOrderCostView({ workOrder, financialRecords, language = "
       <div className="wo-record-list">
         {cost.rows.length ? cost.rows.map(row => (
           <button key={row.id} onClick={() => setSelected(row)}>
-            <span><b>{row.label}</b><small>{row.type} · {row.number}</small></span>
+            <span><b>{row.label}</b><small>{row.type} · {row.number}{paymentStatus(row.source, financialRecords, lang) ? ` · ${paymentStatus(row.source, financialRecords, lang)}` : ""}</small></span>
             <strong><Money value={row.amount} /></strong><i>›</i>
           </button>
         )) : <p className="wo-empty-state">{t.noCosts}</p>}
@@ -129,7 +136,10 @@ export function IXIWorkOrderCostView({ workOrder, financialRecords, language = "
 export function IXIWorkOrderActivityView({ workOrder, financialRecords, language = "en" }) {
   const lang = language === "es" ? "es" : "en";
   const t = COPY[lang];
-  const events = useMemo(() => getIXIWorkOrderActivity(workOrder, financialRecords), [workOrder, financialRecords]);
+  const events = useMemo(() => getIXIWorkOrderActivity(workOrder, financialRecords).map(event => ({
+    ...event,
+    paymentStatus: event.id?.startsWith("record:") ? paymentStatus((financialRecords || []).find(item => paymentDocument(item).financialDocumentId === event.id.slice(7)), financialRecords, lang) : ""
+  })), [workOrder, financialRecords, lang]);
   return (
     <div className="wo-tab-panel">
       <div className="wo-panel-heading"><b>{t.activity}</b><span>{events.length}</span></div>
@@ -137,7 +147,7 @@ export function IXIWorkOrderActivityView({ workOrder, financialRecords, language
         {events.length ? events.map((event, index) => (
           <article key={event.id || index}>
             <i />
-            <div><small>{formatDate(event.occurredAt, lang)}{event.actorLabel ? ` · ${event.actorLabel}` : ""}</small><b>{event.label || event.type}</b>{event.detail ? <p>{event.detail}</p> : null}</div>
+            <div><small>{formatDate(event.occurredAt, lang)}{event.actorLabel ? ` · ${event.actorLabel}` : ""}</small><b>{event.label || event.type}</b>{event.detail ? <p>{event.detail}</p> : null}{event.paymentStatus ? <strong>{event.paymentStatus}</strong> : null}</div>
           </article>
         )) : <p className="wo-empty-state">{t.noActivity}</p>}
       </div>
@@ -150,7 +160,7 @@ export function IXIWorkOrderRelatedView({ workOrder, financialRecords, language 
   const t = COPY[lang];
   const related = useMemo(() => getIXIWorkOrderRelationships(workOrder, financialRecords), [workOrder, financialRecords]);
   const [selected, setSelected] = useState(null);
-  if (selected) return <RecordDetail row={selected} lang={lang} onClose={() => setSelected(null)} />;
+  if (selected) return <RecordDetail row={selected} financialRecords={financialRecords} lang={lang} onClose={() => setSelected(null)} />;
   const groups = [
     [t.relatedRecords, related.records.length],
     [t.notes, related.notes.length],
@@ -164,8 +174,8 @@ export function IXIWorkOrderRelatedView({ workOrder, financialRecords, language 
       <div className="wo-record-list">
         {related.records.length ? related.records.map(row => (
           <button key={row.id} onClick={() => setSelected(row)}>
-            <span><b>{row.label}</b><small>{row.type} · {row.number}</small></span>
-            <strong>{row.status || "—"}</strong><i>›</i>
+            <span><b>{row.label}</b><small>{row.type} · {row.number}{paymentStatus(row.source, financialRecords, lang) ? ` · ${paymentStatus(row.source, financialRecords, lang)}` : ""}</small></span>
+            <strong>{paymentStatus(row.source, financialRecords, lang) || row.status || "—"}</strong><i>›</i>
           </button>
         )) : <p className="wo-empty-state">{t.noRelated}</p>}
       </div>
