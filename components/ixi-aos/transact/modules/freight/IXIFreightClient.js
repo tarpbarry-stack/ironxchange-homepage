@@ -49,3 +49,13 @@ export async function loadIXIFreightEvents(freightOrderId, { signal } = {}) {
 }
 
 export default { loadIXIFreightOrders, createIXIFreightOrder, amendIXIFreightOrder, runIXIFreightAction, loadIXIFreightEvents };
+
+export async function loadIXIFreightOrder(id, { signal } = {}) {
+  return (await request(`orders/${encodeURIComponent(id)}`, { signal })).freightOrder;
+}
+export async function loadIXIFreightPeople({ signal } = {}) {
+  return (await request("recipients", { signal })).recipients || [];
+}
+export async function loadIXIFreightAlerts({ signal } = {}) {
+  return (await request("alerts", { signal })).alerts || [];
+}

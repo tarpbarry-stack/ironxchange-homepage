@@ -1,3 +1,4 @@
+import IXIMoneyInput from "../../IXIMoneyInput";
 import { useMemo, useState } from "react";
 import { buildIXIPayablesProjection } from "./IXIPayablesProjectionEngine";
 import {
@@ -303,6 +304,7 @@ export default function IXIPayablesApp({
           <span>VENDOR CREDITS</span>
           <b>{money(selected.credited, selected.currency)}</b>
         </div>
+        {selected.vendorCreditBalance > 0 ? <div className="ap-row"><span>VENDOR CREDIT AVAILABLE</span><b>{money(selected.vendorCreditBalance, selected.currency)}</b></div> : null}
         <div className="ap-row">
           <span>AGING</span>
           <b className={selected.daysPastDue ? "red" : ""}>
@@ -418,7 +420,7 @@ export default function IXIPayablesApp({
         <div className="ap-section">DISPUTE</div>
         <div className="ap-grid2">
           <F label="DISPUTED AMOUNT">
-            <input
+            <IXIMoneyInput
               inputMode="decimal"
               value={moneyInput.amount}
               onChange={(e) =>
@@ -499,7 +501,7 @@ export default function IXIPayablesApp({
         <div className="ap-section">IXI FINANCIAL</div>
         <div className="ap-grid2">
           <F label="AMOUNT">
-            <input
+            <IXIMoneyInput
               inputMode="decimal"
               value={moneyInput.amount}
               onChange={(e) =>

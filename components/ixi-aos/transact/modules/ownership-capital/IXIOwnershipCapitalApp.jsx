@@ -1,3 +1,4 @@
+import IXIMoneyInput from "../../IXIMoneyInput";
 import { useEffect, useMemo, useState } from "react";
 import { hydrateIXIAssetAcquisitionRecord } from "../asset-acquisition/IXIAssetAcquisitionContract";
 import { updateIXIAssetAcquisition } from "../asset-acquisition/IXIAssetAcquisitionCommands";
@@ -312,7 +313,7 @@ export default function IXIOwnershipCapitalApp({
       </div>
       <div className="own-grid">
         <Field label={t.amount}>
-          <input
+          <IXIMoneyInput
             inputMode="decimal"
             value={form.amount}
             onChange={(e) => patch("amount", e.target.value)}

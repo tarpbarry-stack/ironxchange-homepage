@@ -1,3 +1,4 @@
+import IXIMoneyInput, { IXINumericInput } from "../../IXIMoneyInput";
 import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import {
@@ -473,7 +474,7 @@ function CommissionEditor({
             <option value="above-target">% ABOVE TARGET</option>
             <option value="manual">MANUAL</option>
           </select>
-          <Input
+          <IXINumericInput currency={row.calculationMethod === "fixed" || row.calculationMethod === "manual"}
             disabled={disabled}
             inputMode="decimal"
             value={
@@ -482,7 +483,7 @@ function CommissionEditor({
                 ? row.fixedAmount
                 : row.ratePercent
             }
-            onChange={(value) =>
+            onValueChange={(value) =>
               update(
                 index,
                 row.calculationMethod === "fixed" ||
@@ -499,11 +500,11 @@ function CommissionEditor({
                 : "Rate %"
             }
           />
-          <Input
+          <IXIMoneyInput
             disabled={disabled}
             inputMode="decimal"
             value={row.targetAmount}
-            onChange={(value) => update(index, "targetAmount", value)}
+            onValueChange={(value) => update(index, "targetAmount", value)}
             placeholder="Target / hurdle (optional)"
           />
           <Input
@@ -717,11 +718,11 @@ function CardEditor({
               key={key}
               label={key.replace(/([A-Z])/g, " $1").toUpperCase()}
             >
-              <Input
+              <IXIMoneyInput
                 disabled={commercialLocked}
                 inputMode="decimal"
                 value={input[key]}
-                onChange={(v) => patch(key, v)}
+                onValueChange={(v) => patch(key, v)}
               />
             </CardField>
           ))}
@@ -1652,11 +1653,11 @@ export default function IXIEquipmentSaleApp({
                           key={key}
                           label={key.replace(/([A-Z])/g, " $1").toUpperCase()}
                         >
-                          <Input
+                          <IXIMoneyInput
                             disabled={orderLocked}
                             inputMode="decimal"
                             value={input[key]}
-                            onChange={(v) => patch(key, v)}
+                            onValueChange={(v) => patch(key, v)}
                           />
                         </Field>
                       ))}

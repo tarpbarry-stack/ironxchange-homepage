@@ -1,3 +1,4 @@
+import IXIMoneyInput from "../../IXIMoneyInput";
 import {
   useMemo,
   useRef,
@@ -293,7 +294,7 @@ export default function IXIPurchaseApp({
             <select aria-label={t.unit} value={item.unit} onChange={event => patchItem(index, "unit", event.target.value)} disabled={saving}>
               <option>EA</option><option>FT</option><option>YD</option><option>HR</option><option>GAL</option>
             </select>
-            <input aria-label={t.unitCost} inputMode="decimal" value={item.estimatedUnitCost} onChange={event => patchItem(index, "estimatedUnitCost", event.target.value)} placeholder="$" disabled={saving} />
+            <IXIMoneyInput aria-label={t.unitCost} inputMode="decimal" value={item.estimatedUnitCost} onChange={event => patchItem(index, "estimatedUnitCost", event.target.value)} placeholder="$" disabled={saving} />
             <button type="button" aria-label="Remove item" onClick={() => removeItem(index)} disabled={saving}>×</button>
           </div>
         ))}
@@ -303,7 +304,7 @@ export default function IXIPurchaseApp({
       <div className="po-two">
         <div>
           <label>{t.shipping}</label>
-          <div className="po-field"><span aria-hidden="true">$</span><input inputMode="decimal" value={shipping} onChange={event => setShipping(event.target.value)} disabled={saving} /></div>
+          <div className="po-field"><span aria-hidden="true">$</span><IXIMoneyInput inputMode="decimal" value={shipping} onChange={event => setShipping(event.target.value)} disabled={saving} /></div>
         </div>
         <div>
           <label>{t.total}</label>

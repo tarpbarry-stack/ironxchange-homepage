@@ -1,3 +1,4 @@
+import IXIMoneyInput from "../../IXIMoneyInput";
 import { useMemo, useState } from "react";
 
 import { getIXIBillAvailableActions, getIXIBillVarianceRequirement } from "./IXIBillPolicyEngine";
@@ -158,7 +159,7 @@ export default function IXIBillCard({
   const [reason, setReason] = useState("");
   const [editOpen, setEditOpen] = useState(false);
   const [editDraft, setEditDraft] = useState({ vendorLabel: record?.bill?.vendorLabel || "", invoiceNumber: record?.identity?.invoiceNumber || "", description: record?.bill?.description || "", amount: record?.bill?.amount || "", invoiceDate: record?.bill?.invoiceDate || "", dueDate: record?.bill?.dueDate || "", category: record?.bill?.category || "", notes: record?.bill?.notes || "" });
-  const [paymentDraft, setPaymentDraft] = useState({ amount: record?.bill?.amount || "", method: "ACH", reference: "", paidDate: new Date().toISOString().slice(0, 10) });
+  const [paymentDraft, setPaymentDraft] = useState({ amount: record?.payment?.openBalance ?? record?.bill?.amount ?? "", method: "ACH", reference: "", paidDate: new Date().toISOString().slice(0, 10) });
   const [scheduleDate, setScheduleDate] = useState(record?.bill?.dueDate || "");
   const t = COPY[language === "es" ? "es" : "en"];
   const actions = useMemo(() => getIXIBillAvailableActions({ record, actor: context.actor || {}, authority, policy }), [record, context.actor, authority, policy]);
@@ -171,7 +172,7 @@ export default function IXIBillCard({
 
   function act(action, payload = {}) {
     if (busy) return;
-    onAction?.(action, payload);
+    return onAction?.(action, payload);
   }
 
   return (
@@ -241,7 +242,7 @@ export default function IXIBillCard({
             </div>
           ) : null}
           {scheduleOpen ? <div className="inline-form"><input type="date" value={scheduleDate} onChange={event => setScheduleDate(event.target.value)} /><button onClick={() => { act("schedule-payment", { scheduledDate: scheduleDate }); setScheduleOpen(false); }}>{t.schedule}</button></div> : null}
-          {paymentOpen ? <div className="inline-form payment-form"><input inputMode="decimal" value={paymentDraft.amount} onChange={event => setPaymentDraft(current => ({ ...current, amount: event.target.value }))} /><select value={paymentDraft.method} onChange={event => setPaymentDraft(current => ({ ...current, method: event.target.value }))}><option>ACH</option><option>CHECK</option><option>WIRE</option><option>CARD</option><option>CASH</option></select><input placeholder="Reference" value={paymentDraft.reference} onChange={event => setPaymentDraft(current => ({ ...current, reference: event.target.value }))} /><input type="date" value={paymentDraft.paidDate} onChange={event => setPaymentDraft(current => ({ ...current, paidDate: event.target.value }))} /><button onClick={() => { act("record-payment", paymentDraft); setPaymentOpen(false); }}>{t.recordPayment}</button></div> : null}
+          {paymentOpen ? <div className="inline-form payment-form"><IXIMoneyInput inputMode="decimal" value={paymentDraft.amount} onChange={event => setPaymentDraft(current => ({ ...current, amount: event.target.value }))} /><select value={paymentDraft.method} onChange={event => setPaymentDraft(current => ({ ...current, method: event.target.value }))}><option>ACH</option><option>CHECK</option><option>WIRE</option><option>CARD</option><option>CASH</option></select><input placeholder="Reference" value={paymentDraft.reference} onChange={event => setPaymentDraft(current => ({ ...current, reference: event.target.value }))} /><input type="date" value={paymentDraft.paidDate} onChange={event => setPaymentDraft(current => ({ ...current, paidDate: event.target.value }))} /><button onClick={async () => { if (await act("record-payment", paymentDraft)) setPaymentOpen(false); }}>{t.recordPayment}</button></div> : null}
         </section>
 
         <section className="bill-section"><h3>{t.notes}</h3><div className="notes-row">{record?.bill?.notes || "—"}</div></section>
@@ -249,7 +250,7 @@ export default function IXIBillCard({
 
         {reasonAction ? <section className="bill-section inline-form payment-form"><strong>{reasonAction === "void" ? "VOID REASON" : reasonAction === "reject" ? "REJECTION REASON" : "CORRECTION NEEDED"}</strong><textarea autoFocus value={reason} onChange={event => setReason(event.target.value)} /><button disabled={!clean(reason)} onClick={() => { act(reasonAction, { reason }); setReasonAction(""); setReason(""); }}>CONFIRM</button><button onClick={() => { setReasonAction(""); setReason(""); }}>CANCEL</button></section> : null}
 
-        {editOpen ? <section className="bill-section inline-form payment-form"><strong>EDIT BILL — REAPPROVAL REQUIRED</strong><input value={editDraft.vendorLabel} onChange={event => setEditDraft(current => ({ ...current, vendorLabel: event.target.value }))} placeholder="Vendor" /><input value={editDraft.invoiceNumber} onChange={event => setEditDraft(current => ({ ...current, invoiceNumber: event.target.value }))} placeholder="Invoice #" /><textarea value={editDraft.description} onChange={event => setEditDraft(current => ({ ...current, description: event.target.value }))} placeholder="Description" /><input inputMode="decimal" value={editDraft.amount} onChange={event => setEditDraft(current => ({ ...current, amount: event.target.value }))} placeholder="Amount" /><input type="date" value={editDraft.invoiceDate} onChange={event => setEditDraft(current => ({ ...current, invoiceDate: event.target.value }))} /><input type="date" value={editDraft.dueDate} onChange={event => setEditDraft(current => ({ ...current, dueDate: event.target.value }))} /><input value={editDraft.category} onChange={event => setEditDraft(current => ({ ...current, category: event.target.value }))} placeholder="Category" /><textarea value={editDraft.notes} onChange={event => setEditDraft(current => ({ ...current, notes: event.target.value }))} placeholder="Notes" /><button onClick={() => { const { invoiceNumber, ...bill } = editDraft; act("edit", { identity: { invoiceNumber }, bill: { ...bill, amount: Number(bill.amount) } }); setEditOpen(false); }}>SAVE CORRECTION</button><button onClick={() => setEditOpen(false)}>CANCEL</button></section> : null}
+        {editOpen ? <section className="bill-section inline-form payment-form"><strong>EDIT BILL / CORRECTION</strong><input value={editDraft.vendorLabel} onChange={event => setEditDraft(current => ({ ...current, vendorLabel: event.target.value }))} placeholder="Vendor" /><input value={editDraft.invoiceNumber} onChange={event => setEditDraft(current => ({ ...current, invoiceNumber: event.target.value }))} placeholder="Invoice #" /><textarea value={editDraft.description} onChange={event => setEditDraft(current => ({ ...current, description: event.target.value }))} placeholder="Description" /><IXIMoneyInput inputMode="decimal" value={editDraft.amount} onChange={event => setEditDraft(current => ({ ...current, amount: event.target.value }))} placeholder="Amount" /><input type="date" value={editDraft.invoiceDate} onChange={event => setEditDraft(current => ({ ...current, invoiceDate: event.target.value }))} /><input type="date" value={editDraft.dueDate} onChange={event => setEditDraft(current => ({ ...current, dueDate: event.target.value }))} /><input value={editDraft.category} onChange={event => setEditDraft(current => ({ ...current, category: event.target.value }))} placeholder="Category" /><textarea value={editDraft.notes} onChange={event => setEditDraft(current => ({ ...current, notes: event.target.value }))} placeholder="Notes" /><button onClick={async () => { const { invoiceNumber, ...bill } = editDraft; if (await act("edit", { identity: { invoiceNumber }, bill: { ...bill, amount: Number(bill.amount) } })) setEditOpen(false); }}>SAVE CORRECTION</button><button onClick={() => setEditOpen(false)}>CANCEL</button></section> : null}
 
         {error ? <div className="bill-error" role="alert">{error}</div> : null}
       </div>

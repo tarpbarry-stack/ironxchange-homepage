@@ -12,7 +12,7 @@ export default function IXIFreightStyles(){return <style jsx global>{`
 .ixi-freight .fr-status{padding:5px 7px;border:1px solid #78600b;color:#ffd21a;border-radius:4px;font-size:9px;white-space:nowrap}
 .ixi-freight .fr-status.good{border-color:#12723e;color:#57e697}
 .ixi-freight .fr-status.bad{border-color:#8a2732;color:#ff7280}
-.ixi-freight .fr-tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));height:28px;border-bottom:1px solid #26302b}
+.ixi-freight .fr-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));height:28px;border-bottom:1px solid #26302b}
 .ixi-freight .fr-tabs button,.ixi-freight .fr-foot button{min-width:0;border:0;border-right:1px solid #222a26;background:#0e1310;color:#7f8a84;font:900 9px Inter,Arial;letter-spacing:.03em}
 .ixi-freight .fr-tabs button.on{background:#182119;color:#ffd21a;box-shadow:inset 0 -2px #ffd21a}
 .ixi-freight .fr-body{flex:1;width:100%;min-width:0;min-height:0;overflow-x:hidden;overflow-y:auto;padding:8px 9px}
@@ -60,4 +60,11 @@ export default function IXIFreightStyles(){return <style jsx global>{`
 .ixi-freight .fr-check{min-width:0;display:flex;gap:6px;align-items:flex-start;margin:6px 0;color:#c3cbc7}
 .ixi-freight .fr-check input{margin:0}
 .ixi-freight .fr-pill{display:inline-block;max-width:100%;padding:2px 4px;border:1px solid #3a4540;color:#9da7a2;border-radius:3px;font-size:9px;margin-right:3px;overflow-wrap:anywhere}
+.ixi-freight details{margin:9px 0;border:1px solid #2c3430;border-radius:4px;padding:6px}
+.ixi-freight summary{color:#ffd21a;cursor:pointer;font-size:9px;padding:3px 0}
+.ixi-freight .fr-data-row{display:grid;grid-template-columns:96px minmax(0,1fr);gap:8px;padding:5px 0;border-bottom:1px solid #202823}
+.ixi-freight .fr-data-row span{color:#939d97}
+.ixi-freight .fr-data-row b{min-width:0;text-align:right;overflow-wrap:anywhere;white-space:normal}
+.ixi-freight input[type=file]{width:100%;font-size:9px}
+.ixi-freight button:focus-visible,.ixi-freight summary:focus-visible{outline:2px solid #ffd21a;outline-offset:1px}
 `}</style>}

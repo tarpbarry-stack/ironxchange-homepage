@@ -283,7 +283,7 @@ export async function createIXIBillPayment({
   const amount = numeric(input.amount);
   const method = clean(input.method);
   const reference = clean(input.reference);
-  const remaining = Math.max(0, numeric(record?.bill?.amount) - numeric(record?.payment?.amountPaid));
+  const remaining = Number(record?.payment?.openBalance ?? Math.max(0, numeric(record?.bill?.amount) - numeric(record?.payment?.amountPaid) - numeric(record?.payment?.credited)));
   if (!(amount > 0) || amount > remaining + 0.005 || !method || !reference || clean(record?.approval?.status) !== "approved") {
     const error = new Error("Approved Bill, valid remaining amount, payment method, and transaction reference are required.");
     error.code = "IXI_BILL_PAYMENT_VALIDATION_FAILED";

@@ -281,6 +281,7 @@ export function buildIXIPayablesProjection({
       originalAmount,
       paid,
       credited,
+      vendorCreditBalance: money(Math.max(0, paid + credited - originalAmount)),
       balance,
       recognized,
       pendingAmount: recognized ? 0 : originalAmount,

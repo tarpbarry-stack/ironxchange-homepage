@@ -1,3 +1,4 @@
+import IXIMoneyInput from "../../IXIMoneyInput";
 import { useEffect, useMemo, useState } from "react";
 import {
   calculateIXISettlementWaterfall,
@@ -990,9 +991,9 @@ export default function IXISettlementApp({
         <Money label={t.postCosts} value={projection.postAcquisitionCosts} />
         <Money label={t.income} value={projection.assetIncome} />
         <Field label={t.sellingCosts}>
-          <Input
+          <IXIMoneyInput
             value={sellingCosts}
-            onChange={setSellingCosts}
+            onValueChange={setSellingCosts}
             inputMode="decimal"
             placeholder={usd(projection.sellingCosts)}
           />
@@ -1185,9 +1186,9 @@ export default function IXISettlementApp({
           {t.addPrior}
         </button>
         <Field label={t.retained}>
-          <Input
+          <IXIMoneyInput
             value={retainedProceeds}
-            onChange={setRetainedProceeds}
+            onValueChange={setRetainedProceeds}
             inputMode="decimal"
           />
         </Field>
@@ -1308,9 +1309,9 @@ function MoneyRow({ t, row, onPatch, onRemove, labelField = false }) {
           />
         </Field>
         <Field label={t.amount}>
-          <Input
+          <IXIMoneyInput
             value={row.amount}
-            onChange={(value) => onPatch("amount", value)}
+            onValueChange={(value) => onPatch("amount", value)}
             inputMode="decimal"
           />
         </Field>
@@ -1439,23 +1440,23 @@ function CommissionRow({ t, row, calculated = {}, onPatch, onRemove }) {
           />
         </Field>
         <Field label={t.fixed}>
-          <Input
+          <IXIMoneyInput
             value={row.fixedAmount}
-            onChange={(value) => onPatch("fixedAmount", value)}
+            onValueChange={(value) => onPatch("fixedAmount", value)}
             inputMode="decimal"
           />
         </Field>
         <Field label={t.target}>
-          <Input
+          <IXIMoneyInput
             value={row.targetAmount}
-            onChange={(value) => onPatch("targetAmount", value)}
+            onValueChange={(value) => onPatch("targetAmount", value)}
             inputMode="decimal"
           />
         </Field>
         <Field label={t.adjustment}>
-          <Input
+          <IXIMoneyInput allowNegative
             value={row.adjustmentAmount}
-            onChange={(value) => onPatch("adjustmentAmount", value)}
+            onValueChange={(value) => onPatch("adjustmentAmount", value)}
             inputMode="decimal"
           />
         </Field>
@@ -1542,9 +1543,9 @@ function OwnerRow({ t, row, owners, label, onPatch, onRemove }) {
           </select>
         </Field>
         <Field label={label}>
-          <Input
+          <IXIMoneyInput
             value={row.amount}
-            onChange={(value) => onPatch("amount", value)}
+            onValueChange={(value) => onPatch("amount", value)}
             inputMode="decimal"
           />
         </Field>
@@ -1578,9 +1579,9 @@ function PaymentPanel({ t, recipients, values, setters, busy, onPay }) {
       </Field>
       <div className="stl-grid">
         <Field label={t.amount}>
-          <Input
+          <IXIMoneyInput
             value={values.payAmount}
-            onChange={setters.setPayAmount}
+            onValueChange={setters.setPayAmount}
             inputMode="decimal"
           />
         </Field>

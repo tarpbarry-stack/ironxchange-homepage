@@ -54,8 +54,8 @@ test("TRANSACT locale is persisted and Freight supports en-US and es-MX", async 
   assert.match(freight, /useIXITransactLocale/u);
   assert.match(freight, /className="fr-lang"/u);
   assert.match(freight, /setLocale\(IXI_TRANSACT_LOCALES\.SPANISH_MEXICO\)/u);
-  assert.match(freight, /t\("EDIT ORDER"\)/u);
-  assert.match(freight, /errorMessage\(err,"FREIGHT ACTION FAILED\."\)/u);
+  assert.match(freight, /t\("EDIT REQUEST"\)/u);
+  assert.match(freight, /role="alert"/u);
 
   const spanishKeys = new Set(
     [...locale.matchAll(/^\s*"([^"]+)":/gmu)].map(match => match[1]),

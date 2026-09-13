@@ -58,8 +58,8 @@ function assertSettlementReady(payable = {}, input = {}, kind = "Payment") {
     clean(payable.approvalStatus).toLowerCase() !== "approved"
   )
     throw new Error("Bill must be approved before settlement.");
-  if (amount > num(payable.balance) + 0.005)
-    throw new Error(`${kind} cannot exceed the open A/P balance.`);
+  if (amount > (kind === "Vendor credit" ? num(payable.originalAmount) - num(payable.credited) : num(payable.balance)) + 0.005)
+    throw new Error(kind === "Vendor credit" ? "Credits cannot exceed the original Bill amount." : "Payment cannot exceed the open A/P balance.");
   return amount;
 }
 export async function saveIXIPayablesControl({

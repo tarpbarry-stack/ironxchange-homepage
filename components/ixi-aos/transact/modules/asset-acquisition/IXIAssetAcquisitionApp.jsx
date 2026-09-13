@@ -1,3 +1,4 @@
+import IXIMoneyInput from "../../IXIMoneyInput";
 import { useEffect, useMemo, useState } from "react";
 import {
   createIXIAssetAcquisition,
@@ -949,9 +950,9 @@ export default function IXIAssetAcquisitionApp({
             </Field>
             <div className="acq-grid2">
               <Field label={tx("REVISED VALUE")}>
-                <Input
+                <IXIMoneyInput
                   value={amendmentValue}
-                  onChange={setAmendmentValue}
+                  onValueChange={setAmendmentValue}
                   inputMode="decimal"
                 />
               </Field>
@@ -998,9 +999,9 @@ export default function IXIAssetAcquisitionApp({
                 />
               </Field>
               <Field label={tx("AUTHORITATIVE PACKAGE TOTAL")}>
-                <Input
+                <IXIMoneyInput
                   value={packageTotal}
-                  onChange={setPackageTotal}
+                  onValueChange={setPackageTotal}
                   inputMode="decimal"
                 />
               </Field>
@@ -1046,9 +1047,9 @@ export default function IXIAssetAcquisitionApp({
                     />
                   </Field>
                   <Field label={tx("ALLOCATION")}>
-                    <Input
+                    <IXIMoneyInput
                       value={allocation.amount}
-                      onChange={(value) =>
+                      onValueChange={(value) =>
                         updateAllocation(index, "amount", value)
                       }
                       inputMode="decimal"
@@ -1209,9 +1210,9 @@ export default function IXIAssetAcquisitionApp({
             ) : null}
             <div className="acq-grid2">
               <Field label={t.eventAmount}>
-                <Input
+                <IXIMoneyInput
                   value={eventAmount}
-                  onChange={setEventAmount}
+                  onValueChange={setEventAmount}
                   inputMode="decimal"
                 />
               </Field>
@@ -1358,60 +1359,60 @@ export default function IXIAssetAcquisitionApp({
       </Field>
       <div className="acq-section">{tx("PURCHASE ECONOMICS")}</div>
       <Field label={t.price}>
-        <Input
+        <IXIMoneyInput
           value={purchasePrice}
-          onChange={setPurchasePrice}
+          onValueChange={setPurchasePrice}
           inputMode="decimal"
         />
       </Field>
       <div className="acq-grid2">
         <Field label={t.premium}>
-          <Input
+          <IXIMoneyInput
             value={buyerPremium}
-            onChange={setBuyerPremium}
+            onValueChange={setBuyerPremium}
             inputMode="decimal"
           />
         </Field>
         <Field label={tx("AUCTION / DOCUMENT FEES")}>
-          <Input
+          <IXIMoneyInput
             value={auctionDocumentFees}
-            onChange={setAuctionDocumentFees}
+            onValueChange={setAuctionDocumentFees}
             inputMode="decimal"
           />
         </Field>
         <Field label={t.tax}>
-          <Input value={tax} onChange={setTax} inputMode="decimal" />
+          <IXIMoneyInput value={tax} onValueChange={setTax} inputMode="decimal" />
         </Field>
         <Field label={t.titleFees}>
-          <Input
+          <IXIMoneyInput
             value={titleFees}
-            onChange={setTitleFees}
+            onValueChange={setTitleFees}
             inputMode="decimal"
           />
         </Field>
         <Field label={t.broker}>
-          <Input
+          <IXIMoneyInput
             value={brokerFees}
-            onChange={setBrokerFees}
+            onValueChange={setBrokerFees}
             inputMode="decimal"
           />
         </Field>
       </div>
       <Field label={t.otherFees}>
-        <Input value={otherFees} onChange={setOtherFees} inputMode="decimal" />
+        <IXIMoneyInput value={otherFees} onValueChange={setOtherFees} inputMode="decimal" />
       </Field>
       <div className="acq-grid2">
         <Field label={tx("TRADE ALLOWANCE")}>
-          <Input
+          <IXIMoneyInput
             value={tradeAllowance}
-            onChange={setTradeAllowance}
+            onValueChange={setTradeAllowance}
             inputMode="decimal"
           />
         </Field>
         <Field label={tx("SELLER CREDIT / DISCOUNT")}>
-          <Input
+          <IXIMoneyInput
             value={sellerCredits}
-            onChange={setSellerCredits}
+            onValueChange={setSellerCredits}
             inputMode="decimal"
           />
         </Field>
@@ -1470,9 +1471,9 @@ export default function IXIAssetAcquisitionApp({
           </div>
           <div className="acq-grid2">
             <Field label={t.capital}>
-              <Input
+              <IXIMoneyInput
                 value={owner.initialContribution}
-                onChange={(v) => updateOwner(i, "initialContribution", v)}
+                onValueChange={(v) => updateOwner(i, "initialContribution", v)}
                 inputMode="decimal"
               />
             </Field>
@@ -1538,9 +1539,9 @@ export default function IXIAssetAcquisitionApp({
               />
             </Field>
             <Field label={t.amount}>
-              <Input
+              <IXIMoneyInput
                 value={payment.amount}
-                onChange={(v) => updatePayment(i, "amount", v)}
+                onValueChange={(v) => updatePayment(i, "amount", v)}
                 inputMode="decimal"
               />
             </Field>
