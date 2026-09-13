@@ -162,6 +162,29 @@ function getSerialNumber(record = {}) {
   );
 }
 
+function getStockNumber(record = {}) {
+  const publicData = getPublicData(record);
+  const fields = record?.fields || {};
+
+  return firstText(
+    record?.stockNumber,
+    record?.stock,
+    record?.inventoryId,
+    record?.customerAssetId,
+    record?.assetId,
+    fields?.stockNumber,
+    fields?.stock,
+    fields?.inventoryId,
+    fields?.customerAssetId,
+    fields?.assetId,
+    publicData?.stockNumber,
+    publicData?.stock,
+    publicData?.inventoryId,
+    publicData?.customerAssetId,
+    publicData?.assetId
+  );
+}
+
 function getAssetId(record = {}) {
   const publicData = getPublicData(record);
   const fields = record?.fields || {};
@@ -349,6 +372,7 @@ function buildEntityContext(entity = {}) {
     value: 0,
     imageUrl: getImageUrl(entity),
     serialNumber: "",
+    stockNumber: "",
     assetId: firstText(entity?.customerId, entity?.accountId),
     source: entity,
     updatedAt: getDateValue(entity)
@@ -382,6 +406,7 @@ function buildMosContext(object = {}) {
     value: getMoneyValue(object),
     imageUrl: getImageUrl(object),
     serialNumber: getSerialNumber(object),
+    stockNumber: getStockNumber(object),
     assetId: getAssetId(object),
     source: object,
     updatedAt: getDateValue(object)
@@ -411,6 +436,7 @@ function buildMachineContext(listing = {}) {
     value: getMoneyValue(listing),
     imageUrl: getImageUrl(listing),
     serialNumber: getSerialNumber(listing),
+    stockNumber: getStockNumber(listing),
     assetId: getAssetId(listing),
     source: listing,
     updatedAt: getDateValue(listing)
@@ -564,6 +590,7 @@ export function buildIXIAosCommandContexts({
         passportId: canonical.passportId || machine.passportId,
         imageUrl: machine.imageUrl || canonical.imageUrl,
         serialNumber: canonical.serialNumber || machine.serialNumber,
+        stockNumber: canonical.stockNumber || machine.stockNumber,
         assetId: canonical.assetId || machine.assetId,
         source: { canonical: canonical.source, presentation: machine.source }
       });
