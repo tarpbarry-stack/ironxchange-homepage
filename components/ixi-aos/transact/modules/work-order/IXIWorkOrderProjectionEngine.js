@@ -145,7 +145,7 @@ export function getIXIWorkOrderRelatedRecords(workOrder = {}, financialRecords =
 
 export function getIXIWorkOrderCostProjection(workOrder = {}, financialRecords = []) {
   const related = getIXIWorkOrderRelatedRecords(workOrder, financialRecords);
-  const actualRows = related.filter(row => !["purchasing"].includes(row.category));
+  const actualRows = related.filter(row => !["purchasing"].includes(row.category) && !["payment", "payables-control", "collection", "journal-entry"].includes(row.type));
   const committedRows = related.filter(row => row.category === "purchasing");
   const sum = rows => money(rows.reduce((total, row) => total + row.amount, 0));
   const derived = {

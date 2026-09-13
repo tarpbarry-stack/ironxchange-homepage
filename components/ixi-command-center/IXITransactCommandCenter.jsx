@@ -1,3 +1,6 @@
+import IXIPaymentsPanel from "../ixi-aos/transact/payments/IXIPaymentsPanel";
+import { paymentSummary, paymentDocument } from "../ixi-aos/transact/payments/IXIPaymentModel";
+import { createIXITransactContext } from "../ixi-aos/transact/IXITransactContext";
 import { useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 
@@ -292,25 +295,26 @@ function ContextIdentityCard({ context, interactive = false, onActivate }) {
   );
 }
 
-function RecordTable({ records, currency, emptyMessage, onSelect }) {
+function RecordTable({ records, currency, emptyMessage, onSelect, paymentRecords = [], onMarkPaid }) {
   if (!records.length) {
     return <div className={styles.emptyState}><strong>NO RECORDS RETURNED</strong><span>{emptyMessage}</span></div>;
   }
   return (
     <div className={styles.tableWrap}>
       <table className={styles.dataTable}>
-        <thead><tr><th>RECORD</th><th>PARTY / SOURCE</th><th>STATUS</th><th>DUE / DATE</th><th>AMOUNT</th><th aria-label="Open record" /></tr></thead>
+        <thead><tr><th>RECORD</th><th>PARTY / SOURCE</th><th>STATUS</th><th>DUE / DATE</th><th>AMOUNT</th><th>PAYMENT</th><th aria-label="Open record" /></tr></thead>
         <tbody>
-          {records.slice(0, 50).map(record => (
+          {records.slice(0, 50).map(record => { const paid = paymentSummary(paymentRecords.find(item => paymentDocument(item).financialDocumentId === record.id) || record.raw || record.document, paymentRecords); return (
             <tr key={record.id}>
               <td><strong>{record.title}</strong><small>{record.id}</small></td>
               <td>{record.party}</td>
               <td><StatusBadge value={record.status} /></td>
               <td>{record.date}</td>
               <td className={styles.money}>{record.amount === null ? "—" : formatIXIMoney(record.amount, currency)}</td>
-              <td><button type="button" className={styles.rowAction} onClick={() => onSelect?.(record)}>VIEW</button></td>
+              <td>{paid ? <><StatusBadge value={paid.status} /><small>{formatIXIMoney(paid.paid, paid.currency)} PAID · {formatIXIMoney(paid.balance, paid.currency)} DUE</small></> : "—"}</td>
+              <td>{paid && paid.active ? <button type="button" className={styles.rowAction} onClick={() => onMarkPaid?.(paid.id)}>{paid.balance > 0 ? "MARK PAID" : "PAYMENT DETAILS"}</button> : null}<button type="button" className={styles.rowAction} onClick={() => onSelect?.(record)}>VIEW</button></td>
             </tr>
-          ))}
+          ); })}
         </tbody>
       </table>
     </div>
@@ -352,6 +356,7 @@ export default function IXITransactCommandCenter() {
   const [error, setError] = useState("");
   const [financialError, setFinancialError] = useState("");
   const [passportRecords, setPassportRecords] = useState([]);
+  const [paymentSelection, setPaymentSelection] = useState(null);
   const [passportRecordsLoading, setPassportRecordsLoading] = useState(false);
   const [passportRecordsError, setPassportRecordsError] = useState("");
   const contextHydrationStarted = useRef(false);
@@ -554,6 +559,7 @@ export default function IXITransactCommandCenter() {
   }, [contexts, query]);
 
   function selectContext(context) {
+    setPaymentSelection(null);
     setSelectedKind(context.kind);
     setSelectedId(context.id);
     setQuery("");
@@ -653,7 +659,14 @@ export default function IXITransactCommandCenter() {
     );
   }
 
+  function openPaymentRecord(id = "") { setPaymentSelection({ id, contextId: selectedContext?.id }); }
+
   function renderWorkspace() {
+    if (paymentSelection?.contextId === selectedContext?.id) {
+      const sourceObject = buildTransactObject(selectedContext, passportRecords);
+      const paymentContext = createIXITransactContext({ object: sourceObject, actor: accessData.actor || {}, entity: environment?.entity || {}, permissions });
+      return <section className={styles.workPanel}><IXIPaymentsPanel key={`${selectedContext.id}:${paymentSelection.id}`} context={paymentContext} object={sourceObject} sourceIds={paymentSelection.id ? [paymentSelection.id] : null} initialOpenId={paymentSelection.id} onClose={() => setPaymentSelection(null)} onChanged={() => setPassportRefreshKey(value => value + 1)} /></section>;
+    }
     if (activeWorkspace === "record-view" && selectedRecord?.document?.financialDocumentId) {
       return <IXITransactRecordWorkspace
         key={`${selectedContext?.id}:${selectedRecord.document.financialDocumentId}`}
@@ -682,7 +695,7 @@ export default function IXITransactCommandCenter() {
             records={normalizedPassportRecords}
             currency={currency}
             emptyMessage={passportRecordsLoading ? "Loading lifetime Passport records…" : passportRecordsError || "No governed financial records were returned for this Passport."}
-            onSelect={openTransactionRecord}
+            onSelect={openTransactionRecord} paymentRecords={passportRecords} onMarkPaid={openPaymentRecord}
           />
         </section>
       );
@@ -713,7 +726,7 @@ export default function IXITransactCommandCenter() {
       return (
         <section className={styles.workPanel}>
           <WorkspaceHeader eyebrow={activeWorkspace === "work" ? "OPERATING CONTEXT + FINANCIAL EVIDENCE" : "LIFETIME PASSPORT HISTORY"} title={activeWorkspace === "work" ? "WORK & ASSET STORY" : "RECORD CHRONOLOGY"} detail={activeWorkspace === "work" ? "The same canonical business object, connected to its work, people, locations and financial evidence." : "The complete authorized Passport record history remains visible independently of the selected accounting period."} count={normalizedPassportRecords.length + story.length} actionLabel={activeWorkspace === "work" ? "RETURN TO AOS" : "OPEN LEDGER"} href={activeWorkspace === "work" ? "/aos/work" : "/transact/ledger"} />
-          {normalizedPassportRecords.length || passportRecordsLoading || passportRecordsError ? <RecordTable records={normalizedPassportRecords} currency={currency} emptyMessage={passportRecordsLoading ? "Loading lifetime Passport records…" : passportRecordsError || "No governed financial records were returned for this Passport."} onSelect={openTransactionRecord} /> : null}
+          {normalizedPassportRecords.length || passportRecordsLoading || passportRecordsError ? <RecordTable records={normalizedPassportRecords} currency={currency} emptyMessage={passportRecordsLoading ? "Loading lifetime Passport records…" : passportRecordsError || "No governed financial records were returned for this Passport."} onSelect={openTransactionRecord} paymentRecords={passportRecords} onMarkPaid={openPaymentRecord} /> : null}
           {activeWorkspace === "work" ? <div className={styles.storyList}>{story.length ? story.map(item => <div className={styles.storyRow} key={item.id}><span className={styles.storyGlyph}>{contextLabel(item.kind).slice(0, 2)}</span><div><strong>{item.title}</strong><span>{item.detail}</span></div><time>{relativeTime(item.updatedAt)}</time></div>) : <div className={styles.emptyState}><strong>NO OPERATING CHRONOLOGY RETURNED</strong><span>No related AOS events were returned for this canonical context.</span></div>}</div> : null}
         </section>
       );
@@ -723,7 +736,7 @@ export default function IXITransactCommandCenter() {
       const reports = projection?.reports && typeof projection.reports === "object"
         ? Object.entries(projection.reports).map(([key, value]) => ({ id: `report-${key}`, title: clean(value?.title || value?.label || key.replace(/[-_]/g, " ")).toUpperCase(), party: clean(value?.description || "Authoritative financial projection"), date: displayTimestamp(value?.generatedAt || projection?.generatedAt), status: clean(value?.status || "AVAILABLE"), amount: null, raw: value }))
         : [];
-      return <section className={styles.workPanel}><WorkspaceHeader eyebrow="READ-ONLY PROJECTIONS" title="REPORTING & AUDIT" detail="Every report remains a view of canonical accounting truth and must retain drill-down lineage." count={reports.length} /><RecordTable records={reports} currency={currency} emptyMessage="No server-returned reports are available for this scope." onSelect={openTransactionRecord} /></section>;
+      return <section className={styles.workPanel}><WorkspaceHeader eyebrow="READ-ONLY PROJECTIONS" title="REPORTING & AUDIT" detail="Every report remains a view of canonical accounting truth and must retain drill-down lineage." count={reports.length} /><RecordTable records={reports} currency={currency} emptyMessage="No server-returned reports are available for this scope." onSelect={openTransactionRecord} paymentRecords={passportRecords} onMarkPaid={openPaymentRecord} /></section>;
     }
 
     const labels = {
@@ -736,7 +749,7 @@ export default function IXITransactCommandCenter() {
     };
     const [eyebrow, title, detail] = labels[activeWorkspace] || labels.gl;
     const records = recordsByWorkspace[activeWorkspace] || [];
-    return <section className={styles.workPanel}><WorkspaceHeader eyebrow={eyebrow} title={title} detail={`${detail} Passport history is not hidden by the reporting-period selector.`} count={records.length} /><RecordTable records={records} currency={currency} emptyMessage={passportRecordsLoading ? "Loading authoritative Passport records…" : passportRecordsError || "No server-returned records are available for this scope."} onSelect={openTransactionRecord} /></section>;
+    return <section className={styles.workPanel}><WorkspaceHeader eyebrow={eyebrow} title={title} detail={`${detail} Passport history is not hidden by the reporting-period selector.`} count={records.length} /><RecordTable records={records} currency={currency} emptyMessage={passportRecordsLoading ? "Loading authoritative Passport records…" : passportRecordsError || "No server-returned records are available for this scope."} onSelect={openTransactionRecord} paymentRecords={passportRecords} onMarkPaid={openPaymentRecord} /></section>;
   }
 
   const selectedDetail = selectedRecord || selectedQueueItem;
@@ -773,6 +786,7 @@ export default function IXITransactCommandCenter() {
           <input id="ixi-transact-global-search" className={styles.search} type="search" value={query} onChange={event => setQuery(event.target.value)} placeholder="Search object, Passport, vendor, amount or document…" aria-label="Search TRAN$ACT" aria-controls="ixi-transact-search-results" aria-expanded={searchResults.length > 0} onKeyDown={event => { if (event.key === "Escape") setQuery(""); }} />
           {searchResults.length ? <div className={styles.searchResults} id="ixi-transact-search-results" role="listbox">{searchResults.map(result => <button type="button" role="option" aria-selected="false" key={result.id} onClick={() => selectContext(result)}><span><strong>{result.title}</strong><small>{result.passportId || result.sourceId}</small></span><b>{contextLabel(result.kind)}</b></button>)}</div> : null}
         </div>
+        <button type="button" className={styles.newAction} onClick={() => openPaymentRecord()} disabled={!selectedContext}>PAYMENTS · MARK PAID</button>
         <a className={styles.newAction} href="/transact/ledger">+ NEW</a>
         <a className={styles.aosAction} href="/aos/work">RETURN TO AOS</a>
       </header>
@@ -780,7 +794,7 @@ export default function IXITransactCommandCenter() {
       <div className={styles.desktop}>
         <aside className={styles.navigation}>
           <div className={styles.operator}><span>WORKING AS</span><strong>{operatorLabel(accessData)}</strong><small>{permissions.length} GRANTS · {denied.length} DENIES</small></div>
-          <nav aria-label="TRAN$ACT workspaces">{WORKSPACES.map(([id, label, number]) => <button type="button" key={id} data-active={activeWorkspace === id} onClick={() => { setActiveWorkspace(id); setActiveModuleId(""); setSelectedRecord(null); }}><span>{number}</span><strong>{label}</strong>{id === "today" && queue.length ? <b>{queue.length}</b> : null}</button>)}</nav>
+          <nav aria-label="TRAN$ACT workspaces">{WORKSPACES.map(([id, label, number]) => <button type="button" key={id} data-active={activeWorkspace === id} onClick={() => { setPaymentSelection(null); setActiveWorkspace(id); setActiveModuleId(""); setSelectedRecord(null); }}><span>{number}</span><strong>{label}</strong>{id === "today" && queue.length ? <b>{queue.length}</b> : null}</button>)}</nav>
           <section className={styles.objectDirectory} aria-label="Governed AOS Object directory">
             <header>
               <strong className={styles.objectDirectoryCount} aria-label={`${objectDirectory.length} objects`}>{objectDirectory.length}</strong>

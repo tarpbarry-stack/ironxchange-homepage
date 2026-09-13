@@ -21,6 +21,7 @@ function normalizeCurrency(value) {
 export const IXI_EXPENSE_SCHEMA = "ixi-expense-v3";
 
 export const IXI_EXPENSE_PAYMENT_METHODS = Object.freeze([
+  "unpaid",
   "company-card",
   "company-cash",
   "my-money",

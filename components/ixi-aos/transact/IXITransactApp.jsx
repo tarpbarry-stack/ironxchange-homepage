@@ -1,3 +1,4 @@
+import IXIPaymentsPanel from "./payments/IXIPaymentsPanel";
 import { withIXIBillBalance } from "./modules/bill/IXIBillBalance";
 import { useEffect, useMemo, useRef, useState } from "react";
 
@@ -151,6 +152,7 @@ export default function IXITransactApp({
   workspaceEmbedded = false,
 }) {
   const dialogRef = useRef(null);
+  const [paymentsOpen, setPaymentsOpen] = useState(false);
   const [worksheetOpen, setWorksheetOpen] = useState(false);
   const [locale, setLocale] = useState(IXI_TRANSACT_LOCALES.ENGLISH);
 
@@ -653,6 +655,7 @@ export default function IXITransactApp({
   useEffect(() => {
     setModuleId(clean(initialModuleId));
   }, [initialModuleId]);
+  useEffect(() => { setPaymentsOpen(false); }, [moduleId, context.primary?.passportId]);
   useEffect(() => {
     const documentId = clean(selectedFinancialDocumentId);
     if (documentId && SALES_MODULE_IDS.has(clean(initialModuleId))) {
@@ -706,6 +709,10 @@ export default function IXITransactApp({
   const back = () => {
     if (worksheetOpen) {
       closeWorksheet();
+      return;
+    }
+    if (paymentsOpen) {
+      setPaymentsOpen(false);
       return;
     }
     if (workspaceEmbedded) {
@@ -989,6 +996,7 @@ export default function IXITransactApp({
         object={object}
         workOrder={workOrderSnapshot}
         initialRecord={expenseSnapshot}
+        onFinancialRecordsChange={onFinancialRecordsChange}
         selectedFinancialDocumentId={selectedFinancialDocumentId}
         expensePolicy={
           entity?.expensePolicy ||
@@ -1994,7 +2002,10 @@ export default function IXITransactApp({
             className={`tx-body ${moduleId === "freight" ? "tx-body-edge-to-edge" : "tx-body-safe-area"}`}
             data-ixi-transact-module={moduleId || "home"}
           >
-            {body}
+            {paymentsOpen ? <IXIPaymentsPanel context={context} object={object} language={locale.startsWith("es") ? "es" : "en"} onChanged={onFinancialRecordsChange} onClose={() => setPaymentsOpen(false)} /> : <>
+              <button type="button" className="tx-payments-access" onClick={() => setPaymentsOpen(true)}>{locale.startsWith("es") ? "PAGOS · MARCAR PAGADO" : "PAYMENTS · MARK PAID"}</button>
+              {body}
+            </>}
           </main>
           {!worksheetOpen ? (
             !workspaceEmbedded ? <IXIMachineRail
@@ -2012,6 +2023,7 @@ export default function IXITransactApp({
             /> : null
           ) : null}
           {!active ? <IXITransactHomeTypography /> : null}
+          <style jsx>{`.tx-payments-access { display:block; width:100%; min-height:36px; padding:8px 10px; margin:0 0 8px; border:1px solid #997f16; border-radius:5px; color:#ffdf38; background:#19221a; font:700 12px Inter,Arial,sans-serif; cursor:pointer; }`}</style>
           <IXITransactStyles />
           <IXISalesDealStyles />
         </div>

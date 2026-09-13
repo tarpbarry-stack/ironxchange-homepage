@@ -249,9 +249,9 @@ export default function IXIBillApp({
     setError("");
     try {
       let paymentResponse = null;
-      if (action === "record-payment") {
-        const persisted = await createIXIBillPayment({ object: originObject, context, record: selected, input: payload, metadata: { source: "ixi-transact-bill-card" } });
-        paymentResponse = persisted.response;
+      if (action === "record-payment" || action === "payments-changed") {
+        const persisted = action === "record-payment" ? await createIXIBillPayment({ object: originObject, context, record: selected, input: payload, metadata: { source: "ixi-transact-bill-card" } }) : null;
+        paymentResponse = persisted?.response;
         const documents = await loadIXIAosPassportFinancialDocuments({ passportId: context.primary?.passportId });
         const fresh = documents.map(hydrateIXIBillRecord).filter(Boolean).map(record => withIXIBillBalance(record, documents));
         setRecords(fresh);

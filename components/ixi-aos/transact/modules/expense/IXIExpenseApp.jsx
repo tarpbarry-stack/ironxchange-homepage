@@ -1,3 +1,4 @@
+import IXIPaymentsPanel from "../../payments/IXIPaymentsPanel";
 import IXIMoneyInput from "../../IXIMoneyInput";
 import {
   useEffect,
@@ -211,6 +212,7 @@ export default function IXIExpenseApp({
   initialRecord = null,
   selectedFinancialDocumentId = "",
   onCancel = null,
+  onFinancialRecordsChange = null,
   onSave = null,
   language = "",
   onLanguageChange = null,
@@ -225,7 +227,7 @@ export default function IXIExpenseApp({
   const [category, setCategory] = useState("");
   const [costPurpose, setCostPurpose] = useState("other");
   const [expenseDate, setExpenseDate] = useState(today());
-  const [paymentMethod, setPaymentMethod] = useState("company-card");
+  const [paymentMethod, setPaymentMethod] = useState("unpaid");
   const [referenceNumber, setReferenceNumber] = useState("");
   const [notes, setNotes] = useState("");
   const [receipt, setReceipt] = useState(null);
@@ -406,7 +408,7 @@ export default function IXIExpenseApp({
     setCategory("");
     setCostPurpose("other");
     setExpenseDate(today());
-    setPaymentMethod("company-card");
+    setPaymentMethod("unpaid");
     setReferenceNumber("");
     setNotes("");
     setReceipt(null);
@@ -587,6 +589,7 @@ export default function IXIExpenseApp({
     : clean(policy?.label) || t.receiptPolicy;
 
   const paymentLabel = {
+    "unpaid": lang === "es" ? "SIN PAGAR" : "UNPAID",
     "company-card": t.companyCard,
     "company-cash": t.companyCash,
     "my-money": t.myMoney,
@@ -627,6 +630,7 @@ export default function IXIExpenseApp({
           <div><small>{t.expense}</small><strong>{record.identity?.number || record.identity?.expenseId}</strong></div>
           <span className={locked ? "locked" : "open"}>{locked ? t.locked : t.editable}</span>
         </div>
+        <IXIPaymentsPanel context={context} object={object} sourceIds={[record.financialBinding?.financialDocumentId || record.identity?.expenseId]} language={lang} onChanged={onFinancialRecordsChange} />
         <div className="ex-record-amount"><small>{t.amount}</small><strong>${Number(details.amount || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong></div>
         <div className="ex-record-grid">
           <div><small>{t.vendor}</small><b>{details.vendor || "—"}</b></div>
@@ -634,7 +638,6 @@ export default function IXIExpenseApp({
           <div className="wide"><small>{t.bought}</small><b>{details.description || "—"}</b></div>
           <div><small>{t.category}</small><b>{categoryEntry?.[lang === "es" ? "labelEs" : "label"] || details.category || "—"}</b></div>
           <div><small>{t.costPurpose}</small><b>{purposeEntry?.[lang === "es" ? "labelEs" : "label"] || details.costPurpose || "—"}</b></div>
-          <div><small>{t.paid}</small><b>{paymentLabel}</b></div>
           <div><small>{t.reference}</small><b>{details.referenceNumber || "—"}</b></div>
           <div><small>IXI PASSPORT</small><b>{record.context?.primaryPassportId || "—"}</b></div>
           <div><small>{t.workOrder}</small><b>{record.context?.workOrderNumber || "—"}</b></div>
@@ -722,6 +725,7 @@ export default function IXIExpenseApp({
         <div>
           <label>{t.paid} <em>*</em></label>
           <div className={`ex-paid ${errors.paymentMethod ? "bad" : ""}`}>
+            <button className={paymentMethod === "unpaid" ? "on" : ""} onClick={() => setPaymentMethod("unpaid")} disabled={saving}>{lang === "es" ? "SIN PAGAR" : "UNPAID"}</button>
             <button className={paymentMethod === "company-card" ? "on" : ""} onClick={() => setPaymentMethod("company-card")} disabled={saving}>{t.companyCard}</button>
             <button className={paymentMethod === "company-cash" ? "on" : ""} onClick={() => setPaymentMethod("company-cash")} disabled={saving}>{t.companyCash}</button>
             <button className={paymentMethod === "my-money" ? "on" : ""} onClick={() => setPaymentMethod("my-money")} disabled={saving}>{t.myMoney}</button>
