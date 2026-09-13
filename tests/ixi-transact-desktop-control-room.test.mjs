@@ -79,8 +79,11 @@ test("Object console is History-first and reuses the governed TRAN$ACT app bus",
   assert.doesNotMatch(source, /<span>INDEX<\/span>/u);
   assert.match(source, /<b>SN<\/b><span>\{item\.serialNumber \|\| "NOT RECORDED"\}<\/span>/u);
   assert.match(source, /<b>ID<\/b><span>\{item\.stockNumber \|\| item\.assetId \|\| item\.passportId \|\| "NOT RECORDED"\}<\/span>/u);
-  assert.match(source, /className=\{styles\.headerIdentity\}[\s\S]*selectedContext\.serialNumber[\s\S]*selectedContext\.stockNumber[\s\S]*selectedContext\.passportId[\s\S]*selectedContext\.sourceId/u);
-  assert.match(source, /SERIAL NUMBER[\s\S]*context\.serialNumber[\s\S]*STOCK NUMBER[\s\S]*context\.stockNumber[\s\S]*PASSPORT NUMBER[\s\S]*context\.passportId[\s\S]*OBJECT ID[\s\S]*context\.sourceId/u);
+  assert.match(source, /function ContextIdentityFields\(\{ context, compact = false \}\)[\s\S]*context\?\.kind !== "company"/u);
+  assert.match(source, /includeObjectIdentity \? <>[\s\S]*SERIAL NUMBER[\s\S]*context\.serialNumber[\s\S]*STOCK NUMBER[\s\S]*context\.stockNumber[\s\S]*<\/> : null/u);
+  assert.match(source, /PASSPORT NUMBER[\s\S]*context\.passportId/u);
+  assert.match(source, /includeObjectIdentity \? <div><dt>OBJECT ID<\/dt><dd>\{context\.sourceId/u);
+  assert.match(source, /className=\{styles\.headerIdentity\}><ContextIdentityFields context=\{selectedContext\} compact \/>/u);
   assert.doesNotMatch(source, /shortIdentity/u);
   assert.match(source, /setActiveWorkspace\(context\.kind === "company" \? "today" : "object-history"\)/u);
   assert.match(source, /title="TRANSACTION HISTORY"/u);
