@@ -1,3 +1,4 @@
+import IXIPaymentsPanel from "../../payments/IXIPaymentsPanel";
 import { useEffect, useMemo, useState } from "react";
 import { amendIXIFreightOrder, createIXIFreightOrder, loadIXIFreightEvents, loadIXIFreightOrders, loadIXIFreightOrder, loadIXIFreightPeople, loadIXIFreightAlerts } from "./IXIFreightClient";
 import { createIXIFreightOrderInput, freightVariance, IXI_FREIGHT_PURPOSES, validateIXIFreightOrderInput, invoiceCharges } from "./IXIFreightContract";
@@ -129,7 +130,7 @@ export default function IXIFreightApp({ context = {}, object = {}, workflowInten
         // A canonical Payment is the only cash write. The displayed balance is
         // derived from it, so a follow-up Bill patch cannot strand a payment.
         await createIXIBillPayment({ object, context, record: bill, input: payload });
-      } else {
+      } else if (action !== "payments-changed") {
         const revised = applyIXIBillAction({ record: bill, action, payload, actor: context.actor, authority });
         await updateIXIBill({ record: revised, action });
       }
@@ -187,7 +188,7 @@ export default function IXIFreightApp({ context = {}, object = {}, workflowInten
   </>; }
   function billsView() {
     const variance = freightVariance(order);
-    return <><div className="fr-kpis">{[["EXPECTED", variance.hasExpected ? money(variance.expected) : t("NOT SET")], ["NET FREIGHT COST", money(variance.actual)], ["PAID", money(order.financial?.paidTotal)], ["OPEN PAYABLE", money(order.financial?.openPayableTotal)]].map(([title, value]) => <div className="fr-kpi" key={title}><span>{t(title)}</span><strong>{value}</strong></div>)}</div>
+    return <><IXIPaymentsPanel key={selectedId} context={context} object={object} sourceIds={billRecords.map(record => record.financialBinding.financialDocumentId)} language={locale.startsWith("es") ? "es" : "en"} onChanged={async () => { await refreshOrder(); await onFinancialRecordsChange?.(); }} /><div className="fr-kpis">{[["EXPECTED", variance.hasExpected ? money(variance.expected) : t("NOT SET")], ["NET FREIGHT COST", money(variance.actual)], ["PAID", money(order.financial?.paidTotal)], ["OPEN PAYABLE", money(order.financial?.openPayableTotal)]].map(([title, value]) => <div className="fr-kpi" key={title}><span>{t(title)}</span><strong>{value}</strong></div>)}</div>
       {order.financial?.carrierCreditTotal > 0 ? <div className="fr-note">{t("CARRIER CREDIT AVAILABLE")}: {money(order.financial.carrierCreditTotal)}. {t("A CREDIT IS NOT A CASH REFUND.")}</div> : null}
       {order.financial?.missingFinancialDocumentIds?.length ? <div className="fr-error" role="alert">{t("SOME LINKED FINANCIAL RECORDS COULD NOT BE RESOLVED. REVIEW BEFORE RECORDING PAYMENT.")}</div> : null}
       <div className="fr-section">{t("BILLS & CREDITS")}</div>

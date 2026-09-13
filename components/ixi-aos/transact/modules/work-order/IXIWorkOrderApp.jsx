@@ -1,3 +1,4 @@
+import IXIPaymentsPanel from "../../payments/IXIPaymentsPanel";
 import {
   useEffect,
   useMemo,
@@ -1437,6 +1438,7 @@ export default function IXIWorkOrderApp({
         {!performedDateLocked ? <button className="wo-edit" onClick={() => act("edit-work-order")}><EditIcon size={13} /></button> : null}
       </div>
 
+      <IXIPaymentsPanel context={context} object={context.primary} workOrder={workOrder} language={lang} />
       <div className="wo-tabs">
         <button className={activeTab === "work" ? "active" : ""} onClick={() => act("work")}>{t.work}</button>
         <button className={activeTab === "cost" ? "active" : ""} onClick={() => act("cost")}>{t.cost}</button>

@@ -1,3 +1,4 @@
+import IXIPaymentsPanel from "../../payments/IXIPaymentsPanel";
 import IXIMoneyInput from "../../IXIMoneyInput";
 import { useMemo, useState } from "react";
 import { buildIXIPayablesProjection } from "./IXIPayablesProjectionEngine";
@@ -281,6 +282,7 @@ export default function IXIPayablesApp({
             {t.back}
           </button>
         </div>
+        <IXIPaymentsPanel context={context} object={object} sourceIds={[selected.billId]} language={lang} onChanged={onFinancialRecordsChange} />
         <div className="ap-title">
           <strong>{selected.vendorLabel}</strong>
           <span>
@@ -545,13 +547,6 @@ export default function IXIPayablesApp({
         </div>
         {error ? <div className="ap-error">{error}</div> : null}
         <div className="ap-actions">
-          <button
-            className="ap-action primary"
-            disabled={busy || !policy.canPostPayment}
-            onClick={() => financialAction("payment")}
-          >
-            {t.pay}
-          </button>
           <button
             className="ap-action"
             disabled={busy || !policy.canApplyCredit}

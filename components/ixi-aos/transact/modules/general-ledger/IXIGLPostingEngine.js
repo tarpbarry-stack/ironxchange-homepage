@@ -177,6 +177,7 @@ function relatedInvoice(r = {}) {
 }
 function relatedBill(r = {}) {
   const s = source(r);
+  if (s.sourceFinancialDocumentId && ["bill", "supplier-invoice", "expense"].includes(clean(s.metadata?.sourceDocumentType || r.metadata?.sourceDocumentType))) return s.sourceFinancialDocumentId;
   return (
     clean(
       s.relatedBillId ||
@@ -344,7 +345,7 @@ export function classifyIXIFinancialDocument({
       ).toLowerCase(),
       credit = paidWith.includes("card")
         ? "2100"
-        : paidWith.includes("my-money") || paidWith.includes("employee")
+        : paidWith === "unpaid" || paidWith.includes("my-money") || paidWith.includes("employee")
           ? "2000"
           : cashAccount(record);
     lines = [
@@ -456,7 +457,7 @@ export function classifyIXIFinancialDocument({
           line(chart, "2000", "debit", amt, docNumber(record), dims),
           line(
             chart,
-            cashAccount(record),
+            clean(s.paymentMethod).toLowerCase() === "card" ? "2100" : cashAccount(record),
             "credit",
             amt,
             docNumber(record),

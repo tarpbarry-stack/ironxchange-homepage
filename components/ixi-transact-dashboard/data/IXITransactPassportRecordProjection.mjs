@@ -90,7 +90,7 @@ const WORKSPACE_TYPES = Object.freeze({
   purchasing: new Set(["purchase-order", "asset-acquisition"]),
   sales: new Set(["quote", "service-quote", "sales-order", "invoice", "collection", "settlement"]),
   ar: new Set(["invoice", "collection", "credit"]),
-  ap: new Set(["bill", "supplier-invoice", "payables-control", "credit"]),
+  ap: new Set(["bill", "supplier-invoice", "expense", "payables-control", "credit"]),
   treasury: new Set(["treasury-account", "treasury-reconciliation", "payment", "collection", "credit"]),
   gl: new Set(["journal-entry", "period-close", "period-reopen", "posting-rule"])
 });

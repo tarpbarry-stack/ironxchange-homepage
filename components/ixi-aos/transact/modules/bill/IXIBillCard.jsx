@@ -1,3 +1,4 @@
+import IXIPaymentsPanel from "../../payments/IXIPaymentsPanel";
 import IXIMoneyInput from "../../IXIMoneyInput";
 import { useMemo, useState } from "react";
 
@@ -153,14 +154,10 @@ export default function IXIBillCard({
   record = {}, context = {}, authority = {}, policy = undefined, language = "en", onLanguageChange = null,
   onAction = null, busy = false, error = "", onBack = null
 }) {
-  const [paymentOpen, setPaymentOpen] = useState(false);
-  const [scheduleOpen, setScheduleOpen] = useState(false);
   const [reasonAction, setReasonAction] = useState("");
   const [reason, setReason] = useState("");
   const [editOpen, setEditOpen] = useState(false);
   const [editDraft, setEditDraft] = useState({ vendorLabel: record?.bill?.vendorLabel || "", invoiceNumber: record?.identity?.invoiceNumber || "", description: record?.bill?.description || "", amount: record?.bill?.amount || "", invoiceDate: record?.bill?.invoiceDate || "", dueDate: record?.bill?.dueDate || "", category: record?.bill?.category || "", notes: record?.bill?.notes || "" });
-  const [paymentDraft, setPaymentDraft] = useState({ amount: record?.payment?.openBalance ?? record?.bill?.amount ?? "", method: "ACH", reference: "", paidDate: new Date().toISOString().slice(0, 10) });
-  const [scheduleDate, setScheduleDate] = useState(record?.bill?.dueDate || "");
   const t = COPY[language === "es" ? "es" : "en"];
   const actions = useMemo(() => getIXIBillAvailableActions({ record, actor: context.actor || {}, authority, policy }), [record, context.actor, authority, policy]);
   const varianceRequirement = useMemo(() => getIXIBillVarianceRequirement(record, policy), [record, policy]);
@@ -189,6 +186,7 @@ export default function IXIBillCard({
       </div>
 
       <div className="bill-scroll">
+        <IXIPaymentsPanel key={record.financialBinding?.financialDocumentId} context={context} object={context.primary} sourceIds={[record.financialBinding?.financialDocumentId || record.identity?.billDocumentId]} language={language} onChanged={() => act("payments-changed")} />
         <section className="identity-grid">
           <div className="wide"><small>{t.vendor}</small><strong>{record?.bill?.vendorLabel || "—"}</strong></div>
           <div><small>{t.amount}</small><strong className="amount">{money(record?.bill?.amount)}</strong></div>
@@ -232,18 +230,6 @@ export default function IXIBillCard({
           ) : null}
         </section>
 
-        <section className="bill-section">
-          <h3>{t.payment}</h3>
-          <div className="payment-grid"><div><small>{t.paymentStatus}</small><strong className={paymentStatus === "paid" ? "green" : "yellow"}>{statusLabel(paymentStatus, t)}</strong></div><div><small>{t.method}</small><strong>{record?.payment?.method || "—"}</strong></div><div><small>{t.scheduledDate}</small><strong>{localeDate(record?.payment?.scheduledDate, language)}</strong></div><div><small>{t.paidDate}</small><strong>{localeDate(record?.payment?.paidDate, language)}</strong></div><div><small>{t.amountPaid}</small><strong>{money(record?.payment?.amountPaid)}</strong></div></div>
-          {(record.status === "approved" || record?.approval?.status === "approved") && paymentStatus !== "paid" ? (
-            <div className="payment-actions">
-              {actions.has("schedule-payment") ? <button onClick={() => setScheduleOpen(value => !value)}>▣ {t.schedule}</button> : null}
-              {actions.has("record-payment") ? <button onClick={() => setPaymentOpen(value => !value)}>✓ {t.recordPayment}</button> : null}
-            </div>
-          ) : null}
-          {scheduleOpen ? <div className="inline-form"><input type="date" value={scheduleDate} onChange={event => setScheduleDate(event.target.value)} /><button onClick={() => { act("schedule-payment", { scheduledDate: scheduleDate }); setScheduleOpen(false); }}>{t.schedule}</button></div> : null}
-          {paymentOpen ? <div className="inline-form payment-form"><IXIMoneyInput inputMode="decimal" value={paymentDraft.amount} onChange={event => setPaymentDraft(current => ({ ...current, amount: event.target.value }))} /><select value={paymentDraft.method} onChange={event => setPaymentDraft(current => ({ ...current, method: event.target.value }))}><option>ACH</option><option>CHECK</option><option>WIRE</option><option>CARD</option><option>CASH</option></select><input placeholder="Reference" value={paymentDraft.reference} onChange={event => setPaymentDraft(current => ({ ...current, reference: event.target.value }))} /><input type="date" value={paymentDraft.paidDate} onChange={event => setPaymentDraft(current => ({ ...current, paidDate: event.target.value }))} /><button onClick={async () => { if (await act("record-payment", paymentDraft)) setPaymentOpen(false); }}>{t.recordPayment}</button></div> : null}
-        </section>
 
         <section className="bill-section"><h3>{t.notes}</h3><div className="notes-row">{record?.bill?.notes || "—"}</div></section>
         <section className="bill-section"><h3>{t.activity}</h3>{latest ? <div className="activity-row"><span>●</span><div><strong>{latest.label}</strong><small>{latest.actorLabel || ""} · {latest.occurredAt ? new Date(latest.occurredAt).toLocaleString(language === "es" ? "es-MX" : "en-US") : ""}</small></div></div> : <div className="empty-row">—</div>}</section>

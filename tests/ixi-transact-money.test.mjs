@@ -1,7 +1,14 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-const load = async path => import(`data:text/javascript;base64,${Buffer.from(await readFile(new URL(`../components/ixi-aos/transact/${path}`, import.meta.url))).toString("base64")}`);
+const sourceUrl = async url => {
+  let source = await readFile(url, "utf8");
+  for (const match of [...source.matchAll(/from ["'](\.[^"']+)["']/g)]) {
+    source = source.replace(match[0], `from "${await sourceUrl(new URL(match[1], url))}"`);
+  }
+  return `data:text/javascript;base64,${Buffer.from(source).toString("base64")}`;
+};
+const load = async path => import(await sourceUrl(new URL(`../components/ixi-aos/transact/${path}`, import.meta.url)));
 const { parseIXIMoneyInput: parse, formatIXIMoneyInput: format } = await load("IXIMoney.js");
 const { withIXIBillBalance } = await load("modules/bill/IXIBillBalance.js");
 

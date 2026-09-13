@@ -79,7 +79,7 @@ function relatedBillId(record = {}) {
   );
 }
 function isBill(record = {}) {
-  if (typeOf(record) !== "bill") return false;
+  if (!["bill", "supplier-invoice"].includes(typeOf(record)) && !(typeOf(record) === "expense" && ["unpaid", "my-money"].includes(clean(sourceOf(record).paymentMethod || sourceOf(record).expense?.paymentMethod || sourceOf(record).expenseRecord?.expense?.paymentMethod).toLowerCase()))) return false;
   const source = sourceOf(record);
   return !["void", "reversed", "rejected"].includes(
     clean(
@@ -148,6 +148,7 @@ export function getIXIPayablesAgingBucket({
 }
 function approvalFrom(record = {}) {
   const source = sourceOf(record);
+  if (typeOf(record) === "expense") return "approved";
   return clean(
     source.billRecord?.approval?.status ||
       source.approval?.status ||
@@ -265,7 +266,7 @@ export function buildIXIPayablesProjection({
       ),
       vendorLabel: clean(
         vendorRef?.label ||
-          source.vendorName ||
+          source.vendorName || source.expenseRecord?.expense?.vendor || source.expense?.vendor ||
           billRecord.bill?.vendorLabel ||
           bill.bill?.vendorLabel ||
           "VENDOR",
