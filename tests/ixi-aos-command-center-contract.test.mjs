@@ -84,6 +84,28 @@ test("desktop machine scope rejects a listing without canonical object identity"
   assert.equal(contexts.some(item => item.kind === "machine"), false);
 });
 
+test("verified Entity Passport survives a hydrated Entity envelope that omits it", () => {
+  const contexts = buildIXIAosCommandContexts({
+    entity: {
+      entityId: "entity-star-and-sons",
+      displayName: "Star & Sons Unlimited LLC"
+    },
+    entityPassportId: "IXI-ENTITY-STAR-SONS"
+  });
+
+  assert.equal(contexts[0].kind, "company");
+  assert.equal(contexts[0].passportId, "IXI-ENTITY-STAR-SONS");
+});
+
+test("hydrated Entity Passport remains authoritative over the access fallback", () => {
+  const contexts = buildIXIAosCommandContexts({
+    entity,
+    entityPassportId: "IXI-STALE-FALLBACK"
+  });
+
+  assert.equal(contexts[0].passportId, "IXI-ENTITY-1");
+});
+
 test("canonical machines fail closed without the governed Equipment projection", () => {
   const contexts = buildIXIAosCommandContexts({
     entity,
