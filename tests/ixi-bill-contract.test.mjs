@@ -53,6 +53,45 @@ test("Persisted Bill records hydrate with canonical identity and revision", () =
   assert.equal(hydrated.financialBinding.financialLineId, "ifl_1");
 });
 
+function legacyFreight() {
+  const freightOrderId = "FO-20260905-TEST1234";
+  const draft = contract.createIXIBillRecord({ context, input: input({ clientRequestId: `${freightOrderId}:HS-78451`, amount: 1600, purchaseOrderId: freightOrderId, purchaseOrderNumber: freightOrderId, poCommittedAmount: 0, receivedAmount: 1600, receivedComplete: false }) });
+  return { server: { revision: 1, storageMetadata: { source: "ixi-transact-freight", transactModule: "bill", freightOrderId } }, financialDocument: { financialDocumentId: "ifd_freight_test", documentType: "bill", sourceFinancialDocumentId: "", metadata: {}, references: [], billRecord: draft, lines: [{ financialLineId: "ifl_freight_test", amount: 1600 }] } };
+}
+
+test("legacy freight references are classified without inventing PO approval or changing bill facts", () => {
+  const stored = legacyFreight(), original = structuredClone(stored);
+  const hydrated = contract.hydrateIXIBillRecord(stored);
+  assert.equal(hydrated.purchaseMatch.status, "n/a");
+  assert.equal(hydrated.purchaseMatch.purchaseOrderNumber, "");
+  assert.equal(hydrated.purchaseMatch.variance, 0);
+  assert.equal(hydrated.purchaseMatch.varianceApproval, null);
+  assert.equal(hydrated.financialBinding.freightOrderId, "FO-20260905-TEST1234");
+  assert.deepEqual(hydrated.freight.legacyPurchaseMatch, original.financialDocument.billRecord.purchaseMatch);
+  for (const key of ["bill", "context", "approval", "payment", "timeline", "audit"]) assert.deepEqual(hydrated[key], original.financialDocument.billRecord[key]);
+  assert.ok(hydrated.related.some(ref => ref.id === "FO-20260905-TEST1234" && ref.type === "freight-order"));
+  assert.deepEqual(stored, original, "reading must not mutate the stored record");
+  const saved = { ...stored, server: { ...stored.server, revision: 2 }, financialDocument: { ...stored.financialDocument, billRecord: hydrated } };
+  assert.deepEqual(contract.hydrateIXIBillRecord(saved).freight, hydrated.freight, "the original match evidence survives subsequent saves and reloads");
+});
+
+test("actual or ambiguous purchase orders retain their variance review", () => {
+  const variants = [
+    row => { row.server.storageMetadata.source = "ixi-transact-bill"; },
+    row => { row.server.storageMetadata.freightOrderId = "FO-OTHER"; },
+    row => { row.financialDocument.billRecord.identity.clientRequestId = "manual-bill"; },
+    row => { row.financialDocument.billRecord.purchaseMatch.purchaseOrderId = "PO-REAL"; },
+    row => { row.financialDocument.sourceFinancialDocumentId = "ifd_real_purchase_order"; },
+    row => { row.financialDocument.references = [{ role: "purchase-order", passportId: "PASS-PO" }]; },
+    row => { row.financialDocument.lines[0].references = [{ role: "purchase-order", externalId: "PO-REAL" }]; },
+    row => { row.financialDocument.billRecord.related.push({ type: "purchase-order", id: "PO-REAL" }); }
+  ];
+  for (const change of variants) {
+    const stored = legacyFreight(); change(stored);
+    assert.deepEqual(contract.hydrateIXIBillRecord(stored).purchaseMatch, stored.financialDocument.billRecord.purchaseMatch);
+  }
+});
+
 test("Bill commands use canonical amount fields, deterministic duplicate control, and separate payment lineage", async () => {
   const source = await readFile(new URL("../components/ixi-aos/transact/modules/bill/IXIBillCommands.js", import.meta.url), "utf8");
   assert.match(source, /idempotencyKey:\s*`ixi-bill:\$\{fingerprint\}`/u);

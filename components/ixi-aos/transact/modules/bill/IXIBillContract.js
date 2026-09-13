@@ -149,11 +149,36 @@ export function validateIXIBillInput(input = {}) {
   return { valid: Object.keys(errors).length === 0, errors };
 }
 
+function normalizeLegacyFreightMatch(record, document, metadata) {
+  const freightOrderId = clean(metadata.freightOrderId);
+  const match = record.purchaseMatch || {};
+  const references = [...(document.references || []), ...(document.lines || []).flatMap(line => line.references || [])];
+  // Early Freight capture stored its request ID as a PO even when there was
+  // no purchase order or estimate. Require the original creator and exact
+  // request/invoice lineage; a freight category or an FO prefix is not enough.
+  if (clean(metadata.source) !== "ixi-transact-freight" || !freightOrderId ||
+      clean(match.purchaseOrderId) !== freightOrderId || clean(match.purchaseOrderNumber) !== freightOrderId ||
+      clean(record.identity?.clientRequestId) !== `${freightOrderId}:${clean(record.identity?.invoiceNumber)}` ||
+      clean(document.sourceFinancialDocumentId) ||
+      references.some(ref => clean(ref.role) === "purchase-order" || clean(ref.objectType) === "purchase-order") ||
+      (record.related || []).some(ref => clean(ref.type) === "purchase-order" && clean(ref.id) !== freightOrderId)) return record;
+
+  return {
+    ...record,
+    // Retain the full original evidence in the next ordinary, revision-checked
+    // Bill save. Reading does not approve a variance or write a financial record.
+    freight: { ...(record.freight || {}), freightOrderId, legacyPurchaseMatch: match },
+    purchaseMatch: { ...match, purchaseOrderId: "", purchaseOrderNumber: "", poCommittedAmount: 0, variance: 0, status: "n/a", varianceApproval: null },
+    related: (record.related || []).map(ref => clean(ref.type) === "purchase-order" && clean(ref.id) === freightOrderId ? { ...ref, type: "freight-order" } : ref)
+  };
+}
+
 export function hydrateIXIBillRecord(financialRecord = {}) {
   const stored = financialRecord?.record || financialRecord;
   const document = stored?.financialDocument || financialRecord?.financialDocument || financialRecord;
   if (!document || !["bill", "supplier-invoice"].includes(clean(document.documentType).toLowerCase()) || !document.billRecord) return null;
-  const record = document.billRecord;
+  const metadata = { ...(stored?.server?.storageMetadata || {}), ...(document.metadata || {}) };
+  const record = normalizeLegacyFreightMatch(document.billRecord, document, metadata);
   return {
     ...record,
     documents: Array.isArray(document.attachments) ? document.attachments : record.documents || [],
@@ -166,6 +191,7 @@ export function hydrateIXIBillRecord(financialRecord = {}) {
     },
     financialBinding: {
       financialDocumentId: clean(document.financialDocumentId),
+      freightOrderId: clean(metadata.freightOrderId),
       revision: Number(stored?.server?.revision || financialRecord?.server?.revision || 1),
       financialLineId: clean(document?.lines?.[0]?.financialLineId),
       line: document?.lines?.[0] || null

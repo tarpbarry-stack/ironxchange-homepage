@@ -79,6 +79,7 @@ function canonicalizeBill(draft, response) {
     },
     financialBinding: {
       financialDocumentId,
+      freightOrderId: clean(document?.metadata?.freightOrderId || stored?.server?.storageMetadata?.freightOrderId || canonical?.freight?.freightOrderId),
       revision: Number(stored?.server?.revision || stored?.revision || 1),
       financialLineId: clean(document?.lines?.[0]?.financialLineId),
       line: document?.lines?.[0] || null
@@ -271,7 +272,8 @@ export async function updateIXIBill({ record = {}, action = "update", metadata =
       totals: { subtotal: amount, total: amount },
       accountingTreatment: billAccountingTreatment(financialState)
     },
-    metadata: { ...metadata, transactModule: "bill", action, billStatus: canonical.status, approvalStatus: canonical?.approval?.status },
+    metadata: { ...metadata, transactModule: "bill", action, billStatus: canonical.status, approvalStatus: canonical?.approval?.status,
+      ...(canonical.freight?.legacyPurchaseMatch ? { freightOrderId: canonical.freight.freightOrderId, purchaseOrderNumber: clean(canonical.purchaseMatch?.purchaseOrderNumber), billReferenceCorrection: "legacy-freight-order" } : {}) },
     signal
   });
   return { response, record: canonicalizeBill(canonical, response) };

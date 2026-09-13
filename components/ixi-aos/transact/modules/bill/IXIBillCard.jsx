@@ -21,6 +21,7 @@ const COPY = {
     context: "LOCATION / ENTITY",
     related: "RELATED TO",
     po: "PURCHASE ORDER",
+    freightOrder: "FREIGHT ORDER",
     match: "THREE-WAY MATCH",
     committed: "PO COMMITTED",
     received: "RECEIVED",
@@ -78,6 +79,7 @@ const COPY = {
     context: "UBICACIÓN / ENTIDAD",
     related: "RELACIONADO CON",
     po: "ORDEN DE COMPRA",
+    freightOrder: "ORDEN DE FLETE",
     match: "CONCILIACIÓN DE TRES VÍAS",
     committed: "OC COMPROMETIDA",
     received: "RECIBIDO",
@@ -197,7 +199,7 @@ export default function IXIBillCard({
           <div><small>{t.category}</small><strong>{record?.bill?.category || "—"}</strong></div>
           <div className="wide"><small>{t.context}</small><strong>⌖ {record?.context?.locationLabel || record?.context?.primaryObjectLabel || "—"}</strong></div>
           <div><small>{t.related}</small><strong>{record?.context?.primaryObjectLabel || "—"}</strong></div>
-          <div><small>{t.po}</small><strong>{record?.purchaseMatch?.purchaseOrderNumber || t.none}</strong></div>
+          <div><small>{!hasPo && record?.financialBinding?.freightOrderId ? t.freightOrder : t.po}</small><strong>{record?.purchaseMatch?.purchaseOrderNumber || record?.financialBinding?.freightOrderId || t.none}</strong></div>
         </section>
 
         {hasPo ? (
