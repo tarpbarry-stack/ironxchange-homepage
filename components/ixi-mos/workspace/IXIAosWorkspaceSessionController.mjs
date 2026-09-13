@@ -247,6 +247,22 @@ export function createAosWorkspaceSessionController({
     return session;
   }
 
+  function reconcilePlacements() {
+    if (!session) return;
+    let next = workspacePlacementsFromSession(session, initialSurfaces);
+    // Keep newer queued gestures visible over the last authoritative session.
+    // Completed and rejected operations must never supply rollback positions.
+    operations.forEach(operation => {
+      if (!operation.pending) return;
+      operation.objects.forEach(record => {
+        if (objectEpoch.get(record.objectId) !== record.epoch) return;
+        next = placeOneObject(next, record.objectId, record.after);
+      });
+    });
+    placements = next;
+    onPlacements(clone(placements));
+  }
+
   async function withStableRetry(request) {
     try {
       return await request();
@@ -283,14 +299,19 @@ export function createAosWorkspaceSessionController({
       publishSession(next);
       return response;
     } catch (error) {
-      if (error?.code === "WORKSPACE_SESSION_REVISION_CONFLICT") {
-        const readback = await transport.read({
-          sessionId: session.sessionId,
-          placementScope: session.placementScope
-        });
-        const next = sessionFromResponse(readback);
-        if (next) publishSession(next);
+      if (error?.code === "WORKSPACE_SESSION_REVISION_CONFLICT" || retryable(error)) {
+        try {
+          const readback = await transport.read({
+            sessionId: session.sessionId,
+            placementScope: session.placementScope
+          });
+          const next = sessionFromResponse(readback);
+          if (next) publishSession(next);
+        } catch (readError) {
+          onError(readError);
+        }
       }
+      reconcilePlacements();
       throw error;
     }
   }
@@ -378,10 +399,16 @@ export function createAosWorkspaceSessionController({
       : changedCandidates;
     const operation = {
       operationId,
+      pending: true,
       objects: changed.map(objectId => {
         const epoch = (objectEpoch.get(objectId) || 0) + 1;
         objectEpoch.set(objectId, epoch);
-        return { objectId, epoch, before: locateWorkspaceObject(previous, objectId) };
+        return {
+          objectId,
+          epoch,
+          before: locateWorkspaceObject(previous, objectId),
+          after: locateWorkspaceObject(next, objectId)
+        };
       })
     };
     operations.set(operationId, operation);
@@ -483,16 +510,15 @@ export function createAosWorkspaceSessionController({
           });
           reorderIndex += 1;
         }
+        operation.pending = false;
+        reconcilePlacements();
         return { ok: true, operationId, changedObjectIds: changed };
       } catch (error) {
-        const eligible = rollbackLocal(operationId);
-        if (captureUndo && eligible.length) {
-          try {
-            await undoServerOperation(operationId, eligible);
-          } catch (undoError) {
-            onError(undoError);
-          }
-        }
+        operation.pending = false;
+        operations.delete(operationId);
+        // Placement commands are atomic. A rejection has no committed Return
+        // snapshot to undo; a lost response is resolved by authoritative readback.
+        reconcilePlacements();
         throw error;
       }
     });
@@ -543,13 +569,15 @@ export function createAosWorkspaceSessionController({
     const ids = objectIds.map(canonicalObjectId);
     const operation = {
       operationId,
+      pending: true,
       objects: ids.map(objectId => {
         const epoch = (objectEpoch.get(objectId) || 0) + 1;
         objectEpoch.set(objectId, epoch);
         return {
           objectId,
           epoch,
-          before: locateWorkspaceObject(placements, objectId)
+          before: locateWorkspaceObject(placements, objectId),
+          after: session?.objects?.[objectId]?.sessionOrigin || null
         };
       })
     };
@@ -564,14 +592,20 @@ export function createAosWorkspaceSessionController({
     onPlacements(clone(placements));
 
     return enqueue(async () => {
-      await applyCommand({
-        commandId: `${commandIdPart(operationId)}:recall`,
-        commandType: "objects.recall",
-        payload: { objectIds: ids, operationId }
-      });
-      placements = workspacePlacementsFromSession(session, initialSurfaces);
-      onPlacements(clone(placements));
-      return { operationId, session: clone(session) };
+      try {
+        await applyCommand({
+          commandId: `${commandIdPart(operationId)}:recall`,
+          commandType: "objects.recall",
+          payload: { objectIds: ids, operationId }
+        });
+        return { operationId, session: clone(session) };
+      } catch (error) {
+        operations.delete(operationId);
+        throw error;
+      } finally {
+        operation.pending = false;
+        reconcilePlacements();
+      }
     });
   }
 

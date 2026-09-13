@@ -187,6 +187,30 @@ test("a mixed Locations projection keeps five Locations and one machine distinct
   );
 });
 
+test("conflicting projection hints stay neutral regardless of container order", () => {
+  const neutral = { objectId: "object_neutral", objectType: "generic", passportId: "IXI_NEUTRAL" };
+  const locations = [1, 2].map(n => ({ objectId: `object_location_${n}`, objectType: "location" }));
+  const people = [1, 2].map(n => ({ objectId: `object_person_${n}`, objectType: "person" }));
+  const indexes = [{ items: [...locations, neutral] }, { items: [...people, neutral] }];
+  const aosObjects = [neutral, ...locations, ...people];
+  const before = structuredClone(aosObjects);
+  const kind = systemIndexes => buildIXIAosCommandContexts({ aosObjects, systemIndexes })
+    .find(context => context.sourceId === neutral.objectId).kind;
+  assert.equal(kind(indexes), "object");
+  assert.equal(kind([...indexes].reverse()), "object");
+  assert.deepEqual(aosObjects, before);
+});
+
+test("repeated references to one projected member cannot manufacture dominant evidence", () => {
+  const neutral = { objectId: "object_neutral", objectType: "generic" };
+  const location = { objectId: "object_location", objectType: "location" };
+  const contexts = buildIXIAosCommandContexts({
+    aosObjects: [neutral, location],
+    systemIndexes: [{ items: [location, location, location, neutral] }]
+  });
+  assert.equal(contexts.find(context => context.sourceId === neutral.objectId).kind, "object");
+});
+
 test("location perspective resolves only active canonical IX-Core edges", () => {
   const contexts = buildIXIAosCommandContexts({
     entity,
