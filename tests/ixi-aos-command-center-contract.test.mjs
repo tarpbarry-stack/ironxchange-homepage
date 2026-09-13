@@ -130,6 +130,26 @@ test("canonical primary image fields hydrate both TRAN$ACT Object card surfaces"
   );
 });
 
+test("canonical admission retains the owned listing photo from its presentation source", () => {
+  const contexts = buildIXIAosCommandContexts({
+    entity,
+    aosObjects: [{
+      ...canonicalMachine,
+      imageUrl: "",
+      imageUrls: [],
+      presentationSource: {
+        imageUrl: "https://images.example.com/listing-presentation-544k.jpg"
+      }
+    }],
+    systemIndexes: [equipmentIndex([{ objectId: "object-machine-1" }])]
+  });
+
+  assert.equal(
+    contexts.find(context => context.sourceId === "object-machine-1")?.imageUrl,
+    "https://images.example.com/listing-presentation-544k.jpg"
+  );
+});
+
 test("TRAN$ACT Object directory follows customer-governed System Index names", () => {
   const equipment = { ...canonicalMachine };
   const location = { ...objects[0] };
@@ -146,14 +166,20 @@ test("TRAN$ACT Object directory follows customer-governed System Index names", (
     { objectId: "index-empty", displayName: "Empty", items: [] }
   ]);
 
-  assert.deepEqual(directories.map(directory => directory.label), [
-    "Equipment",
+  assert.deepEqual(directories.map(directory => directory.menuLabel), [
+    "ALL",
+    "EQUIP",
     "Locations",
     "Workforce"
   ]);
   assert.deepEqual(
     directories.map(directory => directory.items.map(item => item.sourceId)),
-    [[equipment.objectId], [location.objectId], [person.objectId]]
+    [
+      [equipment.objectId, location.objectId, person.objectId],
+      [equipment.objectId],
+      [location.objectId],
+      [person.objectId]
+    ]
   );
 });
 

@@ -700,7 +700,7 @@ export default function IXITransactCommandCenter() {
           <section className={styles.objectDirectory} aria-label="Governed AOS Object directory">
             <header>
               <div><span>{selectedDirectory?.label || "AOS OBJECTS"}</span><strong>{objectDirectory.length}</strong></div>
-              <label><span>INDEX</span><select value={selectedDirectory?.id || ""} onChange={event => setSelectedDirectoryId(event.target.value)}>{objectDirectories.map(directory => <option value={directory.id} key={directory.id}>{directory.label.toUpperCase()}</option>)}</select></label>
+              <label><span>INDEX</span><select value={selectedDirectory?.id || ""} onChange={event => setSelectedDirectoryId(event.target.value)}>{objectDirectories.map(directory => <option value={directory.id} key={directory.id}>{directory.menuLabel.toUpperCase()}</option>)}</select></label>
             </header>
             <div className={styles.objectDirectoryList} role="list">
               {objectDirectory.map(item => (

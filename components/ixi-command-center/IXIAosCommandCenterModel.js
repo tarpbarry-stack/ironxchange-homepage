@@ -200,6 +200,8 @@ function getImageUrl(record = {}) {
   const fields = record?.fields || {};
   const metadata = record?.metadata || {};
   const presentation = record?.presentation || record?.selectedPresentation || {};
+  const presentationSource = record?.presentationSource || record?.source?.presentation || {};
+  const presentationPublicData = getPublicData(presentationSource);
   const candidates = [
     record?.logoUrl,
     record?.primaryImageUrl,
@@ -218,7 +220,17 @@ function getImageUrl(record = {}) {
     record?.media?.[0]?.imageUrl,
     record?.media?.[0]?.attributes?.variants?.default?.url,
     record?.images?.[0]?.url,
-    record?.images?.[0]?.attributes?.variants?.default?.url
+    record?.images?.[0]?.attributes?.variants?.default?.url,
+    presentationSource?.primaryImageUrl,
+    presentationSource?.imageUrl,
+    typeof presentationSource?.image === "string" ? presentationSource.image : "",
+    presentationSource?.image?.url,
+    safeArray(presentationSource?.imageUrls)[0],
+    presentationPublicData?.imageUrl,
+    safeArray(presentationPublicData?.imageUrls)[0],
+    presentationSource?.media?.[0]?.url,
+    presentationSource?.media?.[0]?.imageUrl,
+    presentationSource?.images?.[0]?.url
   ];
 
   return candidates.map(clean).find(Boolean) || "";
@@ -234,7 +246,7 @@ export function getIXITransactObjectDirectories(
       .filter(([objectId]) => objectId)
   );
 
-  return safeArray(systemIndexes).flatMap(index => {
+  const directories = safeArray(systemIndexes).flatMap(index => {
     const id = firstText(index?.objectId, index?.indexId);
     const label = firstText(index?.displayName, index?.label, index?.name);
     if (!id || !label) return [];
@@ -248,8 +260,23 @@ export function getIXITransactObjectDirectories(
       return [context];
     });
 
-    return items.length ? [{ id, label, items }] : [];
+    return items.length ? [{
+      id,
+      label,
+      menuLabel: clean(label).toUpperCase() === "EQUIPMENT" ? "EQUIP" : label,
+      items
+    }] : [];
   });
+
+  const seen = new Set();
+  const allItems = directories.flatMap(directory => directory.items.flatMap(item => {
+    const objectId = clean(item?.sourceId);
+    if (!objectId || seen.has(objectId)) return [];
+    seen.add(objectId);
+    return [item];
+  }));
+
+  return [{ id: "all", label: "ALL", menuLabel: "ALL", items: allItems }, ...directories];
 }
 
 function getDateValue(record = {}) {
