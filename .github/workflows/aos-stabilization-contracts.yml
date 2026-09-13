@@ -1,0 +1,56 @@
+name: AOS paired stabilization gate
+on:
+  pull_request:
+  workflow_call:
+    outputs:
+      core_commit:
+        description: Verified immutable backend commit
+        value: ${{ jobs.paired.outputs.core_commit }}
+permissions:
+  contents: read
+jobs:
+  paired:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    outputs:
+      core_commit: ${{ steps.release.outputs.core_commit }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: frontend
+          fetch-depth: 0
+      - id: release
+        name: Read pinned backend release
+        working-directory: frontend
+        run: |
+          set -euo pipefail
+          core_commit="$(jq -r .commit config/ixi-core-release.json)"
+          [[ "$core_commit" =~ ^[a-f0-9]{40}$ ]]
+          echo "core_commit=$core_commit" >> "$GITHUB_OUTPUT"
+      - uses: actions/checkout@v4
+        with:
+          repository: tarpbarry-stack/ixi-core
+          ref: ${{ steps.release.outputs.core_commit }}
+          path: core
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: |
+            frontend/package-lock.json
+            core/package-lock.json
+      - run: npm ci --no-audit --no-fund
+        working-directory: core
+      - run: npm ci --no-audit --no-fund
+        working-directory: frontend
+      - name: Run required paired contracts
+        working-directory: frontend
+        env:
+          IXI_CORE_CONTRACT_ROOT: ${{ github.workspace }}/core
+        run: node scripts/verify-aos-stabilization.mjs
+      - name: Compile frontend
+        working-directory: frontend
+        env:
+          NEXT_TELEMETRY_DISABLED: '1'
+        run: npm run build

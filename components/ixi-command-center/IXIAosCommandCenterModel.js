@@ -315,7 +315,7 @@ function buildMachineContext(listing = {}) {
 }
 
 function getProjectedKindOverrides(systemIndexes = []) {
-  const overrides = new Map();
+  const candidates = new Map();
 
   safeArray(systemIndexes).forEach(index => {
     if (clean(index?.metadata?.adapterId) === IXI_OWNED_EQUIPMENT_ADAPTER_ID) {
@@ -324,8 +324,12 @@ function getProjectedKindOverrides(systemIndexes = []) {
 
     const projectedItems = safeArray(index?.items);
     const kindCounts = new Map();
+    const countedObjectIds = new Set();
 
     projectedItems.forEach(item => {
+      const objectId = getProjectedItemObjectId(item);
+      if (!objectId || countedObjectIds.has(objectId)) return;
+      countedObjectIds.add(objectId);
       const kind = getObjectKind(item);
       if (kind === "object") return;
       kindCounts.set(kind, (kindCounts.get(kind) || 0) + 1);
@@ -349,11 +353,18 @@ function getProjectedKindOverrides(systemIndexes = []) {
     projectedItems.forEach(item => {
       if (getObjectKind(item) !== "object") return;
       const objectId = getObjectId(item);
-      if (objectId) overrides.set(objectId, dominantKind);
+      if (!objectId) return;
+      if (!candidates.has(objectId)) candidates.set(objectId, new Set());
+      candidates.get(objectId).add(dominantKind);
     });
   });
 
-  return overrides;
+  // These are display hints, never identity or authorization facts. An object
+  // can belong to several containers; conflicting hints remain neutral instead
+  // of letting the last container in an array redefine its presentation.
+  return new Map([...candidates.entries()]
+    .filter(([, kinds]) => kinds.size === 1)
+    .map(([objectId, kinds]) => [objectId, [...kinds][0]]));
 }
 
 export function buildIXIAosCommandContexts({
