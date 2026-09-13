@@ -10,12 +10,20 @@ async function sourceUrl(url) {
 }
 const load = async path => import(await sourceUrl(new URL(path, base)));
 const model = await load("payments/IXIPaymentModel.js");
+const { formatIXIAccountingMoney } = await load("IXIMoney.js");
 const { withIXIBillBalance } = await load("modules/bill/IXIBillBalance.js");
 const { getIXIWorkOrderCostProjection } = await load("modules/work-order/IXIWorkOrderProjectionEngine.js");
 const { classifyIXIFinancialDocument } = await load("modules/general-ledger/IXIGLPostingEngine.js");
 const { buildIXIPayablesProjection } = await load("modules/payables/IXIPayablesProjectionEngine.js");
 const source = (id = "bill-1", type = "bill", extra = {}) => ({ server: { revision: 2, entityPassportId: "IXIENTITY001" }, financialDocument: { financialDocumentId: id, documentType: type, financialState: "incurred", occurredAt: "2026-02-01T12:00:00Z", currency: "USD", totals: { total: 1000 }, references: [{ role: "entity", passportId: "IXIENTITY001" }], billRecord: { approval: { status: "approved" } }, ...extra } });
 const pay = (id, amount, extra = {}) => source(id, "payment", { sourceFinancialDocumentId: "bill-1", financialState: "paid", paymentDirection: "outflow", occurredAt: "2026-03-15T12:00:00Z", paymentMethod: "CHECK", transactionReference: "CK-104", totals: { total: amount }, lines: [{ financialLineId: `${id}-line`, amount, quantity: 1, rate: amount }], ...extra });
+
+test("Desktop accounting amounts retain exact cents instead of using rounded AOS summaries", () => {
+  assert.equal(formatIXIAccountingMoney(474.66), "$474.66");
+  assert.equal(formatIXIAccountingMoney(.07), "$0.07");
+  assert.equal(formatIXIAccountingMoney(10500), "$10,500.00");
+  assert.equal(formatIXIAccountingMoney(-500), "-$500.00");
+});
 
 test("company payment scope reuses the authenticated Entity Passport without changing Object identity", () => {
   const object = { objectId: "entity-1", passportId: "", displayName: "Company" };

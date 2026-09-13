@@ -19,3 +19,9 @@ export function formatIXIMoneyInput(value) {
   if (!parsed.valid) return String(value);
   return Number(parsed.value).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
+
+export function formatIXIAccountingMoney(value, currency = "USD") {
+  const amount = Number(value);
+  if (!Number.isFinite(amount)) return "—";
+  return amount.toLocaleString("en-US", { style: "currency", currency: currency || "USD", minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
