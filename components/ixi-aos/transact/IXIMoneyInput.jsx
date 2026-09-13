@@ -7,13 +7,20 @@ import { formatIXIMoneyInput, parseIXIMoneyInput } from "./IXIMoney";
 const IXIMoneyInput = forwardRef(function IXIMoneyInput({ value = "", onChange, onValueChange, onFocus, onBlur, allowNegative = false, ...props }, ref) {
   const { t } = useIXITransactLocale();
   const [focused, setFocused] = useState(false);
+  const [draft, setDraft] = useState("");
   const [message, setMessage] = useState("");
   const messageId = useId();
   return <>
     <input {...props} ref={ref} type="text" inputMode="decimal" data-ixi-money="true"
-      value={focused ? value : formatIXIMoneyInput(value)}
+      value={focused ? draft : formatIXIMoneyInput(value)}
       aria-describedby={[props["aria-describedby"], message ? messageId : ""].filter(Boolean).join(" ") || undefined}
-      onFocus={event => { setFocused(true); onFocus?.(event); }}
+      onFocus={event => {
+        // Keep the displayed text unchanged on focus so keyboard and paste
+        // selections survive. Format only after the user leaves the field.
+        setDraft(event.currentTarget.value);
+        setFocused(true);
+        onFocus?.(event);
+      }}
       onBlur={event => {
         setFocused(false);
         if (value === "-") {
@@ -26,6 +33,7 @@ const IXIMoneyInput = forwardRef(function IXIMoneyInput({ value = "", onChange, 
         const parsed = parseIXIMoneyInput(event.target.value, { allowNegative });
         if (!parsed.valid) { setMessage(t("Use an amount such as 1,234.07, with at most two decimal places.")); return; }
         setMessage("");
+        setDraft(event.target.value);
         // Existing TRAN$ACT controls consume event.target.value; keep that API.
         const target = { value: parsed.value, name: event.target.name, id: event.target.id };
         onChange?.({ ...event, target, currentTarget: target });
