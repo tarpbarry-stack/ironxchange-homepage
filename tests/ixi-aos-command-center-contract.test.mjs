@@ -8,7 +8,8 @@ import {
   getIXIAosRelationshipEvidence,
   getIXIAosRelatedContexts,
   getIXITransactOwnedEquipmentObjectIds,
-  getIXIFinancialQueryScope
+  getIXIFinancialQueryScope,
+  getIXITransactObjectDirectories
 } from "../components/ixi-command-center/IXIAosCommandCenterModel.js";
 
 const entity = {
@@ -111,6 +112,49 @@ test("one canonical Object produces one command context and keeps machine presen
   assert.equal(matching[0].imageUrl, "https://images.example.com/544k.jpg");
   assert.equal(matching[0].serialNumber, "1DW544KZVHF123456");
   assert.equal(matching[0].assetId, "SSU-544K-01");
+});
+
+test("canonical primary image fields hydrate both TRAN$ACT Object card surfaces", () => {
+  const contexts = buildIXIAosCommandContexts({
+    entity,
+    aosObjects: [{
+      ...canonicalMachine,
+      primaryImageUrl: "https://images.example.com/canonical-primary-544k.jpg"
+    }],
+    systemIndexes: [equipmentIndex([{ objectId: "object-machine-1" }])]
+  });
+
+  assert.equal(
+    contexts.find(context => context.sourceId === "object-machine-1")?.imageUrl,
+    "https://images.example.com/canonical-primary-544k.jpg"
+  );
+});
+
+test("TRAN$ACT Object directory follows customer-governed System Index names", () => {
+  const equipment = { ...canonicalMachine };
+  const location = { ...objects[0] };
+  const person = { ...objects[2] };
+  const contexts = buildIXIAosCommandContexts({
+    entity,
+    aosObjects: [equipment, location, person],
+    systemIndexes: [equipmentIndex([{ objectId: equipment.objectId }])]
+  });
+  const directories = getIXITransactObjectDirectories(contexts, [
+    { objectId: "index-equipment", displayName: "Equipment", items: [{ objectId: equipment.objectId }] },
+    { objectId: "index-locations", displayName: "Locations", items: [{ objectId: location.objectId }] },
+    { objectId: "index-workforce", displayName: "Workforce", items: [{ objectId: person.objectId }] },
+    { objectId: "index-empty", displayName: "Empty", items: [] }
+  ]);
+
+  assert.deepEqual(directories.map(directory => directory.label), [
+    "Equipment",
+    "Locations",
+    "Workforce"
+  ]);
+  assert.deepEqual(
+    directories.map(directory => directory.items.map(item => item.sourceId)),
+    [[equipment.objectId], [location.objectId], [person.objectId]]
+  );
 });
 
 test("a canonical IX-Core machine remains selectable when Sharetribe returns zero listings", () => {

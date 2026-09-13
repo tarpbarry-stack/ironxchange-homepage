@@ -102,7 +102,7 @@ test("desktop styling preserves the permanent professional shell and responsive 
   const styles = read("components/ixi-command-center/IXIAosCommandCenter.module.css");
 
   assert.match(styles, /\.topbar\s*\{[\s\S]*position:\s*sticky/u);
-  assert.match(styles, /grid-template-columns:\s*220px minmax\(0, 1fr\) 296px/u);
+  assert.match(styles, /grid-template-columns:\s*250px minmax\(0, 1fr\) 330px/u);
   assert.match(styles, /@media \(max-width: 1220px\)/u);
   assert.match(styles, /overflow-x:\s*hidden/u);
   assert.match(styles, /--gold:\s*#ffc400/u);

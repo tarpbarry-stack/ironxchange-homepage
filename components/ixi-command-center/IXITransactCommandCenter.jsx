@@ -28,7 +28,8 @@ import {
   getIXIAosRelatedContexts,
   getIXIFinancialQueryScope,
   getIXITransactAttentionBand,
-  getIXITransactControlCounts
+  getIXITransactControlCounts,
+  getIXITransactObjectDirectories
 } from "./IXIAosCommandCenterModel";
 
 import styles from "./IXIAosCommandCenter.module.css";
@@ -287,7 +288,7 @@ export default function IXITransactCommandCenter() {
   const [selectedQueueId, setSelectedQueueId] = useState("");
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [activeModuleId, setActiveModuleId] = useState("");
-  const [directorySort, setDirectorySort] = useState("kind");
+  const [selectedDirectoryId, setSelectedDirectoryId] = useState("");
   const [passportRefreshKey, setPassportRefreshKey] = useState(0);
   const [refreshKey, setRefreshKey] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -473,16 +474,24 @@ export default function IXITransactCommandCenter() {
   ), [contexts, relationships, selectedContext]);
   const connections = useMemo(() => connectionSummary(related), [related]);
   const currentGroup = groups[selectedKind] || [];
-  const objectDirectory = useMemo(() => {
-    const items = contexts.filter(item => item.kind !== "company");
-    return [...items].sort((left, right) => {
-      if (directorySort === "name") return left.title.localeCompare(right.title);
-      if (directorySort === "recent") {
-        return (right.updatedAt?.getTime?.() || 0) - (left.updatedAt?.getTime?.() || 0) || left.title.localeCompare(right.title);
-      }
-      return contextLabel(left.kind).localeCompare(contextLabel(right.kind)) || left.title.localeCompare(right.title);
-    });
-  }, [contexts, directorySort]);
+  const objectDirectories = useMemo(
+    () => getIXITransactObjectDirectories(contexts, environment?.systemIndexes || []),
+    [contexts, environment?.systemIndexes]
+  );
+  useEffect(() => {
+    if (!objectDirectories.length) {
+      setSelectedDirectoryId("");
+      return;
+    }
+    if (!objectDirectories.some(directory => directory.id === selectedDirectoryId)) {
+      setSelectedDirectoryId(objectDirectories[0].id);
+    }
+  }, [objectDirectories, selectedDirectoryId]);
+  const selectedDirectory = objectDirectories.find(directory => directory.id === selectedDirectoryId) || objectDirectories[0] || null;
+  const objectDirectory = useMemo(
+    () => [...safeArray(selectedDirectory?.items)].sort((left, right) => left.title.localeCompare(right.title)),
+    [selectedDirectory]
+  );
   const selectedQueueItem = queue.find(item => item.id === selectedQueueId) || queue[0] || null;
   const searchResults = useMemo(() => {
     const normalized = clean(query).toLowerCase();
@@ -690,8 +699,8 @@ export default function IXITransactCommandCenter() {
           <nav aria-label="TRAN$ACT workspaces">{WORKSPACES.map(([id, label, number]) => <button type="button" key={id} data-active={activeWorkspace === id} onClick={() => { setActiveWorkspace(id); setActiveModuleId(""); setSelectedRecord(null); }}><span>{number}</span><strong>{label}</strong>{id === "today" && queue.length ? <b>{queue.length}</b> : null}</button>)}</nav>
           <section className={styles.objectDirectory} aria-label="Governed AOS Object directory">
             <header>
-              <div><span>AOS OBJECTS</span><strong>{objectDirectory.length}</strong></div>
-              <label><span>SORT</span><select value={directorySort} onChange={event => setDirectorySort(event.target.value)}><option value="kind">TYPE</option><option value="name">NAME</option><option value="recent">RECENT</option></select></label>
+              <div><span>{selectedDirectory?.label || "AOS OBJECTS"}</span><strong>{objectDirectory.length}</strong></div>
+              <label><span>INDEX</span><select value={selectedDirectory?.id || ""} onChange={event => setSelectedDirectoryId(event.target.value)}>{objectDirectories.map(directory => <option value={directory.id} key={directory.id}>{directory.label.toUpperCase()}</option>)}</select></label>
             </header>
             <div className={styles.objectDirectoryList} role="list">
               {objectDirectory.map(item => (

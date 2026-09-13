@@ -197,13 +197,21 @@ function getMoneyValue(record = {}) {
 
 function getImageUrl(record = {}) {
   const publicData = getPublicData(record);
+  const fields = record?.fields || {};
+  const metadata = record?.metadata || {};
+  const presentation = record?.presentation || record?.selectedPresentation || {};
   const candidates = [
     record?.logoUrl,
+    record?.primaryImageUrl,
     record?.imageUrl,
     typeof record?.image === "string" ? record.image : "",
     record?.image?.url,
     record?.image?.attributes?.variants?.default?.url,
     safeArray(record?.imageUrls)[0],
+    fields?.primaryImageUrl,
+    metadata?.primaryImageUrl,
+    metadata?.presentation?.primaryImageUrl,
+    presentation?.primaryImageUrl,
     publicData?.imageUrl,
     safeArray(publicData?.imageUrls)[0],
     record?.media?.[0]?.url,
@@ -214,6 +222,34 @@ function getImageUrl(record = {}) {
   ];
 
   return candidates.map(clean).find(Boolean) || "";
+}
+
+export function getIXITransactObjectDirectories(
+  contexts = [],
+  systemIndexes = []
+) {
+  const contextsByObjectId = new Map(
+    safeArray(contexts)
+      .map(context => [clean(context?.sourceId), context])
+      .filter(([objectId]) => objectId)
+  );
+
+  return safeArray(systemIndexes).flatMap(index => {
+    const id = firstText(index?.objectId, index?.indexId);
+    const label = firstText(index?.displayName, index?.label, index?.name);
+    if (!id || !label) return [];
+
+    const seen = new Set();
+    const items = safeArray(index?.items).flatMap(item => {
+      const objectId = getProjectedItemObjectId(item);
+      const context = contextsByObjectId.get(objectId);
+      if (!context || seen.has(objectId)) return [];
+      seen.add(objectId);
+      return [context];
+    });
+
+    return items.length ? [{ id, label, items }] : [];
+  });
 }
 
 function getDateValue(record = {}) {
