@@ -1,3 +1,4 @@
+import IXIMoneyInput from "../../IXIMoneyInput";
 import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import Image from "next/image";
@@ -131,11 +132,11 @@ function QuoteEditor({ input, patch, patchRpo, setAdditionalTerms }) {
       <Field label="EQUIPMENT DESCRIPTION" wide><Area value={input.equipmentDescription} onChange={value => patch("equipmentDescription", value)} /></Field>
     </div></section>
     <section><h2>PRICE</h2><div className="qt-form-grid money-grid">
-      <Field label="EQUIPMENT PRICE"><Input inputMode="decimal" value={input.quotedPrice} onChange={value => patch("quotedPrice", value)} /></Field>
-      <Field label="SALES TAX"><Input inputMode="decimal" value={input.tax} onChange={value => patch("tax", value)} /></Field>
-      <Field label="FREIGHT"><Input inputMode="decimal" value={input.freight} onChange={value => patch("freight", value)} /></Field>
-      <Field label="OTHER FEES"><Input inputMode="decimal" value={input.fees} onChange={value => patch("fees", value)} /></Field>
-      <Field label="TRADE ALLOWANCE"><Input inputMode="decimal" value={input.tradeAllowance} onChange={value => patch("tradeAllowance", value)} /></Field>
+      <Field label="EQUIPMENT PRICE"><IXIMoneyInput inputMode="decimal" value={input.quotedPrice} onValueChange={value => patch("quotedPrice", value)} /></Field>
+      <Field label="SALES TAX"><IXIMoneyInput inputMode="decimal" value={input.tax} onValueChange={value => patch("tax", value)} /></Field>
+      <Field label="FREIGHT"><IXIMoneyInput inputMode="decimal" value={input.freight} onValueChange={value => patch("freight", value)} /></Field>
+      <Field label="OTHER FEES"><IXIMoneyInput inputMode="decimal" value={input.fees} onValueChange={value => patch("fees", value)} /></Field>
+      <Field label="TRADE ALLOWANCE"><IXIMoneyInput inputMode="decimal" value={input.tradeAllowance} onValueChange={value => patch("tradeAllowance", value)} /></Field>
       <Field label="TRADE DESCRIPTION"><Input value={input.tradeDescription} onChange={value => patch("tradeDescription", value)} /></Field>
     </div></section>
     <section><h2>COMMERCIAL TERMS</h2><div className="qt-form-grid">
@@ -235,7 +236,7 @@ export default function IXIQuoteApp({ context = {}, object = {}, dealId = "", in
       <div className="qt-card-asset"><span>EQUIPMENT</span><strong>{draft.asset?.label || "CURRENT MACHINE"}</strong><small>{[draft.asset?.serialNumber, draft.asset?.stockNumber].filter(Boolean).join(" · ") || "PASSPORT-LINKED"}</small></div>
       <div className="qt-card-fields">
         <Field label="CUSTOMER / COMPANY"><Input value={input.customerName} onChange={value => patch("customerName", value)} placeholder="Name" /></Field>
-        <div className="qt-card-two"><Field label="PHONE"><Input value={input.customerPhone} onChange={value => patch("customerPhone", value)} placeholder="Phone" /></Field><Field label="PRICE"><Input inputMode="decimal" value={input.quotedPrice} onChange={value => patch("quotedPrice", value)} placeholder="$0" /></Field></div>
+        <div className="qt-card-two"><Field label="PHONE"><Input value={input.customerPhone} onChange={value => patch("customerPhone", value)} placeholder="Phone" /></Field><Field label="PRICE"><IXIMoneyInput inputMode="decimal" value={input.quotedPrice} onValueChange={value => patch("quotedPrice", value)} placeholder="$0" /></Field></div>
       </div>
       {input.dealType === "rental-purchase-option" ? <div className="qt-card-rpo"><RPOEditor compact rpo={input.rpo} patchRpo={patchRpo} /></div> : null}
       <div className="qt-card-total"><span>QUOTED TOTAL</span><strong>{money(draft.totals?.total)}</strong></div>

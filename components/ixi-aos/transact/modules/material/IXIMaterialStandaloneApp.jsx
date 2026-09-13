@@ -1,3 +1,4 @@
+import IXIMoneyInput from "../../IXIMoneyInput";
 import { useMemo, useRef, useState } from "react";
 
 import { createIXIMaterialUsage } from "./IXIMaterialCommands";
@@ -671,7 +672,7 @@ export default function IXIMaterialStandaloneApp({
             {t.unitCost} <em>*</em>
           </label>
           <div className="ms-field">
-            <input
+            <IXIMoneyInput
               className="ms-money"
               inputMode="decimal"
               value={unitCost}

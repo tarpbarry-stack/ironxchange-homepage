@@ -1,3 +1,4 @@
+import IXIMoneyInput, { IXINumericInput } from "../../IXIMoneyInput";
 import { useEffect, useMemo, useState } from "react";
 
 import { createIXIServiceQuote, updateIXIServiceQuote } from "./IXIServiceQuoteCommands";
@@ -527,7 +528,7 @@ export default function IXIServiceQuoteApp({
               <TextInput value={changeDescription} onChange={setChangeDescription} />
             </Field>
             <Field label="CUSTOMER PRICE DELTA">
-              <TextInput value={changeAmount} onChange={setChangeAmount} inputMode="decimal" />
+              <IXIMoneyInput value={changeAmount} onValueChange={setChangeAmount} inputMode="decimal" />
             </Field>
             <button
               className="sq-secondary"
@@ -686,16 +687,16 @@ export default function IXIServiceQuoteApp({
               </div>
               <div className="sq-grid2">
                 <Field label="CUSTOMER UNIT PRICE">
-                  <TextInput
+                  <IXIMoneyInput
                     value={line.unitPrice}
-                    onChange={value => updateLine(optionIndex, lineIndex, "unitPrice", value)}
+                    onValueChange={value => updateLine(optionIndex, lineIndex, "unitPrice", value)}
                     inputMode="decimal"
                   />
                 </Field>
                 <Field label="INTERNAL UNIT COST">
-                  <TextInput
+                  <IXIMoneyInput
                     value={line.unitCost}
-                    onChange={value => updateLine(optionIndex, lineIndex, "unitCost", value)}
+                    onValueChange={value => updateLine(optionIndex, lineIndex, "unitCost", value)}
                     inputMode="decimal"
                   />
                 </Field>
@@ -748,11 +749,11 @@ export default function IXIServiceQuoteApp({
           </select>
         </Field>
         <Field label="DEPOSIT VALUE">
-          <TextInput value={depositValue} onChange={setDepositValue} inputMode="decimal" />
+          <IXINumericInput currency={depositType === "fixed"} value={depositValue} onValueChange={setDepositValue} inputMode="decimal" />
         </Field>
       </div>
       <Field label="TAX">
-        <TextInput value={taxAmount} onChange={setTaxAmount} inputMode="decimal" />
+        <IXIMoneyInput value={taxAmount} onValueChange={setTaxAmount} inputMode="decimal" />
       </Field>
       <Field label="ASSUMPTIONS">
         <textarea value={assumptions} onChange={event => setAssumptions(event.target.value)} />

@@ -1,3 +1,4 @@
+import IXIMoneyInput from "../../IXIMoneyInput";
 import { useMemo, useState } from "react";
 
 import { createIXIServiceInvoice } from "./IXIServiceInvoiceCommands";
@@ -107,7 +108,7 @@ export default function IXIServiceInvoiceApp({ context = {}, object = {}, workOr
       <div className="sinv-callout"><b>{clean(r.source?.pricingType).replace(/-/g, " ").toUpperCase()}</b><br/>AUTHORIZED {money(r.billingRule?.authorized)} · ACTUAL BILLABLE {money(r.billingRule?.actualBillable)}</div>
       {r.billingRule?.authorizationException ? <div className="sinv-error">AUTHORIZATION EXCEPTION · {money(r.billingRule?.authorizationExceptionAmount)} ABOVE AUTHORIZED AMOUNT</div> : null}
       {r.status === "draft" ? <button className="sinv-primary" onClick={() => mutate(issueIXIServiceInvoice(r, actor), { action: "issue" })}>{t.issue}</button> : null}
-      {issued && !paid ? <><div className="sinv-section">{t.payment}</div><div className="sinv-grid2"><Field label="AMOUNT"><Input value={paymentAmount} onChange={setPaymentAmount} inputMode="decimal" /></Field><Field label="METHOD"><select value={paymentMethod} onChange={e => setPaymentMethod(e.target.value)}><option>ACH</option><option>WIRE</option><option>CHECK</option><option>CARD</option><option>CASH</option><option>OTHER</option></select></Field></div><Field label="REFERENCE"><Input value={paymentReference} onChange={setPaymentReference} /></Field><button className="sinv-primary" onClick={() => mutate(recordIXIServiceInvoicePayment(r, { amount: paymentAmount, method: paymentMethod, reference: paymentReference }, actor), { action: "record-payment" })}>RECORD PAYMENT</button></> : null}
+      {issued && !paid ? <><div className="sinv-section">{t.payment}</div><div className="sinv-grid2"><Field label="AMOUNT"><IXIMoneyInput value={paymentAmount} onValueChange={setPaymentAmount} inputMode="decimal" /></Field><Field label="METHOD"><select value={paymentMethod} onChange={e => setPaymentMethod(e.target.value)}><option>ACH</option><option>WIRE</option><option>CHECK</option><option>CARD</option><option>CASH</option><option>OTHER</option></select></Field></div><Field label="REFERENCE"><Input value={paymentReference} onChange={setPaymentReference} /></Field><button className="sinv-primary" onClick={() => mutate(recordIXIServiceInvoicePayment(r, { amount: paymentAmount, method: paymentMethod, reference: paymentReference }, actor), { action: "record-payment" })}>RECORD PAYMENT</button></> : null}
       {r.status === "draft" ? <><Field label="VOID REASON"><Input value={voidReason} onChange={setVoidReason} /></Field><button className="sinv-danger" onClick={() => mutate(voidIXIServiceInvoice(r, { reason: voidReason }, actor), { action: "void" })}>VOID DRAFT</button></> : null}
       <div className="sinv-section">ACTIVITY</div>{(r.timeline || []).slice().reverse().map(item => <div className="sinv-row" key={item.activityId}><div className="sinv-rowhead"><strong>{clean(item.type).replace(/-/g, " ").toUpperCase()}</strong><b>{item.amount ? money(item.amount) : ""}</b></div><small>{item.actorLabel || "SYSTEM"} · {item.occurredAt}</small></div>)}
       <button className="sinv-secondary" onClick={() => onBack?.()}>‹ TRAN$ACT</button>
@@ -130,9 +131,9 @@ export default function IXIServiceInvoiceApp({ context = {}, object = {}, workOr
     <div className="sinv-money"><span>PARTS / MATERIAL</span><b>{money(preview.charges?.material)}</b></div>
     <div className="sinv-money"><span>OUTSIDE SERVICE</span><b>{money(preview.charges?.outsideService)}</b></div>
     <div className="sinv-money"><span>OTHER</span><b>{money(preview.charges?.other)}</b></div>
-    <Field label="TRAVEL / FREIGHT"><Input value={travelFreightAmount} onChange={setTravelFreightAmount} inputMode="decimal" /></Field>
-    <div className="sinv-grid2"><Field label="TAX"><Input value={taxAmount} onChange={setTaxAmount} inputMode="decimal" /></Field><Field label="DEPOSIT / CREDIT"><Input value={depositCredit} onChange={setDepositCredit} inputMode="decimal" /></Field></div>
-    <Field label="OTHER CREDIT"><Input value={otherCredit} onChange={setOtherCredit} inputMode="decimal" /></Field>
+    <Field label="TRAVEL / FREIGHT"><IXIMoneyInput value={travelFreightAmount} onValueChange={setTravelFreightAmount} inputMode="decimal" /></Field>
+    <div className="sinv-grid2"><Field label="TAX"><IXIMoneyInput value={taxAmount} onValueChange={setTaxAmount} inputMode="decimal" /></Field><Field label="DEPOSIT / CREDIT"><IXIMoneyInput value={depositCredit} onValueChange={setDepositCredit} inputMode="decimal" /></Field></div>
+    <Field label="OTHER CREDIT"><IXIMoneyInput value={otherCredit} onValueChange={setOtherCredit} inputMode="decimal" /></Field>
     <div className="sinv-total"><span>AMOUNT DUE</span><strong>{money(preview.charges?.amountDue)}</strong></div>
     {preview.billingRule?.authorizationException ? <div className="sinv-error">AUTHORIZATION EXCEPTION · {money(preview.billingRule.authorizationExceptionAmount)} ABOVE AUTHORIZED AMOUNT</div> : null}
     <div className="sinv-section">{t.terms}</div>

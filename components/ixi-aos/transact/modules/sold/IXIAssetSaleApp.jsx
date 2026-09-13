@@ -1,3 +1,4 @@
+import IXIMoneyInput from "../../IXIMoneyInput";
 import { useEffect, useMemo, useState } from "react";
 import {
   createIXIAssetSaleDraft,
@@ -392,7 +393,7 @@ export default function IXIAssetSaleApp({
 
     {!record && invoiceCollectible && shownCollection.balanceDue > 0.005 ? <>
       <div className="sale-grid">
-        <Field label={copy.paymentAmount}><Input value={payAmount} onChange={setPayAmount} inputMode="decimal" /></Field>
+        <Field label={copy.paymentAmount}><IXIMoneyInput value={payAmount} onValueChange={setPayAmount} inputMode="decimal" /></Field>
         <Field label={copy.paymentDate}><Input type="date" value={payDate} onChange={setPayDate} /></Field>
       </div>
       <div className="sale-grid">

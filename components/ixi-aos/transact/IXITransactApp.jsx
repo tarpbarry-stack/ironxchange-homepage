@@ -1,3 +1,4 @@
+import { withIXIBillBalance } from "./modules/bill/IXIBillBalance";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import IXIMachineRail from "../../IXIMachineRail";
@@ -625,7 +626,7 @@ export default function IXITransactApp({
         object?.relatedFinancialRecords ||
         object?.financialRecords ||
         [];
-    return candidates.map(hydrateIXIBillRecord).filter(Boolean);
+    return candidates.map(hydrateIXIBillRecord).filter(Boolean).map(record => withIXIBillBalance(record, candidates));
   }, [object, financialRecords]);
   const purchaseOrderSnapshot = useMemo(() => {
     const candidates = financialRecords.length

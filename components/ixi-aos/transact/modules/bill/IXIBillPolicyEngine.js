@@ -107,6 +107,18 @@ export function canIXIActorApproveBillVariance({ record = {}, actor = {}, author
 
 export function getIXIBillAvailableActions({ record = {}, actor = {}, authority = {}, policy = DEFAULT_IXI_BILL_POLICY } = {}) {
   const actions = new Set();
+  const server = authority.serverActions;
+  if (server && typeof server === "object") {
+    const approved = clean(record.approval?.status) === "approved";
+    const active = clean(record.status) !== "void";
+    if (!active) return actions;
+    if (server["financial.document.patch"] && (!approved || server["financial.document.approve"])) actions.add("edit");
+    if (!approved && server["financial.document.approve"]) actions.add(clean(record.purchaseMatch?.status) === "exception" ? "approve-variance" : "approve");
+    if (!approved && server["financial.document.reject"]) { actions.add("return"); actions.add("reject"); }
+    if (approved && Number(record.payment?.openBalance ?? (Number(record.bill?.amount || 0) - Number(record.payment?.amountPaid || 0))) > 0 && server["financial.payment.create"]) { actions.add("record-payment"); actions.add("schedule-payment"); }
+    if (!Number(record.payment?.amountPaid) && server["financial.document.void"]) actions.add("void");
+    return actions;
+  }
   const status = clean(record.status);
   const approval = clean(record?.approval?.status);
   const payment = clean(record?.payment?.status);

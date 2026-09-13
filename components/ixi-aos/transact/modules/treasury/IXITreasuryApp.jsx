@@ -1,3 +1,4 @@
+import IXIMoneyInput from "../../IXIMoneyInput";
 import { useMemo, useState } from "react";
 import {
   createIXITreasuryAccount,
@@ -458,7 +459,7 @@ export default function IXITreasuryApp({
               />
             </Field>
             <Field label="BOOK BALANCE *">
-              <input
+              <IXIMoneyInput allowNegative
                 inputMode="decimal"
                 value={accountInput.openingBalance}
                 onChange={(e) =>
@@ -499,7 +500,7 @@ export default function IXITreasuryApp({
             </Field>
           </div>
           <Field label="MINIMUM / RESERVED CASH">
-            <input
+            <IXIMoneyInput
               inputMode="decimal"
               value={accountInput.minimumCash}
               onChange={(e) =>
@@ -617,7 +618,7 @@ export default function IXITreasuryApp({
                 </select>
               </Field>
               <Field label="AMOUNT">
-                <input
+                <IXIMoneyInput
                   inputMode="decimal"
                   value={action.amount}
                   onChange={(e) =>
@@ -686,7 +687,7 @@ export default function IXITreasuryApp({
             </Field>
             <div className="tr-grid2">
               <Field label="AMOUNT">
-                <input
+                <IXIMoneyInput
                   inputMode="decimal"
                   value={action.amount}
                   onChange={(e) =>
@@ -733,7 +734,7 @@ export default function IXITreasuryApp({
             />
           </Field>
           <Field label="STATEMENT BALANCE">
-            <input
+            <IXIMoneyInput allowNegative
               inputMode="decimal"
               value={recon.statementBalance}
               onChange={(e) =>
@@ -744,7 +745,7 @@ export default function IXITreasuryApp({
         </div>
         <div className="tr-grid2">
           <Field label="DEPOSITS IN TRANSIT">
-            <input
+            <IXIMoneyInput
               inputMode="decimal"
               value={recon.depositsInTransit}
               onChange={(e) =>
@@ -753,7 +754,7 @@ export default function IXITreasuryApp({
             />
           </Field>
           <Field label="OUTSTANDING PAYMENTS">
-            <input
+            <IXIMoneyInput
               inputMode="decimal"
               value={recon.outstandingPayments}
               onChange={(e) =>
@@ -763,7 +764,7 @@ export default function IXITreasuryApp({
           </Field>
         </div>
         <Field label="OTHER RECONCILING ITEMS">
-          <input
+          <IXIMoneyInput allowNegative
             inputMode="decimal"
             value={recon.otherReconcilingItems}
             onChange={(e) =>

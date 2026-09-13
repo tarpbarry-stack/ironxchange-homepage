@@ -1,3 +1,4 @@
+import IXIMoneyInput from "../../IXIMoneyInput";
 import {
   useEffect,
   useMemo,
@@ -714,7 +715,7 @@ export default function IXIExpenseApp({
           <label>{t.amount} <em>*</em></label>
           <div className={`ex-field ex-money ${errors.amount ? "bad" : ""}`}>
             <span>$</span>
-            <input inputMode="decimal" value={amount} onChange={event => setAmount(event.target.value)} placeholder="0.00" disabled={saving} />
+            <IXIMoneyInput inputMode="decimal" value={amount} onChange={event => setAmount(event.target.value)} placeholder="0.00" disabled={saving} />
           </div>
         </div>
 

@@ -268,13 +268,18 @@ export function applyIXIBillAction({
       ...next,
       identity: { ...(next.identity || {}), invoiceNumber },
       bill,
+      approval: clean(next.approval?.status) === "returned" ? { ...next.approval, status: "pending" } : next.approval,
+      payment: { ...next.payment, status: Number(next.payment?.amountPaid || 0) >= Number(bill.amount) ? "paid" : Number(next.payment?.amountPaid || 0) > 0 ? "partial" : "unpaid" },
       purchaseMatch: { ...(next.purchaseMatch || {}), billedAmount: money(bill.amount), variance, status: hasPo ? (next?.purchaseMatch?.receivedComplete && Math.abs(variance) < 0.005 ? "matched" : "exception") : "n/a", varianceApproval: null },
       timeline: appendTimeline(next, {
         activityId: `ACT-EDIT-${now}`,
         type: "bill-edited",
         label: "Bill edited",
         actorLabel: who.label,
-        occurredAt: now
+        occurredAt: now,
+        changes: Object.keys(bill).filter(key => JSON.stringify(record.bill?.[key]) !== JSON.stringify(bill[key])).map(field => ({ field, before: record.bill?.[field] ?? null, after: bill[field] })),
+        invoiceNumberBefore: record.identity?.invoiceNumber,
+        invoiceNumberAfter: invoiceNumber
       })
     };
   }

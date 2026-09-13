@@ -41,17 +41,14 @@ export function createIXIFreightOrderInput({ context = {}, object = {}, input = 
       escortEstimate:money(input.escortEstimate), fuelSurchargeEstimate:money(input.fuelSurchargeEstimate), otherEstimate:money(input.otherEstimate),
       expectedProvided:[input.agreedAmount,input.permitEstimate,input.escortEstimate,input.fuelSurchargeEstimate,input.otherEstimate].some(value=>clean(value)!=="")
     },
-    metadata:{ payer:clean(input.payer || "company"), customerRebill:Boolean(input.customerRebill), acquisitionCost:clean(input.purpose)==="acquisition-inbound", notes:clean(input.notes) }
+    metadata:{ payer:clean(input.payer || "company"), customerRebill:Boolean(input.customerRebill), acquisitionCost:clean(input.purpose)==="acquisition-inbound", notes:clean(input.notes), notificationRecipients:Array.isArray(input.notificationRecipients)?input.notificationRecipients:[] }
   };
 }
 
 export function validateIXIFreightOrderInput(payload = {}) {
   const errors = {};
   if (!clean(payload?.asset?.passportId)) errors.asset = "Machine IXI Passport is required.";
-  if (!clean(payload?.route?.origin?.label || payload?.route?.origin?.address || payload?.route?.origin?.objectId)) errors.origin = "Origin is required.";
-  if (!clean(payload?.route?.destination?.label || payload?.route?.destination?.address || payload?.route?.destination?.objectId)) errors.destination = "Destination is required.";
   if (!IXI_FREIGHT_PURPOSES.includes(clean(payload.purpose))) errors.purpose = "Purpose is invalid.";
-  if (payload.execution?.mode === "external-carrier" && !clean(payload.execution?.carrierName)) errors.carrierName = "Carrier is required for an external load.";
   if (number(payload.economics?.agreedAmount) < 0) errors.agreedAmount = "Agreed amount cannot be negative.";
   return { valid:Object.keys(errors).length===0, errors };
 }

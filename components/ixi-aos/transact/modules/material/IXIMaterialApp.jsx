@@ -1,3 +1,4 @@
+import IXIMoneyInput from "../../IXIMoneyInput";
 import { useMemo, useRef, useState } from "react";
 import {
   createIXIMaterialDraft,
@@ -377,7 +378,7 @@ export default function IXIMaterialApp({
           </label>
           <div className="mat-field">
             <span>$</span>
-            <input
+            <IXIMoneyInput
               className="mat-cost"
               inputMode="decimal"
               value={unitCost}

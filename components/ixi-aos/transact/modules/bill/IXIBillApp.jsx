@@ -1,3 +1,7 @@
+import { hydrateIXIBillRecord } from "./IXIBillContract";
+import { withIXIBillBalance } from "./IXIBillBalance";
+import { loadIXIAosFinancialAccessContext, loadIXIAosPassportFinancialDocuments } from "../../../financial-runtime/IXIAosFinancialReadClient";
+import IXIMoneyInput from "../../IXIMoneyInput";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { validateIXITransactFile, createIXIPendingAttachment } from "../../IXITransactFilePolicy";
@@ -129,13 +133,16 @@ export default function IXIBillApp({
   context = {},
   object = null,
   initialRecords = [],
-  authority = {},
+  authority: suppliedAuthority = {},
   policy = undefined,
   language = "en",
   onLanguageChange = null,
   onBack = null,
   onRecordChange = null
 }) {
+  const [serverActions, setServerActions] = useState({});
+  const authority = { ...suppliedAuthority, serverActions };
+  useEffect(() => { const controller = new AbortController(); loadIXIAosFinancialAccessContext({ signal: controller.signal }).then(data => setServerActions(data.capabilities || {})).catch(error => { if (error.name !== "AbortError") setError("Bill permissions could not load. Reopen Bills to retry."); }); return () => controller.abort(); }, []);
   const [records, setRecords] = useState(Array.isArray(initialRecords) ? initialRecords : []);
   const [mode, setMode] = useState("queue");
   const [selectedId, setSelectedId] = useState("");
@@ -205,6 +212,7 @@ export default function IXIBillApp({
     if ((input.attachments || []).some(item => !clean(item?.storageKey || item?.key) || !["uploaded", "available", "verified"].includes(clean(item?.status).toLowerCase()))) nextErrors.attachments = true;
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length) {
+      setError("Complete vendor, invoice number, description, a positive amount, and a valid invoice date. Due date may be blank or on/after the invoice date.");
       if (nextErrors.attachments) setError("The invoice file must finish secure upload before this Bill can be saved. Remove it or retry after upload completes.");
       return;
     }
@@ -235,12 +243,18 @@ export default function IXIBillApp({
       if (action === "record-payment") {
         const persisted = await createIXIBillPayment({ object: originObject, context, record: selected, input: payload, metadata: { source: "ixi-transact-bill-card" } });
         paymentResponse = persisted.response;
+        const documents = await loadIXIAosPassportFinancialDocuments({ passportId: context.primary?.passportId });
+        const fresh = documents.map(hydrateIXIBillRecord).filter(Boolean).map(record => withIXIBillBalance(record, documents));
+        setRecords(fresh);
+        await onRecordChange?.(fresh.find(record => record.financialBinding?.financialDocumentId === selected.financialBinding?.financialDocumentId) || selected, { action, paymentResponse, payload });
+        return true;
       }
       const local = applyIXIBillAction({ record: selected, action, actor: context.actor || {}, authority, policy, payload });
       const persisted = await updateIXIBill({ record: local, action, metadata: { source: "ixi-transact-bill-card", paymentFinancialDocumentId: clean(paymentResponse?.data?.record?.financialDocument?.financialDocumentId || paymentResponse?.financialDocument?.financialDocumentId) } });
       const next = persisted.record;
       await onRecordChange?.(next, { action, paymentResponse, response: persisted.response, payload });
       setRecords(current => current.map(item => clean(item?.identity?.billRecordId || item?.identity?.billDocumentId) === selectedId ? next : item));
+      return true;
     } catch (err) {
       setError(clean(err?.message) || "Bill action failed.");
     } finally {
@@ -260,14 +274,14 @@ export default function IXIBillApp({
           <div className="bill-form-grid">
             <label className="wide">{t.vendor}<input className={errors.vendorLabel ? "invalid" : ""} value={input.vendorLabel} onChange={event => patch("vendorLabel", event.target.value)} /></label>
             <label>{t.invoice}<input className={errors.invoiceNumber ? "invalid" : ""} value={input.invoiceNumber} onChange={event => patch("invoiceNumber", event.target.value)} /></label>
-            <label>{t.amount}<input className={errors.amount ? "invalid" : ""} inputMode="decimal" value={input.amount} onChange={event => patch("amount", event.target.value)} /></label>
+            <label>{t.amount}<IXIMoneyInput className={errors.amount ? "invalid" : ""} inputMode="decimal" value={input.amount} onChange={event => patch("amount", event.target.value)} /></label>
             <label className="wide">{t.description}<textarea className={errors.description ? "invalid" : ""} value={input.description} onChange={event => patch("description", event.target.value)} /></label>
             <label>{t.invoiceDate}<input className={errors.invoiceDate ? "invalid" : ""} type="date" value={input.invoiceDate} onChange={event => patch("invoiceDate", event.target.value)} /></label>
             <label>{t.dueDate}<input type="date" value={input.dueDate} onChange={event => patch("dueDate", event.target.value)} /></label>
             <label>{t.category}<input value={input.category} onChange={event => patch("category", event.target.value)} placeholder="Electric / Utilities" /></label>
             <label>{t.related}<input readOnly value={input.relatedLabel || context.primary?.label || ""} /></label>
             <label>{t.po}<input value={input.purchaseOrderNumber} onChange={event => patch("purchaseOrderNumber", event.target.value)} placeholder="None / PO-####" /></label>
-            <label>{t.poCommitted}<input inputMode="decimal" value={input.poCommittedAmount} onChange={event => patch("poCommittedAmount", event.target.value)} /></label>
+            <label>{t.poCommitted}<IXIMoneyInput inputMode="decimal" value={input.poCommittedAmount} onChange={event => patch("poCommittedAmount", event.target.value)} /></label>
             <label>{t.received}<select value={input.receivedComplete ? "yes" : "no"} onChange={event => patch("receivedComplete", event.target.value === "yes")}><option value="no">{t.no}</option><option value="yes">{t.yes}</option></select></label>
             <label className="wide">{t.document}<div className="bill-file-box"><input ref={fileRef} type="file" accept="application/pdf,image/jpeg,image/png" onChange={event => chooseFile(event.target.files?.[0])} /><small>{input.attachments?.[0]?.fileName || t.fileHelp}</small></div></label>
             <label className="wide">{t.notes}<textarea value={input.notes} onChange={event => patch("notes", event.target.value)} /></label>

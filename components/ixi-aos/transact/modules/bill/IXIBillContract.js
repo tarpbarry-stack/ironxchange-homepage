@@ -156,6 +156,7 @@ export function hydrateIXIBillRecord(financialRecord = {}) {
   const record = document.billRecord;
   return {
     ...record,
+    documents: Array.isArray(document.attachments) ? document.attachments : record.documents || [],
     identity: {
       ...(record.identity || {}),
       billDocumentId: clean(document.financialDocumentId),

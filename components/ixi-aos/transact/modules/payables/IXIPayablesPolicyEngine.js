@@ -29,7 +29,7 @@ export function getIXIPayablesPolicy({ context = {}, payable = null } = {}) {
     has(permissions, "financial.payment.create");
   const canApplyCredit =
     recognized &&
-    open &&
+    Number(payable?.originalAmount) > Number(payable?.credited || 0) &&
     has(
       permissions,
       "financial.vendor-credit.apply",

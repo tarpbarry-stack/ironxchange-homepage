@@ -1,3 +1,4 @@
+import IXIMoneyInput from "../../IXIMoneyInput";
 import { useMemo, useState } from "react";
 
 import {
@@ -194,7 +195,7 @@ export default function IXIPurchaseOrderApp({
           <label>{t.what}</label><textarea value={directDraft.description} onChange={e=>setDirectDraft(c=>({...c,description:e.target.value}))}/>
           <label>{t.reason}</label><textarea value={directDraft.businessReason} onChange={e=>setDirectDraft(c=>({...c,businessReason:e.target.value}))}/>
           <label>ITEM</label><input value={directDraft.lines[0].description} onChange={e=>patchDirectLine("description",e.target.value)}/>
-          <div className="ixi-po-grid2"><div><label>QTY</label><input value={directDraft.lines[0].quantity} onChange={e=>patchDirectLine("quantity",e.target.value)}/></div><div><label>UNIT COST</label><input value={directDraft.lines[0].estimatedUnitCost} onChange={e=>patchDirectLine("estimatedUnitCost",e.target.value)}/></div></div>
+          <div className="ixi-po-grid2"><div><label>QTY</label><input value={directDraft.lines[0].quantity} onChange={e=>patchDirectLine("quantity",e.target.value)}/></div><div><label>UNIT COST</label><IXIMoneyInput value={directDraft.lines[0].estimatedUnitCost} onChange={e=>patchDirectLine("estimatedUnitCost",e.target.value)}/></div></div>
         </div>
         <button className="ixi-po-wide" type="button" onClick={rebuildDirectRecord}>CALCULATE AUTHORITY</button>
         <div className="ixi-po-section">{t.approval}</div>
@@ -262,7 +263,7 @@ export default function IXIPurchaseOrderApp({
       {actions.has(IXI_PO_ACTIONS.MATCH_BILL)?<div className="ixi-po-inline">
         <label>{t.invoiceNumber}</label><input value={billForm.invoiceNumber} onChange={e=>setBillForm(c=>({...c,invoiceNumber:e.target.value}))}/>
         <label>{t.invoiceDate}</label><input type="date" value={billForm.invoiceDate} onChange={e=>setBillForm(c=>({...c,invoiceDate:e.target.value}))}/>
-        <label>{t.billAmount}</label><input value={billForm.amount} onChange={e=>setBillForm(c=>({...c,amount:e.target.value}))}/>
+        <label>{t.billAmount}</label><IXIMoneyInput value={billForm.amount} onChange={e=>setBillForm(c=>({...c,amount:e.target.value}))}/>
         <button className="ixi-po-wide" disabled={busy} onClick={()=>runAction(IXI_PO_ACTIONS.MATCH_BILL)}>{t.saveBill}</button>
       </div>:null}
       {actions.has(IXI_PO_ACTIONS.APPROVE_VARIANCE)?<button className="ixi-po-wide" disabled={busy} onClick={()=>runAction(IXI_PO_ACTIONS.APPROVE_VARIANCE)}>{t.approveVariance}</button>:null}

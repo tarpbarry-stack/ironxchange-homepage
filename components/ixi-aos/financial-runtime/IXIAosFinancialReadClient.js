@@ -157,3 +157,8 @@ export async function uploadIXIAosFinancialAttachment({
 export function getIXIFinancialDocument(record = {}) {
   return record?.financialDocument || record?.record?.financialDocument || null;
 }
+
+export async function loadIXIAosFinancialHistory(financialDocumentId, { signal } = {}) {
+  const payload = await request(`/api/ixi/financial/documents/${encodeURIComponent(financialDocumentId)}/history`, { signal }, "Financial history could not load.");
+  return payload.data?.history || [];
+}

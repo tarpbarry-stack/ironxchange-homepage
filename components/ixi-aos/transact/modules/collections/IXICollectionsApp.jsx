@@ -1,3 +1,4 @@
+import IXIMoneyInput from "../../IXIMoneyInput";
 import { useEffect, useMemo, useState } from "react";
 import { buildIXIReceivableProjection } from "./IXICollectionsProjectionEngine";
 import {
@@ -452,10 +453,10 @@ export default function IXICollectionsApp({
             <Input value={depositCustomer} onChange={setDepositCustomer} />
           </Field>
           <Field label={language === "es" ? "MONTO" : "AMOUNT"}>
-            <Input
+            <IXIMoneyInput
               inputMode="decimal"
               value={depositAmount}
-              onChange={setDepositAmount}
+              onValueChange={setDepositAmount}
             />
           </Field>
         </div>
@@ -691,9 +692,9 @@ export default function IXICollectionsApp({
           <div className="coll-section">{copy.promise}</div>
           <div className="coll-grid2">
             <Field label="AMOUNT">
-              <Input
+              <IXIMoneyInput
                 value={promiseAmount}
-                onChange={setPromiseAmount}
+                onValueChange={setPromiseAmount}
                 inputMode="decimal"
               />
             </Field>
@@ -725,9 +726,9 @@ export default function IXICollectionsApp({
           <div className="coll-section">{copy.dispute}</div>
           <div className="coll-grid2">
             <Field label="AMOUNT">
-              <Input
+              <IXIMoneyInput
                 value={disputeAmount}
-                onChange={setDisputeAmount}
+                onValueChange={setDisputeAmount}
                 inputMode="decimal"
               />
             </Field>
@@ -753,9 +754,9 @@ export default function IXICollectionsApp({
           <div className="coll-section">{copy.payment}</div>
           <div className="coll-grid2">
             <Field label="AMOUNT">
-              <Input
+              <IXIMoneyInput
                 value={paymentAmount}
-                onChange={setPaymentAmount}
+                onValueChange={setPaymentAmount}
                 inputMode="decimal"
               />
             </Field>
@@ -785,9 +786,9 @@ export default function IXICollectionsApp({
           <div className="coll-section">{copy.credit}</div>
           <div className="coll-grid2">
             <Field label="AMOUNT">
-              <Input
+              <IXIMoneyInput
                 value={creditAmount}
-                onChange={setCreditAmount}
+                onValueChange={setCreditAmount}
                 inputMode="decimal"
               />
             </Field>
