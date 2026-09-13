@@ -1,0 +1,174 @@
+{
+  "backend": {
+    "commit": "da2d6456815a2580ed13cc19779e183ef4e39f75",
+    "failures": [],
+    "files": 417,
+    "repository": "tarpbarry-stack/ixi-core"
+  },
+  "backups": {
+    "bucket": "ixi-core-recovery-459212966383-us-east-2",
+    "businessTablePitr": {
+      "enabled": true,
+      "enabledFrom": "2026-09-13",
+      "retentionDays": 35,
+      "tables": [
+        "ixi-financial-v1",
+        "IXIFreight",
+        "IXITickets"
+      ]
+    },
+    "encryption": "AES256",
+    "hourlyTimer": "active",
+    "integrityTimer": "active",
+    "latestObject": {
+      "ContentLength": 55333409,
+      "LastModified": "2026-09-13T01:20:40+00:00",
+      "Metadata": {
+        "sha256": "5c7ee1146d3358fa032a863b8e4d67bb16d11a2d276a07ad3bf03651e3912a05"
+      },
+      "ServerSideEncryption": "AES256",
+      "VersionId": "c1HICYrIYoEqzsKNX5qAoi3b2_wyDY9c"
+    },
+    "latestReceipt": {
+      "bucket": "ixi-core-recovery-459212966383-us-east-2",
+      "census": {
+        "activeIdentitySha256": "0e48fc8d033ac19924a33fb61c4bc04f616932c9b16f48944e812101274cc181",
+        "activeObjects": 56,
+        "collectionChecksums": {
+          "accounts.json": "cca9977aa95180857dce4dcc747ad927a87461f52b75f745ad668a49b0ab83a1",
+          "card-templates.json": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+          "customer-object-types.json": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+          "entities.json": "e6a073c5eef28e575e68c440841a761186072dcfec2f7eaf238ae6c893e61221",
+          "events.json": "be410a76b93fe2ead6c386c56b99fb9fd6c5b01391fe27376a7d4d7125f23146",
+          "expenses.json": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+          "face-assignments.json": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+          "face-audit.json": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+          "face-library.json": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+          "face-versions.json": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+          "idempotency.json": "c78a7b2296f57fd7e9b57150553c93b3feab0c19a9197da6890df2e99c3685fe",
+          "import-jobs.json": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+          "imports.json": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+          "internal-auth-replay.json": "7cddb17066a406971376e0a315024f6b6bd2a5998d29ebf056079422b0452891",
+          "job-tickets.json": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+          "memberships.json": "24702bbdae408185c45f3a4a8bbc7a92864f3e4853a2ec8880ea79630ce47540",
+          "movements.json": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+          "notifications.json": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+          "objects.json": "7c9ffd7638af855924bbd718bd7aabbcda807b6a7b7841eb95a44d7dbe34ba26",
+          "permissions.json": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+          "projections.json": "41ad7fd316fd93ebd2c14ee1265279456e7fab63251713c0804e53e5a78d21c7",
+          "relationships.json": "465ad2cf0cde953c6d551022e3769c64668c4b28b562957248c0e530480fd985",
+          "work-orders.json": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+          "workspace-sessions.json": "d4a893434a93ca4c3572e5f815b7912b3e0a3daa9ca4fa37f193ddc5e0fc6b59"
+        },
+        "collections": 24,
+        "integrity": "ok",
+        "objects": 101,
+        "passports": 228
+      },
+      "consistency": "sqlite-snapshot-stable-passports",
+      "createdAt": "2026-09-13T01:19:29.685585+00:00",
+      "key": "recovery/2026-09-13T01-19-29-685585+00-00-5c7ee1146d33.tar.gz",
+      "ok": true,
+      "sha256": "5c7ee1146d3358fa032a863b8e4d67bb16d11a2d276a07ad3bf03651e3912a05",
+      "versionId": "c1HICYrIYoEqzsKNX5qAoi3b2_wyDY9c"
+    },
+    "private": true,
+    "scheduledServiceExitCode": 0,
+    "versioned": true,
+    "versions": [
+      {
+        "IsLatest": true,
+        "Key": "recovery/2026-09-13T01-16-21-193267+00-00-8c0fa54ebcd5.tar.gz",
+        "LastModified": "2026-09-13T01:17:27+00:00",
+        "Size": 55282962,
+        "VersionId": "J8mwbdujkynzYjihLn_DJM_H7QBNeqNX"
+      },
+      {
+        "IsLatest": true,
+        "Key": "recovery/2026-09-13T01-19-29-685585+00-00-5c7ee1146d33.tar.gz",
+        "LastModified": "2026-09-13T01:20:40+00:00",
+        "Size": 55333409,
+        "VersionId": "c1HICYrIYoEqzsKNX5qAoi3b2_wyDY9c"
+      }
+    ]
+  },
+  "browser": {
+    "aos": {
+      "boardCardsAfterCommand": 9,
+      "boardChildCount": 6,
+      "boardPersistedAfterReload": true,
+      "finalArrangementPersistedAfterReload": true,
+      "initialBoardCards": 3,
+      "outDisplayedSelectedExistingChild": true,
+      "recallRestoredExactOriginalArrangement": true,
+      "returnRestoredExactOriginalArrangement": true
+    },
+    "transact": {
+      "existingMachineScope": "Financial CURRENT",
+      "noFinancialRecordsWritten": true,
+      "passportRecordCount": 13,
+      "scopeErrorAbsent": true
+    }
+  },
+  "data": {
+    "activeObjects": 56,
+    "allCollectionChecksumsValid": true,
+    "businessChecksums": {
+      "objects.json": "7c9ffd7638af855924bbd718bd7aabbcda807b6a7b7841eb95a44d7dbe34ba26",
+      "relationships.json": "465ad2cf0cde953c6d551022e3769c64668c4b28b562957248c0e530480fd985"
+    },
+    "collections": 24,
+    "currentIdempotency": {
+      "updatedAt": "2026-09-13T01:28:52.433Z",
+      "version": 606
+    },
+    "idempotencyHistory": {
+      "lastArchivedAt": "2026-09-12T23:15:03.654Z",
+      "newCopiesSinceRelease": 0,
+      "retainedVersions": 591
+    },
+    "objects": 101,
+    "passportFileSha256": "7d03e013246265e94b579b7fa7fb37df05b528785bd7bf9215241b24dca102f6",
+    "passports": 228,
+    "uniquePassportIds": 228
+  },
+  "date": "2026-09-13",
+  "deployment": {
+    "ssmCommandId": "49656576-46d5-4d7d-8e3e-a9dc4552f6c1",
+    "status": "Success",
+    "workflowRun": "https://github.com/tarpbarry-stack/ironxchange-homepage/actions/runs/34729430314"
+  },
+  "frontend": {
+    "commit": "1d0a9d132f7cc17c24513f1887be6e1a9a9c0955",
+    "deploymentId": "dpl_BSZehEFEqQ7cx9eofvpQ4ALrXsu5",
+    "host": "preview.ironxchange.com",
+    "repository": "tarpbarry-stack/ironxchange-homepage"
+  },
+  "health": {
+    "live": {
+      "elapsedMs": 65,
+      "status": 200
+    },
+    "ready": {
+      "elapsedMs": 5,
+      "status": 200
+    },
+    "unsignedEmailStatus": 401,
+    "unsignedJournalPostStatus": 401
+  },
+  "limits": [
+    "Targeted stabilization, not certification of every financial balance or workflow.",
+    "Public-origin and SSH hardening, bare-domain routing, load testing and complete infrastructure disaster recovery remain separate work.",
+    "Existing idempotency history is retained; no database migration or compaction was performed.",
+    "Older open browser tabs must reload to use the deployed frontend."
+  ],
+  "schema": "ixi.stabilization-release-evidence.v1",
+  "status": "verified-stabilization-baseline",
+  "tests": {
+    "backend": 245,
+    "frontend": 345,
+    "frontendProductionBuild": "passed",
+    "integrity": 13,
+    "pairedHttpSqlite": "passed"
+  }
+}
