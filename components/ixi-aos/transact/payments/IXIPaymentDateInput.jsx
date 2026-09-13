@@ -4,9 +4,10 @@ import styles from "./IXIPayments.module.css";
 
 export default function IXIPaymentDateInput({ value = "", onValueChange, label, language = "en", disabled = false }) {
   const id = useId(), input = useRef(null), editing = useRef(false), restoreFocus = useRef(false);
-  // One display value: focusing or choosing a day must never replace an edit
-  // with the previous parent value. Format only when the user finishes typing.
-  const [text, setText] = useState(() => formatPaymentDate(value));
+  // Let the browser own the editable text and caret. React tracks the draft for
+  // validation/calendar state, but must not write a value back on each keystroke.
+  const initialText = useRef(formatPaymentDate(value));
+  const [text, setText] = useState(initialText.current);
   const [touched, setTouched] = useState(false);
   const [open, setOpen] = useState(false), [month, setMonth] = useState(0), [year, setYear] = useState(new Date().getFullYear());
   const [yearText, setYearText] = useState(String(year));
@@ -19,7 +20,11 @@ export default function IXIPaymentDateInput({ value = "", onValueChange, label, 
   const weekdays = Array.from({ length: 7 }, (_, index) => new Date(Date.UTC(2026, 2, 1 + index)).toLocaleDateString(locale, { weekday: "narrow", timeZone: "UTC" }));
 
   useEffect(() => {
-    if (!editing.current) setText(formatPaymentDate(value));
+    if (!editing.current) {
+      const next = formatPaymentDate(value);
+      if (input.current && input.current.value !== next) input.current.value = next;
+      setText(next);
+    }
   }, [value]);
   useEffect(() => {
     input.current?.setCustomValidity(text && !selected ? dateError : "");
@@ -38,8 +43,12 @@ export default function IXIPaymentDateInput({ value = "", onValueChange, label, 
   function close() { restoreFocus.current = true; setOpen(false); }
   function finishTyping() {
     setTouched(true);
-    const iso = parsePaymentDate(text);
-    if (iso) { setText(formatPaymentDate(iso)); onValueChange(iso); }
+    const draft = input.current?.value ?? text;
+    const iso = parsePaymentDate(draft);
+    const next = iso ? formatPaymentDate(iso) : draft;
+    if (input.current && input.current.value !== next) input.current.value = next;
+    setText(next);
+    onValueChange(iso || draft);
   }
   function toggle() {
     if (open) { close(); return; }
@@ -56,6 +65,7 @@ export default function IXIPaymentDateInput({ value = "", onValueChange, label, 
     setYear(date.getUTCFullYear()); setYearText(String(date.getUTCFullYear())); setMonth(date.getUTCMonth());
   }
   function chooseDate(date) {
+    if (input.current) input.current.value = formatPaymentDate(date);
     setText(formatPaymentDate(date)); setTouched(false); onValueChange(date); close();
   }
   return <div className={styles.dateField} onKeyDown={event => {
@@ -64,15 +74,16 @@ export default function IXIPaymentDateInput({ value = "", onValueChange, label, 
     <label htmlFor={id}>{label}</label>
     <div className={styles.dateEntry}>
       <input ref={input} id={id} aria-label={label} type="text" inputMode="text" autoComplete="off" placeholder="MM/DD/YYYY" required disabled={disabled}
-        aria-describedby={`${id}-hint${touched && !selected ? ` ${id}-error` : ""}`} aria-invalid={touched && !selected || undefined} value={text}
+        aria-describedby={`${id}-hint${touched && !selected ? ` ${id}-error` : ""}`} aria-invalid={touched && !selected || undefined} defaultValue={initialText.current}
         onFocus={() => { editing.current = true; }}
         onBlur={() => { editing.current = false; finishTyping(); }}
         onInvalid={() => setTouched(true)}
         onKeyDown={event => {
           if (event.key === "Enter") { event.preventDefault(); event.stopPropagation(); finishTyping(); }
         }}
-        onChange={event => {
-          const next = event.target.value, iso = parsePaymentDate(next);
+        onInput={event => {
+          editing.current = true;
+          const next = event.currentTarget.value, iso = parsePaymentDate(next);
           setText(next); setTouched(false); onValueChange(iso || next);
           if (iso && open) showDate(iso);
         }} />

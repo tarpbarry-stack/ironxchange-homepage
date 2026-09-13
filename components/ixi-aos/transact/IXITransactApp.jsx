@@ -2002,7 +2002,9 @@ export default function IXITransactApp({
             className={`tx-body ${moduleId === "freight" ? "tx-body-edge-to-edge" : "tx-body-safe-area"}`}
             data-ixi-transact-module={moduleId || "home"}
           >
-            {paymentsOpen ? <IXIPaymentsPanel context={context} object={object} language={locale.startsWith("es") ? "es" : "en"} onChanged={onFinancialRecordsChange} onClose={() => setPaymentsOpen(false)} /> : <>
+            {paymentsOpen ? <IXIPaymentsPanel context={context} object={object}
+              sourceIds={clean(selectedFinancialDocumentId) && ["bill", "expense"].includes(moduleId) ? [clean(selectedFinancialDocumentId)] : null}
+              language={locale.startsWith("es") ? "es" : "en"} onChanged={onFinancialRecordsChange} onClose={() => setPaymentsOpen(false)} /> : <>
               <button type="button" className="tx-payments-access" onClick={() => setPaymentsOpen(true)}>{locale.startsWith("es") ? "PAGOS · MARCAR PAGADO" : "PAYMENTS · MARK PAID"}</button>
               {body}
             </>}

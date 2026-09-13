@@ -43,6 +43,11 @@ test("Desktop identity changes retain the released common payment entry and row 
   assert.match(desktop, /STOCK NUMBER/);
 });
 
+test("the payment shortcut inside a saved bill or expense stays on the selected charge", async () => {
+  const app = await readFile(new URL("IXITransactApp.jsx", base), "utf8");
+  assert.match(app, /sourceIds=\{clean\(selectedFinancialDocumentId\) && \["bill", "expense"\]\.includes\(moduleId\) \? \[clean\(selectedFinancialDocumentId\)\] : null\}/);
+});
+
 test("one payment produces the same balance/date/method in every projection, without duplicate counting", () => {
   const bill = source(), payment = pay("pay-1", 250.07);
   const records = [bill, payment, payment];

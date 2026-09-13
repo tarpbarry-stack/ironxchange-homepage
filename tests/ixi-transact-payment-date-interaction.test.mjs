@@ -35,10 +35,13 @@ test("payment date typing, calendar navigation and focus agree before a payment 
     name => name.endsWith(".module.css") ? {} : sourceRequire(name), module, module.exports
   );
   const DateInput = module.exports.default;
-  let paidDate = "2026-03-05", submits = 0;
+  let paidDate = "2026-03-05", submits = 0, rerenderParent, replaceDate;
   function Harness() {
     const [value, setValue] = React.useState(paidDate);
     const [dirty, setDirty] = React.useState(false);
+    const [, setRenderCount] = React.useState(0);
+    rerenderParent = () => setRenderCount(count => count + 1);
+    replaceDate = setValue;
     return React.createElement("form", {
       "data-dirty": dirty,
       onInputCapture: () => setDirty(true),
@@ -73,6 +76,39 @@ test("payment date typing, calendar navigation and focus agree before a payment 
     assert.equal(element.value, text, "The complete typed text must remain intact");
   }
   await act(() => root.render(React.createElement(Harness)));
+  // Exercise deletion/replacement of an existing date and the DOM input event,
+  // including editors which set the DOM property before delivering that event.
+  // A full-field fill alone does not cover this path.
+  await act(() => input().focus());
+  await act(() => {
+    input().value = "03/05/202";
+    input().setSelectionRange(9, 9);
+    input().dispatchEvent(new w.InputEvent("input", { bubbles: true, inputType: "deleteContentBackward" }));
+  });
+  await act(rerenderParent);
+  assert.equal(input().value, "03/05/202", "Backspace must not restore the old date");
+  assert.equal(paidDate, "03/05/202", "The payment draft must receive deletion events");
+  await act(() => {
+    input().setSelectionRange(0, input().value.length);
+    input().setRangeText("09/13/2026", 0, input().value.length, "end");
+    input().dispatchEvent(new w.InputEvent("input", { bubbles: true, inputType: "insertReplacementText" }));
+  });
+  await act(() => {
+    input().setSelectionRange(0, 2);
+    input().setRangeText("02", 0, 2, "end");
+    input().dispatchEvent(new w.InputEvent("input", { bubbles: true, inputType: "insertText", data: "02" }));
+  });
+  await act(rerenderParent);
+  assert.equal(input().value, "02/13/2026");
+  assert.equal(input().selectionStart, 2, "Editing the month must preserve the cursor");
+  assert.equal(paidDate, "2026-02-13");
+  await act(() => { input().value = ""; input().dispatchEvent(new w.InputEvent("input", { bubbles: true, inputType: "deleteContentBackward" })); });
+  await act(rerenderParent);
+  assert.equal(input().value, "", "The entire date must be clearable");
+  assert.equal(paidDate, "");
+  await act(() => input().blur());
+  await act(() => replaceDate("2026-03-05"));
+  assert.equal(input().value, "03/05/2026", "An external date change still synchronizes outside editing");
   await act(() => d.querySelector('[aria-label="Open payment date calendar"]').click());
   await typeDate("2/4/2026");
   assert.equal(paidDate, "2026-02-04");
