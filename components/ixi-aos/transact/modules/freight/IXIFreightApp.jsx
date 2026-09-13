@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { amendIXIFreightOrder, createIXIFreightOrder, loadIXIFreightEvents, loadIXIFreightOrders, loadIXIFreightOrder, loadIXIFreightPeople, loadIXIFreightAlerts } from "./IXIFreightClient";
 import { createIXIFreightOrderInput, freightVariance, IXI_FREIGHT_PURPOSES, validateIXIFreightOrderInput, invoiceCharges } from "./IXIFreightContract";
 import { createAndMatchIXIFreightInvoice } from "./IXIFreightCommands";
+import { loadIXIFreightHistory } from "./IXIFreightHistory";
 import { loadIXIAosFinancialAccessContext, loadIXIAosFinancialHistory, uploadIXIAosFinancialAttachment } from "../../../financial-runtime/IXIAosFinancialReadClient";
 import { hydrateIXIBillRecord } from "../bill/IXIBillContract";
 import { withIXIBillBalance } from "../bill/IXIBillBalance";
@@ -59,6 +60,7 @@ export default function IXIFreightApp({ context = {}, object = {}, workflowInten
   const [access, setAccess] = useState({}), [billId, setBillId] = useState(""), [showBillForm, setShowBillForm] = useState(false);
   const [uploadBillId, setUploadBillId] = useState("");
   const [financialHistory, setFinancialHistory] = useState([]);
+  const [historyLoading, setHistoryLoading] = useState(false), [historyAttempt, setHistoryAttempt] = useState(0);
   const order = orders.find(item => item.identity?.freightOrderId === selectedId);
   const authority = useMemo(() => ({ serverActions: access.capabilities || {} }), [access]);
   const billRecords = useMemo(() => (order?.financialRecords || []).map(hydrateIXIBillRecord).filter(Boolean).map(record => withIXIBillBalance(record, order.financialRecords)), [order]);
@@ -81,17 +83,18 @@ export default function IXIFreightApp({ context = {}, object = {}, workflowInten
     return () => controller.abort();
   }, [passportId]);
   useEffect(() => {
-    if (!selectedId) return;
-    const controller = new AbortController(); setHistoryError("");
-    loadIXIFreightEvents(selectedId, { signal: controller.signal }).then(setEvents).catch(err => { if (err.name !== "AbortError") setHistoryError(err.message); });
-    return () => controller.abort();
-  }, [selectedId, order?.identity?.revision]);
-  useEffect(() => {
     if (tab !== "history" || !order) return;
-    const controller = new AbortController(); setFinancialHistory([]);
-    Promise.all((order.financialRecords || []).map(record => loadIXIAosFinancialHistory(record.financialDocument.financialDocumentId, { signal: controller.signal }))).then(groups => setFinancialHistory(groups.flat())).catch(err => { if (err.name !== "AbortError") setHistoryError(err.message); });
+    const controller = new AbortController();
+    setEvents([]); setFinancialHistory([]); setHistoryError(""); setHistoryLoading(true);
+    loadIXIFreightHistory({ order, loadEvents: loadIXIFreightEvents, loadFinancialHistory: loadIXIAosFinancialHistory, signal: controller.signal }).then(result => {
+      if (controller.signal.aborted) return;
+      setEvents(result.events); setFinancialHistory(result.financialHistory);
+      setHistoryError(result.incomplete ? "SOME HISTORY COULD NOT LOAD. RETRY TO COMPLETE THIS VIEW." : "");
+    }).catch(err => {
+      if (!controller.signal.aborted) setHistoryError("SOME HISTORY COULD NOT LOAD. RETRY TO COMPLETE THIS VIEW.");
+    }).finally(() => { if (!controller.signal.aborted) setHistoryLoading(false); });
     return () => controller.abort();
-  }, [tab, order]);
+  }, [tab, order, historyAttempt]);
   async function saveOrder() {
     if (busy) return;
     const payload = createIXIFreightOrderInput({ context, object, input: draft });
@@ -216,7 +219,7 @@ export default function IXIFreightApp({ context = {}, object = {}, workflowInten
     });
     const revisions = financialHistory.filter(item => item.operation !== "create").map(item => ({ occurredAt: item.recordedAt, eventType: `${item.record?.financialDocument?.documentType || "document"} revision ${item.revision}`, actorId: item.actorPassportId, amount: item.record?.financialDocument?.totals?.total }));
     const history = [...events, ...financial, ...revisions].sort((a, b) => clean(b.occurredAt).localeCompare(clean(a.occurredAt)));
-    return <><div className="fr-section">{t("REQUEST & FINANCIAL HISTORY")}</div>{historyError ? <div role="alert" className="fr-error">{historyError}</div> : null}{history.map((event, index) => <div className="fr-event" key={event.eventId || `${event.occurredAt}-${index}`}><time>{when(event.occurredAt)} · {event.actorId || "IXI"}</time><strong>{t(label(event.eventType))}{event.amount != null ? ` · ${money(event.amount)}` : ""}</strong>{event.payload?.changeReason ? <p>{event.payload.changeReason}</p> : null}{(event.payload?.changes || []).map(change => <Row key={change.field} label={t(historyFields[change.field] || label(change.field))} value={`${Array.isArray(change.before) ? change.before.join(", ") : change.before ?? "—"} → ${Array.isArray(change.after) ? change.after.join(", ") : change.after ?? "—"}`} />)}</div>)}<Row label={t("CREATED")} value={when(order.audit?.createdAt)} /><Row label={t("UPDATED")} value={when(order.audit?.updatedAt)} /></>;
+    return <><div className="fr-section">{t("REQUEST & FINANCIAL HISTORY")}</div>{historyLoading ? <div role="status" className="fr-note">{t("LOADING HISTORY…")}</div> : null}{historyError ? <div role="alert" className="fr-error">{t(historyError)}<button className="fr-btn" disabled={historyLoading} onClick={() => setHistoryAttempt(current => current + 1)}>{t("RETRY HISTORY")}</button></div> : null}{history.map((event, index) => <div className="fr-event" key={event.eventId || `${event.occurredAt}-${index}`}><time>{when(event.occurredAt)} · {event.actorId || "IXI"}</time><strong>{t(label(event.eventType))}{event.amount != null ? ` · ${money(event.amount)}` : ""}</strong>{event.payload?.changeReason ? <p>{event.payload.changeReason}</p> : null}{(event.payload?.changes || []).map(change => <Row key={change.field} label={t(historyFields[change.field] || label(change.field))} value={`${Array.isArray(change.before) ? change.before.join(", ") : change.before ?? "—"} → ${Array.isArray(change.after) ? change.after.join(", ") : change.after ?? "—"}`} />)}</div>)}<Row label={t("CREATED")} value={when(order.audit?.createdAt)} /><Row label={t("UPDATED")} value={when(order.audit?.updatedAt)} /></>;
   }
   if (bill) return <div className="ixi-bill-standalone"><IXIBillCard key={billId} record={bill} context={context} authority={authority} language={locale === "es-MX" ? "es" : "en"} onLanguageChange={language => setLocale(language === "es" ? "es-MX" : "en-US")} busy={busy} error={error} onAction={billAction} onBack={() => { setBillId(""); setError(""); }} /><IXIBillStandaloneStyles /></div>;
   return <div className="ixi-freight">
