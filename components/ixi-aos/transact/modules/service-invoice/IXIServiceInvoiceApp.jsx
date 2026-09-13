@@ -1,9 +1,10 @@
 import IXIMoneyInput from "../../IXIMoneyInput";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState, useEffect } from "react";
 
-import { createIXIServiceInvoice } from "./IXIServiceInvoiceCommands";
+import { createIXIServiceInvoice, updateIXIServiceInvoice, hydrateIXIServiceInvoice } from "./IXIServiceInvoiceCommands";
 import { createIXIServiceInvoiceDraft, validateIXIServiceInvoice } from "./IXIServiceInvoiceContract";
-import { issueIXIServiceInvoice, recordIXIServiceInvoicePayment, voidIXIServiceInvoice } from "./IXIServiceInvoiceRecordEngine";
+import IXIServiceInvoiceReceipt from "./IXIServiceInvoiceReceipt";
+import { loadIXIAosFinancialDocument } from "../../../financial-runtime/IXIAosFinancialReadClient";
 import IXIServiceInvoiceStyles from "./IXIServiceInvoiceStyles";
 
 const clean = value => String(value ?? "").trim();
@@ -37,36 +38,35 @@ const COPY = {
 function Field({ label, children }) { return <div className="sinv-field"><label>{label}</label>{children}</div>; }
 function Input({ value, onChange, ...props }) { return <input value={value} onChange={e => onChange(e.target.value)} {...props} />; }
 
-export default function IXIServiceInvoiceApp({ context = {}, object = {}, workOrder = null, initialRecord = null, language = "en", onBack = null, onRecordChange = null }) {
+export default function IXIServiceInvoiceApp({ context = {}, object = {}, workOrder: suppliedWorkOrder = null, financialRecords = [], onFinancialRecordsChange = null, initialRecord = null, language = "en", onBack = null, onRecordChange = null }) {
   const [lang, setLang] = useState(language === "es" ? "es" : "en");
   const t = COPY[lang];
   const actor = context.actor || {};
+  const [selectedWorkOrderId, setSelectedWorkOrderId] = useState("");
+  const [paymentsOpen, setPaymentsOpen] = useState(false);
+  const createCommand = useRef(crypto.randomUUID());
+  const workOrders = financialRecords.map(item => { const document = item.financialDocument || item.record?.financialDocument; return document?.workOrder ? { ...document.workOrder, financialBinding: { financialDocumentId: document.financialDocumentId, revision: item.server?.revision || item.record?.server?.revision } } : null; }).filter(item => item?.customer?.name);
+  const workOrder = suppliedWorkOrder || workOrders.find(item => item.financialBinding.financialDocumentId === selectedWorkOrderId) || null;
   const [record, setRecord] = useState(initialRecord);
+  useEffect(() => { if (initialRecord) setRecord(initialRecord); }, [initialRecord]);
+  useEffect(() => {
+    if (!workOrder || record) return;
+    const id = workOrder.financialBinding?.financialDocumentId || workOrder.identity?.workOrderId;
+    const existing = financialRecords.find(item => { const doc = item.financialDocument || item.record?.financialDocument; return doc?.serviceInvoice && doc.sourceFinancialDocumentId === id && !["void", "reversed"].includes(doc.financialState); });
+    if (existing) setRecord(hydrateIXIServiceInvoice(existing, financialRecords));
+  }, [workOrder, financialRecords, record]);
   const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState({});
   const [invoiceDate, setInvoiceDate] = useState(today());
   const [dueDate, setDueDate] = useState(plusDays(30));
   const [paymentTerms, setPaymentTerms] = useState("NET 30");
   const [taxAmount, setTaxAmount] = useState("");
-  const [depositCredit, setDepositCredit] = useState("");
-  const [otherCredit, setOtherCredit] = useState("");
   const [travelFreightAmount, setTravelFreightAmount] = useState("");
   const [memo, setMemo] = useState("");
-  const [documents, setDocuments] = useState([]);
-  const [paymentAmount, setPaymentAmount] = useState("");
-  const [paymentMethod, setPaymentMethod] = useState("ACH");
-  const [paymentReference, setPaymentReference] = useState("");
   const [voidReason, setVoidReason] = useState("");
 
-  const input = useMemo(() => ({ invoiceDate, dueDate, paymentTerms, taxAmount, depositCredit, otherCredit, travelFreightAmount, memo, documents }), [invoiceDate, dueDate, paymentTerms, taxAmount, depositCredit, otherCredit, travelFreightAmount, memo, documents]);
+  const input = useMemo(() => ({ invoiceDate, dueDate, paymentTerms, taxAmount, travelFreightAmount, memo }), [invoiceDate, dueDate, paymentTerms, taxAmount, travelFreightAmount, memo]);
   const preview = useMemo(() => createIXIServiceInvoiceDraft({ context, workOrder: workOrder || {}, input }), [context, workOrder, input]);
-
-  function addDocuments(files) {
-    setDocuments(current => [
-      ...current,
-      ...Array.from(files || []).map((file, index) => ({ documentId: `SINV-DOC-${Date.now()}-${index}`, type: "service-invoice-document", fileName: file.name, mimeType: file.type, size: file.size, status: "local-pending-upload" }))
-    ]);
-  }
 
   async function createRecord() {
     const check = validateIXIServiceInvoice(preview);
@@ -74,19 +74,31 @@ export default function IXIServiceInvoiceApp({ context = {}, object = {}, workOr
     if (!check.valid) return;
     setSaving(true);
     try {
-      const result = await createIXIServiceInvoice({ object, context, workOrder, input, metadata: { source: "ixi-transact-service-invoice" } });
+      const result = await createIXIServiceInvoice({ object, context, workOrder, input, commandId: createCommand.current, metadata: { source: "ixi-transact-service-invoice" } });
       setRecord(result.record);
       await onRecordChange?.(result.record, { action: "create", response: result.response }, context);
-    } finally { setSaving(false); }
+    } catch (error) { setErrors({ save: error.message }); } finally { setSaving(false); }
   }
 
-  async function mutate(next, change) {
-    setRecord(next);
-    await onRecordChange?.(next, change, context);
+  async function mutate(action) {
+    if (saving) return;
+    setSaving(true); setErrors({});
+    try {
+      const result = await updateIXIServiceInvoice({ record, action, actor, reason: voidReason });
+      setRecord(result.record);
+      await onFinancialRecordsChange?.();
+      await onRecordChange?.(result.record, { action, response: result.response }, context);
+    } catch (error) { setErrors({ save: error.message }); }
+    finally { setSaving(false); }
+  }
+  async function reloadInvoice(receipt = null) {
+    const canonical = await loadIXIAosFinancialDocument({ financialDocumentId: record.financialBinding.financialDocumentId });
+    setRecord(hydrateIXIServiceInvoice(canonical, receipt ? [...financialRecords, receipt] : financialRecords));
+    await onFinancialRecordsChange?.();
   }
 
   if (!workOrder && !record) {
-    return <div className="ixi-sinv"><div className="sinv-top"><div><div className="sinv-kicker">IXI TRAN$ACT</div><div className="sinv-title">{t.title}</div></div></div><div className="sinv-error">CUSTOMER SERVICE WORK ORDER REQUIRED</div><button className="sinv-secondary" onClick={() => onBack?.()}>‹ TRAN$ACT</button><IXIServiceInvoiceStyles /></div>;
+    return <div className="ixi-sinv"><div className="sinv-top"><div><div className="sinv-kicker">IXI TRAN$ACT</div><div className="sinv-title">{t.title}</div></div></div><div className="sinv-error">SELECT A CUSTOMER SERVICE WORK ORDER</div><select aria-label="Service work order" value={selectedWorkOrderId} onChange={event => setSelectedWorkOrderId(event.target.value)}><option value="">Choose work order</option>{workOrders.map(item => <option key={item.financialBinding.financialDocumentId} value={item.financialBinding.financialDocumentId}>{item.identity?.number || item.work?.title || item.financialBinding.financialDocumentId}</option>)}</select><button className="sinv-secondary" onClick={() => onBack?.()}>‹ TRAN$ACT</button><IXIServiceInvoiceStyles /></div>;
   }
 
   if (record) {
@@ -107,9 +119,10 @@ export default function IXIServiceInvoiceApp({ context = {}, object = {}, workOr
       <div className="sinv-section">BILLING RULE</div>
       <div className="sinv-callout"><b>{clean(r.source?.pricingType).replace(/-/g, " ").toUpperCase()}</b><br/>AUTHORIZED {money(r.billingRule?.authorized)} · ACTUAL BILLABLE {money(r.billingRule?.actualBillable)}</div>
       {r.billingRule?.authorizationException ? <div className="sinv-error">AUTHORIZATION EXCEPTION · {money(r.billingRule?.authorizationExceptionAmount)} ABOVE AUTHORIZED AMOUNT</div> : null}
-      {r.status === "draft" ? <button className="sinv-primary" onClick={() => mutate(issueIXIServiceInvoice(r, actor), { action: "issue" })}>{t.issue}</button> : null}
-      {issued && !paid ? <><div className="sinv-section">{t.payment}</div><div className="sinv-grid2"><Field label="AMOUNT"><IXIMoneyInput value={paymentAmount} onValueChange={setPaymentAmount} inputMode="decimal" /></Field><Field label="METHOD"><select value={paymentMethod} onChange={e => setPaymentMethod(e.target.value)}><option>ACH</option><option>WIRE</option><option>CHECK</option><option>CARD</option><option>CASH</option><option>OTHER</option></select></Field></div><Field label="REFERENCE"><Input value={paymentReference} onChange={setPaymentReference} /></Field><button className="sinv-primary" onClick={() => mutate(recordIXIServiceInvoicePayment(r, { amount: paymentAmount, method: paymentMethod, reference: paymentReference }, actor), { action: "record-payment" })}>RECORD PAYMENT</button></> : null}
-      {r.status === "draft" ? <><Field label="VOID REASON"><Input value={voidReason} onChange={setVoidReason} /></Field><button className="sinv-danger" onClick={() => mutate(voidIXIServiceInvoice(r, { reason: voidReason }, actor), { action: "void" })}>VOID DRAFT</button></> : null}
+      {r.status === "draft" ? <button className="sinv-primary" disabled={saving} onClick={() => mutate("issue")}>{t.issue}</button> : null}
+      {issued ? <><button className="sinv-primary" onClick={() => setPaymentsOpen(value => !value)}>{paid ? "PAYMENT DETAILS" : "RECORD MONEY RECEIVED"}</button>{paymentsOpen ? <IXIServiceInvoiceReceipt context={context} object={object} invoiceId={r.financialBinding.financialDocumentId} onChanged={reloadInvoice} /> : null}</> : null}
+      {r.status === "draft" ? <><Field label="VOID REASON"><Input value={voidReason} onChange={setVoidReason} /></Field><button className="sinv-danger" disabled={saving} onClick={() => mutate("void")}>VOID DRAFT</button></> : null}
+      {errors.save ? <div className="sinv-error" role="alert">{errors.save}</div> : null}
       <div className="sinv-section">ACTIVITY</div>{(r.timeline || []).slice().reverse().map(item => <div className="sinv-row" key={item.activityId}><div className="sinv-rowhead"><strong>{clean(item.type).replace(/-/g, " ").toUpperCase()}</strong><b>{item.amount ? money(item.amount) : ""}</b></div><small>{item.actorLabel || "SYSTEM"} · {item.occurredAt}</small></div>)}
       <button className="sinv-secondary" onClick={() => onBack?.()}>‹ TRAN$ACT</button>
       <div className="sinv-foot">Quote authorizes. Work Order records actual work. Service Invoice creates A/R. Payment records cash received.</div>
@@ -132,15 +145,14 @@ export default function IXIServiceInvoiceApp({ context = {}, object = {}, workOr
     <div className="sinv-money"><span>OUTSIDE SERVICE</span><b>{money(preview.charges?.outsideService)}</b></div>
     <div className="sinv-money"><span>OTHER</span><b>{money(preview.charges?.other)}</b></div>
     <Field label="TRAVEL / FREIGHT"><IXIMoneyInput value={travelFreightAmount} onValueChange={setTravelFreightAmount} inputMode="decimal" /></Field>
-    <div className="sinv-grid2"><Field label="TAX"><IXIMoneyInput value={taxAmount} onValueChange={setTaxAmount} inputMode="decimal" /></Field><Field label="DEPOSIT / CREDIT"><IXIMoneyInput value={depositCredit} onValueChange={setDepositCredit} inputMode="decimal" /></Field></div>
-    <Field label="OTHER CREDIT"><IXIMoneyInput value={otherCredit} onValueChange={setOtherCredit} inputMode="decimal" /></Field>
+    <Field label="TAX"><IXIMoneyInput value={taxAmount} onValueChange={setTaxAmount} inputMode="decimal" /></Field>
     <div className="sinv-total"><span>AMOUNT DUE</span><strong>{money(preview.charges?.amountDue)}</strong></div>
     {preview.billingRule?.authorizationException ? <div className="sinv-error">AUTHORIZATION EXCEPTION · {money(preview.billingRule.authorizationExceptionAmount)} ABOVE AUTHORIZED AMOUNT</div> : null}
     <div className="sinv-section">{t.terms}</div>
     <div className="sinv-grid2"><Field label="INVOICE DATE"><Input type="date" value={invoiceDate} onChange={setInvoiceDate} /></Field><Field label="DUE DATE"><Input type="date" value={dueDate} onChange={setDueDate} /></Field></div>
     <Field label="PAYMENT TERMS"><Input value={paymentTerms} onChange={setPaymentTerms} /></Field><Field label="MEMO"><textarea value={memo} onChange={e => setMemo(e.target.value)} /></Field>
-    <div className="sinv-section">DOCUMENTS</div><label className="sinv-secondary" style={{display:"block",textAlign:"center",paddingTop:10}}>+ ATTACH DOCUMENT<input type="file" multiple style={{display:"none"}} onChange={e => addDocuments(e.target.files)} /></label>{documents.map(doc => <div className="sinv-row" key={doc.documentId}><strong>{doc.fileName}</strong></div>)}
-    {Object.keys(errors).length ? <div className="sinv-error">{Object.keys(errors).map(key => key.toUpperCase()).join(" · ")}</div> : null}
+    <p>Supporting documents remain linked through the source work order. Record deposits and payments against the issued invoice.</p>
+    {Object.keys(errors).length ? <div className="sinv-error">{Object.entries(errors).map(([key, value]) => `${key.toUpperCase()}: ${value}`).join(" · ")}</div> : null}
     <button className="sinv-primary" disabled={saving} onClick={createRecord}>{saving ? "CREATING..." : t.create}</button><button className="sinv-secondary" onClick={() => onBack?.()}>‹ TRAN$ACT</button>
     <IXIServiceInvoiceStyles />
   </div>;

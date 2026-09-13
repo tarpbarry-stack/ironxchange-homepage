@@ -3,7 +3,16 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 const read = path => readFile(new URL(`../${path}`, import.meta.url), "utf8");
-const load = async path => import(`data:text/javascript;base64,${Buffer.from(await read(path)).toString("base64")}`);
+async function sourceUrl(path) {
+  let source = await read(path);
+  for (const match of [...source.matchAll(/from ["'](\.[^"']+)["']/g)]) {
+    const resolved = new URL(match[1], new URL(`../${path}`, import.meta.url));
+    const dependency = await readFile(resolved, "utf8");
+    source = source.replace(match[0], `from "data:text/javascript;base64,${Buffer.from(dependency).toString("base64")}"`);
+  }
+  return `data:text/javascript;base64,${Buffer.from(source).toString("base64")}`;
+}
+const load = async path => import(await sourceUrl(path));
 const routeFile = "pages/api/ixi/financial/documents/[financialDocumentId]/history.js";
 const { loadIXIFreightHistory } = await load("components/ixi-aos/transact/modules/freight/IXIFreightHistory.js");
 const { loadIXIAosFinancialHistory } = await load("components/ixi-aos/financial-runtime/IXIAosFinancialReadClient.js");

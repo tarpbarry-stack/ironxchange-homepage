@@ -315,8 +315,10 @@ export function applyIXIPurchaseOrderAction({
       break;
 
     case IXI_PO_ACTIONS.SEND_PO:
+      if (payload.deliveryReceipt?.status !== "accepted" || !payload.deliveryReceipt?.deliveryId) throw new Error("Purchase Order email has not been accepted by the delivery provider.");
       next.status = "sent";
-      next.timeline.push(event("po-sent", "Purchase Order sent to vendor", user, {}, note));
+      next.deliveryReceipt = payload.deliveryReceipt;
+      next.timeline.push(event("po-sent", "Purchase Order email accepted by provider", user, { deliveryReceipt: payload.deliveryReceipt }, note));
       break;
 
     case IXI_PO_ACTIONS.RECEIVE: {

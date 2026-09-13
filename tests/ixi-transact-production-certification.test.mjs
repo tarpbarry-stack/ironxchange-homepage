@@ -10,7 +10,7 @@ test("unfinished chassis are not exposed as operational TRANSACT applications", 
   const visible = registry.getIXITransactModules({ objectType: "machine" });
   const all = registry.getIXITransactModules({ objectType: "machine", includeUnavailable: true });
 
-  assert.equal(visible.some(item => ["receipt", "service-invoice"].includes(item.id)), false);
+  assert.equal(visible.some(item => ["receipt"].includes(item.id)), false);
   assert.equal(visible.some(item => item.id === "quote"), true);
   assert.equal(visible.some(item => item.id === "sales-order"), true);
   assert.equal(visible.some(item => item.id === "invoice"), true);
@@ -18,7 +18,7 @@ test("unfinished chassis are not exposed as operational TRANSACT applications", 
   assert.equal(all.find(item => item.id === "quote")?.readiness, "operational");
   assert.equal(all.find(item => item.id === "sales-order")?.documentType, "sales-order");
   assert.equal(all.find(item => item.id === "invoice")?.readiness, "operational");
-  assert.equal(all.find(item => item.id === "service-invoice")?.readiness, "sales-build");
+  assert.equal(all.find(item => item.id === "service-invoice")?.readiness, "operational");
   assert.equal(all.find(item => item.id === "technology-work")?.documentType, "work-order");
   assert.equal(all.find(item => item.id === "service-quote")?.documentType, "service-quote");
 });
@@ -139,7 +139,7 @@ test("Purchase Order lifecycle persists with revision control and canonical read
   assert.match(recordEngine, /financialBinding/u);
   assert.match(app, /updateIXIPurchaseOrder/u);
   assert.match(shell, /initialPurchaseOrder=\{purchaseOrderSnapshot\}/u);
-  assert.doesNotMatch(shell, /setModuleId\("service-invoice"\)/u);
+  assert.match(shell, /onOpenServiceInvoice=/u);
 });
 
 test("private TRANSACT runtime reads authority and Passport history before exposing applications", async () => {

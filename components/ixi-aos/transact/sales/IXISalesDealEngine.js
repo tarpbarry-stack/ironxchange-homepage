@@ -96,6 +96,7 @@ function embeddedOf(document = {}) {
 }
 
 function stagesOf(document = {}) {
+  if (document.serviceInvoice || document.metadata?.transactModule === "service-invoice") return [];
   const type = clean(document.documentType).toLowerCase();
   const metadata = object(document.metadata);
   if (type === "quote") return ["quote"];

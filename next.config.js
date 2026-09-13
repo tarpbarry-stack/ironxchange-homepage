@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  outputFileTracingIncludes: { "/api/ixi/financial/delivery/email": ["./public/fonts/IXI-Document-Sans.ttf"] },
 
   async redirects() {
     return [

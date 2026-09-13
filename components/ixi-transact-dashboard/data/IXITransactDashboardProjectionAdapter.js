@@ -11,6 +11,7 @@ function safeArray(value) {
 }
 
 function finiteNumber(value) {
+  if (value === null || value === undefined || value === "") return null;
   const number = Number(value);
   return Number.isFinite(number) ? number : null;
 }
@@ -33,13 +34,13 @@ export function normalizeIXITransactDashboardProjection(payload = {}) {
   const reports = safeObject(root.reports);
   const domains = safeObject(root.domains);
   const attentionSource = root.attention;
-  const attention = Array.isArray(attentionSource)
+  const attentionItems = Array.isArray(attentionSource)
     ? attentionSource
     : [
-        ...safeArray(attentionSource?.recentActivity),
         ...safeArray(attentionSource?.warnings),
-        ...safeArray(root.recentActivity)
+        ...safeArray(attentionSource?.exceptions)
       ];
+  const attention = [...new Map(attentionItems.map((item, index) => [item.id || item.alertId || `${item.code}:${item.financialDocumentId || index}`, item])).values()];
 
   return {
     generatedAt: clean(root.generatedAt),
@@ -49,8 +50,8 @@ export function normalizeIXITransactDashboardProjection(payload = {}) {
     scope: safeObject(root.scope),
     period: safeObject(root.period),
     executive: {
-      revenue: moneyMetric(executive, "revenue", "revenueCurrentPeriod", "inflow"),
-      netIncome: moneyMetric(executive, "netIncome", "net"),
+      revenue: moneyMetric(executive, "revenue", "revenueCurrentPeriod"),
+      netIncome: moneyMetric(executive, "netIncome"),
       cash: moneyMetric(executive, "cash", "cashBalance"),
       openAr: moneyMetric(executive, "openAr", "accountsReceivable"),
       overdueAr: moneyMetric(executive, "overdueAr"),

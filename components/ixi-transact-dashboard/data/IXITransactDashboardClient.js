@@ -1,3 +1,4 @@
+import { normalizeIXITransactAccess } from "./IXITransactAccessProjection.mjs";
 function clean(value) {
   return String(value ?? "").trim();
 }
@@ -65,7 +66,7 @@ export async function loadIXIFinancialAccessContext({ signal } = {}) {
     "IXI_FINANCIAL_ACCESS_FAILED"
   );
 
-  return payload;
+  return normalizeIXITransactAccess(payload);
 }
 
 export async function loadIXITransactDashboard({ query, signal } = {}) {

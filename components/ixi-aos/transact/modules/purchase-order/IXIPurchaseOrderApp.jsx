@@ -1,5 +1,6 @@
+import { sendIXITransactEmail } from "../../IXITransactDeliveryClient";
 import IXIMoneyInput from "../../IXIMoneyInput";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 
 import {
   IXI_PO_ACTIONS,
@@ -89,6 +90,8 @@ export default function IXIPurchaseOrderApp({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [note, setNote] = useState("");
+  const [sendRecipient, setSendRecipient] = useState("");
+  const sendAttempt = useRef(null);
   const [billForm, setBillForm] = useState({ invoiceNumber:"", invoiceDate:"", amount:"" });
   const [receiveDraft, setReceiveDraft] = useState({});
   const [directDraft, setDirectDraft] = useState(() => buildDirectDraft(context));
@@ -142,6 +145,16 @@ export default function IXIPurchaseOrderApp({
         working = issued.record;
         const next = applyIXIPurchaseOrderAction({ record:working, action, context, policy:resolvedPolicy, authority, actor, payload:{committedAmount:working.costs?.estimated} });
         await commit(next, { action, issueResponse:issued.response, previous:record });
+        return;
+      }
+
+      if (action === IXI_PO_ACTIONS.SEND_PO) {
+        const id = clean(record?.financialBinding?.financialDocumentId);
+        const fingerprint = JSON.stringify([id, sendRecipient.trim()]);
+        if (sendAttempt.current?.fingerprint !== fingerprint) sendAttempt.current = { fingerprint, commandId: crypto.randomUUID() };
+        const deliveryReceipt = await sendIXITransactEmail({ documentIds: [id], recipient: sendRecipient.trim(), commandId: sendAttempt.current.commandId });
+        const next = applyIXIPurchaseOrderAction({ record, action, context, policy: resolvedPolicy, authority, actor, payload: { deliveryReceipt } });
+        await commit(next, { action, deliveryReceipt });
         return;
       }
 
@@ -233,7 +246,7 @@ export default function IXIPurchaseOrderApp({
         </div>
       </> : null}
       {actions.has(IXI_PO_ACTIONS.ISSUE_PO) ? <div className="ixi-po-actions one"><button className="good" disabled={busy} onClick={()=>runAction(IXI_PO_ACTIONS.ISSUE_PO)}>{t.issue}</button></div> : null}
-      {actions.has(IXI_PO_ACTIONS.SEND_PO) ? <div className="ixi-po-actions one"><button disabled={busy} onClick={()=>runAction(IXI_PO_ACTIONS.SEND_PO)}>{t.send}</button></div> : null}
+      {actions.has(IXI_PO_ACTIONS.SEND_PO) ? <div className="ixi-po-actions one"><label>VENDOR EMAIL<input type="email" value={sendRecipient} onChange={event => setSendRecipient(event.target.value)} disabled={busy}/></label><button disabled={busy} onClick={()=>runAction(IXI_PO_ACTIONS.SEND_PO)}>{t.send}</button></div> : null}
     </>;
   }
 

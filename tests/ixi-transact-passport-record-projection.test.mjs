@@ -75,9 +75,10 @@ test("released IX-Core dashboard envelope maps without silently discarding evide
     }
   });
 
-  assert.equal(projection.executive.revenue, 62500);
-  assert.equal(projection.executive.netIncome, 21000);
-  assert.equal(projection.attention.length, 3);
+  assert.equal(projection.executive.revenue, null);
+  assert.equal(projection.executive.netIncome, null);
+  assert.equal(projection.attention.length, 1);
+  assert.equal(projection.raw.recentActivity.length, 1);
   assert.equal(projection.lineageVersion, "1.0.0");
   assert.equal(projection.domains.receivables.source, "lifecycleSnapshot");
 });

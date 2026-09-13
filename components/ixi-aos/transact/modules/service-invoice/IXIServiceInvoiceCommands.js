@@ -1,3 +1,7 @@
+import { patchIXIAosFinancialDocument } from "../../../financial-runtime/IXIAosFinancialReadClient";
+import { hydrateIXIServiceInvoice } from "./IXIServiceInvoiceProjection.js";
+export { hydrateIXIServiceInvoice } from "./IXIServiceInvoiceProjection.js";
+import { issueIXIServiceInvoice, voidIXIServiceInvoice } from "./IXIServiceInvoiceRecordEngine";
 import { createIXIAosObjectFinancialDocument, createIXIAosFinancialObjectReference } from "../../../financial-runtime/IXIAosFinancialRuntimeAdapter";
 import { runIXIActionNoticeLifecycle } from "../../../../ixi-object-system/IXIActionNoticeEngine";
 import { createIXIServiceInvoiceDraft, validateIXIServiceInvoice } from "./IXIServiceInvoiceContract";
@@ -53,7 +57,13 @@ export async function createIXIServiceInvoice({ object = {}, context = {}, workO
           amount: draft.charges.amountDue,
           description: `Service Invoice · ${draft.customer.name} · ${draft.asset.label}`,
           status: "draft",
-          financialState: "receivable",
+          financialState: "draft",
+          documentNumber: `SINV-${cmd.replace(/[^a-zA-Z0-9]/g, "").slice(-12).toUpperCase()}`,
+          occurredAt: `${draft.terms.invoiceDate}T12:00:00.000Z`,
+          dueDate: draft.terms.dueDate,
+          paymentTerms: draft.terms.paymentTerms,
+          memo: draft.terms.memo,
+          sourceFinancialDocumentId: clean(workOrder?.financialBinding?.financialDocumentId || draft.source.customerServiceWorkOrderId),
           serviceInvoice: draft,
           references,
           attachments: draft.documents
@@ -74,20 +84,25 @@ export async function createIXIServiceInvoice({ object = {}, context = {}, workO
         signal
       });
 
-      const id = clean(response?.document?.documentId || response?.financialDocument?.documentId || response?.documentId || cmd);
-      const number = clean(response?.document?.documentNumber || response?.financialDocument?.documentNumber) || `SINV-${id.replace(/^SINV-/i, "").slice(-6).toUpperCase()}`;
-      const occurredAt = new Date().toISOString();
-      return {
-        record: {
-          ...draft,
-          identity: { ...draft.identity, serviceInvoiceId: id, number },
-          timeline: [...(draft.timeline || []), { activityId: `ACT-SINV-CREATE-${Date.now()}`, type: "service-invoice-created", occurredAt, actorLabel: draft.context.actorLabel }],
-          audit: { ...draft.audit, updatedAt: occurredAt }
-        },
-        response
-      };
+      const saved = response?.record || response?.data?.record;
+      if (!saved?.financialDocument?.financialDocumentId || !saved?.server?.revision) throw new Error("Service Invoice save did not return its canonical identity and revision.");
+      return { record: hydrateIXIServiceInvoice(saved), response };
     }
   });
 }
 
-export default { createIXIServiceInvoice };
+export async function updateIXIServiceInvoice({ record, action, actor, reason = "" }) {
+  const next = action === "issue" ? issueIXIServiceInvoice(record, actor) : voidIXIServiceInvoice(record, { reason }, actor);
+  const binding = record.financialBinding || {};
+  if (!binding.financialDocumentId || !binding.revision) throw new Error("Open the saved invoice before changing it.");
+  const commandId = crypto.randomUUID();
+  const { financialBinding, ...stored } = next;
+  const response = await patchIXIAosFinancialDocument({ financialDocumentId: binding.financialDocumentId, expectedRevision: binding.revision,
+    commandId, idempotencyKey: commandId, patch: { serviceInvoice: stored, financialState: action === "issue" ? "billed" : "void", status: action === "issue" ? "open" : "void" },
+    metadata: { transactModule: "service-invoice", action } });
+  const canonical = response?.data?.record || response?.record;
+  if (!canonical?.financialDocument) throw new Error("Invoice update did not return a saved record.");
+  return { record: hydrateIXIServiceInvoice(canonical), response };
+}
+
+export default { createIXIServiceInvoice, updateIXIServiceInvoice, hydrateIXIServiceInvoice };

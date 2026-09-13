@@ -84,7 +84,7 @@ export function createIXIServiceInvoiceDraft({ context = {}, workOrder = {}, inp
   const depositCredit = money(input.depositCredit);
   const otherCredit = money(input.otherCredit);
   const totalCredits = money(depositCredit + otherCredit);
-  const amountDue = money(Math.max(0, subtotal + tax - totalCredits));
+  const amountDue = money(Math.max(0, subtotal + money(input.travelFreightAmount) + tax - totalCredits));
   const primary = context.primary || {};
   const customer = workOrder.customer || {};
 
