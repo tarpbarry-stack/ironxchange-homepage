@@ -1,4 +1,5 @@
 import { paymentHistorySummary } from "../ixi-aos/transact/payments/IXIPaymentHistory";
+import IXIPaymentStatusBadge from "../ixi-aos/transact/payments/IXIPaymentStatusBadge";
 import IXIPaymentsPanel from "../ixi-aos/transact/payments/IXIPaymentsPanel";
 import { paymentDocument, paymentScopeObject } from "../ixi-aos/transact/payments/IXIPaymentModel";
 import { createIXITransactContext } from "../ixi-aos/transact/IXITransactContext";
@@ -215,6 +216,7 @@ function buildTransactObject(context = {}, financialRecords = []) {
 
 function StatusBadge({ value }) {
   const normalized = clean(value || "ACTIVE").toUpperCase();
+  if (["PAID", "UNPAID", "PART PAID", "PARTIALLY PAID", "PARTIAL"].includes(normalized)) return <IXIPaymentStatusBadge status={normalized} />;
   const tone = /FAIL|BLOCK|DENY|OVERDUE|CONFLICT/.test(normalized)
     ? "danger"
     : /PAID|POSTED|CLOSED|VERIFIED|COMPLETE|CURRENT/.test(normalized)
@@ -330,7 +332,7 @@ function RecordTable({ records, currency, emptyMessage, onSelect, paymentRecords
               <td><StatusBadge value={paid?.status || record.status} /></td>
               <td>{record.date}</td>
               <td className={styles.money}>{record.amount === null ? "—" : formatIXIMoney(record.amount, currency)}</td>
-              <td>{paid ? <><StatusBadge value={paid.status} />{paid.currency ? <small>{formatIXIMoney(paid.paid, paid.currency)} PAID · {formatIXIMoney(paid.balance, paid.currency)} DUE</small> : null}</> : "—"}</td>
+              <td>{paid?.currency ? <small>{formatIXIMoney(paid.paid, paid.currency)} PAID · {formatIXIMoney(paid.balance, paid.currency)} DUE</small> : "—"}</td>
               <td>{paid && !paid.aggregate && paid.active ? <button type="button" className={styles.rowAction} onClick={() => onMarkPaid?.(paid.id)}>{paid.balance > 0 ? "MARK PAID" : "PAYMENT DETAILS"}</button> : null}<button type="button" className={styles.rowAction} onClick={() => onSelect?.(record)}>VIEW</button></td>
             </tr>
           ); })}

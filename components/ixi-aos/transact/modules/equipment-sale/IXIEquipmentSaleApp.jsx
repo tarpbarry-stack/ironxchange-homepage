@@ -393,7 +393,7 @@ function CommissionEditor({
       ),
     );
   return (
-    <section className={`es-additional ${compact ? "compact" : ""}`}>
+    <section className={`es-additional es-compensation ${compact ? "compact" : ""}`}>
       <div className="es-section-head">
         <div>
           <h3>INTERNAL COMPENSATION</h3>
@@ -426,95 +426,116 @@ function CommissionEditor({
             ])
           }
         >
-          + ADD
+          + ADD RECIPIENT
         </button>
       </div>
       {rows.map((row, index) => (
-        <div className="es-term-row" key={row.commissionId || index}>
-          <Input
-            disabled={disabled}
-            value={row.recipientLabel}
-            onChange={(value) => update(index, "recipientLabel", value)}
-            placeholder="Salesperson, broker, referral or company"
-          />
-          <select
-            disabled={disabled}
-            value={row.commissionType || "salesperson"}
-            onChange={(event) =>
-              update(index, "commissionType", event.target.value)
-            }
-          >
-            <option value="salesperson">SALESPERSON</option>
-            <option value="broker">BROKER</option>
-            <option value="referral">REFERRAL</option>
-            <option value="bounty">MACHINE BOUNTY</option>
-            <option value="bonus">BONUS</option>
-            <option value="management">MANAGEMENT</option>
-            <option value="other">OTHER</option>
-          </select>
-          <select
-            disabled={disabled}
-            value={row.calculationMethod || "fixed"}
-            onChange={(event) =>
-              update(index, "calculationMethod", event.target.value)
-            }
-          >
-            <option value="fixed">FIXED</option>
-            <option value="sale-price">% SALE PRICE</option>
-            <option value="gross-profit">% GROSS PROFIT</option>
-            <option value="net-profit">% NET PROFIT</option>
-            <option value="above-target">% ABOVE TARGET</option>
-            <option value="manual">MANUAL</option>
-          </select>
-          <IXINumericInput currency={row.calculationMethod === "fixed" || row.calculationMethod === "manual"}
-            disabled={disabled}
-            inputMode="decimal"
-            value={
-              row.calculationMethod === "fixed" ||
-              row.calculationMethod === "manual"
-                ? row.fixedAmount
-                : row.ratePercent
-            }
-            onValueChange={(value) =>
-              update(
-                index,
-                row.calculationMethod === "fixed" ||
+        <div className="es-commission-entry" role="group" aria-label={`Compensation recipient ${index + 1}`} key={row.commissionId || index}>
+          <div className="es-commission-head">
+            <strong>RECIPIENT {index + 1}</strong>
+            <button
+              disabled={disabled}
+              type="button"
+              aria-label={`Remove commission recipient ${index + 1}`}
+              onClick={() => onChange(rows.filter((_, current) => current !== index))}
+            >
+              REMOVE
+            </button>
+          </div>
+          <div className="es-commission-fields">
+            <label className="es-commission-field es-commission-wide">
+              <span>WHO GETS PAID</span>
+              <Input
+                disabled={disabled}
+                value={row.recipientLabel}
+                onChange={(value) => update(index, "recipientLabel", value)}
+                placeholder="Person or company name"
+              />
+            </label>
+            <label className="es-commission-field">
+              <span>COMPENSATION TYPE</span>
+              <select
+                disabled={disabled}
+                value={row.commissionType || "salesperson"}
+                onChange={(event) =>
+                  update(index, "commissionType", event.target.value)
+                }
+              >
+                <option value="salesperson">SALESPERSON</option>
+                <option value="broker">BROKER</option>
+                <option value="referral">REFERRAL</option>
+                <option value="bounty">MACHINE BOUNTY</option>
+                <option value="bonus">BONUS</option>
+                <option value="management">MANAGEMENT</option>
+                <option value="other">OTHER</option>
+              </select>
+            </label>
+            <label className="es-commission-field">
+              <span>CALCULATE BY</span>
+              <select
+                disabled={disabled}
+                value={row.calculationMethod || "fixed"}
+                onChange={(event) =>
+                  update(index, "calculationMethod", event.target.value)
+                }
+              >
+                <option value="fixed">FIXED</option>
+                <option value="sale-price">% SALE PRICE</option>
+                <option value="gross-profit">% GROSS PROFIT</option>
+                <option value="net-profit">% NET PROFIT</option>
+                <option value="above-target">% ABOVE TARGET</option>
+                <option value="manual">MANUAL</option>
+              </select>
+            </label>
+            <label className="es-commission-field">
+              <span>{row.calculationMethod === "fixed" || row.calculationMethod === "manual" ? "AMOUNT ($)" : "RATE (%)"}</span>
+              <IXINumericInput currency={row.calculationMethod === "fixed" || row.calculationMethod === "manual"}
+                disabled={disabled}
+                inputMode="decimal"
+                value={
+                  row.calculationMethod === "fixed" ||
                   row.calculationMethod === "manual"
-                  ? "fixedAmount"
-                  : "ratePercent",
-                value,
-              )
-            }
-            placeholder={
-              row.calculationMethod === "fixed" ||
-              row.calculationMethod === "manual"
-                ? "Amount"
-                : "Rate %"
-            }
-          />
-          <IXIMoneyInput
-            disabled={disabled}
-            inputMode="decimal"
-            value={row.targetAmount}
-            onValueChange={(value) => update(index, "targetAmount", value)}
-            placeholder="Target / hurdle (optional)"
-          />
-          <Input
-            disabled={disabled}
-            value={row.conditions}
-            onChange={(value) => update(index, "conditions", value)}
-            placeholder="Earned conditions / notes"
-          />
-          <button
-            disabled={disabled}
-            type="button"
-            aria-label="Remove commission"
-            onClick={() =>
-              onChange(rows.filter((_, current) => current !== index))
-            }
-          >
-            ×
-          </button>
+                    ? row.fixedAmount
+                    : row.ratePercent
+                }
+                onValueChange={(value) =>
+                  update(
+                    index,
+                    row.calculationMethod === "fixed" ||
+                      row.calculationMethod === "manual"
+                      ? "fixedAmount"
+                      : "ratePercent",
+                    value,
+                  )
+                }
+                placeholder={
+                  row.calculationMethod === "fixed" ||
+                  row.calculationMethod === "manual"
+                    ? "Amount"
+                    : "Rate %"
+                }
+              />
+            </label>
+            <label className="es-commission-field">
+              <span>TARGET / HURDLE ($) · OPTIONAL</span>
+              <IXIMoneyInput
+                disabled={disabled}
+                inputMode="decimal"
+                value={row.targetAmount}
+                onValueChange={(value) => update(index, "targetAmount", value)}
+                placeholder="0.00"
+              />
+            </label>
+            <label className="es-commission-field es-commission-wide">
+              <span>CONDITIONS / NOTES · OPTIONAL</span>
+              <Area
+                disabled={disabled}
+                value={row.conditions}
+                onChange={(value) => update(index, "conditions", value)}
+                placeholder="Earned conditions / notes"
+              />
+            </label>
+          </div>
         </div>
       ))}
     </section>

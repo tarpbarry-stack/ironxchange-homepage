@@ -1,0 +1,21 @@
+.badge.badge {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  max-width: 100%;
+  box-sizing: border-box;
+  min-height: 28px;
+  padding: 5px 9px;
+  border: 1px solid #526058;
+  border-radius: 4px;
+  background: #18221c;
+  color: #d1d9d4;
+  font-size: 12px;
+  line-height: 1.25;
+  font-weight: 900;
+  letter-spacing: .04em;
+  white-space: normal;
+}
+.badge.badge[data-tone="paid"] { color: #a1f0bf; border-color: #4d9d69; background: #123321; }
+.badge.badge[data-tone="unpaid"] { color: #ffc0b5; border-color: #af7163; background: #35201c; }
+.badge.badge[data-tone="partial"] { color: #ffe080; border-color: #b3913d; background: #332b14; }
