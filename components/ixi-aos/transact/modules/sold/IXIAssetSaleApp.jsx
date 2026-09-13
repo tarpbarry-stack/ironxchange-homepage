@@ -4,6 +4,7 @@ import {
   createIXIAssetSaleDraft,
   projectIXIAssetSaleCollection,
   validateIXIAssetSale,
+  getIXIAssetSaleValidationMessages,
 } from "./IXIAssetSaleContract";
 import { createIXIAssetSale, recordIXIAssetSaleReceipt } from "./IXIAssetSaleCommands";
 import { uploadIXIAosFinancialAttachment } from "../../../financial-runtime/IXIAosFinancialReadClient";
@@ -28,7 +29,7 @@ const COPY = {
   en: {
     title: "SOLD CLOSEOUT",
     invoiceControl: "SOURCE INVOICE",
-    invoice: "INVOICE #",
+    invoice: "INVOICE / REFERENCE",
     invoiceState: "INVOICE STATE",
     buyer: "BUYER",
     collection: "CUSTOMER COLLECTION",
@@ -58,7 +59,7 @@ const COPY = {
     customer: "CUSTOMER",
     addBillOfSale: "+ BILL OF SALE",
     addDocument: "+ OTHER DOCUMENT",
-    blocked: "BLOCKED",
+    blocked: "TO FINISH",
     verifying: "VERIFYING…",
     soldStatus: "✓ SOLD · FUNDS COLLECTED",
     settlement: "SETTLEMENT",
@@ -68,7 +69,7 @@ const COPY = {
   es: {
     title: "CIERRE DE VENTA",
     invoiceControl: "FACTURA DE ORIGEN",
-    invoice: "FACTURA #",
+    invoice: "FACTURA / REFERENCIA",
     invoiceState: "ESTADO DE FACTURA",
     buyer: "COMPRADOR",
     collection: "COBRANZA DEL CLIENTE",
@@ -98,7 +99,7 @@ const COPY = {
     customer: "CLIENTE",
     addBillOfSale: "+ CONTRATO DE VENTA",
     addDocument: "+ OTRO DOCUMENTO",
-    blocked: "BLOQUEADO",
+    blocked: "PARA TERMINAR",
     verifying: "VERIFICANDO…",
     soldStatus: "✓ VENDIDO · FONDOS COBRADOS",
     settlement: "LIQUIDACIÓN",
@@ -374,7 +375,7 @@ export default function IXIAssetSaleApp({
 
     <div className="sale-section">{copy.invoiceControl}</div>
     <div className="sale-grid">
-      <Field label={copy.invoice}><Input readOnly value={invoiceSnapshot?.documentNumber || "—"} /></Field>
+      <Field label={copy.invoice}><Input readOnly value={invoiceSnapshot?.documentNumber || invoiceIdOf(invoiceSnapshot) || "—"} /></Field>
       <Field label={copy.invoiceState}><Input readOnly value={(invoiceState || "draft").toUpperCase()} /></Field>
     </div>
     <div className="sale-grid">
@@ -433,7 +434,7 @@ export default function IXIAssetSaleApp({
         <small>{clean(document.type).replace(/-/g, " ").toUpperCase()} · SHA-256</small>
       </div>)}
       <Field label={copy.notes}><textarea value={notes} onChange={event => setNotes(event.target.value)} /></Field>
-      {Object.keys(errors).length ? <div className="sale-error">{copy.blocked}: {Object.values(errors).join(" · ").toUpperCase()}</div> : null}
+      {Object.keys(errors).length ? <div className="sale-error" role="alert"><strong>{copy.blocked}</strong><ul>{getIXIAssetSaleValidationMessages(errors, lang).map(message => <li key={message}>{message}</li>)}</ul></div> : null}
       <button type="button" className="sale-primary" disabled={saving || uploading || !closeoutReady} onClick={closeSale}>{saving ? copy.verifying : copy.record}</button>
     </> : <div className="sale-status"><strong>{copy.soldStatus}</strong><div className="sale-money"><span>{copy.settlement}</span><b>{copy.ready}</b></div></div>}
 

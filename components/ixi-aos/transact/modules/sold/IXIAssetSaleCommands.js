@@ -5,7 +5,7 @@ import {
 } from "../../../financial-runtime/IXIAosFinancialRuntimeAdapter";
 import { patchIXIAosFinancialDocument } from "../../../financial-runtime/IXIAosFinancialReadClient";
 import { runIXIActionNoticeLifecycle } from "../../../../ixi-object-system/IXIActionNoticeEngine";
-import { createIXIAssetSaleDraft, validateIXIAssetSale } from "./IXIAssetSaleContract";
+import { createIXIAssetSaleDraft, validateIXIAssetSale, getIXIAssetSaleValidationMessages } from "./IXIAssetSaleContract";
 
 const clean = value => String(value ?? "").trim();
 const storedRecord = response => response?.data?.record || response?.record || {};
@@ -121,7 +121,7 @@ export async function createIXIAssetSale({
   const draft = createIXIAssetSaleDraft({ context, input });
   const check = validateIXIAssetSale(draft, input.sourceInvoice);
   if (!check.valid) {
-    const error = new Error("SOLD requires an issued Invoice with a zero customer balance.");
+    const error = new Error(getIXIAssetSaleValidationMessages(check.errors).join(" "));
     error.validation = check;
     throw error;
   }
