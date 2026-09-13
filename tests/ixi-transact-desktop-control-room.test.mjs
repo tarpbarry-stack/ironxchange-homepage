@@ -76,7 +76,11 @@ test("Object console is History-first and reuses the governed TRAN$ACT app bus",
   assert.match(source, /className=\{styles\.objectDirectorySelect\}[\s\S]*aria-label="Object directory"/u);
   assert.doesNotMatch(source, /selectedDirectory\?\.label \|\| "AOS OBJECTS"/u);
   assert.doesNotMatch(source, /<span>INDEX<\/span>/u);
-  assert.match(source, /SN · \{item\.serialNumber \|\| "NOT RECORDED"\}/u);
+  assert.match(source, /<b>SN<\/b><span>\{item\.serialNumber \|\| "NOT RECORDED"\}<\/span>/u);
+  assert.match(source, /<b>ID<\/b><span>\{item\.stockNumber \|\| item\.assetId \|\| item\.passportId \|\| "NOT RECORDED"\}<\/span>/u);
+  assert.match(source, /className=\{styles\.headerIdentity\}[\s\S]*selectedContext\.serialNumber[\s\S]*selectedContext\.stockNumber[\s\S]*selectedContext\.passportId[\s\S]*selectedContext\.sourceId/u);
+  assert.match(source, /SERIAL NUMBER[\s\S]*context\.serialNumber[\s\S]*STOCK NUMBER[\s\S]*context\.stockNumber[\s\S]*PASSPORT NUMBER[\s\S]*context\.passportId[\s\S]*OBJECT ID[\s\S]*context\.sourceId/u);
+  assert.doesNotMatch(source, /shortIdentity/u);
   assert.match(source, /setActiveWorkspace\(context\.kind === "company" \? "today" : "object-history"\)/u);
   assert.match(source, /title="TRANSACTION HISTORY"/u);
   assert.match(source, /getIXITransactModules/u);
