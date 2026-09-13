@@ -9,6 +9,10 @@ export const expensePaymentMethod = item => {
   const d = paymentDocument(item);
   return clean(d.paymentMethod || d.expense?.paymentMethod || d.expenseRecord?.expense?.paymentMethod).toLowerCase();
 };
+export function paymentScopeObject(object, kind, entityPassportId) {
+  if (kind !== "company" || clean(object?.passportId)) return object;
+  return { ...object, passportId: clean(entityPassportId) };
+}
 
 export function uniquePaymentRecords(records = []) {
   const map = new Map();
