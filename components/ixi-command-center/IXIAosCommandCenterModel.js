@@ -434,7 +434,17 @@ function getVerifiedListingAliasMap(aosObjects = []) {
     const objectId = getObjectId(object);
     if (!objectId) return;
 
-    safeArray(object?.aliases?.listingIds).forEach(rawAlias => {
+    // IX-Core admission returns typed aliases; the AOS presentation adapter
+    // groups those aliases into listingIds. Both refer to the same Object.
+    const listingAliases = Array.isArray(object?.aliases)
+      ? object.aliases
+        .filter(alias => ["sharetribe-listing", "sharetribe", "listing"].includes(
+          clean(alias?.sourceType).toLowerCase()
+        ))
+        .map(alias => alias?.sourceId)
+      : safeArray(object?.aliases?.listingIds);
+
+    listingAliases.forEach(rawAlias => {
       const alias = clean(rawAlias);
       if (!alias || collisions.has(alias)) return;
       const existing = aliases.get(alias);

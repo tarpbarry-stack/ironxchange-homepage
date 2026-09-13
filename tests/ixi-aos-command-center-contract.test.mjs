@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import test from "node:test";
+import { normalizeIxCoreAdmissionEnvelope } from "../lib/mos/ixiAosCanonicalAdmission.mjs";
 
 import {
   buildIXIAosCommandContexts,
@@ -170,6 +171,54 @@ test("a production-shaped listing alias joins its photo to the canonical machine
   assert.equal(machine?.imageUrl, "https://images.example.com/verified-alias-544k.jpg");
   assert.equal(machine?.sourceId, "object-machine-1");
   assert.equal(machine?.passportId, "IXI-MACHINE-1");
+});
+
+test("IX-Core admission aliases carry an existing listing photo into Desktop", () => {
+  const object = { ...canonicalMachine, passportId: "IXIMZFWCE7", entityId: entity.entityId };
+  const listing = {
+    id: "listing-544k",
+    title: "2017 Deere 544K II",
+    publicData: { passportId: object.passportId },
+    imageUrl: "https://images.example.com/existing-544k.jpg"
+  };
+  const admit = (record, aliases) => normalizeIxCoreAdmissionEnvelope({
+    response: {
+      ok: true,
+      object: record,
+      identity: {
+        objectId: record.objectId,
+        passportId: record.passportId,
+        entityId: record.entityId,
+        aliases,
+        evidence: { source: "canonical-identity-registry" }
+      }
+    },
+    requestedObject: record,
+    expectedEntityId: record.entityId
+  });
+  const alias = { sourceType: "sharetribe-listing", sourceId: listing.id };
+  const admitted = admit(object, [alias]);
+  assert.equal(Array.isArray(admitted.aliases), true);
+
+  const build = aosObjects => buildIXIAosCommandContexts({
+    entity,
+    aosObjects,
+    ownedListings: [listing],
+    systemIndexes: [equipmentIndex(aosObjects.map(item => ({ objectId: item.objectId })))]
+  });
+  const machine = build([admitted]).find(context => context.sourceId === object.objectId);
+  assert.equal(machine.imageUrl, listing.imageUrl);
+  assert.equal(machine.passportId, object.passportId);
+  assert.equal(machine.source.presentation.id, listing.id);
+  assert.equal(machine.source.presentation.publicData.ixiMedia, undefined);
+
+  // Only listing aliases may supply listing presentation; IDs alone cannot.
+  const wrongSource = admit(object, [{ sourceType: "external-record", sourceId: listing.id }]);
+  assert.equal(build([wrongSource]).find(context => context.sourceId === object.objectId).imageUrl, "");
+
+  // A colliding alias must never put another machine's picture on either card.
+  const other = admit({ ...object, objectId: "other-machine", passportId: "IXIDU64CY2" }, [alias]);
+  assert.equal(build([admitted, other]).filter(context => context.kind === "machine").every(context => !context.imageUrl), true);
 });
 
 test("an unverified listing alias cannot attach a photo to a canonical machine", () => {
