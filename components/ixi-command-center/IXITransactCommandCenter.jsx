@@ -783,8 +783,8 @@ export default function IXITransactCommandCenter() {
           <nav aria-label="TRAN$ACT workspaces">{WORKSPACES.map(([id, label, number]) => <button type="button" key={id} data-active={activeWorkspace === id} onClick={() => { setActiveWorkspace(id); setActiveModuleId(""); setSelectedRecord(null); }}><span>{number}</span><strong>{label}</strong>{id === "today" && queue.length ? <b>{queue.length}</b> : null}</button>)}</nav>
           <section className={styles.objectDirectory} aria-label="Governed AOS Object directory">
             <header>
-              <div><span>{selectedDirectory?.label || "AOS OBJECTS"}</span><strong>{objectDirectory.length}</strong></div>
-              <label><span>INDEX</span><select value={selectedDirectory?.id || ""} onChange={event => setSelectedDirectoryId(event.target.value)}>{objectDirectories.map(directory => <option value={directory.id} key={directory.id}>{directory.menuLabel.toUpperCase()}</option>)}</select></label>
+              <strong className={styles.objectDirectoryCount} aria-label={`${objectDirectory.length} objects`}>{objectDirectory.length}</strong>
+              <select className={styles.objectDirectorySelect} aria-label="Object directory" value={selectedDirectory?.id || ""} onChange={event => setSelectedDirectoryId(event.target.value)}>{objectDirectories.map(directory => <option value={directory.id} key={directory.id}>{directory.menuLabel.toUpperCase()}</option>)}</select>
             </header>
             <div className={styles.objectDirectoryList} role="list">
               {objectDirectory.map(item => (
