@@ -82,7 +82,8 @@ test("Object console is History-first and reuses the governed TRAN$ACT app bus",
   assert.match(source, /SERIAL NUMBER[\s\S]*context\.serialNumber[\s\S]*STOCK NUMBER[\s\S]*context\.stockNumber[\s\S]*PASSPORT NUMBER[\s\S]*context\.passportId[\s\S]*OBJECT ID[\s\S]*context\.sourceId/u);
   assert.doesNotMatch(source, /shortIdentity/u);
   assert.match(source, /setActiveWorkspace\(context\.kind === "company" \? "today" : "object-history"\)/u);
-  assert.match(source, /title="TRANSACTION HISTORY"/u);
+  assert.match(source, /<IXITransactMachineHistory/u);
+  assert.match(read("components/ixi-command-center/IXITransactMachineHistory.jsx"), /<h2>TRANSACTION HISTORY<\/h2>/u);
   assert.match(source, /getIXITransactModules/u);
   assert.match(source, /workspaceEmbedded/u);
   assert.match(source, /dynamic\([\s\S]*import\("\.\.\/ixi-aos\/transact\/IXITransactApp"\)/u);
