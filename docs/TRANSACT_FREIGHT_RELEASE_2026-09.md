@@ -44,3 +44,22 @@ The backend pin is in `config/ixi-core-release.json`. Production completion also
 requires the complete runtime deployment workflow's recovery, source and canonical
 data checks, plus live browser checks. Test evidence does not substitute for
 those deployment checks.
+
+Production evidence, 2026-09-13:
+- Frontend PR #304 and backend PR #57 merged. Backend eea656050444997dc9b1c0ab1a9179dab6114687
+  completed the full production workflow 34770091133; both the paired gate and
+  deployment jobs succeeded. SSM command e29c12da-e71b-4800-8971-f811d357866b succeeded.
+- The complete release enforces private recovery with restore verification,
+  installed manifest verification, unchanged canonical identity and relationships,
+  runtime health and the recurring recovery service before successful completion.
+- S3 independently confirms the new recovery object at 17:03:09 UTC, immutable
+  version 4VTsimni2UXAlJpLKUUZC1iK81oFZini, AES256 encryption, and SHA-256
+  5c6a63db3c618f1fecc1489f03e7e1d1c6bfacd9f55efe033c8632d87d937347.
+- Live browser checks found Equipment, Workforce and Locations containers,
+  existing 544K inbound/outbound Freight requests, the linked $1,600 inbound Bill,
+  available correction controls, and request/financial history. All business edits
+  were cancelled; no real payment, approval, credit or settlement was posted.
+- Live verification identified a focus/selection problem in the shared currency
+  input. The follow-up retains displayed text while focused and formats on blur.
+  Isolated form checks now explicitly preserve select-all on focus before replacing
+  an amount, alongside the existing correction and paid-credit scenarios.
