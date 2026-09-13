@@ -1,3 +1,4 @@
+import { hydrateIXIServiceInvoice } from "../ixi-aos/transact/modules/service-invoice/IXIServiceInvoiceProjection.js";
 import { resolveIXITransactRecordModuleId } from "../ixi-aos/transact/IXITransactRecordRouting.js";
 import { buildIXISalesDealRegister, findIXISalesDeal } from "../ixi-aos/transact/sales/IXISalesDealEngine.js";
 
@@ -51,6 +52,9 @@ export function buildIXITransactRecordView({ record, financialDocumentId, object
     props.object[route[0]] = bind(document[route[0]]);
   } else if (type === "expense") {
     moduleId = "expense";
+  } else if (type === "invoice" && document.serviceInvoice) {
+    moduleId = "service-invoice";
+    props.object.serviceInvoice = hydrateIXIServiceInvoice(record, props.financialRecords);
   } else if (type === "invoice") {
     moduleId = "invoice";
   } else if (type === "work-order") {

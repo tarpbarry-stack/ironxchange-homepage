@@ -1,3 +1,4 @@
+import { sendIXITransactEmail } from "../ixi-aos/transact/IXITransactDeliveryClient";
 import { useEffect, useRef, useState } from "react";
 import {
   machineCsv,
@@ -27,6 +28,7 @@ export default function IXITransactDocumentActions({
   const [channel, setChannel] = useState("email");
   const dialog = useRef(null);
   const controller = useRef(null);
+  const sendAttempt = useRef(null);
   const selectionCount = useRef(0);
   useEffect(() => {
     if (selectionCount.current !== selectedRows.length) {
@@ -138,6 +140,22 @@ export default function IXITransactDocumentActions({
     } finally {
       setBusy("");
     }
+  }
+
+  async function emailDocuments() {
+    if (busy) return;
+    setError(""); setStatus("");
+    const target = recipient.trim();
+    if (!/^[^\s@,;]+@[^\s@,;]+\.[^\s@,;]+$/.test(target)) { setError("Enter one valid email address."); return; }
+    const documentIds = chosen.map(row => row.id);
+    const fingerprint = JSON.stringify([target, documentIds]);
+    if (sendAttempt.current?.fingerprint !== fingerprint) sendAttempt.current = { fingerprint, commandId: crypto.randomUUID() };
+    setBusy("send");
+    try {
+      const delivery = await sendIXITransactEmail({ documentIds, recipient: target, commandId: sendAttempt.current.commandId });
+      setStatus(`PDF emailed to ${delivery.recipient}. Accepted by the email provider. Reference: ${delivery.messageIds.join(", ")}`);
+    } catch (cause) { setError(cause.message || "Email could not be sent. Retry with the same selection."); }
+    finally { setBusy(""); }
   }
 
   function handoff() {
@@ -271,8 +289,7 @@ export default function IXITransactDocumentActions({
             ))}
           </ul>
           <p>
-            Share a PDF, or send links that require the recipient to sign in
-            with permission to view these records.
+            Email the selected documents as a PDF attachment. Text and WhatsApp open your messaging app with private links.
           </p>
           <div className={styles.actions}>
             <button type="button" disabled={Boolean(busy)} onClick={shareFile}>
@@ -328,13 +345,8 @@ export default function IXITransactDocumentActions({
           ) : null}
           {status || busy ? <p role="status">{busy || status}</p> : null}
           <div className={styles.actions}>
-            <button type="button" disabled={Boolean(busy)} onClick={handoff}>
-              OPEN{" "}
-              {channel === "email"
-                ? "EMAIL"
-                : channel === "sms"
-                  ? "TEXT MESSAGE"
-                  : "WHATSAPP"}
+            <button type="button" disabled={Boolean(busy)} onClick={channel === "email" ? emailDocuments : handoff}>
+              {channel === "email" ? (busy ? "SENDING…" : "EMAIL PDF") : channel === "sms" ? "OPEN TEXT MESSAGE" : "OPEN WHATSAPP"}
             </button>
             <button type="button" autoFocus onClick={() => setSharing(false)}>
               CLOSE

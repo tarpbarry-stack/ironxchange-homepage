@@ -1,3 +1,5 @@
+import { buildIXIReceivableProjection } from "../../ixi-aos/transact/modules/collections/IXICollectionsProjectionEngine.js";
+import { paymentHistorySummary } from "../../ixi-aos/transact/payments/IXIPaymentHistory.js";
 const clean = value => String(value ?? "").trim();
 const safeArray = value => Array.isArray(value) ? value : [];
 
@@ -20,6 +22,8 @@ function finiteMoney(...values) {
 
 function documentParty(document = {}) {
   return firstText(
+    document?.vendorName,
+    document?.customerName,
     document?.customer?.label,
     document?.customer?.name,
     document?.vendor?.label,
@@ -113,6 +117,24 @@ export function getIXITransactWorkspaceRecords(records = [], workspace = "record
 }
 
 export function getIXITransactActionableRecords(records = []) {
-  const terminal = /^(PAID|POSTED|CLOSED|COMPLETE|COMPLETED|CANCELED|CANCELLED|VOID)$/;
-  return normalizeIXITransactPassportRecords(records).filter(record => !terminal.test(record.status));
+  const terminal = /^(PAID|COLLECTED|POSTED|CLOSED|COMPLETE|COMPLETED|CANCELED|CANCELLED|VOID|REVERSED|REJECTED|SUPERSEDED)$/;
+  const receivables = new Map(buildIXIReceivableProjection({ financialRecords: records }).receivables.map(item => [item.invoiceId, item]));
+  return normalizeIXITransactPassportRecords(records).filter(record => {
+    if (terminal.test(record.status)) return false;
+    if (record.type === "invoice") {
+      const receivable = receivables.get(record.id);
+      if (receivable?.balance === 0) return false;
+    }
+    const payment = paymentHistorySummary(record.raw, records);
+    if (payment?.status === "PAID") return false;
+    // A signed order with an issued invoice is a completed handoff. The
+    // invoice's balance owns the remaining collection task.
+    if (record.type === "sales-order" && records.some(item => {
+      const document = getIXITransactFinancialDocument(item);
+      return document?.documentType === "invoice" &&
+        [document.sourceFinancialDocumentId, document.salesOrderFinancialDocumentId, document.salesOrder?.financialDocumentId].includes(record.id) &&
+        !/^(void|reversed|cancelled|draft)$/.test(clean(document.financialState).toLowerCase());
+    })) return false;
+    return true;
+  });
 }

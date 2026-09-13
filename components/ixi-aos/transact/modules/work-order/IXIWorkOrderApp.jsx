@@ -419,6 +419,7 @@ export default function IXIWorkOrderApp({
   workflowIntent = null,
   onBack = null,
   onCreate = null,
+  onOpenServiceInvoice = null,
   onAction = null
 }) {
   const [lang, setLang] = useState("en");
@@ -1537,6 +1538,8 @@ export default function IXIWorkOrderApp({
           <button onClick={() => act("documents")}><DocumentIcon size={18} />{t.document}</button>
         </div>
       </section> : null}
+
+      {workOrder.customer?.name && onOpenServiceInvoice ? <button className="wo-primary" onClick={() => onOpenServiceInvoice(workOrder)}>SERVICE INVOICE</button> : null}
 
       <section className="wo-note-card">
         <div className="head">{t.notes}<button onClick={() => setActiveTab("related")}>{t.viewAll}</button></div>

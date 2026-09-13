@@ -82,8 +82,8 @@ export const IXI_TRANSACT_MODULES = Object.freeze([
     label: "SERVICE INVOICE",
     group: "sell",
     documentType: "invoice",
-    readiness: "sales-build",
-    available: false,
+    readiness: "operational",
+    available: true,
   }),
   Object.freeze({
     id: "sold",

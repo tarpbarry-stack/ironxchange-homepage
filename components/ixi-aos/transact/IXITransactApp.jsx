@@ -671,7 +671,7 @@ export default function IXITransactApp({
   }, [initialModuleId, selectedFinancialDocumentId]);
   useEffect(() => {
     if (activeWorkOrder) setWorkOrderSnapshot(activeWorkOrder);
-    else if (moduleId !== "work-order") setWorkOrderSnapshot(null);
+    else if (!["work-order", "service-invoice"].includes(moduleId)) setWorkOrderSnapshot(null);
   }, [activeWorkOrder, moduleId]);
   useEffect(() => {
     if (activeTechWorkOrder) setTechWorkOrderSnapshot(activeTechWorkOrder);
@@ -1028,8 +1028,9 @@ export default function IXITransactApp({
         context={context}
         initialPurchaseOrder={purchaseOrderSnapshot}
         onBack={back}
-        onRecordChange={(record, changePayload) =>
-          change(
+        onRecordChange={async (record, changePayload) => {
+          await onFinancialRecordsChange?.();
+          await change(
             "purchase-order",
             "PURCHASE ORDER UPDATE",
             "buy",
@@ -1037,8 +1038,8 @@ export default function IXITransactApp({
             "purchaseOrderRecord",
             record,
             changePayload,
-          )
-        }
+          );
+        }}
       />
     );
   else if (moduleId === "time")
@@ -1384,10 +1385,14 @@ export default function IXITransactApp({
       <IXIServiceInvoiceApp
         context={context}
         object={object}
+        financialRecords={financialRecords}
+        initialRecord={object?.serviceInvoice || null}
+        onFinancialRecordsChange={onFinancialRecordsChange}
         workOrder={workOrderSnapshot || activeWorkOrder}
         onBack={back}
-        onRecordChange={(record, changePayload, sourceContext) =>
-          change(
+        onRecordChange={async (record, changePayload, sourceContext) => {
+          await onFinancialRecordsChange?.();
+          await change(
             "service-invoice",
             "SERVICE INVOICE UPDATE",
             "sell",
@@ -1401,8 +1406,8 @@ export default function IXITransactApp({
               customer: record?.customer || null,
               ar: record?.ar || null,
             },
-          )
-        }
+          );
+        }}
       />
     );
   else if (moduleId === "sold")
@@ -1726,6 +1731,7 @@ export default function IXITransactApp({
   else if (moduleId === "work-order")
     body = (
       <IXIWorkOrderApp
+        onOpenServiceInvoice={record => { setWorkOrderSnapshot(record); setModuleId("service-invoice"); }}
         context={context}
         initialWorkOrder={workOrderSnapshot || activeWorkOrder}
         financialRecords={financialRecords}
@@ -1805,8 +1811,6 @@ export default function IXITransactApp({
             sourceContext,
             { workOrder: nextWorkOrder, ...payload },
           );
-          // Service Invoice remains intentionally gated until the sales workflow
-          // persists issue, payment, void, and canonical readback end to end.
           return nextWorkOrder;
         }}
       />

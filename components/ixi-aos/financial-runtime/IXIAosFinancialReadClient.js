@@ -1,3 +1,4 @@
+import { normalizeIXITransactAccess } from "../../ixi-transact-dashboard/data/IXITransactAccessProjection.mjs";
 const clean = value => String(value ?? "").trim();
 
 async function request(path, options = {}, fallback = "IXI Financial request failed.") {
@@ -37,7 +38,7 @@ export async function loadIXIAosFinancialAccessContext({ signal } = {}) {
     { method: "GET", signal },
     "IXI Financial access context could not be loaded."
   );
-  return payload?.data || {};
+  return normalizeIXITransactAccess(payload)?.data || {};
 }
 
 export async function loadIXIAosPassportFinancialDocuments({ passportId, signal } = {}) {

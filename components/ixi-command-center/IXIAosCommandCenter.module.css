@@ -278,11 +278,12 @@
 .workspaceHeader p { max-width: 760px; margin: 0; color: var(--muted); font-size: var(--tx-type-body); line-height: var(--tx-leading-body); }
 .workspaceHeaderActions { flex: 0 0 auto; display: flex; align-items: center; gap: 8px; }
 .workspaceHeaderActions b { color: var(--gold); font-size: var(--tx-type-label); letter-spacing: 0.035em; }
+.workspaceHeaderActions button,
 .workspaceHeaderActions a,
 .focusCard a,
 .closeCard a { min-height: 40px; display: inline-flex; align-items: center; justify-content: center; padding: 0 12px; border: 1px solid rgba(255, 196, 0, 0.32); border-radius: 3px; color: var(--gold); background: rgba(255, 196, 0, 0.035); font-size: var(--tx-type-control); font-weight: 900; letter-spacing: 0.04em; text-decoration: none; }
 
-.queueBands { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); border-bottom: 1px solid var(--line); }
+.queueBands { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); border-bottom: 1px solid var(--line); }
 .queueBands > div { min-width: 0; min-height: 54px; padding: 9px 10px; display: grid; gap: 4px; border-right: 1px solid var(--line); }
 .queueBands > div:last-child { border-right: 0; }
 .queueBands span { overflow: hidden; color: var(--muted); text-overflow: ellipsis; white-space: nowrap; font-size: var(--tx-type-meta); font-weight: 850; letter-spacing: 0.04em; }
@@ -605,3 +606,9 @@
   .statusbar span:nth-child(2),
   .statusbar span:nth-child(3) { display: none; }
 }
+
+.newTransactionMenu { position: fixed; z-index: 120; top: 82px; right: 22px; width: min(480px, calc(100vw - 44px)); max-height: calc(100vh - 104px); overflow-y: auto; padding: 18px; border: 1px solid var(--gold); border-radius: 6px; background: #0e110f; box-shadow: 0 12px 36px #0009; }
+.newTransactionMenu h2 { margin: 0 0 8px; }
+.workspaceHeaderActions { flex-wrap: wrap; }
+.workspaceHeaderActions button { cursor: pointer; }
+.workspaceHeaderActions button:disabled { opacity: .5; cursor: default; }

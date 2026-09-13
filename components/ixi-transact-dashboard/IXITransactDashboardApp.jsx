@@ -1,3 +1,4 @@
+import IXITransactAccountingReports from "./IXITransactAccountingReports";
 import { useEffect, useMemo, useState } from "react";
 
 import {
@@ -50,8 +51,10 @@ function Metric({ label, value, currency, text = false }) {
 }
 
 
-function GenericRecordTable({ title, records, currency }) {
-  const rows = Array.isArray(records) ? records.slice(0, 50) : [];
+function GenericRecordTable({ title, records, currency, passportId }) {
+  const [page, setPage] = useState(0);
+  useEffect(() => setPage(0), [records]);
+  const rows = Array.isArray(records) ? records.slice(page * 50, (page + 1) * 50) : [];
 
   return (
     <section className="workspace-panel">
@@ -63,6 +66,7 @@ function GenericRecordTable({ title, records, currency }) {
         <b>{rows.length} SHOWN</b>
       </div>
 
+      {records?.length > 50 ? <div><button disabled={page === 0} onClick={() => setPage(value => value - 1)}>PREVIOUS</button><span> Page {page + 1} of {Math.ceil(records.length / 50)} </span><button disabled={(page + 1) * 50 >= records.length} onClick={() => setPage(value => value + 1)}>NEXT</button></div> : null}
       {rows.length ? (
         <div className="table-wrap">
           <table>
@@ -81,11 +85,11 @@ function GenericRecordTable({ title, records, currency }) {
                 const party = record.customerName || record.vendorName || record.partyName || record.label || record.source || "—";
                 const status = record.status || record.paymentStatus || record.state || "—";
                 const date = record.dueDate || record.dueAt || record.date || record.postedAt || "—";
-                const amount = record.openBalance ?? record.amount ?? record.total ?? record.balance;
+                const amount = record.openBalance ?? record.totals?.total ?? record.amount ?? record.total ?? record.treasuryAccount?.balances?.current ?? record.balance;
 
                 return (
                   <tr key={`${id}-${index}`}>
-                    <td><strong>{id}</strong></td>
+                    <td><a href={`/transact?passport=${encodeURIComponent(passportId || "")}&record=${encodeURIComponent(id)}`}><strong>{record.documentNumber || id}</strong></a></td>
                     <td>{party}</td>
                     <td>{status}</td>
                     <td>{date}</td>
@@ -155,6 +159,7 @@ function Executive({ projection }) {
 
 export default function IXITransactDashboardApp() {
   const [workspace, setWorkspace] = useState("executive");
+  useEffect(() => { const selected = new URLSearchParams(window.location.search).get("workspace"); if (WORKSPACES.some(([id]) => id === selected)) setWorkspace(selected); }, []);
   const [period, setPeriod] = useState(getDefaultIXITransactAccountingPeriod());
   const [access, setAccess] = useState(null);
   const [projectionPayload, setProjectionPayload] = useState(null);
@@ -215,11 +220,11 @@ export default function IXITransactDashboardApp() {
   if (workspace === "executive") {
     body = <Executive projection={projection} />;
   } else if (workspace === "ar") {
-    body = <GenericRecordTable title="ACCOUNTS RECEIVABLE" records={projection.ar.records} currency={projection.currency} />;
+    body = <GenericRecordTable title="ACCOUNTS RECEIVABLE" records={projection.ar.records} currency={projection.currency} passportId={projection.scope.entityPassportId} />;
   } else if (workspace === "ap") {
-    body = <GenericRecordTable title="ACCOUNTS PAYABLE" records={projection.ap.records} currency={projection.currency} />;
+    body = <GenericRecordTable title="ACCOUNTS PAYABLE" records={projection.ap.records} currency={projection.currency} passportId={projection.scope.entityPassportId} />;
   } else if (workspace === "treasury") {
-    body = <GenericRecordTable title="TREASURY ACCOUNTS" records={projection.treasury.accounts} currency={projection.currency} />;
+    body = <GenericRecordTable title="TREASURY ACCOUNTS" records={projection.treasury.accounts} currency={projection.currency} passportId={projection.scope.entityPassportId} />;
   } else if (workspace === "gl") {
     body = (
       <IXITransactGLWorkspace
@@ -230,12 +235,7 @@ export default function IXITransactDashboardApp() {
       />
     );
   } else {
-    body = (
-      <section className="workspace-panel">
-        <div className="panel-title"><div><span>REPORTING</span><strong>FINANCIAL REPORTS</strong></div></div>
-        <pre className="report-contract">{JSON.stringify(projection.reports, null, 2)}</pre>
-      </section>
-    );
+    body = <IXITransactAccountingReports reports={projection.reports} currency={projection.currency} period={period} onOpenRecord={record => window.location.assign(`/transact?passport=${encodeURIComponent(projection.scope.entityPassportId || "")}&record=${encodeURIComponent(record.document.financialDocumentId)}`)} />;
   }
 
   return (
