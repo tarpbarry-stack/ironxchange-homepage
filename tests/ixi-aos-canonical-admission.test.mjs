@@ -1,5 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { getPrimaryImage } from "../components/ixi-aos/card-runtime/IXIAosSemanticObjectPresentation.js";
+import { getAosObjectPrimaryImage } from "../components/ixi-mos/system-index/IXISystemIndexPresentationEngine.js";
 
 import {
   buildAosCanonicalAdmission,
@@ -10,6 +12,48 @@ import {
   preserveAosOwnedListingPresentations,
   resolveAosCanonicalPresentation
 } from "../lib/mos/ixiAosCanonicalAdmission.mjs";
+
+test("container references retain the same visible saved photo as their canonical cards", () => {
+  for (const objectType of ["location", "person", "machine"]) {
+    for (const media of [
+      [{ url: "https://media.example.test/photo.jpg", mediaId: "media-1" }],
+      ["https://media.example.test/photo.jpg"],
+      [{ url: "https://media.example.test/denied.jpg", permissions: { read: false } },
+        { url: "https://media.example.test/photo.jpg" }],
+      [{ url: "https://media.example.test/denied.jpg", effectivePermissions: { deny: ["VIEW"] } },
+        { src: "https://media.example.test/photo.jpg" }]
+    ]) {
+      const source = machine({ objectType, media });
+      const before = JSON.stringify(source);
+      const admission = buildAosCanonicalAdmission({ aosObjects: [source] });
+      const preview = createAosObjectPreviewReference(source.objectId, admission);
+      assert.equal(preview.primaryImageUrl, getPrimaryImage(source));
+      assert.equal(getPrimaryImage(preview), "https://media.example.test/photo.jpg");
+      assert.equal(getAosObjectPrimaryImage(preview), getPrimaryImage(source));
+      assert.equal(preview.objectId, source.objectId);
+      assert.equal(preview.passportId, source.passportId);
+      assert.equal(preview.referenceOnly, true);
+      assert.equal(preview.media, undefined, "reference must not copy canonical media records");
+      assert.equal(JSON.stringify(source), before);
+    }
+  }
+});
+
+test("container photo references keep primary-image fallbacks and photo-less objects empty", () => {
+  for (const extra of [
+    {},
+    { media: [{ url: "https://media.example.test/denied.jpg", access: { canView: false } }] },
+    { primaryImageUrl: "https://media.example.test/primary.jpg" },
+    { fields: { primaryImageUrl: "https://media.example.test/field.jpg" } },
+    { metadata: { presentation: { primaryImageUrl: "https://media.example.test/presentation.jpg" } } }
+  ]) {
+    const source = machine(extra);
+    const preview = createAosObjectPreviewReference(source.objectId,
+      buildAosCanonicalAdmission({ aosObjects: [source] }));
+    assert.equal(getPrimaryImage(preview), getPrimaryImage(source));
+    assert.equal(getAosObjectPrimaryImage(preview), getPrimaryImage(source));
+  }
+});
 
 function machine(overrides = {}) {
   return {

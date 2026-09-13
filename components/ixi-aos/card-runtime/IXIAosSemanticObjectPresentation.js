@@ -11,6 +11,8 @@
    - explicit permission denial always wins
    ========================================================= */
 
+import { getAosVisiblePrimaryImage } from "../../../lib/media/ixiAosPrimaryImage.mjs";
+
 export function clean(value) {
   return String(value ?? "").trim();
 }
@@ -452,34 +454,7 @@ export function getObjectActionCapabilities(object = {}) {
 }
 
 export function getPrimaryImage(object = {}) {
-  const fields = getObjectFields(object);
-  const metadata = getObjectMetadata(object);
-  const media = asArray(object?.media);
-
-  for (const item of media) {
-    const permissions = {
-      ...safeObject(item?.access),
-      ...safeObject(item?.permissions),
-      ...safeObject(item?.effectivePermissions)
-    };
-
-    if (!permissionDecision(permissions, ["view", "read", "canView", "canRead"], true)) {
-      continue;
-    }
-
-    const url = typeof item === "string"
-      ? clean(item)
-      : clean(item?.url || item?.src || item?.imageUrl);
-
-    if (url) return url;
-  }
-
-  return clean(
-    object?.primaryImageUrl ||
-    fields?.primaryImageUrl ||
-    metadata?.primaryImageUrl ||
-    getObjectPresentation(object)?.primaryImageUrl
-  );
+  return getAosVisiblePrimaryImage(object);
 }
 
 function normalizedAggregateValues(value, mode) {
