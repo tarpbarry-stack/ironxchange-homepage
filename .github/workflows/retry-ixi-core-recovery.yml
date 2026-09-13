@@ -1,0 +1,74 @@
+name: Verify installed IX-Core and retry private recovery
+on:
+  workflow_dispatch:
+  push:
+    branches: [ops/verify-owned-machine-release]
+    paths: [.github/workflows/retry-ixi-core-recovery.yml]
+permissions:
+  contents: read
+concurrency:
+  group: ixi-core-production
+  cancel-in-progress: false
+jobs:
+  recovery:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      AWS_REGION: us-east-2
+      AWS_INSTANCE_ID: ${{ secrets.AWS_INSTANCE_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-2
+      - name: Verify installed source and run the existing recovery service
+        run: |
+          set -euo pipefail
+          test "$AWS_INSTANCE_ID" = i-06d9ae98889f6fdab
+          test "$(aws sts get-caller-identity --query Account --output text)" = 459212966383
+          python3 - <<'PY'
+          import json,os,pathlib,re,shlex
+          expected=json.loads(pathlib.Path('config/ixi-core-release.json').read_text())['commit']
+          assert re.fullmatch('[a-f0-9]{40}',expected)
+          command = 'export IXI_EXPECTED_RELEASE='+shlex.quote(expected)+'\n'+r'''set -eu
+          cd /var/www/ix-core
+          node ops/runtime-release.js verify /var/www/ix-core /var/www/ix-core/.ixi-release.json
+          python3 - <<'CHECK'
+          import json,os,pathlib
+          release=json.loads(pathlib.Path('.ixi-release.json').read_text())
+          assert release['commit']==os.environ['IXI_EXPECTED_RELEASE'], 'Installed release differs from paired pin'
+          CHECK
+          curl --max-time 5 -fsS http://127.0.0.1:4100/live
+          curl --max-time 5 -fsS http://127.0.0.1:4100/ready
+          export IXI_RECOVERY_STARTED_AT="$(date -u +%s)"
+          if ! systemctl start ixi-core-recovery.service; then
+            journalctl -u ixi-core-recovery.service -n 30 --no-pager -o cat
+            exit 1
+          fi
+          test "$(systemctl show ixi-core-recovery.service -p Result --value)" = success
+          systemctl is-active --quiet ixi-core-recovery.timer
+          python3 - <<'CHECK'
+          import datetime,json,os,pathlib
+          receipt=json.loads(pathlib.Path('/var/backups/ixi-core-releases/latest-recovery.json').read_text())
+          assert receipt['ok'] and receipt['versionId'] and receipt['sha256']
+          assert receipt['consistency']=='sqlite-snapshot-stable-passports'
+          assert datetime.datetime.fromisoformat(receipt['createdAt']).timestamp() >= int(os.environ['IXI_RECOVERY_STARTED_AT'])
+          print(json.dumps({'freshPrivateRecoveryVerified':True,'releaseCommit':os.environ['IXI_EXPECTED_RELEASE'],'recovery':{k:receipt[k] for k in ['createdAt','consistency','sha256','versionId']},'census':{k:receipt['census'][k] for k in ['objects','activeObjects','passports','activeIdentitySha256']}}))
+          CHECK
+          node ops/runtime-release.js verify /var/www/ix-core /var/www/ix-core/.ixi-release.json
+          curl --max-time 5 -fsS http://127.0.0.1:4100/live
+          curl --max-time 5 -fsS http://127.0.0.1:4100/ready'''
+          pathlib.Path(os.environ['RUNNER_TEMP'],'recovery.json').write_text(json.dumps({'commands':[command],'executionTimeout':['720']}))
+          PY
+          command_id="$(aws ssm send-command --instance-ids "$AWS_INSTANCE_ID" --document-name AWS-RunShellScript --comment 'Verify installed IX-Core and retry existing private recovery service' --parameters "file://$RUNNER_TEMP/recovery.json" --query Command.CommandId --output text)"
+          echo "Recovery verification command: $command_id"
+          for attempt in {1..72}; do
+            sleep 10
+            aws ssm get-command-invocation --command-id "$command_id" --instance-id "$AWS_INSTANCE_ID" > "$RUNNER_TEMP/result.json"
+            status="$(jq -r .Status "$RUNNER_TEMP/result.json")"
+            case "$status" in Pending|InProgress|Delayed) continue ;; *) break ;; esac
+          done
+          jq -r '.StandardOutputContent,.StandardErrorContent' "$RUNNER_TEMP/result.json"
+          test "$status" = Success
