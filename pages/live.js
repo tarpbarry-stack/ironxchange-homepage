@@ -25,6 +25,10 @@ import {
   resolveIXILaunchSelection
 } from "../lib/listings/resolveIXILaunchSelection.mjs";
 
+import {
+  loadIXIOwnedListings
+} from "../lib/listings/loadIXIOwnedListings";
+
 import MachineBadges from "../components/MachineBadges";
 
 import categoryDnaKeywords from "../lib/categoryDnaKeywords";
@@ -569,7 +573,8 @@ const [externalLinks, setExternalLinks] = useState([
     try {
       const environment =
         await loadIXIListingsEnvironment({
-          includePrivateState: true
+          includePrivateState: true,
+          includePublicListings: false
         });
 
       if (cancelled) return;
@@ -593,23 +598,32 @@ const [externalLinks, setExternalLinks] = useState([
         String(environment.userId || "");
 
       const ownedListings =
-        (environment.listings || []).filter(item => {
-          const authorId =
-            String(getAuthorId(item) || "");
+        await loadIXIOwnedListings(
+          authenticatedUserId,
+          {
+            hydrateMedia: false
+          }
+        );
 
-          const status =
-            getListingStatus(item);
+      if (cancelled) {
+        return;
+      }
+
+      const sellerOwnedListings =
+        ownedListings.filter(item => {
+          const authorId = String(
+            getAuthorId(item) || ""
+          );
 
           return (
-            authorId === authenticatedUserId &&
-            status !== "deleted" &&
-            status !== "archived"
+            !authorId ||
+            authorId === authenticatedUserId
           );
         });
 
       setIsAuthenticated(true);
       setCurrentUserId(authenticatedUserId);
-      setListings(ownedListings);
+      setListings(sellerOwnedListings);
     } catch (error) {
       if (cancelled) return;
 
