@@ -295,6 +295,61 @@ test("TRAN$ACT Object directory follows customer-governed System Index names", (
   );
 });
 
+function containerDirectoryFixture() {
+  let serial = 0;
+  const canonical = (objectId, displayName, objectType = "person") => ({ objectId, displayName, objectType, entityId: entity.entityId, passportId: `IXIAAAAAA${"BCDEFGH"[serial++]}`, status: "active" });
+  const workforce = canonical("workforce-folder", "Field Team");
+  const matt = { ...canonical("matt", "Matt Tuley"), fields: { employeeId: "1-005" } };
+  const cooper = canonical("cooper", "Cooper Liles");
+  const yard = canonical("yard", "West Yard", "location");
+  const machine = { ...canonicalMachine, entityId: entity.entityId, passportId: "IXITEST999" };
+  const foreignMachine = canonical("unowned-machine", "Visible external machine", "machine");
+  const publication = { ...canonical("publication", "Retired publication adapter", "system-index"), metadata: { adapterId: "ixi-owned-for-sale" } };
+  const aosObjects = [workforce, matt, cooper, yard, machine, foreignMachine, publication];
+  const systemIndexes = [{ ...equipmentIndex([{ objectId: machine.objectId }]), displayName: "Equipment" }];
+  const railProjections = {
+    [workforce.objectId]: { members: [matt, cooper, matt, yard, foreignMachine] },
+    [yard.objectId]: { members: [matt, workforce] },
+    [publication.objectId]: { members: [machine] }
+  };
+  const contexts = buildIXIAosCommandContexts({ entity, aosObjects, systemIndexes });
+  return { workforce, matt, cooper, yard, aosObjects, systemIndexes, railProjections, contexts };
+}
+
+test("TRAN$ACT includes governed container rails even when the container uses a Person card", () => {
+  const fixture = containerDirectoryFixture();
+  const before = structuredClone(fixture);
+  const directories = getIXITransactObjectDirectories(fixture.contexts, fixture.systemIndexes, fixture);
+  assert.deepEqual(directories.map(directory => directory.menuLabel), ["ALL", "EQUIP", "Field Team", "West Yard"]);
+  assert.deepEqual(directories.find(directory => directory.id === fixture.workforce.objectId).items.map(item => item.sourceId), ["matt", "cooper", "yard"]);
+  const all = directories[0].items;
+  assert.equal(all.filter(item => item.sourceId === "matt").length, 1, "multiple container memberships do not duplicate an employee in ALL");
+  assert.equal(all.some(item => item.sourceId === "unowned-machine"), false, "a rail cannot bypass Equipment ownership admission");
+  assert.equal(all.find(item => item.sourceId === "matt").passportId, fixture.matt.passportId);
+  assert.equal(all.find(item => item.sourceId === "matt").kind, "person");
+  assert.deepEqual(fixture, before, "navigation never changes Objects, Passports, relationships, or presentation kinds");
+});
+
+test("container navigation follows renames and current rail members, not board placement or old parent fields", () => {
+  const fixture = containerDirectoryFixture();
+  fixture.aosObjects[0].displayName = "Our People";
+  fixture.matt.directContainerId = "a-different-old-parent";
+  fixture.railProjections[fixture.workforce.objectId].members = [fixture.cooper];
+  fixture.railProjections[fixture.yard.objectId].members = [fixture.matt];
+  const contexts = buildIXIAosCommandContexts({ entity, aosObjects: fixture.aosObjects, systemIndexes: fixture.systemIndexes });
+  const directories = getIXITransactObjectDirectories(contexts, fixture.systemIndexes, fixture);
+  const directory = directories.find(item => item.id === fixture.workforce.objectId);
+  assert.equal(directory.label, "Our People");
+  assert.deepEqual(directory.items.map(item => item.sourceId), [fixture.cooper.objectId]);
+  assert.equal(directories.find(item => item.id === fixture.yard.objectId).items[0].sourceId, fixture.matt.objectId);
+});
+
+test("container directory rejects a mismatched Passport instead of attaching another employee's identity", () => {
+  const fixture = containerDirectoryFixture();
+  fixture.railProjections[fixture.workforce.objectId].members = [{ objectId: fixture.matt.objectId, passportId: fixture.cooper.passportId }];
+  assert.throws(() => getIXITransactObjectDirectories(fixture.contexts, fixture.systemIndexes, fixture), error => error.code === "IXI_AOS_PROJECTION_PASSPORT_MISMATCH");
+});
+
 test("a canonical IX-Core machine remains selectable when Sharetribe returns zero listings", () => {
   const contexts = buildIXIAosCommandContexts({
     entity,
