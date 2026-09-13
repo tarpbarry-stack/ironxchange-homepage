@@ -67,6 +67,34 @@ test("desktop remains an authenticated read surface over governed financial cont
   assert.doesNotMatch(source, /method:\s*"(?:POST|PUT|PATCH|DELETE)"/u);
 });
 
+test("Object console is History-first and reuses the governed TRAN$ACT app bus", () => {
+  const source = read("components/ixi-command-center/IXITransactCommandCenter.jsx");
+  const app = read("components/ixi-aos/transact/IXITransactApp.jsx");
+
+  assert.match(source, /Governed AOS Object directory/u);
+  assert.match(source, /SN · \{item\.serialNumber \|\| "NOT RECORDED"\}/u);
+  assert.match(source, /setActiveWorkspace\(context\.kind === "company" \? "today" : "object-history"\)/u);
+  assert.match(source, /title="TRANSACTION HISTORY"/u);
+  assert.match(source, /getIXITransactModules/u);
+  assert.match(source, /workspaceEmbedded/u);
+  assert.match(source, /dynamic\([\s\S]*import\("\.\.\/ixi-aos\/transact\/IXITransactApp"\)/u);
+  assert.match(source, /IXI CORE CONNECTED · PASSPORT HISTORY/u);
+  assert.doesNotMatch(source, /window\.location[^\n]*object-history/u);
+  assert.match(app, /workspaceEmbedded = false/u);
+  assert.match(app, /workspaceEmbedded[\s\S]*"RETURN TO TRANSACTION HISTORY"/u);
+});
+
+test("machine photos hydrate progressively from the deduplicated IXI Media bus", () => {
+  const source = read("components/ixi-command-center/IXITransactCommandCenter.jsx");
+
+  assert.match(source, /import \{ hydrateIXIListingMedia \} from "\.\.\/\.\.\/lib\/listings\/hydrateIXIListingMedia"/u);
+  assert.match(source, /hydrateIXIListingMedia\(listing, \{ dedupeRequests: true \}\)/u);
+  assert.match(source, /IntersectionObserver/u);
+  assert.match(source, /rootMargin: "160px 0px"/u);
+  assert.match(source, /label=`?\{?`?\$?\{?context\.title/u);
+  assert.match(source, /eager/u);
+});
+
 test("TRAN$ACT login returns the authenticated operator to the desktop", () => {
   const source = read("components/ixi-command-center/IXITransactCommandCenter.jsx");
 
@@ -85,7 +113,7 @@ test("desktop styling preserves the permanent professional shell and responsive 
   const styles = read("components/ixi-command-center/IXIAosCommandCenter.module.css");
 
   assert.match(styles, /\.topbar\s*\{[\s\S]*position:\s*sticky/u);
-  assert.match(styles, /grid-template-columns:\s*220px minmax\(0, 1fr\) 296px/u);
+  assert.match(styles, /grid-template-columns:\s*250px minmax\(0, 1fr\) 330px/u);
   assert.match(styles, /@media \(max-width: 1220px\)/u);
   assert.match(styles, /overflow-x:\s*hidden/u);
   assert.match(styles, /--gold:\s*#ffc400/u);
