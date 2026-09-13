@@ -417,6 +417,39 @@ function buildMachineContext(listing = {}) {
   };
 }
 
+function getListingAlias(listing = {}) {
+  return firstText(
+    listing?.listingId,
+    listing?.id?.uuid,
+    listing?.id,
+    listing?.uuid
+  );
+}
+
+function getVerifiedListingAliasMap(aosObjects = []) {
+  const aliases = new Map();
+  const collisions = new Set();
+
+  safeArray(aosObjects).forEach(object => {
+    const objectId = getObjectId(object);
+    if (!objectId) return;
+
+    safeArray(object?.aliases?.listingIds).forEach(rawAlias => {
+      const alias = clean(rawAlias);
+      if (!alias || collisions.has(alias)) return;
+      const existing = aliases.get(alias);
+      if (existing && existing !== objectId) {
+        aliases.delete(alias);
+        collisions.add(alias);
+        return;
+      }
+      aliases.set(alias, objectId);
+    });
+  });
+
+  return aliases;
+}
+
 function getProjectedKindOverrides(systemIndexes = []) {
   const candidates = new Map();
 
@@ -488,6 +521,7 @@ export function buildIXIAosCommandContexts({
     getIXITransactOwnedEquipmentObjectIds(systemIndexes)
   );
   const projectedKindOverrides = getProjectedKindOverrides(systemIndexes);
+  const verifiedListingAliases = getVerifiedListingAliasMap(aosObjects);
 
   safeArray(aosObjects)
     .map(buildMosContext)
@@ -501,7 +535,12 @@ export function buildIXIAosCommandContexts({
     .forEach(context => byObjectId.set(context.sourceId, context));
 
   safeArray(ownedListings)
-    .map(buildMachineContext)
+    .map(listing => {
+      const verifiedObjectId = verifiedListingAliases.get(getListingAlias(listing));
+      return buildMachineContext(verifiedObjectId
+        ? { ...listing, objectId: verifiedObjectId }
+        : listing);
+    })
     .filter(Boolean)
     .filter(machine => ownedEquipmentIds.has(machine.sourceId))
     .forEach(machine => {

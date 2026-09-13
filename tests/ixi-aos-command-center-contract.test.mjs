@@ -150,6 +150,46 @@ test("canonical admission retains the owned listing photo from its presentation 
   );
 });
 
+test("a production-shaped listing alias joins its photo to the canonical machine", () => {
+  const contexts = buildIXIAosCommandContexts({
+    entity,
+    aosObjects: [{
+      ...canonicalMachine,
+      aliases: { listingIds: ["sharetribe-listing-544k"] }
+    }],
+    ownedListings: [{
+      id: "sharetribe-listing-544k",
+      title: "2017 Deere 544K II",
+      imageUrl: "https://images.example.com/verified-alias-544k.jpg",
+      passportId: "IXI-MACHINE-1"
+    }],
+    systemIndexes: [equipmentIndex([{ objectId: "object-machine-1" }])]
+  });
+
+  const machine = contexts.find(context => context.sourceId === "object-machine-1");
+  assert.equal(machine?.imageUrl, "https://images.example.com/verified-alias-544k.jpg");
+  assert.equal(machine?.sourceId, "object-machine-1");
+  assert.equal(machine?.passportId, "IXI-MACHINE-1");
+});
+
+test("an unverified listing alias cannot attach a photo to a canonical machine", () => {
+  const contexts = buildIXIAosCommandContexts({
+    entity,
+    aosObjects: [canonicalMachine],
+    ownedListings: [{
+      id: "unverified-listing-544k",
+      title: "Unverified 544K",
+      imageUrl: "https://images.example.com/unverified.jpg"
+    }],
+    systemIndexes: [equipmentIndex([{ objectId: "object-machine-1" }])]
+  });
+
+  assert.equal(
+    contexts.find(context => context.sourceId === "object-machine-1")?.imageUrl,
+    ""
+  );
+});
+
 test("TRAN$ACT Object directory follows customer-governed System Index names", () => {
   const equipment = { ...canonicalMachine };
   const location = { ...objects[0] };
