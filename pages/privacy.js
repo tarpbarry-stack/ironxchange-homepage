@@ -22,7 +22,7 @@ export default function PrivacyPage() {
           <div className="legal-card">
             <span>IronXchange Legal</span>
             <h1>Privacy Policy</h1>
-            <p className="updated">Last updated: February 1, 2026</p>
+            <p className="updated">Last updated: September 13, 2026</p>
 
             <p>
               IronXchange operates an online marketplace platform that enables users
@@ -98,7 +98,24 @@ export default function PrivacyPage() {
               settings, though disabling cookies may affect functionality.
             </p>
 
-            <h2>8. Data Retention</h2>
+            <h2>8. Text Passport Communications</h2>
+            <p>
+              When you enter a mobile number in the Text Passport form, check
+              the consent box, and select Send Passport, you request one
+              transactional SMS or MMS containing information about the selected
+              equipment listing. Message frequency is one message per request.
+              Message and data rates may apply. Reply STOP to opt out or HELP
+              for help. Consent is not a condition of purchase.
+            </p>
+            <p>
+              IronXchange does not sell or share mobile numbers with third
+              parties for their marketing or promotional purposes. We may provide
+              a mobile number to communications service providers only as needed
+              to deliver the message requested by the recipient, maintain
+              security, prevent abuse, and comply with law.
+            </p>
+
+            <h2>9. Data Retention</h2>
             <p>
               We retain personal information for as long as reasonably necessary for the
               purposes described in this Privacy Policy, as required by law, or as needed
@@ -106,14 +123,14 @@ export default function PrivacyPage() {
               resolution, compliance, and recordkeeping.
             </p>
 
-            <h2>9. Security</h2>
+            <h2>10. Security</h2>
             <p>
               We use commercially reasonable safeguards to protect personal information.
               However, no system is completely secure, and we cannot guarantee absolute
               security.
             </p>
 
-            <h2>10. Your Rights</h2>
+            <h2>11. Your Rights</h2>
             <p>
               Depending on your location, you may have rights to access, correct, delete,
               restrict, object to, or request a copy of certain personal information. You
@@ -125,7 +142,7 @@ export default function PrivacyPage() {
               to verify your identity and may deny requests where permitted by law.
             </p>
 
-            <h2>11. U.S. State Privacy Rights</h2>
+            <h2>12. U.S. State Privacy Rights</h2>
             <p>
               Some U.S. state privacy laws, including California privacy law, provide
               eligible residents rights regarding personal information collected,
@@ -136,7 +153,7 @@ export default function PrivacyPage() {
               about them. 
             </p>
 
-            <h2>12. International Transfers</h2>
+            <h2>13. International Transfers</h2>
             <p>
               Personal information may be processed and stored in the United States or
               other jurisdictions where our service providers operate. By using the
@@ -144,21 +161,21 @@ export default function PrivacyPage() {
               processed in those locations.
             </p>
 
-            <h2>13. Children</h2>
+            <h2>14. Children</h2>
             <p>
               IronXchange is intended for business and equipment marketplace users and
               is not directed to children under 13. We do not knowingly collect personal
               information from children under 13.
             </p>
 
-            <h2>14. Changes</h2>
+            <h2>15. Changes</h2>
             <p>
               We may update this Privacy Policy from time to time. Changes become
               effective when posted. Continued use of IronXchange after changes are
               posted means you accept the updated Privacy Policy.
             </p>
 
-            <h2>15. Contact</h2>
+            <h2>16. Contact</h2>
             <p>
               Questions or privacy requests may be sent to:<br />
               IronXchange<br />

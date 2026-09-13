@@ -22,7 +22,7 @@ export default function TermsPage() {
           <div className="legal-card">
             <span>IronXchange Legal</span>
             <h1>Terms of Service</h1>
-            <p className="updated">Last updated: May 26, 2026</p>
+            <p className="updated">Last updated: September 13, 2026</p>
 
             <p>
               IronXchange is a heavy equipment marketplace that allows users to browse,
@@ -77,6 +77,14 @@ export default function TermsPage() {
               By using IronXchange, you agree that buyers, sellers, and IronXchange may
               contact you regarding listings, inquiries, account activity, and marketplace
               operations.
+            </p>
+            <p>
+              Text Passport is a recipient-initiated transactional messaging
+              service. When you enter a mobile number, check the consent box, and
+              select Send Passport, you request one SMS or MMS containing the
+              selected equipment Passport. Message frequency is one message per
+              request. Message and data rates may apply. Reply STOP to opt out or
+              HELP for help. Consent is not a condition of purchase.
             </p>
 
             <h2>8. Limitation of Liability</h2>

@@ -24,14 +24,59 @@ test("one global Passport email provider owns the shared dialog", () => {
 test("Passport delivery telemetry completes only after confirmed success", () => {
   const dialog = read("components/passport/PassportEmailDialog.jsx");
   const requested = dialog.indexOf("listing_share_email_requested");
-  const response = dialog.indexOf("await fetch");
-  const completed = dialog.indexOf("listing_share_completed");
-  const failed = dialog.indexOf("listing_share_failed");
+  const response = dialog.indexOf(
+    'await fetch("/api/marketplace/share-email"'
+  );
+  const completed = dialog.lastIndexOf("listing_share_completed");
+  const failed = dialog.lastIndexOf("listing_share_failed");
 
   assert.ok(requested > -1);
   assert.ok(response > requested);
   assert.ok(completed > response);
   assert.ok(failed > completed);
+});
+
+test("Text Passport presents explicit one-time consent before provider activation", () => {
+  const dialog = read("components/passport/PassportEmailDialog.jsx");
+  const provider = read("components/ixi-marketplace/ListingShareProvider.jsx");
+  const proof = read("pages/text-passport-consent.js");
+
+  assert.match(dialog, /Recipient mobile number/u);
+  assert.match(dialog, /I requested this one-time machine Passport text/u);
+  assert.match(dialog, /One SMS\/MMS per request/u);
+  assert.match(dialog, /Message and data rates may apply/u);
+  assert.match(dialog, /Reply STOP to opt out or HELP for help/u);
+  assert.match(dialog, /Consent is not a\s+condition of purchase/u);
+  assert.match(dialog, /does not sell or share your\s+mobile number/u);
+  assert.match(dialog, /844-430-IRON/u);
+  assert.match(dialog, /if \(!textDeliveryEnabled\)/u);
+  assert.match(dialog, /No message was sent/u);
+  assert.match(
+    dialog,
+    /await fetch\("\/api\/marketplace\/share-text"/u
+  );
+  assert.match(
+    provider,
+    /NEXT_PUBLIC_IXI_TEXT_PASSPORT_ENABLED === "true"/u
+  );
+  assert.match(proof, /initialChannel="text"/u);
+  assert.match(proof, /textDeliveryEnabled=\{false\}/u);
+});
+
+test("Text Passport legal surfaces disclose the transactional program", () => {
+  const privacy = read("pages/privacy.js");
+  const terms = read("pages/terms.js");
+
+  for (const source of [privacy, terms]) {
+    assert.match(source, /one message per\s+request/iu);
+    assert.match(source, /Message and data rates may apply/u);
+    assert.match(source, /Reply STOP to opt out or\s+HELP\s+for help/u);
+    assert.match(source, /Consent is not a condition of purchase/u);
+  }
+  assert.match(
+    privacy,
+    /does not sell or share mobile numbers with third\s+parties for their marketing/iu
+  );
 });
 
 test("only machine-card families wire their rails to Passport email", () => {
