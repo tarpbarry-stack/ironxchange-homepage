@@ -79,9 +79,9 @@ function ManualSignatureControl({ value, onChange, onSubmit, busy, signed }) {
     );
   return (
     <section className="es-manual-signature">
-      <strong>MANUAL SIGNATURE CONTROL</strong>
+      <strong>SIGNED OUTSIDE IXI</strong>
       <p>
-        Use when the signed Sales Order and Terms were returned outside IXI.
+        Record a signed Sales Order received by paper, email, or another method. Customer email and phone are optional for this step.
       </p>
       <label>
         <span>SIGNER NAME</span>
@@ -119,21 +119,13 @@ function ManualSignatureControl({ value, onChange, onSubmit, busy, signed }) {
           placeholder="Email subject, file, or paper location"
         />
       </label>
-      <label className="es-manual-attestation">
-        <input
-          type="checkbox"
-          checked={value.attestation === true}
-          onChange={(event) => onChange("attestation", event.target.checked)}
-        />
-        <span>
-          I confirm the customer-signed Sales Order and Terms are on file.
-        </span>
-      </label>
+      <p className="es-manual-attestation">
+        By clicking MARK SIGNED, you confirm the customer-signed Sales Order and Terms are on file.
+      </p>
       <button
         type="button"
         disabled={
           busy ||
-          !value.attestation ||
           clean(value.signerName).length < 2 ||
           !value.signerDate
         }
@@ -1276,6 +1268,7 @@ export default function IXIEquipmentSaleApp({
     try {
       const result = await attestIXIEquipmentSaleSigned(draft, {
         ...manualSignature,
+        attestation: true,
         existingInvoiceId: clean(
           invoiceRecord?.financialDocumentId ||
             invoiceRecord?.financialBinding?.financialDocumentId,

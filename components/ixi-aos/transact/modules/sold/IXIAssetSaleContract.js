@@ -132,7 +132,7 @@ export function createIXIAssetSaleDraft({ context = {}, input = {} } = {}) {
       dealId: clean(input.dealId),
       saleId: invoiceId,
       financialInvoiceId: invoiceId,
-      number: clean(input.number || (invoiceNumber ? `SALE-${invoiceNumber}` : "")),
+      number: clean(input.number || (invoiceNumber || invoiceId ? `SALE-${invoiceNumber || invoiceId}` : "")),
       clientRequestId: clean(input.clientRequestId) || `SALE-${Date.now()}`,
     },
     context: {
@@ -192,13 +192,37 @@ export function validateIXIAssetSale(record = {}, sourceInvoice = {}) {
   const invoiceState = clean(sourceInvoice?.financialState).toLowerCase();
   if (!clean(record.context?.assetPassportId || record.context?.assetObjectId)) errors.asset = "required";
   if (!clean(record.identity?.financialInvoiceId)) errors.invoice = "required";
-  if (!clean(record.sale?.invoiceNumber)) errors.invoiceNumber = "required";
+  // The canonical Invoice ID controls lineage. Imported and older generated
+  // Invoices can legitimately have no human-assigned invoice number.
   if (!clean(record.sale?.buyerLabel)) errors.buyer = "required";
   if (!clean(record.sale?.saleDate)) errors.saleDate = "required";
   if (!["billed", "partially-collected", "collected"].includes(invoiceState)) errors.invoiceState = "invoice-must-be-issued";
   if (number(record.collection?.balanceDue) > 0.005) errors.collection = "buyer-balance-outstanding";
   if (clean(record.collection?.status) !== "paid") errors.collectionStatus = "payment-required";
   return { valid: Object.keys(errors).length === 0, errors };
+}
+
+export function getIXIAssetSaleValidationMessages(errors = {}, language = "en") {
+  const messages = language === "es" ? {
+    asset: "Abra VENDIDO desde el Passport de la máquina.",
+    invoice: "Seleccione la factura de esta venta.",
+    buyer: "Agregue el nombre del comprador en la factura.",
+    saleDate: "Ingrese la fecha de cierre / venta.",
+    invoiceState: "Emita la factura antes de cerrar la venta.",
+    collection: "Registre el dinero recibido para liquidar el saldo de la factura.",
+    collectionStatus: "Confirme el pago registrado de la factura."
+  } : {
+    asset: "Open SOLD from the machine's Passport.",
+    invoice: "Select the invoice for this sale.",
+    buyer: "Add the buyer's name on the invoice.",
+    saleDate: "Enter the closed / sold date.",
+    invoiceState: "Issue the invoice before closing the sale.",
+    collection: "Record the money received to clear the invoice balance.",
+    collectionStatus: "Confirm the invoice's recorded payment."
+  };
+  return Object.keys(errors)
+    .filter(key => key !== "collectionStatus" || !errors.collection)
+    .map(key => messages[key] || errors[key]);
 }
 
 export default {
