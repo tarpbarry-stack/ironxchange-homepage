@@ -1,67 +1,69 @@
-# AOS stabilization: release status and one-time AWS setup
+# AOS stabilization: verified release baseline
 
-## Decision
+Status: deployed and verified on September 13, 2026. The administrator recovery setup is complete.
+Building can resume from this baseline through the paired release workflow. Refresh existing AOS
+and TRAN$ACT browser tabs before using the release.
 
-The evidence supports repairing the existing system. A rebuild is not justified by the audited
-identity census or the reproduced failures. Repeated drift has concrete causes in session recovery,
-Financial source admission, order-dependent presentation, storage history amplification and partial
-AWS releases. The corrective code and complete-release gate are in GitHub.
+## Decision and retained contracts
 
-This is not a declaration that all production behavior, accounting balances, security or capacity
-have been certified. Backend promotion is blocked until recovery setup is completed.
+Keep the existing system. The audit and reproduced failures support repair rather than recreating
+the identity foundation. Canonical Object/Passport identities, durable relationships and commercial
+lifecycle meanings are retained. Session movement and display projections do not create identity.
 
-## Current evidence
+## Exact released versions
 
-- Frontend stabilization merged in PR #294 and deployed to preview.ironxchange.com at commit
-  96c2c216325ab60b6267f2c92b3d4e0e27ebf387.
-- Backend stabilization merged in tarpbarry-stack/ixi-core PR #52. The first complete AWS release
-  stopped before installing runtime source: github-actions-ironxchange was denied s3:CreateBucket.
-- 345 frontend tests, 245 backend tests and 13 integrity tests pass. Paired tests use signed HTTP
-  and actual SQLite, covering stale clients, queued gestures, lost responses, restart and Return.
-- The production frontend build and paired GitHub gate passed for the initial release. The follow-up
-  setup separation must pass the same paired gate against its exact backend commit.
-- Core PR #53 separates one-time administrator setup from ordinary SSM deployment. It verifies
-  actual 35-day table recovery and an authorization probe that cannot write a Treasury record.
-- The audit found no duplicate Passport IDs, shared active canonical Passports or active Objects
-  without Passports. Identity preservation is also an enforced release gate.
+| Component | Released version | Evidence |
+| --- | --- | --- |
+| Frontend | 1d0a9d132f7cc17c24513f1887be6e1a9a9c0955 | Vercel dpl_BSZehEFEqQ7cx9eofvpQ4ALrXsu5, preview.ironxchange.com |
+| IX-Core | da2d6456815a2580ed13cc19779e183ef4e39f75 | 417 installed source files verified; zero mismatches |
+| Complete deployment | GitHub Actions run 34729430314 | Successful resumed deployment after administrator setup |
 
-## One-time action by an AWS administrator
+[Deployment run](https://github.com/tarpbarry-stack/ironxchange-homepage/actions/runs/34729430314)
+and [machine-readable release evidence](./AOS_RELEASE_EVIDENCE_2026-09-13.json).
+Later documentation-only commits do not change these released source versions.
 
-Open AWS CloudShell in account **459212966383**, with an administrator allowed to configure S3,
-the existing EC2-SSM-Role policies, and DynamoDB recovery. Run this pinned, reviewable setup:
+## Verified behavior and recovery
 
-```bash
-curl -fsS https://raw.githubusercontent.com/tarpbarry-stack/ixi-core/da2d6456815a2580ed13cc19779e183ef4e39f75/ops/configure-runtime-recovery.sh -o /tmp/ixi-recovery-setup.sh &&
-AWS_REGION=us-east-2 bash /tmp/ixi-recovery-setup.sh
-```
+- 345 frontend tests, 245 backend tests, 13 integrity tests and the frontend production build pass.
+  The required paired tests use signed HTTP and actual SQLite for stale clients, queued gestures,
+  lost responses, process restart and Return.
+- Live AOS: Locations Board brought six existing children onto the board, increasing visible cards
+  from three to nine. Placement survived a full reload. Return restored the exact original arrangement.
+  OUT displayed the selected existing child; Recall restored the original arrangement, also after reload.
+- Live TRAN$ACT: the previously denied existing machine scope now displays Financial CURRENT and
+  its same 13 Passport records. No financial record was created or changed during verification.
+- All 24 collection checksums pass. The 56 active Objects and 228 unique Passports remain intact.
+  Object and relationship checksums match before deployment, after deployment and after UI movement.
+- /live and /ready returned 200 in 65 ms and 5 ms in the recorded local probes. Unsigned protected
+  email and journal-post requests returned 401.
+- A quiesced pre-release recovery set and the first scheduled online recovery set were independently
+  verified and stored as private encrypted S3 versions. Capture verifies restored data; upload is
+  followed by a full download/hash check. The scheduled service exited successfully and its hourly
+  timer is active. The creation-integrity timer was restored.
+- Financial, Freight and Tickets have 35-day point-in-time recovery enabled from September 13.
+  Enabling retention does not create recovery history before activation.
+- The runtime Treasury authorization probe passed without a write. Its impossible condition prevents
+  a financial record from being created or changed.
+- Existing idempotency history retains 591 versions. Live verification commands advanced durable
+  command state while creating zero additional whole-map history copies.
 
-The script checks the account and region. It creates the dedicated private versioned backup bucket,
-sets encryption and retention, adds narrowly scoped recovery and atomic Treasury permissions to
-the existing runtime role, and enables 35-day recovery on Financial, Freight and Tickets. It does
-not grant S3/IAM administration to GitHub, replace business tables, or modify business records.
-The new recovery copies and DynamoDB recovery have ongoing AWS storage charges.
+## Release discipline
 
-Success ends with: `Private recovery storage, DynamoDB PITR, and atomic Treasury permission verified.`
-Return that success line or the error, without credentials. The normal complete-release workflow can
-then be resumed using the existing GitHub deployment access.
+One lead owns integration. Keep changes isolated and reviewable. Backend changes update
+config/ixi-core-release.json and must pass the required paired contract/build gate. The single complete
+deployment workflow verifies recovery before stopping writers, installs every manifest-listed source,
+and verifies source, health and canonical data. Retired feature overlays must stay retired.
 
-Why this requires an administrator: the connected AWS tool explicitly provides read-only audit
-access. The actual GitHub deployment IAM user has EC2 read and SSM access; AWS denied bucket
-creation. The recovery requirement will not be bypassed to force a backend deployment.
-
-## Evidence still required before resuming unrestricted building
-
-1. Successful complete backend deployment from the pinned commit.
-2. Restore-verified and download-verified S3 recovery receipt, plus a successful scheduled backup.
-3. Installed source manifest, bounded health probes, denied unsigned protected routes, and unchanged
-   canonical Object/Passport and relationship checksums.
-4. Fresh authenticated AOS movement/Return and the existing machine Financial projection in TRAN$ACT.
-
-Keep competing agents and manual AWS overlays paused until those gates are satisfied. Future
-backend changes update config/ixi-core-release.json and pass the paired complete-release workflow.
+The one-time administrator setup was performed with the pinned
+[recovery setup script](https://github.com/tarpbarry-stack/ixi-core/blob/da2d6456815a2580ed13cc19779e183ef4e39f75/ops/configure-runtime-recovery.sh).
+Ordinary deployments use existing GitHub SSM access and verify runtime capabilities; they do not
+need S3 or IAM administration. Runtime recovery receipts are kept outside the application at
+/var/backups/ixi-core-releases/latest-recovery.json. Recovery storage has ongoing AWS charges.
 
 ## Remaining scope limits
 
-Public origin/SSH access, the parked bare-domain route, all accounting reconciliations and load or
-disaster-recovery exercises remain separate work. Existing large idempotency history is retained;
-the release stops new amplification without a database migration or destructive compaction.
+This release verifies the targeted stabilization paths. It does not certify every accounting balance,
+every commercial workflow, public-launch security or future workload capacity. Public origin/SSH
+hardening, bare-domain routing, full accounting reconciliation, load testing and complete infrastructure
+disaster recovery remain separate work. Existing large idempotency history was preserved; no database
+migration, destructive compaction or identity recreation was performed.
