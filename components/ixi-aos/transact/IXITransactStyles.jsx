@@ -36,6 +36,17 @@ export default function IXITransactStyles() {
         z-index: 2147483000;
       }
 
+      .ixi-transact-dialog.workspace-embedded {
+        position: relative;
+        inset: auto;
+        width: 100%;
+        height: max(620px, calc(100vh - 278px));
+        margin: 0;
+        transform: none;
+        z-index: auto;
+        box-shadow: none;
+      }
+
       .ixi-transact-app,
       .ixi-transact-app * {
         box-sizing: border-box;

@@ -148,6 +148,40 @@ function getMachineHours(record = {}) {
   return Number.isFinite(number) ? number : null;
 }
 
+function getSerialNumber(record = {}) {
+  const publicData = getPublicData(record);
+  const fields = record?.fields || {};
+
+  return firstText(
+    record?.serialNumber,
+    record?.serial,
+    fields?.serialNumber,
+    fields?.serial,
+    publicData?.serialNumber,
+    publicData?.serial
+  );
+}
+
+function getAssetId(record = {}) {
+  const publicData = getPublicData(record);
+  const fields = record?.fields || {};
+
+  return firstText(
+    record?.customerAssetId,
+    record?.assetId,
+    record?.stockNumber,
+    record?.inventoryId,
+    fields?.customerAssetId,
+    fields?.assetId,
+    fields?.stockNumber,
+    fields?.inventoryId,
+    publicData?.customerAssetId,
+    publicData?.assetId,
+    publicData?.stockNumber,
+    publicData?.inventoryId
+  );
+}
+
 function getMoneyValue(record = {}) {
   const publicData = getPublicData(record);
   const raw = record?.price ?? record?.attributes?.price ?? record?.value ??
@@ -251,6 +285,8 @@ function buildEntityContext(entity = {}) {
     hours: null,
     value: 0,
     imageUrl: getImageUrl(entity),
+    serialNumber: "",
+    assetId: firstText(entity?.customerId, entity?.accountId),
     source: entity,
     updatedAt: getDateValue(entity)
   };
@@ -282,6 +318,8 @@ function buildMosContext(object = {}) {
     hours: null,
     value: getMoneyValue(object),
     imageUrl: getImageUrl(object),
+    serialNumber: getSerialNumber(object),
+    assetId: getAssetId(object),
     source: object,
     updatedAt: getDateValue(object)
   };
@@ -309,6 +347,8 @@ function buildMachineContext(listing = {}) {
     hours,
     value: getMoneyValue(listing),
     imageUrl: getImageUrl(listing),
+    serialNumber: getSerialNumber(listing),
+    assetId: getAssetId(listing),
     source: listing,
     updatedAt: getDateValue(listing)
   };
@@ -411,6 +451,8 @@ export function buildIXIAosCommandContexts({
         parentId: canonical.parentId || machine.parentId,
         passportId: canonical.passportId || machine.passportId,
         imageUrl: machine.imageUrl || canonical.imageUrl,
+        serialNumber: canonical.serialNumber || machine.serialNumber,
+        assetId: canonical.assetId || machine.assetId,
         source: { canonical: canonical.source, presentation: machine.source }
       });
     });

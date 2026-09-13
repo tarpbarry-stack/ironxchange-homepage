@@ -45,7 +45,7 @@ const ownedListings = [
     objectId: "object-machine-1",
     title: "2017 Deere 544K II",
     passportId: "IXI-MACHINE-1",
-    publicData: { machineLocation: "DFW Airport Yard", hours: 4500 },
+    publicData: { machineLocation: "DFW Airport Yard", hours: 4500, serialNumber: "1DW544KZVHF123456", customerAssetId: "SSU-544K-01" },
     price: { amount: 4150000, currency: "USD" },
     imageUrl: "https://images.example.com/544k.jpg"
   }
@@ -109,6 +109,8 @@ test("one canonical Object produces one command context and keeps machine presen
   assert.equal(matching[0].kind, "machine");
   assert.equal(matching[0].passportId, "IXI-MACHINE-1");
   assert.equal(matching[0].imageUrl, "https://images.example.com/544k.jpg");
+  assert.equal(matching[0].serialNumber, "1DW544KZVHF123456");
+  assert.equal(matching[0].assetId, "SSU-544K-01");
 });
 
 test("a canonical IX-Core machine remains selectable when Sharetribe returns zero listings", () => {

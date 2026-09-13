@@ -67,6 +67,23 @@ test("desktop remains an authenticated read surface over governed financial cont
   assert.doesNotMatch(source, /method:\s*"(?:POST|PUT|PATCH|DELETE)"/u);
 });
 
+test("Object console is History-first and reuses the governed TRAN$ACT app bus", () => {
+  const source = read("components/ixi-command-center/IXITransactCommandCenter.jsx");
+  const app = read("components/ixi-aos/transact/IXITransactApp.jsx");
+
+  assert.match(source, /Governed AOS Object directory/u);
+  assert.match(source, /SN · \{item\.serialNumber \|\| "NOT RECORDED"\}/u);
+  assert.match(source, /setActiveWorkspace\(context\.kind === "company" \? "today" : "object-history"\)/u);
+  assert.match(source, /title="TRANSACTION HISTORY"/u);
+  assert.match(source, /getIXITransactModules/u);
+  assert.match(source, /workspaceEmbedded/u);
+  assert.match(source, /dynamic\([\s\S]*import\("\.\.\/ixi-aos\/transact\/IXITransactApp"\)/u);
+  assert.match(source, /IXI CORE CONNECTED · PASSPORT HISTORY/u);
+  assert.doesNotMatch(source, /window\.location[^\n]*object-history/u);
+  assert.match(app, /workspaceEmbedded = false/u);
+  assert.match(app, /workspaceEmbedded[\s\S]*"RETURN TO TRANSACTION HISTORY"/u);
+});
+
 test("TRAN$ACT login returns the authenticated operator to the desktop", () => {
   const source = read("components/ixi-command-center/IXITransactCommandCenter.jsx");
 
