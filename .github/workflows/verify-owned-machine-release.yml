@@ -34,11 +34,41 @@ jobs:
           systemctl show ixi-core-recovery.service ixi-core-recovery.timer -p Id -p ActiveState -p SubState -p Result -p ExecMainStatus
           journalctl -u ixi-core-recovery.service -n 45 --no-pager -o cat
           python3 - <<'CHECK'
-          import json,pathlib
+          import importlib.util,json,pathlib
           release=json.loads(pathlib.Path('.ixi-release.json').read_text())
           receipt=json.loads(pathlib.Path('/var/backups/ixi-core-releases/latest-recovery.json').read_text())
-          print(json.dumps({'releaseCommit':release.get('commit') or release.get('sourceCommit'),'recovery':{k:receipt.get(k) for k in ['ok','createdAt','consistency','sha256','versionId']},'census':{k:receipt.get('census',{}).get(k) for k in ['objects','activeObjects','passports','activeIdentitySha256']}}))
-          CHECK'''
+          spec=importlib.util.spec_from_file_location('recovery',pathlib.Path('ops/runtime-recovery.py'))
+          module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)
+          current=module.census('/var/lib/ixi-core/mos/ixi-aos.sqlite',json.loads(pathlib.Path('passport/passports.json').read_text()))
+          keys=['objects','activeObjects','passports','activeIdentitySha256']
+          identity_unchanged=all(current[key]==receipt['census'][key] for key in keys)
+          objects_unchanged=current['collectionChecksums']['objects.json']==receipt['census']['collectionChecksums']['objects.json']
+          print(json.dumps({'releaseCommit':release.get('commit') or release.get('sourceCommit'),'recovery':{k:receipt.get(k) for k in ['ok','createdAt','consistency','sha256','versionId']},'currentCensus':{k:current[k] for k in keys},'canonicalIdentityUnchanged':identity_unchanged,'objectCollectionUnchanged':objects_unchanged}))
+          assert identity_unchanged and objects_unchanged, 'Canonical data differs from the verified recovery baseline'
+          CHECK
+          node <<'EDGES'
+          const fs = require('node:fs');
+          const crypto = require('node:crypto');
+          const { execFileSync } = require('node:child_process');
+          const receipt = JSON.parse(fs.readFileSync('/var/backups/ixi-core-releases/latest-recovery.json', 'utf8'));
+          const raw = execFileSync('python3', ['-c', `import sqlite3
+          db=sqlite3.connect('file:/var/lib/ixi-core/mos/ixi-aos.sqlite?mode=ro',uri=True)
+          print(db.execute("SELECT payload FROM mos_collections WHERE collection_key = ?", ('relationships.json',)).fetchone()[0])
+          db.close()`], { encoding: 'utf8', maxBuffer: 8 * 1024 * 1024 });
+          const relationships = JSON.parse(raw);
+          let admitted = 0;
+          const keep = value => {
+            if (value.metadata?.source === 'authenticated-owned-machine-onboarding.v1' && Date.parse(value.createdAt) >= Date.parse(receipt.createdAt)) {
+              admitted += 1;
+              return false;
+            }
+            return true;
+          };
+          const previous = Array.isArray(relationships) ? relationships.filter(keep) : Object.fromEntries(Object.entries(relationships).filter(([,value]) => keep(value)));
+          const unchanged = crypto.createHash('sha256').update(JSON.stringify(previous)).digest('hex') === receipt.census.collectionChecksums['relationships.json'];
+          console.log(JSON.stringify({ admittedEquipmentRelationships: admitted, allOtherRelationshipsUnchanged: unchanged }));
+          if (!unchanged) throw new Error('Relationship changes exceed owned-machine admission');
+          EDGES'''
           pathlib.Path(os.environ['RUNNER_TEMP'],'inspect.json').write_text(json.dumps({'commands':[command],'executionTimeout':['180']}))
           PY
           command_id="$(aws ssm send-command --instance-ids "$AWS_INSTANCE_ID" --document-name AWS-RunShellScript --comment 'Read-only IX-Core release and recovery inspection' --parameters "file://$RUNNER_TEMP/inspect.json" --query Command.CommandId --output text)"
