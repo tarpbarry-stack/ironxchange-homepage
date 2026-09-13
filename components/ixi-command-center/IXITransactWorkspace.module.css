@@ -203,12 +203,12 @@
   border-bottom: 1px solid #253027;
   vertical-align: top;
 }
-.table td:nth-child(n + 4):nth-child(-n + 7) {
+.table td:nth-child(n + 5):nth-child(-n + 8) {
   white-space: nowrap;
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
-.table th:nth-child(n + 4):nth-child(-n + 7) {
+.table th:nth-child(n + 5):nth-child(-n + 8) {
   text-align: right;
 }
 .table td strong,

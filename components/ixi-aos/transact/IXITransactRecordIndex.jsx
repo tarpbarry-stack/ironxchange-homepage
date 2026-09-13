@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { paymentHistorySummary } from "./payments/IXIPaymentHistory";
+import IXIPaymentStatusBadge from "./payments/IXIPaymentStatusBadge";
 
 import { getIXITransactModule } from "./IXITransactModuleRegistry";
 import { resolveIXITransactRecordModuleId } from "./IXITransactRecordRouting";
@@ -495,7 +496,7 @@ export default function IXITransactRecordIndex({
           <article className="txri-detail">
             <div className="txri-state">
               <span className={record.open ? "open" : "closed"} />
-              {upper(record.payment?.status || record.status)}
+              {record.payment ? <IXIPaymentStatusBadge status={record.payment.status} /> : upper(record.status)}
             </div>
             <dl>
               <div>
@@ -552,8 +553,9 @@ export default function IXITransactRecordIndex({
                 <span className={item.open ? "open" : "closed"} />
                 <div>
                   <strong>{item.number}</strong>
+                  {item.payment ? <IXIPaymentStatusBadge status={item.payment.status} /> : null}
                   <small>
-                    {upper(item.payment?.status || item.status)} · {formatDate(item.occurredAt)}
+                    {item.payment ? "" : `${upper(item.status)} · `}{formatDate(item.occurredAt)}
                   </small>
                 </div>
                 <b>{item.amount ? formatMoney(item.amount) : "—"}</b>
@@ -597,7 +599,7 @@ export default function IXITransactRecordIndex({
         .txri-section-bar strong{color:#ffc400;font-size:11px;font-weight:950}
         .txri-records>button{position:relative;width:100%;min-height:58px;padding:8px 8px 8px 20px;border:0;border-bottom:1px solid rgba(255,255,255,.07);background:#0e1110;color:#eee;display:grid;grid-template-columns:minmax(0,1fr) 72px;align-items:center;text-align:left;cursor:pointer}
         .txri-records>button:hover,.txri-records>button:focus-visible{outline:none;background:#151918}
-        .txri-records>button>span,.txri-state>span{position:absolute;left:8px;width:6px;height:6px;border-radius:50%}
+        .txri-records>button>span,.txri-state>span:first-child{position:absolute;left:8px;width:6px;height:6px;border-radius:50%}
         .txri-records .open,.txri-state .open{background:#ffc400;box-shadow:0 0 7px rgba(255,196,0,.42)}
         .txri-records .closed,.txri-state .closed{background:#69706c}
         .txri-records div{min-width:0}
@@ -606,7 +608,7 @@ export default function IXITransactRecordIndex({
         .txri-records b{color:#c3c7c5;font-size:9px;font-weight:900;text-align:right}
         .txri-detail{padding:1px}
         .txri-state{position:relative;height:35px;padding-left:19px;border-bottom:1px solid rgba(255,255,255,.08);color:#aeb3b0;display:flex;align-items:center;font-size:8px;font-weight:950;letter-spacing:.055em}
-        .txri-state>span{left:5px}
+        .txri-state>span:first-child{left:5px}
         .txri-detail dl{margin:0}
         .txri-detail dl>div{min-height:50px;padding:9px 7px;border-bottom:1px solid rgba(255,255,255,.07);display:grid;grid-template-columns:92px minmax(0,1fr);gap:8px;align-items:center}
         .txri-detail dt{color:#858b88;font-size:8px;font-weight:900}

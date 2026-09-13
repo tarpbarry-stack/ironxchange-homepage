@@ -5,4 +5,25 @@ export default function IXIEquipmentSaleStyles() { return <style jsx global>{`
   .es-revision-control{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:7px 9px;border-block:1px solid #806800;background:#1d1805;flex:0 0 auto}.es-revision-control>div{min-width:0}.es-revision-control b,.es-revision-control span{display:block}.es-revision-control b{color:#ffc400;font-size:8px}.es-revision-control span{margin-top:2px;font-size:6px!important;color:#c8c3ad}.es-revision-control button{flex:0 0 auto;min-height:28px;border:1px solid #ffc400;background:#ffc400;color:#090a09;font-size:7px;font-weight:950;padding:5px 7px}.es-workspace>.es-revision-control{max-width:850px;margin:0 auto;padding:10px 14px}.es-workspace>.es-revision-control span{font-size:9px!important}.es-workspace>.es-revision-control button{font-size:9px;padding:8px 12px}
   .es-direct-invoice-state{min-height:0;flex:1;padding:24px 14px;display:flex;flex-direction:column;justify-content:center;gap:8px;text-align:center}.es-direct-invoice-state>span{color:#ffc400;font-size:9px!important;font-weight:950;letter-spacing:1.4px}.es-direct-invoice-state>strong{font-size:15px;line-height:1.2}.es-direct-invoice-state>p{margin:0 auto 10px;max-width:260px;color:#aeb2af;font-size:9px;line-height:1.5}.es-direct-invoice-state>div{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:5px 10px;align-items:end;padding:12px;border:1px solid #3b403d;background:#101311;text-align:left}.es-direct-invoice-state>div small{grid-column:1/-1;color:#8e938f;font-size:7px;font-weight:950}.es-direct-invoice-state>div b{min-width:0;overflow:hidden;text-overflow:ellipsis;font-size:11px;white-space:nowrap}.es-direct-invoice-state>div strong{color:#ffc400;font-size:14px}.es-direct-invoice-actions{display:grid;grid-template-columns:1.35fr 1fr;gap:6px;padding:8px 10px;border-top:1px solid #303030}.es-direct-invoice-actions button{min-height:38px;border:1px solid #ffc400;background:#ffc400;color:#080808;font-size:8px;font-weight:950}.es-direct-invoice-actions button+button{border-color:#3b403d;background:#171a18;color:#d6d9d7}
 .es-card-actions button.issue{grid-column:1/-1;background:#f4f4f4}
+  .es-compensation{min-width:0}
+  .es-compensation .es-section-head{gap:10px;flex-wrap:wrap;align-items:flex-start}
+  .es-compensation .es-section-head>div{flex:1 1 200px;min-width:0}
+  .es-compensation .es-section-head h3{font-size:11px;line-height:1.4;overflow-wrap:anywhere}
+  .es-compensation .es-section-head small{display:block;margin-top:4px;color:#aeb5b0;font-size:10px;line-height:1.4}
+  .es-compensation button{min-height:44px;box-sizing:border-box;flex:0 0 auto;font-size:10px;line-height:1.3;cursor:pointer}
+  .es-compensation button:disabled{opacity:.4;cursor:not-allowed}
+  .es-commission-entry{min-width:0;margin-top:12px;padding:10px;border:1px solid #39423d;border-radius:4px;background:#0b0e0c}
+  .es-commission-head{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+  .es-commission-head strong{font-size:11px;color:#d5dbd7}
+  .es-commission-head button{border:1px solid #555e58;border-radius:3px;padding:8px 10px;background:#141815;color:#d5dbd7;font-weight:800}
+  .es-commission-fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:12px}
+  .es-compensation.compact .es-commission-fields{grid-template-columns:minmax(0,1fr)}
+  .es-commission-field{display:flex;flex-direction:column;gap:5px;min-width:0}
+  .es-commission-wide{grid-column:1/-1}
+  .es-compensation .es-commission-field>span{font-size:10px;line-height:1.4;letter-spacing:.035em;color:#b6c0b9;font-weight:800;overflow-wrap:anywhere}
+  .es-commission-field input,.es-commission-field select,.es-commission-field textarea{box-sizing:border-box;width:100%;min-width:0;max-width:100%;min-height:44px;border:1px solid #46524a;border-radius:3px;background:#050706;color:#f4f6f5;padding:10px 8px;font:inherit;font-size:12px;line-height:1.4;color-scheme:dark}
+  .es-commission-field textarea{min-height:80px;resize:vertical}
+  .es-commission-field input::placeholder,.es-commission-field textarea::placeholder{color:#87928b}
+  .es-commission-field input:focus,.es-commission-field select:focus,.es-commission-field textarea:focus,.es-compensation button:focus-visible{outline:2px solid #ffc400;outline-offset:1px}
+  .es-commission-field input:disabled,.es-commission-field select:disabled,.es-commission-field textarea:disabled{color:#9aa39d;background:#171b18}
 `}</style>; }

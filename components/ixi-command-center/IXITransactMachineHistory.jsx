@@ -5,6 +5,7 @@ import {
   moneyLabel,
 } from "./IXITransactMachineLedger.mjs";
 import IXITransactDocumentActions from "./IXITransactDocumentActions";
+import IXIPaymentStatusBadge from "../ixi-aos/transact/payments/IXIPaymentStatusBadge";
 import styles from "./IXITransactWorkspace.module.css";
 
 const pageSize = 50;
@@ -278,6 +279,7 @@ export default function IXITransactMachineHistory({
                     />
                   </th>
                   <th>DATE / RECORD</th>
+                  <th>PAYMENT STATUS</th>
                   <th>PARTY / STATUS</th>
                   <th>COST</th>
                   <th>REVENUE</th>
@@ -305,8 +307,12 @@ export default function IXITransactMachineHistory({
                       </small>
                     </td>
                     <td>
+                      {row.paymentStatus ? <IXIPaymentStatusBadge status={row.paymentStatus} /> : <span>—</span>}
+                      {row.paymentStatus && row.openCents != null ? <small>{moneyLabel(row.openCents, row.currency)} DUE</small> : null}
+                    </td>
+                    <td>
                       <strong>{row.party || "—"}</strong>
-                      <span>{row.paymentStatus || row.status}</span>
+                      <span>{row.status}</span>
                       <small>
                         {row.review
                           ? row.reason
