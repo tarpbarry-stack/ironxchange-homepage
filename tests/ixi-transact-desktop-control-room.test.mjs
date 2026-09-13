@@ -118,6 +118,11 @@ test("desktop styling preserves the permanent professional shell and responsive 
   assert.match(styles, /overflow-x:\s*hidden/u);
   assert.match(styles, /--gold:\s*#ffc400/u);
   assert.match(styles, /font-family:\s*'Inter Variable', Inter, ui-sans-serif/u);
+  assert.match(styles, /--tx-type-meta:\s*12px/u);
+  assert.match(styles, /--tx-type-body:\s*14px/u);
+  assert.match(styles, /--tx-type-control:\s*14px/u);
+  assert.match(styles, /--tx-type-value:\s*16px/u);
+  assert.match(styles, /--tx-type-section:\s*20px/u);
   assert.match(
     styles,
     /\.shell button,[\s\S]*\.shell input,[\s\S]*\.shell select,[\s\S]*\.shell textarea\s*\{[\s\S]*font-family:\s*inherit/u,
@@ -125,7 +130,17 @@ test("desktop styling preserves the permanent professional shell and responsive 
   );
   assert.doesNotMatch(
     styles,
-    /font-size:\s*(?:[5-8](?:\.\d+)?)px/u,
-    "TRAN$ACT desktop must preserve the commercial 10px/9px type floor"
+    /font-size:\s*(?:[5-9](?:\.\d+)?|1[01])px/u,
+    "TRAN$ACT desktop must preserve the V13 12px type floor"
+  );
+  assert.match(
+    styles,
+    /\.shell :global\(\.ixi-transact-dialog\.workspace-embedded\.worksheet-open\)/u,
+    "opened desktop apps must receive the V13 worksheet typography contract"
+  );
+  assert.doesNotMatch(
+    styles,
+    /:global\([^)]*\.card-open/u,
+    "desktop typography must never target the card-level presentation"
   );
 });
