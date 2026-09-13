@@ -5,6 +5,13 @@ import {
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/u;
 
+function normalizeUsMobile(value) {
+  const digits = String(value || "").replace(/\D/gu, "");
+  if (digits.length === 10) return `+1${digits}`;
+  if (digits.length === 11 && digits.startsWith("1")) return `+${digits}`;
+  return "";
+}
+
 function parseRecipients(value) {
   return Array.from(
     new Set(
@@ -31,9 +38,14 @@ export default function PassportEmailDialog({
   listingId,
   passportId,
   title,
-  unavailableReason = ""
+  unavailableReason = "",
+  initialChannel = "email",
+  textDeliveryEnabled = false
 }) {
+  const [channel, setChannel] = useState(initialChannel);
   const [recipientText, setRecipientText] = useState("");
+  const [mobileNumber, setMobileNumber] = useState("");
+  const [textConsent, setTextConsent] = useState(false);
   const [message, setMessage] = useState("");
   const [status, setStatus] = useState("idle");
   const [feedback, setFeedback] = useState("");
@@ -42,8 +54,10 @@ export default function PassportEmailDialog({
 
   useEffect(() => {
     if (!open) return;
+    setChannel(initialChannel === "text" ? "text" : "email");
     setStatus("idle");
     setFeedback("");
+    setTextConsent(false);
     setSendToken(createSendToken());
     const timer = window.setTimeout(() => inputRef.current?.focus(), 0);
     const onKeyDown = event => {
@@ -56,13 +70,92 @@ export default function PassportEmailDialog({
       window.clearTimeout(timer);
       window.removeEventListener("keydown", onKeyDown);
     };
-  }, [open, onClose]);
+  }, [initialChannel, open, onClose]);
 
   if (!open) return null;
 
   async function handleSubmit(event) {
     event.preventDefault();
     if (status === "sending" || unavailableReason) return;
+
+    if (channel === "text") {
+      const recipient = normalizeUsMobile(mobileNumber);
+      if (!recipient) {
+        setStatus("error");
+        setFeedback("Enter a valid U.S. mobile number.");
+        return;
+      }
+      if (!textConsent) {
+        setStatus("error");
+        setFeedback("Confirm that you requested this one-time Passport text.");
+        return;
+      }
+      if (!textDeliveryEnabled) {
+        setStatus("pending");
+        setFeedback(
+          "844-430-IRON is awaiting carrier approval. No message was sent."
+        );
+        return;
+      }
+
+      setStatus("sending");
+      setFeedback("");
+      captureMarketplaceIntelligence("listing_share_text_requested", {
+        listing_id: listingId,
+        channel: "text",
+        result: "requested"
+      });
+
+      try {
+        const response = await fetch("/api/marketplace/share-text", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Idempotency-Key": sendToken
+          },
+          body: JSON.stringify({
+            listingId,
+            recipient,
+            message,
+            consent: {
+              type: "one-time-passport-request",
+              accepted: true
+            },
+            idempotencyKey: sendToken
+          })
+        });
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok || payload?.ok !== true) {
+          const error = new Error(
+            payload?.error || "IXI Machine Passport text could not be sent."
+          );
+          error.code = payload?.code;
+          throw error;
+        }
+
+        setStatus("sent");
+        setFeedback("Passport text accepted for delivery.");
+        captureMarketplaceIntelligence("listing_share_completed", {
+          listing_id: listingId,
+          channel: "text",
+          result: "text_accepted",
+          replayed: Boolean(payload.replayed)
+        });
+      } catch (error) {
+        setStatus("error");
+        setFeedback(
+          error?.message || "IXI Machine Passport text could not be sent."
+        );
+        setSendToken(createSendToken());
+        captureMarketplaceIntelligence("listing_share_failed", {
+          listing_id: listingId,
+          channel: "text",
+          result: "failed",
+          error_code: error?.code || "text_send_failed"
+        });
+      }
+      return;
+    }
 
     const recipients = parseRecipients(recipientText);
     if (
@@ -147,19 +240,19 @@ export default function PassportEmailDialog({
         className="dialog"
         role="dialog"
         aria-modal="true"
-        aria-labelledby="passport-email-title"
+        aria-labelledby="passport-send-title"
       >
         <header>
           <div>
             <span>IXI MACHINE PASSPORT</span>
-            <h2 id="passport-email-title">Email Passport</h2>
+            <h2 id="passport-send-title">Send Passport</h2>
           </div>
           <button
             type="button"
             className="close"
             onClick={onClose}
             disabled={status === "sending"}
-            aria-label="Close email Passport"
+            aria-label="Close Send Passport"
           >
             ×
           </button>
@@ -170,27 +263,89 @@ export default function PassportEmailDialog({
           <span>{passportId}</span>
         </div>
 
+        <div className="channels" role="tablist" aria-label="Delivery method">
+          <button
+            type="button"
+            role="tab"
+            aria-selected={channel === "email"}
+            className={channel === "email" ? "active" : ""}
+            onClick={() => {
+              setChannel("email");
+              setStatus("idle");
+              setFeedback("");
+            }}
+          >
+            Email
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={channel === "text"}
+            className={channel === "text" ? "active" : ""}
+            onClick={() => {
+              setChannel("text");
+              setStatus("idle");
+              setFeedback("");
+            }}
+          >
+            Text
+          </button>
+        </div>
+
         <form onSubmit={handleSubmit}>
-          <label htmlFor="passport-email-recipients">
-            Recipient email
-          </label>
-          <textarea
-            ref={inputRef}
-            id="passport-email-recipients"
-            value={recipientText}
-            onChange={event => setRecipientText(event.target.value)}
-            placeholder="buyer@example.com"
-            rows={2}
-            disabled={
-              Boolean(unavailableReason) ||
-              status === "sending" ||
-              status === "sent"
-            }
-            aria-describedby="passport-email-recipient-help"
-          />
-          <small id="passport-email-recipient-help">
-            Up to five addresses, separated by commas.
-          </small>
+          {channel === "email" ? (
+            <>
+              <label htmlFor="passport-email-recipients">
+                Recipient email
+              </label>
+              <textarea
+                ref={inputRef}
+                id="passport-email-recipients"
+                value={recipientText}
+                onChange={event => setRecipientText(event.target.value)}
+                placeholder="buyer@example.com"
+                rows={2}
+                disabled={
+                  Boolean(unavailableReason) ||
+                  status === "sending" ||
+                  status === "sent"
+                }
+                aria-describedby="passport-email-recipient-help"
+              />
+              <small id="passport-email-recipient-help">
+                Up to five addresses, separated by commas.
+              </small>
+            </>
+          ) : (
+            <>
+              <div className="text-source">
+                <span>Delivered by IronXchange</span>
+                <strong>844-430-IRON</strong>
+              </div>
+              <label htmlFor="passport-text-recipient">
+                Recipient mobile number
+              </label>
+              <input
+                ref={inputRef}
+                id="passport-text-recipient"
+                type="tel"
+                inputMode="tel"
+                autoComplete="tel"
+                value={mobileNumber}
+                onChange={event => setMobileNumber(event.target.value.slice(0, 24))}
+                placeholder="(940) 555-0123"
+                disabled={
+                  Boolean(unavailableReason) ||
+                  status === "sending" ||
+                  status === "sent"
+                }
+                aria-describedby="passport-text-recipient-help"
+              />
+              <small id="passport-text-recipient-help">
+                Enter the U.S. mobile number that requested this Passport.
+              </small>
+            </>
+          )}
 
           <label htmlFor="passport-email-note">
             Personal note <em>optional</em>
@@ -209,13 +364,50 @@ export default function PassportEmailDialog({
           />
           <small>{message.length}/500</small>
 
+          {channel === "text" ? (
+            <div className="consent">
+              <label htmlFor="passport-text-consent">
+                <input
+                  id="passport-text-consent"
+                  type="checkbox"
+                  checked={textConsent}
+                  onChange={event => setTextConsent(event.target.checked)}
+                  disabled={
+                    Boolean(unavailableReason) ||
+                    status === "sending" ||
+                    status === "sent"
+                  }
+                />
+                <span>
+                  I requested this one-time machine Passport text at the number
+                  entered above.
+                </span>
+              </label>
+              <p>
+                One SMS/MMS per request. Message and data rates may apply.
+                Reply STOP to opt out or HELP for help. Consent is not a
+                condition of purchase. IronXchange does not sell or share your
+                mobile number for third-party marketing. See our{" "}
+                <a href="/terms" target="_blank" rel="noreferrer">Terms</a>
+                {" "}and{" "}
+                <a href="/privacy" target="_blank" rel="noreferrer">Privacy Policy</a>.
+              </p>
+            </div>
+          ) : null}
+
           {unavailableReason ? (
             <p className="feedback notice" role="status">
               {unavailableReason}
             </p>
           ) : feedback ? (
             <p
-              className={status === "sent" ? "feedback sent" : "feedback error"}
+              className={
+                status === "sent"
+                  ? "feedback sent"
+                  : status === "pending"
+                    ? "feedback notice"
+                    : "feedback error"
+              }
               role="status"
             >
               {feedback}
@@ -241,7 +433,9 @@ export default function PassportEmailDialog({
                   ? "Post machine first"
                   : status === "sending"
                     ? "Sending…"
-                    : "Send Passport"}
+                    : channel === "text" && !textDeliveryEnabled
+                      ? "Carrier approval pending"
+                      : "Send Passport"}
               </button>
             ) : null}
           </footer>
@@ -317,6 +511,34 @@ export default function PassportEmailDialog({
           font-weight: 800;
           letter-spacing: 0.08em;
         }
+        .channels {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 8px;
+          margin: 14px 22px 0;
+          padding: 5px;
+          background: #090a09;
+          border: 1px solid #292b28;
+          border-radius: 10px;
+        }
+        .channels button {
+          min-height: 42px;
+          color: #8e918c;
+          background: transparent;
+          border: 1px solid transparent;
+          border-radius: 7px;
+          font-size: 11px;
+          font-weight: 950;
+          letter-spacing: 0.1em;
+          text-transform: uppercase;
+          cursor: pointer;
+        }
+        .channels button.active {
+          color: #ffc400;
+          background: #151611;
+          border-color: #66530d;
+          box-shadow: inset 0 -2px #ffc400;
+        }
         form {
           padding: 18px 22px 22px;
         }
@@ -332,8 +554,10 @@ export default function PassportEmailDialog({
           color: #777a75;
           font-style: normal;
         }
-        textarea {
+        textarea,
+        input[type="tel"] {
           width: 100%;
+          box-sizing: border-box;
           padding: 12px;
           resize: vertical;
           color: #eeeeee;
@@ -343,9 +567,65 @@ export default function PassportEmailDialog({
           font: 14px/1.45 Arial, Helvetica, sans-serif;
           outline: none;
         }
-        textarea:focus {
+        textarea:focus,
+        input[type="tel"]:focus {
           border-color: #a98300;
           box-shadow: 0 0 0 2px rgba(255, 196, 0, 0.12);
+        }
+        .text-source {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+          margin-bottom: 14px;
+          padding: 11px 12px;
+          color: #81847f;
+          background: #0b0c0b;
+          border: 1px solid #292b28;
+          border-radius: 8px;
+          font-size: 10px;
+          font-weight: 800;
+          letter-spacing: 0.06em;
+          text-transform: uppercase;
+        }
+        .text-source strong {
+          color: #eeeeee;
+          font-size: 12px;
+        }
+        .consent {
+          margin-top: 14px;
+          padding: 13px;
+          background: #0b0c0b;
+          border: 1px solid #343633;
+          border-radius: 9px;
+        }
+        .consent label {
+          display: grid;
+          grid-template-columns: 20px 1fr;
+          gap: 10px;
+          align-items: start;
+          margin: 0;
+          color: #eeeeee;
+          font-size: 12px;
+          line-height: 1.4;
+          letter-spacing: 0;
+          text-transform: none;
+          cursor: pointer;
+        }
+        .consent input {
+          width: 18px;
+          height: 18px;
+          margin: 0;
+          accent-color: #ffc400;
+        }
+        .consent p {
+          margin: 10px 0 0 30px;
+          color: #898c87;
+          font-size: 10px;
+          line-height: 1.5;
+        }
+        .consent a {
+          color: #c9aa35;
         }
         small {
           display: block;
@@ -402,7 +682,8 @@ export default function PassportEmailDialog({
           border: 1px solid #ffc400;
         }
         button:disabled,
-        textarea:disabled {
+        textarea:disabled,
+        input:disabled {
           opacity: 0.58;
           cursor: default;
         }

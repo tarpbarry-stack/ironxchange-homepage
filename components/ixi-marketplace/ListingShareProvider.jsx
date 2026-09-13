@@ -79,6 +79,9 @@ export default function ListingShareProvider({ children }) {
         passportId={listing?.passportId || ""}
         title={listing?.title || "Equipment listing"}
         unavailableReason={listing?.unavailableReason || ""}
+        textDeliveryEnabled={
+          process.env.NEXT_PUBLIC_IXI_TEXT_PASSPORT_ENABLED === "true"
+        }
       />
     </>
   );
