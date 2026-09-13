@@ -1,4 +1,6 @@
 import { getIXIAosEquipmentAdapter } from "../../lib/mos/IXIAosSystemAdapterRegistry.js";
+import { buildAosCanonicalAdmission } from "../../lib/mos/ixiAosCanonicalAdmission.mjs";
+import { getAosRailProjectionObjectIds } from "../../lib/mos/IXIAosMembershipBridge.mjs";
 
 const clean = value => String(value ?? "").trim();
 
@@ -261,7 +263,8 @@ function getImageUrl(record = {}) {
 
 export function getIXITransactObjectDirectories(
   contexts = [],
-  systemIndexes = []
+  systemIndexes = [],
+  { aosObjects = [], railProjections = {} } = {}
 ) {
   const contextsByObjectId = new Map(
     safeArray(contexts)
@@ -290,6 +293,25 @@ export function getIXITransactObjectDirectories(
       items
     }] : [];
   });
+
+  // A customer container can use any card presentation, including Person.
+  // Read its governed rail as a navigation folder without promoting it to a
+  // System Index or deriving membership from labels, types, or board placement.
+  const indexIds = new Set(safeArray(systemIndexes).map(index => firstText(index?.objectId, index?.indexId)));
+  const ownerIds = (railProjections instanceof Map ? [...railProjections.keys()] : Object.keys(railProjections || {}))
+    .filter(objectId => contextsByObjectId.has(objectId) && !indexIds.has(objectId));
+  if (ownerIds.length) {
+    const admission = buildAosCanonicalAdmission({ aosObjects });
+    ownerIds.forEach(objectId => {
+      const owner = contextsByObjectId.get(objectId);
+      const items = getAosRailProjectionObjectIds({ railOwnerObjectId: objectId, railProjections, admission })
+        .map(memberId => contextsByObjectId.get(memberId))
+        .filter(Boolean);
+      // Contexts already enforce Equipment ownership admission. A different
+      // container rail cannot make an unowned machine eligible for TRAN$ACT.
+      if (items.length) directories.push({ id: objectId, label: owner.title, menuLabel: owner.title, items });
+    });
+  }
 
   const seen = new Set();
   const allItems = directories.flatMap(directory => directory.items.flatMap(item => {

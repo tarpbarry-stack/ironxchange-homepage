@@ -556,10 +556,16 @@ export default function IXITransactCommandCenter() {
   ), [contexts, relationships, selectedContext]);
   const connections = useMemo(() => connectionSummary(related), [related]);
   const currentGroup = groups[selectedKind] || [];
-  const objectDirectories = useMemo(
-    () => getIXITransactObjectDirectories(contexts, environment?.systemIndexes || []),
-    [contexts, environment?.systemIndexes]
-  );
+  const directoryProjection = useMemo(() => {
+    try {
+      return { directories: getIXITransactObjectDirectories(contexts, environment?.systemIndexes || [], {
+        aosObjects: environment?.objects || [], railProjections: environment?.railProjections || {}
+      }), error: "" };
+    } catch (error) {
+      return { directories: [], error: error?.message || "AOS folder membership could not be verified." };
+    }
+  }, [contexts, environment?.systemIndexes, environment?.objects, environment?.railProjections]);
+  const objectDirectories = directoryProjection.directories;
   useEffect(() => {
     if (!objectDirectories.length) {
       setSelectedDirectoryId("");
@@ -853,6 +859,7 @@ export default function IXITransactCommandCenter() {
               <strong className={styles.objectDirectoryCount} aria-label={`${objectDirectory.length} objects`}>{objectDirectory.length}</strong>
               <select className={styles.objectDirectorySelect} aria-label="Object directory" value={selectedDirectory?.id || ""} onChange={event => setSelectedDirectoryId(event.target.value)}>{objectDirectories.map(directory => <option value={directory.id} key={directory.id}>{directory.menuLabel.toUpperCase()}</option>)}</select>
             </header>
+            {directoryProjection.error ? <p role="alert">The AOS folder list could not load. Use REFRESH to retry.</p> : null}
             <div className={styles.objectDirectoryList} role="list">
               {objectDirectory.map(item => (
                 <div role="listitem" key={item.id}><button type="button" className={styles.objectTile} data-active={selectedContext?.id === item.id} onClick={() => selectContext(item)}>
