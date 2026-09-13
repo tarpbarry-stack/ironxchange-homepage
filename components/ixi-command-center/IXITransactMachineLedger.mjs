@@ -359,11 +359,7 @@ export function buildMachineLedger(
         row.openCents = eligible ? cents(shared.balance) : null;
         row.paymentStatus =
           shared.status === "PARTIALLY PAID" ? "PART PAID" : shared.status;
-        row.paymentAction = shared.active
-          ? shared.balance > 0
-            ? "MARK PAID"
-            : "PAYMENT DETAILS"
-          : "";
+        row.paymentAction = shared.active && shared.balance > 0 ? "MARK PAID" : "";
         row.payable =
           eligible &&
           (row.type !== "expense" || ["unpaid", "my-money"].includes(method));

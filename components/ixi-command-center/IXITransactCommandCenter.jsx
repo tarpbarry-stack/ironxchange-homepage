@@ -2,6 +2,7 @@ import { searchIXITransact } from "./IXITransactSearch.mjs";
 import IXITransactAccountingReports from "../ixi-transact-dashboard/IXITransactAccountingReports";
 import { paymentHistorySummary } from "../ixi-aos/transact/payments/IXIPaymentHistory";
 import IXIPaymentStatusBadge from "../ixi-aos/transact/payments/IXIPaymentStatusBadge";
+import paymentStyles from "../ixi-aos/transact/payments/IXIPaymentStatusBadge.module.css";
 import IXIPaymentsPanel from "../ixi-aos/transact/payments/IXIPaymentsPanel";
 import { paymentDocument, paymentScopeObject } from "../ixi-aos/transact/payments/IXIPaymentModel";
 import { createIXITransactContext } from "../ixi-aos/transact/IXITransactContext";
@@ -337,7 +338,7 @@ function RecordTable({ records, currency, emptyMessage, onSelect, paymentRecords
               <td>{record.date}</td>
               <td className={styles.money}>{record.amount === null ? "—" : formatIXIMoney(record.amount, currency)}</td>
               <td>{paid?.currency ? <small>{formatIXIMoney(paid.paid, paid.currency)} PAID · {formatIXIMoney(paid.balance, paid.currency)} DUE</small> : "—"}</td>
-              <td>{paid && !paid.aggregate && paid.active ? <button type="button" className={styles.rowAction} onClick={() => onMarkPaid?.(paid.id)}>{paid.balance > 0 ? "MARK PAID" : "PAYMENT DETAILS"}</button> : null}<button type="button" className={styles.rowAction} onClick={() => onSelect?.(record)}>VIEW</button></td>
+              <td>{paid && !paid.aggregate && paid.active && paid.balance > 0 && onMarkPaid ? <button type="button" className={styles.rowAction} onClick={() => onMarkPaid(paid.id)}>MARK PAID</button> : null}<button type="button" className={paymentStyles.badge} data-tone="action" onClick={() => onSelect?.(record)}>VIEW</button></td>
             </tr>
           ); })}
         </tbody>

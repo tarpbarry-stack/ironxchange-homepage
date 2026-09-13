@@ -6,6 +6,7 @@ import {
 } from "./IXITransactMachineLedger.mjs";
 import IXITransactDocumentActions from "./IXITransactDocumentActions";
 import IXIPaymentStatusBadge from "../ixi-aos/transact/payments/IXIPaymentStatusBadge";
+import paymentStyles from "../ixi-aos/transact/payments/IXIPaymentStatusBadge.module.css";
 import styles from "./IXITransactWorkspace.module.css";
 
 const pageSize = 50;
@@ -346,7 +347,7 @@ export default function IXITransactMachineHistory({
                           {row.paymentAction}
                         </button>
                       ) : null}
-                      <button type="button" onClick={() => onOpenRecord(row)}>
+                      <button type="button" className={paymentStyles.badge} data-tone="action" onClick={() => onOpenRecord(row)}>
                         VIEW
                       </button>
                     </td>

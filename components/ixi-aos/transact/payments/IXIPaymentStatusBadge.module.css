@@ -19,3 +19,6 @@
 .badge.badge[data-tone="paid"] { color: #a1f0bf; border-color: #4d9d69; background: #123321; }
 .badge.badge[data-tone="unpaid"] { color: #ffc0b5; border-color: #af7163; background: #35201c; }
 .badge.badge[data-tone="partial"] { color: #ffe080; border-color: #b3913d; background: #332b14; }
+.badge.badge[data-tone="action"] { justify-content: center; font-family: inherit; color: #ffce28; border-color: #806a1c; background: #181d10; cursor: pointer; }
+.badge.badge[data-tone="action"]:hover { border-color: #ffc400; background: #332b14; }
+.badge.badge[data-tone="action"]:focus-visible { outline: 2px solid #ffc400; outline-offset: 2px; }
