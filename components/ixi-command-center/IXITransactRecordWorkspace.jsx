@@ -28,6 +28,7 @@ export default function IXITransactRecordWorkspace({ financialDocumentId, object
   const [history, setHistory] = useState(null);
   const [historyError, setHistoryError] = useState("");
   const [historyLoading, setHistoryLoading] = useState(false);
+  const [historyAttempt, setHistoryAttempt] = useState(0);
   const heading = useRef(null);
 
   useEffect(() => {
@@ -61,12 +62,13 @@ export default function IXITransactRecordWorkspace({ financialDocumentId, object
     if (!record || !showDetails) return undefined;
     const controller = new AbortController();
     setHistoryLoading(true);
+    setHistoryError("");
     loadIXIAosFinancialHistory(financialDocumentId, { signal: controller.signal })
       .then(result => { if (!controller.signal.aborted) setHistory(array(result)); })
       .catch(problem => { if (!controller.signal.aborted) setHistoryError(problem?.message || "Revision history could not be loaded."); })
       .finally(() => { if (!controller.signal.aborted) setHistoryLoading(false); });
     return () => controller.abort();
-  }, [record, financialDocumentId, showDetails]);
+  }, [record, financialDocumentId, showDetails, historyAttempt]);
 
   const field = (name, value) => <div><dt>{name}</dt><dd>{clean(value) || "—"}</dd></div>;
   return <section className={styles.workPanel} aria-label="Selected transaction record">
@@ -116,7 +118,7 @@ export default function IXITransactRecordWorkspace({ financialDocumentId, object
         <h3>EVIDENCE</h3>
         {array(document.attachments).length ? <ul>{document.attachments.map((attachment, index) => <li key={attachment.attachmentId || index}>{attachment.fileName || attachment.name || "Attachment"} · {label(attachment.status || attachment.type)}</li>)}</ul> : <p>No attachments were returned for this record.</p>}
         <h3>REVISION HISTORY</h3>
-        {historyError ? <p role="alert">{historyError}</p> : historyLoading ? <p role="status">Loading revision history…</p> : history?.length ? <ol className={styles.recordHistory}>{history.map((entry, index) => <li key={`${entry.revision}:${index}`}><strong>REVISION {entry.revision || "—"} · {label(entry.operation)}</strong><span>{date(entry.recordedAt)}{entry.actorPassportId ? ` · ${entry.actorPassportId}` : ""}</span></li>)}</ol> : <p>No revision history was returned.</p>}
+        {historyError ? <div role="alert"><p>{historyError}</p><button type="button" className={styles.rowAction} onClick={() => setHistoryAttempt(value => value + 1)}>RETRY HISTORY</button></div> : historyLoading ? <p role="status">Loading revision history…</p> : history?.length ? <ol className={styles.recordHistory}>{history.map((entry, index) => <li key={`${entry.revision}:${index}`}><strong>REVISION {entry.revision || "—"} · {label(entry.operation)}</strong><span>{date(entry.recordedAt)}{entry.actorPassportId ? ` · ${entry.actorPassportId}` : ""}</span></li>)}</ol> : <p>No revision history was returned.</p>}
       </div>}
     </>}
   </section>;

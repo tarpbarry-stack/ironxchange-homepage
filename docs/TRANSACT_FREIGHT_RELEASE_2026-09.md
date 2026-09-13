@@ -63,3 +63,16 @@ Production evidence, 2026-09-13:
   input. The follow-up retains displayed text while focused and formats on blur.
   Isolated form checks now explicitly preserve select-all on focus before replacing
   an amount, alongside the existing correction and paid-credit scenarios.
+
+History follow-up:
+- A later user check exposed a missing Next.js history route. The initial browser
+  check saw request events before the separate financial-history read failed;
+  that check did not establish complete financial-history loading.
+- The document-history URL now delegates GET requests to the existing authenticated
+  Financial proxy and its backend document/tenant/history permissions.
+- History shows its loading state, retains successful sources when another source
+  fails, and offers a read-only retry that clears the previous failure after success.
+- Regression tests connect the actual client URL and route handler, reject writes
+  and invalid IDs, verify partial failures and retries, and reject stale cancelled
+  results. Production verification must wait for financial revisions to load and
+  the loading indicator to finish before judging the History view complete.
