@@ -37,6 +37,48 @@ async function documentFont() {
   return fontBytesPromise;
 }
 
+function entityLogoSource(entity = {}) {
+  return (
+    entity.logoUrl ||
+    entity.imageUrl ||
+    entity.logo?.url ||
+    entity.logo?.imageUrl ||
+    ""
+  );
+}
+
+async function embeddedEntityLogo(pdf, entity) {
+  const source = entityLogoSource(entity);
+  if (!source) return null;
+  try {
+    const url = new URL(
+      source,
+      globalThis.location?.origin || "https://preview.ironxchange.com",
+    );
+    // Sharetribe serves entity media through Imgix. Force a pdf-lib-compatible
+    // format instead of accepting its default AVIF/WebP negotiation.
+    if (url.hostname.endsWith("imgix.net") && !url.searchParams.has("s")) {
+      url.searchParams.set("fm", "png");
+      url.searchParams.set("auto", "compress");
+    }
+    const response = await fetch(url.toString(), {
+      credentials: "omit",
+      referrerPolicy: "no-referrer",
+    });
+    if (!response.ok) return null;
+    const bytes = await response.arrayBuffer();
+    const type = response.headers.get("content-type") || "";
+    if (/png/i.test(type) || /(?:\?|&)fm=png(?:&|$)/i.test(url.search))
+      return await pdf.embedPng(bytes);
+    if (/jpe?g/i.test(type) || /\.jpe?g(?:\?|$)/i.test(url.pathname))
+      return await pdf.embedJpg(bytes);
+  } catch {
+    // Brand media must never make a financial export unavailable. The entity
+    // name remains present when the remote image cannot be fetched or decoded.
+  }
+  return null;
+}
+
 export async function createTransactionPdf({
   rows,
   context = {},
@@ -57,6 +99,7 @@ export async function createTransactionPdf({
     // but missing or malformed letters in the rendered document.
     subset: false,
   });
+  const entityLogo = await embeddedEntityLogo(pdf, entity);
   const supported = new Set(font.getCharacterSet());
   const printable = (text) =>
     Array.from(String(text ?? ""))
@@ -81,21 +124,32 @@ export async function createTransactionPdf({
     bottom = 52;
   function newPage() {
     page = pdf.addPage([612, 792]);
-    y = 724;
+    y = 710;
     page.drawRectangle({
       x: margin,
-      y: 751,
+      y: 742,
       width,
       height: 3,
       color: rgb(0.94, 0.72, 0),
     });
     page.drawText("IXI TRAN$ACT", {
       x: margin,
-      y: 762,
+      y: 760,
       size: 12,
       font,
       color: rgb(0.1, 0.13, 0.11),
     });
+    if (entityLogo) {
+      const ratio = Math.min(90 / entityLogo.width, 35 / entityLogo.height, 1);
+      const logoWidth = entityLogo.width * ratio;
+      const logoHeight = entityLogo.height * ratio;
+      page.drawImage(entityLogo, {
+        x: margin + width - logoWidth,
+        y: 750,
+        width: logoWidth,
+        height: logoHeight,
+      });
+    }
   }
   function wrap(value, size = 9, availableWidth = width) {
     const lines = [];
@@ -145,6 +199,112 @@ export async function createTransactionPdf({
     write(`Exported: ${generatedAt}`);
     space();
   }
+
+  function fit(value, size, availableWidth) {
+    const source = printable(value || "—");
+    if (font.widthOfTextAtSize(source, size) <= availableWidth) return source;
+    let result = source;
+    while (
+      result.length > 1 &&
+      font.widthOfTextAtSize(`${result}…`, size) > availableWidth
+    )
+      result = result.slice(0, -1);
+    return `${result.trim()}…`;
+  }
+
+  function registerHeader() {
+    const columns = [
+      ["DATE", 44],
+      ["RECORD / TYPE", 108],
+      ["PARTY", 218],
+      ["STATUS", 330],
+      ["AMOUNT / EFFECT", 426],
+    ];
+    page.drawRectangle({
+      x: margin,
+      y: y - 5,
+      width,
+      height: 24,
+      color: rgb(0.1, 0.13, 0.11),
+    });
+    for (const [label, x] of columns)
+      page.drawText(label, {
+        x,
+        y: y + 3,
+        size: 7,
+        font,
+        color: rgb(1, 1, 1),
+      });
+    y -= 29;
+  }
+
+  function registerPage() {
+    newPage();
+    write("TRANSACTION REGISTER", 15);
+    write(
+      `${context.title || "Machine"} · ${context.passportId || "No passport"}`,
+      8,
+      rgb(0.36, 0.4, 0.37),
+    );
+    space();
+    registerHeader();
+  }
+
+  function registerRow(row, index) {
+    if (y < 86) registerPage();
+    const rowHeight = 35;
+    if (index % 2 === 0)
+      page.drawRectangle({
+        x: margin,
+        y: y - rowHeight + 8,
+        width,
+        height: rowHeight,
+        color: rgb(0.96, 0.97, 0.96),
+      });
+    const dark = rgb(0.13, 0.16, 0.14);
+    const muted = rgb(0.36, 0.4, 0.37);
+    const amount = moneyLabel(row.amountCents, row.currency);
+    const effects = [
+      row.costCents ? `COST ${moneyLabel(row.costCents, row.currency)}` : "",
+      row.revenueCents
+        ? `REVENUE ${moneyLabel(row.revenueCents, row.currency)}`
+        : "",
+      row.receivedCents
+        ? `RECEIVED ${moneyLabel(row.receivedCents, row.currency)}`
+        : "",
+    ].filter(Boolean);
+    const cells = [
+      [fit(row.date, 8, 58), 44, 8, dark],
+      [fit(row.title, 8, 104), 108, 8, dark],
+      [fit(row.party, 8, 106), 218, 8, dark],
+      [fit(row.status, 8, 90), 330, 8, dark],
+      [fit(amount, 8, 138), 426, 8, dark],
+      [fit(row.type, 7, 104), 108, 7, muted],
+      [fit(row.paymentStatus || "—", 7, 90), 330, 7, muted],
+      [
+        fit(effects.join(" · ") || "NO FINANCIAL EFFECT", 6.5, 138),
+        426,
+        6.5,
+        muted,
+      ],
+    ];
+    cells.forEach(([value, x, size, color], cellIndex) =>
+      page.drawText(value, {
+        x,
+        y: y - (cellIndex > 4 ? 14 : 1),
+        size,
+        font,
+        color,
+      }),
+    );
+    page.drawLine({
+      start: { x: margin, y: y - rowHeight + 6 },
+      end: { x: margin + width, y: y - rowHeight + 6 },
+      thickness: 0.4,
+      color: rgb(0.82, 0.84, 0.82),
+    });
+    y -= rowHeight;
+  }
   newPage();
   identity();
   if (ledger) {
@@ -172,65 +332,78 @@ export async function createTransactionPdf({
     write(
       `${rows.length} transaction(s) included in this export. Running costs retain lifetime context.`,
     );
-  }
-  for (const [index, row] of rows.entries()) {
-    if (ledger || index > 0) {
-      newPage();
-      identity();
-    }
-    write(row.title, 14);
     space();
-    const fields = documentPrintFields(row);
-    for (let fieldIndex = 0; fieldIndex < fields.length;) {
-      const first = fields[fieldIndex];
-      const compact = (field) =>
-        field && String(field[1]).length < 95 && String(field[0]).length < 35;
-      const paired = compact(first) && compact(fields[fieldIndex + 1]);
-      const group = paired ? fields.slice(fieldIndex, fieldIndex + 2) : [first];
-      const cellWidth = paired ? (width - 20) / 2 : width;
-      const cells = group.map(([name, value]) => ({
-        labels: wrap(name.toUpperCase(), 8, cellWidth),
-        values: wrap(value, 10, cellWidth),
-      }));
-      const height = Math.max(
-        ...cells.map(
-          (cell) => cell.labels.length * 12 + cell.values.length * 15 + 14,
-        ),
-      );
-      if (y - Math.min(height, 620) < bottom) newPage();
-      if (height > 620) {
-        write(first[0].toUpperCase(), 8, rgb(0.36, 0.4, 0.37));
-        write(first[1], 10);
-        space();
-        fieldIndex++;
-        continue;
+    write(
+      "This PDF is a concise financial statement. The Excel and machine-package exports preserve the complete field-level record, revision history and supporting evidence.",
+      8,
+      rgb(0.36, 0.4, 0.37),
+    );
+    if (rows.length) {
+      registerPage();
+      rows.forEach(registerRow);
+    }
+  } else {
+    for (const [index, row] of rows.entries()) {
+      if (index > 0) {
+        newPage();
+        identity();
       }
-      cells.forEach((cell, column) => {
-        let baseline = y;
-        const x = margin + column * (cellWidth + 20);
-        for (const label of cell.labels) {
-          page.drawText(label, {
-            x,
-            y: baseline,
-            size: 8,
-            font,
-            color: rgb(0.36, 0.4, 0.37),
-          });
-          baseline -= 12;
+      write(row.title, 14);
+      space();
+      const fields = documentPrintFields(row);
+      for (let fieldIndex = 0; fieldIndex < fields.length;) {
+        const first = fields[fieldIndex];
+        const compact = (field) =>
+          field && String(field[1]).length < 95 && String(field[0]).length < 35;
+        const paired = compact(first) && compact(fields[fieldIndex + 1]);
+        const group = paired
+          ? fields.slice(fieldIndex, fieldIndex + 2)
+          : [first];
+        const cellWidth = paired ? (width - 20) / 2 : width;
+        const cells = group.map(([name, value]) => ({
+          labels: wrap(name.toUpperCase(), 8, cellWidth),
+          values: wrap(value, 10, cellWidth),
+        }));
+        const height = Math.max(
+          ...cells.map(
+            (cell) => cell.labels.length * 12 + cell.values.length * 15 + 14,
+          ),
+        );
+        if (y - Math.min(height, 620) < bottom) newPage();
+        if (height > 620) {
+          write(first[0].toUpperCase(), 8, rgb(0.36, 0.4, 0.37));
+          write(first[1], 10);
+          space();
+          fieldIndex++;
+          continue;
         }
-        for (const value of cell.values) {
-          page.drawText(value, {
-            x,
-            y: baseline,
-            size: 10,
-            font,
-            color: rgb(0.13, 0.16, 0.14),
-          });
-          baseline -= 15;
-        }
-      });
-      y -= height;
-      fieldIndex += group.length;
+        cells.forEach((cell, column) => {
+          let baseline = y;
+          const x = margin + column * (cellWidth + 20);
+          for (const label of cell.labels) {
+            page.drawText(label, {
+              x,
+              y: baseline,
+              size: 8,
+              font,
+              color: rgb(0.36, 0.4, 0.37),
+            });
+            baseline -= 12;
+          }
+          for (const value of cell.values) {
+            page.drawText(value, {
+              x,
+              y: baseline,
+              size: 10,
+              font,
+              color: rgb(0.13, 0.16, 0.14),
+            });
+            baseline -= 15;
+          }
+        });
+        y -= height;
+        fieldIndex += group.length;
+      }
     }
   }
   const pages = pdf.getPages();
