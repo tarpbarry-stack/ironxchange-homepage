@@ -6,6 +6,11 @@ import test from "node:test";
 import { createRequire } from "node:module";
 import { execFileSync } from "node:child_process";
 import crypto from "node:crypto";
+import { moveObjectToWorkspaceSurface } from "../components/ixi-chassis/IXIWorkspacePlacementEngine.js";
+import {
+  getAosMembershipObjectIds,
+  getAosRailProjectionObjectIds
+} from "../lib/mos/IXIAosMembershipBridge.mjs";
 import {
   createAosWorkspaceSessionController,
   workspacePlacementsFromSession
@@ -121,8 +126,107 @@ test("paired frontend and signed HTTP SQLite backend recover failed operations",
     })));
     const second = make();
     await second.open({ workspaceId: "aos-work" });
-    return { A, B, first, second, make, transport, calls, errors, context };
+    return { A, B, first, second, make, transport, calls, errors, context, create };
   }
+
+  // Execute the production page handlers, including their page-level guards and
+  // Return references. Controller-only tests missed a guard that silently blocked
+  // Board after Recall. These plain functions are read from the page, not copied
+  // into a separate test implementation.
+  const workPage = fs.readFileSync(new URL("../pages/aos/work.js", import.meta.url), "utf8");
+  const commandStart = workPage.indexOf("function getDirectContainerChildIds(");
+  const commandEnd = workPage.indexOf("function moveMachineToContainer(", commandStart);
+  assert.ok(commandStart >= 0 && commandEnd > commandStart);
+  const bindPageCommands = new Function(
+    "equipmentIndex", "aosWorkspaceAdmission", "aosWorkspaceObjectRegistry",
+    "aosRelationships", "aosRailProjections", "aosWorkspaceSession",
+    "workspaceSessionControllerRef", "containerReturnSnapshotsRef",
+    "createMosCommandId", "moveObjectToWorkspaceSurface", "getListingId",
+    "getAosMembershipObjectIds", "getAosRailProjectionObjectIds",
+    workPage.slice(commandStart, commandEnd) +
+      "\nreturn { board: boardContainerChildren, recall: recallContainerChildren, undo: returnContainerChildren };"
+  );
+
+  await t.test("page folders repeat Board and Recall, preserve Return, and keep working after refresh", async () => {
+    const f = await fixture();
+    const folders = [
+      { objectId: f.create("Equipment"), indexId: "equipment", children: [f.A] },
+      { objectId: f.create("Workforce"), children: [f.B] },
+      { objectId: f.create("Locations"), children: [f.create("Existing location")] }
+    ];
+    const home = folder => folder.indexId === "equipment" ? "indexEquipment" : `container:${folder.objectId}`;
+    const objectsById = new Map(listObjects({ status: null }).map(object => [object.objectId, object]));
+    const admission = {
+      objectsById,
+      resolveObjectId: value => objectsById.has(value) ? value : ""
+    };
+    const projections = Object.fromEntries(folders.map(folder => [folder.objectId, {
+      members: folder.children.map(objectId => ({ objectId }))
+    }]));
+    const equipment = { ...folders[0], items: folders[0].children.map(objectId => ({ objectId })) };
+    const makePage = controller => {
+      const snapshots = { current: {} };
+      return () => bindPageCommands(
+        equipment, admission, objectsById, [], projections, controller.readSession(),
+        { current: controller }, snapshots, commandId, moveObjectToWorkspaceSurface,
+        item => item?.id || "", getAosMembershipObjectIds, getAosRailProjectionObjectIds
+      );
+    };
+    await f.first.admitObjects(folders.flatMap((folder, visualOrder) => [
+      { objectId: folder.objectId, surfaceId: "board", visualOrder, operatingState: "operating" },
+      ...folder.children.map(objectId => ({ objectId, surfaceId: home(folder), visualOrder: 0, operatingState: "tucked" }))
+    ]));
+    let page = makePage(f.first);
+    // Start with Recall, including existing board members. Every folder now has
+    // the same saved Return state that locked the deployed user's folders.
+    for (const folder of folders) await page().recall(folder);
+    const before = census();
+    const origins = Object.fromEntries(Object.entries(f.first.readSession().objects)
+      .map(([id, record]) => [id, record.sessionOrigin]));
+
+    for (let cycle = 0; cycle < 3; cycle += 1) {
+      for (const folder of folders) {
+        await page().board(folder);
+        for (const id of folder.children) assert.equal(f.first.readSession().objects[id].currentPlacement.surfaceId, "board", `cycle ${cycle}: ${folder.objectId} Board`);
+        await page().recall(folder);
+        for (const id of folder.children) assert.equal(f.first.readSession().objects[id].currentPlacement.surfaceId, home(folder), `cycle ${cycle}: ${folder.objectId} Recall`);
+      }
+    }
+
+    // A redundant Recall must retain the preceding movement's Return snapshot.
+    const selected = folders[0];
+    await page().recall(selected);
+    await page().undo(selected);
+    assert.equal(f.first.readSession().objects[f.A].currentPlacement.surfaceId, "board");
+    await page().recall(selected);
+    const refreshed = f.make();
+    await refreshed.open({ workspaceId: "aos-work" });
+    page = makePage(refreshed);
+    for (const folder of folders) {
+      await page().board(folder);
+      await page().board(folder);
+      await page().undo(folder);
+      for (const id of folder.children) assert.equal(refreshed.readSession().objects[id].currentPlacement.surfaceId, home(folder), "repeated Board retains Return after refresh");
+      await page().board(folder);
+      await page().recall(folder);
+    }
+    // One existing machine can appear in Equipment and Locations. Alternating
+    // those folders must keep one operating Object and honor the last command.
+    folders[2].children.push(f.A);
+    projections[folders[2].objectId].members.push({ objectId: f.A });
+    await page().board(folders[0]);
+    await page().board(folders[2]);
+    assert.equal(refreshed.readPlacements().board.filter(id => id === f.A).length, 1);
+    await page().recall(folders[0]);
+    assert.equal(refreshed.readSession().objects[f.A].currentPlacement.surfaceId, "indexEquipment");
+    await page().board(folders[2]);
+    assert.equal(refreshed.readSession().objects[f.A].currentPlacement.surfaceId, "board");
+    await page().recall(folders[2]);
+    assert.equal(refreshed.readSession().objects[f.A].currentPlacement.surfaceId, home(folders[2]));
+    assert.deepEqual(Object.fromEntries(Object.entries(refreshed.readSession().objects)
+      .map(([id, record]) => [id, record.sessionOrigin])), origins);
+    assert.deepEqual(census(), before);
+  });
 
   await t.test("stale movement hydrates all authoritative placements without undoing a rejected command", async () => {
     const f = await fixture(), before = census();

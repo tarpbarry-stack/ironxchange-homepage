@@ -1411,10 +1411,6 @@ function getContainerReturnSnapshot(container) {
   return { operationId, childIds: snapshotChildIds };
 }
 
-function hasContainerReturnSnapshot(container) {
-  return Boolean(getContainerReturnSnapshot(container)?.operationId);
-}
-
 async function returnContainerChildren(container) {
   const containerId = getContainerObjectId(container);
   const snapshot = getContainerReturnSnapshot(container);
@@ -1432,8 +1428,7 @@ async function boardContainerChildren(container) {
   if (
     !containerId ||
     !childIds.length ||
-    !controller ||
-    hasContainerReturnSnapshot(container)
+    !controller
   ) {
     return;
   }
@@ -1448,21 +1443,27 @@ async function boardContainerChildren(container) {
   });
 
   const operationId = createMosCommandId("aos-board");
-  containerReturnSnapshotsRef.current[containerId] = {
-    operationId,
-    childIds: [...childIds]
-  };
-
   const boarded = controller.persistLayout(nextPlacements, {
     operationId,
     objectIds: childIds,
     activeSummonedContext: containerId
   });
 
+  // Return records the previous movement; it must never lock the next Board.
+  // Repeating an already-complete command must not erase the useful snapshot.
+  if (boarded.changedObjectIds.length) {
+    containerReturnSnapshotsRef.current[containerId] = {
+      operationId,
+      childIds: [...childIds]
+    };
+  }
+
   try {
     await boarded.completion;
   } catch (error) {
-    delete containerReturnSnapshotsRef.current[containerId];
+    if (containerReturnSnapshotsRef.current[containerId]?.operationId === operationId) {
+      delete containerReturnSnapshotsRef.current[containerId];
+    }
     throw error;
   }
 }
@@ -1493,20 +1494,24 @@ async function recallContainerChildren(container) {
   });
 
   const operationId = createMosCommandId("aos-container-recall");
-  containerReturnSnapshotsRef.current[containerId] = {
-    operationId,
-    childIds: [...childIds]
-  };
-
   const recalled = controller.persistLayout(recalledPlacements, {
     operationId,
     objectIds: childIds
   });
 
+  if (recalled.changedObjectIds.length) {
+    containerReturnSnapshotsRef.current[containerId] = {
+      operationId,
+      childIds: [...childIds]
+    };
+  }
+
   try {
     await recalled.completion;
   } catch (error) {
-    delete containerReturnSnapshotsRef.current[containerId];
+    if (containerReturnSnapshotsRef.current[containerId]?.operationId === operationId) {
+      delete containerReturnSnapshotsRef.current[containerId];
+    }
     throw error;
   }
 }
