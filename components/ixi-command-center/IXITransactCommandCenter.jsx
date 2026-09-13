@@ -426,12 +426,15 @@ export default function IXITransactCommandCenter() {
     return () => controller.abort();
   }, [access, environment?.hydration?.canonicalObjects, financialError, financialLoading, projectionPayload, refreshKey]);
 
+  const accessData = access?.data || {};
+  const entityPassportId = clean(accessData.defaults?.entityPassportId || accessData.entities?.[0]?.passportId || environment?.entity?.passportId);
   const contexts = useMemo(() => buildIXIAosCommandContexts({
     entity: environment?.entity || {},
+    entityPassportId,
     aosObjects: environment?.objects || [],
     ownedListings: environment?.ownedListings || [],
     systemIndexes: environment?.systemIndexes || []
-  }), [environment]);
+  }), [entityPassportId, environment]);
   const groups = useMemo(() => getIXIAosContextGroups(contexts), [contexts]);
 
   useEffect(() => {
@@ -453,9 +456,6 @@ export default function IXITransactCommandCenter() {
     contexts,
     relationships
   ), [contexts, relationships, selectedContext]);
-  const accessData = access?.data || {};
-  const entityPassportId = clean(accessData.defaults?.entityPassportId || accessData.entities?.[0]?.passportId || environment?.entity?.passportId);
-
   useEffect(() => {
     const passportId = clean(selectedContext?.passportId);
     if (!passportId || !access) {
