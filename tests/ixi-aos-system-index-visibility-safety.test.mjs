@@ -3,6 +3,7 @@ import test from "node:test";
 
 import {
   excludePeerSystemIndexMembers,
+  pinSystemIndexToBoard,
   reconcilePeerSystemIndexesToBoard
 } from "../components/ixi-mos/workspace/IXIAosSystemIndexPlacement.mjs";
 import {
@@ -169,6 +170,33 @@ test("ordinary containers are not changed by the System Index safety rule", () =
 
   assert.deepEqual(result.releasedObjectIds, []);
   assert.deepEqual(result.placements, placements);
+});
+
+test("the registered Equipment System Index is pinned to the main board only", () => {
+  const placements = {
+    board: [LOCATIONS],
+    [`container:${LOCATIONS}`]: [YARD, EQUIPMENT],
+    [`container:${WORKFORCE}`]: [PERSON, EQUIPMENT],
+    [`container:${EQUIPMENT}`]: [MACHINE]
+  };
+
+  const result = pinSystemIndexToBoard({
+    placements,
+    objectId: EQUIPMENT
+  });
+
+  assert.equal(result.changed, true);
+  assert.deepEqual(result.placements.board, [LOCATIONS, EQUIPMENT]);
+  assert.deepEqual(result.placements[`container:${LOCATIONS}`], [YARD]);
+  assert.deepEqual(result.placements[`container:${WORKFORCE}`], [PERSON]);
+  assert.deepEqual(result.placements[`container:${EQUIPMENT}`], [MACHINE]);
+
+  const replay = pinSystemIndexToBoard({
+    placements: result.placements,
+    objectId: EQUIPMENT
+  });
+  assert.equal(replay.changed, false);
+  assert.deepEqual(replay.placements, result.placements);
 });
 
 test("authenticated readback keeps peer indexes out of stale legacy parents", () => {
