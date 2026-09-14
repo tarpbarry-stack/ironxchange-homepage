@@ -725,3 +725,8 @@
   .shell[data-ui-rebuild] .eyebrow { font-size: 12px; }
 }
 .workspaceMenu nav > a { display: flex; align-items: center; min-height: 44px; padding: 8px; color: #ffcf38; font-size: 12px; text-decoration: none; }
+.objectPickers { margin: 8px 0; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); border: 1px solid #39423a; border-radius: 3px; background: #0d130f; }
+.shell[data-ui-rebuild] dialog .contextPanel, .shell[data-ui-rebuild] dialog .navigation { position: static; height: auto; min-height: 0; flex: 1; width: 100%; }
+.shell[data-ui-rebuild] dialog .newTransactionMenu { position: static; inset: auto; width: 100%; margin: 0; border: 0; box-shadow: none; max-height: none; }
+.shell[data-ui-rebuild] .newAction { max-width: 124px; white-space: normal; line-height: 1.25; }
+@media (max-width: 600px) { .objectPickers { grid-template-columns: repeat(3, minmax(0, 1fr)); } }

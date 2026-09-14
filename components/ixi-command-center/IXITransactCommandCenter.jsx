@@ -625,6 +625,7 @@ export default function IXITransactCommandCenter({ runtime, active = true }) {
 
   function refreshAuthoritativeContext() {
     recordCache.invalidate();
+    setWorkingTabs(tabs => tabs.map(tab => tab.dirty ? tab : { ...tab, recordRefresh: (tab.recordRefresh || 0) + 1 }));
     runtime?.invalidateFinancial();
     contextHydrationStarted.current = false;
     setRefreshKey(value => value + 1);
@@ -966,7 +967,7 @@ export default function IXITransactCommandCenter({ runtime, active = true }) {
           </div>
 
           <div className={styles.compactContext}><button type="button" className={styles.directoryToggle} onClick={() => setOpenPanel("directory")}>Objects</button><strong>{selectedContext?.title || "Connecting…"}</strong><button type="button" className={styles.appsToggle} onClick={() => setOpenPanel("apps")}>Apps</button></div>
-          <div className={styles.scopeStrip} aria-label="Financial story scope">{SCOPE_OPTIONS.map(([kind, code, label]) => <IXITransactObjectPicker key={kind} label={label} items={groups[kind] || []} selectedId={selectedContext?.id} onSelect={selectContext} />)}</div>
+          <div className={styles.objectPickers} aria-label="Financial story scope">{SCOPE_OPTIONS.map(([kind, code, label]) => <IXITransactObjectPicker key={kind} label={label} items={groups[kind] || []} selectedId={selectedContext?.id} onSelect={selectContext} />)}</div>
 
           {loading ? <div className={styles.loadingState}><strong>VERIFYING TRAN$ACT SESSION</strong><span>Connecting to your authenticated operating company…</span><small>Unauthenticated sessions return to the secure sign-in automatically.</small></div> : null}
           {!loading && error ? <div className={styles.errorBanner} role="alert"><strong>TRAN$ACT UNAVAILABLE</strong><span>{error}</span><small>No financial values have been fabricated.</small><a className={styles.loginAction} href={TRANSACT_LOGIN_HREF}>LOG IN AND RETURN TO TRAN$ACT</a></div> : null}

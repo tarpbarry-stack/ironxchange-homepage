@@ -7,6 +7,7 @@ import { buildIXITransactRecordView, linkedIXITransactRecordIds, recordDocument,
 import styles from "./IXIAosCommandCenter.module.css";
 import IXITransactDocumentActions from "./IXITransactDocumentActions";
 import IXITransactEvidence from "./IXITransactEvidence";
+import { paymentHistorySummary } from "../ixi-aos/transact/payments/IXIPaymentHistory";
 import IXIPaymentStatusBadge from "../ixi-aos/transact/payments/IXIPaymentStatusBadge";
 import { buildMachineLedger, moneyLabel } from "./IXITransactMachineLedger.mjs";
 
@@ -50,7 +51,7 @@ export default function IXITransactRecordWorkspace({ financialDocumentId, object
         if (!controller.signal.aborted) setError(problem?.message || "The saved transaction could not be loaded.");
       });
     return () => controller.abort();
-  }, [financialDocumentId, refresh, refreshVersion, recordCache, active, dirty]);
+  }, [financialDocumentId, refresh, refreshVersion, recordCache, active, dirty, financialRecords]);
 
   const view = useMemo(() => record ? buildIXITransactRecordView({ record, financialDocumentId, object, financialRecords }) : null, [record, financialDocumentId, object, financialRecords]);
   const modules = getIXITransactModules({ objectType: object?.objectType || object?.kind || "object", permissions });
@@ -61,6 +62,7 @@ export default function IXITransactRecordWorkspace({ financialDocumentId, object
   const currency = document.currency || "USD";
   const links = linkedIXITransactRecordIds(document);
   const exportLedger = useMemo(() => buildMachineLedger(record ? [record, ...financialRecords.filter(item => recordDocument(item)?.financialDocumentId !== financialDocumentId)] : [], { passportId: object.passportId }), [record, financialRecords, financialDocumentId, object.passportId]);
+  const savedPayment = useMemo(() => record ? paymentHistorySummary(record, financialRecords) : null, [record, financialRecords]);
   const exportRow = exportLedger.rows.find(item => item.id === financialDocumentId);
   const exportContext = { ...object, sourceId: object.canonicalObjectId || object.objectId || object.id };
 
@@ -88,7 +90,7 @@ export default function IXITransactRecordWorkspace({ financialDocumentId, object
       </div>
     </div>
     {error ? <div className={styles.errorBanner} role="alert"><strong>RECORD UNAVAILABLE</strong><span>{error}</span><button type="button" className={styles.rowAction} onClick={() => setRefresh(value => value + 1)}>RETRY</button></div> : !record ? <div className={styles.loadingState} role="status">Loading the selected saved transaction…</div> : <>
-      <div className={styles.recordIdentity}><IXIPaymentStatusBadge status={exportRow?.paymentStatus || summary.status} /><span>Total <strong>{exportRow?.amountCents == null ? "—" : moneyLabel(exportRow.amountCents, currency)}</strong></span>{exportRow?.openCents != null ? <span>Balance <strong>{moneyLabel(exportRow.openCents, currency)}</strong></span> : null}<span>{date(document.occurredAt)}</span></div>
+      <div className={styles.recordIdentity}><IXIPaymentStatusBadge status={exportRow?.paymentStatus || summary.status} /><span>Total <strong>{exportRow?.amountCents == null ? "—" : moneyLabel(exportRow.amountCents, currency)}</strong></span>{savedPayment?.currency ? <span>Paid <strong>{moneyLabel(Math.round(savedPayment.paid * 100), savedPayment.currency)}</strong></span> : null}{exportRow?.openCents != null ? <span>Balance <strong>{moneyLabel(exportRow.openCents, currency)}</strong></span> : null}<span>{date(document.occurredAt)}</span></div>
       {module ? <div className={styles.embeddedWorkspace} hidden={details} style={details ? { display: "none" } : undefined}>
         <IXITransactApp
           {...view.props}
