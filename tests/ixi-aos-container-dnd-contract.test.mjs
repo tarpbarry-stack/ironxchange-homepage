@@ -291,6 +291,18 @@ test("System Index parent safety restores workspace visibility and preserves chi
     work,
     /aos-pin-equipment-board[\s\S]*?objectIds: \[equipmentObjectId\][\s\S]*?captureUndo: false/
   );
+  assert.match(
+    work,
+    /getNestedRootSystemIndexObjectIds\(\{[\s\S]*?aosWorkspaceAdmission\.objectsById\.values\(\)/
+  );
+  assert.match(
+    work,
+    /aos-pin-root-system-indexes-board[\s\S]*?objectIds: nestedRootSystemIndexObjectIds[\s\S]*?captureUndo: false/
+  );
+  assert.doesNotMatch(
+    work,
+    /displayName[^\n]*WORKFORCE|label[^\n]*WORKFORCE/
+  );
 });
 
 
