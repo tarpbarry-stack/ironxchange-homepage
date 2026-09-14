@@ -1,3 +1,4 @@
+import { transactionDisplayTitle } from "./IXITransactDisplay.mjs";
 import { searchIXITransact } from "./IXITransactSearch.mjs";
 import IXITransactAccountingReports from "../ixi-transact-dashboard/IXITransactAccountingReports";
 import { paymentHistorySummary } from "../ixi-aos/transact/payments/IXIPaymentHistory";
@@ -661,7 +662,7 @@ export default function IXITransactCommandCenter({ runtime, active = true }) {
     const references = record?.document?.references || [];
     const targetContext = contexts.find(context => references.some(ref => ["asset", "machine", "object"].includes(ref.role) && ref.passportId === context.passportId)) || selectedContext;
     const records = [...new Map([...companyRecords, ...passportRecords].map(item => [paymentDocument(item).financialDocumentId, item])).values()];
-    const tab = { id: financialDocumentId, financialDocumentId, label: record.title || financialDocumentId,
+    const tab = { id: financialDocumentId, financialDocumentId, label: transactionDisplayTitle(record.document || paymentDocument(record.raw), record.title),
       context: targetContext, object: buildTransactObject(targetContext, records), financialRecords: records, dirty: false };
     setWorkingTabs(tabs => [...tabs, tab]);
     activateTab(tab);

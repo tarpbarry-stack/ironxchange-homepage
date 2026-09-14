@@ -457,3 +457,11 @@
 .tabsContainer { display: flex; min-width: 0; align-items: center; gap: 6px; }
 .tabsContainer > .tabs { flex: 1; min-width: 0; }
 .tabOverflow { width: 115px; flex-shrink: 0; min-height: 44px; background: #111a14; color: #e3ebe6; border: 1px solid #586247; border-radius: 3px; padding: 6px; font-size: 12px; }
+.historyHeading { min-height: 28px; padding: 6px 10px; }
+.history button.metric { min-height: 54px; padding: 5px 8px; }
+.metric strong { font-size: 20px; margin-top: 3px; }
+.table { font-size: 14px; }
+.table td { height: 45px; padding: 0 7px; }
+.table td strong { font-size: 14px; }
+.tableWrap { max-height: max(260px, calc(100dvh - 462px)); }
+.pagination { padding: 3px 10px; min-height: 50px; }

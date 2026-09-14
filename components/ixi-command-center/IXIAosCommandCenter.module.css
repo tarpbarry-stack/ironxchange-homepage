@@ -730,3 +730,5 @@
 .shell[data-ui-rebuild] dialog .newTransactionMenu { position: static; inset: auto; width: 100%; margin: 0; border: 0; box-shadow: none; max-height: none; }
 .shell[data-ui-rebuild] .newAction { max-width: 124px; white-space: normal; line-height: 1.25; }
 @media (max-width: 600px) { .objectPickers { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.shell[data-ui-rebuild] { overflow-x: clip; overflow-y: visible; }
+.shell[data-ui-rebuild] .appLauncher button strong { font-size: 14px; }

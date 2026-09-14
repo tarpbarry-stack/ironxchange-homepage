@@ -154,11 +154,12 @@ function statusLabel(value, t) {
 
 export default function IXIBillCard({
   record = {}, context = {}, authority = {}, policy = undefined, language = "en", onLanguageChange = null,
-  onAction = null, busy = false, error = "", onBack = null
+  onAction = null, busy = false, error = "", onBack = null, recordHeaderEmbedded = false
 }) {
   const [reasonAction, setReasonAction] = useState("");
   const [reason, setReason] = useState("");
   const [editOpen, setEditOpen] = useState(false);
+  const [paymentDetailsOpen, setPaymentDetailsOpen] = useState(false);
   const [editDraft, setEditDraft] = useState({ vendorLabel: record?.bill?.vendorLabel || "", invoiceNumber: record?.identity?.invoiceNumber || "", description: record?.bill?.description || "", amount: record?.bill?.amount || "", invoiceDate: record?.bill?.invoiceDate || "", dueDate: record?.bill?.dueDate || "", category: record?.bill?.category || "", notes: record?.bill?.notes || "" });
   const t = COPY[language === "es" ? "es" : "en"];
   const actions = useMemo(() => getIXIBillAvailableActions({ record, actor: context.actor || {}, authority, policy }), [record, context.actor, authority, policy]);
@@ -177,22 +178,23 @@ export default function IXIBillCard({
   return (
     <div className="ixi-bill-card">
       <div className="bill-toolbar">
-        <button type="button" onClick={() => onBack?.()} aria-label="Back">‹</button>
+        {!recordHeaderEmbedded ? <button type="button" onClick={() => onBack?.()} aria-label="Back">‹</button> : null}
         <div className="bill-language"><button className={language === "en" ? "on" : ""} onClick={() => onLanguageChange?.("en")}>ENG</button><span>/</span><button className={language === "es" ? "on" : ""} onClick={() => onLanguageChange?.("es")}>ESP</button></div>
-        <button type="button" aria-label="More">•••</button>
+        {!recordHeaderEmbedded ? <button type="button" aria-label="More">•••</button> : <button type="button" aria-expanded={paymentDetailsOpen} onClick={() => setPaymentDetailsOpen(value => !value)}>{language === "es" ? "DETALLES DEL PAGO" : "PAYMENT DETAILS"}</button>}
       </div>
 
-      <div className="bill-head">
+      {!recordHeaderEmbedded ? <div className="bill-head">
         <div><strong>{record?.identity?.billNumber || record?.identity?.invoiceNumber || "BILL"}</strong><span>{t.bill}</span></div>
         <b className={`status ${clean(record.status)}`}>{statusLabel(record.status, t)}</b>
       </div>
 
+      : null}
       <div className="bill-scroll">
-        <IXIPaymentsPanel key={record.financialBinding?.financialDocumentId} context={context} object={context.primary} sourceIds={[record.financialBinding?.financialDocumentId || record.identity?.billDocumentId]} language={language} onChanged={() => act("payments-changed")} />
+        {!recordHeaderEmbedded || paymentDetailsOpen ? <IXIPaymentsPanel key={record.financialBinding?.financialDocumentId} context={context} object={context.primary} sourceIds={[record.financialBinding?.financialDocumentId || record.identity?.billDocumentId]} language={language} onChanged={() => act("payments-changed")} /> : null}
         <section className="identity-grid">
           <div className="wide"><small>{t.vendor}</small><strong>{record?.bill?.vendorLabel || "—"}</strong></div>
-          <div><small>{t.amount}</small><strong className="amount">{money(record?.bill?.amount)}</strong></div>
-          <div><small>{t.invoice}</small><strong>{record?.identity?.invoiceNumber || "—"}</strong></div>
+          {!recordHeaderEmbedded ? <div><small>{t.amount}</small><strong className="amount">{money(record?.bill?.amount)}</strong></div> : null}
+          {!recordHeaderEmbedded ? <div><small>{t.invoice}</small><strong>{record?.identity?.invoiceNumber || "—"}</strong></div> : null}
           <div><small>{t.invoiceDate}</small><strong>{localeDate(record?.bill?.invoiceDate, language)}</strong></div>
           <div><small>{t.dueDate}</small><strong className="yellow">{localeDate(record?.bill?.dueDate, language)}</strong></div>
           <div className="wide"><small>{t.description}</small><strong>{record?.bill?.description || "—"}</strong></div>

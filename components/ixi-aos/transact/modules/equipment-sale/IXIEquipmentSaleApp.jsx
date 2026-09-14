@@ -1042,6 +1042,7 @@ export default function IXIEquipmentSaleApp({
   activeStageId = "sales-order",
   initialTab = "order",
   entryMode = "sales-order",
+  recordHeaderEmbedded = false,
   onOpenStage,
   onStartStage,
   onOpenInvoice,
@@ -1814,7 +1815,7 @@ export default function IXIEquipmentSaleApp({
   return (
     <>
       <div className="es-card">
-        <header>
+        {!recordHeaderEmbedded ? <header>
           <button
             type="button"
             aria-label="Back to TRAN$ACT apps"
@@ -1831,7 +1832,7 @@ export default function IXIEquipmentSaleApp({
               ? clean(invoiceRecord?.financialState || "draft").toUpperCase()
               : `${readiness.percent}%`}
           </i>
-        </header>
+        </header> : null}
         <StageRail
           record={record}
           invoice={invoiceRecord}
@@ -1840,7 +1841,7 @@ export default function IXIEquipmentSaleApp({
           onOpenStage={onOpenStage}
           onStartStage={onStartStage}
         />
-        <div className="es-card-record">
+        {!recordHeaderEmbedded ? <div className="es-card-record">
           <span>
             {invoiceEntry
               ? invoiceDisplayNumber(invoiceRecord)
@@ -1848,6 +1849,7 @@ export default function IXIEquipmentSaleApp({
           </span>
           <strong>{usd(displayedTotal)}</strong>
         </div>
+        : null}
         {error ? <div className="es-error">{error}</div> : null}
         {revisionControl}
         {activeStageId === "signed" ? (

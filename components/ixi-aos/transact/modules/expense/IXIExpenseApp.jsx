@@ -216,9 +216,12 @@ export default function IXIExpenseApp({
   onSave = null,
   language = "",
   onLanguageChange = null,
-  expensePolicy = null
+  expensePolicy = null,
+  recordHeaderEmbedded = false,
+  recordPartyLabel = ""
 }) {
   const [record, setRecord] = useState(initialRecord);
+  const [paymentDetailsOpen, setPaymentDetailsOpen] = useState(false);
   const [mode, setMode] = useState(initialRecord ? "record" : "new");
   const [localLang, setLocalLang] = useState(language || "en");
   const [vendor, setVendor] = useState("");
@@ -622,7 +625,7 @@ export default function IXIExpenseApp({
           <button className={lang === "en" ? "on" : ""} onClick={() => setLanguage("en")}>ENG</button><i>/</i>
           <button className={lang === "es" ? "on" : ""} onClick={() => setLanguage("es")}>ESP</button>
         </div>
-        <div className="ex-head">
+        {!recordHeaderEmbedded ? <><div className="ex-head">
           <div className="ex-icon">$</div>
           <div className="ex-title"><strong>{t.recordTitle}</strong><small>{t.recordSub}</small></div>
         </div>
@@ -630,10 +633,12 @@ export default function IXIExpenseApp({
           <div><small>{t.expense}</small><strong>{record.identity?.number || record.identity?.expenseId}</strong></div>
           <span className={locked ? "locked" : "open"}>{locked ? t.locked : t.editable}</span>
         </div>
-        <IXIPaymentsPanel context={context} object={object} sourceIds={[record.financialBinding?.financialDocumentId || record.identity?.expenseId]} language={lang} onChanged={onFinancialRecordsChange} />
-        <div className="ex-record-amount"><small>{t.amount}</small><strong>${Number(details.amount || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong></div>
+        </> : null}
+        {recordHeaderEmbedded ? <div className="ex-record-actions" data-transact-read-only-controls><span>{locked ? t.locked : t.editable}</span><button type="button" aria-expanded={paymentDetailsOpen} onClick={() => setPaymentDetailsOpen(value => !value)}>{lang === "es" ? "DETALLES DEL PAGO" : "PAYMENT DETAILS"}</button></div> : null}
+        {!recordHeaderEmbedded || paymentDetailsOpen ? <IXIPaymentsPanel context={context} object={object} sourceIds={[record.financialBinding?.financialDocumentId || record.identity?.expenseId]} language={lang} onChanged={onFinancialRecordsChange} /> : null}
+        {!recordHeaderEmbedded ? <div className="ex-record-amount"><small>{t.amount}</small><strong>${Number(details.amount || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong></div> : null}
         <div className="ex-record-grid">
-          <div><small>{t.vendor}</small><b>{details.vendor || "—"}</b></div>
+          <div><small>{t.vendor}</small><b>{details.vendor || recordPartyLabel || "—"}</b></div>
           <div><small>{t.date}</small><b>{details.expenseDate || "—"}</b></div>
           <div className="wide"><small>{t.bought}</small><b>{details.description || "—"}</b></div>
           <div><small>{t.category}</small><b>{categoryEntry?.[lang === "es" ? "labelEs" : "label"] || details.category || "—"}</b></div>
@@ -668,7 +673,7 @@ export default function IXIExpenseApp({
         <div className="ex-record-actions">
           {!locked ? <button className="primary" onClick={() => { setMode("edit"); requestRef.current = createClientRequestId(); }}>{t.edit}</button> : null}
           <button className="danger" onClick={() => { setMode("correction"); requestRef.current = createClientRequestId(); }}>{t.correct}</button>
-          <button onClick={onCancel}>{t.back}</button>
+          {!recordHeaderEmbedded ? <button onClick={onCancel}>{t.back}</button> : null}
         </div>
         <IXIExpenseStyles />
       </div>

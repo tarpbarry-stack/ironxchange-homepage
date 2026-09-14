@@ -4,6 +4,7 @@ import {
   filterMachineLedger,
   moneyLabel,
 } from "./IXITransactMachineLedger.mjs";
+import { transactionDisplayTitle } from "./IXITransactDisplay.mjs";
 import IXITransactDocumentActions from "./IXITransactDocumentActions";
 import IXIPaymentStatusBadge from "../ixi-aos/transact/payments/IXIPaymentStatusBadge";
 import styles from "./IXITransactWorkspace.module.css";
@@ -136,13 +137,6 @@ export default function IXITransactMachineHistory({
     >
       <div className={styles.historyHeading}>
         <span>LIFETIME TOTALS · {displayCurrency}</span>
-        <button
-          type="button"
-          aria-expanded={help}
-          onClick={() => setHelp((value) => !value)}
-        >
-          How totals work
-        </button>
         {ledger.currencies.length > 1 ? (
           <select
             aria-label="Summary currency"
@@ -162,10 +156,11 @@ export default function IXITransactMachineHistory({
         <button
           type="button"
           className={styles.metric}
+          title="How totals work"
           onClick={() => setHelp((value) => !value)}
           aria-expanded={help}
         >
-          <span>MARGIN</span>
+          <span>MARGIN · ⓘ</span>
           <strong>
             {loading || error
               ? "—"
@@ -400,7 +395,7 @@ export default function IXITransactMachineHistory({
                     <td>
                       <input
                         type="checkbox"
-                        aria-label={`Select ${row.title}`}
+                        aria-label={`Select ${transactionDisplayTitle(row.document, row.title)}`}
                         checked={selected.has(row.id)}
                         onChange={() => toggle(row.id)}
                       />
@@ -408,9 +403,7 @@ export default function IXITransactMachineHistory({
                     <td>
                       <span>{row.date || "Date missing"}</span>
                       <strong>
-                        {row.title === row.id && /^ifd_/.test(row.id)
-                          ? `${row.type.toUpperCase()} · Number unavailable`
-                          : row.title}
+                        {transactionDisplayTitle(row.document, row.title)}
                       </strong>
                     </td>
                     <td>
@@ -448,12 +441,16 @@ export default function IXITransactMachineHistory({
                     <td>
                       <button
                         type="button"
-                        aria-label={`View ${row.title}`}
+                        aria-label={`View ${transactionDisplayTitle(row.document, row.title)}`}
                         onPointerEnter={() =>
-                          recordCache?.load(row.id).catch(() => {})
+                          recordCache
+                            ?.load(row.id, { foreground: false })
+                            .catch(() => {})
                         }
                         onFocus={() =>
-                          recordCache?.load(row.id).catch(() => {})
+                          recordCache
+                            ?.load(row.id, { foreground: false })
+                            .catch(() => {})
                         }
                         onClick={() => onOpenRecord(row)}
                       >

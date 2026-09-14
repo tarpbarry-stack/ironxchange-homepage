@@ -1,3 +1,4 @@
+import { transactionDisplayTitle } from "./IXITransactDisplay.mjs";
 import { useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { loadIXIAosFinancialDocument, loadIXIAosFinancialHistory } from "../ixi-aos/financial-runtime/IXIAosFinancialReadClient";
@@ -81,7 +82,7 @@ export default function IXITransactRecordWorkspace({ financialDocumentId, object
   const field = (name, value) => <div><dt>{name}</dt><dd>{clean(value) || "—"}</dd></div>;
   return <section className={styles.workPanel} aria-label="Selected transaction record">
     <div className={styles.workspaceHeader} data-transact-read-only-controls>
-      <div><h2 ref={heading} tabIndex={-1}>{summary?.title || "OPENING RECORD"}</h2><p>{summary?.party || document.description || document.memo || "Saved transaction"}</p></div>
+      <div><h2 ref={heading} tabIndex={-1}>{record ? transactionDisplayTitle(document, summary?.title) : "OPENING RECORD"}</h2><p>{exportRow?.party || summary?.party || document.description || document.memo || "Saved transaction"}</p></div>
       <div className={styles.workspaceHeaderActions}>
         <button type="button" className={styles.rowAction} onClick={onBack}>‹ HISTORY</button>
         {exportRow?.paymentAction && onMarkPaid ? <button type="button" className={styles.rowAction} onClick={onMarkPaid}>{exportRow.paymentAction}</button> : null}
@@ -97,6 +98,7 @@ export default function IXITransactRecordWorkspace({ financialDocumentId, object
           key={`${financialDocumentId}:${view.server.revision}:${refreshVersion}`}
           workspaceEmbedded
           recordHeaderEmbedded
+          recordPartyLabel={exportRow?.party || ""}
           initialModuleId={module.id}
           actor={actor}
           entity={entity}
@@ -114,7 +116,7 @@ export default function IXITransactRecordWorkspace({ financialDocumentId, object
           {field("WORKFLOW STATUS", summary.status)}
           {field("AMOUNT", summary.amount == null ? "—" : moneyLabel(Math.round(summary.amount * 100), currency))}
           {field("TRANSACTION DATE", date(document.occurredAt))}
-          {field("PARTY / SOURCE", summary.party)}
+          {field("PARTY / SOURCE", exportRow?.party || summary.party)}
           {field("DUE DATE", date(document.dueDate || document.dueAt))}
           {document.paymentMethod ? field("PAYMENT METHOD", label(document.paymentMethod)) : null}
           {document.transactionReference ? field("PAYMENT REFERENCE", document.transactionReference) : null}

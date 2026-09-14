@@ -394,6 +394,7 @@ export default function IXIAssetAcquisitionApp({
   onLanguageChange = null,
   onBack = null,
   onRecordChange = null,
+  recordHeaderEmbedded = false,
 }) {
   const primary = context.primary || {};
   const entity = context.entity || {};
@@ -824,13 +825,14 @@ export default function IXIAssetAcquisitionApp({
     return (
       <div className="ixi-acq" lang={lang === "es" ? "es-MX" : "en-US"}>
         <div className="acq-top">
-          <div>
+          {!recordHeaderEmbedded ? <div>
             <div className="acq-kicker">IXI TRAN$ACT</div>
             <div className="acq-title">{t.record}</div>
             <div className="acq-id">
               {r.identity?.number || r.identity?.acquisitionId}
             </div>
           </div>
+          : null}
           <div className="acq-lang">
             <button
               type="button"
@@ -850,13 +852,14 @@ export default function IXIAssetAcquisitionApp({
             </button>
           </div>
         </div>
-        <div className="acq-context">
+        {!recordHeaderEmbedded ? <div className="acq-context">
           <strong>{r.context?.primaryLabel}</strong>
           <small>
             {tx(r.context?.primaryObjectType || "ASSET")} ·{" "}
             {r.context?.locationLabel || tx("NO LOCATION")}
           </small>
         </div>
+        : null}
         <div className="acq-status-grid">
           <div className="acq-status">
             <span>{tx("OWNERSHIP")}</span>
