@@ -111,7 +111,11 @@ export default function useIXIAosWorkspaceRegistry({
         ...legacyRelationshipIds,
         ...railProjectionIds,
         ...systemIndexIds
-      ]);
+      ]).filter(childObjectId =>
+        !projectedIndex ||
+        !systemIndexesByObjectId.has(objectId) ||
+        !systemIndexesByObjectId.has(childObjectId)
+      );
       const isEquipmentIndex =
         projectedIndex?.metadata?.adapterId === "ixi-owned-equipment";
       const presentationItems = isEquipmentIndex
@@ -125,6 +129,7 @@ export default function useIXIAosWorkspaceRegistry({
         ...admittedObject,
         ...(projectedIndex || {}),
         objectId,
+        objectType: projectedIndex ? "system-index" : admittedObject.objectType,
         passportId: admittedObject.passportId,
         canonicalIdentity: admittedObject.canonicalIdentity,
         aliases: admittedObject.aliases,
@@ -137,7 +142,12 @@ export default function useIXIAosWorkspaceRegistry({
     }
 
     for (const [objectId, object] of registry) {
-      const placedObjectIds = canonicalWorkspacePlacements[`container:${objectId}`] || [];
+      const placedObjectIds = (
+        canonicalWorkspacePlacements[`container:${objectId}`] || []
+      ).filter(childObjectId =>
+        !systemIndexesByObjectId.has(objectId) ||
+        !systemIndexesByObjectId.has(childObjectId)
+      );
       if (!placedObjectIds.length) continue;
 
       const itemObjectIds = uniqueObjectIds([
@@ -184,12 +194,34 @@ export default function useIXIAosWorkspaceRegistry({
         .filter(Boolean)
     );
 
-    return orderedObjects.filter(item =>
+    const visibleOrderedObjects = orderedObjects.filter(item =>
       !machineObjectIds.has(item.objectId) || visibleMachineObjectIds.has(item.objectId)
     );
+
+    /*
+     * Recovery invariant: a System Index can never disappear inside another
+     * System Index, even when an old relationship or saved session placement
+     * predates the current guard. Surface the peer Index on the Board so the
+     * operator can remove only its invalid parent edge.
+     */
+    const visibleIds = new Set(visibleOrderedObjects.map(item => item.objectId));
+    const recoveredSystemIndexes = [...objectRegistry.values()].filter(item => {
+      if (!systemIndexesByObjectId.has(item.objectId) || visibleIds.has(item.objectId)) {
+        return false;
+      }
+      const locatedSurface = Object.entries(canonicalWorkspacePlacements).find(([, objectIds]) =>
+        Array.isArray(objectIds) && objectIds.includes(item.objectId)
+      )?.[0] || "";
+      if (!locatedSurface.startsWith("container:")) return false;
+      const parentObjectId = locatedSurface.slice("container:".length);
+      return systemIndexesByObjectId.has(parentObjectId);
+    });
+
+    return [...visibleOrderedObjects, ...recoveredSystemIndexes];
   }, [
     canonicalWorkspacePlacements,
     objectRegistry,
+    systemIndexesByObjectId,
     visibleSavedListings,
     admission,
     machineObjectIds

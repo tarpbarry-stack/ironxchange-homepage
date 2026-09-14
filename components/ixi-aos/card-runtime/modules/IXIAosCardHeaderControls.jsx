@@ -29,6 +29,7 @@ export default function IXIAosCardHeaderControls({
   onTransact = null,
   onHide = null,
   onDelete = null,
+  onDetachFromParent = null,
   onOpenConsole = null,
   skinId = "",
   skinOptions = [],
@@ -42,6 +43,9 @@ export default function IXIAosCardHeaderControls({
   const [menuOpen, setMenuOpen] = useState(false);
   const [localSkinId, setLocalSkinId] = useState("v12");
   const [deleteArmed, setDeleteArmed] = useState(false);
+  const [detachArmed, setDetachArmed] = useState(false);
+  const [detaching, setDetaching] = useState(false);
+  const [detachError, setDetachError] = useState("");
 
   const resolvedOnTransact = typeof onTransact === "function"
     ? onTransact
@@ -60,6 +64,7 @@ export default function IXIAosCardHeaderControls({
   const showConsole = effective?.canOpenConsole !== false && typeof onOpenConsole === "function";
   const showHide = canHide !== false && effective?.canHide !== false && typeof onHide === "function";
   const showDelete = canDelete !== false && (effective ? effective.canDelete === true : true) && typeof onDelete === "function";
+  const showDetach = typeof onDetachFromParent === "function";
 
   function stop(event) {
     event?.preventDefault?.();
@@ -105,6 +110,40 @@ export default function IXIAosCardHeaderControls({
               })}
             </div>
             {showConsole ? <button type="button" onClick={event => { stop(event); setMenuOpen(false); onOpenConsole(); }}>OPEN CONSOLE</button> : null}
+            {showDetach ? (
+              <button
+                type="button"
+                className={detachArmed ? "detach armed" : "detach"}
+                disabled={detaching}
+                onClick={async event => {
+                  stop(event);
+                  if (!detachArmed) {
+                    setDetachError("");
+                    setDetachArmed(true);
+                    return;
+                  }
+                  if (detaching) return;
+                  setDetaching(true);
+                  setDetachError("");
+                  try {
+                    await onDetachFromParent();
+                    setDetachArmed(false);
+                    setMenuOpen(false);
+                  } catch (error) {
+                    setDetachError(error?.message || "REMOVE FROM CONTAINER FAILED");
+                  } finally {
+                    setDetaching(false);
+                  }
+                }}
+              >
+                {detaching
+                  ? "REMOVING…"
+                  : detachArmed
+                    ? "CONFIRM · KEEP ALL CHILDREN"
+                    : "REMOVE FROM CONTAINER"}
+              </button>
+            ) : null}
+            {detachError ? <div className="menu-error" role="alert">{detachError}</div> : null}
             {showHide ? <button type="button" onClick={event => { stop(event); setMenuOpen(false); onHide(); }}>HIDE</button> : null}
             {showDelete ? (
               <button type="button" className="danger" onClick={event => {
@@ -125,7 +164,7 @@ export default function IXIAosCardHeaderControls({
       </div>
 
       <style jsx>{`
-        .ixi-aos-card-header-controls{position:absolute;top:9px;right:8px;height:20px;display:flex;align-items:center;z-index:180}.header-action{height:20px;min-width:22px;display:grid;place-items:center;padding:0 6px;border:0;border-left:1px solid rgba(255,255,255,.055);background:transparent;color:rgba(255,255,255,.48);font:950 6px/1 Arial;cursor:pointer}.ixi-aos-card-header-controls>.header-action:first-child{border-left:0}.header-action.add{min-width:23px;color:#ffc400;font-size:17px;font-weight:500}.header-action.edit{min-width:34px;color:rgba(255,255,255,.62)}.header-action.transact{min-width:25px;color:#ffc400;font-size:16px;font-weight:500}.header-action.menu{min-width:23px;color:rgba(255,255,255,.52);font-size:15px}.header-action:hover,.header-action.active{color:#ffc400;background:rgba(255,255,255,.02)}.menu-shell{position:relative;display:flex}.header-menu{position:absolute;top:24px;right:0;width:148px;max-height:328px;overflow:auto;display:flex;flex-direction:column;gap:4px;padding:6px;border:1px solid rgba(255,255,255,.10);border-radius:6px;background:rgba(8,8,8,.985);box-shadow:0 14px 30px rgba(0,0,0,.46);z-index:200}.skin-menu-group{display:flex;flex-direction:column;gap:3px;padding-bottom:5px;border-bottom:1px solid rgba(255,255,255,.06)}.menu-label{padding:2px 6px;color:rgba(255,255,255,.28);font-size:5px;font-weight:950}.header-menu button{width:100%;height:25px;padding:0 7px;border:1px solid rgba(255,255,255,.06);border-radius:4px;background:rgba(255,255,255,.02);color:rgba(255,255,255,.62);font-size:6px;font-weight:950;text-align:left}.header-menu button:hover,.header-menu button.active{border-color:rgba(255,196,0,.28);color:#ffc400}.skin-option{display:flex!important;align-items:center;justify-content:space-between}.danger:hover{color:#ff7070!important}
+        .ixi-aos-card-header-controls{position:absolute;top:9px;right:8px;height:20px;display:flex;align-items:center;z-index:180}.header-action{height:20px;min-width:22px;display:grid;place-items:center;padding:0 6px;border:0;border-left:1px solid rgba(255,255,255,.055);background:transparent;color:rgba(255,255,255,.48);font:950 6px/1 Arial;cursor:pointer}.ixi-aos-card-header-controls>.header-action:first-child{border-left:0}.header-action.add{min-width:23px;color:#ffc400;font-size:17px;font-weight:500}.header-action.edit{min-width:34px;color:rgba(255,255,255,.62)}.header-action.transact{min-width:25px;color:#ffc400;font-size:16px;font-weight:500}.header-action.menu{min-width:23px;color:rgba(255,255,255,.52);font-size:15px}.header-action:hover,.header-action.active{color:#ffc400;background:rgba(255,255,255,.02)}.menu-shell{position:relative;display:flex}.header-menu{position:absolute;top:24px;right:0;width:148px;max-height:328px;overflow:auto;display:flex;flex-direction:column;gap:4px;padding:6px;border:1px solid rgba(255,255,255,.10);border-radius:6px;background:rgba(8,8,8,.985);box-shadow:0 14px 30px rgba(0,0,0,.46);z-index:200}.skin-menu-group{display:flex;flex-direction:column;gap:3px;padding-bottom:5px;border-bottom:1px solid rgba(255,255,255,.06)}.menu-label{padding:2px 6px;color:rgba(255,255,255,.28);font-size:5px;font-weight:950}.header-menu button{width:100%;height:25px;padding:0 7px;border:1px solid rgba(255,255,255,.06);border-radius:4px;background:rgba(255,255,255,.02);color:rgba(255,255,255,.62);font-size:6px;font-weight:950;text-align:left}.header-menu button:hover,.header-menu button.active{border-color:rgba(255,196,0,.28);color:#ffc400}.header-menu button.detach{color:rgba(255,196,0,.82)}.header-menu button.detach.armed{border-color:rgba(255,196,0,.38);background:rgba(255,196,0,.08);color:#ffc400}.menu-error{padding:4px 6px;border:1px solid rgba(255,80,80,.22);border-radius:4px;color:#ff8585;font-size:6px;font-weight:900;line-height:1.25}.skin-option{display:flex!important;align-items:center;justify-content:space-between}.danger:hover{color:#ff7070!important}
       `}</style>
 
       <IXIAosOfficeSkinCompatibilityStyles />

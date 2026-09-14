@@ -36,6 +36,8 @@ import {
   commitMosObjectCommand,
   createMosCommandId,
   createMosRelationship,
+  endMosRelationship,
+  fetchMosObjectRelationships,
   endAosWorkspaceSession,
   fetchAosWorkspaceSession,
   openAosWorkspaceSession
@@ -49,7 +51,8 @@ import {
   createAosMembershipRelationship,
   createAosRailOrderKey,
   getAosRailProjectionObjectIds,
-  getAosMembershipObjectIds
+  getAosMembershipObjectIds,
+  isAosMembershipRelationship
 } from "../../lib/mos/IXIAosMembershipBridge.mjs";
 
 import {
@@ -153,6 +156,10 @@ function stripAosSessionOnlyCardState(record = {}) {
       !AOS_SESSION_ONLY_CARD_KEYS.has(key)
     )
   );
+}
+
+function getAosRelationshipRecord(value = {}) {
+  return value?.relationship || value?.edge || value;
 }
 
 import {
@@ -1378,6 +1385,102 @@ function getDirectContainerChildIds(
 function getContainerObjectId(container) {
   const target = container?.container || container;
   return String(target?.objectId || target?.id || "").trim();
+}
+
+async function detachSystemIndexFromParents(container) {
+  const objectId = aosWorkspaceAdmission.resolveObjectId(
+    getContainerObjectId(container)
+  );
+  const controller = workspaceSessionControllerRef.current;
+
+  if (!objectId || !aosWorkspaceObjectRegistry.has(objectId)) {
+    throw new Error("CANONICAL SYSTEM INDEX IDENTITY IS REQUIRED");
+  }
+  if (!controller || !workspaceSessionReady) {
+    throw new Error("AOS WORKSPACE SESSION IS NOT READY");
+  }
+
+  const relationshipReadback = await fetchMosObjectRelationships(objectId, {
+    direction: "outgoing",
+    status: "active"
+  });
+  const parentEdges = (relationshipReadback?.relationships || [])
+    .map(getAosRelationshipRecord)
+    .filter(isAosMembershipRelationship)
+    .filter(relationship =>
+      aosWorkspaceAdmission.resolveObjectId(relationship?.sourceObjectId) === objectId
+    );
+
+  for (const relationship of parentEdges) {
+    const relationshipId = String(relationship?.relationshipId || "").trim();
+    const expectedRevision = Number(relationship?.revision);
+    if (!relationshipId || !Number.isInteger(expectedRevision)) {
+      const error = new Error("IX CORE RELATIONSHIP REVISION IS REQUIRED");
+      error.code = "IXI_AOS_RELATIONSHIP_REVISION_REQUIRED";
+      throw error;
+    }
+
+    await endMosRelationship({
+      relationshipId,
+      expectedRevision,
+      commandId: createMosCommandId("aos-detach-index"),
+      reason: "aos-system-index-detach-parent",
+      metadata: {
+        source: "aos-work",
+        preserveChildren: true
+      }
+    });
+  }
+
+  const verifiedReadback = await fetchMosObjectRelationships(objectId, {
+    direction: "outgoing",
+    status: "active"
+  });
+  const remainingParentEdges = (verifiedReadback?.relationships || [])
+    .map(getAosRelationshipRecord)
+    .filter(isAosMembershipRelationship)
+    .filter(relationship =>
+      aosWorkspaceAdmission.resolveObjectId(relationship?.sourceObjectId) === objectId
+    );
+
+  if (remainingParentEdges.length) {
+    const error = new Error("IX CORE DID NOT CONFIRM THE CONTAINER RELEASE");
+    error.code = "IXI_AOS_RELATIONSHIP_END_READBACK_REQUIRED";
+    throw error;
+  }
+
+  const endedRelationshipIds = new Set(
+    parentEdges.map(relationship => String(relationship.relationshipId))
+  );
+  if (endedRelationshipIds.size) {
+    setAosRelationships(current => (current || []).filter(item =>
+      !endedRelationshipIds.has(
+        String(getAosRelationshipRecord(item)?.relationshipId || "")
+      )
+    ));
+  }
+
+  const nextPlacements = moveObjectToWorkspaceSurface({
+    placements: controller.readPlacements(),
+    objectId,
+    targetSurface: "board"
+  });
+  const released = controller.persistLayout(nextPlacements, {
+    operationId: createMosCommandId("aos-release-index"),
+    objectIds: [objectId],
+    captureUndo: false,
+    activeSummonedContext: null
+  });
+  await released.completion;
+
+  showAosObjectNotice({
+    objectId,
+    message: endedRelationshipIds.size
+      ? "CONTAINER RELEASED · CHILDREN PRESERVED"
+      : "CONTAINER IS ALREADY TOP LEVEL",
+    tone: "success",
+    duration: 2800
+  });
 }
 
 function getContainerRequestedChildIds(request) {
@@ -3119,6 +3222,10 @@ onGatherContainerChildren={
 
 onReturnContainerChildren={
   returnContainerChildren
+}
+
+onDetachContainerFromParents={
+  detachSystemIndexFromParents
 }
 
   onCreateObjectChild={

@@ -32,6 +32,7 @@ function IXIAosCard018Presentation({
   onAddObject = null,
   onHideObject = null,
   onDeleteObject = null,
+  onDetachFromParent = null,
   onExposeObject = null,
   onOpenTransact = null,
   onRecall = null,
@@ -117,6 +118,11 @@ function IXIAosCard018Presentation({
             onTransact={() => onOpenTransact?.(object)}
             onHide={onHideObject}
             onDelete={onDeleteObject}
+            onDetachFromParent={
+              typeof onDetachFromParent === "function"
+                ? () => onDetachFromParent(object)
+                : null
+            }
             onOpenConsole={onOpenTransact}
             skinId="v12"
           />
