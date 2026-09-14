@@ -5,7 +5,6 @@ import { loadIXIFinancialAccessContext, loadIXITransactDashboard } from "./data/
 import { createIXITransactSessionRuntime } from "./data/IXITransactSessionRuntime.mjs";
 
 const IXITransactCommandCenter = dynamic(() => import("../ixi-command-center/IXITransactCommandCenter"), { ssr: false });
-const IXITransactLegacyCommandCenter = dynamic(() => import("../ixi-command-center/IXITransactLegacyCommandCenter"), { ssr: false });
 const IXITransactDashboardApp = dynamic(() => import("./IXITransactDashboardApp"), { ssr: false });
 
 export function IXITransactSessionLayout({ children }) {
@@ -14,9 +13,6 @@ export function IXITransactSessionLayout({ children }) {
   const [runtime, setRuntime] = useState(null);
   const [session, setSession] = useState({ access: null, generation: 0, error: null });
   const [warm, setWarm] = useState(false);
-  // Staged release stays in the existing authenticated session; it grants no access.
-  const [rebuildMode, setRebuildMode] = useState(false);
-  useEffect(() => { if (router.isReady && router.query?.ui === "rebuild") setRebuildMode(true); }, [router.isReady, router.query?.ui]);
   const [visited, setVisited] = useState({ records: !ledger, ledger });
   useEffect(() => { setVisited(previous => ({ ...previous, [ledger ? "ledger" : "records"]: true })); }, [ledger]);
 
@@ -67,7 +63,7 @@ export function IXITransactSessionLayout({ children }) {
       {session.error ? "TRAN$ACT session could not be verified." : "Opening your TRAN$ACT workspace…"}
     </div> : <div key={session.generation} data-ixi-transact-session>
       <div hidden={ledger} style={{ display: ledger ? "none" : "block" }} data-ixi-transact-view="records">
-        {(!ledger || visited.records || warm) && (rebuildMode ? <IXITransactCommandCenter runtime={runtime} active={!ledger} /> : <IXITransactLegacyCommandCenter runtime={runtime} active={!ledger} />)}
+        {(!ledger || visited.records || warm) && <IXITransactCommandCenter runtime={runtime} active={!ledger} />}
       </div>
       <div hidden={!ledger} style={{ display: ledger ? "block" : "none" }} data-ixi-transact-view="ledger">
         {(ledger || visited.ledger || warm) && <IXITransactDashboardApp runtime={runtime} active={ledger} />}
