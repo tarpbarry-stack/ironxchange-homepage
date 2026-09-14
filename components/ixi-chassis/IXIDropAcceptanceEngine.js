@@ -44,6 +44,8 @@ function isSystemIndexObject(
     metadata.isSystemIndex === true ||
     metadata.systemAdapter === true ||
     metadata.systemIndexPresentation === true ||
+    metadata.rootContainer === true ||
+    clean(metadata.hierarchyRole).toLowerCase() === "index" ||
     clean(value?.cardTemplateSlug || value?.templateId || metadata?.templateId) ===
       "ixi-system-index-v1"
   );
@@ -113,7 +115,7 @@ export function canIXIObjectAcceptDrop({
    * composable; this guard applies only to explicit System Index identity.
    */
   if (
-    clean(getIXIDragObjectType(dragData)).toLowerCase() === "system-index" &&
+    isSystemIndexObject(dragData) &&
     isSystemIndexObject(target)
   ) {
     return {
