@@ -64,6 +64,7 @@ export default function IXITransactMachineHistory({
     <button
       type="button"
       className={styles.metric}
+      title={detail}
       data-active={filters.effect === effect}
       onClick={() =>
         setFilter("effect", filters.effect === effect ? "" : effect)
@@ -77,7 +78,6 @@ export default function IXITransactMachineHistory({
             ? `${total.hours.toLocaleString("en-US", { maximumFractionDigits: 4 })} h`
             : moneyLabel(total[key], displayCurrency)}
       </strong>
-      <small>{detail}</small>
     </button>
   );
   return (
@@ -88,8 +88,6 @@ export default function IXITransactMachineHistory({
       <div className={styles.historyHeading}>
         <div>
           <span>LIFETIME FINANCIAL POSITION</span>
-          <h2>TRANSACTION HISTORY</h2>
-          <p>Recorded costs, revenue and cash for {context.title}.</p>
         </div>
         {ledger.currencies.length > 1 ? (
           <label>
@@ -150,13 +148,9 @@ export default function IXITransactMachineHistory({
               ? "—"
               : moneyLabel(total.marginCents, displayCurrency)}
           </strong>
-          <small>Invoiced revenue less recorded machine costs</small>
         </div>
       </div>
-      <p className={styles.basis}>
-        Lifetime totals stay visible when you filter the records. Recorded
-        margin is a machine performance view; ledger profit may differ.
-      </p>
+      <details className={styles.basis}><summary>How these totals are calculated</summary><p>Lifetime totals stay visible when you filter records. Costs include acquisition and recognized costs, less credits. Revenue excludes stated tax and unbilled contracts. Recorded margin is revenue less recorded machine costs; posted ledger profit may differ. Payments track cash separately. Pending costs remain separate until recognized.</p></details>
       {!loading && !error && ledger.warnings.length ? (
         <div className={styles.notice}>
           <button type="button" onClick={() => setFilter("effect", "review")}>
@@ -304,7 +298,7 @@ export default function IXITransactMachineHistory({
                       <span>{row.date || "Date missing"}</span>
                       <strong>{row.title}</strong>
                       <small>
-                        {row.type} · {row.id}
+                        {row.type.replaceAll("-", " ")}
                       </small>
                     </td>
                     <td>
@@ -314,12 +308,12 @@ export default function IXITransactMachineHistory({
                     <td>
                       <strong>{row.party || "—"}</strong>
                       <span>{row.status}</span>
-                      <small>
+                      <small title={row.reason}>
                         {row.review
                           ? row.reason
                           : row.pendingCents
                             ? `Pending ${moneyLabel(row.pendingCents, row.currency)}`
-                            : row.reason}
+                            : ""}
                       </small>
                     </td>
                     <td>

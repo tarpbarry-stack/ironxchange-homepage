@@ -83,11 +83,12 @@ test("Object console is History-first and reuses the governed TRAN$ACT app bus",
   assert.match(source, /includeObjectIdentity \? <>[\s\S]*SERIAL NUMBER[\s\S]*context\.serialNumber[\s\S]*STOCK NUMBER[\s\S]*context\.stockNumber[\s\S]*<\/> : null/u);
   assert.match(source, /PASSPORT NUMBER[\s\S]*context\.passportId/u);
   assert.match(source, /includeObjectIdentity \? <div><dt>OBJECT ID<\/dt><dd>\{context\.sourceId/u);
-  assert.match(source, /className=\{styles\.headerIdentity\}><ContextIdentityFields context=\{selectedContext\} compact \/>/u);
+  assert.match(source, /<ContextIdentityCard context=\{selectedContext\}/u);
+  assert.doesNotMatch(source, /className=\{styles\.headerIdentity\}><ContextIdentityFields/u);
   assert.doesNotMatch(source, /shortIdentity/u);
   assert.match(source, /setActiveWorkspace\(context\.kind === "company" \? "today" : "object-history"\)/u);
   assert.match(source, /<IXITransactMachineHistory/u);
-  assert.match(read("components/ixi-command-center/IXITransactMachineHistory.jsx"), /<h2>TRANSACTION HISTORY<\/h2>/u);
+  assert.match(read("components/ixi-command-center/IXITransactMachineHistory.jsx"), /aria-label="Machine transaction history"/u);
   assert.match(source, /getIXITransactModules/u);
   assert.match(source, /workspaceEmbedded/u);
   assert.match(source, /dynamic\([\s\S]*import\("\.\.\/ixi-aos\/transact\/IXITransactApp"\)/u);
@@ -128,6 +129,11 @@ test("desktop styling preserves the permanent professional shell and responsive 
   assert.match(styles, /\.topbar\s*\{[\s\S]*position:\s*sticky/u);
   assert.match(styles, /grid-template-columns:\s*250px minmax\(0, 1fr\) 330px/u);
   assert.match(styles, /@media \(max-width: 1220px\)/u);
+  assert.match(styles, /\.responsiveShell \.desktop\s*\{ grid-template-columns: 220px minmax\(0, 1fr\)/u);
+  assert.match(styles, /@media \(max-width: 1199px\)/u);
+  const source = read("components/ixi-command-center/IXITransactCommandCenter.jsx");
+  assert.match(source, /label="Navigation and machines" dockAt=\{1200\}/u);
+  assert.match(source, /label="Apps and details" dockAt=\{1600\}/u);
   assert.match(styles, /overflow-x:\s*hidden/u);
   assert.match(styles, /--gold:\s*#ffc400/u);
   assert.match(styles, /font-family:\s*'Inter Variable', Inter, ui-sans-serif/u);

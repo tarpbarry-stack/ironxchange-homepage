@@ -609,6 +609,76 @@
 }
 
 .newTransactionMenu { position: fixed; z-index: 120; top: 82px; right: 22px; width: min(480px, calc(100vw - 44px)); max-height: calc(100vh - 104px); overflow-y: auto; padding: 18px; border: 1px solid var(--gold); border-radius: 6px; background: #0e110f; box-shadow: 0 12px 36px #0009; }
+
+/* TRAN$ACT owns its responsive shell; these rules do not change AOS boards. */
+.responsiveShell { display: flex; flex-direction: column; height: 100dvh; min-height: 0; padding: 0; overflow: hidden; }
+.responsiveShell .topbar { position: relative; display: flex; flex-wrap: wrap; flex: 0 0 auto; gap: 10px 14px; padding: 12px 18px; box-shadow: none; }
+.responsiveShell .brand { flex: 0 0 180px; }
+.responsiveShell .entityScope { display: block; flex: 0 1 200px; min-width: 150px; }
+.responsiveShell .periodControl { display: grid; flex: 0 0 152px; }
+.responsiveShell .searchWrap { flex: 1 1 240px; }
+.responsiveShell .search { width: 100%; }
+.responsiveShell .aosAction { display: inline-flex; }
+.responsiveShell .desktop { flex: 1 1 auto; min-height: 0; display: grid; grid-template-columns: 240px minmax(0, 1fr) 300px; }
+.responsiveShell .navigation, .responsiveShell .contextPanel { position: static; top: auto; display: flex; flex-direction: column; height: 100%; min-height: 0; overflow-y: auto; }
+.responsiveShell .navigation { padding: 14px 10px; }
+.responsiveShell .navigation nav { display: grid; flex-shrink: 0; overflow: visible; }
+.responsiveShell .navigation nav button { width: 100%; min-height: 40px; }
+.responsiveShell .operator { display: block; }
+.responsiveShell .objectDirectory { display: flex; min-height: 220px; }
+.responsiveShell .navFooter { display: block; flex-shrink: 0; }
+.responsiveShell .main { min-height: 0; overflow: auto; padding: 18px 22px 28px; }
+.responsiveShell .pageHeader { padding-bottom: 12px; margin-bottom: 12px; border-bottom: 1px solid var(--line-strong); gap: 18px; }
+.responsiveShell .pageHeader h1 { font-size: clamp(23px, 2vw, 30px); }
+.responsiveShell .pageHeader p { margin: 5px 0 0; white-space: normal; }
+.responsiveShell .headerActions { flex-wrap: wrap; }
+.responsiveShell .headerActions select { max-width: 100%; }
+.responsiveShell .scopeStrip { margin-bottom: 12px; }
+.responsiveShell .statusbar { position: static; flex: 0 0 auto; min-height: 28px; padding: 4px 16px; }
+.panelControls { display: flex; gap: 10px; margin-bottom: 12px; }
+.panelControls button { min-height: 44px; padding: 0 12px; border: 1px solid var(--line-strong); border-radius: 4px; background: #151b17; color: #ffc400; font-size: 13px; font-weight: 800; cursor: pointer; }
+.panelControls .navigationToggle, .panelControls .contextToggle { display: none; }
+.panelControls:has(.contextToggle) { justify-content: space-between; }
+.searchStatus { position: absolute; top: 100%; left: 0; padding: 3px 8px; background: #101612; color: #d4dbd6; font-size: 12px; }
+.searchStatus:empty { display: none; }
+.responsiveShell .searchResults button[aria-selected="true"] { background: #30290e; outline: 2px solid #ffc400; outline-offset: -2px; }
+.desktopLauncher { display: grid; gap: 10px; }
+.desktopLauncher > button { min-height: 44px; border: 1px solid #66551a; background: #201e10; color: #ffc400; font-size: 13px; font-weight: 800; cursor: pointer; }
+.desktopLauncher :global(.tx-grid) { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.desktopLauncher :global(.tx-app-tile) { position: relative; min-height: 96px; border: 1px solid #354138; border-radius: 4px; background: #101713; }
+.desktopLauncher :global(.tx-app-drag-surface) { position: absolute; top: 2px; right: 2px; z-index: 1; width: 44px; height: 44px; padding: 0; border: 0; background: transparent; color: #9eaaa2; cursor: grab; touch-action: none; }
+.desktopLauncher :global(.tx-app-drag-surface)::after { content: "⠿"; font-size: 22px; }
+.desktopLauncher :global(.tx-app-content) { padding: 10px; }
+.desktopLauncher :global(.tx-app-group) { display: block; min-height: 38px; padding-right: 38px; color: #aeb9b1; font-size: 12px; }
+.desktopLauncher :global(.tx-app-open) { display: block; width: 100%; min-height: 44px; padding: 4px 0; border: 0; color: #f2f5f3; background: transparent; font-size: 13px; font-weight: 800; text-align: left; cursor: pointer; }
+.desktopLauncher :global(.tx-app-document) { display: none; }
+.desktopLauncher :global(.tx-app-tile-dragging) { z-index: 2; border-color: #ffc400; }
+.desktopLauncher :global(button:focus-visible) { outline: 2px solid #ffc400; outline-offset: 2px; }
+@media (min-width: 1600px) {
+  .panelControls { display: none; }
+}
+@media (max-width: 1599px) {
+  .responsiveShell .desktop { grid-template-columns: 220px minmax(0, 1fr); }
+  .panelControls .contextToggle { display: inline-flex; align-items: center; margin-left: auto; }
+}
+@media (max-width: 1199px) {
+  .responsiveShell .desktop { grid-template-columns: minmax(0, 1fr); }
+  .panelControls .navigationToggle { display: inline-flex; align-items: center; }
+  .responsiveShell .pageHeader { display: flex; flex-wrap: wrap; }
+  .responsiveShell .headerActions { margin: 0; }
+}
+@media (max-width: 799px) {
+  .responsiveShell .topbar { padding: 10px 12px; }
+  .responsiveShell .brand { flex-basis: 150px; }
+  .responsiveShell .entityScope { flex: 1 1 150px; }
+  .responsiveShell .searchWrap { order: 10; flex-basis: 100%; }
+  .responsiveShell .main { padding: 12px; }
+  .responsiveShell .scopeStrip { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .responsiveShell .headerActions { width: 100%; }
+  .responsiveShell .headerActions label { flex: 1; min-width: 0; }
+  .responsiveShell .headerActions select { width: 100%; }
+  .responsiveShell .statusbar { font-size: 12px; }
+}
 .newTransactionMenu h2 { margin: 0 0 8px; }
 .workspaceHeaderActions { flex-wrap: wrap; }
 .workspaceHeaderActions button { cursor: pointer; }

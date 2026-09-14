@@ -9,7 +9,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  padding: 20px;
+  padding: 12px 16px;
 }
 .historyHeading h2 {
   margin: 6px 0;
@@ -31,13 +31,13 @@
 .metrics {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 10px;
-  padding: 0 20px;
+  gap: 8px;
+  padding: 0 16px;
 }
 .metric {
   border: 1px solid #354138;
   background: #111a14;
-  padding: 15px 12px;
+  padding: 10px 12px;
   text-align: left;
   color: #edf3ef;
   min-width: 0;
@@ -57,7 +57,7 @@
 .metric strong {
   font-size: 22px;
   font-weight: 850;
-  margin: 9px 0;
+  margin: 5px 0 0;
   overflow-wrap: anywhere;
 }
 .metric small {
