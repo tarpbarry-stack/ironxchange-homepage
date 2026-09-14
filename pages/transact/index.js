@@ -1,6 +1,6 @@
 import Head from "next/head";
 
-import IXITransactCommandCenter from "../../components/ixi-command-center/IXITransactCommandCenter";
+import { getIXITransactLayout } from "../../components/ixi-transact-dashboard/IXITransactSessionLayout";
 
 export default function IXITransactPage() {
   return (
@@ -12,8 +12,8 @@ export default function IXITransactPage() {
           content="IXI TRAN$ACT financial operating system"
         />
       </Head>
-
-      <IXITransactCommandCenter />
     </>
   );
 }
+
+IXITransactPage.getLayout = getIXITransactLayout;

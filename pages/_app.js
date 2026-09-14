@@ -9,6 +9,7 @@ import ListingShareProvider from "../components/ixi-marketplace/ListingShareProv
 
 export default function App({ Component, pageProps }) {
   const router = useRouter();
+  const getLayout = Component.getLayout || (page => page);
 
   useEffect(() => {
     if (!router.isReady) return;
@@ -67,7 +68,7 @@ export default function App({ Component, pageProps }) {
 
       <ListingShareProvider>
         <IXIMarketplaceFaceTypography />
-        <Component {...pageProps} />
+        {getLayout(<Component {...pageProps} />)}
         {!Component.hideGlobalTicketLauncher && <IXIGlobalTicketLauncher />}
       </ListingShareProvider>
     </IXITicketProvider>
