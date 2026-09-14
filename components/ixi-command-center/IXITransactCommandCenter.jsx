@@ -904,6 +904,7 @@ export default function IXITransactCommandCenter() {
                 <div role="listitem" key={item.id}><button type="button" className={styles.objectTile} data-active={selectedContext?.id === item.id} onClick={() => selectContext(item)}>
                   <strong className={styles.objectTileTitle}>{item.title}</strong>
                   <small className={`${styles.objectTileField} ${styles.objectTileSerial}`}><b>SN</b><span>{item.serialNumber || "NOT RECORDED"}</span></small>
+                  <small className={`${styles.objectTileField} ${styles.objectTileIdentity}`}><b>ID</b><span>{item.stockNumber || item.assetId || item.passportId || "NOT RECORDED"}</span></small>
                   <IXIContextImage
                     key={item.id}
                     context={item}
@@ -913,7 +914,6 @@ export default function IXITransactCommandCenter() {
                     label={`${item.title} thumbnail`}
                     as="span"
                   />
-                  <small className={`${styles.objectTileField} ${styles.objectTileIdentity}`}><b>ID</b><span>{item.stockNumber || item.assetId || item.passportId || "NOT RECORDED"}</span></small>
                 </button></div>
               ))}
             </div>
