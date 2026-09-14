@@ -95,7 +95,8 @@ import useIXIAosWorkspaceRegistry
   from "../../components/ixi-mos/workspace/useIXIAosWorkspaceRegistry";
 
 import {
-  reconcilePeerSystemIndexesToBoard
+  reconcilePeerSystemIndexesToBoard,
+  pinSystemIndexToBoard
 } from "../../components/ixi-mos/workspace/IXIAosSystemIndexPlacement.mjs";
 
 import useIXIEquipmentWorkspace
@@ -380,6 +381,7 @@ const POCKET_TARGETS = [
   const workspaceSessionControllerRef = useRef(null);
   const containerReturnSnapshotsRef = useRef({});
   const systemIndexPlacementReconciliationKeyRef = useRef("");
+  const equipmentBoardPinKeyRef = useRef("");
   
   const [activeDndId, setActiveDndId] = useState("");
   const {
@@ -1081,6 +1083,66 @@ useEffect(() => {
   equipmentIndex?.objectId,
   aosRailProjections,
   workspaceSystemIndexes
+]);
+
+useEffect(() => {
+  const controller = workspaceSessionControllerRef.current;
+  const equipmentObjectId = aosWorkspaceAdmission.resolveObjectId(
+    equipmentWorkspaceIndex?.objectId
+  );
+
+  if (
+    !workspaceSessionReady ||
+    !controller ||
+    !equipmentObjectId
+  ) {
+    return;
+  }
+
+  const pinned = pinSystemIndexToBoard({
+    placements: controller.readPlacements(),
+    objectId: equipmentObjectId
+  });
+
+  if (!pinned.changed) return;
+
+  const current = locateWorkspaceObject(
+    controller.readPlacements(),
+    equipmentObjectId
+  );
+  const pinKey = [
+    String(aosWorkspaceSession?.sessionId || ""),
+    equipmentObjectId,
+    current?.surfaceId || "missing",
+    current?.visualOrder ?? -1
+  ].join("|");
+
+  if (
+    !pinKey ||
+    equipmentBoardPinKeyRef.current === pinKey
+  ) {
+    return;
+  }
+
+  equipmentBoardPinKeyRef.current = pinKey;
+
+  const operation = controller.persistLayout(pinned.placements, {
+    operationId: createMosCommandId("aos-pin-equipment-board"),
+    objectIds: [equipmentObjectId],
+    captureUndo: false,
+    activeSummonedContext: null
+  });
+
+  void operation.completion.catch(error => {
+    equipmentBoardPinKeyRef.current = "";
+    console.error("IXI AOS EQUIPMENT BOARD PIN FAILED:", error);
+  });
+}, [
+  workspaceSessionReady,
+  aosWorkspaceSession?.sessionId,
+  aosWorkspaceAdmission,
+  equipmentWorkspaceIndex?.objectId,
+  workspacePlacements
 ]);
 
 useEffect(() => {
