@@ -84,13 +84,11 @@ test("financial proxy attaches only minimal canonical company context", () => {
   assert.equal(JSON.stringify(result).includes("must-not-leak"), false);
 });
 
-test("TRAN$ACT financial projection precedes full AOS hydration", () => {
+test("TRAN$ACT validates access before hydrating objects independently of the dashboard", () => {
   const source = fs.readFileSync(new URL("../components/ixi-command-center/IXITransactCommandCenter.jsx", import.meta.url), "utf8");
-  const accessIndex = source.indexOf("await loadIXIFinancialAccessContext");
-  const aosIndex = source.indexOf("await loadIXIMosEnvironment");
-
-  assert.ok(accessIndex >= 0);
-  assert.ok(aosIndex > accessIndex);
-  assert.match(source, /financialLoading \|\| \(!projectionPayload && !financialError\)/u);
-  assert.doesNotMatch(source.slice(accessIndex, aosIndex), /loadIXIMosEnvironment/u);
+  const hydration = source.slice(source.indexOf("if (!access || contextHydrationStarted.current)"), source.indexOf("const accessData ="));
+  assert.match(source, /runtime\?\.loadAccess/u);
+  assert.match(source, /buildIXITransactFastEnvironment\(accessPayload\)/u);
+  assert.match(hydration, /await loadIXIMosEnvironment/u);
+  assert.doesNotMatch(hydration, /financialLoading|projectionPayload|financialError/u);
 });

@@ -636,8 +636,11 @@ test("recursive command center owns transact while the detailed ledger remains a
     "utf8"
   );
 
-  assert.match(transactPage, /IXITransactCommandCenter/u);
-  assert.match(ledgerPage, /IXITransactDashboardApp/u);
+  const layout = fs.readFileSync(new URL("../components/ixi-transact-dashboard/IXITransactSessionLayout.jsx", import.meta.url), "utf8");
+  assert.match(transactPage, /IXITransactPage\.getLayout = getIXITransactLayout/u);
+  assert.match(ledgerPage, /IXITransactLedgerPage\.getLayout = getIXITransactLayout/u);
+  assert.match(layout, /IXITransactCommandCenter/u);
+  assert.match(layout, /IXITransactDashboardApp/u);
   assert.match(commandCenter, /\["today", "TODAY", "01"\]/u);
   assert.match(commandCenter, /\["purchasing", "PURCHASING", "03"\]/u);
   assert.match(commandCenter, /\["sales", "SALES", "04"\]/u);

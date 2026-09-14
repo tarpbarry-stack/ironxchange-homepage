@@ -1,5 +1,7 @@
 import IXITransactAccountingReports from "./IXITransactAccountingReports";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/router";
 
 import {
   buildIXITransactDashboardQuery,
@@ -89,7 +91,7 @@ function GenericRecordTable({ title, records, currency, passportId }) {
 
                 return (
                   <tr key={`${id}-${index}`}>
-                    <td><a href={`/transact?passport=${encodeURIComponent(passportId || "")}&record=${encodeURIComponent(id)}`}><strong>{record.documentNumber || id}</strong></a></td>
+                    <td><Link href={`/transact?passport=${encodeURIComponent(passportId || "")}&record=${encodeURIComponent(id)}`}><strong>{record.documentNumber || id}</strong></Link></td>
                     <td>{party}</td>
                     <td>{status}</td>
                     <td>{date}</td>
@@ -157,9 +159,17 @@ function Executive({ projection }) {
 }
 
 
-export default function IXITransactDashboardApp() {
+export default function IXITransactDashboardApp({ runtime, active = true }) {
+  const router = useRouter();
+  const loadedPeriod = useRef("");
+  const readAccess = runtime?.loadAccess || loadIXIFinancialAccessContext;
+  const readDashboard = runtime?.loadDashboard || loadIXITransactDashboard;
   const [workspace, setWorkspace] = useState("executive");
-  useEffect(() => { const selected = new URLSearchParams(window.location.search).get("workspace"); if (WORKSPACES.some(([id]) => id === selected)) setWorkspace(selected); }, []);
+  useEffect(() => {
+    if (!active || !router.isReady) return;
+    const selected = new URLSearchParams(router.asPath.split("?")[1] || "").get("workspace");
+    if (WORKSPACES.some(([id]) => id === selected)) setWorkspace(selected);
+  }, [active, router.isReady, router.asPath]);
   const [period, setPeriod] = useState(getDefaultIXITransactAccountingPeriod());
   const [access, setAccess] = useState(null);
   const [projectionPayload, setProjectionPayload] = useState(null);
@@ -173,6 +183,8 @@ export default function IXITransactDashboardApp() {
   );
 
   useEffect(() => {
+    if (loadedPeriod.current !== period) setProjectionPayload(null);
+    loadedPeriod.current = period;
     const controller = new AbortController();
 
     async function load() {
@@ -180,7 +192,8 @@ export default function IXITransactDashboardApp() {
       setError(null);
 
       try {
-        const accessPayload = await loadIXIFinancialAccessContext({ signal: controller.signal });
+        const accessPayload = await readAccess({ signal: controller.signal });
+        if (controller.signal.aborted) return;
         setAccess(accessPayload);
 
         const defaults = accessPayload?.data?.defaults || {};
@@ -191,12 +204,12 @@ export default function IXITransactDashboardApp() {
           accountingPeriod: period
         });
 
-        const dashboardPayload = await loadIXITransactDashboard({
+        const dashboardPayload = await readDashboard({
           query,
           signal: controller.signal
         });
 
-        setProjectionPayload(dashboardPayload);
+        if (!controller.signal.aborted) setProjectionPayload(dashboardPayload);
       } catch (loadError) {
         if (loadError?.name !== "AbortError") {
           setError(loadError);
@@ -208,7 +221,12 @@ export default function IXITransactDashboardApp() {
 
     load();
     return () => controller.abort();
-  }, [period, refreshKey]);
+  }, [active, period, refreshKey, readAccess, readDashboard]);
+
+  function refresh() {
+    runtime?.invalidateFinancial();
+    setRefreshKey(value => value + 1);
+  }
 
   const accessData = access?.data || {};
   const actor = accessData.actor || {};
@@ -231,11 +249,11 @@ export default function IXITransactDashboardApp() {
         period={period}
         currency={projection.currency || "USD"}
         refreshKey={refreshKey}
-        onCommitted={() => setRefreshKey(value => value + 1)}
+        onCommitted={refresh}
       />
     );
   } else {
-    body = <IXITransactAccountingReports reports={projection.reports} currency={projection.currency} period={period} onOpenRecord={record => window.location.assign(`/transact?passport=${encodeURIComponent(projection.scope.entityPassportId || "")}&record=${encodeURIComponent(record.document.financialDocumentId)}`)} />;
+    body = <IXITransactAccountingReports reports={projection.reports} currency={projection.currency} period={period} onOpenRecord={record => router.push(`/transact?passport=${encodeURIComponent(projection.scope.entityPassportId || "")}&record=${encodeURIComponent(record.document.financialDocumentId)}`)} />;
   }
 
   return (
@@ -246,6 +264,8 @@ export default function IXITransactDashboardApp() {
           <strong>TRAN$ACT</strong>
           <small>FINANCIAL OPERATING SYSTEM</small>
         </div>
+
+        <Link href="/transact" className="return-link">← RETURN TO TRAN$ACT</Link>
 
         <nav>
           {WORKSPACES.map(([id, label]) => (
@@ -283,7 +303,7 @@ export default function IXITransactDashboardApp() {
                 onChange={event => setPeriod(event.target.value)}
               />
             </label>
-            <button type="button" onClick={() => setRefreshKey(value => value + 1)}>
+            <button type="button" onClick={refresh}>
               REFRESH
             </button>
           </div>
@@ -298,7 +318,7 @@ export default function IXITransactDashboardApp() {
           <div>
             <span className={projectionPayload ? "dot green" : "dot"} />
             <b>FINANCIAL</b>
-            <small>{projectionPayload ? "PROJECTION LIVE" : "NO PROJECTION"}</small>
+            <small>{loading ? "REFRESHING" : error ? "REFRESH FAILED" : projectionPayload ? "PROJECTION LIVE" : "NO PROJECTION"}</small>
           </div>
           <div>
             <b>ENTITY</b>
@@ -318,14 +338,13 @@ export default function IXITransactDashboardApp() {
           </div>
         ) : null}
 
-        <section className={loading ? "content loading" : "content"}>
+        <section aria-busy={loading} className={loading && !projectionPayload ? "content loading" : "content"}>
           {body}
         </section>
       </main>
 
       <style jsx>{`
-        :global(html), :global(body), :global(#__next) { min-height: 100%; background: #070808; }
-        :global(body) { margin: 0; }
+        .return-link { color: #ffc400; text-decoration: none; font-size: 12px; font-weight: 800; padding: 12px 8px; border: 1px solid #55471c; border-radius: 6px; }
         .transact-desktop { min-height: 100vh; display: grid; grid-template-columns: 230px minmax(0, 1fr); background: #070808; color: #f3f5f6; font-family: Inter, Arial, sans-serif; }
         .sidebar { position: sticky; top: 0; height: 100vh; box-sizing: border-box; padding: 24px 16px; border-right: 1px solid rgba(255,255,255,.08); background: linear-gradient(180deg,#0d0f0f,#080909); display: flex; flex-direction: column; gap: 24px; }
         .brand { display: grid; gap: 2px; padding: 0 8px 18px; border-bottom: 1px solid rgba(255,255,255,.07); }

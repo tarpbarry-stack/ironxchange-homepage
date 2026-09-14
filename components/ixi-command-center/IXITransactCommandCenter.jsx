@@ -9,6 +9,8 @@ import { createIXITransactContext } from "../ixi-aos/transact/IXITransactContext
 import { formatIXIAccountingMoney as formatIXIMoney } from "../ixi-aos/transact/IXIMoney";
 import { useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
+import Link from "next/link";
+import { useRouter } from "next/router";
 
 import { loadIXIMosEnvironment } from "../../lib/mos/loadIXIMosEnvironment";
 import { hydrateIXIListingMedia } from "../../lib/listings/hydrateIXIListingMedia";
@@ -353,13 +355,16 @@ function WorkspaceHeader({ eyebrow, title, detail, count, actionLabel = "OPEN LE
       <div><span>{eyebrow}</span><h2>{title}</h2><p>{detail}</p></div>
       <div className={styles.workspaceHeaderActions}>
         {count !== undefined ? <b>{count} RETURNED</b> : null}
-        <a href={href}>{actionLabel}</a>
+        <Link href={href}>{actionLabel}</Link>
       </div>
     </div>
   );
 }
 
-export default function IXITransactCommandCenter() {
+export default function IXITransactCommandCenter({ runtime, active = true }) {
+  const router = useRouter();
+  const readAccess = runtime?.loadAccess || loadIXIFinancialAccessContext;
+  const readDashboard = runtime?.loadDashboard || loadIXITransactDashboard;
   const [environment, setEnvironment] = useState(null);
   const [access, setAccess] = useState(null);
   const [projectionPayload, setProjectionPayload] = useState(null);
@@ -378,7 +383,9 @@ export default function IXITransactCommandCenter() {
   const [workingTabs, setWorkingTabs] = useState([]);
   const [activeTabId, setActiveTabId] = useState("");
   const [closingTab, setClosingTab] = useState(null);
-  const deepLinkOpened = useRef(false);
+  const deepLinkOpened = useRef(null);
+  const loadedPassport = useRef("");
+  const financialQueryKey = useRef("");
   const [activeModuleId, setActiveModuleId] = useState("");
   const [selectedDirectoryId, setSelectedDirectoryId] = useState("");
   const [passportRefreshKey, setPassportRefreshKey] = useState(0);
@@ -390,6 +397,7 @@ export default function IXITransactCommandCenter() {
   const [error, setError] = useState("");
   const [financialError, setFinancialError] = useState("");
   const [passportRecords, setPassportRecords] = useState([]);
+  const [passportRecordsReadyFor, setPassportRecordsReadyFor] = useState("");
   const [passportRecordsLoading, setPassportRecordsLoading] = useState(false);
   const [passportRecordsError, setPassportRecordsError] = useState("");
   const contextHydrationStarted = useRef(false);
@@ -403,10 +411,10 @@ export default function IXITransactCommandCenter() {
       try {
         let accessPayload;
         try {
-          accessPayload = await loadIXIFinancialAccessContext({ signal: controller.signal });
+          accessPayload = await readAccess({ signal: controller.signal });
         } catch (accessError) {
-          if (accessError?.status !== 401 || controller.signal.aborted) throw accessError;
-          accessPayload = await loadIXIFinancialAccessContext({ signal: controller.signal });
+          if (runtime || accessError?.status !== 401 || controller.signal.aborted) throw accessError;
+          accessPayload = await readAccess({ signal: controller.signal });
         }
         if (controller.signal.aborted) return;
 
@@ -433,11 +441,10 @@ export default function IXITransactCommandCenter() {
     }
     load();
     return () => controller.abort();
-  }, []);
+  }, [readAccess, runtime]);
 
   useEffect(() => {
-    if (!access || contextHydrationStarted.current || environment?.hydration?.canonicalObjects !== "deferred" && refreshKey === 0) return undefined;
-    if (financialLoading || (!projectionPayload && !financialError)) return undefined;
+    if (!access || contextHydrationStarted.current) return undefined;
 
     const controller = new AbortController();
     contextHydrationStarted.current = true;
@@ -461,8 +468,8 @@ export default function IXITransactCommandCenter() {
       }
     }
     loadOperatingContext();
-    return () => controller.abort();
-  }, [access, environment?.hydration?.canonicalObjects, financialError, financialLoading, projectionPayload, refreshKey]);
+    return () => { controller.abort(); contextHydrationStarted.current = false; };
+  }, [access, refreshKey]);
 
   const accessData = access?.data || {};
   const entityPassportId = clean(accessData.defaults?.entityPassportId || accessData.entities?.[0]?.passportId || environment?.entity?.passportId);
@@ -496,6 +503,7 @@ export default function IXITransactCommandCenter() {
     relationships
   ), [contexts, relationships, selectedContext]);
   useEffect(() => {
+    if (!active) return undefined;
     const passportId = clean(selectedContext?.passportId);
     if (!passportId || !access) {
       setPassportRecords([]);
@@ -504,13 +512,14 @@ export default function IXITransactCommandCenter() {
     }
 
     const controller = new AbortController();
-    setPassportRecords([]);
+    if (loadedPassport.current !== passportId) { setPassportRecords([]); setPassportRecordsReadyFor(""); }
+    loadedPassport.current = passportId;
     setPassportRecordsLoading(true);
     setPassportRecordsError("");
 
     loadIXIAosPassportFinancialDocuments({ passportId, signal: controller.signal })
       .then(records => {
-        if (!controller.signal.aborted) setPassportRecords(records);
+        if (!controller.signal.aborted) { setPassportRecords(records); setPassportRecordsReadyFor(passportId); }
       })
       .catch(loadError => {
         if (!controller.signal.aborted && loadError?.name !== "AbortError") {
@@ -522,7 +531,7 @@ export default function IXITransactCommandCenter() {
       });
 
     return () => controller.abort();
-  }, [access, passportRefreshKey, selectedContext?.id, selectedContext?.passportId]);
+  }, [access, active, passportRefreshKey, selectedContext?.id, selectedContext?.passportId]);
 
   useEffect(() => {
     if (!selectedContext || !access) return undefined;
@@ -532,13 +541,17 @@ export default function IXITransactCommandCenter() {
       setFinancialError("");
       return undefined;
     }
+    const dashboardQuery = buildIXITransactDashboardQuery({ ...financialScope, accountingPeriod: period });
+    const queryKey = JSON.stringify(dashboardQuery);
+    if (financialQueryKey.current !== queryKey) setProjectionPayload(null);
+    financialQueryKey.current = queryKey;
     const controller = new AbortController();
     async function loadFinancial() {
       setFinancialLoading(true);
       setFinancialError("");
       try {
-        const result = await loadIXITransactDashboard({
-          query: buildIXITransactDashboardQuery({ ...financialScope, accountingPeriod: period }),
+        const result = await readDashboard({
+          query: dashboardQuery,
           signal: controller.signal
         });
         if (!controller.signal.aborted) setProjectionPayload(result);
@@ -553,7 +566,7 @@ export default function IXITransactCommandCenter() {
     }
     loadFinancial();
     return () => controller.abort();
-  }, [access, entityPassportId, period, refreshKey, selectedContext]);
+  }, [access, active, entityPassportId, period, refreshKey, selectedContext, readDashboard]);
 
   const projection = useMemo(() => projectionPayload ? normalizeIXITransactDashboardProjection(projectionPayload) : null, [projectionPayload]);
   const currency = projection?.currency || "USD";
@@ -621,6 +634,7 @@ export default function IXITransactCommandCenter() {
   }
 
   function refreshAuthoritativeContext() {
+    runtime?.invalidateFinancial();
     contextHydrationStarted.current = false;
     setRefreshKey(value => value + 1);
     setPassportRefreshKey(value => value + 1);
@@ -690,6 +704,7 @@ export default function IXITransactCommandCenter() {
   }
 
   async function worksheetSaved(id) {
+    runtime?.invalidateFinancial();
     const savedTab = workingTabs.find(tab => tab.id === id);
     setWorkingTabs(tabs => tabs.map(tab => tab.id === id ? { ...tab, dirty: false } : tab));
     setPassportRefreshKey(value => value + 1);
@@ -712,27 +727,33 @@ export default function IXITransactCommandCenter() {
       const link = event.target.closest?.("a[href]");
       if (!link || link.target === "_blank" || event.ctrlKey || event.metaKey || event.shiftKey || link.hasAttribute("download")) return;
       const url = new URL(link.href, window.location.href);
-      if (url.pathname === "/transact" && url.origin === window.location.origin) return;
+      if (["/transact", "/transact/ledger"].includes(url.pathname) && url.origin === window.location.origin) return;
       if (!window.confirm("There are unfinished worksheet edits. Leave TRAN$ACT and discard those edits? Saved transactions will remain.")) { event.preventDefault(); event.stopPropagation(); }
     };
+    router.beforePopState(({ as }) => {
+      const path = as.split("?")[0].split("#")[0];
+      const allowed = ["/transact", "/transact/ledger"].includes(path) || window.confirm("There are unfinished worksheet edits. Leave TRAN$ACT and discard those edits? Saved transactions will remain.");
+      if (!allowed) router.replace(router.asPath, undefined, { scroll: false });
+      return allowed;
+    });
     window.addEventListener("beforeunload", protect);
     document.addEventListener("click", protectLink, true);
-    return () => { window.removeEventListener("beforeunload", protect); document.removeEventListener("click", protectLink, true); };
-  }, [workingTabs]);
+    return () => { router.beforePopState(() => true); window.removeEventListener("beforeunload", protect); document.removeEventListener("click", protectLink, true); };
+  }, [workingTabs, router]);
 
   useEffect(() => {
-    if (deepLinkOpened.current || !contexts.length || contextLoading) return;
-    const params = new URLSearchParams(window.location.search);
+    if (!active || !router.isReady || deepLinkOpened.current === router.asPath || !contexts.length || contextLoading) return;
+    const params = new URLSearchParams(router.asPath.split("?")[1] || "");
     const passport = params.get("passport");
-    if (!passport) { deepLinkOpened.current = true; return; }
+    if (!passport) { deepLinkOpened.current = router.asPath; return; }
     const context = contexts.find(item => item.passportId === passport);
     if (!context) return;
     if (selectedContext?.id !== context.id) { selectContext(context); return; }
     if (passportRecordsLoading) return;
-    deepLinkOpened.current = true;
+    deepLinkOpened.current = router.asPath;
     const id = params.get("record");
     if (id) openTransactionRecord(normalizeIXITransactPassportRecords(passportRecords).find(item => item.id === id) || { title: "SHARED TRANSACTION", document: { financialDocumentId: id } });
-  }, [contexts, contextLoading, selectedContext, passportRecordsLoading, passportRecords]);
+  }, [active, router.isReady, router.asPath, contexts, contextLoading, selectedContext, passportRecordsLoading, passportRecords]);
 
   const normalizedPassportRecords = useMemo(
     () => normalizeIXITransactPassportRecords(passportRecords),
@@ -783,13 +804,13 @@ export default function IXITransactCommandCenter() {
         <aside className={styles.todaySide}>
           <section className={styles.focusCard}>
             <span className={styles.miniLabel}>CURRENT DECISION</span>
-            {selectedQueueItem ? <><StatusBadge value={selectedQueueItem.band} /><h3>{selectedQueueItem.title}</h3><p>{selectedQueueItem.detail}</p><button type="button" className={styles.rowAction} onClick={() => selectedQueueItem.raw ? openTransactionRecord(selectedQueueItem.raw) : window.location.assign(selectedQueueItem.href)}>OPEN SOURCE RECORD →</button></> : <><h3>No selected exception</h3><p>When work is returned, select it to see the controlling source and next authorized action.</p></>}
+            {selectedQueueItem ? <><StatusBadge value={selectedQueueItem.band} /><h3>{selectedQueueItem.title}</h3><p>{selectedQueueItem.detail}</p><button type="button" className={styles.rowAction} onClick={() => selectedQueueItem.raw ? openTransactionRecord(selectedQueueItem.raw) : router.push(selectedQueueItem.href)}>OPEN SOURCE RECORD →</button></> : <><h3>No selected exception</h3><p>When work is returned, select it to see the controlling source and next authorized action.</p></>}
           </section>
           <section className={styles.closeCard}>
             <div><span className={styles.miniLabel}>PERIOD CONTROL</span><StatusBadge value={projection?.executive?.closeReadiness || "NOT CERTIFIED"} /></div>
             <h3>{period}</h3>
             <p>Queue completion never substitutes for source coverage, reconciliation evidence, approvals, and governed close.</p>
-            <a href="/transact/ledger?workspace=gl">OPEN CLOSE WORKSPACE <span>→</span></a>
+            <Link href="/transact/ledger?workspace=gl">OPEN CLOSE WORKSPACE <span>→</span></Link>
           </section>
         </aside>
       </div>
@@ -872,7 +893,7 @@ export default function IXITransactCommandCenter() {
   return (
     <div className={styles.shell}>
       <header className={styles.topbar}>
-        <a className={styles.brand} href="/transact" aria-label="TRAN$ACT home"><span className={styles.mark}>IXI</span><span className={styles.brandCopy}><strong>TRAN$ACT</strong><small>FINANCIAL OPERATING SYSTEM</small></span></a>
+        <Link className={styles.brand} href="/transact" aria-label="TRAN$ACT home"><span className={styles.mark}>IXI</span><span className={styles.brandCopy}><strong>TRAN$ACT</strong><small>FINANCIAL OPERATING SYSTEM</small></span></Link>
         <div className={styles.entityScope}>
           {environment?.entity?.logoUrl ? <img className={styles.entityLogo} src={environment.entity.logoUrl} alt={`${environment.entity.displayName || "Entity"} logo`} /> : null}
           <span>ENTITY</span><strong>{environment?.entity?.displayName || "AUTHENTICATED ENTITY"}</strong>
@@ -918,7 +939,7 @@ export default function IXITransactCommandCenter() {
               ))}
             </div>
           </section>
-          <div className={styles.navFooter}><span>BOUNDARY</span><p>AOS describes operating context. IXI Financial owns accounting truth.</p><a href="/transact/ledger">LEDGER CONTROL →</a></div>
+          <div className={styles.navFooter}><span>BOUNDARY</span><p>AOS describes operating context. IXI Financial owns accounting truth.</p><Link href="/transact/ledger">LEDGER CONTROL →</Link></div>
         </aside>
 
         <main className={styles.main}>
@@ -939,7 +960,7 @@ export default function IXITransactCommandCenter() {
             <IXITransactWorkingTabs tabs={workingTabs} activeId={activeTabId} onSelect={activateTab} onHistory={returnToObjectHistory} onClose={closeTab} />
             <div id="transact-history-panel" role="tabpanel" aria-labelledby="transact-tab-history" hidden={Boolean(activeTabId)}>
               <div hidden={activeWorkspace !== "object-history"}><IXITransactMachineHistory key={selectedContext?.id} context={selectedContext} entity={environment?.entity}
-                records={passportRecords} loading={passportRecordsLoading} error={passportRecordsError} currency={currency}
+                records={passportRecords} loading={passportRecordsReadyFor !== selectedContext?.passportId} error={passportRecordsError} currency={currency}
                 onOpenRecord={openTransactionRecord} onMarkPaid={openPaymentRecord} onRetry={() => setPassportRefreshKey(value => value + 1)} /></div>
               {renderWorkspace()}
             </div>
