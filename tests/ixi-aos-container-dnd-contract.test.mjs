@@ -4,6 +4,7 @@ import test from "node:test";
 
 import {
   createAosMembershipRelationship,
+  getAosMembershipRelationships,
   getInvalidAosSystemIndexMemberships,
   isExplicitAosSystemIndexObject,
   removeAosRailProjectionMemberships
@@ -461,6 +462,69 @@ test("System Index reconciliation removes only the peer-index edge and projectio
       "relationship_person",
       "relationship_machine"
     ]
+  );
+});
+
+test("targeted cleanup selects only requested active members of one canonical owner", () => {
+  const objectIds = [
+    "object_locations",
+    "object_ripper",
+    "object_kanyon",
+    "object_yard",
+    "object_equipment"
+  ];
+  const admission = {
+    objectsById: new Map(objectIds.map(objectId => [objectId, {
+      objectId,
+      passportId: `passport_${objectId}`
+    }])),
+    resolveObjectId(reference) {
+      const objectId = String(reference || "").trim();
+      return this.objectsById.has(objectId) ? objectId : "";
+    }
+  };
+  const relationship = ({ relationshipId, sourceObjectId, targetObjectId }) => ({
+    relationshipId,
+    sourceObjectId,
+    sourcePassportId: `passport_${sourceObjectId}`,
+    targetObjectId,
+    targetPassportId: `passport_${targetObjectId}`,
+    behaviorId: "aos.rail-membership.v1",
+    status: "active"
+  });
+  const relationships = [
+    relationship({
+      relationshipId: "relationship-ripper-locations",
+      sourceObjectId: "object_ripper",
+      targetObjectId: "object_locations"
+    }),
+    relationship({
+      relationshipId: "relationship-kanyon-locations",
+      sourceObjectId: "object_kanyon",
+      targetObjectId: "object_locations"
+    }),
+    relationship({
+      relationshipId: "relationship-yard-locations",
+      sourceObjectId: "object_yard",
+      targetObjectId: "object_locations"
+    }),
+    relationship({
+      relationshipId: "relationship-ripper-equipment",
+      sourceObjectId: "object_ripper",
+      targetObjectId: "object_equipment"
+    })
+  ];
+
+  const selected = getAosMembershipRelationships({
+    relationships,
+    parentObjectId: "object_locations",
+    memberObjectIds: ["object_ripper", "object_kanyon"],
+    admission
+  });
+
+  assert.deepEqual(
+    selected.map(item => item.relationshipId),
+    ["relationship-ripper-locations", "relationship-kanyon-locations"]
   );
 });
 
