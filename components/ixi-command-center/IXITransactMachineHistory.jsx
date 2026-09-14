@@ -357,7 +357,7 @@ export default function IXITransactMachineHistory({
               <thead>
                 <tr>
                   <th>
-                    <input
+                    <label className={styles.rowSelect}><input
                       type="checkbox"
                       aria-label="Select all filtered transactions"
                       checked={allSelected}
@@ -372,7 +372,7 @@ export default function IXITransactMachineHistory({
                           return next;
                         })
                       }
-                    />
+                    /></label>
                   </th>
                   <th>Date / Number</th>
                   <th>Party</th>
@@ -393,12 +393,12 @@ export default function IXITransactMachineHistory({
                 {paged.map((row) => (
                   <tr key={row.id} data-review={row.review}>
                     <td>
-                      <input
+                      <label className={styles.rowSelect}><input
                         type="checkbox"
                         aria-label={`Select ${transactionDisplayTitle(row.document, row.title)}`}
                         checked={selected.has(row.id)}
                         onChange={() => toggle(row.id)}
-                      />
+                      /></label>
                     </td>
                     <td>
                       <span>{row.date || "Date missing"}</span>
