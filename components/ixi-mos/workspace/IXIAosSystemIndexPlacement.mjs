@@ -126,8 +126,43 @@ export function pinSystemIndexToBoard({
   };
 }
 
+export function getNestedRootSystemIndexObjectIds({
+  objects = [],
+  placements = {},
+  resolveObjectId = value => clean(value)
+} = {}) {
+  const rootSystemIndexIds = new Set(
+    (Array.isArray(objects) ? objects : [])
+      .filter(object => {
+        const metadata =
+          object?.metadata && typeof object.metadata === "object"
+            ? object.metadata
+            : {};
+
+        return (
+          metadata.rootContainer === true ||
+          clean(metadata.hierarchyRole).toLowerCase() === "index"
+        );
+      })
+      .map(object => resolveObjectId(object?.objectId))
+      .map(clean)
+      .filter(Boolean)
+  );
+
+  if (!rootSystemIndexIds.size) return [];
+
+  return uniqueIds(
+    Object.entries(clonePlacements(placements))
+      .filter(([surfaceId]) => surfaceId.startsWith("container:"))
+      .flatMap(([, objectIds]) =>
+        objectIds.filter(objectId => rootSystemIndexIds.has(objectId))
+      )
+  );
+}
+
 export default {
   excludePeerSystemIndexMembers,
   reconcilePeerSystemIndexesToBoard,
-  pinSystemIndexToBoard
+  pinSystemIndexToBoard,
+  getNestedRootSystemIndexObjectIds
 };
