@@ -151,6 +151,7 @@ export default function IXITransactApp({
   onModuleOrderChange = null,
   workspaceEmbedded = false,
   recordHeaderEmbedded = false,
+  recordPartyLabel = "",
 }) {
   const dialogRef = useRef(null);
   const [paymentsOpen, setPaymentsOpen] = useState(false);
@@ -965,6 +966,7 @@ export default function IXITransactApp({
   if (moduleId === "bill")
     body = (
       <IXIBillStandaloneApp
+        recordHeaderEmbedded={recordHeaderEmbedded}
         context={context}
         object={object}
         initialRecords={billRecords}
@@ -993,6 +995,8 @@ export default function IXITransactApp({
   else if (moduleId === "expense")
     body = (
       <IXIExpenseApp
+        recordHeaderEmbedded={recordHeaderEmbedded}
+        recordPartyLabel={recordPartyLabel}
         context={context}
         object={object}
         workOrder={workOrderSnapshot}
@@ -1090,6 +1094,7 @@ export default function IXITransactApp({
   else if (moduleId === "asset-acquisition")
     body = (
       <IXIAssetAcquisitionApp
+        recordHeaderEmbedded={recordHeaderEmbedded}
         context={context}
         object={object}
         initialRecord={acquisitionSnapshot}
@@ -1337,6 +1342,7 @@ export default function IXITransactApp({
   else if (moduleId === "sales-order" || moduleId === "invoice")
     body = (
       <IXIEquipmentSaleApp
+        recordHeaderEmbedded={recordHeaderEmbedded}
         key={`${activeSalesStageId}:${salesRoute?.dealId || selectedSalesDeal?.dealId || "new"}:${salesRoute?.documentId || ""}`}
         context={context}
         object={object}

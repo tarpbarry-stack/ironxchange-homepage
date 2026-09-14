@@ -139,7 +139,8 @@ export default function IXIBillApp({
   language = "en",
   onLanguageChange = null,
   onBack = null,
-  onRecordChange = null
+  onRecordChange = null,
+  recordHeaderEmbedded = false
 }) {
   const [serverActions, setServerActions] = useState({});
   const authority = { ...suppliedAuthority, serverActions };
@@ -276,7 +277,7 @@ export default function IXIBillApp({
   }
 
   if (mode === "record" && selected) {
-    return <IXIBillCard record={selected} context={context} authority={authority} policy={policy} language={language} onLanguageChange={onLanguageChange} onAction={recordAction} busy={busy} error={error} onBack={() => { setMode("queue"); setSelectedId(""); setError(""); }} />;
+    return <IXIBillCard recordHeaderEmbedded={recordHeaderEmbedded} record={selected} context={context} authority={authority} policy={policy} language={language} onLanguageChange={onLanguageChange} onAction={recordAction} busy={busy} error={error} onBack={() => { setMode("queue"); setSelectedId(""); setError(""); }} />;
   }
 
   return (
