@@ -6,7 +6,7 @@ import {
   transactionLink,
 } from "./IXITransactExportModel.mjs";
 import { moneyLabel } from "./IXITransactMachineLedger.mjs";
-import styles from "./IXITransactWorkspace.module.css";
+import styles from "./IXITransactLegacyWorkspace.module.css";
 
 export default function IXITransactDocumentActions({
   rows = [],
@@ -16,7 +16,6 @@ export default function IXITransactDocumentActions({
   entity = {},
   ledger,
   single = false,
-  compact = false,
   disabled = false,
 }) {
   const [scope, setScope] = useState("view");
@@ -200,11 +199,8 @@ export default function IXITransactDocumentActions({
     );
   }
 
-  const Container = compact ? "details" : "div";
   return (
-    <Container className={compact ? styles.exportPopover : styles.documentActions} data-transact-read-only-controls>
-      {compact ? <summary>Export</summary> : null}
-      <div className={compact ? styles.exportBody : undefined}>
+    <div className={styles.documentActions} data-transact-read-only-controls>
       <div className={styles.actions}>
         {!single ? (
           <label>
@@ -358,7 +354,6 @@ export default function IXITransactDocumentActions({
           </div>
         </dialog>
       ) : null}
-      </div>
-    </Container>
+    </div>
   );
 }

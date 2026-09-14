@@ -150,6 +150,7 @@ export default function IXITransactApp({
   moduleOrder = null,
   onModuleOrderChange = null,
   workspaceEmbedded = false,
+  recordHeaderEmbedded = false,
 }) {
   const dialogRef = useRef(null);
   const [paymentsOpen, setPaymentsOpen] = useState(false);
@@ -1946,7 +1947,7 @@ export default function IXITransactApp({
           data-ixi-transact-presentation={workspacePresentation ? "worksheet" : "card"}
           className={`ixi-transact-app ixi-transact-v13 board-color-none board-outline-1 ${active ? "module-open" : "home-open"}`}
         >
-          <header className="tx-header">
+          {!recordHeaderEmbedded ? <header className="tx-header">
             <div className="tx-brand">
               <span>{t("IXI TRAN$ACT")}</span>
               {!active ? (
@@ -2001,7 +2002,7 @@ export default function IXITransactApp({
                 ×
               </button>
             </div>
-          </header>
+          </header> : null}
           <main
             className={`tx-body ${moduleId === "freight" ? "tx-body-edge-to-edge" : "tx-body-safe-area"}`}
             data-ixi-transact-module={moduleId || "home"}
@@ -2009,7 +2010,7 @@ export default function IXITransactApp({
             {paymentsOpen ? <IXIPaymentsPanel context={context} object={object}
               sourceIds={clean(selectedFinancialDocumentId) && ["bill", "expense"].includes(moduleId) ? [clean(selectedFinancialDocumentId)] : null}
               language={locale.startsWith("es") ? "es" : "en"} onChanged={onFinancialRecordsChange} onClose={() => setPaymentsOpen(false)} /> : <>
-              <button type="button" className="tx-payments-access" onClick={() => setPaymentsOpen(true)}>{locale.startsWith("es") ? "PAGOS · MARCAR PAGADO" : "PAYMENTS · MARK PAID"}</button>
+              {!recordHeaderEmbedded ? <button type="button" className="tx-payments-access" onClick={() => setPaymentsOpen(true)}>{locale.startsWith("es") ? "PAGOS · MARCAR PAGADO" : "PAYMENTS · MARK PAID"}</button> : null}
               {body}
             </>}
           </main>

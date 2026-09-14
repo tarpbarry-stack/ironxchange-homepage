@@ -77,17 +77,17 @@ test("Object console is History-first and reuses the governed TRAN$ACT app bus",
   assert.match(source, /className=\{styles\.objectDirectorySelect\}[\s\S]*aria-label="Object directory"/u);
   assert.doesNotMatch(source, /selectedDirectory\?\.label \|\| "AOS OBJECTS"/u);
   assert.doesNotMatch(source, /<span>INDEX<\/span>/u);
-  assert.match(source, /<b>SN<\/b><span>\{item\.serialNumber \|\| "NOT RECORDED"\}<\/span>/u);
-  assert.match(source, /<b>ID<\/b><span>\{item\.stockNumber \|\| item\.assetId \|\| item\.passportId \|\| "NOT RECORDED"\}<\/span>/u);
-  assert.match(source, /function ContextIdentityFields\(\{ context, compact = false \}\)[\s\S]*context\?\.kind !== "company"/u);
-  assert.match(source, /includeObjectIdentity \? <>[\s\S]*SERIAL NUMBER[\s\S]*context\.serialNumber[\s\S]*STOCK NUMBER[\s\S]*context\.stockNumber[\s\S]*<\/> : null/u);
-  assert.match(source, /PASSPORT NUMBER[\s\S]*context\.passportId/u);
-  assert.match(source, /includeObjectIdentity \? <div><dt>OBJECT ID<\/dt><dd>\{context\.sourceId/u);
-  assert.match(source, /className=\{styles\.headerIdentity\}><ContextIdentityFields context=\{selectedContext\} compact \/>/u);
+  // Identity lives in the selected-object card; optional fields do not create noise.
+  assert.match(source, /item\.serialNumber \? [\s\S]*<b>SN<\/b><span>\{item\.serialNumber\}/u);
+  assert.match(source, /<b>ID<\/b><span>\{item\.stockNumber \|\| item\.assetId \|\| item\.passportId/u);
+  assert.match(source, /aria-label="Selected object"/u);
+  assert.match(source, /<dt>PASSPORT<\/dt><dd>\{context\.passportId/u);
+  assert.match(source, /<details className=\{styles\.identityDetails\}>[\s\S]*OBJECT ID/u);
+  assert.doesNotMatch(source, /className=\{styles\.headerIdentity\}/u);
   assert.doesNotMatch(source, /shortIdentity/u);
   assert.match(source, /setActiveWorkspace\(context\.kind === "company" \? "today" : "object-history"\)/u);
   assert.match(source, /<IXITransactMachineHistory/u);
-  assert.match(read("components/ixi-command-center/IXITransactMachineHistory.jsx"), /<h2>TRANSACTION HISTORY<\/h2>/u);
+  assert.match(read("components/ixi-command-center/IXITransactMachineHistory.jsx"), /aria-label="Machine transaction history"/u);
   assert.match(source, /getIXITransactModules/u);
   assert.match(source, /workspaceEmbedded/u);
   assert.match(source, /dynamic\([\s\S]*import\("\.\.\/ixi-aos\/transact\/IXITransactApp"\)/u);
