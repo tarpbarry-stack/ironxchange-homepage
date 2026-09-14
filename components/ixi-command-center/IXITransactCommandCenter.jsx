@@ -961,7 +961,7 @@ export default function IXITransactCommandCenter({ runtime, active = true }) {
           <div className={styles.navFooter}><Link href="/transact/ledger">LEDGER CONTROL →</Link></div>
         </IXITransactSidePanel>
 
-        <main className={styles.main}>
+        <main className={styles.main} data-history-active={activeWorkspace === "object-history" && !activeTabId}>
           <div className={styles.pageHeader}>
             <div><span className={styles.eyebrow}>{environment?.entity?.displayName || "IXI ENTITY"} · {contextLabel(selectedContext?.kind)}</span><h1>{workspaceTitle}</h1></div>
             <div className={styles.headerActions}><button type="button" onClick={refreshAuthoritativeContext}>REFRESH</button></div>
@@ -978,8 +978,8 @@ export default function IXITransactCommandCenter({ runtime, active = true }) {
           {passportRecordsError ? <div className={styles.errorBanner} role="alert"><strong>PASSPORT RECORDS UNAVAILABLE</strong><span>{passportRecordsError}</span><small>No substitute records or financial values have been created.</small></div> : null}
           {!loading && !error && selectedContext ? <>
             {workingTabs.length ? <IXITransactWorkingTabs tabs={workingTabs} activeId={activeTabId} onSelect={activateTab} onHistory={returnToObjectHistory} onClose={closeTab} /> : null}
-            <div id="transact-history-panel" role="tabpanel" aria-label="Transaction history" aria-labelledby={workingTabs.length ? "transact-tab-history" : undefined} hidden={Boolean(activeTabId)}>
-              <div hidden={activeWorkspace !== "object-history"}><IXITransactMachineHistory key={selectedContext?.id} context={selectedContext} entity={environment?.entity}
+            <div className={styles.historyPane} id="transact-history-panel" role="tabpanel" aria-label="Transaction history" aria-labelledby={workingTabs.length ? "transact-tab-history" : undefined} hidden={Boolean(activeTabId)}>
+              <div className={styles.historyViewport} hidden={activeWorkspace !== "object-history"}><IXITransactMachineHistory key={selectedContext?.id} context={selectedContext} entity={environment?.entity}
                 savedState={historyStates.current.get(historyStateKey)} recordCache={recordCache} active={active && activeWorkspace === "object-history" && !activeTabId}
                 records={passportRecords} loading={passportRecordsReadyFor !== selectedContext?.passportId} error={passportRecordsError} currency={currency}
                 onOpenRecord={openTransactionRecord} onMarkPaid={openPaymentRecord} onRetry={() => { recordCache.invalidate(); setPassportRefreshKey(value => value + 1); }} /></div>
