@@ -194,7 +194,7 @@
 .aosAction { color: rgba(255, 255, 255, 0.72); }
 
 .desktop { min-height: calc(100vh - 106px); display: grid; grid-template-columns: 250px minmax(0, 1fr) 330px; }
-.navigation { position: sticky; top: 72px; min-width: 0; height: calc(100vh - 106px); padding: 16px 11px 12px; display: flex; flex-direction: column; overflow: hidden; border-right: 1px solid var(--line); background: #0b0e0c; }
+.navigation { position: sticky; top: 72px; min-width: 0; height: calc(100vh - 106px); padding: 16px 11px 12px; display: flex; flex-direction: column; overflow-x: hidden; overflow-y: auto; border-right: 1px solid var(--line); background: #0b0e0c; }
 .operator { margin: 0 6px 15px; padding: 2px 4px 14px; display: grid; gap: 4px; border-bottom: 1px solid var(--line); }
 .operator strong { overflow: hidden; color: rgba(255, 255, 255, 0.8); text-overflow: ellipsis; white-space: nowrap; font-size: var(--tx-type-label); }
 .operator small { font-size: var(--tx-type-meta); }
@@ -211,7 +211,7 @@
 .navigation nav button[data-active="true"] { border-color: rgba(255, 196, 0, 0.26); color: var(--gold); background: var(--gold-soft); box-shadow: inset 3px 0 0 var(--gold); }
 .navigation nav button[data-active="true"] > span { color: var(--gold); }
 
-.objectDirectory { min-height: 150px; margin: 12px 0 10px; display: flex; flex: 1 1 auto; flex-direction: column; overflow: hidden; border-top: 1px solid var(--line-strong); }
+.objectDirectory { min-height: 220px; margin: 12px 0 10px; display: flex; flex: 1 1 auto; flex-direction: column; overflow: hidden; border-top: 1px solid var(--line-strong); }
 .objectDirectory > header { min-height: 52px; padding: 9px 6px 8px; display: grid; grid-template-columns: minmax(34px, auto) minmax(0, 1fr); align-items: center; gap: 12px; }
 .objectDirectoryCount { min-width: 34px; color: var(--gold); font-size: var(--tx-type-value); font-variant-numeric: tabular-nums; line-height: 1; text-align: center; }
 .objectDirectorySelect { width: 100%; min-width: 0; height: 36px; padding: 0 30px 0 11px; border: 1px solid var(--line-strong); border-radius: 4px; color: rgba(255, 255, 255, 0.82); background: #111412; font-size: var(--tx-type-body); font-weight: 850; }
