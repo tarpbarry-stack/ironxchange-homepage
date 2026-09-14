@@ -2,6 +2,11 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import test from "node:test";
 
+import {
+  getInvalidAosSystemIndexMemberships,
+  removeAosRailProjectionMemberships
+} from "../lib/mos/IXIAosMembershipBridge.mjs";
+
 function read(relativePath) {
   return fs.readFileSync(relativePath, "utf8");
 }
@@ -279,5 +284,105 @@ test("System Index parent release ends only outgoing membership and preserves ch
   assert.match(
     card018,
     /onDetachFromParent = null[\s\S]*?<IXIAosCardHeaderControls[\s\S]*?onDetachFromParent=/
+  );
+});
+
+
+test("System Index reconciliation removes only the peer-index edge and projection", () => {
+  const objectIds = [
+    "object_locations",
+    "object_workforce",
+    "object_yard",
+    "object_person"
+  ];
+  const admission = {
+    objectsById: new Map(objectIds.map(objectId => [objectId, { objectId }])),
+    resolveObjectId(reference) {
+      const objectId = String(reference || "").trim();
+      return this.objectsById.has(objectId) ? objectId : "";
+    }
+  };
+  const membership = ({
+    relationshipId,
+    sourceObjectId,
+    targetObjectId
+  }) => ({
+    relationshipId,
+    sourceObjectId,
+    targetObjectId,
+    sourcePassportId: `passport_${sourceObjectId}`,
+    targetPassportId: `passport_${targetObjectId}`,
+    behaviorId: "aos.rail-membership.v1",
+    status: "active",
+    revision: 1
+  });
+  objectIds.forEach(objectId => {
+    admission.objectsById.get(objectId).passportId = `passport_${objectId}`;
+  });
+  const relationships = [
+    membership({
+      relationshipId: "relationship_bad",
+      sourceObjectId: "object_workforce",
+      targetObjectId: "object_locations"
+    }),
+    membership({
+      relationshipId: "relationship_yard",
+      sourceObjectId: "object_yard",
+      targetObjectId: "object_locations"
+    }),
+    membership({
+      relationshipId: "relationship_person",
+      sourceObjectId: "object_person",
+      targetObjectId: "object_workforce"
+    })
+  ];
+
+  const invalid = getInvalidAosSystemIndexMemberships({
+    relationships,
+    systemIndexObjectIds: [
+      "object_locations",
+      "object_workforce"
+    ],
+    admission
+  });
+
+  assert.deepEqual(
+    invalid.map(relationship => relationship.relationshipId),
+    ["relationship_bad"]
+  );
+
+  const nextProjections = removeAosRailProjectionMemberships({
+    railProjections: {
+      object_locations: {
+        members: [
+          { objectId: "object_workforce" },
+          { objectId: "object_yard" }
+        ]
+      },
+      object_workforce: {
+        members: [
+          { objectId: "object_person" }
+        ]
+      }
+    },
+    memberships: invalid,
+    admission
+  });
+
+  assert.deepEqual(
+    nextProjections.object_locations.members.map(member => member.objectId),
+    ["object_yard"]
+  );
+  assert.deepEqual(
+    nextProjections.object_workforce.members.map(member => member.objectId),
+    ["object_person"]
+  );
+  assert.deepEqual(
+    relationships.map(relationship => relationship.relationshipId),
+    [
+      "relationship_bad",
+      "relationship_yard",
+      "relationship_person"
+    ]
   );
 });

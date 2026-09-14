@@ -52,7 +52,9 @@ import {
   createAosRailOrderKey,
   getAosRailProjectionObjectIds,
   getAosMembershipObjectIds,
-  isAosMembershipRelationship
+  getInvalidAosSystemIndexMemberships,
+  isAosMembershipRelationship,
+  removeAosRailProjectionMemberships
 } from "../../lib/mos/IXIAosMembershipBridge.mjs";
 
 import {
@@ -374,6 +376,7 @@ const POCKET_TARGETS = [
 
   const workspaceSessionControllerRef = useRef(null);
   const containerReturnSnapshotsRef = useRef({});
+  const systemIndexReconciliationKeyRef = useRef("");
   
   const [activeDndId, setActiveDndId] = useState("");
   const {
@@ -1063,6 +1066,161 @@ useEffect(() => {
   aosRailProjections
 ]);
 
+useEffect(() => {
+  const controller = workspaceSessionControllerRef.current;
+  const systemIndexObjectIds = workspaceSystemIndexes
+    .map(index => aosWorkspaceAdmission.resolveObjectId(index?.objectId))
+    .filter(Boolean)
+    .sort();
+  const reconciliationKey = systemIndexObjectIds.join("|");
+
+  if (
+    !workspaceSessionReady ||
+    !controller ||
+    systemIndexObjectIds.length < 2 ||
+    !reconciliationKey ||
+    systemIndexReconciliationKeyRef.current === reconciliationKey
+  ) {
+    return undefined;
+  }
+
+  systemIndexReconciliationKeyRef.current = reconciliationKey;
+  let cancelled = false;
+
+  void (async () => {
+    const relationshipReadbacks = await Promise.all(
+      systemIndexObjectIds.map(objectId =>
+        fetchMosObjectRelationships(objectId, {
+          direction: "outgoing",
+          status: "active"
+        })
+      )
+    );
+    const invalidMemberships = getInvalidAosSystemIndexMemberships({
+      relationships: relationshipReadbacks.flatMap(readback =>
+        Array.isArray(readback?.relationships) ? readback.relationships : []
+      ),
+      systemIndexObjectIds,
+      admission: aosWorkspaceAdmission
+    });
+
+    if (!invalidMemberships.length || cancelled) return;
+
+    for (const relationship of invalidMemberships) {
+      const relationshipId = String(relationship?.relationshipId || "").trim();
+      const expectedRevision = Number(relationship?.revision);
+
+      if (!relationshipId || !Number.isInteger(expectedRevision)) {
+        const error = new Error(
+          "IX CORE SYSTEM INDEX RELATIONSHIP REVISION IS REQUIRED"
+        );
+        error.code = "IXI_AOS_SYSTEM_INDEX_REPAIR_REVISION_REQUIRED";
+        throw error;
+      }
+
+      await endMosRelationship({
+        relationshipId,
+        expectedRevision,
+        commandId: createMosCommandId("aos-reconcile-index-membership"),
+        reason: "aos-system-index-peer-containment-repair",
+        metadata: {
+          source: "aos-work",
+          automaticRepair: true,
+          preserveChildren: true
+        }
+      });
+    }
+
+    const releasedObjectIds = [...new Set(
+      invalidMemberships
+        .map(relationship =>
+          aosWorkspaceAdmission.resolveObjectId(
+            relationship?.sourceObjectId
+          )
+        )
+        .filter(Boolean)
+    )];
+    const verificationReadbacks = await Promise.all(
+      releasedObjectIds.map(objectId =>
+        fetchMosObjectRelationships(objectId, {
+          direction: "outgoing",
+          status: "active"
+        })
+      )
+    );
+    const remainingInvalidMemberships = getInvalidAosSystemIndexMemberships({
+      relationships: verificationReadbacks.flatMap(readback =>
+        Array.isArray(readback?.relationships) ? readback.relationships : []
+      ),
+      systemIndexObjectIds,
+      admission: aosWorkspaceAdmission
+    });
+
+    if (remainingInvalidMemberships.length) {
+      const error = new Error(
+        "IX CORE DID NOT CONFIRM SYSTEM INDEX PEER RELEASE"
+      );
+      error.code = "IXI_AOS_SYSTEM_INDEX_REPAIR_READBACK_REQUIRED";
+      throw error;
+    }
+    if (cancelled) return;
+
+    const endedRelationshipIds = new Set(
+      invalidMemberships.map(relationship =>
+        String(relationship?.relationshipId || "")
+      )
+    );
+    setAosRelationships(current => (current || []).filter(item =>
+      !endedRelationshipIds.has(
+        String(getAosRelationshipRecord(item)?.relationshipId || "")
+      )
+    ));
+    setAosRailProjections(current =>
+      removeAosRailProjectionMemberships({
+        railProjections: current,
+        memberships: invalidMemberships,
+        admission: aosWorkspaceAdmission
+      })
+    );
+
+    let nextPlacements = controller.readPlacements();
+    releasedObjectIds.forEach(objectId => {
+      nextPlacements = moveObjectToWorkspaceSurface({
+        placements: nextPlacements,
+        objectId,
+        targetSurface: "board"
+      });
+    });
+    const released = controller.persistLayout(nextPlacements, {
+      operationId: createMosCommandId("aos-reconcile-index-layout"),
+      objectIds: releasedObjectIds,
+      captureUndo: false,
+      activeSummonedContext: null
+    });
+    await released.completion;
+
+    releasedObjectIds.forEach(objectId => {
+      showAosObjectNotice({
+        objectId,
+        message: "SYSTEM INDEX RELEASED · CHILDREN PRESERVED",
+        tone: "success",
+        duration: 3200
+      });
+    });
+  })().catch(error => {
+    systemIndexReconciliationKeyRef.current = "";
+    console.error("IXI AOS SYSTEM INDEX RECONCILIATION FAILED:", error);
+  });
+
+  return () => {
+    cancelled = true;
+  };
+}, [
+  workspaceSessionReady,
+  workspaceSystemIndexes,
+  aosWorkspaceAdmission
+]);
+
   function getAosWorkspaceObjectById(
   objectId
 ) {
@@ -1458,6 +1616,13 @@ async function detachSystemIndexFromParents(container) {
         String(getAosRelationshipRecord(item)?.relationshipId || "")
       )
     ));
+    setAosRailProjections(current =>
+      removeAosRailProjectionMemberships({
+        railProjections: current,
+        memberships: parentEdges,
+        admission: aosWorkspaceAdmission
+      })
+    );
   }
 
   const nextPlacements = moveObjectToWorkspaceSurface({
