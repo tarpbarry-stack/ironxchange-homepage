@@ -345,3 +345,55 @@ test("authenticated readback routes a governed Equipment member ahead of stale L
     [MACHINE]
   );
 });
+
+test("authoritative relationship readback removes ended governed rail snapshots", () => {
+  const objects = [
+    canonicalObject({
+      objectId: LOCATIONS,
+      passportId: "IXIABC2345",
+      displayName: "LOCATIONS",
+      objectType: "system-index",
+      metadata: { systemIndexPresentation: true }
+    }),
+    canonicalObject({
+      objectId: WORKFORCE,
+      passportId: "IXIDEF2345",
+      displayName: "WORKFORCE",
+      objectType: "system-index",
+      metadata: { systemIndexPresentation: true }
+    }),
+    canonicalObject({
+      objectId: YARD,
+      passportId: "IXIKMN2345",
+      displayName: "WICHITA FALLS"
+    })
+  ];
+  const governed = objectId => ({
+    objectId,
+    behaviorId: IXI_AOS_RAIL_MEMBERSHIP_BEHAVIOR_ID
+  });
+  const relationship = ({ relationshipId, sourceObjectId }) => ({
+    relationshipId,
+    sourceObjectId,
+    targetObjectId: LOCATIONS,
+    behaviorId: IXI_AOS_RAIL_MEMBERSHIP_BEHAVIOR_ID,
+    status: "active"
+  });
+  const normalized = normalizeAosRailProjectionHierarchy({
+    aosObjects: objects,
+    relationships: [
+      relationship({ relationshipId: "relationship-yard", sourceObjectId: YARD })
+    ],
+    railProjections: {
+      [LOCATIONS]: {
+        railOwnerObjectId: LOCATIONS,
+        members: [governed(YARD), governed(WORKFORCE)]
+      }
+    }
+  });
+
+  assert.deepEqual(
+    normalized[LOCATIONS].members.map(member => member.objectId),
+    [YARD]
+  );
+});

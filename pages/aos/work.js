@@ -51,6 +51,7 @@ import {
   createAosMembershipRelationship,
   createAosRailOrderKey,
   getAosRailProjectionObjectIds,
+  getAosMembershipRelationships,
   getAosMembershipObjectIds,
   getInvalidAosSystemIndexMemberships,
   isExplicitAosSystemIndexObject,
@@ -218,6 +219,69 @@ import {
 import {
   setIXIActionNotice
 } from "../../components/ixi-object-system/IXIActionNoticeEngine";
+
+const IXI_AOS_LOCATIONS_REPAIR_2026_09_14 = Object.freeze({
+  entityId: "entity_4d78e9fb-92e4-4cc2-a8cb-1a2f19e097d0",
+  locationsObjectId: "object_1d1a2a9d-1485-47ed-b3d6-18a144affbd7",
+  ripperObjectId: "object_da02cb31-d7db-4297-a395-f2603e2f1320",
+  person: Object.freeze({
+    firstName: "kanyon",
+    lastName: "mcgahey",
+    displayName: "kanyon mcgahey"
+  })
+});
+
+function cleanRepairValue(value) {
+  return String(value ?? "").trim().toLowerCase();
+}
+
+function getRepairPersonName(object = {}) {
+  const fields = object?.fields && typeof object.fields === "object"
+    ? object.fields
+    : {};
+  const firstName = cleanRepairValue(
+    object?.firstName || fields?.firstName || object?.publicData?.firstName
+  );
+  const lastName = cleanRepairValue(
+    object?.lastName || fields?.lastName || object?.publicData?.lastName
+  );
+  const displayName = cleanRepairValue(
+    object?.displayName || object?.name || object?.label || fields?.displayName
+  );
+  return { firstName, lastName, displayName };
+}
+
+function getLocationsRepairMemberObjectIds({ entityId, admission } = {}) {
+  if (
+    String(entityId || "").trim() !==
+    IXI_AOS_LOCATIONS_REPAIR_2026_09_14.entityId
+  ) {
+    return [];
+  }
+
+  const memberIds = [IXI_AOS_LOCATIONS_REPAIR_2026_09_14.ripperObjectId];
+  const kanyonMatches = [...admission.objectsById.values()].filter(object => {
+    const person = getRepairPersonName(object);
+    return (
+      person.displayName ===
+        IXI_AOS_LOCATIONS_REPAIR_2026_09_14.person.displayName ||
+      (
+        person.firstName ===
+          IXI_AOS_LOCATIONS_REPAIR_2026_09_14.person.firstName &&
+        person.lastName ===
+          IXI_AOS_LOCATIONS_REPAIR_2026_09_14.person.lastName
+      )
+    );
+  });
+
+  if (kanyonMatches.length === 1) {
+    memberIds.push(kanyonMatches[0].objectId);
+  }
+
+  return memberIds
+    .map(reference => admission.resolveObjectId(reference))
+    .filter(Boolean);
+}
 
 export default function IXIAosWorkPage() {
   const [listings, setListings] = useState([]);
@@ -1113,13 +1177,37 @@ useEffect(() => {
 
   let invalidMemberships = [];
   try {
-    invalidMemberships = getInvalidAosSystemIndexMemberships({
+    const peerIndexMemberships = getInvalidAosSystemIndexMemberships({
       relationships: aosRelationships,
       systemIndexObjectIds,
       admission: aosWorkspaceAdmission
     });
+    const locationsRepairMemberObjectIds =
+      getLocationsRepairMemberObjectIds({
+        entityId: aosEntity?.entityId,
+        admission: aosWorkspaceAdmission
+      });
+    const locationsRepairMemberships =
+      locationsRepairMemberObjectIds.length
+        ? getAosMembershipRelationships({
+            relationships: aosRelationships,
+            parentObjectId:
+              IXI_AOS_LOCATIONS_REPAIR_2026_09_14.locationsObjectId,
+            memberObjectIds: locationsRepairMemberObjectIds,
+            admission: aosWorkspaceAdmission
+          })
+        : [];
+    const membershipsById = new Map();
+    [...peerIndexMemberships, ...locationsRepairMemberships]
+      .forEach(relationship => {
+        const relationshipId = String(
+          relationship?.relationshipId || ""
+        ).trim();
+        if (relationshipId) membershipsById.set(relationshipId, relationship);
+      });
+    invalidMemberships = [...membershipsById.values()];
   } catch (error) {
-    console.error("IXI AOS PEER SYSTEM INDEX MEMBERSHIP INSPECTION FAILED:", error);
+    console.error("IXI AOS MEMBERSHIP RECONCILIATION INSPECTION FAILED:", error);
     return undefined;
   }
 
@@ -1242,7 +1330,7 @@ useEffect(() => {
 
   void reconcileInvalidSystemIndexMemberships().catch(error => {
     invalidSystemIndexMembershipCleanupKeyRef.current = "";
-    console.error("IXI AOS PEER SYSTEM INDEX MEMBERSHIP CLEANUP FAILED:", error);
+    console.error("IXI AOS MEMBERSHIP RECONCILIATION FAILED:", error);
   });
 
   return () => {
@@ -1257,6 +1345,7 @@ useEffect(() => {
   workspaceSessionReady,
   aosWorkspaceAdmission,
   aosRelationships,
+  aosEntity?.entityId,
   workspaceSystemIndexes
 ]);
 
