@@ -396,7 +396,16 @@ return (
       "board",
 
     sourceContainerId:
-      "board"
+      "board",
+
+    metadata:
+      item?.metadata,
+
+    cardTemplateSlug:
+      item?.cardTemplateSlug,
+
+    templateId:
+      item?.templateId
   }}
 
     className={`ixi-board-sortable-card ${

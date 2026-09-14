@@ -3,7 +3,9 @@ import fs from "node:fs";
 import test from "node:test";
 
 import {
+  createAosMembershipRelationship,
   getInvalidAosSystemIndexMemberships,
+  isExplicitAosSystemIndexObject,
   removeAosRailProjectionMemberships
 } from "../lib/mos/IXIAosMembershipBridge.mjs";
 
@@ -136,7 +138,15 @@ test("ordinary containers remain composable while System Index peers cannot cont
   );
   assert.match(
     dropAcceptanceEngine,
-    /getIXIDragObjectType\(dragData\)[\s\S]*?=== "system-index"[\s\S]*?isSystemIndexObject\(target\)[\s\S]*?reason: "system-index-nesting"/
+    /isSystemIndexObject\(dragData\)[\s\S]*?isSystemIndexObject\(target\)[\s\S]*?reason: "system-index-nesting"/
+  );
+  assert.match(
+    dropAcceptanceEngine,
+    /metadata\.rootContainer === true[\s\S]*?metadata\.hierarchyRole/
+  );
+  assert.match(
+    board,
+    /dragData=\{\{[\s\S]*?metadata:[\s\S]*?item\?\.metadata/
   );
   assert.doesNotMatch(
     dropAcceptanceEngine,
@@ -299,6 +309,22 @@ test("System Index parent safety restores workspace visibility and preserves chi
     work,
     /aos-pin-root-system-indexes-board[\s\S]*?objectIds: nestedRootSystemIndexObjectIds[\s\S]*?captureUndo: false/
   );
+  assert.match(
+    work,
+    /getInvalidAosSystemIndexMemberships\(\{[\s\S]*?relationships: aosRelationships[\s\S]*?systemIndexObjectIds/
+  );
+  assert.match(
+    work,
+    /aos-end-peer-system-index-membership[\s\S]*?reason: "aos-peer-system-index-nesting-prohibited"[\s\S]*?preserveChildren: true/
+  );
+  assert.match(
+    work,
+    /fetchMosObjectRelationships\(sourceObjectId[\s\S]*?IX Core did not confirm the peer System Index release/
+  );
+  assert.match(
+    work,
+    /parentObject: targetWorkspaceObject[\s\S]*?memberObject: sourceObject/
+  );
   assert.doesNotMatch(
     work,
     /displayName[^\n]*WORKFORCE|label[^\n]*WORKFORCE/
@@ -310,11 +336,21 @@ test("System Index reconciliation removes only the peer-index edge and projectio
   const objectIds = [
     "object_locations",
     "object_workforce",
+    "object_equipment",
     "object_yard",
-    "object_person"
+    "object_person",
+    "object_machine"
   ];
   const admission = {
-    objectsById: new Map(objectIds.map(objectId => [objectId, { objectId }])),
+    objectsById: new Map(objectIds.map(objectId => [objectId, {
+      objectId,
+      metadata: objectId === "object_locations" || objectId === "object_workforce"
+        ? { rootContainer: true }
+        : {},
+      objectType: objectId === "object_equipment"
+        ? "system-index"
+        : "generic"
+    }])),
     resolveObjectId(reference) {
       const objectId = String(reference || "").trim();
       return this.objectsById.has(objectId) ? objectId : "";
@@ -339,9 +375,14 @@ test("System Index reconciliation removes only the peer-index edge and projectio
   });
   const relationships = [
     membership({
-      relationshipId: "relationship_bad",
+      relationshipId: "relationship_workforce",
       sourceObjectId: "object_workforce",
       targetObjectId: "object_locations"
+    }),
+    membership({
+      relationshipId: "relationship_equipment",
+      sourceObjectId: "object_equipment",
+      targetObjectId: "object_workforce"
     }),
     membership({
       relationshipId: "relationship_yard",
@@ -352,6 +393,11 @@ test("System Index reconciliation removes only the peer-index edge and projectio
       relationshipId: "relationship_person",
       sourceObjectId: "object_person",
       targetObjectId: "object_workforce"
+    }),
+    membership({
+      relationshipId: "relationship_machine",
+      sourceObjectId: "object_machine",
+      targetObjectId: "object_equipment"
     })
   ];
 
@@ -359,14 +405,15 @@ test("System Index reconciliation removes only the peer-index edge and projectio
     relationships,
     systemIndexObjectIds: [
       "object_locations",
-      "object_workforce"
+      "object_workforce",
+      "object_equipment"
     ],
     admission
   });
 
   assert.deepEqual(
     invalid.map(relationship => relationship.relationshipId),
-    ["relationship_bad"]
+    ["relationship_workforce", "relationship_equipment"]
   );
 
   const nextProjections = removeAosRailProjectionMemberships({
@@ -379,7 +426,13 @@ test("System Index reconciliation removes only the peer-index edge and projectio
       },
       object_workforce: {
         members: [
+          { objectId: "object_equipment" },
           { objectId: "object_person" }
+        ]
+      },
+      object_equipment: {
+        members: [
+          { objectId: "object_machine" }
         ]
       }
     },
@@ -396,11 +449,74 @@ test("System Index reconciliation removes only the peer-index edge and projectio
     ["object_person"]
   );
   assert.deepEqual(
+    nextProjections.object_equipment.members.map(member => member.objectId),
+    ["object_machine"]
+  );
+  assert.deepEqual(
     relationships.map(relationship => relationship.relationshipId),
     [
-      "relationship_bad",
+      "relationship_workforce",
+      "relationship_equipment",
       "relationship_yard",
-      "relationship_person"
+      "relationship_person",
+      "relationship_machine"
     ]
   );
+});
+
+test("legacy root metadata identifies peer System Indexes and blocks new membership writes", async () => {
+  const workforce = {
+    objectId: "object_workforce",
+    objectType: "generic",
+    metadata: { rootContainer: true }
+  };
+  const locations = {
+    objectId: "object_locations",
+    objectType: "generic",
+    metadata: { hierarchyRole: "index" }
+  };
+
+  assert.equal(isExplicitAosSystemIndexObject(workforce), true);
+  assert.equal(isExplicitAosSystemIndexObject(locations), true);
+
+  let transportCalled = false;
+  await assert.rejects(
+    createAosMembershipRelationship({
+      createRelationship: async () => {
+        transportCalled = true;
+        return {};
+      },
+      parentObjectId: locations.objectId,
+      parentPassportId: "passport_locations",
+      parentObject: locations,
+      memberObjectId: workforce.objectId,
+      memberPassportId: "passport_workforce",
+      memberObject: workforce,
+      orderKey: "000100"
+    }),
+    error => error?.code === "IXI_AOS_SYSTEM_INDEX_NESTING_PROHIBITED"
+  );
+  assert.equal(transportCalled, false);
+
+  const person = {
+    objectId: "object_person",
+    objectType: "person",
+    metadata: {}
+  };
+  const result = await createAosMembershipRelationship({
+    createRelationship: async request => {
+      transportCalled = true;
+      return request;
+    },
+    parentObjectId: workforce.objectId,
+    parentPassportId: "passport_workforce",
+    parentObject: workforce,
+    memberObjectId: person.objectId,
+    memberPassportId: "passport_person",
+    memberObject: person,
+    orderKey: "000200"
+  });
+  assert.equal(transportCalled, true);
+  assert.equal(result.sourceObjectId, person.objectId);
+  assert.equal(result.targetObjectId, workforce.objectId);
 });
