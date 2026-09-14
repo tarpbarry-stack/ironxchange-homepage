@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { accountingViewState, closeReviewItems } from "./domain/accountingViewState.mjs";
 
 import {
   closeIXITransactAccountingPeriod,
@@ -32,6 +33,7 @@ function number(value) {
 
 
 function money(value, currency = "USD") {
+  if (value === null || value === undefined || value === "") return "—";
   const resolved = Number(value);
 
   if (!Number.isFinite(resolved)) {
@@ -228,7 +230,14 @@ function JournalRegister({ journals, currency }) {
               <tr key={document.financialDocumentId}>
                 <td>
                   <strong>{document.documentNumber || "JOURNAL"}</strong>
-                  <small className="document-id">{document.financialDocumentId}</small>
+                  <details>
+                    <summary>Journal details</summary>
+                    <small className="document-id">{document.financialDocumentId}</small>
+                    <p>Source: {document.sourceDocumentNumber || document.sourceFinancialDocumentId || "Manual journal"}</p>
+                    <p>Posting rule: {document.postingRuleId || "Not recorded"}</p>
+                    <p>Posted by: {document.postedBy || document.metadata?.postedBy || "Not recorded"}</p>
+                    {safeArray(document.lines).map((line, index) => <p key={line.financialLineId || index}>{line.accountCode} · {line.accountName || line.description} · Debit {money(line.debit, currency)} · Credit {money(line.credit, currency)}</p>)}
+                  </details>
                 </td>
                 <td>{document.documentDate || document.occurredAt || "—"}</td>
                 <td>{document.description || "—"}</td>
@@ -595,6 +604,8 @@ export default function IXITransactGLWorkspace({
       setAccountsLoading(true);
       setError(null);
       setAccountsError(null);
+      setPayload(null);
+      setAccountsPayload(null);
 
       const [glResult, accountsResult] = await Promise.allSettled([
         loadIXITransactGL({ period, currency, signal: controller.signal }),
@@ -631,7 +642,8 @@ export default function IXITransactGLWorkspace({
 
   const gl = useMemo(() => normalizeGLPayload(payload), [payload]);
   const coa = useMemo(() => normalizeAccountsPayload(accountsPayload), [accountsPayload]);
-  const projection = gl.projection;
+  const view = accountingViewState({ payload, period, currency, loading, error });
+  const projection = view.ready ? gl.projection : {};
   const periodState = projection.period || {};
   const counts = projection.counts || {};
   const periodTB = projection.trialBalance || {};
@@ -640,6 +652,7 @@ export default function IXITransactGLWorkspace({
   const cumulativePnl = projection.cumulativeProfitAndLoss || {};
   const balanceSheet = projection.balanceSheet || {};
   const controls = projection.controls || {};
+  const closeReview = closeReviewItems(controls);
   const resolvedCurrency = projection.currency || clean(currency || "USD").toUpperCase();
   const periodIsClosed = periodState.closed === true;
   const periodIsValid = /^\d{4}-\d{2}$/.test(clean(period));
@@ -648,9 +661,9 @@ export default function IXITransactGLWorkspace({
     [coa.integrityErrors]
   );
   const effectiveAccountsError = accountsError || coaIntegrityError;
-  const coaReady = coa.accounts.length > 0 && !accountsLoading && !effectiveAccountsError;
+  const coaReady = view.ready && coa.accounts.length > 0 && !accountsLoading && !effectiveAccountsError;
   const closeReady = Boolean(
-    payload &&
+    view.ready &&
     periodIsValid &&
     !periodIsClosed &&
     controls.ready === true &&
@@ -758,11 +771,11 @@ export default function IXITransactGLWorkspace({
         </div>
 
         <div className="command-actions">
-          <StatusPill good={!periodIsClosed} neutral={!payload}>
-            {periodIsClosed ? "CLOSED" : "OPEN"}
+          <StatusPill good={view.ready && !periodIsClosed} neutral={!view.ready}>
+            {view.status}
           </StatusPill>
-          <StatusPill good={controls.ready === true} neutral={!payload}>
-            {controls.ready === true ? "CONTROLS READY" : "CONTROL REVIEW"}
+          <StatusPill good={controls.ready === true} neutral={!view.ready}>
+            {!view.ready ? "AWAITING CONTROLS" : controls.ready === true ? "CONTROLS READY" : "CONTROL REVIEW"}
           </StatusPill>
           <StatusPill good={coaReady} neutral={accountsLoading}>
             {accountsLoading ? "COA LOADING" : coaReady ? `${coa.accounts.length} COA ACTIVE` : "COA UNAVAILABLE"}
@@ -826,14 +839,16 @@ export default function IXITransactGLWorkspace({
           currency={resolvedCurrency}
           closed={periodIsClosed}
           accounts={coa.accounts}
-          accountsLoading={accountsLoading}
+          accountsLoading={accountsLoading || !view.ready}
           accountsError={effectiveAccountsError}
           onCancel={() => setComposerOpen(false)}
           onCommitted={handleCommitted}
         />
       ) : null}
 
-      <div className={loading ? "gl-body loading" : "gl-body"}>
+      {!view.ready ? <div className="gl-error" role="status"><strong>{view.status === "LOADING" ? `Loading ${period} accounting records…` : `Accounting records for ${period} are unavailable.`}</strong><span>Balances and posting actions appear after the selected period is verified.</span></div> : null}
+
+      {view.ready ? <div className="gl-body">
         <div className="gl-metrics">
           <Metric label="PERIOD NET INCOME" value={money(pnl.netIncome, resolvedCurrency)} detail="Current accounting period" emphasis />
           <Metric label="PERIOD DEBITS" value={money(periodTB.debits, resolvedCurrency)} detail={`${counts.journals || 0} posted journals`} />
@@ -844,13 +859,26 @@ export default function IXITransactGLWorkspace({
         </div>
 
         <div className="control-strip">
-          <div><span>PERIOD</span><strong>{periodState.status?.toUpperCase?.() || "OPEN"}</strong></div>
+          <div><span>PERIOD</span><strong>{view.status}</strong></div>
           <div><span>PERIOD TB</span><strong>{periodTB.balanced ? "BALANCED" : "OUT OF BALANCE"}</strong></div>
           <div><span>ENDING TB</span><strong>{endingTB.balanced ? "BALANCED" : "OUT OF BALANCE"}</strong></div>
           <div><span>BALANCE SHEET</span><strong>{balanceSheet.balanced ? "BALANCED" : "OUT OF BALANCE"}</strong></div>
           <div><span>POSTING EXCEPTIONS</span><strong>{controls.postingExceptions || 0}</strong></div>
           <div><span>AS-OF EXCEPTIONS</span><strong>{controls.endingPostingExceptions || 0}</strong></div>
         </div>
+
+        <section className="gl-panel reconciliation-panel" aria-label="Accounting reconciliation">
+          <header className="panel-head"><strong>ACCOUNTING RECONCILIATION</strong><b>{controls.ready === true ? "READY" : "REVIEW REQUIRED"}</b></header>
+          <div className="statement-body">
+            <p>Balanced debits and credits do not establish that every transaction has been posted.</p>
+            <p>Source-document and draft-journal counts apply to {period}. Receivables, payables and cash compare balances through this period.</p>
+            {closeReview ? <>
+              {closeReview.counts.map(item => <div className="statement-row" key={item.label}><span>{item.label}</span><b>{item.value ?? "Not returned"}</b></div>)}
+              {closeReview.balances.map(item => <div className="statement-row" key={item.label}><span>{item.label} difference from ledger</span><b>{money(item.difference, resolvedCurrency)} · {item.balanced === true ? "MATCHED" : item.balanced === false ? "REVIEW" : "NOT RETURNED"}</b></div>)}
+              {closeReview.exceptions.length ? <details><summary>Review {closeReview.exceptions.length} exceptions</summary><ul>{closeReview.exceptions.map((item, index) => <li key={`${item.code}-${item.financialDocumentId || item.accountId || index}`}><strong>{clean(item.code).replaceAll("_", " ")}</strong>{item.documentType ? ` · ${item.documentType.replaceAll("-", " ")}` : ""}{item.amount != null ? ` · ${money(item.amount, resolvedCurrency)}` : ""}<small className="document-id">{item.financialDocumentId || item.accountId || item.accountCode}</small></li>)}</ul></details> : null}
+            </> : <p>Source reconciliation evidence was not returned. Posting completeness has not been verified.</p>}
+          </div>
+        </section>
 
         <JournalRegister journals={projection.journal} currency={resolvedCurrency} />
 
@@ -884,7 +912,7 @@ export default function IXITransactGLWorkspace({
             </div>
           </section>
         </div>
-      </div>
+      </div> : null}
 
       <style jsx>{`
         .gl-workspace { display: grid; gap: 14px; color: #f2f4f5; }
