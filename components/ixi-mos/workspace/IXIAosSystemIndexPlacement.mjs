@@ -83,7 +83,51 @@ export function reconcilePeerSystemIndexesToBoard({
   return { placements: next, releasedObjectIds };
 }
 
+export function pinSystemIndexToBoard({
+  placements = {},
+  objectId
+} = {}) {
+  const pinnedObjectId = clean(objectId);
+  const next = clonePlacements(placements);
+
+  if (!pinnedObjectId) {
+    return {
+      placements: next,
+      changed: false
+    };
+  }
+
+  const boardHasObject = (next.board || []).includes(pinnedObjectId);
+  const nonBoardHasObject = Object.entries(next).some(
+    ([surfaceId, objectIds]) =>
+      surfaceId !== "board" && objectIds.includes(pinnedObjectId)
+  );
+
+  if (boardHasObject && !nonBoardHasObject) {
+    return {
+      placements: next,
+      changed: false
+    };
+  }
+
+  Object.keys(next).forEach(surfaceId => {
+    next[surfaceId] = next[surfaceId].filter(
+      candidate => candidate !== pinnedObjectId
+    );
+  });
+  next.board = uniqueIds([
+    ...(next.board || []),
+    pinnedObjectId
+  ]);
+
+  return {
+    placements: next,
+    changed: true
+  };
+}
+
 export default {
   excludePeerSystemIndexMembers,
-  reconcilePeerSystemIndexesToBoard
+  reconcilePeerSystemIndexesToBoard,
+  pinSystemIndexToBoard
 };
