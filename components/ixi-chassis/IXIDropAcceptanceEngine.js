@@ -29,6 +29,27 @@ function normalizeTypes(
 }
 
 
+function isSystemIndexObject(
+  value = {}
+) {
+  const metadata =
+    value?.metadata &&
+    typeof value.metadata === "object"
+      ? value.metadata
+      : {};
+
+  return (
+    clean(value?.objectType).toLowerCase() === "system-index" ||
+    metadata.systemIndex === true ||
+    metadata.isSystemIndex === true ||
+    metadata.systemAdapter === true ||
+    metadata.systemIndexPresentation === true ||
+    clean(value?.cardTemplateSlug || value?.templateId || metadata?.templateId) ===
+      "ixi-system-index-v1"
+  );
+}
+
+
 export function getIXIDragObjectType(
   dragData = {}
 ) {
@@ -81,6 +102,23 @@ export function canIXIObjectAcceptDrop({
     return {
       accepted: false,
       reason: "self-drop"
+    };
+  }
+
+
+  /*
+   * System Indexes are peer roots in AOS Work. Allowing one Index to
+   * contain another can hide the entire workspace behind a single card and
+   * create cycles. Ordinary customer containers remain universally
+   * composable; this guard applies only to explicit System Index identity.
+   */
+  if (
+    clean(getIXIDragObjectType(dragData)).toLowerCase() === "system-index" &&
+    isSystemIndexObject(target)
+  ) {
+    return {
+      accepted: false,
+      reason: "system-index-nesting"
     };
   }
 

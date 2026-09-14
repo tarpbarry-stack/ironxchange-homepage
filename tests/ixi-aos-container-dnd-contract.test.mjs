@@ -24,6 +24,9 @@ const collisionEngine = read(
 const dropTarget = read(
   "components/ixi-chassis/IXIObjectDropTarget.jsx"
 );
+const dropAcceptanceEngine = read(
+  "components/ixi-chassis/IXIDropAcceptanceEngine.js"
+);
 const operatingCardRuntime = read(
   "components/ixi-aos/card-runtime/IXIAosOperatingCardRuntime.jsx"
 );
@@ -105,7 +108,7 @@ test("valid ON targets win collision detection and publish accepting state", () 
   );
 });
 
-test("container sources can enter accepted parent containers without moving the targets", () => {
+test("ordinary containers remain composable while System Index peers cannot contain each other", () => {
   assert.match(
     sortableObject,
     /data:[\s\S]*?reorderBehavior/
@@ -125,6 +128,14 @@ test("container sources can enter accepted parent containers without moving the 
   assert.match(
     collisionEngine,
     /acceptance engine already rejects self-drop[\s\S]*?container nesting impossible/
+  );
+  assert.match(
+    dropAcceptanceEngine,
+    /getIXIDragObjectType\(dragData\)[\s\S]*?=== "system-index"[\s\S]*?isSystemIndexObject\(target\)[\s\S]*?reason: "system-index-nesting"/
+  );
+  assert.doesNotMatch(
+    dropAcceptanceEngine,
+    /acceptedObjectTypes\.length === 0[\s\S]{0,220}system-index-nesting/
   );
 });
 
@@ -234,4 +245,39 @@ test("legacy clear-to-parent mutation is not connected to AOS Work", () => {
   assert.doesNotMatch(work, /clearContainerChildrenToParent/);
   assert.doesNotMatch(work, /commitMosContainerPlacement/);
   assert.doesNotMatch(work, /onClearContainerToParent=\{/);
+});
+
+test("System Index parent release ends only outgoing membership and preserves children", () => {
+  assert.match(
+    workspaceRegistry,
+    /Recovery invariant:[\s\S]*?System Index can never disappear inside another[\s\S]*?recoveredSystemIndexes/
+  );
+  assert.match(
+    workspaceRegistry,
+    /!systemIndexesByObjectId\.has\(childObjectId\)/
+  );
+  assert.match(
+    workspaceRegistry,
+    /objectType: projectedIndex \? "system-index" : admittedObject\.objectType/
+  );
+  assert.match(
+    work,
+    /fetchMosObjectRelationships\(objectId, \{[\s\S]*?direction: "outgoing"[\s\S]*?status: "active"/
+  );
+  assert.match(
+    work,
+    /\.filter\(isAosMembershipRelationship\)[\s\S]*?endMosRelationship\(\{[\s\S]*?preserveChildren: true/
+  );
+  assert.match(
+    work,
+    /targetSurface: "board"[\s\S]*?captureUndo: false[\s\S]*?CONTAINER RELEASED · CHILDREN PRESERVED/
+  );
+  assert.match(
+    workspaceBoard,
+    /onDetachFromParent=[\s\S]*?onDetachContainerFromParents\(commandTarget\)/
+  );
+  assert.match(
+    card018,
+    /onDetachFromParent = null[\s\S]*?<IXIAosCardHeaderControls[\s\S]*?onDetachFromParent=/
+  );
 });

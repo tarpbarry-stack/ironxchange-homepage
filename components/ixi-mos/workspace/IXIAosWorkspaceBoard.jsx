@@ -199,6 +199,7 @@ export default function IXIAosWorkspaceBoard({
   onGatherContainerChildren,
   onReturnContainerChildren,
   onClearContainerToParent,
+  onDetachContainerFromParents,
 
   onSaveContainerPresentation,
 
@@ -428,6 +429,11 @@ export default function IXIAosWorkspaceBoard({
                         onOpenTransact={onOpenTransact}
                         onSaveObject={onSaveObject}
                         onDeleteObject={onDeleteObject}
+                        onDetachFromParent={
+                          typeof onDetachContainerFromParents === "function"
+                            ? () => onDetachContainerFromParents(commandTarget)
+                            : null
+                        }
                         onAddObject={
                           canCreateChild
                             ? onAddObject
