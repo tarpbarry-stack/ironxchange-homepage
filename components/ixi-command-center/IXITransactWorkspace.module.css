@@ -407,3 +407,53 @@
     min-height: 450px;
   }
 }
+
+/* Compact history: one summary and one control row. */
+.historyHeading { padding: 6px 10px; min-height: 32px; gap: 8px; }
+.historyHeading > span { font-size: 12px; color: #b8c4bb; font-weight: 800; letter-spacing: .04em; }
+.historyHeading > button { margin-left: auto; min-height: 32px; padding: 4px 8px; background: transparent; border: 0; color: #e1c872; font-size: 12px; }
+.metrics { padding: 0 10px 8px; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+.metric, .history button.metric { min-height: 57px; padding: 7px 9px; }
+.metric span { font-size: 12px; letter-spacing: .015em; line-height: 1.25; }
+.metric strong { font-size: clamp(18px, 1.6vw, 24px); margin: 5px 0 0; line-height: 1.2; font-variant-numeric: tabular-nums; }
+.basis { padding: 10px 12px; font-size: 13px; }
+.notice { margin: 0 10px 8px; padding: 8px 10px; font-size: 12px; }
+.notice summary { cursor: pointer; min-height: 24px; }
+.filters { padding: 8px 10px; gap: 6px; flex-wrap: wrap; align-items: center; }
+.filters .search { flex: 1 1 130px; width: 130px; min-width: 90px; }
+.filters > select { width: auto; max-width: 136px; min-height: 44px; font-size: 13px; }
+.history input, .history select, .history button, .actions button { min-height: 44px; }
+.history button { font-size: 12px; padding: 6px 9px; }
+.filterStatus { padding: 0 10px 8px; display: flex; gap: 8px; align-items: center; justify-content: space-between; font-size: 12px; color: #cad5ce; }
+.filterStatus button { min-height: 32px; }
+.popover, .exportPopover { position: relative; font-size: 13px; }
+.popover > summary, .exportPopover > summary { min-height: 44px; display: flex; align-items: center; padding: 7px 9px; border: 1px solid #3e4a41; border-radius: 3px; cursor: pointer; color: #e1e9e4; background: #121914; font-weight: 700; list-style: none; }
+.popover[open], .exportPopover[open] { z-index: 25; }
+.popover > div, .exportBody { position: absolute; right: 0; top: calc(100% + 4px); width: 270px; max-width: calc(100vw - 40px); padding: 12px; border: 1px solid #6b5d2d; background: #111914; color: #dce7df; box-shadow: 0 12px 28px #0009; display: grid; gap: 10px; }
+.popover label:has(input[type="checkbox"]) { flex-direction: row; align-items: center; min-height: 44px; }
+.exportBody { width: 310px; }
+.exportBody select { min-height: 44px; background: #131d16; color: #e4ede7; border: 1px solid #56644e; font: inherit; padding: 7px; max-width: 100%; }
+.exportBody p { font-size: 13px; line-height: 1.5; }
+.tableWrap { max-height: max(264px, calc(100dvh - 440px)); scrollbar-width: thin; }
+.table { table-layout: auto; font-size: 13px; }
+.table th { position: sticky; top: 0; z-index: 2; height: 36px; padding: 7px; background: #121a14; font-size: 12px; }
+.table td { padding: 4px 7px; height: 48px; vertical-align: middle; }
+.table td:nth-child(n + 5):nth-child(-n + 8), .table th:nth-child(n + 5):nth-child(-n + 8) { text-align: left; white-space: normal; }
+.table .money, .table th.money, .table td.money { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.table td:nth-child(2) { min-width: 110px; max-width: 180px; }
+.table td:nth-child(3) { min-width: 100px; max-width: 200px; }
+.table td strong { font-size: 13px; overflow-wrap: anywhere; line-height: 1.3; }
+.table td span, .table td small { font-size: 12px; color: #b8c5bb; margin: 0; }
+.table td button { min-height: 44px; white-space: nowrap; }
+.workflowStatus { font-size: 12px; color: #c5d0c8; white-space: nowrap; }
+.pagination { padding: 8px 10px; font-size: 12px; }
+.tabs { position: static; min-height: 44px; padding: 0; margin: 8px 0; align-items: stretch; overflow-x: auto; }
+.tabs > button, .tabPair > button { min-height: 44px; padding: 7px 10px; font-size: 12px; }
+.tabPair small { display: none; }
+.tabPair strong { max-width: 180px; overflow: hidden; text-overflow: ellipsis; }
+.tabPanel { min-height: 0; max-height: calc(100dvh - 248px); }
+@media (max-width: 1279px) { .tableWrap { max-height: max(230px, calc(100dvh - 500px)); } .tabPanel { max-height: calc(100dvh - 330px); } }
+@media (max-width: 600px) { .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); } .metric strong { font-size: 20px; } .filters .search { flex-basis: 100%; } .tableWrap { max-height: 60dvh; } .tabPanel { max-height: none; } .popover > div { right: auto; left: 0; } }
+.tabsContainer { display: flex; min-width: 0; align-items: center; gap: 6px; }
+.tabsContainer > .tabs { flex: 1; min-width: 0; }
+.tabOverflow { width: 115px; flex-shrink: 0; min-height: 44px; background: #111a14; color: #e3ebe6; border: 1px solid #586247; border-radius: 3px; padding: 6px; font-size: 12px; }

@@ -31,6 +31,7 @@ export default function IXITransactWorkingTabs({
     buttons[next].click();
   }
   return (
+    <div className={styles.tabsContainer}>
     <div
       className={styles.tabs}
       role="tablist"
@@ -77,6 +78,8 @@ export default function IXITransactWorkingTabs({
           </button>
         </div>
       ))}
+    </div>
+    {tabs.length > 5 ? <select className={styles.tabOverflow} aria-label="Open worksheet tabs" value={activeId} onChange={event => { const tab = tabs.find(item => item.id === event.target.value); if (tab) onSelect(tab); else onHistory(); }}><option value="">History · {tabs.length} open</option>{tabs.map(tab => <option key={tab.id} value={tab.id}>{tab.label}{tab.dirty ? " • Unsaved" : ""} · {tab.context.title}</option>)}</select> : null}
     </div>
   );
 }

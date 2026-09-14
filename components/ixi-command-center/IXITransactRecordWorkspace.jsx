@@ -7,6 +7,7 @@ import { buildIXITransactRecordView, linkedIXITransactRecordIds, recordDocument,
 import styles from "./IXIAosCommandCenter.module.css";
 import IXITransactDocumentActions from "./IXITransactDocumentActions";
 import IXITransactEvidence from "./IXITransactEvidence";
+import IXIPaymentStatusBadge from "../ixi-aos/transact/payments/IXIPaymentStatusBadge";
 import { buildMachineLedger, moneyLabel } from "./IXITransactMachineLedger.mjs";
 
 const IXITransactApp = dynamic(() => import("../ixi-aos/transact/IXITransactApp"), {
@@ -22,8 +23,8 @@ const date = value => {
   return /^\d{4}-\d{2}-\d{2}/.test(raw) ? raw.slice(0, 10) : raw;
 };
 
-export default function IXITransactRecordWorkspace({ financialDocumentId, object, actor, entity, permissions = [], financialRecords = [], onBack, onOpenRecord, onFinancialRecordsChange }) {
-  const [record, setRecord] = useState(null);
+export default function IXITransactRecordWorkspace({ financialDocumentId, object, actor, entity, permissions = [], financialRecords = [], onBack, onOpenRecord, onFinancialRecordsChange, onMarkPaid, recordCache, refreshVersion = 0, active = true, dirty = false }) {
+  const [record, setRecord] = useState(() => recordCache?.peek(financialDocumentId) || null);
   const [error, setError] = useState("");
   const [refresh, setRefresh] = useState(0);
   const [details, setDetails] = useState(false);
@@ -34,13 +35,13 @@ export default function IXITransactRecordWorkspace({ financialDocumentId, object
   const heading = useRef(null);
 
   useEffect(() => {
+    if (!active || dirty) return undefined;
     const controller = new AbortController();
-    setRecord(null);
     setError("");
     setHistory(null);
     setHistoryError("");
     heading.current?.focus();
-    loadIXIAosFinancialDocument({ financialDocumentId, signal: controller.signal })
+    (recordCache ? recordCache.load(financialDocumentId) : loadIXIAosFinancialDocument({ financialDocumentId, signal: controller.signal }))
       .then(result => {
         verifyIXITransactSelectedRecord(result, financialDocumentId);
         if (!controller.signal.aborted) setRecord(result);
@@ -49,7 +50,7 @@ export default function IXITransactRecordWorkspace({ financialDocumentId, object
         if (!controller.signal.aborted) setError(problem?.message || "The saved transaction could not be loaded.");
       });
     return () => controller.abort();
-  }, [financialDocumentId, refresh]);
+  }, [financialDocumentId, refresh, refreshVersion, recordCache, active, dirty]);
 
   const view = useMemo(() => record ? buildIXITransactRecordView({ record, financialDocumentId, object, financialRecords }) : null, [record, financialDocumentId, object, financialRecords]);
   const modules = getIXITransactModules({ objectType: object?.objectType || object?.kind || "object", permissions });
@@ -78,30 +79,34 @@ export default function IXITransactRecordWorkspace({ financialDocumentId, object
   const field = (name, value) => <div><dt>{name}</dt><dd>{clean(value) || "—"}</dd></div>;
   return <section className={styles.workPanel} aria-label="Selected transaction record">
     <div className={styles.workspaceHeader} data-transact-read-only-controls>
-      <div><h2 ref={heading} tabIndex={-1}>{summary?.title || "OPENING RECORD"}</h2><p>{document.description || document.memo || financialDocumentId}</p></div>
+      <div><h2 ref={heading} tabIndex={-1}>{summary?.title || "OPENING RECORD"}</h2><p>{summary?.party || document.description || document.memo || "Saved transaction"}</p></div>
       <div className={styles.workspaceHeaderActions}>
         <button type="button" className={styles.rowAction} onClick={onBack}>‹ HISTORY</button>
+        {exportRow?.paymentAction && onMarkPaid ? <button type="button" className={styles.rowAction} onClick={onMarkPaid}>{exportRow.paymentAction}</button> : null}
+        {exportRow ? <IXITransactDocumentActions compact single rows={[exportRow]} context={exportContext} entity={entity} ledger={exportLedger} /> : null}
         {module ? <button type="button" className={styles.rowAction} onClick={() => setDetails(value => !value)}>{details ? "OPEN WORKSHEET" : "RECORD DETAILS"}</button> : null}
       </div>
     </div>
     {error ? <div className={styles.errorBanner} role="alert"><strong>RECORD UNAVAILABLE</strong><span>{error}</span><button type="button" className={styles.rowAction} onClick={() => setRefresh(value => value + 1)}>RETRY</button></div> : !record ? <div className={styles.loadingState} role="status">Loading the selected saved transaction…</div> : <>
-      <div className={styles.recordIdentity}><span>{exportRow?.paymentStatus || summary.status}</span><span>REVISION {view.server.revision || "—"}</span><code>{financialDocumentId}</code></div>
-      {exportRow ? <IXITransactDocumentActions single rows={[exportRow]} context={exportContext} entity={entity} ledger={exportLedger} /> : null}
+      <div className={styles.recordIdentity}><IXIPaymentStatusBadge status={exportRow?.paymentStatus || summary.status} /><span>Total <strong>{exportRow?.amountCents == null ? "—" : moneyLabel(exportRow.amountCents, currency)}</strong></span>{exportRow?.openCents != null ? <span>Balance <strong>{moneyLabel(exportRow.openCents, currency)}</strong></span> : null}<span>{date(document.occurredAt)}</span></div>
       {module ? <div className={styles.embeddedWorkspace} hidden={details} style={details ? { display: "none" } : undefined}>
         <IXITransactApp
           {...view.props}
-          key={`${financialDocumentId}:${refresh}`}
+          key={`${financialDocumentId}:${view.server.revision}:${refreshVersion}`}
           workspaceEmbedded
+          recordHeaderEmbedded
           initialModuleId={module.id}
           actor={actor}
           entity={entity}
           permissions={permissions}
           onClose={onBack}
-          onFinancialRecordsChange={() => { setRefresh(value => value + 1); return onFinancialRecordsChange?.(); }}
+          onFinancialRecordsChange={() => { recordCache?.invalidate(); setRefresh(value => value + 1); return onFinancialRecordsChange?.(); }}
         />
       </div> : null}
       {showDetails ? <div className={styles.recordDetails} data-transact-read-only-controls>
         <dl className={styles.recordFields}>
+          {field("SERVER RECORD ID", financialDocumentId)}
+          {field("REVISION", view.server.revision)}
           {field("TYPE", label(document.documentType))}
           {field("PAYMENT STATUS", exportRow?.paymentStatus || "—")}
           {field("WORKFLOW STATUS", summary.status)}
