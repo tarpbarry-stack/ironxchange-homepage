@@ -8,6 +8,10 @@ import {
 import {
   buildAosSystemIndexes
 } from "../lib/mos/buildAosSystemIndexes.js";
+import {
+  IXI_AOS_RAIL_MEMBERSHIP_BEHAVIOR_ID,
+  normalizeAosRailProjectionHierarchy
+} from "../lib/mos/IXIAosMembershipBridge.mjs";
 
 const LOCATIONS = "object_locations";
 const WORKFORCE = "object_workforce";
@@ -165,4 +169,101 @@ test("ordinary containers are not changed by the System Index safety rule", () =
 
   assert.deepEqual(result.releasedObjectIds, []);
   assert.deepEqual(result.placements, placements);
+});
+
+test("authenticated readback keeps peer indexes out of stale legacy parents", () => {
+  const objects = [
+    canonicalObject({
+      objectId: LOCATIONS,
+      passportId: "IXIABC2345",
+      displayName: "LOCATIONS",
+      objectType: "system-index",
+      metadata: { systemIndexPresentation: true }
+    }),
+    canonicalObject({
+      objectId: WORKFORCE,
+      passportId: "IXIDEF2345",
+      displayName: "WORKFORCE",
+      objectType: "system-index",
+      metadata: { systemIndexPresentation: true }
+    }),
+    canonicalObject({
+      objectId: YARD,
+      passportId: "IXIKMN2345",
+      displayName: "RINGLING YARD"
+    })
+  ];
+  const normalized = normalizeAosRailProjectionHierarchy({
+    aosObjects: objects,
+    railProjections: {
+      [LOCATIONS]: {
+        railOwnerObjectId: LOCATIONS,
+        members: [
+          { objectId: YARD, behaviorId: null },
+          { objectId: WORKFORCE, behaviorId: null }
+        ]
+      }
+    }
+  });
+
+  assert.deepEqual(
+    normalized[LOCATIONS].members.map(member => member.objectId),
+    [YARD]
+  );
+});
+
+test("authenticated readback routes a governed Equipment member ahead of stale Locations evidence", () => {
+  const objects = [
+    canonicalObject({
+      objectId: LOCATIONS,
+      passportId: "IXIABC2345",
+      displayName: "LOCATIONS",
+      objectType: "system-index",
+      metadata: { systemIndexPresentation: true }
+    }),
+    canonicalObject({
+      objectId: EQUIPMENT,
+      passportId: "IXIGHJ2345",
+      displayName: "EQUIPMENT",
+      objectType: "system-index",
+      metadata: {
+        systemIndexPresentation: true,
+        adapterId: "ixi-owned-equipment"
+      }
+    }),
+    canonicalObject({
+      objectId: MACHINE,
+      passportId: "IXISTU2345",
+      displayName: "CUSTOMER MACHINE"
+    })
+  ];
+  const normalized = normalizeAosRailProjectionHierarchy({
+    aosObjects: objects,
+    railProjections: {
+      [LOCATIONS]: {
+        railOwnerObjectId: LOCATIONS,
+        members: [{
+          objectId: MACHINE,
+          behaviorId: null,
+          migrationEvidence: {
+            kind: "legacy-direct-container-corroborated.v1",
+            readOnly: true
+          }
+        }]
+      },
+      [EQUIPMENT]: {
+        railOwnerObjectId: EQUIPMENT,
+        members: [{
+          objectId: MACHINE,
+          behaviorId: IXI_AOS_RAIL_MEMBERSHIP_BEHAVIOR_ID
+        }]
+      }
+    }
+  });
+
+  assert.deepEqual(normalized[LOCATIONS].members, []);
+  assert.deepEqual(
+    normalized[EQUIPMENT].members.map(member => member.objectId),
+    [MACHINE]
+  );
 });
