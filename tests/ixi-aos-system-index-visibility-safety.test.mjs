@@ -3,6 +3,7 @@ import test from "node:test";
 
 import {
   excludePeerSystemIndexMembers,
+  getNestedRootSystemIndexObjectIds,
   pinSystemIndexToBoard,
   reconcilePeerSystemIndexesToBoard
 } from "../components/ixi-mos/workspace/IXIAosSystemIndexPlacement.mjs";
@@ -197,6 +198,55 @@ test("the registered Equipment System Index is pinned to the main board only", (
   });
   assert.equal(replay.changed, false);
   assert.deepEqual(replay.placements, result.placements);
+});
+
+test("a customer-named root System Index is released from a parent without moving its children", () => {
+  const rootIndex = canonicalObject({
+    objectId: WORKFORCE,
+    passportId: "IXIDEF2345",
+    displayName: "FIELD TEAM",
+    objectType: "generic",
+    metadata: {
+      rootContainer: true,
+      createdFrom: "aos-scoreboard-plus"
+    }
+  });
+  const ordinaryContainer = canonicalObject({
+    objectId: YARD,
+    passportId: "IXIKMN2345",
+    displayName: "RINGLING YARD",
+    objectType: "location",
+    metadata: {
+      rootContainer: false
+    }
+  });
+  const placements = {
+    board: [LOCATIONS],
+    [`container:${LOCATIONS}`]: [YARD, WORKFORCE],
+    [`container:${WORKFORCE}`]: [PERSON]
+  };
+  const admission = new Map([
+    [WORKFORCE, rootIndex],
+    [YARD, ordinaryContainer]
+  ]);
+
+  const nestedRootIds = getNestedRootSystemIndexObjectIds({
+    objects: [...admission.values()],
+    placements,
+    resolveObjectId: reference =>
+      admission.has(reference) ? reference : ""
+  });
+
+  assert.deepEqual(nestedRootIds, [WORKFORCE]);
+
+  const result = pinSystemIndexToBoard({
+    placements,
+    objectId: nestedRootIds[0]
+  });
+
+  assert.deepEqual(result.placements.board, [LOCATIONS, WORKFORCE]);
+  assert.deepEqual(result.placements[`container:${LOCATIONS}`], [YARD]);
+  assert.deepEqual(result.placements[`container:${WORKFORCE}`], [PERSON]);
 });
 
 test("authenticated readback keeps peer indexes out of stale legacy parents", () => {

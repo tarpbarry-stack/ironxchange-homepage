@@ -96,7 +96,8 @@ import useIXIAosWorkspaceRegistry
 
 import {
   reconcilePeerSystemIndexesToBoard,
-  pinSystemIndexToBoard
+  pinSystemIndexToBoard,
+  getNestedRootSystemIndexObjectIds
 } from "../../components/ixi-mos/workspace/IXIAosSystemIndexPlacement.mjs";
 
 import useIXIEquipmentWorkspace
@@ -382,6 +383,7 @@ const POCKET_TARGETS = [
   const containerReturnSnapshotsRef = useRef({});
   const systemIndexPlacementReconciliationKeyRef = useRef("");
   const equipmentBoardPinKeyRef = useRef("");
+  const rootSystemIndexBoardPinKeyRef = useRef("");
   
   const [activeDndId, setActiveDndId] = useState("");
   const {
@@ -1142,6 +1144,74 @@ useEffect(() => {
   aosWorkspaceSession?.sessionId,
   aosWorkspaceAdmission,
   equipmentWorkspaceIndex?.objectId,
+  workspacePlacements
+]);
+
+useEffect(() => {
+  const controller = workspaceSessionControllerRef.current;
+
+  if (
+    !workspaceSessionReady ||
+    !controller
+  ) {
+    return;
+  }
+
+  const currentPlacements = controller.readPlacements();
+  const nestedRootSystemIndexObjectIds =
+    getNestedRootSystemIndexObjectIds({
+      objects: [
+        ...aosWorkspaceAdmission.objectsById.values()
+      ],
+      placements: currentPlacements,
+      resolveObjectId: reference =>
+        aosWorkspaceAdmission.resolveObjectId(reference)
+    });
+
+  if (!nestedRootSystemIndexObjectIds.length) return;
+
+  const nextPlacements =
+    nestedRootSystemIndexObjectIds.reduce(
+      (placements, objectId) =>
+        pinSystemIndexToBoard({
+          placements,
+          objectId
+        }).placements,
+      currentPlacements
+    );
+
+  const pinKey = [
+    String(aosWorkspaceSession?.sessionId || ""),
+    ...nestedRootSystemIndexObjectIds.map(objectId => {
+      const current = locateWorkspaceObject(currentPlacements, objectId);
+      return `${objectId}:${current?.surfaceId || "missing"}:${current?.visualOrder ?? -1}`;
+    })
+  ].join("|");
+
+  if (
+    !pinKey ||
+    rootSystemIndexBoardPinKeyRef.current === pinKey
+  ) {
+    return;
+  }
+
+  rootSystemIndexBoardPinKeyRef.current = pinKey;
+
+  const operation = controller.persistLayout(nextPlacements, {
+    operationId: createMosCommandId("aos-pin-root-system-indexes-board"),
+    objectIds: nestedRootSystemIndexObjectIds,
+    captureUndo: false,
+    activeSummonedContext: null
+  });
+
+  void operation.completion.catch(error => {
+    rootSystemIndexBoardPinKeyRef.current = "";
+    console.error("IXI AOS ROOT SYSTEM INDEX BOARD PIN FAILED:", error);
+  });
+}, [
+  workspaceSessionReady,
+  aosWorkspaceSession?.sessionId,
+  aosWorkspaceAdmission,
   workspacePlacements
 ]);
 
