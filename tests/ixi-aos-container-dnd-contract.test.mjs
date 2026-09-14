@@ -279,6 +279,18 @@ test("System Index parent safety restores workspace visibility and preserves chi
     card018,
     /onDetachFromParent = null[\s\S]*?<IXIAosCardHeaderControls[\s\S]*?onDetachFromParent=/
   );
+  assert.match(
+    work,
+    /equipmentWorkspaceIndex\?\.objectId/
+  );
+  assert.match(
+    work,
+    /pinSystemIndexToBoard\(\{[\s\S]*?objectId: equipmentObjectId/
+  );
+  assert.match(
+    work,
+    /aos-pin-equipment-board[\s\S]*?objectIds: \[equipmentObjectId\][\s\S]*?captureUndo: false/
+  );
 });
 
 
