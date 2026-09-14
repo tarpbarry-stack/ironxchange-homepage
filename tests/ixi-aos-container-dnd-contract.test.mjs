@@ -252,14 +252,14 @@ test("legacy clear-to-parent mutation is not connected to AOS Work", () => {
   assert.doesNotMatch(work, /onClearContainerToParent=\{/);
 });
 
-test("System Index parent release ends only outgoing membership and preserves children", () => {
+test("System Index parent safety restores workspace visibility and preserves children", () => {
   assert.match(
     workspaceRegistry,
     /Recovery invariant:[\s\S]*?System Index can never disappear inside another[\s\S]*?recoveredSystemIndexes/
   );
   assert.match(
     workspaceRegistry,
-    /!systemIndexesByObjectId\.has\(childObjectId\)/
+    /excludePeerSystemIndexMembers/
   );
   assert.match(
     workspaceRegistry,
@@ -267,16 +267,10 @@ test("System Index parent release ends only outgoing membership and preserves ch
   );
   assert.match(
     work,
-    /fetchMosObjectRelationships\(objectId, \{[\s\S]*?direction: "outgoing"[\s\S]*?status: "active"/
+    /reconcilePeerSystemIndexesToBoard\(\{[\s\S]*?captureUndo: false[\s\S]*?SYSTEM INDEX RESTORED TO BOARD · CHILDREN PRESERVED/
   );
-  assert.match(
-    work,
-    /\.filter\(isAosMembershipRelationship\)[\s\S]*?endMosRelationship\(\{[\s\S]*?preserveChildren: true/
-  );
-  assert.match(
-    work,
-    /targetSurface: "board"[\s\S]*?captureUndo: false[\s\S]*?CONTAINER RELEASED · CHILDREN PRESERVED/
-  );
+  assert.doesNotMatch(work, /automaticRepair: true/);
+  assert.doesNotMatch(work, /aos-system-index-peer-containment-repair/);
   assert.match(
     workspaceBoard,
     /onDetachFromParent=[\s\S]*?onDetachContainerFromParents\(commandTarget\)/

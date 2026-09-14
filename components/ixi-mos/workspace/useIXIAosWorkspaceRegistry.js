@@ -17,6 +17,9 @@ import { resolveWorkspaceObjects } from "../../ixi-chassis/IXIWorkspacePlacement
 import {
   isIXIAosWorkspaceVisibleAdapter
 } from "../../../lib/mos/IXIAosSystemAdapterRegistry";
+import {
+  excludePeerSystemIndexMembers
+} from "./IXIAosSystemIndexPlacement.mjs";
 
 function clean(value) {
   return String(value ?? "").trim();
@@ -106,16 +109,16 @@ export default function useIXIAosWorkspaceRegistry({
       const systemIndexIds = projectedIndex
         ? indexMemberObjectIds(projectedIndex, admission)
         : [];
-      const itemObjectIds = uniqueObjectIds([
-        ...relationshipIds,
-        ...legacyRelationshipIds,
-        ...railProjectionIds,
-        ...systemIndexIds
-      ]).filter(childObjectId =>
-        !projectedIndex ||
-        !systemIndexesByObjectId.has(objectId) ||
-        !systemIndexesByObjectId.has(childObjectId)
-      );
+      const itemObjectIds = excludePeerSystemIndexMembers({
+        ownerObjectId: objectId,
+        memberObjectIds: uniqueObjectIds([
+          ...relationshipIds,
+          ...legacyRelationshipIds,
+          ...railProjectionIds,
+          ...systemIndexIds
+        ]),
+        systemIndexObjectIds: [...systemIndexesByObjectId.keys()]
+      });
       const isEquipmentIndex =
         projectedIndex?.metadata?.adapterId === "ixi-owned-equipment";
       const presentationItems = isEquipmentIndex
@@ -142,12 +145,12 @@ export default function useIXIAosWorkspaceRegistry({
     }
 
     for (const [objectId, object] of registry) {
-      const placedObjectIds = (
-        canonicalWorkspacePlacements[`container:${objectId}`] || []
-      ).filter(childObjectId =>
-        !systemIndexesByObjectId.has(objectId) ||
-        !systemIndexesByObjectId.has(childObjectId)
-      );
+      const placedObjectIds = excludePeerSystemIndexMembers({
+        ownerObjectId: objectId,
+        memberObjectIds:
+          canonicalWorkspacePlacements[`container:${objectId}`] || [],
+        systemIndexObjectIds: [...systemIndexesByObjectId.keys()]
+      });
       if (!placedObjectIds.length) continue;
 
       const itemObjectIds = uniqueObjectIds([
