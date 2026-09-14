@@ -4,10 +4,10 @@ import { createIXITransactRecordCache } from '../components/ixi-command-center/I
 const record = (id, revision = 1) => ({ financialDocument: { financialDocumentId: id }, server: { revision } });
 const tick = () => new Promise(resolve => setImmediate(resolve));
 
-test('preparing 100 records admits only 16 and runs at most two reads concurrently', async () => {
+test('preparing 1,000 records admits only 16 and runs at most two reads concurrently', async () => {
   let active = 0, max = 0, reads = 0;
   const cache = createIXITransactRecordCache({ read: async ({ financialDocumentId }) => { reads++; max = Math.max(max, ++active); await tick(); active--; return record(financialDocumentId); } });
-  cache.prefetch(Array.from({ length: 100 }, (_, i) => String(i)));
+  cache.prefetch(Array.from({ length: 1000 }, (_, i) => String(i)));
   for (let i = 0; i < 20; i++) await tick();
   assert.equal(reads, 16); assert.equal(max, 2); assert.equal(cache.stats().prepared, 16);
 });
@@ -47,4 +47,19 @@ test('wrong IDs and missing revisions fail closed; retry can recover and TTL for
   assert.equal((await cache.load('a')).server.revision, 3); await tick();
   assert.equal((await cache.load('a')).server.revision, 3); time = 31;
   assert.equal((await cache.load('a')).server.revision, 4);
+});
+
+
+test('display party follows an explicit payment source without changing financial documents', async () => {
+  const { buildMachineLedger } = await import('../components/ixi-command-center/IXITransactMachineLedger.mjs');
+  const documents = [
+    { financialDocument: { financialDocumentId: 'invoice', documentType: 'invoice', documentNumber: 'INV-1', occurredAt: '2026-02-04', financialState: 'incurred', totals: { total: 82000 }, metadata: { customer: { name: 'Customer One' } } }, server: { revision: 1 } },
+    { financialDocument: { financialDocumentId: 'payment', documentType: 'payment', occurredAt: '2026-02-04', financialState: 'paid', paymentDirection: 'inflow', sourceFinancialDocumentId: 'invoice', totals: { total: 82000 } }, server: { revision: 1 } },
+  ];
+  const before = JSON.stringify(documents);
+  const result = buildMachineLedger(documents);
+  assert.equal(result.rows.find(row => row.id === 'invoice').party, 'Customer One');
+  assert.equal(result.rows.find(row => row.id === 'payment').party, 'Customer One');
+  assert.equal(result.rows.find(row => row.id === 'invoice').openCents, 0);
+  assert.equal(JSON.stringify(documents), before);
 });

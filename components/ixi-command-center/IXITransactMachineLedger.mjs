@@ -80,6 +80,8 @@ export function recordParty(doc = {}) {
       (typeof doc.vendor === "string" ? doc.vendor : "") ||
       doc.partyName ||
       doc.counterpartyName ||
+      doc.metadata?.customer?.name ||
+      doc.metadata?.customer?.label ||
       doc.metadata?.customerName ||
       doc.metadata?.vendorName ||
       array(doc.references).find((item) =>
@@ -162,7 +164,7 @@ export function buildMachineLedger(
       ),
       type: lower(doc.documentType),
       status: text(doc.financialState || doc.status || "active").toUpperCase(),
-      party: recordParty(doc),
+      party: recordParty(doc) || recordParty(byId.get(text(doc.sourceFinancialDocumentId)) || {}),
       date: recordDate(doc),
       dueDate: text(doc.dueDate || doc.dueAt).slice(0, 10),
       currency: text(doc.currency || currency).toUpperCase(),

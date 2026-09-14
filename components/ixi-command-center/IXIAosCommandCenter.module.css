@@ -732,3 +732,23 @@
 @media (max-width: 600px) { .objectPickers { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 .shell[data-ui-rebuild] { overflow-x: clip; overflow-y: visible; }
 .shell[data-ui-rebuild] .appLauncher button strong { font-size: 14px; }
+
+/* Keep workspace context visible while each working region owns its scrolling. */
+.shell[data-ui-rebuild] { height: 100dvh; min-height: 0; padding-bottom: 0; display: flex; flex-direction: column; overflow: hidden; }
+.shell[data-ui-rebuild] .topbar { position: relative; top: auto; flex-shrink: 0; }
+.shell[data-ui-rebuild] .periodControl > span { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.shell[data-ui-rebuild] .periodControl { display: block; }
+.shell[data-ui-rebuild] .desktop { min-height: 0; flex: 1; overflow: hidden; }
+.shell[data-ui-rebuild] .main { min-height: 0; padding: 8px 10px; display: flex; flex-direction: column; overflow-y: auto; }
+.shell[data-ui-rebuild] .main[data-history-active="true"] { overflow-y: hidden; }
+.shell[data-ui-rebuild] .main > * { flex-shrink: 0; }
+.shell[data-ui-rebuild] .pageHeader { min-height: 48px; }
+.shell[data-ui-rebuild] .pageHeader h1 { font-size: 24px; margin: 2px 0; }
+.shell[data-ui-rebuild] .pageHeader .eyebrow { font-size: 12px; line-height: 16px; }
+.shell[data-ui-rebuild] .historyPane:not([hidden]) { min-height: 0; flex: 1; overflow: auto; }
+.shell[data-ui-rebuild] .main[data-history-active="true"] .historyPane { overflow: hidden; }
+.historyViewport { height: 100%; min-height: 0; }
+.shell[data-ui-rebuild] .navigation, .shell[data-ui-rebuild] .contextPanel { position: relative; top: auto; height: 100%; min-height: 0; }
+.shell[data-ui-rebuild] .statusbar { position: relative; flex-shrink: 0; min-height: 26px; }
+@media (max-width: 999px) { .shell[data-ui-rebuild] .desktop { display: flex; } .shell[data-ui-rebuild] .main { width: 100%; } }
+@media (max-width: 600px), (max-height: 600px) { .shell[data-ui-rebuild] .main[data-history-active="true"] { overflow-y: auto; } .shell[data-ui-rebuild] .historyPane:not([hidden]) { flex-shrink: 0; min-height: 500px; } }
