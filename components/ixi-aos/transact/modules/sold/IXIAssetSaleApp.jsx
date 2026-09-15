@@ -137,7 +137,7 @@ export default function IXIAssetSaleApp({
   const [localReceipts, setLocalReceipts] = useState(initialRecord?.collection?.receipts || []);
   const [type, setType] = useState(initialRecord?.sale?.type || "sale");
   const [soldByLabel, setSoldByLabel] = useState(initialRecord?.sale?.soldByLabel || "");
-  const [machineSalePrice, setMachineSalePrice] = useState(initialRecord?.sale?.machineSalePrice ?? "");
+  const [machineSalePrice, setMachineSalePrice] = useState(initialRecord?.sale?.machineSalePrice ?? (sourceInvoice?.metadata?.trades?.length ? sourceInvoice.metadata?.commercialBreakdown?.subtotal : ""));
   const [saleCommandId] = useState(() => globalThis.crypto?.randomUUID?.() || `SALE-${Date.now()}`);
   const [saleDate, setSaleDate] = useState(initialRecord?.sale?.saleDate || today());
   const [billOfSaleNumber, setBillOfSaleNumber] = useState(

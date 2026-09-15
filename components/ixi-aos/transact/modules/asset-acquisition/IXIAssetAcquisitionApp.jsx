@@ -390,6 +390,8 @@ export default function IXIAssetAcquisitionApp({
   context = {},
   object = {},
   initialRecord = null,
+  initialInput = {},
+  tradeContext = null,
   language = "en",
   onLanguageChange = null,
   onBack = null,
@@ -411,22 +413,22 @@ export default function IXIAssetAcquisitionApp({
   const [errors, setErrors] = useState({});
   const [clientRequestId] = useState(
     () =>
-      globalThis.crypto?.randomUUID?.() ||
+      initialInput.clientRequestId || globalThis.crypto?.randomUUID?.() ||
       `ACQ-${Date.now()}-${Math.random().toString(16).slice(2)}`,
   );
-  const [acquisitionType, setAcquisitionType] = useState("direct-purchase"),
-    [sellerLabel, setSellerLabel] = useState(""),
+  const [acquisitionType, setAcquisitionType] = useState(initialInput.acquisitionType ?? "direct-purchase"),
+    [sellerLabel, setSellerLabel] = useState(initialInput.sellerLabel ?? ""),
     [sourceLabel, setSourceLabel] = useState(""),
-    [sourceReference, setSourceReference] = useState(""),
+    [sourceReference, setSourceReference] = useState(initialInput.sourceReference ?? ""),
     [auctionLotNumber, setAuctionLotNumber] = useState(""),
-    [purchaseDate, setPurchaseDate] = useState(today()),
+    [purchaseDate, setPurchaseDate] = useState(initialInput.purchaseDate ?? today()),
     [invoiceNumber, setInvoiceNumber] = useState(""),
     [invoiceDate, setInvoiceDate] = useState(today()),
     [agreementNumber, setAgreementNumber] = useState(""),
     [dueDate, setDueDate] = useState(""),
     [paymentTerms, setPaymentTerms] = useState("");
   const [purchasePrice, setPurchasePrice] = useState(() =>
-      startingValue(object),
+      initialInput.purchasePrice ?? startingValue(object),
     ),
     [buyerPremium, setBuyerPremium] = useState(""),
     [auctionDocumentFees, setAuctionDocumentFees] = useState(""),
@@ -453,7 +455,7 @@ export default function IXIAssetAcquisitionApp({
     [clearTitle, setClearTitle] = useState("unknown"),
     [titleNumber, setTitleNumber] = useState("");
   const [condition, setCondition] = useState("running"),
-    [hours, setHours] = useState(""),
+    [hours, setHours] = useState(initialInput.hoursAtAcquisition ?? ""),
     [knownIssues, setKnownIssues] = useState("");
   const [purchaseLocation, setPurchaseLocation] = useState(""),
     [deliverTo, setDeliverTo] = useState(clean(location.label)),
@@ -639,7 +641,7 @@ export default function IXIAssetAcquisitionApp({
           label: primary.label,
         },
         context,
-        input,
+        input: { ...input, trade: tradeContext },
         metadata: { source: "ixi-transact-asset-acquisition" },
       });
       setRecord(result.record);

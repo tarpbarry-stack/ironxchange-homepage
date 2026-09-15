@@ -192,6 +192,11 @@ export function documentPrintFields(row) {
         .filter(Boolean)
         .join(" · "),
     ]);
+  const trades = doc.salesOrder?.trades || doc.metadata?.trades || [];
+  trades.forEach((trade, index) => fields.push([
+    `Trade ${index + 1}`,
+    `${trade.year} ${trade.make} ${trade.model} · SN ${trade.serialNumber} · ${trade.hours} hours · Passport ${trade.passportId} · Allowance ${Number(trade.allowance).toFixed(2)}`
+  ]));
   return fields;
 }
 

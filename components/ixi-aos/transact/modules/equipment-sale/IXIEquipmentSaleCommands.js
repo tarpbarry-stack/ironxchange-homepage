@@ -120,6 +120,8 @@ function invoiceMetadata(record = {}, input = {}, invoice = {}) {
     customerPoNumber: clean(input.customerPoNumber),
     administrativeNote: clean(input.memo),
     commercialBreakdown: record?.totals || {},
+    trades: record.trades || [],
+    tradeContext: { ...record.context, dealId: record.identity?.dealId },
     dealType: record?.dealType || "standard-sale",
     rpo: record?.rpo || {},
     additionalTerms: record?.additionalTerms || [],

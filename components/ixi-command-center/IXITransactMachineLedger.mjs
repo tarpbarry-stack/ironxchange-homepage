@@ -279,7 +279,8 @@ export function buildMachineLedger(
         row.reason = "Revenue is not yet invoiced";
       else {
         row.revenueCents =
-          row.amountCents -
+          row.amountCents +
+          (Array.isArray(doc.metadata?.trades) && doc.metadata.trades.length ? doc.metadata.trades.reduce((sum, trade) => sum + (cents(trade.allowance) || 0), 0) : 0) -
           (cents(doc.totals?.tax ?? doc.metadata?.commercialBreakdown?.tax) ||
             0);
         row.reason = "Invoiced revenue, excluding stated tax";
