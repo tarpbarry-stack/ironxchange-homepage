@@ -1,4 +1,4 @@
-import { transactionDisplayTitle } from "./IXITransactDisplay.mjs";
+import { sidebarObjectTitle, transactionDisplayTitle } from "./IXITransactDisplay.mjs";
 import { searchIXITransact } from "./IXITransactSearch.mjs";
 import IXITransactAccountingReports from "../ixi-transact-dashboard/IXITransactAccountingReports";
 import { paymentHistorySummary } from "../ixi-aos/transact/payments/IXIPaymentHistory";
@@ -942,7 +942,7 @@ export default function IXITransactCommandCenter({ runtime, active = true }) {
             <div className={styles.objectDirectoryList} role="list">
               {objectDirectory.map(item => (
                 <div role="listitem" key={item.id}><button type="button" className={styles.objectTile} data-active={selectedContext?.id === item.id} onClick={() => selectContext(item)}>
-                  <strong className={styles.objectTileTitle}>{item.title}</strong>
+                  <strong className={styles.objectTileTitle}>{sidebarObjectTitle(item)}</strong>
                   {item.serialNumber ? <small className={`${styles.objectTileField} ${styles.objectTileSerial}`}><b>SN</b><span>{item.serialNumber}</span></small> : null}
                   <small className={`${styles.objectTileField} ${styles.objectTileIdentity}`}><b>ID</b><span>{item.stockNumber || item.assetId || item.passportId || "NOT RECORDED"}</span></small>
                   <IXIContextImage
@@ -951,7 +951,7 @@ export default function IXITransactCommandCenter({ runtime, active = true }) {
                     mediaClassName={styles.objectTileMedia}
                     fallbackClassName={styles.objectTileMark}
                     fallback={contextLabel(item.kind).slice(0, 2)}
-                    label={`${item.title} thumbnail`}
+                    label={`${sidebarObjectTitle(item)} thumbnail`}
                     as="span"
                   />
                 </button></div>
