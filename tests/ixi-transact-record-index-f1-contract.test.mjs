@@ -1,8 +1,19 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import test from "node:test";
+import { execFileSync } from "node:child_process";
 
 const read = path => fs.readFileSync(path, "utf8");
+
+test("financial business dates do not shift to the previous day in US time zones", () => {
+  const source = read("components/ixi-aos/transact/IXITransactRecordIndex.jsx");
+  const formatter = source.match(/function formatDate\([\s\S]*?\n\}/)?.[0];
+  assert.ok(formatter);
+  for (const timezone of ["America/Chicago", "America/Los_Angeles", "Asia/Tokyo"]) {
+    const result = execFileSync(process.execPath, ["-e", `${formatter}\nprocess.stdout.write(JSON.stringify([formatDate('2026-02-04'),formatDate('2026-02-04T00:00:00Z'),formatDate('')]));`], { encoding: "utf8", env: { ...process.env, TZ: timezone } });
+    assert.deepEqual(JSON.parse(result), ["FEB 4, 2026", "FEB 4, 2026", "—"], timezone);
+  }
+});
 
 test("F$1 is a peer machine workspace, never a TRAN$ACT application", () => {
   const consoleRuntime = read(
