@@ -382,6 +382,7 @@ export default function IXITransactRecordIndex({
   financialRecords = [],
   onOpenModule = null,
   onOpenWorksheet = null,
+  onOpenApps = null,
   onClose = null
 }) {
   const index = useMemo(
@@ -439,18 +440,21 @@ export default function IXITransactRecordIndex({
   return (
     <div className="tx-record-index">
       <header className="txri-header">
-        <div>
+        <div className="txri-heading">
           <span>IXI MACHINE · F$1</span>
           <strong>
             {record ? record.number : category ? category.label : "RECORD INDEX"}
           </strong>
           <small>{clean(context?.primary?.label) || "AOS CARD"}</small>
         </div>
+        <div className="txri-header-actions">
+        {onOpenApps ? <button type="button" className="txri-apps" onClick={onOpenApps} aria-label="Open TRANSACT apps" title="TRAN$ACT apps">APPS</button> : null}
         {category || onClose ? (
           <button type="button" onClick={navigateBack} aria-label="Back">
             ‹
           </button>
         ) : null}
+        </div>
       </header>
 
       <main className="txri-body">
@@ -574,6 +578,7 @@ export default function IXITransactRecordIndex({
         .txri-header strong{display:block;max-width:244px;margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:15px;line-height:1.08;font-weight:900}
         .txri-header small{display:block;max-width:244px;margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#858b88;font-size:7px;font-weight:800;text-transform:uppercase}
         .txri-header button{width:30px;height:30px;margin:-1px -1px 0 6px;border:1px solid rgba(255,255,255,.14);border-radius:7px;background:#111313;color:#ffc400;font-size:21px;font-weight:900;cursor:pointer}
+        .txri-heading{min-width:0;flex:1}.txri-header-actions{display:flex;flex-shrink:0}.txri-header .txri-apps{width:36px;font-size:8px;letter-spacing:.04em}.txri-heading strong,.txri-heading small{max-width:100%}
         .txri-body{position:absolute;inset:61px 0 9px;overflow-x:hidden;overflow-y:auto;padding:9px;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.18) transparent}
         .txri-summary{display:grid;grid-template-columns:82px minmax(0,1fr);gap:7px;margin-bottom:8px}
         .txri-summary div{height:56px;padding:8px 10px;border:1px solid rgba(255,255,255,.09);border-radius:7px;background:#101313;display:flex;flex-direction:column;align-items:flex-start;justify-content:center}

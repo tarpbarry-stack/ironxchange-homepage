@@ -110,10 +110,19 @@ export function projectIXIAssetSaleCollection({
   };
 }
 
+// An omitted sale date comes from the invoice, never the date of data entry.
+// An explicit blank remains blank so required-date validation can report it.
+export function resolveIXIAssetSaleDate({ sourceInvoice = {}, saleDate, saleDateSource } = {}) {
+  const invoiceDate = clean(sourceInvoice.occurredAt).slice(0, 10);
+  const day = saleDate == null ? invoiceDate : clean(saleDate);
+  return { saleDate: day, saleDateSource: (saleDate == null || saleDateSource === "invoice") && day === invoiceDate ? "invoice" : "operator" };
+}
+
 export function createIXIAssetSaleDraft({ context = {}, input = {} } = {}) {
   const primary = object(context.primary);
   const actor = object(context.actor);
   const sourceInvoice = object(input.sourceInvoice);
+  const businessDate = resolveIXIAssetSaleDate({ ...input, sourceInvoice });
   const collection = projectIXIAssetSaleCollection({
     sourceInvoice,
     financialRecords: input.financialRecords,
@@ -156,7 +165,7 @@ export function createIXIAssetSaleDraft({ context = {}, input = {} } = {}) {
       buyerContact: clean(input.buyerContact),
       buyerEmail: clean(input.buyerEmail),
       buyerPhone: clean(input.buyerPhone),
-      saleDate: clean(input.saleDate),
+      ...businessDate,
       salePrice: collection.invoiceTotal,
       machineSalePrice: input.machineSalePrice === "" || input.machineSalePrice == null ? null : money(input.machineSalePrice),
       soldByLabel: clean(input.soldByLabel),
@@ -177,7 +186,7 @@ export function createIXIAssetSaleDraft({ context = {}, input = {} } = {}) {
     passportState: {
       ownershipState: "sold",
       custodyState: "buyer",
-      effectiveDate: clean(input.saleDate),
+      effectiveDate: businessDate.saleDate,
     },
     settlement: { status: "not-started", settlementId: "" },
     status: collection.balanceDue <= 0.005 ? "sold" : "collection-open",

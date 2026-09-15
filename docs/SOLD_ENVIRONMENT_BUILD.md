@@ -78,6 +78,16 @@ node scripts/verify-sold-atomicity.js /absolute/path/to/dynamodb-local
 - A live pocket movement using “Sync machine” was blocked by automatic approval review because it may persist placement. No bypass was attempted. The user has not yet approved that specific live test.
 - Live sale/credit/refund/physical-return writes were exercised against isolated DynamoDB Local, not fabricated in the customer's production company.
 - Remaining responsive-device and multi-page movement scenarios need an isolated hosted test company. The completed live browser checks used the available desktop session.
-- Existing sale dates and salesperson evidence must be assessed independently of price display. The compatibility correction does not rewrite those facts.
+- Historical date recovery requires matching canonical invoice and collection evidence; ambiguous dates retain their existing value. Missing salesperson evidence still requires the actual historical salesperson, not the data-entry actor.
 - Current inventory reads project company documents on demand and coalesce simultaneous requests. No 1,000-seat throughput benchmark or zero-defect guarantee is established.
 - Every backend pin change requires the exact paired tests, frontend compilation, full immutable runtime deployment, recovery, installed-source verification and live browser confirmation. Source tests and deployment status must be reported separately.
+
+## Historical business dates and shared card correction
+
+The earlier SOLD form defaulted its sale date to the day of data entry. For an unmarked legacy closeout whose stored sale date equals its audit closeout day, the projection uses the earlier invoice date only when unique, finalized, same-company and same-currency canonical receipts establish full collection on that date. Explicit operator dates remain authoritative. The response retains `recordedSaleDate`, `recordedAt` and `saleDateSource`; original invoice and payment records are unchanged. Inventory ordering, date filtering and return/adjustment bounds share this resolver.
+
+New closeouts default to the source invoice date, never today's date; missing dates remain blank and operator edits survive invoice loading. The server records invoice/operator provenance.
+
+The SOLD front now uses the existing PrivateListingCard photo, photo-fit rules, arrows, counter, title, hours, rail and actuators. Only the sale-details body and SOLD banner are specialized. TRAN$ACT opens the record index with APPS inside its header; the extra external button no longer offsets the primary panel from adjacent workspaces.
+
+Candidate verification: optimized frontend build passes; exact local paired gate passes 500 frontend plus 319 backend tests. Ten new date regressions cover provenance, incomplete or unrelated receipts, duplicate IDs, inventory chronology and historical returns. Production activation and browser geometry checks must be recorded separately.
