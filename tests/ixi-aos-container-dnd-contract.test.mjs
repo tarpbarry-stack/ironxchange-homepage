@@ -4,6 +4,7 @@ import test from "node:test";
 
 import {
   createAosMembershipRelationship,
+  getExactActiveAosRelationship,
   getAosMembershipRelationships,
   getInvalidAosSystemIndexMemberships,
   isExplicitAosSystemIndexObject,
@@ -525,6 +526,86 @@ test("targeted cleanup selects only requested active members of one canonical ow
   assert.deepEqual(
     selected.map(item => item.relationshipId),
     ["relationship-ripper-locations", "relationship-kanyon-locations"]
+  );
+});
+
+test("exact legacy relationship repair cannot select a different Ripper relationship", () => {
+  const objects = [
+    { objectId: "object_locations", passportId: "IXILOCATIONS" },
+    { objectId: "object_equipment", passportId: "IXIEQUIPMENT" },
+    { objectId: "object_ripper", passportId: "IXIRIPPER" }
+  ];
+  const admission = {
+    objectsById: new Map(objects.map(object => [object.objectId, object])),
+    resolveObjectId(reference) {
+      const cleanReference = String(reference || "").trim();
+      const byObjectId = this.objectsById.get(cleanReference);
+      if (byObjectId) return byObjectId.objectId;
+      return objects.find(object => object.passportId === cleanReference)?.objectId || "";
+    }
+  };
+  const relationships = [
+    {
+      relationshipId: "relationship_ripper_locations",
+      sourceObjectId: "object_ripper",
+      sourcePassportId: "IXIRIPPER",
+      targetObjectId: "object_locations",
+      targetPassportId: "IXILOCATIONS",
+      legacyType: "contained-in",
+      status: "active",
+      revision: 4
+    },
+    {
+      relationshipId: "relationship_ripper_equipment",
+      sourceObjectId: "object_ripper",
+      sourcePassportId: "IXIRIPPER",
+      targetObjectId: "object_equipment",
+      targetPassportId: "IXIEQUIPMENT",
+      behaviorId: "aos.rail-membership.v1",
+      status: "active",
+      revision: 8
+    }
+  ];
+
+  const exact = getExactActiveAosRelationship({
+    relationships,
+    relationshipId: "relationship_ripper_locations",
+    sourceObjectId: "object_ripper",
+    targetObjectId: "object_locations",
+    admission
+  });
+
+  assert.equal(exact?.relationshipId, "relationship_ripper_locations");
+  assert.equal(exact?.legacyType, "contained-in");
+  assert.equal(exact?.revision, 4);
+  assert.equal(
+    getExactActiveAosRelationship({
+      relationships,
+      relationshipId: "relationship_ripper_locations",
+      sourceObjectId: "object_ripper",
+      targetObjectId: "object_equipment",
+      admission
+    }),
+    null
+  );
+});
+
+test("work repairs only the exact deployed Ripper to Locations edge", () => {
+  assert.match(
+    work,
+    /relationship_efb98dc5-cad0-4d51-90c0-90fa558d9696/
+  );
+  assert.match(
+    work,
+    /getExactActiveAosRelationship\(\{[\s\S]*?relationshipId,[\s\S]*?sourceObjectId,[\s\S]*?targetObjectId,[\s\S]*?admission: aosWorkspaceAdmission/
+  );
+  assert.match(
+    work,
+    /aos-exact-ripper-direct-locations-membership-repair/
+  );
+  assert.match(
+    work,
+    /preserveAllOtherRelationships: true/
   );
 });
 
