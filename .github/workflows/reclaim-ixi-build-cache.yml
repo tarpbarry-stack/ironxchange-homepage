@@ -1,0 +1,91 @@
+name: Reclaim generated IX-Core build caches
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/reclaim-ixi-build-cache.yml']
+permissions:
+  contents: read
+concurrency:
+  group: ixi-core-production
+  cancel-in-progress: false
+jobs:
+  reclaim:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      AWS_REGION: us-east-2
+      AWS_INSTANCE_ID: ${{ secrets.AWS_INSTANCE_ID }}
+    steps:
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-2
+      - name: Reclaim inactive generated dependencies and frontend build output
+        run: |
+          set -euo pipefail
+          test "$AWS_INSTANCE_ID" = i-06d9ae98889f6fdab
+          test "$(aws sts get-caller-identity --query Account --output text)" = 459212966383
+          python3 - <<'PY'
+          import json,os,pathlib
+          command = r'''set -eu
+          exec 9>/var/lock/ixi-core-production.lock
+          flock -n 9 || { echo 'Another release holds the deployment lock.' >&2; exit 1; }
+          curl --max-time 5 -fsS http://127.0.0.1:4100/ready
+          python3 - <<'CACHE'
+          import json,os,pathlib,re,shutil,subprocess
+          def free():
+              s=os.statvfs('/')
+              return s.f_bavail*s.f_frsize
+          before=free()
+          excluded=set()
+          pid=int(os.readlink('/proc/self'))
+          while pid>1:
+              excluded.add(pid)
+              try:
+                  pid=int(pathlib.Path(f'/proc/{pid}/status').read_text().split('PPid:')[1].splitlines()[0].strip())
+              except (OSError,ValueError,IndexError):
+                  break
+          parents=[pathlib.Path('/tmp/ixi-aos-rollout-frontend')]
+          parents += [p for p in pathlib.Path('/var/tmp').glob('ixi-complete-release-*') if re.fullmatch(r'ixi-complete-release-[A-Za-z0-9]{8}',p.name)]
+          actions=[]
+          for parent in parents:
+              if parent.is_symlink() or not parent.is_dir() or parent.resolve()!=parent or not (parent/'package.json').is_file() or not (parent/'package-lock.json').is_file():
+                  continue
+              busy=[]
+              for proc in pathlib.Path('/proc').iterdir():
+                  if not proc.name.isdigit() or int(proc.name) in excluded:
+                      continue
+                  try:
+                      cwd=(proc/'cwd').resolve()
+                      args=(proc/'cmdline').read_bytes()
+                      if cwd==parent or parent in cwd.parents or str(parent).encode() in args:
+                          busy.append(int(proc.name))
+                  except (OSError,ValueError):
+                      pass
+              if busy:
+                  actions.append({'parent':str(parent),'skipped':'active-process','processIds':busy})
+                  continue
+              names=['node_modules','.next'] if parent.name=='ixi-aos-rollout-frontend' else ['node_modules']
+              for name in names:
+                  target=parent/name
+                  if target.is_symlink() or not target.is_dir() or target.resolve()!=target:
+                      continue
+                  size=subprocess.run(['du','-sx','-B1','--',str(target)],check=True,capture_output=True,text=True).stdout.split()[0]
+                  shutil.rmtree(target)
+                  actions.append({'removedGeneratedCache':str(target),'allocatedBytes':int(size)})
+          print(json.dumps({'availableBytesBefore':before,'availableBytesAfter':free(),'actions':actions}))
+          CACHE
+          node /var/www/ix-core/ops/runtime-release.js verify /var/www/ix-core /var/www/ix-core/.ixi-release.json
+          curl --max-time 5 -fsS http://127.0.0.1:4100/live
+          curl --max-time 5 -fsS http://127.0.0.1:4100/ready
+          '''
+          pathlib.Path(os.environ['RUNNER_TEMP'],'cache-reclaim.json').write_text(json.dumps({'commands':[command],'executionTimeout':['300']}))
+          PY
+          command_id="$(aws ssm send-command --instance-ids "$AWS_INSTANCE_ID" --document-name AWS-RunShellScript --comment 'Reclaim only inactive generated build caches' --parameters "file://$RUNNER_TEMP/cache-reclaim.json" --query Command.CommandId --output text)"
+          echo "SSM cache reclaim: $command_id"
+          aws ssm wait command-executed --command-id "$command_id" --instance-id "$AWS_INSTANCE_ID" || true
+          aws ssm get-command-invocation --command-id "$command_id" --instance-id "$AWS_INSTANCE_ID" > "$RUNNER_TEMP/cache-reclaim-result.json"
+          jq -r '.StandardOutputContent, .StandardErrorContent' "$RUNNER_TEMP/cache-reclaim-result.json"
+          test "$(jq -r .Status "$RUNNER_TEMP/cache-reclaim-result.json")" = Success
