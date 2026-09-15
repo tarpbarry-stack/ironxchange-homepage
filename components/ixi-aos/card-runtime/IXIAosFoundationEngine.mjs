@@ -345,6 +345,10 @@ export function acceptIXIAosCanonicalObject(command = {}, response = {}) {
   ) {
     throw Object.assign(new Error("IX Core returned a stale AOS object revision."), { code: "IXI_AOS_CANONICAL_REVISION_STALE" });
   }
+  if (clean(command.patch?.objectType) && clean(canonical.objectType) !== clean(command.patch.objectType)) {
+    throw Object.assign(new Error("IX-Core has not confirmed the requested Object classification."),
+      { code: "IXI_AOS_CLASSIFICATION_READBACK_MISMATCH" });
+  }
   return synchronizeIXIAosBusinessIdentifier(canonical);
 }
 

@@ -9,7 +9,7 @@
  * business operation.
  */
 
-import { isExplicitAosSystemIndexObject } from "../../lib/mos/IXIAosSystemIndexMembershipPolicy.js";
+import { isExplicitAosSystemIndexObject, evaluateAosSystemIndexMembership } from "../../lib/mos/IXIAosSystemIndexMembershipPolicy.js";
 
 function clean(value) {
   return String(
@@ -131,6 +131,17 @@ export function canIXIObjectAcceptDrop({
       reason:
         "target-disabled"
     };
+  }
+
+  // A workspace predicate may restrict a System Index drop, but cannot grant
+  // membership which its canonical structural policy rejects.
+  if (isSystemIndexObject(target)) {
+    const decision = evaluateAosSystemIndexMembership({ sourceObject: dragData, targetObject: target });
+    if (!decision.allowed) return { accepted: false, reason: decision.reason };
+    if (typeof policy.accepts === "function" && !policy.accepts({ dragData, target })) {
+      return { accepted: false, reason: "policy-rejected" };
+    }
+    return { accepted: true, reason: "classification-accepted" };
   }
 
 

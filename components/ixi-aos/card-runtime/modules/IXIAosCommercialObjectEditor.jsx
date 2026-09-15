@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 
 import IXIAosPrimaryMediaEditor from "./IXIAosPrimaryMediaEditor";
 import IXIAosMembershipPolicyEditor from "./IXIAosMembershipPolicyEditor";
-import { AOS_MEMBER_TYPES } from "../../../../lib/mos/IXIAosMemberTypes.js";
+import { AOS_MEMBER_TYPES, canClassifyExistingAosObject } from "../../../../lib/mos/IXIAosMemberTypes.js";
 import { AOS_SYSTEM_INDEX_MEMBERSHIP_POLICY_SCHEMA, isExplicitAosSystemIndexObject, getAosSystemIndexMembershipPolicy } from "../../../../lib/mos/IXIAosSystemIndexMembershipPolicy.js";
 
 import {
@@ -134,7 +134,7 @@ export default function IXIAosCommercialObjectEditor({
   const [membershipPolicy, setMembershipPolicy] = useState(() => membershipDraft(object));
   const [objectType, setObjectType] = useState(object.objectType);
   const editsMembership = isExplicitAosSystemIndexObject(object) && !object?.metadata?.adapterId;
-  const canClassify = object.objectType === "generic" && !object.definitionId && !isExplicitAosSystemIndexObject(object);
+  const canClassify = canClassifyExistingAosObject(object);
 
   useEffect(() => {
     const nextDefinitions = normalizeDefinitions(object);

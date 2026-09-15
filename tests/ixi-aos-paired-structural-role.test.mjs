@@ -47,3 +47,30 @@ test("Equipment presentation aliases do not confer its membership policy", () =>
   const equipment = { objectType: "system-index", metadata: { adapterId: "ixi-owned-equipment" } };
   assert.deepEqual(getAosSystemIndexMembershipPolicy(equipment).allowedObjectTypes, ["machine"]);
 });
+
+test("index membership and drop acceptance use the same canonical classifications as IX-Core", {
+  skip: coreRoot ? false : "Run the required paired gate with IXI_CORE_CONTRACT_ROOT."
+}, () => {
+  const require = createRequire(path.join(path.resolve(coreRoot), "package.json"));
+  const core = require("./mos/relationships/aosSystemIndexMembershipPolicy.js");
+  const root = { objectId: "root", objectType: "system-index", metadata: { systemIndexMembershipPolicy: {
+    schema: "aos.system-index-membership.v1", enabled: true, defaultWorkspaceHome: false,
+    allowedObjectTypes: ["person"], allowedDefinitionIds: ["customer-definition"]
+  } }, workspaceDropPolicy: { enabled: true, accepts: () => true } };
+  const variants = [
+    { objectType: "person" }, { objectType: "PERSON" }, { objectType: "machine" },
+    { objectType: "generic", definitionId: "customer-definition" },
+    { objectType: "generic", metadata: { definitionId: "customer-definition" } },
+    { sourceObjectType: "person" }, { type: "person" }
+  ];
+  for (const variant of variants) {
+    const source = { objectId: "member", ...variant };
+    const expected = core.evaluateAosRailMembership({ sourceObject: source, targetObject: root }).allowed;
+    assert.equal(evaluateAosSystemIndexMembership({ sourceObject: source, targetObject: root }).allowed, expected,
+      `membership: ${JSON.stringify(variant)}`);
+    assert.equal(canIXIObjectAcceptDrop({ dragData: source, target: root }).accepted, expected,
+      `drop: ${JSON.stringify(variant)}`);
+  }
+  assert.equal(canIXIObjectAcceptDrop({ dragData: { objectId: "member", objectType: "person" },
+    target: { ...root, metadata: {} } }).accepted, false);
+});

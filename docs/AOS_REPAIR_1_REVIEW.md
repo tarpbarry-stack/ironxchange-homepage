@@ -1,6 +1,6 @@
 # AOS/WORK — First repair review
 
-Prepared 15 September 2026. Status: review candidate; publication authorized; not deployed.
+Prepared 15 September 2026. Status: published draft candidate; not deployed. See [the post-publication audit](AOS_REPAIR_1_PUBLISHED_AUDIT.md) for corrections and the current release verdict.
 
 ## Decision
 
@@ -66,6 +66,6 @@ An old source-text assertion was replaced with a behavior assertion because drag
 
 ## Publication status
 
-The user explicitly authorized publication and a subsequent audit. The backend is published as [draft PR 66](https://github.com/tarpbarry-stack/ixi-core/pull/66). The frontend is being published as its paired review branch. Publication does not include merging or deploying production.
+The user explicitly authorized publication and a subsequent audit. The backend is published as [draft PR 66](https://github.com/tarpbarry-stack/ixi-core/pull/66); the frontend is published as [draft PR 353](https://github.com/tarpbarry-stack/ironxchange-homepage/pull/353). Publication does not include merging or deploying production.
 
-The post-publication audit will verify remote source identity, the exact backend pin, automated checks, and remaining release blockers.
+The [post-publication audit](AOS_REPAIR_1_PUBLISHED_AUDIT.md) records the reproduced gaps, follow-up corrections, published-source checks and remaining release blockers. Its validation results supersede the earlier counts in this preparation report.

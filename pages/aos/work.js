@@ -1365,10 +1365,17 @@ const saveAosWorkspaceObject = useCallback(async (payload = {}) => {
       throw Object.assign(new Error("The active Entity changed while refreshing membership."),
         { code: "AOS_BROWSER_ENTITY_MISMATCH", status: 403 });
     }
-    setAosObjects(environment.objects || []);
+    const refreshed = (environment.objects || []).find(object => object.objectId === objectId);
+    if (!refreshed || Number(refreshed.revision) < Number(canonical.revision)) {
+      throw Object.assign(new Error("The saved Object is not available in the refreshed workspace."),
+        { code: "IXI_AOS_CANONICAL_READBACK_REQUIRED" });
+    }
+    const acceptedRefreshed = mergeAosCanonicalObject(payload?.object || canonical, refreshed);
+    setAosObjects(environment.objects.map(object => object.objectId === objectId ? acceptedRefreshed : object));
     setAosRelationships(environment.relationships || []);
     setAosRailProjections(environment.railProjections || {});
     setSystemIndexes(environment.systemIndexes || []);
+    return { ...result, object: acceptedRefreshed };
   }
 
   setAosObjects(current => current.map(existing => {
