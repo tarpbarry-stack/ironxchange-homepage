@@ -106,3 +106,28 @@
   outline: 2px solid #ffc400;
   outline-offset: 3px;
 }
+.summary {
+  min-width: 0;
+}
+.summaryItem {
+  display: grid;
+  min-width: 0;
+  gap: 6px;
+  padding: 12px 0;
+  border-bottom: 1px solid #3b3e35;
+  overflow-wrap: anywhere;
+  font-size: 13px;
+}
+.summaryItem strong {
+  font-size: 14px;
+}
+.summaryItem a {
+  color: #ffc400;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+}
+.summaryItem a:focus-visible {
+  outline: 2px solid #ffc400;
+  outline-offset: 3px;
+}

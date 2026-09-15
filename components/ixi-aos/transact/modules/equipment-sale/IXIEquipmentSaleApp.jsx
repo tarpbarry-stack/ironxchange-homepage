@@ -1,4 +1,5 @@
 import IXITradeInSection from "../../sales/IXITradeInSection";
+import IXITradeSummary from "../../sales/IXITradeSummary";
 import IXIMoneyInput, { IXINumericInput } from "../../IXIMoneyInput";
 import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
@@ -643,6 +644,7 @@ function CardEditor({
   invoiceDraft,
   setInvoiceDraft,
   tradeSection,
+  invoiceTrades,
 }) {
   const commercialLocked = invoiceEntry ? invoiceLocked : orderLocked;
   return (
@@ -720,6 +722,7 @@ function CardEditor({
         </div>
       </section>
       {tradeSection}
+      {invoiceEntry ? <IXITradeSummary trades={invoiceTrades ?? input.trades ?? []} /> : null}
       <section>
         <h3>COMMERCIAL</h3>
         <div className="es-card-pair">
@@ -1575,6 +1578,7 @@ export default function IXIEquipmentSaleApp({
                     </p>
                     <CardEditor
                       invoiceEntry
+                      invoiceTrades={invoiceRecord?.metadata?.trades}
                       linkedInvoice={linkedInvoice}
                       invoiceLocked={invoiceLocked}
                       orderLocked={false}
@@ -1897,6 +1901,7 @@ export default function IXIEquipmentSaleApp({
         ) : null}
         <CardEditor
           invoiceEntry={invoiceEntry}
+          invoiceTrades={invoiceRecord?.metadata?.trades}
           linkedInvoice={linkedInvoice}
           invoiceLocked={invoiceLocked}
           orderLocked={orderLocked}

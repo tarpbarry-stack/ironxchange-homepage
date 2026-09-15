@@ -10,7 +10,7 @@ Sales Orders previously exposed one trade allowance without identities for the i
 4. Launch opens that exact listing for photos and other machine details. Returning to the order refreshes its photos.
 5. Acquisition opens the existing full acquisition form against the incoming machine, prefilled with its allowance and linked to the order. Each incoming machine has its own acquisition identity and basis.
 6. Recording the acquisition verifies the financial document before admitting the same machine to owned Equipment. An interrupted promotion offers Finish Inventory.
-7. Signing and document exports identify every trade. The cash invoice deducts the allowances; outgoing machine revenue includes the noncash consideration. SOLD verifies the actual trade acquisitions and cash balance.
+7. Both invoice card and worksheet show every incoming machine, serial, hours, Passport link and allowance. Signing and document exports identify every trade. The cash invoice deducts the allowances; outgoing machine revenue includes the noncash consideration. SOLD verifies the actual trade acquisitions and cash balance.
 
 ## Integrity and compatibility
 
