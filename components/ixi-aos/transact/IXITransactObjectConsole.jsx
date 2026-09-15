@@ -463,8 +463,8 @@ export default function IXITransactObjectConsole({
               {isListing ? (
                 <>
                   {primaryHistory && !consoleModules[slot.slotId] ? <>
-                    <button type="button" className="sold-open-apps" onClick={() => setPrimaryHistory(false)}>TRAN$ACT APPS</button>
                     <IXITransactRecordIndex context={context} financialRecords={financialRecords} onClose={onClose}
+                      onOpenApps={() => setPrimaryHistory(false)}
                       onOpenModule={(item, moduleContext, payload) => openConsoleModule(slot.slotId, item, payload)} />
                   </> : <IXITransactApp
                     object={object}
