@@ -40,7 +40,7 @@ test("company payment scope reuses the authenticated Entity Passport without cha
 test("Desktop identity changes retain the released common payment entry and row actions", async () => {
   const desktop = await readFile(new URL("../../../ixi-command-center/IXITransactCommandCenter.jsx", new URL("payments/IXIPaymentModel.js", base)), "utf8");
   assert.match(desktop, /<IXIPaymentsPanel\b/);
-  assert.match(desktop, />PAYMENTS · MARK PAID<\/button>/);
+  assert.match(desktop, /onClick=\{\(\) => openPaymentRecord\(\)\}[^>]*>PAYMENTS<\/button>/);
   assert.match(desktop, /onMarkPaid=\{openPaymentRecord\}/);
   assert.match(desktop, /paymentScopeObject\(buildTransactObject/);
   assert.match(desktop, /STOCK NUMBER/);

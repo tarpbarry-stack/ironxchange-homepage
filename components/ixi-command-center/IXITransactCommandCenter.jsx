@@ -61,6 +61,11 @@ const IXITransactApp = dynamic(
   }
 );
 
+const IXITransactAppDirectory = dynamic(() => import("./IXITransactAppDirectory"), {
+  ssr: false,
+  loading: () => <p role="status">Loading apps…</p>,
+});
+
 const SCOPE_OPTIONS = [
   ["company", "CO", "Company"],
   ["location", "LO", "Locations"],
@@ -353,7 +358,6 @@ export default function IXITransactCommandCenter({ runtime, active = true }) {
   const [searchError, setSearchError] = useState("");
   const [newMenuOpen, setNewMenuOpen] = useState(false);
   const [openPanel, setOpenPanel] = useState("");
-  const [appQuery, setAppQuery] = useState("");
   const [searchIndex, setSearchIndex] = useState(-1);
   const workspaceMenu = useRef(null);
   const historyStates = useRef(new Map());
@@ -905,7 +909,8 @@ export default function IXITransactCommandCenter({ runtime, active = true }) {
     const idle = window.requestIdleCallback ? window.requestIdleCallback(warm, { timeout: 2000 }) : window.setTimeout(warm, 300);
     return () => { if (window.cancelIdleCallback) window.cancelIdleCallback(idle); else window.clearTimeout(idle); };
   }, [active, activeWorkspace, passportRecordsLoading, passportRecords.length]);
-  const appGroups = [...new Set(selectedModules.map(module => module.group))];
+  const appPreferenceKey = entityPassportId && accessData.actor?.passportId
+    ? `ixi:transact:app-order:v1:${entityPassportId}:${accessData.actor.passportId}` : "";
 
   return (
     <div className={styles.shell} data-ui-rebuild="true">
@@ -922,7 +927,7 @@ export default function IXITransactCommandCenter({ runtime, active = true }) {
           {searchResults.length ? <div className={styles.searchResults} id="ixi-transact-search-results" role="listbox" aria-label="Search results">{searchResults.map((result, index) => <button type="button" role="option" id={`ixi-search-result-${index}`} aria-selected={searchIndex === index} key={result.resultId} onClick={() => chooseSearchResult(result)}><span><strong>{result.title}</strong><small>{result.party || result.passportId}</small></span><b>{result.resultType === "transaction" ? "TRANSACTION" : contextLabel(result.kind)}</b></button>)}</div> : null}
           {query.trim().length >= 2 ? <span role="status" className={styles.searchStatus}>{searchError || (searchLoading ? "Searching…" : !searchResults.length ? "No matches" : "")}</span> : null}
         </div>
-        <button type="button" className={styles.newAction} onClick={() => openPaymentRecord()} disabled={!selectedContext}>PAYMENTS · MARK PAID</button>
+        <button type="button" className={`${styles.newAction} ${styles.paymentsAction}`} onClick={() => openPaymentRecord()} title="Open payments and record a payment" disabled={!selectedContext}>PAYMENTS</button>
         <button type="button" className={styles.newAction} onClick={() => setNewMenuOpen(value => !value)} aria-expanded={newMenuOpen} disabled={!selectedContext}>+ NEW</button>
         <a className={styles.aosAction} href="/aos/work">RETURN TO AOS</a>
       </header>
@@ -1004,7 +1009,7 @@ export default function IXITransactCommandCenter({ runtime, active = true }) {
         <IXITransactSidePanel className={styles.contextPanel} label="Selected object and apps" dockAt={1000} open={openPanel === "apps"} onDismiss={() => setOpenPanel("")}>
           <div className={styles.contextTitle}><span>ACTIVE CONTEXT</span><strong>{objectContextActive ? "TRAN$ACT APPS" : "PROOF & LINEAGE"}</strong></div>
           {selectedContext ? <ContextIdentityCard context={selectedContext} interactive={objectContextActive} onActivate={returnToObjectHistory} /> : null}
-          {objectContextActive ? <section className={styles.groupedApps} aria-label="TRAN$ACT applications"><button type="button" className={styles.historyApp} data-active={activeWorkspace === "object-history"} onClick={returnToObjectHistory}>TRANSACTION HISTORY</button><input type="search" aria-label="Find an app" placeholder="Find an app…" value={appQuery} onChange={event => setAppQuery(event.target.value)} /><div className={styles.appGroups}>{appGroups.map(group => { const modules = selectedModules.filter(module => module.group === group && module.label.toLowerCase().includes(appQuery.toLowerCase())); return modules.length ? <section key={group}><h3>{group}</h3><div className={styles.appLauncher}>{modules.map(module => <button type="button" key={module.id} data-active={activeModuleId === module.id} onClick={() => openTransactModule(module.id)}><strong>{module.label}</strong></button>)}</div></section> : null; })}{!selectedModules.some(module => module.label.toLowerCase().includes(appQuery.toLowerCase())) ? <p>No matching apps.</p> : null}</div></section> : <section className={styles.proofCard}>
+          {objectContextActive ? <IXITransactAppDirectory key={appPreferenceKey || "session"} modules={selectedModules} activeModuleId={activeModuleId} onOpen={openTransactModule} onHistory={returnToObjectHistory} historyActive={activeWorkspace === "object-history" && !activeTabId} preferenceKey={appPreferenceKey} /> : <section className={styles.proofCard}>
             <div><span>IDENTITY</span><StatusBadge value={access ? "VERIFIED" : "WAITING"} /></div>
             <div><span>FINANCIAL</span><StatusBadge value={projectionPayload ? "CURRENT" : "NOT PROVEN"} /></div>
             <div><span>SOURCE COVERAGE</span><strong>{projectionPayload ? "SERVER RETURNED" : "NOT RETURNED"}</strong></div>

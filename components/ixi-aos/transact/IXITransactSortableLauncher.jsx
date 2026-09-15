@@ -16,6 +16,7 @@ import {
   useSortable,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import sidebarStyles from "../../ixi-command-center/IXITransactAppDirectory.module.css";
 
 import {
   moveIXITransactModule,
@@ -53,7 +54,7 @@ function ModuleCopy({ item, openControl = false }) {
   );
 }
 
-function SortableModuleTile({ item, onOpen }) {
+function SortableModuleTile({ item, onOpen, variant, activeModuleId }) {
   const {
     attributes,
     listeners,
@@ -69,6 +70,19 @@ function SortableModuleTile({ item, onOpen }) {
       moduleId: item.id,
     },
   });
+
+  if (variant === "sidebar") return (
+    <div ref={setNodeRef} className={sidebarStyles.tile} data-app-id={item.id}
+      data-active={activeModuleId === item.id} data-dragging={isDragging}
+      style={{ transform: CSS.Transform.toString(transform), transition: isDragging ? "none" : transition }}>
+      <button type="button" className={sidebarStyles.open} onClick={() => onOpen?.(item)}>{item.label}</button>
+      <button ref={setActivatorNodeRef} type="button" className={sidebarStyles.handle}
+        {...attributes} {...listeners} aria-label={`Reorder ${item.label}`}
+        title={`Drag to reorder ${item.label}. Keyboard: Space, arrow keys, Space.`}>
+        <svg viewBox="0 0 16 22" aria-hidden="true"><circle cx="5" cy="5" r="1.5" /><circle cx="11" cy="5" r="1.5" /><circle cx="5" cy="11" r="1.5" /><circle cx="11" cy="11" r="1.5" /><circle cx="5" cy="17" r="1.5" /><circle cx="11" cy="17" r="1.5" /></svg>
+      </button>
+    </div>
+  );
 
   return (
     <div
@@ -98,6 +112,8 @@ export default function IXITransactSortableLauncher({
   moduleOrder = null,
   onOpen = null,
   onOrderChange = null,
+  variant = "default",
+  activeModuleId = "",
 }) {
   const moduleIds = useMemo(
     () => modules.map(item => clean(item?.id)).filter(Boolean),
@@ -163,7 +179,7 @@ export default function IXITransactSortableLauncher({
         strategy={rectSortingStrategy}
       >
         <div
-          className="tx-grid"
+          className={variant === "sidebar" ? sidebarStyles.grid : "tx-grid"}
           data-ixi-transact-sortable-launcher
         >
           {orderedModules.map(item => (
@@ -171,6 +187,8 @@ export default function IXITransactSortableLauncher({
               key={item.id}
               item={item}
               onOpen={onOpen}
+              variant={variant}
+              activeModuleId={activeModuleId}
             />
           ))}
         </div>

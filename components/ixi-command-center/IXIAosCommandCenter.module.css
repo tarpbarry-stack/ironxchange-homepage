@@ -728,7 +728,9 @@
 .objectPickers { margin: 8px 0; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); border: 1px solid #39423a; border-radius: 3px; background: #0d130f; }
 .shell[data-ui-rebuild] dialog .contextPanel, .shell[data-ui-rebuild] dialog .navigation { position: static; height: auto; min-height: 0; flex: 1; width: 100%; }
 .shell[data-ui-rebuild] dialog .newTransactionMenu { position: static; inset: auto; width: 100%; margin: 0; border: 0; box-shadow: none; max-height: none; }
-.shell[data-ui-rebuild] .newAction { max-width: 124px; white-space: normal; line-height: 1.25; }
+.shell[data-ui-rebuild] .newAction { white-space: nowrap; line-height: 1; }
+.shell[data-ui-rebuild] .paymentsAction { min-width: 104px; padding-inline: 12px; color: #ffce32; border-color: #796126; background: #171c11; letter-spacing: .04em; }
+.shell[data-ui-rebuild] .paymentsAction:hover { background: #2b2a14; border-color: #ffc400; }
 @media (max-width: 600px) { .objectPickers { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 .shell[data-ui-rebuild] { overflow-x: clip; overflow-y: visible; }
 .shell[data-ui-rebuild] .appLauncher button strong { font-size: 14px; }
