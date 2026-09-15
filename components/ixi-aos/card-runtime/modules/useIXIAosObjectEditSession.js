@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { assertCompleteAosCreation } from "../../../../lib/mos/ixiAosCreationClient.mjs";
 
 import { commitMosObjectCommand, fetchMosObject } from "../../../../lib/mos/ixiMosClient";
 import {
@@ -123,7 +124,16 @@ export default function useIXIAosObjectEditSession({
         throw readbackError;
       }
 
-      const canonical = acceptIXIAosCanonicalObject(command, { object: adapterObject });
+      const isCreation = runtimeObject?.metadata?.draftOnly === true && command.objectId.startsWith("aos-draft:");
+      if (isCreation && result.creation?.draftId !== command.objectId) {
+        throw Object.assign(new Error("The saved Object does not match this creation draft."), { code: "AOS_CREATION_DRAFT_MISMATCH" });
+      }
+      const canonical = isCreation
+        ? synchronizeIXIAosBusinessIdentifier(assertCompleteAosCreation(result, {
+            entityId: runtimeObject.entityId, membership: result.creation?.membership,
+            objectType: draft.objectType, definitionId: draft.definitionId
+          }).object)
+        : acceptIXIAosCanonicalObject(command, { object: adapterObject });
       pendingCommandRef.current = null;
       conflictDraftRef.current = null;
       setRuntimeObject(canonical);

@@ -1,4 +1,6 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import IXIAosCreationTypeEditor from "./IXIAosCreationTypeEditor";
+import { canClassifyAosCreationDraft, assertAosDraftCreationReady } from "../../../../lib/mos/IXIAosChildCreationContract.mjs";
 
 import IXIAosPrimaryMediaEditor from "./IXIAosPrimaryMediaEditor";
 import IXIAosMembershipPolicyEditor from "./IXIAosMembershipPolicyEditor";
@@ -133,6 +135,19 @@ export default function IXIAosCommercialObjectEditor({
   const [mediaError, setMediaError] = useState("");
   const [membershipPolicy, setMembershipPolicy] = useState(() => membershipDraft(object));
   const [objectType, setObjectType] = useState(object.objectType);
+  const [definitionId, setDefinitionId] = useState(object.definitionId || null);
+  const [creationDefinition, setCreationDefinition] = useState(null);
+  const createsObject = canClassifyAosCreationDraft(object);
+  const acceptCreationDefinition = useCallback(definition => {
+    setCreationDefinition(definition);
+    if (!definition) return;
+    setDefinitions(current => {
+      const schema = (definition.fieldSchema || []).map(field => ({ ...field,
+        fieldId: field.fieldId || field.field, fieldType: field.type || "text" }));
+      const keys = new Set(schema.map(field => field.fieldId));
+      return [...current.filter(field => !keys.has(field.fieldId)), ...schema];
+    });
+  }, []);
   const editsMembership = isExplicitAosSystemIndexObject(object) && !object?.metadata?.adapterId;
   const canClassify = canClassifyExistingAosObject(object);
 
@@ -155,6 +170,7 @@ export default function IXIAosCommercialObjectEditor({
     setMediaError("");
     setMembershipPolicy(membershipDraft(object));
     setObjectType(object.objectType);
+    setDefinitionId(object.definitionId || null);
   }, [object]);
 
   function addField() {
@@ -241,6 +257,10 @@ export default function IXIAosCommercialObjectEditor({
     });
 
     try {
+      assertAosDraftCreationReady({ ...object, objectType, definitionId });
+      if (createsObject && definitionId && creationDefinition?.definitionId !== definitionId) {
+        throw new Error("Load the selected customer definition before saving.");
+      }
       if (editsMembership && membershipPolicy.enabled &&
         !membershipPolicy.allowedObjectTypes.length && !membershipPolicy.allowedDefinitionIds.length) {
         throw new Error("Choose what this index accepts before saving.");
@@ -252,6 +272,7 @@ export default function IXIAosCommercialObjectEditor({
       await onSave?.({
         ...object,
         ...(canClassify ? { objectType } : {}),
+        ...(createsObject ? { objectType, definitionId, definitionKey: creationDefinition?.definitionKey || null } : {}),
         displayName: clean(name) || getObjectDisplayName(object),
         fields: nextFields,
         fieldDefinitions: normalizedDefinitions,
@@ -328,6 +349,10 @@ export default function IXIAosCommercialObjectEditor({
             {AOS_MEMBER_TYPES.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
           </select>
         </section> : null}
+
+        {createsObject ? <IXIAosCreationTypeEditor object={object} objectType={objectType} definitionId={definitionId}
+          disabled={saving || Boolean(mediaStatus)} onDefinition={acceptCreationDefinition}
+          onChange={choice => { setObjectType(choice.objectType); setDefinitionId(choice.definitionId); }} /> : null}
 
         <section>
           <h4>FIELDS</h4>

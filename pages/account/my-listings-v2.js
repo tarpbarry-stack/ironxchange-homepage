@@ -1538,7 +1538,7 @@ toggleSearchSurfaceRevealed
 />
               
      {isSold && <div className="sold-toolbar" aria-label="Sold inventory filters">
-       <strong>SOLD <span>{inventoryStatus.total} sales</span></strong>
+       <strong>SOLD <span>{inventoryStatus.total} {inventoryStatus.total === 1 ? "sale" : "sales"}</span></strong>
        <label>Settlement<select value={soldQuery.settlement} onChange={event => setSoldQuery(current => ({ ...current, settlement: event.target.value, page: 1 }))}><option value="all">All</option><option value="open">Open</option><option value="closed">Closed</option></select></label>
        <label>Sale status<select value={soldQuery.status} onChange={event => setSoldQuery(current => ({ ...current, status: event.target.value, page: 1 }))}><option value="all">All sales</option><option value="sold">Sold</option><option value="returned">Returned</option></select></label>
        <label>From<input type="date" value={soldQuery.from} onChange={event => setSoldQuery(current => ({ ...current, from: event.target.value, page: 1 }))} /></label>

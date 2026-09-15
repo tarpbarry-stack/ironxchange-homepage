@@ -36,8 +36,9 @@ assert(
   "Container + must create a client-only draft."
 );
 assert(
-  creationHook.includes("await provisionAosObject({"),
-  "Manual Save must terminate at canonical provisioning."
+  creationHook.includes("await createAndAttachAosObject(request)") &&
+    !creationHook.includes("await placeProvisionedObject("),
+  "Manual Save must use the durable creation-and-attachment command."
 );
 assert(
   creationHook.includes("replaceWorkspaceObjectId("),

@@ -1,6 +1,7 @@
 import { preserveOpenInventoryTransactions, releaseClosedInventoryTransactions } from "../../lib/listings/IXIInventorySession.mjs";
 import { subscribeInventoryChanges } from "../../lib/listings/IXIInventoryEvents";
 import Head from "next/head";
+import IXIAosCreationRecovery from "../../components/ixi-mos/object-creation/IXIAosCreationRecovery";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import {
@@ -2213,6 +2214,10 @@ function saveWorkspaceLayout(
 const {
   createRootContainerDraft,
   createChildContainerDraft,
+  pendingCreations,
+  creationRecoveryError,
+  refreshCreationCommands,
+  finishPendingCreation,
   saveMosObjectName,
   deleteMosWorkspaceObject
 } = useIXIMosObjectCreation({
@@ -2233,6 +2238,10 @@ const {
   setAosObjects,
 
   setSystemIndexes,
+
+  setAosRelationships,
+  setAosRailProjections,
+  inventoryCardStateRef,
 
   onObjectNotice:
     showAosObjectNotice
@@ -2372,6 +2381,9 @@ const saveAosWorkspaceObjectOrDraft =
     if (isAosDraftId(objectId)) {
       return saveMosObjectName({
         objectId,
+        objectType: payload?.objectType ?? payload?.object?.objectType,
+        definitionId: payload?.definitionId !== undefined ? payload.definitionId : payload?.object?.definitionId,
+        definitionKey: payload?.definitionKey !== undefined ? payload.definitionKey : payload?.object?.definitionKey,
         displayName:
           payload?.displayName ||
           payload?.object?.displayName,
@@ -2424,6 +2436,9 @@ return (
       </Head>
 
             <Navbar />
+
+            <IXIAosCreationRecovery commands={pendingCreations} loadError={creationRecoveryError}
+              onRefresh={refreshCreationCommands} onFinish={finishPendingCreation} />
 
    
 <IXIWorkspaceEngine
