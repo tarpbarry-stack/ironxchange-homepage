@@ -1,3 +1,11 @@
+// A quiet zero in history is not a fabricated balance for non-obligation records.
+export function historyBalanceDisplay(row = {}) {
+  if (row.openCents === 0) return { label: "—", description: "Zero outstanding balance" };
+  if (row.openCents != null) return { label: "", description: undefined };
+  if (row.review) return { label: "REVIEW", description: row.reason || "Balance requires review" };
+  return { label: "—", description: "No standalone balance on this record; view transaction for details" };
+}
+
 // Shorten only the sidebar label; keep the canonical title and hours intact.
 export function sidebarObjectTitle(context = {}) {
   const title = String(context.title || "");

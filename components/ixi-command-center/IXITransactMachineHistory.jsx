@@ -4,7 +4,7 @@ import {
   filterMachineLedger,
   moneyLabel,
 } from "./IXITransactMachineLedger.mjs";
-import { transactionDisplayTitle } from "./IXITransactDisplay.mjs";
+import { historyBalanceDisplay, transactionDisplayTitle } from "./IXITransactDisplay.mjs";
 import IXITransactDocumentActions from "./IXITransactDocumentActions";
 import IXIPaymentStatusBadge from "../ixi-aos/transact/payments/IXIPaymentStatusBadge";
 import styles from "./IXITransactWorkspace.module.css";
@@ -417,19 +417,13 @@ export default function IXITransactMachineHistory({
                         ? "—"
                         : moneyLabel(row.amountCents, row.currency)}
                     </td>
-                    <td className={styles.money}>
-                      {row.openCents == null
-                        ? "—"
+                    <td className={styles.money} title={historyBalanceDisplay(row).description} aria-label={historyBalanceDisplay(row).description}>
+                      {row.openCents == null || row.openCents === 0
+                        ? historyBalanceDisplay(row).label
                         : moneyLabel(row.openCents, row.currency)}
                     </td>
                     <td>
-                      {row.paymentStatus ? (
-                        <IXIPaymentStatusBadge status={paymentStatus(row)} />
-                      ) : (
-                        <span className={styles.workflowStatus}>
-                          {row.status}
-                        </span>
-                      )}
+                      <IXIPaymentStatusBadge status={paymentStatus(row)} kind={row.paymentStatus || ["PAID", "UNPAID", "PARTIAL", "DUE", "OVERDUE"].includes(paymentStatus(row)) ? "payment" : "transaction"} />
                     </td>
                     {optionalColumns
                       .filter(([key]) => columns.includes(key))
