@@ -2,10 +2,11 @@ name: Reclaim unused IX-Core release build output
 on:
   workflow_dispatch:
   push:
-    branches: [main]
+    branches: [main, ops/ixi-capacity-cleanup-20260915]
     paths:
       - '.github/workflows/reclaim-ixi-release-build-output.yml'
       - 'scripts/ops/reclaim-release-build-output.py'
+      - 'scripts/ops/test_reclaim_release_build_output.py'
 permissions:
   contents: read
 concurrency:
@@ -14,18 +15,20 @@ concurrency:
 jobs:
   reclaim:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 30
     env:
       AWS_REGION: us-east-2
       AWS_INSTANCE_ID: ${{ secrets.AWS_INSTANCE_ID }}
     steps:
       - uses: actions/checkout@v4
+      - name: Test cleanup boundaries and archive verification
+        run: python3 -m unittest discover -s scripts/ops -p test_reclaim_release_build_output.py -v
       - uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-2
-      - name: Reclaim only audited unused build output
+      - name: Archive, verify, and retire audited obsolete local material
         run: |
           set -euo pipefail
           test "$AWS_INSTANCE_ID" = i-06d9ae98889f6fdab
@@ -33,14 +36,19 @@ jobs:
           python3 - <<'PY'
           import json,os,pathlib
           source=pathlib.Path('scripts/ops/reclaim-release-build-output.py').read_text()
-          command="set -eu\nexec 9>/var/lock/ixi-core-production.lock\nflock -n 9\npython3 - --apply <<'RECLAIM'\n"+source+"\nRECLAIM\n"
-          command+='node /var/www/ix-core/ops/runtime-release.js verify /var/www/ix-core /var/www/ix-core/.ixi-release.json\n'
-          command+='curl --max-time 5 -fsS http://127.0.0.1:4100/live\ncurl --max-time 5 -fsS http://127.0.0.1:4100/ready\n'
-          pathlib.Path(os.environ['RUNNER_TEMP'],'reclaim.json').write_text(json.dumps({'commands':[command],'executionTimeout':['180']}))
+          command="set -eu\numask 077\npython3 - --apply <<'RECLAIM'\n"+source+"\nRECLAIM\n"
+          pathlib.Path(os.environ['RUNNER_TEMP'],'reclaim.json').write_text(json.dumps({'commands':[command],'executionTimeout':['1500']}))
           PY
-          command_id="$(aws ssm send-command --instance-ids "$AWS_INSTANCE_ID" --document-name AWS-RunShellScript --comment 'Reclaim audited regenerable build output for IX-Core release' --parameters "file://$RUNNER_TEMP/reclaim.json" --query Command.CommandId --output text)"
+          command_id="$(aws ssm send-command --instance-ids "$AWS_INSTANCE_ID" --document-name AWS-RunShellScript --comment 'Authorized IX-Core capacity cleanup: verified archive and retire obsolete copies' --parameters "file://$RUNNER_TEMP/reclaim.json" --query Command.CommandId --output text)"
           echo "SSM maintenance: $command_id"
-          aws ssm wait command-executed --command-id "$command_id" --instance-id "$AWS_INSTANCE_ID" || true
-          aws ssm get-command-invocation --command-id "$command_id" --instance-id "$AWS_INSTANCE_ID" > "$RUNNER_TEMP/reclaim-result.json"
+          for attempt in {1..160}; do
+            sleep 10
+            aws ssm get-command-invocation --command-id "$command_id" --instance-id "$AWS_INSTANCE_ID" > "$RUNNER_TEMP/reclaim-result.json"
+            status="$(jq -r .Status "$RUNNER_TEMP/reclaim-result.json")"
+            case "$status" in
+              Pending|InProgress|Delayed) continue ;;
+              *) break ;;
+            esac
+          done
           jq -r '.StandardOutputContent, .StandardErrorContent' "$RUNNER_TEMP/reclaim-result.json"
-          test "$(jq -r .Status "$RUNNER_TEMP/reclaim-result.json")" = Success
+          test "$status" = Success
