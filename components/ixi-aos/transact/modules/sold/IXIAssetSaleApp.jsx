@@ -3,6 +3,7 @@ import IXIMoneyInput from "../../IXIMoneyInput";
 import { useEffect, useMemo, useState } from "react";
 import {
   createIXIAssetSaleDraft,
+  resolveIXIAssetSaleDate,
   projectIXIAssetSaleCollection,
   validateIXIAssetSale,
   getIXIAssetSaleValidationMessages,
@@ -139,7 +140,10 @@ export default function IXIAssetSaleApp({
   const [soldByLabel, setSoldByLabel] = useState(initialRecord?.sale?.soldByLabel || "");
   const [machineSalePrice, setMachineSalePrice] = useState(initialRecord?.sale?.machineSalePrice ?? "");
   const [saleCommandId] = useState(() => globalThis.crypto?.randomUUID?.() || `SALE-${Date.now()}`);
-  const [saleDate, setSaleDate] = useState(initialRecord?.sale?.saleDate || today());
+  const [saleDateOverride, setSaleDate] = useState(initialRecord?.sale?.saleDate);
+  const { saleDate, saleDateSource } = resolveIXIAssetSaleDate({
+    sourceInvoice: invoiceSnapshot, saleDate: saleDateOverride,
+  });
   const [billOfSaleNumber, setBillOfSaleNumber] = useState(
     initialRecord?.sale?.billOfSaleNumber || billOfSaleDefault(sourceInvoice),
   );
@@ -191,7 +195,7 @@ export default function IXIAssetSaleApp({
     buyerContact: clean(customer.contactName || initialRecord?.sale?.buyerContact),
     buyerEmail: clean(customer.email || initialRecord?.sale?.buyerEmail),
     buyerPhone: clean(customer.phone || initialRecord?.sale?.buyerPhone),
-    saleDate,
+    saleDate, saleDateSource,
     terms: clean(invoiceSnapshot.paymentTerms || initialRecord?.sale?.terms),
     dueDate: clean(invoiceSnapshot.dueDate || initialRecord?.sale?.dueDate),
     buyerPoNumber: clean(invoiceSnapshot.externalReference || initialRecord?.sale?.buyerPoNumber),
@@ -213,7 +217,7 @@ export default function IXIAssetSaleApp({
     initialRecord,
     invoiceSnapshot,
     notes,
-    saleDate,
+    saleDate, saleDateSource,
     type,
   ]);
   const preview = useMemo(() => createIXIAssetSaleDraft({ context, input }), [context, input]);

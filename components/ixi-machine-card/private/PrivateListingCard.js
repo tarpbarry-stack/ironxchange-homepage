@@ -16,7 +16,7 @@ import {
 } from "../../../lib/listingFormatters";
 
 import MachineBadges from "../../MachineBadges";
-import IXISoldFrontFace from "./IXISoldFrontFace";
+import IXISoldDetails from "./IXISoldDetails";
 
 import IXIMachineRail from "../../IXIMachineRail";
 
@@ -441,7 +441,9 @@ function beginCardDragFromNonInteractiveSurface(event) {
     ref={dndActivatorRef}
     onPointerDown={beginCardDragFromNonInteractiveSurface}
     data-listing-card-id={id}
-    className={`card private-listing-card console-actuator-${consoleActuatorVariant} board-color-${boardColor} board-outline-${boardOutline} ${
+    role={listing.soldSummary ? "region" : undefined}
+    aria-label={listing.soldSummary ? `Sold ${listing.title || listing.soldSummary.label}` : undefined}
+    className={`card private-listing-card ${listing.soldSummary ? "sold-mode" : ""} console-actuator-${consoleActuatorVariant} board-color-${boardColor} board-outline-${boardOutline} ${
       isBoardDragging ? "board-dragging" : ""
     } ${isBoardDraggingCard ? "grid-drag-source" : ""} ${
       isGhostTarget ? "grid-ghost-target" : ""
@@ -483,10 +485,7 @@ function beginCardDragFromNonInteractiveSurface(event) {
     {actionNotice?.message || ixiState?.actionNotice?.message || ixiState.theaterNotice}
   </div>
 ) : null}
-{listing.soldSummary && Number(machineFace || 1) === 1 ? (
-  <IXISoldFrontFace listing={listing} photo={currentPhoto} photoIndex={photoIndex} photoCount={images.length}
-    onPhoto={changePhoto} onOpenTransact={() => onOpenTransact?.(listing)} />
-) : Number(machineFace || 1) === 2 ? (
+{Number(machineFace || 1) === 2 ? (
 presentation === "seller" && !listing.soldSummary ? (
   <IXISellerMachineObjectFace2
       listing={listing}
@@ -516,11 +515,11 @@ presentation === "seller" && !listing.soldSummary ? (
   <>
     
 <a
-  href={getListingHref(listing, from)}
+  href={listing.soldSummary ? undefined : getListingHref(listing, from)}
   className={`photo-click-zone ${
   Number(machineFace || 1) === 1 ? "" : "mof-hidden"
 }`}
-  onClick={handleCardClick}
+  onClick={listing.soldSummary ? undefined : handleCardClick}
 >
   <div className="card-photo">
     <img
@@ -533,7 +532,10 @@ style={getFrameStyle(currentImageObject, "card")}
   loading="lazy"
 />
 
-   {presentation === "seller" ? (
+   {listing.soldSummary ? <>
+     <strong className="sold-sign">SOLD</strong>
+     {listing.soldSummary.status === "returned" ? <span className="sold-returned">RETURNED TO INVENTORY</span> : null}
+   </> : presentation === "seller" ? (
   <div
     className={`status-photo-pill ${sellerPlacementClass}`}
   >
@@ -572,14 +574,14 @@ style={getFrameStyle(currentImageObject, "card")}
 <div className="card-body">
   <>
     <a
-    href={getListingHref(listing, from)}
+    href={listing.soldSummary ? undefined : getListingHref(listing, from)}
     className="title-click-zone"
-    onClick={handleCardClick}
+    onClick={listing.soldSummary ? undefined : handleCardClick}
   >
     <div className="title-row">
       <h3>{cleanMachineTitle(listing.title)}</h3>
 
-     {presentation === "seller" ? (
+     {presentation === "seller" && !listing.soldSummary ? (
   <input
     className="hours-inline hours-input"
   {...(onHoursChange
@@ -599,13 +601,15 @@ style={getFrameStyle(currentImageObject, "card")}
 />
 ) : (
   <h3 className="hours-inline">
-    {formatHours(listing.hours)}
+    {formatHours(listing.hours ?? publicData.hours)}
   </h3>
 )}
     </div>
   </a>
 
-                             <div
+  {listing.soldSummary ? (
+    <IXISoldDetails listing={listing} onOpenTransact={() => onOpenTransact?.(listing)} />
+  ) : <div
   className="card-board-zone"
   {...keyboardDragHandleProps}
   {...(!dragHandleProps
@@ -792,7 +796,7 @@ onMachinePlacementChange ? (
   </div>
 ) : null}
 
-                     </div>
+                     </div>}
 
             </>
 </div>
@@ -930,6 +934,10 @@ onMachinePlacementChange ? (
   display: none !important;
 }
 
+        .card.sold-mode { height:475px;min-height:475px;max-height:475px; }
+        .card.private-listing-card.sold-mode .card-body { height:227px;min-height:227px;max-height:227px;box-sizing:border-box;padding:10px 12px 8px; }
+        .sold-sign { position:absolute;top:12px;left:12px;padding:4px 14px;background:#f1c400;color:#11150e;font-size:30px;font-weight:950;letter-spacing:2px;line-height:1.15;border:2px solid #15170f;box-shadow:0 2px 12px #0008; }
+        .sold-returned { position:absolute;bottom:0;left:0;right:0;padding:5px;text-align:center;background:#151c15e8;color:#d4e8d5;font-size:10px;font-weight:800; }
         .title-click-zone {
         display: block;
         color: inherit;
