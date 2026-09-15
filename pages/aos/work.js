@@ -1,6 +1,7 @@
 import { preserveOpenInventoryTransactions, releaseClosedInventoryTransactions } from "../../lib/listings/IXIInventorySession.mjs";
 import { subscribeInventoryChanges } from "../../lib/listings/IXIInventoryEvents";
 import Head from "next/head";
+import IXIAosCreationRecovery from "../../components/ixi-mos/object-creation/IXIAosCreationRecovery";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import {
@@ -1365,6 +1366,29 @@ const saveAosWorkspaceObject = useCallback(async (payload = {}) => {
     ? mergeAosCanonicalObject(payload.object, canonical)
     : canonical;
 
+  // Membership configuration and classification change the read projection.
+  // Reload admitted Objects and their reviews before reporting this save complete.
+  if (command.patch?.objectType || command.patch?.metadata?.systemIndexMembershipPolicy) {
+    const environment = await loadIXIMosEnvironment({ includeObjects: true });
+    if (String(environment?.entity?.entityId || "") !== activeEntityId) {
+      throw Object.assign(new Error("The active Entity changed while refreshing membership."),
+        { code: "AOS_BROWSER_ENTITY_MISMATCH", status: 403 });
+    }
+    const refreshed = (environment.objects || []).find(object => object.objectId === objectId);
+    if (!refreshed || Number(refreshed.revision) < Number(canonical.revision)) {
+      throw Object.assign(new Error("The saved Object is not available in the refreshed workspace."),
+        { code: "IXI_AOS_CANONICAL_READBACK_REQUIRED" });
+    }
+    const acceptedRefreshed = mergeAosCanonicalObject(payload?.object || canonical, refreshed);
+    setAosObjects(previous => preserveOpenInventoryTransactions(previous,
+      environment.objects.map(object => object.objectId === objectId ? acceptedRefreshed : object),
+      inventoryCardStateRef.current));
+    setAosRelationships(environment.relationships || []);
+    setAosRailProjections(environment.railProjections || {});
+    setSystemIndexes(environment.systemIndexes || []);
+    return { ...result, object: acceptedRefreshed };
+  }
+
   setAosObjects(current => current.map(existing => {
     if (String(existing?.objectId || "") !== objectId) return existing;
     /*
@@ -2190,6 +2214,10 @@ function saveWorkspaceLayout(
 const {
   createRootContainerDraft,
   createChildContainerDraft,
+  pendingCreations,
+  creationRecoveryError,
+  refreshCreationCommands,
+  finishPendingCreation,
   saveMosObjectName,
   deleteMosWorkspaceObject
 } = useIXIMosObjectCreation({
@@ -2210,6 +2238,10 @@ const {
   setAosObjects,
 
   setSystemIndexes,
+
+  setAosRelationships,
+  setAosRailProjections,
+  inventoryCardStateRef,
 
   onObjectNotice:
     showAosObjectNotice
@@ -2349,6 +2381,9 @@ const saveAosWorkspaceObjectOrDraft =
     if (isAosDraftId(objectId)) {
       return saveMosObjectName({
         objectId,
+        objectType: payload?.objectType ?? payload?.object?.objectType,
+        definitionId: payload?.definitionId !== undefined ? payload.definitionId : payload?.object?.definitionId,
+        definitionKey: payload?.definitionKey !== undefined ? payload.definitionKey : payload?.object?.definitionKey,
         displayName:
           payload?.displayName ||
           payload?.object?.displayName,
@@ -2401,6 +2436,9 @@ return (
       </Head>
 
             <Navbar />
+
+            <IXIAosCreationRecovery commands={pendingCreations} loadError={creationRecoveryError}
+              onRefresh={refreshCreationCommands} onFinish={finishPendingCreation} />
 
    
 <IXIWorkspaceEngine

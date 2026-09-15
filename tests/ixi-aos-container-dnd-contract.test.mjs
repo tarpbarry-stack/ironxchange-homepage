@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import test from "node:test";
+import { canIXIObjectAcceptDrop } from "../components/ixi-chassis/IXIDropAcceptanceEngine.js";
 
 import {
   createAosMembershipRelationship,
@@ -142,10 +143,12 @@ test("ordinary containers remain composable while System Index peers cannot cont
     dropAcceptanceEngine,
     /if \(isSystemIndexObject\(dragData\)\)[\s\S]*?reason: "system-index-nesting"/
   );
-  assert.match(
-    dropAcceptanceEngine,
-    /metadata\.rootContainer === true[\s\S]*?metadata\.hierarchyRole/
-  );
+  for (const metadata of [{ rootContainer: true }, { hierarchyRole: "index" }]) {
+    assert.equal(canIXIObjectAcceptDrop({
+      dragData: { objectId: "root", objectType: "generic", metadata },
+      target: { objectId: "ordinary", objectType: "container", workspaceDropPolicy: { enabled: true } }
+    }).accepted, false);
+  }
   assert.match(
     board,
     /dragData=\{\{[\s\S]*?metadata:[\s\S]*?item\?\.metadata/

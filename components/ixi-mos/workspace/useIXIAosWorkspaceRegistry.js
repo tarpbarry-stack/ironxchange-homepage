@@ -150,6 +150,11 @@ export default function useIXIAosWorkspaceRegistry({
         actorAuthority: admittedObject.actorAuthority,
         presentation: admittedObject.presentation,
         selectedPresentation: admittedObject.selectedPresentation,
+        membershipReview: admittedObject.membershipReview || null,
+        membershipReviewObjects: previewsForObjectIds(
+          (admittedObject.membershipReview?.issues || []).map(issue => issue.objectId),
+          admission
+        ),
         itemObjectIds,
         items: presentationItems
       });
