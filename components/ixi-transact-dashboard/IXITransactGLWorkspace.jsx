@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import IXITransactPeriodReopen from "./IXITransactPeriodReopen";
 
 import {
   closeIXITransactAccountingPeriod,
@@ -573,6 +574,7 @@ export default function IXITransactGLWorkspace({
   period,
   currency = "USD",
   refreshKey = 0,
+  canReopenPeriod = false,
   onCommitted
 }) {
   const [payload, setPayload] = useState(null);
@@ -643,6 +645,7 @@ export default function IXITransactGLWorkspace({
   const resolvedCurrency = projection.currency || clean(currency || "USD").toUpperCase();
   const periodIsClosed = periodState.closed === true;
   const periodIsValid = /^\d{4}-\d{2}$/.test(clean(period));
+  const periodIsCurrent = Boolean(payload && !loading && !error && periodState.period === period && projection.currency === clean(currency).toUpperCase());
   const coaIntegrityError = useMemo(
     () => makeChartIntegrityError(coa.integrityErrors),
     [coa.integrityErrors]
@@ -650,7 +653,7 @@ export default function IXITransactGLWorkspace({
   const effectiveAccountsError = accountsError || coaIntegrityError;
   const coaReady = coa.accounts.length > 0 && !accountsLoading && !effectiveAccountsError;
   const closeReady = Boolean(
-    payload &&
+    periodIsCurrent &&
     periodIsValid &&
     !periodIsClosed &&
     controls.ready === true &&
@@ -758,8 +761,8 @@ export default function IXITransactGLWorkspace({
         </div>
 
         <div className="command-actions">
-          <StatusPill good={!periodIsClosed} neutral={!payload}>
-            {periodIsClosed ? "CLOSED" : "OPEN"}
+          <StatusPill good={periodIsCurrent && !periodIsClosed} neutral={!periodIsCurrent}>
+            {periodIsCurrent ? periodIsClosed ? "CLOSED" : "OPEN" : error ? "UNAVAILABLE" : "LOADING"}
           </StatusPill>
           <StatusPill good={controls.ready === true} neutral={!payload}>
             {controls.ready === true ? "CONTROLS READY" : "CONTROL REVIEW"}
@@ -780,7 +783,7 @@ export default function IXITransactGLWorkspace({
             type="button"
             className="new-journal-button"
             onClick={() => setComposerOpen(true)}
-            disabled={loading || closeBusy || periodIsClosed || !coaReady}
+            disabled={!periodIsCurrent || closeBusy || periodIsClosed || !coaReady}
           >
             + NEW JOURNAL ENTRY
           </button>
@@ -803,7 +806,7 @@ export default function IXITransactGLWorkspace({
         </div>
       ) : null}
 
-      {periodIsClosed ? (
+      {periodIsCurrent && periodIsClosed ? (
         <div className="close-evidence">
           <div><span>PERIOD CONTROL</span><strong>{period} CLOSED</strong></div>
           <div><span>CLOSE DOCUMENT</span><strong>{effectiveCloseDocumentId || "SERVER CONFIRMED"}</strong></div>
@@ -811,6 +814,17 @@ export default function IXITransactGLWorkspace({
           <div><span>CLOSED BY</span><strong>{effectiveClosedBy || "—"}</strong></div>
         </div>
       ) : null}
+
+      {periodIsCurrent && periodIsClosed ? <IXITransactPeriodReopen
+        key={`${gl.entityPassportId}:${period}:${resolvedCurrency}:${effectiveCloseDocumentId}`}
+        entityPassportId={gl.entityPassportId}
+        period={period}
+        currency={resolvedCurrency}
+        closeDocumentId={effectiveCloseDocumentId}
+        allowed={canReopenPeriod}
+        disabled={closeBusy}
+        onCommitted={handleCommitted}
+      /> : null}
 
       {error ? (
         <div className="gl-error">
@@ -844,7 +858,7 @@ export default function IXITransactGLWorkspace({
         </div>
 
         <div className="control-strip">
-          <div><span>PERIOD</span><strong>{periodState.status?.toUpperCase?.() || "OPEN"}</strong></div>
+          <div><span>PERIOD</span><strong>{periodIsCurrent ? periodState.status?.toUpperCase?.() : error ? "UNAVAILABLE" : "LOADING"}</strong></div>
           <div><span>PERIOD TB</span><strong>{periodTB.balanced ? "BALANCED" : "OUT OF BALANCE"}</strong></div>
           <div><span>ENDING TB</span><strong>{endingTB.balanced ? "BALANCED" : "OUT OF BALANCE"}</strong></div>
           <div><span>BALANCE SHEET</span><strong>{balanceSheet.balanced ? "BALANCED" : "OUT OF BALANCE"}</strong></div>
