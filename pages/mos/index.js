@@ -650,13 +650,6 @@ setContainerPath([]);
         {formatMoney(index.value)}
       </span>
 
-      {index.indexId === "for-sale" ? (
-        <small>
-          {index.metadata?.marketplaceCount || 0} MARKETPLACE
-          {" · "}
-          {index.metadata?.auctionCount || 0} AUCTION
-        </small>
-      ) : null}
     </button>
   ))}
 </section>

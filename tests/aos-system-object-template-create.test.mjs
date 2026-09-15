@@ -143,6 +143,12 @@ test("AOS Work routes scoreboard plus through template selection and draft provi
   assert.doesNotMatch(creationHook, /canTransact:\s*true/u);
   assert.doesNotMatch(creationHook, /transactEligible:\s*true/u);
   assert.match(creationHook, /rootContainer:\s*true/u);
+  assert.match(creationHook, /systemIndex:\s*true/u);
+  assert.match(creationHook, /systemIndexMembershipPolicy:/u);
+  assert.match(picker, /Choose at least one canonical member classification/u);
+  assert.match(picker, /allowedObjectTypes/u);
+  assert.match(picker, /allowedDefinitionIds/u);
+  assert.match(picker, /objectDefinitions/u);
   assert.doesNotMatch(creationHook, /IXI_AOS_SYSTEM_INDEX_LABEL/u);
   assert.match(creationHook, /provisionPermanentObject\(\{/u);
 });

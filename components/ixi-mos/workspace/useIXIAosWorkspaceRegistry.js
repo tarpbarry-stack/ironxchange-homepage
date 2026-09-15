@@ -18,6 +18,10 @@ import {
   isIXIAosWorkspaceVisibleAdapter
 } from "../../../lib/mos/IXIAosSystemAdapterRegistry";
 import {
+  evaluateAosSystemIndexMembership,
+  isExplicitAosSystemIndexObject
+} from "../../../lib/mos/IXIAosSystemIndexMembershipPolicy";
+import {
   excludePeerSystemIndexMembers
 } from "./IXIAosSystemIndexPlacement.mjs";
 
@@ -109,7 +113,7 @@ export default function useIXIAosWorkspaceRegistry({
       const systemIndexIds = projectedIndex
         ? indexMemberObjectIds(projectedIndex, admission)
         : [];
-      const itemObjectIds = excludePeerSystemIndexMembers({
+      const candidateObjectIds = excludePeerSystemIndexMembers({
         ownerObjectId: objectId,
         memberObjectIds: uniqueObjectIds([
           ...relationshipIds,
@@ -119,6 +123,13 @@ export default function useIXIAosWorkspaceRegistry({
         ]),
         systemIndexObjectIds: [...systemIndexesByObjectId.keys()]
       });
+      const targetObject = projectedIndex || admittedObject;
+      const itemObjectIds = candidateObjectIds.filter(memberObjectId =>
+        evaluateAosSystemIndexMembership({
+          sourceObject: admission.objectsById.get(memberObjectId),
+          targetObject
+        }).allowed
+      );
       const isEquipmentIndex =
         projectedIndex?.metadata?.adapterId === "ixi-owned-equipment";
       const presentationItems = isEquipmentIndex
@@ -150,7 +161,12 @@ export default function useIXIAosWorkspaceRegistry({
         memberObjectIds:
           canonicalWorkspacePlacements[`container:${objectId}`] || [],
         systemIndexObjectIds: [...systemIndexesByObjectId.keys()]
-      });
+      }).filter(memberObjectId =>
+        evaluateAosSystemIndexMembership({
+          sourceObject: admission.objectsById.get(memberObjectId),
+          targetObject: object
+        }).allowed
+      );
       if (!placedObjectIds.length) continue;
 
       const itemObjectIds = uniqueObjectIds([
@@ -209,15 +225,14 @@ export default function useIXIAosWorkspaceRegistry({
      */
     const visibleIds = new Set(visibleOrderedObjects.map(item => item.objectId));
     const recoveredSystemIndexes = [...objectRegistry.values()].filter(item => {
-      if (!systemIndexesByObjectId.has(item.objectId) || visibleIds.has(item.objectId)) {
+      if (!isExplicitAosSystemIndexObject(item) || visibleIds.has(item.objectId)) {
         return false;
       }
       const locatedSurface = Object.entries(canonicalWorkspacePlacements).find(([, objectIds]) =>
         Array.isArray(objectIds) && objectIds.includes(item.objectId)
       )?.[0] || "";
       if (!locatedSurface.startsWith("container:")) return false;
-      const parentObjectId = locatedSurface.slice("container:".length);
-      return systemIndexesByObjectId.has(parentObjectId);
+      return true;
     });
 
     return [...visibleOrderedObjects, ...recoveredSystemIndexes];

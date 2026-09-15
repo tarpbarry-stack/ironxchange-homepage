@@ -32,6 +32,11 @@ import {
 } from "../../../lib/mos/IXIAosSystemAdapterRegistry";
 
 import {
+  getAosSystemIndexWorkspaceDropPolicy,
+  isExplicitAosSystemIndexObject
+} from "../../../lib/mos/IXIAosSystemIndexMembershipPolicy";
+
+import {
   resolveAosWorkspaceParentName
 } from "../../../lib/mos/ixiAosHierarchyContract.mjs";
 
@@ -88,37 +93,19 @@ function isContainerWorkspaceObject(item = {}) {
 
 
 function getSystemIndexDropPolicy(item = {}) {
-  const adapter =
-    getIXIAosSystemAdapter(
-      item
-    );
-
-  if (adapter) {
-    return {
-      enabled:
-        adapter.canOperationalDrop ===
-        true,
-
-      acceptedObjectTypes: [
-        ...(adapter.acceptedObjectTypes || [])
-      ]
-    };
+  if (isExplicitAosSystemIndexObject(item)) {
+    return getAosSystemIndexWorkspaceDropPolicy(item);
   }
 
   if (isMosWorkspaceObject(item)) {
-    return (
-      item?.workspace?.dropPolicy ||
-      {
-        enabled: true,
-        acceptedObjectTypes: []
-      }
-    );
+    return item?.workspace?.dropPolicy || {
+      enabled: true,
+      acceptedObjectTypes: [],
+      acceptedDefinitionIds: []
+    };
   }
 
-  return {
-    enabled: false,
-    acceptedObjectTypes: []
-  };
+  return { enabled: false, acceptedObjectTypes: [], acceptedDefinitionIds: [] };
 }
 
 

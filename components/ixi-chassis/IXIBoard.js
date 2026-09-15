@@ -401,6 +401,9 @@ return (
     metadata:
       item?.metadata,
 
+    definitionId:
+      item?.definitionId,
+
     cardTemplateSlug:
       item?.cardTemplateSlug,
 

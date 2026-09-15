@@ -140,7 +140,7 @@ test("ordinary containers remain composable while System Index peers cannot cont
   );
   assert.match(
     dropAcceptanceEngine,
-    /isSystemIndexObject\(dragData\)[\s\S]*?isSystemIndexObject\(target\)[\s\S]*?reason: "system-index-nesting"/
+    /if \(isSystemIndexObject\(dragData\)\)[\s\S]*?reason: "system-index-nesting"/
   );
   assert.match(
     dropAcceptanceEngine,
@@ -267,7 +267,7 @@ test("legacy clear-to-parent mutation is not connected to AOS Work", () => {
 test("System Index parent safety restores workspace visibility and preserves children", () => {
   assert.match(
     workspaceRegistry,
-    /Recovery invariant:[\s\S]*?System Index can never disappear inside another[\s\S]*?recoveredSystemIndexes/
+    /Recovery invariant:[\s\S]*?System Index can never disappear[\s\S]*?recoveredSystemIndexes/
   );
   assert.match(
     workspaceRegistry,
@@ -311,18 +311,9 @@ test("System Index parent safety restores workspace visibility and preserves chi
     work,
     /aos-pin-root-system-indexes-board[\s\S]*?objectIds: nestedRootSystemIndexObjectIds[\s\S]*?captureUndo: false/
   );
-  assert.match(
-    work,
-    /getInvalidAosSystemIndexMemberships\(\{[\s\S]*?relationships: aosRelationships[\s\S]*?systemIndexObjectIds/
-  );
-  assert.match(
-    work,
-    /aos-end-peer-system-index-membership[\s\S]*?reason: "aos-peer-system-index-nesting-prohibited"[\s\S]*?preserveChildren: true/
-  );
-  assert.match(
-    work,
-    /fetchMosObjectRelationships\(sourceObjectId[\s\S]*?IX Core did not confirm the peer System Index release/
-  );
+  assert.doesNotMatch(work, /getInvalidAosSystemIndexMemberships/u);
+  assert.doesNotMatch(work, /aos-end-peer-system-index-membership/u);
+  assert.match(work, /evaluateAosSystemIndexMembership\(\{/u);
   assert.match(
     work,
     /parentObject: targetWorkspaceObject[\s\S]*?memberObject: sourceObject/
@@ -590,30 +581,27 @@ test("exact legacy relationship repair cannot select a different Ripper relation
   );
 });
 
-test("work repairs only the exact deployed Ripper to Locations edge", () => {
-  assert.match(
-    work,
-    /relationship_efb98dc5-cad0-4d51-90c0-90fa558d9696/
-  );
-  assert.match(
-    work,
-    /getExactActiveAosRelationship\(\{[\s\S]*?relationshipId,[\s\S]*?sourceObjectId,[\s\S]*?targetObjectId,[\s\S]*?admission: aosWorkspaceAdmission/
-  );
-  assert.match(
-    work,
-    /aos-exact-ripper-direct-locations-membership-repair/
-  );
-  assert.match(
-    work,
-    /preserveAllOtherRelationships: true/
-  );
+test("AOS Work contains no record-specific relationship repair", () => {
+  assert.doesNotMatch(work, /relationship_efb98dc5-cad0-4d51-90c0-90fa558d9696/u);
+  assert.doesNotMatch(work, /aos-exact-ripper-direct-locations-membership-repair/u);
+  assert.doesNotMatch(work, /IXI_AOS_LOCATIONS_REPAIR/u);
+  assert.doesNotMatch(work, /kanyon mcgahey/iu);
 });
 
 test("legacy root metadata identifies peer System Indexes and blocks new membership writes", async () => {
   const workforce = {
     objectId: "object_workforce",
     objectType: "generic",
-    metadata: { rootContainer: true }
+    metadata: {
+      rootContainer: true,
+      systemIndexMembershipPolicy: {
+        schema: "aos.system-index-membership.v1",
+        enabled: true,
+        defaultWorkspaceHome: true,
+        allowedObjectTypes: ["person"],
+        allowedDefinitionIds: []
+      }
+    }
   };
   const locations = {
     objectId: "object_locations",
