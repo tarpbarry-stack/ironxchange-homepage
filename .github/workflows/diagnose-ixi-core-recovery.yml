@@ -27,6 +27,21 @@ jobs:
           python3 - <<'PY'
           import json,os,pathlib
           command = r'''set -eu
+          python3 - <<'SPACE'
+          import json,os,pathlib,subprocess
+          stat=os.statvfs('/')
+          print(json.dumps({'disk':{'totalBytes':stat.f_blocks*stat.f_frsize,'availableBytes':stat.f_bavail*stat.f_frsize,'availableInodes':stat.f_favail}}))
+          for root in ['/var/tmp','/var/backups/ixi-core-releases','/var/lib','/var/www','/home/ubuntu','/var/log','/tmp']:
+              if not pathlib.Path(root).exists():
+                  continue
+              result=subprocess.run(['du','-x','-B1','--max-depth=1',root],capture_output=True,text=True,timeout=35)
+              sizes=[]
+              for line in result.stdout.splitlines():
+                  parts=line.split('\t',1)
+                  if len(parts)==2 and parts[0].isdigit():
+                      sizes.append({'bytes':int(parts[0]),'path':parts[1]})
+              print(json.dumps({'usageRoot':root,'largest':sorted(sizes,key=lambda item:item['bytes'],reverse=True)[:8],'exitCode':result.returncode}))
+          SPACE
           systemctl show ixi-core-recovery.service -p ActiveState -p SubState -p Result -p ExecMainStatus -p ExecMainStartTimestamp -p ExecMainExitTimestamp
           systemctl show ixi-core-recovery.timer -p ActiveState -p SubState -p NextElapseUSecRealtime
           journalctl -u ixi-core-recovery.service -n 35 --no-pager -o cat

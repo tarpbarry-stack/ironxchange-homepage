@@ -318,6 +318,8 @@ export function createIXIAosObjectUpdateCommand({ session, draft, commandId, now
     definitionVersion: clean(current.definitionVersion) || "unversioned",
     issuedAt: now,
     patch: {
+      ...(clean(canonicalDraft.objectType) && canonicalDraft.objectType !== current.baseObject?.objectType
+        ? { objectType: canonicalDraft.objectType } : {}),
       displayName: clean(canonicalDraft.displayName),
       businessIdentifiers: array(canonicalDraft.businessIdentifiers),
       fields: clone(object(canonicalDraft.fields)),
@@ -342,6 +344,10 @@ export function acceptIXIAosCanonicalObject(command = {}, response = {}) {
     revision <= Number(command.expectedRevision)
   ) {
     throw Object.assign(new Error("IX Core returned a stale AOS object revision."), { code: "IXI_AOS_CANONICAL_REVISION_STALE" });
+  }
+  if (clean(command.patch?.objectType) && clean(canonical.objectType) !== clean(command.patch.objectType)) {
+    throw Object.assign(new Error("IX-Core has not confirmed the requested Object classification."),
+      { code: "IXI_AOS_CLASSIFICATION_READBACK_MISMATCH" });
   }
   return synchronizeIXIAosBusinessIdentifier(canonical);
 }

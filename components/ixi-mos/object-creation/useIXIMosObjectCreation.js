@@ -1,21 +1,20 @@
 import {
-  useRef
+  useRef, useState, useEffect, useCallback
 } from "react";
 
 import {
-  createMosRelationship,
   updateMosObject,
   deleteMosObject
 } from "../../../lib/mos/ixiMosClient";
 
 import {
-  createAosMembershipRelationship,
   createAosRailOrderKey
 } from "../../../lib/mos/IXIAosMembershipBridge.mjs";
 
-import {
-  provisionAosObject
-} from "../../../lib/mos/ixiAosProvisioningClient";
+import { createAndAttachAosObject, listAosCreationCommands, resumeAosCreation,
+  acknowledgeAosCreation } from "../../../lib/mos/ixiAosCreationClient.mjs";
+import { getAosChildCreationContract } from "../../../lib/mos/IXIAosChildCreationContract.mjs";
+import { preserveOpenInventoryTransactions } from "../../../lib/listings/IXIInventorySession.mjs";
 
 import {
   createAosDraftId,
@@ -38,9 +37,6 @@ import {
   getAosHierarchyDisplayName
 } from "../../../lib/mos/ixiAosHierarchyContract.mjs";
 
-
-const IXI_SYSTEM_INDEX_TEMPLATE_ID =
-  "ixi-system-index-v1";
 
 const DRAFT_DISPLAY_NAME =
   "NEW OBJECT";
@@ -234,6 +230,9 @@ export default function useIXIMosObjectCreation({
   saveWorkspaceLayout,
   setAosObjects,
   setSystemIndexes,
+  setAosRelationships,
+  setAosRailProjections,
+  inventoryCardStateRef = null,
   onObjectNotice = null
 }) {
   /*
@@ -257,6 +256,29 @@ export default function useIXIMosObjectCreation({
    */
   const draftCommitPromisesRef =
     useRef(new Map());
+  const submittedDraftsRef = useRef(new Map());
+  const placementsRef = useRef(workspacePlacements);
+  placementsRef.current = workspacePlacements;
+  const [pendingCreations, setPendingCreations] = useState([]);
+  const [creationRecoveryError, setCreationRecoveryError] = useState("");
+  const recoveryScopeRef = useRef("");
+  recoveryScopeRef.current = `${entityId}:${userId}`;
+  const refreshCreationCommands = useCallback(async () => {
+    if (!entityId) return;
+    const scope = `${entityId}:${userId}`;
+    try {
+      const result = await listAosCreationCommands();
+      if (scope !== recoveryScopeRef.current) return;
+      setPendingCreations(result.commands || []);
+      setCreationRecoveryError("");
+    } catch (error) { if (scope === recoveryScopeRef.current) setCreationRecoveryError(error.message); }
+  }, [entityId, userId]);
+  useEffect(() => {
+    setPendingCreations([]);
+    submittedDraftsRef.current.clear();
+    draftObjectsRef.current.clear();
+    refreshCreationCommands();
+  }, [refreshCreationCommands]);
 
 
   async function reloadMosEnvironment() {
@@ -265,11 +287,12 @@ export default function useIXIMosObjectCreation({
         includeObjects: true
       });
 
-    setAosObjects?.(
-      Array.isArray(environment?.objects)
-        ? environment.objects
-        : []
-    );
+    if (environment?.entity?.entityId !== clean(entityId)) throw new Error("The workspace Entity changed. Reopen your workspace.");
+    setAosRelationships?.(environment.relationships || []);
+    setAosRailProjections?.(environment.railProjections || {});
+
+    setAosObjects?.(previous => preserveOpenInventoryTransactions(previous,
+      [...(environment?.objects || []), ...draftObjectsRef.current.values()], inventoryCardStateRef?.current || {}));
 
     setSystemIndexes?.(
       Array.isArray(environment?.systemIndexes)
@@ -607,14 +630,15 @@ export default function useIXIMosObjectCreation({
       );
     }
 
+    const childContract = getAosChildCreationContract(container);
     return createClientOnlyDraft({
       container,
       definitionId:
-        clean(sourceTemplate?.definitionId) || null,
+        childContract.definitionId,
       definitionKey:
-        clean(sourceTemplate?.definitionKey) || null,
+        null,
       objectType:
-        "generic",
+        childContract.objectType,
       cardTemplateSlug,
       cardTemplateVersion:
         sourceTemplate?.version ?? null,
@@ -636,6 +660,7 @@ export default function useIXIMosObjectCreation({
           })),
       metadata: {
         ...safeObject(metadata),
+        creationMembershipContract: childContract,
         cardNumber:
           String(templateNumber).padStart(3, "0"),
         cardVariant:
@@ -671,35 +696,44 @@ export default function useIXIMosObjectCreation({
   }
 
 
-  async function placeProvisionedObject({
-    objectId,
-    passportId,
-    destinationContainerId,
-    destinationPassportId,
-    draftId,
-    orderKey = "000100"
-  }) {
-    if (!destinationContainerId) {
-      return null;
+  function verifyCreatedEnvironment(response, environment) {
+    const canonical = environment?.objects?.find(object => object.objectId === response.object.objectId);
+    const passportId = canonical?.canonicalIdentity?.passportId || canonical?.passportId ||
+      canonical?.identities?.find(identity => identity.identityType === "ixi-passport")?.passportId;
+    if (!canonical || canonical.entityId !== clean(entityId) || passportId !== response.identity.passportId ||
+        canonical.objectType !== response.object.objectType || canonical.definitionId !== response.object.definitionId) {
+      throw new Error("The saved Object could not be confirmed in your refreshed workspace. Use FINISH SAVE to retry.");
     }
-
-    if (!clean(passportId) || !clean(destinationPassportId)) {
-      const error = new Error(
-        "Canonical source and rail-owner Passports are required after Save."
-      );
-      error.code = "CANONICAL_IDENTITY_REPAIR_REQUIRED";
-      throw error;
+    const edge = response.creation?.relationship;
+    if (edge && !environment.relationships?.some(item => item.relationshipId === edge.relationshipId &&
+        item.status === "active" && item.behaviorId === "aos.rail-membership.v1" &&
+        item.sourceObjectId === canonical.objectId && item.targetObjectId === edge.targetObjectId)) {
+      throw new Error("The saved attachment could not be confirmed in your workspace. The Object remains saved.");
     }
+    return canonical;
+  }
 
-    return createAosMembershipRelationship({
-      createRelationship: createMosRelationship,
-      parentObjectId: destinationContainerId,
-      parentPassportId: destinationPassportId,
-      memberObjectId: objectId,
-      memberPassportId: passportId,
-      orderKey: clean(orderKey) || createAosRailOrderKey(0),
-      commandId: `aos-rail-membership:${draftId}`
-    });
+  async function finishPendingCreation(commandId) {
+    const scope = recoveryScopeRef.current;
+    const response = await resumeAosCreation(commandId, clean(entityId));
+    if (scope !== recoveryScopeRef.current) throw new Error("The workspace changed. Reopen it to finish this save.");
+    const draftId = response.creation.draftId;
+    const objectId = response.object.objectId;
+    const containsDraft = Object.values(placementsRef.current || {}).some(ids => Array.isArray(ids) && ids.includes(draftId));
+    const placements = containsDraft
+      ? replaceWorkspaceObjectId(placementsRef.current, draftId, objectId)
+      : moveObjectToWorkspaceSurface({ placements: placementsRef.current, objectId, targetSurface: "board" });
+    await saveWorkspaceLayout?.(placements);
+    setWorkspacePlacements?.(placements);
+    const environment = await reloadMosEnvironment();
+    verifyCreatedEnvironment(response, environment);
+    draftObjectsRef.current.delete(draftId);
+    submittedDraftsRef.current.delete(draftId);
+    setAosObjects?.(previous => previous.filter(object => object.objectId !== draftId));
+    await acknowledgeAosCreation(commandId);
+    await refreshCreationCommands();
+    onObjectNotice?.({ objectId, message: `${response.object.displayName} SAVED`, tone: "success" });
+    return response;
   }
 
 
@@ -745,8 +779,7 @@ export default function useIXIMosObjectCreation({
       );
     }
 
-    const response =
-      await provisionAosObject({
+    const request = {
         entityId:
           resolvedEntityId,
         definitionId,
@@ -767,6 +800,9 @@ export default function useIXIMosObjectCreation({
           userId || null,
         draftId:
           resolvedDraftId,
+        membership: destinationContainerId ? { parentObjectId: destinationContainerId,
+          parentPassportId: clean(metadata?.parentPassportId),
+          orderKey: clean(metadata?.orderKey) || createAosRailOrderKey(0) } : null,
         metadata: {
           ...safeObject(metadata),
           capabilities: {
@@ -779,7 +815,24 @@ export default function useIXIMosObjectCreation({
           persistenceState:
             "permanent"
         }
-      });
+      };
+    const recorded = submittedDraftsRef.current.get(resolvedDraftId);
+    if (recorded && JSON.stringify(recorded) !== JSON.stringify(request)) {
+      throw new Error("This save has recorded details. Use FINISH SAVE to recover it before making further edits.");
+    }
+    submittedDraftsRef.current.set(resolvedDraftId, request);
+    let response;
+    try {
+      response = await createAndAttachAosObject(request);
+    } catch (error) {
+      // Only a confirmed pre-creation refusal unlocks the draft for correction.
+      if (error.status >= 400 && error.status < 500 && !error.details?.creation &&
+          !["AOS_CREATION_RETRY", "AOS_CREATION_CONFLICT"].includes(error.code)) {
+        submittedDraftsRef.current.delete(resolvedDraftId);
+      }
+      await refreshCreationCommands();
+      throw error;
+    }
 
     const createdObject =
       response?.object;
@@ -813,103 +866,12 @@ export default function useIXIMosObjectCreation({
       );
     }
 
-    await placeProvisionedObject({
-      objectId:
-        createdObjectId,
-      passportId:
-        response.identity.passportId,
-      destinationContainerId,
-      destinationPassportId:
-        clean(metadata?.parentPassportId),
-      draftId:
-        resolvedDraftId,
-      orderKey:
-        clean(metadata?.orderKey) || createAosRailOrderKey(0)
-    });
-
     return {
       response,
       createdObject,
       createdObjectId,
       draftId:
         resolvedDraftId
-    };
-  }
-
-
-  /* =========================================================
-     ROOT SYSTEM INDEX CREATION
-
-     This operation receives the customer's
-     completed name before provisioning. The
-     technical System Index presentation role
-     never supplies customer business meaning.
-     ========================================================= */
-  async function createRootSystemIndexByName(
-    rawDisplayName
-  ) {
-    const displayName =
-      clean(rawDisplayName);
-
-    if (!displayName) {
-      throw new Error(
-        "Index name is required."
-      );
-    }
-
-    const draftId =
-      createAosDraftId();
-
-    const {
-      response,
-      createdObject,
-      createdObjectId
-    } = await provisionPermanentObject({
-      draftId,
-      objectType:
-        "system-index",
-      cardTemplateSlug:
-        IXI_SYSTEM_INDEX_TEMPLATE_ID,
-      displayName,
-      fields: {
-        parentSystemIndexId:
-          null
-      },
-      source:
-        "manual",
-      metadata: {
-        createdFrom:
-          "aos-work",
-        systemIndex:
-          true,
-        systemIndexPresentation:
-          true,
-        hierarchyRole:
-          "index"
-      }
-    });
-
-    const environment =
-      await reloadMosEnvironment();
-
-    await exposeObjectToBoard(
-      createdObjectId
-    );
-
-    return {
-      created: true,
-      existing: false,
-      object:
-        createdObject,
-      objectId:
-        createdObjectId,
-      passport:
-        response.passport,
-      identity:
-        response.identity,
-      transact:
-        response.transact,
-      environment
     };
   }
 
@@ -1045,12 +1007,16 @@ export default function useIXIMosObjectCreation({
   async function commitDraftObject({
     id,
     name,
+    objectType,
+    definitionId,
+    definitionKey,
     businessIdentifiers,
     fields,
     fieldDefinitions,
     media,
     metadata
   }) {
+    const scope = recoveryScopeRef.current;
     const draft =
       draftObjectsRef.current.get(id);
 
@@ -1075,11 +1041,11 @@ export default function useIXIMosObjectCreation({
         id,
       destinationContainerId,
       definitionId:
-        draft.definitionId,
+        definitionId === undefined ? draft.definitionId : definitionId,
       definitionKey:
-        draft.definitionKey,
+        definitionKey === undefined ? draft.definitionKey : definitionKey,
       objectType:
-        draft.objectType,
+        objectType || draft.objectType,
       displayName:
         name,
       businessIdentifiers:
@@ -1115,6 +1081,8 @@ export default function useIXIMosObjectCreation({
       }
     });
 
+    if (scope !== recoveryScopeRef.current) throw new Error("The workspace changed. Reopen it to finish this save.");
+
     /*
      * The draft remains intact until the
      * Object, Passport, TRAN$ACT identity,
@@ -1126,23 +1094,23 @@ export default function useIXIMosObjectCreation({
      */
     const nextPlacements =
       replaceWorkspaceObjectId(
-        workspacePlacements,
+        placementsRef.current,
         id,
         createdObjectId
       );
 
-    setWorkspacePlacements?.(
-      nextPlacements
-    );
-
     await saveWorkspaceLayout?.(
       nextPlacements
     );
-
-    draftObjectsRef.current.delete(id);
-
+    setWorkspacePlacements?.(nextPlacements);
     const environment =
       await reloadMosEnvironment();
+    verifyCreatedEnvironment(response, environment);
+    draftObjectsRef.current.delete(id);
+    submittedDraftsRef.current.delete(id);
+    setAosObjects?.(previous => previous.filter(object => object.objectId !== id));
+    await acknowledgeAosCreation(response.commandId);
+    await refreshCreationCommands();
 
     onObjectNotice?.({
       objectId:
@@ -1166,7 +1134,8 @@ export default function useIXIMosObjectCreation({
         response.identity,
       transact:
         response.transact,
-      environment
+      environment,
+      creation: response.creation
     };
   }
 
@@ -1174,6 +1143,9 @@ export default function useIXIMosObjectCreation({
   async function saveMosObjectName({
     objectId,
     displayName,
+    objectType,
+    definitionId,
+    definitionKey,
     businessIdentifiers,
     fields,
     fieldDefinitions,
@@ -1213,6 +1185,9 @@ export default function useIXIMosObjectCreation({
         commitDraftObject({
           id,
           name,
+          objectType,
+          definitionId,
+          definitionKey,
           businessIdentifiers,
           fields,
           fieldDefinitions,
@@ -1228,6 +1203,7 @@ export default function useIXIMosObjectCreation({
       try {
         return await commitPromise;
       } finally {
+        await refreshCreationCommands();
         if (
           draftCommitPromisesRef.current.get(id) ===
           commitPromise
@@ -1409,9 +1385,12 @@ export default function useIXIMosObjectCreation({
 
 
   return {
+    pendingCreations,
+    creationRecoveryError,
+    refreshCreationCommands,
+    finishPendingCreation,
     reloadMosEnvironment,
     exposeObjectToBoard,
-    createRootSystemIndexByName,
     createRootContainerDraft,
     createChildContainerDraft,
     createObjectInContainer,

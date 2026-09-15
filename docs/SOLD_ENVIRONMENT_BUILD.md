@@ -1,6 +1,6 @@
 # SOLD environment and inventory lifecycle
 
-Candidate build; not a production release.
+The initial paired release was merged and deployed on September 15, 2026. This document records verified release evidence and the historical-price compatibility correction.
 
 ## Business contract
 
@@ -22,17 +22,17 @@ Forward sale and reverse return; duplicate/retry/concurrent submissions; zero-ba
 
 Production activation requires coordinated frontend/backend release, verified recovery, and read-only reconciliation of existing history before applying any derived index backfill.
 
-## Candidate delivered on September 15, 2026
+## Implementation and release
 
-The frontend pins merged IX-Core commit `e04a3347386ee6afc400079803c6e36f1b3a7153` in `config/ixi-core-release.json`. Backend PR #67 passed its GitHub checks and was merged with the user's publication and main-merge approval.
+The immutable backend revision is recorded in `config/ixi-core-release.json`. The initial release used backend PR #67 and frontend PR #354. Frontend PR #355 corrected issues found during the live audit. Backend PR #69 restores existing invoice machine prices on historical SOLD cards; its deployment follows the same exact paired gate and complete-runtime workflow.
 
 | Area | Implemented behavior |
 | --- | --- |
 | Record sold | Existing TRAN$ACT invoice closeout requires canonical collection evidence, an explicit machine price and matching machine/invoice identity. Audit actor and entity come from the authenticated server context. |
 | Inventory | Completed sales are excluded from owned listings, the AOS inventory view and public availability. Settlement remains independent. Canonical objects and durable relationships are retained. |
 | Sold environment | `/sold` reuses the private card shell, movement controls, pockets and stacks. Research filters include machine, serial/Passport, buyer, salesperson, dates, price and settlement. Paging preserves other pages' card placements. |
-| Card front | SOLD, photo, machine identity, original date, machine price, buyer, salesperson, settlement and TRAN$ACT access. Historical missing values are labeled rather than invented. |
-| Transaction continuity | A successful sale broadcasts an inventory refresh. An open worksheet stays mounted until closed. SOLD opens Transaction History. A failed AOS refresh offers retry without asking the operator to record the sale again. |
+| Card front | SOLD, photo, machine identity, original date, machine price, buyer, salesperson, settlement and TRAN$ACT access. Older machine prices resolve from the existing invoice commercial subtotal when the single-machine identity and full commercial totals reconcile. Explicit current prices stay authoritative. Truly missing facts remain labeled. |
+| Transaction continuity | A successful sale broadcasts an inventory refresh. An open worksheet stays mounted until closed. SOLD opens the existing financial record index, from which original worksheets remain accessible. A failed AOS refresh offers retry without asking the operator to record the sale again. |
 | Adjustments | A linked customer credit reduces revenue. A separate refund records money actually returned and requires its payment reference. Recording a refund does not send money. |
 | Return | A full linked return credit plus explicit possession confirmation restores private inventory. Original invoice, receipt and adjustment records remain. Refund liability can remain open independently. |
 | Settlement | Customer credits/refunds affect the settlement projection and available funds; prior owner distributions remain recorded. A changed sale requires settlement review. |
@@ -41,14 +41,16 @@ The frontend pins merged IX-Core commit `e04a3347386ee6afc400079803c6e36f1b3a715
 
 ## Verification evidence
 
-| Check | Local result |
+| Check | Verified result |
 | --- | --- |
-| Required exact paired gate | **PASS:** 491 frontend tests and 308 backend tests; zero failures. |
+| Required exact paired gate | **PASS for PR #355:** 497 frontend tests and 308 backend tests; zero failures. The historical-price correction adds four backend behavior tests; the exact new pair must pass CI before activation. |
 | Additional existing SOLD closeout contract file | **PASS:** run explicitly with the new SOLD inventory tests. |
 | Production frontend compilation | **PASS:** Next.js optimized production build, including `/sold` and its API routes. Temporary verification route removed. |
 | Actual storage workflow | **PASS:** HTTP → real financial provider → DynamoDB Local → inventory response; sale, credit, actual refund and private return. Original invoice revisions retained. |
 | Storage contention | **PASS:** competing credits, refunds and machine sales; losing transaction rolled back; retries did not duplicate charges. |
-| Production writes | **None:** no customer transactions, accounting periods, historical records or production releases changed. |
+| Deployed source and recovery | Initial backend deployment workflow `35023054848` completed successfully after a deployment-lock retry. Verified private recovery, all 444 installed source files, healthy runtime, and unchanged canonical objects and relationships. |
+| Historical data | No customer transactions, accounting periods or historical financial records were changed by the release or the price-display correction. |
+| Live browser | SOLD card and photos, buyer search, settlement filtering, owned/AOS inventory exclusion, original invoice, receipt and SOLD controls verified. The company-context failure found during this audit was corrected in PR #355 and the live inventory totals were rechecked. |
 
 Reproduce the paired gate from the frontend checkout:
 
@@ -64,12 +66,28 @@ The additional database exercise runs from IX-Core with an official DynamoDB Loc
 node scripts/verify-sold-atomicity.js /absolute/path/to/dynamodb-local
 ```
 
-## Remaining before production
+## Audit corrections
 
-1. **Publish and merge the paired release.** The user explicitly approved publication and merge to main. Backend PR #67 is merged; the frontend must use that exact backend revision and pass the paired gate before its merge.
-2. **Hosted browser verification.** The available browser blocked local HTTP and local-file previews. Server rendering succeeded, but this is not visual or interactive verification. Check desktop, laptop and tablet layouts, long buyer/seller names, movement, paging, photos, transaction tabs and keyboard operation against a hosted candidate with an isolated test company.
-3. **Existing-history reconciliation.** Read original 2026 acquisitions, invoices, receipts, returns and seller evidence without altering them. Review missing lineage, older credits and missing machine prices. Older invoice totals must not be assumed to be machine prices. Any historical correction/backfill needs a separately reviewed migration; this candidate has made none.
-4. **Operational and performance checks.** Verify real company membership/listing bindings, all public/detail entry points, returned-machine publication behavior, and inventory refresh across sessions. Measure query volume and latency with representative history and concurrent users. Current inventory reads project company documents on demand; simultaneous requests are coalesced, but no 1,000-seat throughput claim has been established.
-5. **Coordinated release and recovery.** Use the existing complete frontend/backend release workflow, verified recovery and bounded health checks. Confirm installed source, canonical-data integrity and the actual AOS/TRAN$ACT sale-and-return flow after activation.
+- **Inventory authorization:** account inventory derives its owner from the authenticated browser session and rejects a mismatched requested owner before data reads.
+- **Signed company context:** availability requests first resolve the existing company and pass its Entity identity. Only an absent AOS account permits an empty projection; failed availability routes do not make sold stock available.
+- **Calendar dates:** the existing financial record index uses UTC business dates so US time zones do not display the prior day.
+- **Historical machine prices:** requiring the newer `machineSalePrice` field overlooked prices already stored in issued invoices. The projection now reads a reconciled, single-machine `commercialBreakdown.subtotal` and reports `salePriceSource`. Tax, freight and fees are excluded; deposits and trade allowances do not reduce the machine's sale price. No record migration or customer re-entry is required. Bare invoice totals and ambiguous multi-machine invoices are not silently treated as a machine price.
 
-The candidate has passed local source and storage checks. It is not a deployed or production-certified release, and the tests do not establish a zero-defect guarantee.
+## Verification limits and remaining checks
+
+- A live pocket movement using “Sync machine” was blocked by automatic approval review because it may persist placement. No bypass was attempted. The user has not yet approved that specific live test.
+- Live sale/credit/refund/physical-return writes were exercised against isolated DynamoDB Local, not fabricated in the customer's production company.
+- Remaining responsive-device and multi-page movement scenarios need an isolated hosted test company. The completed live browser checks used the available desktop session.
+- Historical date recovery requires matching canonical invoice and collection evidence; ambiguous dates retain their existing value. Missing salesperson evidence still requires the actual historical salesperson, not the data-entry actor.
+- Current inventory reads project company documents on demand and coalesce simultaneous requests. No 1,000-seat throughput benchmark or zero-defect guarantee is established.
+- Every backend pin change requires the exact paired tests, frontend compilation, full immutable runtime deployment, recovery, installed-source verification and live browser confirmation. Source tests and deployment status must be reported separately.
+
+## Historical business dates and shared card correction
+
+The earlier SOLD form defaulted its sale date to the day of data entry. For an unmarked legacy closeout whose stored sale date equals its audit closeout day, the projection uses the earlier invoice date only when unique, finalized, same-company and same-currency canonical receipts establish full collection on that date. Explicit operator dates remain authoritative. The response retains `recordedSaleDate`, `recordedAt` and `saleDateSource`; original invoice and payment records are unchanged. Inventory ordering, date filtering and return/adjustment bounds share this resolver.
+
+New closeouts default to the source invoice date, never today's date; missing dates remain blank and operator edits survive invoice loading. The server records invoice/operator provenance.
+
+The SOLD front now uses the existing PrivateListingCard photo, photo-fit rules, arrows, counter, title, hours, rail and actuators. Only the sale-details body and SOLD banner are specialized. TRAN$ACT opens the record index with APPS inside its header; the extra external button no longer offsets the primary panel from adjacent workspaces.
+
+Candidate verification: optimized frontend build passes; exact local paired gate passes 500 frontend plus 337 backend tests against integrated backend `65590546489cf47a9320a90b50ac3a5430fef8cc`, retaining the concurrently merged AOS repair and this SOLD correction. Ten new date regressions cover provenance, incomplete or unrelated receipts, duplicate IDs, inventory chronology and historical returns. Production activation and browser geometry checks must be recorded separately.

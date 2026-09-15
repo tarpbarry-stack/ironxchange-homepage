@@ -191,13 +191,13 @@ test("SOLD accepts gross equipment price with net cash paid, and retains separat
   const invoice = {
     financialDocumentId: "invoice-001",
     financialState: "collected",
+    occurredAt: "2026-01-05",
     totals: { total: 85000 },
     metadata: { trades: [{ allowance: 20619 }, { allowance: 20619 }] },
   };
   const input = {
     sourceInvoice: invoice,
     buyerLabel: "Buyer",
-    saleDate: "2026-01-05",
     machineSalePrice: 126238,
     financialRecords: [
       {
@@ -217,8 +217,27 @@ test("SOLD accepts gross equipment price with net cash paid, and retains separat
     input,
   });
   assert.equal(record.sale.salePrice, 126238);
+  assert.equal(record.sale.tradeValue, 41238);
+  assert.equal(record.sale.saleDate, "2026-01-05");
+  assert.equal(record.sale.saleDateSource, "invoice");
+  assert.equal(record.passportState.effectiveDate, "2026-01-05");
   assert.equal(record.collection.amountReceived, 85000);
+  assert.equal(sold.isIXIAssetSaleCollectionReady(record.collection), true);
   assert.equal(sold.validateIXIAssetSale(record, invoice).valid, true);
+});
+test("an all-trade closeout is ready without inventing a cash receipt; credits alone remain insufficient", () => {
+  const invoice = { financialDocumentId: "invoice-full-trade", financialState: "billed", occurredAt: "2026-01-05",
+    totals: { total: 0 }, metadata: { trades: [{ allowance: 10000 }] } };
+  const record = sold.createIXIAssetSaleDraft({ context: { primary: { passportId: "outgoing" } },
+    input: { sourceInvoice: invoice, buyerLabel: "Buyer", machineSalePrice: 10000 } });
+  assert.equal(record.collection.invoiceTotal, 0);
+  assert.equal(record.collection.amountReceived, 0);
+  assert.equal(record.sale.salePrice, 10000);
+  assert.equal(sold.isIXIAssetSaleCollectionReady(record.collection), true);
+  assert.equal(sold.validateIXIAssetSale(record, invoice).valid, true);
+  assert.equal(sold.isIXIAssetSaleCollectionReady({ ...record.collection, tradeValue: 0 }), false);
+  assert.equal(sold.isIXIAssetSaleCollectionReady({ ...record.collection, invoiceTotal: 10000, creditedAmount: 10000 }), false);
+  assert.equal(sold.isIXIAssetSaleCollectionReady({ ...record.collection, invoiceTotal: 100, balanceDue: 100 }), false);
 });
 test("download fields retain every trade serial and Passport", () => {
   const fields = documentPrintFields({
