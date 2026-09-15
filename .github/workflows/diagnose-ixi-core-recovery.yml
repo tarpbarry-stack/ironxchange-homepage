@@ -27,6 +27,10 @@ jobs:
           python3 - <<'PY'
           import json,os,pathlib
           command = r'''set -eu
+          df -B1 /var/www/ix-core /var/backups /var/tmp /tmp
+          df -i /var/www/ix-core /var/backups /var/tmp /tmp
+          du -x -B1 --max-depth=1 /var/tmp /var/backups /var/www/ix-core /var/lib/ixi-core /home/ubuntu/.npm /tmp 2>/dev/null | sort -n || true
+          stat -c '%s %n' /var/lib/ixi-core/mos/ixi-aos.sqlite
           systemctl show ixi-core-recovery.service -p ActiveState -p SubState -p Result -p ExecMainStatus -p ExecMainStartTimestamp -p ExecMainExitTimestamp
           systemctl show ixi-core-recovery.timer -p ActiveState -p SubState -p NextElapseUSecRealtime
           journalctl -u ixi-core-recovery.service -n 35 --no-pager -o cat
