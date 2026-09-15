@@ -318,6 +318,8 @@ export function createIXIAosObjectUpdateCommand({ session, draft, commandId, now
     definitionVersion: clean(current.definitionVersion) || "unversioned",
     issuedAt: now,
     patch: {
+      ...(clean(canonicalDraft.objectType) && canonicalDraft.objectType !== current.baseObject?.objectType
+        ? { objectType: canonicalDraft.objectType } : {}),
       displayName: clean(canonicalDraft.displayName),
       businessIdentifiers: array(canonicalDraft.businessIdentifiers),
       fields: clone(object(canonicalDraft.fields)),

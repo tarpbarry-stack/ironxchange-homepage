@@ -1357,6 +1357,20 @@ const saveAosWorkspaceObject = useCallback(async (payload = {}) => {
     ? mergeAosCanonicalObject(payload.object, canonical)
     : canonical;
 
+  // Membership configuration and classification change the read projection.
+  // Reload admitted Objects and their reviews before reporting this save complete.
+  if (command.patch?.objectType || command.patch?.metadata?.systemIndexMembershipPolicy) {
+    const environment = await loadIXIMosEnvironment({ includeObjects: true });
+    if (String(environment?.entity?.entityId || "") !== activeEntityId) {
+      throw Object.assign(new Error("The active Entity changed while refreshing membership."),
+        { code: "AOS_BROWSER_ENTITY_MISMATCH", status: 403 });
+    }
+    setAosObjects(environment.objects || []);
+    setAosRelationships(environment.relationships || []);
+    setAosRailProjections(environment.railProjections || {});
+    setSystemIndexes(environment.systemIndexes || []);
+  }
+
   setAosObjects(current => current.map(existing => {
     if (String(existing?.objectId || "") !== objectId) return existing;
     /*

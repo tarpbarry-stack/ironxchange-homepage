@@ -19,6 +19,7 @@ function commandId() {
 function draftFingerprint(draft = {}) {
   return JSON.stringify({
     objectId: getIXIAosObjectId(draft),
+    objectType: clean(draft?.objectType),
     displayName: clean(draft?.displayName),
     businessIdentifiers: draft?.businessIdentifiers || [],
     fields: draft?.fields || {},
@@ -164,6 +165,7 @@ export default function useIXIAosObjectEditSession({
       const rebased = draft
         ? synchronizeIXIAosBusinessIdentifier({
             ...canonical,
+            objectType: draft.objectType,
             displayName: draft.displayName,
             businessIdentifiers: draft.businessIdentifiers,
             fields: draft.fields,

@@ -9,6 +9,8 @@
  * business operation.
  */
 
+import { isExplicitAosSystemIndexObject } from "../../lib/mos/IXIAosSystemIndexMembershipPolicy.js";
+
 function clean(value) {
   return String(
     value || ""
@@ -38,23 +40,7 @@ function normalizeIds(values) {
 function isSystemIndexObject(
   value = {}
 ) {
-  const metadata =
-    value?.metadata &&
-    typeof value.metadata === "object"
-      ? value.metadata
-      : {};
-
-  return (
-    clean(value?.objectType).toLowerCase() === "system-index" ||
-    metadata.systemIndex === true ||
-    metadata.isSystemIndex === true ||
-    metadata.systemAdapter === true ||
-    metadata.systemIndexPresentation === true ||
-    metadata.rootContainer === true ||
-    clean(metadata.hierarchyRole).toLowerCase() === "index" ||
-    clean(value?.cardTemplateSlug || value?.templateId || metadata?.templateId) ===
-      "ixi-system-index-v1"
-  );
+  return isExplicitAosSystemIndexObject(value);
 }
 
 

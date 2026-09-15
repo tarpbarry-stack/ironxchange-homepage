@@ -35,25 +35,7 @@ import {
 } from "../../../lib/mos/IXIAosSystemIndexMembershipPolicy";
 
 
-const BUILT_IN_MEMBER_TYPES = Object.freeze([
-  ["location", "LOCATION"],
-  ["person", "PERSON"],
-  ["machine", "MACHINE"],
-  ["equipment", "EQUIPMENT"],
-  ["vehicle", "VEHICLE"],
-  ["trailer", "TRAILER"],
-  ["tool", "TOOL"],
-  ["real-estate", "REAL ESTATE"],
-  ["job", "JOB"],
-  ["building", "BUILDING"],
-  ["room", "ROOM"],
-  ["container", "CONTAINER"],
-  ["work-order", "WORK ORDER"],
-  ["job-ticket", "JOB TICKET"],
-  ["expense", "EXPENSE"],
-  ["movement", "MOVEMENT"],
-  ["freight", "FREIGHT"]
-]);
+import { AOS_MEMBER_TYPES as BUILT_IN_MEMBER_TYPES } from "../../../lib/mos/IXIAosMemberTypes.js";
 
 
 function clean(value) {
