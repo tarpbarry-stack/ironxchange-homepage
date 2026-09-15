@@ -16,6 +16,7 @@ import {
 } from "../../../lib/listingFormatters";
 
 import MachineBadges from "../../MachineBadges";
+import IXISoldFrontFace from "./IXISoldFrontFace";
 
 import IXIMachineRail from "../../IXIMachineRail";
 
@@ -482,8 +483,11 @@ function beginCardDragFromNonInteractiveSurface(event) {
     {actionNotice?.message || ixiState?.actionNotice?.message || ixiState.theaterNotice}
   </div>
 ) : null}
-{Number(machineFace || 1) === 2 ? (
-presentation === "seller" ? (
+{listing.soldSummary && Number(machineFace || 1) === 1 ? (
+  <IXISoldFrontFace listing={listing} photo={currentPhoto} photoIndex={photoIndex} photoCount={images.length}
+    onPhoto={changePhoto} onOpenTransact={() => onOpenTransact?.(listing)} />
+) : Number(machineFace || 1) === 2 ? (
+presentation === "seller" && !listing.soldSummary ? (
   <IXISellerMachineObjectFace2
       listing={listing}
       dragHandleProps={keyboardDragHandleProps}

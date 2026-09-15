@@ -1,3 +1,4 @@
+import { filterPublicInventory } from "../../lib/server/aos/ixiInventoryAvailability";
 import {
   normalizeMachineAccess,
   normalizeMachineChannel
@@ -838,6 +839,7 @@ export default async function handler(req, res) {
         cacheStatus = "miss";
       }
 
+      responseListings = await filterPublicInventory(responseListings);
       if (publicProjection.projection === "directory") {
         responseListings = responseListings.map(
           compactMarketplaceDirectoryEntry
@@ -845,7 +847,7 @@ export default async function handler(req, res) {
       }
     } else {
       const result = await buildListingsCatalogue();
-      responseListings = result.listings;
+      responseListings = await filterPublicInventory(result.listings);
       timings = result.timings;
     }
 
@@ -855,6 +857,9 @@ export default async function handler(req, res) {
       timings
     });
 
+    res.setHeader("Cache-Control", "no-store");
+    res.setHeader("CDN-Cache-Control", "no-store");
+    res.setHeader("Vercel-CDN-Cache-Control", "no-store");
     console.log(JSON.stringify({
       level: "info",
       message: "marketplace_catalogue_served",

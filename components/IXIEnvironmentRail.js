@@ -7,6 +7,7 @@ const RAIL_ITEMS = [
   { label: "IXI THEATER", href: "/theater", access: "relationship" },
   { label: "IXI SELLERS", href: "/yard", access: "always" },
   { label: "DASHBOARD", href: "/account", access: "account" },
+  { label: "SOLD", href: "/sold", access: "account" },
   { label: "INVENTORY", href: "/account/my-listings-v2", access: "seller" },
   { label: "LAUNCH", href: "/live", access: "seller" },
   { label: "POST FREE", href: "/post-free", access: "always", postFree: true }
@@ -127,6 +128,7 @@ onDoubleClick={(e) => {
           align-items: center;
           justify-content: space-between;
           gap: 18px;
+          flex-wrap: wrap;
 
           position: relative;
         }

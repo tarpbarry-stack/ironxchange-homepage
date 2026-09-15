@@ -26,6 +26,7 @@ const draft = (sourceInvoice = invoice, records = [payment]) => createIXIAssetSa
     sourceInvoice,
     buyerLabel: sourceInvoice.metadata.customer.name,
     saleDate: "2026-01-05",
+    machineSalePrice: 75000,
     financialRecords: records,
   },
 });
@@ -75,4 +76,15 @@ test("closeout explains the field or action needed instead of an opaque REQUIRED
   ]);
   assert.equal(getIXIAssetSaleValidationMessages(errors, "es").length, 3);
   assert.ok(getIXIAssetSaleValidationMessages(errors, "es").every(message => !message.includes("required")));
+});
+
+test("SOLD requires the actual machine price and collected funds even at zero balance", () => {
+  const missingPrice = draft();
+  missingPrice.sale.machineSalePrice = null;
+  assert.ok(validateIXIAssetSale(missingPrice, invoice).errors.machineSalePrice);
+  const credited = draft();
+  credited.collection.amountReceived = 0;
+  credited.collection.creditedAmount = 75000;
+  credited.collection.balanceDue = 0;
+  assert.match(validateIXIAssetSale(credited, invoice).errors.collection, /Actual received funds/);
 });
