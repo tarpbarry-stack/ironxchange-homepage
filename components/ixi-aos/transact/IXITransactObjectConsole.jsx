@@ -203,6 +203,7 @@ export default function IXITransactObjectConsole({
   );
 
   const [consoleModules, setConsoleModules] = useState({});
+  const [primaryHistory, setPrimaryHistory] = useState(Boolean(object.soldSummary));
 
   const listingIndex = slots.findIndex(
     slot => slot.type === IXI_CONSOLE_SLOT_TYPES.LISTING
@@ -461,8 +462,15 @@ export default function IXITransactObjectConsole({
 
               {isListing ? (
                 <>
-                  <IXITransactApp
+                  {primaryHistory && !consoleModules[slot.slotId] ? <>
+                    <button type="button" className="sold-open-apps" onClick={() => setPrimaryHistory(false)}>TRAN$ACT APPS</button>
+                    <IXITransactRecordIndex context={context} financialRecords={financialRecords} onClose={onClose}
+                      onOpenModule={(item, moduleContext, payload) => openConsoleModule(slot.slotId, item, payload)} />
+                  </> : <IXITransactApp
                     object={object}
+                    initialModuleId={consoleModules[slot.slotId]?.moduleId}
+                    selectedFinancialDocumentId={consoleModules[slot.slotId]?.financialDocumentId}
+                    returnToClose={Boolean(object.soldSummary)}
                     actor={actor}
                     entity={entity}
                     activeWorkOrder={activeWorkOrder}
@@ -470,7 +478,7 @@ export default function IXITransactObjectConsole({
                     financialRecords={financialRecords}
                     onFinancialRecordsChange={onFinancialRecordsChange}
                     permissions={permissions}
-                    onClose={onClose}
+                    onClose={object.soldSummary ? () => { closeConsoleModule(slot.slotId); setPrimaryHistory(true); } : onClose}
                     onOpenModule={handleOpenModule}
                     onSendFront={onSendFront}
                     onSendBack={onSendBack}
@@ -480,7 +488,7 @@ export default function IXITransactObjectConsole({
                     onSendToArmedDestination={onSendToArmedDestination}
                     moduleOrder={ixiState?.transactModuleOrder}
                     onModuleOrderChange={persistModuleOrder}
-                  />
+                  />}
                   <IXIAosActionNotice variant="field" />
                 </>
               ) : (

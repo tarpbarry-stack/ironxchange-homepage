@@ -1,3 +1,4 @@
+import { announceInventoryChange } from "../../../../../lib/listings/IXIInventoryEvents";
 import {
   createIXIAosObjectFinancialDocument,
   createIXIAosFinancialObjectReference,
@@ -223,9 +224,10 @@ export async function createIXIAssetSale({
         throw new Error("SOLD closeout did not return the original canonical Invoice.");
       }
       const stored = storedRecord(response);
+      announceInventoryChange({ passportId: resolved.passportId, state: "sold", saleId: financialId });
       return {
         record: {
-          ...soldRecord,
+          ...(documentOf(response)?.metadata?.assetSaleRecord || soldRecord),
           financialBinding: {
             financialDocumentId: financialId,
             revision: Number(stored?.server?.revision || expectedRevision + 1),

@@ -5,9 +5,9 @@
 ## Published pair
 
 - [Frontend PR 353](https://github.com/tarpbarry-stack/ironxchange-homepage/pull/353), initially published at `3f96683748daca1fea72b58bef862bd986a2d102`.
-- [IX-Core PR 66](https://github.com/tarpbarry-stack/ixi-core/pull/66), commit `89c903a79d9b011ee03b8196b9eaea75ecd07ff8`.
-- The frontend pins that exact backend commit. The backend published tree is `f0115216a085de66c33a54fb7ba275863b33d81c`, identical to the previously reviewed local candidate. The initial frontend published tree is `eea454a414e87430b709551ba102afa01c230605`, identical to its local publication candidate.
-- This audit correction is a follow-up on the frontend draft branch. IX-Core source is unchanged from PR 66.
+- [IX-Core PR 66](https://github.com/tarpbarry-stack/ixi-core/pull/66), initially published at `89c903a79d9b011ee03b8196b9eaea75ecd07ff8`; current combined candidate `02a3f2e8a6db19e61539f52ba05565f91ccc2340`.
+- The frontend pins the current combined backend. The initial backend published tree was `f0115216a085de66c33a54fb7ba275863b33d81c`, identical to the previously reviewed local candidate. The initial frontend published tree was `eea454a414e87430b709551ba102afa01c230605`, identical to its local publication candidate.
+- Both draft branches now include the newer SOLD baseline: frontend `main` at `f08d851655d322da5447adcd2a24633d4f102324` and backend `main` at `e04a3347386ee6afc400079803c6e36f1b3a7153`.
 
 ## Reproduced findings and corrections
 
@@ -24,14 +24,21 @@ The draft-control finding was established by tracing the editor into `commitDraf
 
 A final CSS review also found that existing global editor rules could shrink membership-option labels and distort checkbox sizing. The membership editor now explicitly scopes its 12 px labels, 44 px label targets and checkbox dimensions. Visual verification still requires access to the candidate browser workflow.
 
+## Concurrent baseline change
+
+Both `main` branches advanced during the audit with SOLD inventory and governed sale-return work (frontend PR 354 and backend PR 67). Keeping the old backend pin would have excluded that financial lifecycle from a subsequent complete runtime release.
+
+The repair branches incorporate both new baseline commits through merge commits. The backend conflict was resolved by retaining both membership review and the SOLD visibility projection. The frontend pin now selects the combined backend. Membership-save refresh also uses the new inventory continuity function so that refreshing an index does not unmount an open SOLD worksheet. The production-page test covers that interaction together with membership review and concurrent revision preservation.
+
 ## Validation evidence
 
 | Check | Result |
 | --- | --- |
-| Required paired gate against published backend `89c903a7` after corrections | 491 frontend/integration tests and 299 IX-Core tests passed; zero failures and zero skips |
-| Frontend production build after corrections | Passed |
+| Required paired gate against published combined backend `02a3f2e8a6db19e61539f52ba05565f91ccc2340` | 501 frontend/integration tests and 316 IX-Core tests passed; zero failures and zero skips |
+| SOLD closeout contract check on the combined frontend | All three tests passed |
+| Frontend production build with the combined SOLD baseline | Passed |
 | Initial published frontend GitHub workflows | All four succeeded: paired stabilization, creation entry unification, card face manifest, and mobile Browse DnD |
-| Published IX-Core GitHub workflows | All three succeeded: complete IX-Core tests, creation integrity, and Object contract tests |
+| Published combined IX-Core GitHub workflows at `02a3f2e8` | All three succeeded: complete IX-Core tests, creation integrity, and Object contract tests |
 | Initial Vercel preview | READY at the initial published frontend commit; preview target, with no production alias |
 | Authenticated browser workflow | Not established. Preview access redirected to Vercel SSO; prior local inspection was blocked by browser URL policy. |
 

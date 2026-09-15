@@ -138,6 +138,7 @@ export function createIXIAssetSaleDraft({ context = {}, input = {} } = {}) {
     context: {
       assetPassportId: clean(primary.passportId),
       assetObjectId: clean(primary.objectId),
+      assetListingId: clean(primary.sourceReference || primary.sourceListingId),
       assetObjectType: clean(primary.objectType),
       assetLabel: clean(primary.label),
       entityPassportId: clean(context.entity?.passportId),
@@ -157,6 +158,9 @@ export function createIXIAssetSaleDraft({ context = {}, input = {} } = {}) {
       buyerPhone: clean(input.buyerPhone),
       saleDate: clean(input.saleDate),
       salePrice: collection.invoiceTotal,
+      machineSalePrice: input.machineSalePrice === "" || input.machineSalePrice == null ? null : money(input.machineSalePrice),
+      soldByLabel: clean(input.soldByLabel),
+      soldByPassportId: clean(input.soldByPassportId),
       currency: clean(sourceInvoice.currency || "USD").toUpperCase(),
       terms: clean(input.terms || sourceInvoice.paymentTerms || "DUE ON SALE"),
       dueDate: clean(input.dueDate || sourceInvoice.dueDate).slice(0, 10),
@@ -198,6 +202,8 @@ export function validateIXIAssetSale(record = {}, sourceInvoice = {}) {
   if (!clean(record.sale?.saleDate)) errors.saleDate = "required";
   if (!["billed", "partially-collected", "collected"].includes(invoiceState)) errors.invoiceState = "invoice-must-be-issued";
   if (number(record.collection?.balanceDue) > 0.005) errors.collection = "buyer-balance-outstanding";
+  else if (number(record.collection?.amountReceived) <= 0 || number(record.collection?.invoiceTotal) <= number(record.collection?.creditedAmount)) errors.collection = "Actual received funds are required; a credit alone does not complete a sale.";
+  if (record.sale?.machineSalePrice == null || number(record.sale.machineSalePrice) <= 0 || number(record.sale.machineSalePrice) > number(record.collection.invoiceTotal)) errors.machineSalePrice = "Enter the machine sale price, excluding invoice additions.";
   if (clean(record.collection?.status) !== "paid") errors.collectionStatus = "payment-required";
   return { valid: Object.keys(errors).length === 0, errors };
 }

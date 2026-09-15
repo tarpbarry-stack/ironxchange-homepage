@@ -243,6 +243,7 @@ export function buildMachineLedger(
     } else if (row.type === "payment") {
       const direction = lower(doc.paymentDirection);
       if (direction === "inflow") row.receivedCents = row.amountCents;
+      else if (direction === "outflow" && doc.metadata?.customerRefund === true) row.receivedCents = -Math.abs(row.amountCents);
       else if (direction === "outflow") row.paidCents = row.amountCents;
       else review("Payment direction is missing");
       if (!row.reason)

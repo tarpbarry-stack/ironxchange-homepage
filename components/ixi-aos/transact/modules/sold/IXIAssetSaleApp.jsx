@@ -1,3 +1,4 @@
+import IXISaleReturnPanel from "./IXISaleReturnPanel";
 import IXIMoneyInput from "../../IXIMoneyInput";
 import { useEffect, useMemo, useState } from "react";
 import {
@@ -135,6 +136,9 @@ export default function IXIAssetSaleApp({
   const [invoiceSnapshot, setInvoiceSnapshot] = useState(sourceInvoice || {});
   const [localReceipts, setLocalReceipts] = useState(initialRecord?.collection?.receipts || []);
   const [type, setType] = useState(initialRecord?.sale?.type || "sale");
+  const [soldByLabel, setSoldByLabel] = useState(initialRecord?.sale?.soldByLabel || "");
+  const [machineSalePrice, setMachineSalePrice] = useState(initialRecord?.sale?.machineSalePrice ?? "");
+  const [saleCommandId] = useState(() => globalThis.crypto?.randomUUID?.() || `SALE-${Date.now()}`);
   const [saleDate, setSaleDate] = useState(initialRecord?.sale?.saleDate || today());
   const [billOfSaleNumber, setBillOfSaleNumber] = useState(
     initialRecord?.sale?.billOfSaleNumber || billOfSaleDefault(sourceInvoice),
@@ -174,6 +178,8 @@ export default function IXIAssetSaleApp({
   const customer = useMemo(() => invoiceSnapshot?.metadata?.customer || {}, [invoiceSnapshot]);
   const input = useMemo(() => ({
     dealId,
+    clientRequestId: saleCommandId,
+    soldByLabel, machineSalePrice,
     sourceFinancialDocumentId: invoiceIdOf(invoiceSnapshot),
     sourceInvoice: invoiceSnapshot,
     financialRecords,
@@ -195,6 +201,7 @@ export default function IXIAssetSaleApp({
     documents,
     assetCostBasis: costBasis.totalInvested,
   }), [
+    soldByLabel, machineSalePrice, saleCommandId,
     billOfSaleNumber,
     collection.receipts,
     customer,
@@ -213,7 +220,7 @@ export default function IXIAssetSaleApp({
   const invoiceState = clean(invoiceSnapshot?.financialState).toLowerCase();
   const invoiceIssued = ["billed", "partially-collected", "collected"].includes(invoiceState);
   const invoiceCollectible = invoiceState === "draft" || invoiceIssued;
-  const readyToClose = invoiceIssued && collection.balanceDue <= 0.005;
+  const readyToClose = invoiceIssued && collection.balanceDue <= 0.005 && collection.amountReceived > 0 && collection.invoiceTotal > collection.creditedAmount;
   const closeoutReady = readyToClose;
 
   async function addDocuments(files, typeLabel) {
@@ -325,7 +332,7 @@ export default function IXIAssetSaleApp({
       });
       setRecord(result.record);
       setInvoiceSnapshot(result.invoice);
-      await onRecordChange?.(
+      try { await onRecordChange?.(
         result.record,
         {
           action: "record-sold",
@@ -334,7 +341,7 @@ export default function IXIAssetSaleApp({
           passportState: result.record.passportState,
         },
         context,
-      );
+      ); } catch { setWarning("SOLD was saved. Transaction history could not refresh; retry the history refresh without recording another sale."); }
     } catch (caught) {
       setError(clean(caught?.message) || "SOLD closeout could not be completed.");
     } finally {
@@ -415,6 +422,8 @@ export default function IXIAssetSaleApp({
       <div className="sale-section">{copy.closeout}</div>
       <div className="sale-grid">
         <Field label={copy.type}><select value={type} onChange={event => setType(event.target.value)}><option value="sale">SALE</option><option value="auction-sale">AUCTION SALE</option><option value="trade">TRADE</option><option value="transfer">TRANSFER</option><option value="total-loss">TOTAL LOSS</option><option value="scrap">SCRAP</option><option value="other">OTHER</option></select></Field>
+        <Field label="Machine sale price"><IXIMoneyInput value={machineSalePrice} onValueChange={setMachineSalePrice} /></Field>
+        <Field label="Sold by"><Input value={soldByLabel} onChange={setSoldByLabel} placeholder="Actual salesperson, if known" /></Field>
         <Field label={copy.date}><Input type="date" value={saleDate} onChange={setSaleDate} /></Field>
       </div>
       <div className="sale-grid">
@@ -438,6 +447,7 @@ export default function IXIAssetSaleApp({
       <button type="button" className="sale-primary" disabled={saving || uploading || !closeoutReady} onClick={closeSale}>{saving ? copy.verifying : copy.record}</button>
     </> : <div className="sale-status"><strong>{copy.soldStatus}</strong><div className="sale-money"><span>{copy.settlement}</span><b>{copy.ready}</b></div></div>}
 
+    {record && <><a className="sale-secondary" href="/sold" target="_blank" rel="noreferrer">VIEW IN SOLD ↗</a><IXISaleReturnPanel invoice={invoiceSnapshot} financialRecords={financialRecords} context={context} onSaved={onRecordChange} /></>}
     {warning ? <div className="sale-warning">{warning}</div> : null}
     {error ? <div className="sale-error">{error}</div> : null}
     <button type="button" className="sale-secondary" onClick={() => onBack?.()}>‹ TRAN$ACT</button>

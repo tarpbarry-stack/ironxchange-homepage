@@ -81,7 +81,7 @@ function transactObjectFromListing(listing = {}) {
     displayName: clean(listing?.title || listing?.attributes?.title) || "EQUIPMENT",
     passportId,
     entityPassportId,
-    sourceReference: clean(getListingId(listing)),
+    sourceReference: clean(listing.sourceListingId || getListingId(listing)),
     fields: {
       ...(listing?.fields || {}),
       entityPassportId,
@@ -220,6 +220,7 @@ export default function IXIOwnedPrivateListingRuntime({ cardContext = "inventory
   }
 
   function handleEditButton() {
+    if (runtimeListing.soldSummary) { showNotice("OPEN TRAN$ACT TO REVIEW THIS SALE", "info"); return; }
     if (!editing) {
       beginEdit();
       return;
@@ -245,6 +246,7 @@ export default function IXIOwnedPrivateListingRuntime({ cardContext = "inventory
   }
 
   const ownerActionBridgeKey = clean(
+    (runtimeListing.soldSummary ? getListingId(runtimeListing) : "") ||
     runtimeListing?.canonicalIdentity?.objectId ||
     runtimeListing?.objectId ||
     getListingId(runtimeListing)

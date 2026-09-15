@@ -23,6 +23,7 @@ export function createIXITransactContext({
 
     primary: {
       passportId,
+      sourceReference: clean(source.sourceReference || source.sourceListingId),
       objectId: clean(source.objectId || source.mosObjectId),
       objectType: clean(source.objectType || source.type || source.templateType),
       label: clean(source.displayName || source.name || source.title) || "AOS CARD"

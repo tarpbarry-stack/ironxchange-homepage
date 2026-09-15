@@ -6,7 +6,7 @@ Prepared 15 September 2026. Status: published draft candidate; not deployed. See
 
 The first repair separates structural roles from appearance and provides an explicit correction path for existing unconfigured indexes and unclassified Objects. Invalid connections remain distinguishable from valid membership. This candidate is not a production completion claim.
 
-The published backend candidate is `89c903a79d9b011ee03b8196b9eaea75ecd07ff8`. Its source tree exactly matches the locally verified `d5195a28dd98bb234d529400570d7b35908819bd`; publication through the GitHub integration assigned a new commit identity. The frontend pins the published commit in `config/ixi-core-release.json`. Both checkouts use branch `aos/structural-contract-compatibility`.
+The current published backend candidate is `02a3f2e8a6db19e61539f52ba05565f91ccc2340`. It incorporates the SOLD lifecycle changes merged into backend `main` during the audit. The initial published backend `89c903a79d9b011ee03b8196b9eaea75ecd07ff8` matched the locally verified `d5195a28dd98bb234d529400570d7b35908819bd` exactly. The frontend pins the current combined candidate in `config/ixi-core-release.json`. Both checkouts use branch `aos/structural-contract-compatibility`.
 
 ## Starting evidence
 

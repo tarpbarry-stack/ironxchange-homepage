@@ -1,3 +1,5 @@
+import { preserveOpenInventoryTransactions, releaseClosedInventoryTransactions } from "../../lib/listings/IXIInventorySession.mjs";
+import { subscribeInventoryChanges } from "../../lib/listings/IXIInventoryEvents";
 import Head from "next/head";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
@@ -349,6 +351,15 @@ const POCKET_TARGETS = [
 ];
 
   const [ixiCardState, setIxiCardState] = useState({});
+  const inventoryCardStateRef = useRef(ixiCardState);
+  const inventoryInitiallyLoaded = useRef(false);
+  const inventoryReloadRef = useRef(null);
+  const [inventoryRefreshError, setInventoryRefreshError] = useState("");
+  inventoryCardStateRef.current = ixiCardState;
+  useEffect(() => {
+    setListings(current => releaseClosedInventoryTransactions(current, ixiCardState));
+    setAosObjects(current => releaseClosedInventoryTransactions(current, ixiCardState));
+  }, [ixiCardState]);
   const [ixiUserId, setIxiUserId] = useState("guest");
   const [workspaceSettings, setWorkspaceSettings] =
   useState({});
@@ -438,17 +449,20 @@ const sensors = useSensors(
 
 useEffect(() => {
   let cancelled = false;
+  let loadVersion = 0;
 
   async function loadAosWorkEnvironment() {
+    const version = ++loadVersion;
     try {
       const environment =
         await loadIXIMosEnvironment({
           includeObjects: true
         });
 
-      if (cancelled) {
+      if (cancelled || version !== loadVersion) {
         return;
       }
+      setInventoryRefreshError("");
 
       const listingEnvironment =
         environment?.listingEnvironment || {};
@@ -478,7 +492,7 @@ useEffect(() => {
           ? listingEnvironment.savedIds
           : []
       );
-      setListings(ownedListings);
+      setListings(previous => preserveOpenInventoryTransactions(previous, ownedListings, inventoryCardStateRef.current));
       setWorkspaceSettings(nextWorkspaceSettings);
 
       setBoardSkinId(
@@ -489,7 +503,7 @@ useEffect(() => {
           : readIXIAosBoardSkinId()
       );
 
-      setIxiCardState(Object.fromEntries(
+      if (!inventoryInitiallyLoaded.current) setIxiCardState(Object.fromEntries(
         Object.entries(remoteIxiState).map(([id, record]) => [
           id,
           stripAosSessionOnlyCardState(record)
@@ -514,13 +528,8 @@ useEffect(() => {
         environment?.principal || null
       );
 
-      setAosObjects(
-        Array.isArray(
-          environment?.objects
-        )
-          ? environment.objects
-          : []
-      );
+      setAosObjects(previous => preserveOpenInventoryTransactions(previous, Array.isArray(environment?.objects) ? environment.objects : [], inventoryCardStateRef.current));
+      inventoryInitiallyLoaded.current = true;
 
       setAosObjectDefinitions(
         Array.isArray(environment?.objectDefinitions)
@@ -560,8 +569,8 @@ setSystemIndexes(
           concurrency: 4
         }
       ).then(hydratedListings => {
-        if (!cancelled) {
-          setListings(hydratedListings);
+        if (!cancelled && version === loadVersion) {
+          setListings(previous => preserveOpenInventoryTransactions(previous, hydratedListings, inventoryCardStateRef.current));
         }
       }).catch(error => {
         console.warn(
@@ -574,17 +583,16 @@ setSystemIndexes(
         "IXI AOS WORK ENVIRONMENT LOAD FAILED:",
         error
       );
-      if (!cancelled) {
-        setSavedIds([]);
+      if (!cancelled && version === loadVersion) {
+        setInventoryRefreshError("Inventory could not be refreshed. Availability on this screen has not been verified; retry without repeating a saved transaction.");
       }
     }
   }
 
   void loadAosWorkEnvironment();
-
-  return () => {
-    cancelled = true;
-  };
+  inventoryReloadRef.current = loadAosWorkEnvironment;
+  const unsubscribe = subscribeInventoryChanges(() => { void loadAosWorkEnvironment(); });
+  return () => { cancelled = true; inventoryReloadRef.current = null; unsubscribe(); };
 }, []);
   
   const savedListings = useMemo(() => {
@@ -1371,7 +1379,9 @@ const saveAosWorkspaceObject = useCallback(async (payload = {}) => {
         { code: "IXI_AOS_CANONICAL_READBACK_REQUIRED" });
     }
     const acceptedRefreshed = mergeAosCanonicalObject(payload?.object || canonical, refreshed);
-    setAosObjects(environment.objects.map(object => object.objectId === objectId ? acceptedRefreshed : object));
+    setAosObjects(previous => preserveOpenInventoryTransactions(previous,
+      environment.objects.map(object => object.objectId === objectId ? acceptedRefreshed : object),
+      inventoryCardStateRef.current));
     setAosRelationships(environment.relationships || []);
     setAosRailProjections(environment.railProjections || {});
     setSystemIndexes(environment.systemIndexes || []);
@@ -3223,12 +3233,13 @@ return null;
   data-ixi-board-skin={boardSkin.skinId}
  >
   <h1 className="aos-work-board-title">IXI AOS WORK</h1>
+  {inventoryRefreshError && <div role="alert" style={{ padding: 12, border: "1px solid #d6aa39", color: "#ffe096", background: "#211e12" }}>{inventoryRefreshError} <button type="button" onClick={() => inventoryReloadRef.current?.()}>RETRY INVENTORY</button></div>}
   <section className="saved-environment-shell">
     <IXIEnvironmentRail
       activeEnvironment="AOS"
       hasAccount={!!aosEntity}
       hasRelationship={!!aosEntity}
-      hasInventory={workspaceListings.length > 0}
+      hasInventory={workspaceListings.some(item => !item.inventorySessionOnly)}
       armedDestination={armedDestination}
       toggleArmedDestination={toggleArmedDestination}
     />
@@ -3237,7 +3248,7 @@ return null;
 <IXIAosScoreboard
   entity={aosEntity}
   currentUser={aosCurrentUser}
-  ownedListings={workspaceListings}
+  ownedListings={workspaceListings.filter(item => !item.inventorySessionOnly)}
   aosObjects={aosObjects}
   onAdd={
   () => openSystemObjectTemplatePicker()
@@ -3307,7 +3318,7 @@ return null;
    <div className="ixi-command-center">
   
        <IXIChassisControls
-  listings={workspaceListings}  
+  listings={workspaceListings.filter(item => !item.inventorySessionOnly)}
   searchQuery={searchQuery}
   setSearchQuery={setSearchQuery}
   workspaceFilters={workspaceFilters}
