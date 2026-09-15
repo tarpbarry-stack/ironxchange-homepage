@@ -617,7 +617,7 @@ export default function IXITransactCommandCenter({ runtime, active = true }) {
   useEffect(() => setQueuePage(0), [selectedContext?.id, queue.length]);
 
   function selectContext(context) {
-    setOpenPanel(""); setAppQuery(""); recordCache.cancelPrefetch();
+    setOpenPanel(""); recordCache.cancelPrefetch();
     if (selectedId !== context.id) { setPassportRecords([]); setPassportRecordsLoading(true); }
     setSelectedKind(context.kind);
     setSelectedId(context.id);
