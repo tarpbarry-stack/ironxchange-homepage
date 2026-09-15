@@ -25,6 +25,7 @@ test("SOLD carries the canonical Invoice identity and commercial terms forward",
     context: { primary: { passportId: "IXI544KII", label: "2017 Deere 544K II" } },
     input: {
       sourceInvoice,
+      machineSalePrice: 82000,
       buyerLabel: "Clements Farm",
       saleDate: "2026-09-06",
       billOfSaleNumber: "BOS-1001",
@@ -50,6 +51,7 @@ test("SOLD carries the canonical Invoice identity and commercial terms forward",
 test("SOLD allows optional closeout paperwork once canonical funds are collected", () => {
   const baseInput = {
     sourceInvoice,
+    machineSalePrice: 82000,
     buyerLabel: "Clements Farm",
     saleDate: "2026-09-06",
     receipts: [{ paymentId: "pay-1", amount: 82000, reference: "QB-DEP-1" }],
@@ -68,6 +70,7 @@ test("SOLD rejects open balances and ignores non-final consideration", () => {
     context: { primary: { passportId: "IXI544KII" } },
     input: {
       sourceInvoice,
+      machineSalePrice: 82000,
       buyerLabel: "Clements Farm",
       saleDate: "2026-09-06",
       financialRecords: [

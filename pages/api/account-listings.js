@@ -1,3 +1,5 @@
+import { loadInventoryAvailability } from "../../lib/server/aos/ixiInventoryAvailability";
+import { applyInventoryProjection } from "../../lib/listings/IXISoldInventory.mjs";
 // /pages/api/account-listings.js
 
 import {
@@ -27,15 +29,10 @@ export default async function handler(req, res) {
       });
     }
 
-    const rawInventory =
-      await fetchSharetribeListingsByAuthor(
-        String(authorId)
-      );
+    const [rawInventory, availability] = await Promise.all([fetchSharetribeListingsByAuthor(String(authorId)), loadInventoryAvailability(String(authorId))]);
 
     const normalizedListings =
-      normalizeSharetribeListings(
-        rawInventory
-      );
+      applyInventoryProjection(normalizeSharetribeListings(rawInventory), availability);
 
     const requestedInventory =
       req.query.scope === "aos-owned"

@@ -1,3 +1,6 @@
+import { preserveOpenInventoryTransactions, releaseClosedInventoryTransactions } from "../../lib/listings/IXIInventorySession.mjs";
+import { subscribeInventoryChanges } from "../../lib/listings/IXIInventoryEvents";
+import { mergeSoldWorkspacePage } from "../../lib/listings/IXISoldInventory.mjs";
 import Head from "next/head";
 import { useEffect, useMemo, useRef, useState } from "react";
 
@@ -58,8 +61,8 @@ import WorkspaceDropPad from "../../components/ixi-chassis/WorkspaceDropPad";
 import useIXISellerMachineOps from "../../components/ixi-chassis/useIXISellerMachineOps";
 
 import {
-  IXI_WORKSPACE_SETTINGS_ID,
-  IXI_WORKSPACE_LAYOUT_ID,
+  IXI_WORKSPACE_SETTINGS_ID as OWNED_SETTINGS_ID,
+  IXI_WORKSPACE_LAYOUT_ID as OWNED_LAYOUT_ID,
   createEmptyWorkspaceContainers,
   sanitizeWorkspaceContainers,
   saveWorkspaceLayoutRecord,
@@ -114,8 +117,17 @@ import {
   setIXIActionNotice
 } from "../../components/ixi-object-system/IXIActionNoticeEngine";
 
-export default function MyListingsV2() {
-  console.log("MY LISTINGS V2 NEW CODE IS RUNNING");
+export default function MyListingsV2({ inventoryMode = "owned" }) {
+  const isSold = inventoryMode === "sold";
+  const IXI_WORKSPACE_SETTINGS_ID = isSold ? "__soldWorkspaceSettings" : OWNED_SETTINGS_ID;
+  const IXI_WORKSPACE_LAYOUT_ID = isSold ? "__soldWorkspaceLayout" : OWNED_LAYOUT_ID;
+  const [soldQuery, setSoldQuery] = useState({ sort: "date-desc", settlement: "all", status: "all", from: "", to: "", page: 1 });
+  const [inventoryStatus, setInventoryStatus] = useState({ loading: true, error: "", total: 0, page: 1, pageSize: 24 });
+  const [inventoryRevision, setInventoryRevision] = useState(0);
+  const soldWorkspaceLayoutRef = useRef(null);
+  const soldSortRef = useRef(soldQuery.sort);
+  const [soldFilterListings, setSoldFilterListings] = useState([]);
+  const [soldIssues, setSoldIssues] = useState([]);
   
   const [listings, setListings] = useState([]);
   
@@ -184,6 +196,9 @@ const POCKET_TARGETS = [
 
   const [activeStackHover, setActiveStackHover] = useState("");
   const [ixiCardState, setIxiCardState] = useState({});
+  const inventoryCardStateRef = useRef(ixiCardState);
+  inventoryCardStateRef.current = ixiCardState;
+  useEffect(() => { if (!isSold) setListings(current => releaseClosedInventoryTransactions(current, ixiCardState)); }, [ixiCardState, isSold]);
   const [ixiUserId, setIxiUserId] = useState("guest");
   const [workspaceSettings, setWorkspaceSettings] =
   useState({});
@@ -348,8 +363,8 @@ const sensors = useSensors(
             error => ({ value: null, error })
           );
 
-        const inventoryRequest = fetch(
-          `/api/account-listings?authorId=${encodeURIComponent(userId)}`
+        const inventoryRequest = isSold ? Promise.resolve({ ok: true, json: async () => [] }) : fetch(
+          `/api/account-listings?scope=aos-owned&authorId=${encodeURIComponent(userId)}`
         );
 
         const res = await inventoryRequest;
@@ -366,7 +381,7 @@ const sensors = useSensors(
           : [];
 
         if (!cancelled) {
-          setListings(rawListings);
+          if (!isSold) { setListings(rawListings); setInventoryStatus(current => ({ ...current, loading: false, error: "" })); }
         }
 
         hydrateIXIListingCollection(
@@ -374,7 +389,7 @@ const sensors = useSensors(
           { dedupeRequests: true }
         ).then(hydratedListings => {
           if (!cancelled) {
-            setListings(hydratedListings);
+            if (!isSold) setListings(hydratedListings);
           }
         }).catch(error => {
           console.warn(
@@ -406,6 +421,7 @@ const sensors = useSensors(
             {};
 
           setWorkspaceSettings(workspaceSettings);
+          if (isSold) soldWorkspaceLayoutRef.current = remoteIxiState?.[IXI_WORKSPACE_LAYOUT_ID]?.machineContainers || {};
           setIxiCardState(remoteIxiState);
           setCardScaleMode(
             resolveSitewideCardScaleMode(
@@ -423,6 +439,7 @@ const sensors = useSensors(
         if (cancelled) return;
         console.error("Saved page load failed:", err);
         setSavedIds([]);
+        setInventoryStatus(current => ({ ...current, loading: false, error: err.message || "Inventory could not be loaded." }));
       }
     }
 
@@ -433,6 +450,51 @@ const sensors = useSensors(
     };
   }, []);
   
+  useEffect(() => {
+    const refresh = () => setInventoryRevision(value => value + 1);
+    const unsubscribe = subscribeInventoryChanges(refresh);
+    window.addEventListener("focus", refresh);
+    return () => { unsubscribe(); window.removeEventListener("focus", refresh); };
+  }, []);
+  useEffect(() => {
+    if (isSold || !inventoryRevision || !ixiUserId || ixiUserId === "guest") return;
+    const controller = new AbortController();
+    (async () => {
+      try {
+        const response = await fetch(`/api/account-listings?scope=aos-owned&authorId=${encodeURIComponent(ixiUserId)}`, { signal: controller.signal });
+        const data = await response.json();
+        if (!response.ok || !Array.isArray(data)) throw new Error(data.error || "Inventory refresh failed.");
+        if (!controller.signal.aborted) setListings(previous => preserveOpenInventoryTransactions(previous, data, inventoryCardStateRef.current));
+      } catch (error) { if (!controller.signal.aborted) setInventoryStatus(current => ({ ...current, error: error.message })); }
+    })();
+    return () => controller.abort();
+  }, [inventoryRevision, isSold, ixiUserId]);
+  const soldFilterKey = JSON.stringify({ ...workspaceFilters, q: searchQuery });
+  useEffect(() => { if (isSold) setSoldQuery(current => ({ ...current, page: 1 })); }, [soldFilterKey, isSold]);
+  useEffect(() => {
+    if (!isSold) return;
+    const controller = new AbortController();
+    const timer = setTimeout(async () => {
+      setInventoryStatus(current => ({ ...current, loading: true, error: "" }));
+      try {
+        const params = new URLSearchParams({ ...JSON.parse(soldFilterKey), ...soldQuery, pageSize: "24" });
+        const response = await fetch(`/api/sold-inventory?${params}`, { signal: controller.signal });
+        const payload = await response.json();
+        if (!response.ok || !payload.ok) throw new Error(payload.error || "SOLD inventory could not be loaded.");
+        if (controller.signal.aborted) return;
+        setListings(payload.listings);
+        setSoldFilterListings(payload.filterListings || payload.listings);
+        setSoldIssues(payload.issues || []);
+        setInventoryStatus({ loading: false, error: "", total: payload.total, page: payload.page, pageSize: payload.pageSize, sort: soldQuery.sort });
+        const hydrated = await hydrateIXIListingCollection(payload.listings, { dedupeRequests: true, concurrency: 4 });
+        if (!controller.signal.aborted) setListings(hydrated);
+      } catch (error) {
+        if (!controller.signal.aborted) setInventoryStatus(current => ({ ...current, loading: false, error: error.message }));
+      }
+    }, 180);
+    return () => { clearTimeout(timer); controller.abort(); };
+  }, [isSold, soldFilterKey, soldQuery, inventoryRevision]);
+
   const savedListings = useMemo(() => {
     const activeListings = listings.filter(item => {
       const listingStatus =
@@ -447,6 +509,7 @@ const sensors = useSensors(
   }, [listings, savedIds]);
 
 const sellerListings = useMemo(() => {
+  if (isSold) return listings;
   return listings.filter(item => {
     const publicData =
       item.publicData ||
@@ -495,7 +558,7 @@ const sellerListings = useMemo(() => {
 
     return true;
   });
-}, [listings]);
+}, [listings, isSold]);
 
 const workspaceListings = useMemo(() => {
   return sellerListings;
@@ -511,6 +574,20 @@ const containerStateKey = useMemo(() => {
 }, [workspaceListings, ixiCardState]);
    
 useEffect(() => {
+  if (isSold) {
+    const ids = workspaceListings.map(item => String(getListingId(item)));
+    const saved = soldWorkspaceLayoutRef.current || ixiCardState?.[IXI_WORKSPACE_LAYOUT_ID]?.machineContainers || {};
+    const visible = sanitizeWorkspaceContainers(saved, ids);
+    // A chosen research sort controls the board; pocket placement survives.
+    if (soldSortRef.current !== inventoryStatus.sort || !ids.every(id => Object.values(saved).some(items => items.includes(id)))) {
+      const order = new Map(ids.map((id, index) => [id, index]));
+      visible.board.sort((a, b) => order.get(a) - order.get(b));
+    }
+    soldSortRef.current = inventoryStatus.sort;
+    soldWorkspaceLayoutRef.current = mergeSoldWorkspacePage(saved, visible, ids);
+    setMachineContainers(visible);
+    return;
+  }
   if (!workspaceListings.length) return;
 
   const validMachineIds = workspaceListings.map(item =>
@@ -554,7 +631,7 @@ useEffect(() => {
   });
 
   setMachineContainers(nextContainers);
-}, [containerStateKey]);
+}, [containerStateKey, isSold, ixiCardState?.[IXI_WORKSPACE_LAYOUT_ID], inventoryStatus.sort]);
 
   const visibleSavedListings = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
@@ -579,6 +656,8 @@ const orderedSource =
   if (getMachineContainer(id) !== "board") {
     return false;
   }
+
+  if (isSold) return ixiColorFilters.length === 0 || ixiColorFilters.includes(ixiCardState[id]?.color || "none");
 
   const searchableText = [
         item.title,
@@ -635,8 +714,8 @@ const matchesIxiColor =
   ixiColorFilters.includes(ixState.color);
 
 const yearValue = Number(item.year || item.publicData?.year || 0);
-const priceValue = Number(String(item.price || "").replace(/[^0-9]/g, ""));
-const hoursValue = Number(String(item.hours || "").replace(/[^0-9]/g, ""));
+const priceValue = Number(String(item.price || "").replace(/[^0-9.-]/g, ""));
+const hoursValue = Number(String(item.hours || "").replace(/[^0-9.-]/g, ""));
 const matchesWorkspaceRanges =
   (!workspaceFilters.yearMin || yearValue >= Number(workspaceFilters.yearMin)) &&
   (!workspaceFilters.yearMax || yearValue <= Number(workspaceFilters.yearMax)) &&
@@ -661,11 +740,11 @@ return (
     });
 
 return [...filtered].sort((a, b) => {
-  const priceA = Number(String(a.price || a.publicData?.price || "").replace(/[^0-9]/g, ""));
-  const priceB = Number(String(b.price || b.publicData?.price || "").replace(/[^0-9]/g, ""));
+  const priceA = Number(String(a.price || a.publicData?.price || "").replace(/[^0-9.-]/g, ""));
+  const priceB = Number(String(b.price || b.publicData?.price || "").replace(/[^0-9.-]/g, ""));
 
-  const hoursA = Number(String(a.hours || a.publicData?.hours || "").replace(/[^0-9]/g, ""));
-  const hoursB = Number(String(b.hours || b.publicData?.hours || "").replace(/[^0-9]/g, ""));
+  const hoursA = Number(String(a.hours || a.publicData?.hours || "").replace(/[^0-9.-]/g, ""));
+  const hoursB = Number(String(b.hours || b.publicData?.hours || "").replace(/[^0-9.-]/g, ""));
 
   const yearA = Number(a.year || a.publicData?.year || 0);
   const yearB = Number(b.year || b.publicData?.year || 0);
@@ -1177,6 +1256,7 @@ function saveWorkspaceSettings(patch = {}) {
   setWorkspaceSettings(nextSettings);
 
   return saveWorkspaceSettingsRecord({
+    settingsId: IXI_WORKSPACE_SETTINGS_ID,
     saveIxiMachinePatch,
     userId: ixiUserId,
     settings: nextSettings
@@ -1184,10 +1264,15 @@ function saveWorkspaceSettings(patch = {}) {
 }
   
 function saveWorkspaceLayout(nextContainers = machineContainers) {
+  const persistedContainers = isSold
+    ? mergeSoldWorkspacePage(soldWorkspaceLayoutRef.current || {}, nextContainers, workspaceListings.map(item => String(getListingId(item))))
+    : nextContainers;
+  if (isSold) soldWorkspaceLayoutRef.current = persistedContainers;
   saveWorkspaceLayoutRecord({
+    layoutId: IXI_WORKSPACE_LAYOUT_ID,
     saveIxiMachinePatch,
     userId: ixiUserId,
-    machineContainers: nextContainers,
+    machineContainers: persistedContainers,
     activeStackLayouts,
     activeStacksOpen
   });
@@ -1218,7 +1303,7 @@ function updateCardScaleMode(nextMode) {
   return (
     <>
       <Head>
-        <title>My Listings V2 | IronXchange</title>
+        <title>{isSold ? "SOLD" : "My Inventory"} | IronXchange</title>
 
         <link
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
@@ -1310,7 +1395,7 @@ toggleSearchSurfaceRevealed
     <main>
   <section className="saved-environment-shell">
    <IXIEnvironmentRail
-  activeEnvironment="INVENTORY"
+  activeEnvironment={isSold ? "SOLD" : "INVENTORY"}
   hasAccount={!!sdk}
   hasRelationship={true}
   hasInventory={!!sdk}
@@ -1361,7 +1446,7 @@ toggleSearchSurfaceRevealed
    <div className="ixi-command-center">
   
        <IXIChassisControls
-  listings={workspaceListings}  
+  listings={isSold ? soldFilterListings : workspaceListings.filter(item => !item.inventorySessionOnly)}
   searchQuery={searchQuery}
   setSearchQuery={setSearchQuery}
   workspaceFilters={workspaceFilters}
@@ -1452,6 +1537,18 @@ toggleSearchSurfaceRevealed
   getSellerListingCardProps={getSellerListingCardProps}
 />
               
+     {isSold && <div className="sold-toolbar" aria-label="Sold inventory filters">
+       <strong>SOLD <span>{inventoryStatus.total} sales</span></strong>
+       <label>Settlement<select value={soldQuery.settlement} onChange={event => setSoldQuery(current => ({ ...current, settlement: event.target.value, page: 1 }))}><option value="all">All</option><option value="open">Open</option><option value="closed">Closed</option></select></label>
+       <label>Sale status<select value={soldQuery.status} onChange={event => setSoldQuery(current => ({ ...current, status: event.target.value, page: 1 }))}><option value="all">All sales</option><option value="sold">Sold</option><option value="returned">Returned</option></select></label>
+       <label>From<input type="date" value={soldQuery.from} onChange={event => setSoldQuery(current => ({ ...current, from: event.target.value, page: 1 }))} /></label>
+       <label>To<input type="date" value={soldQuery.to} onChange={event => setSoldQuery(current => ({ ...current, to: event.target.value, page: 1 }))} /></label>
+       <label>Sort<select value={soldQuery.sort} onChange={event => setSoldQuery(current => ({ ...current, sort: event.target.value, page: 1 }))}>{[["date-desc", "Newest sale"], ["date-asc", "Oldest sale"], ["price-desc", "Price: high first"], ["price-asc", "Price: low first"], ["buyer-asc", "Buyer"], ["seller-asc", "Sold by"], ["make-asc", "Make / model"]].map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
+       <button type="button" disabled={inventoryStatus.loading} onClick={() => setInventoryRevision(value => value + 1)}>Refresh</button>
+     </div>}
+     {inventoryStatus.loading && <p role="status">Loading {isSold ? "sold machines" : "inventory"}…</p>}
+     {isSold && soldIssues.length > 0 && <details className="sold-toolbar"><summary>{soldIssues.length} historical sale facts need review</summary><ul>{soldIssues.map((issue, index) => <li key={`${issue.documentId}:${issue.code}:${index}`}>{issue.passportId ? `${issue.passportId}: ` : ""}{issue.message}</li>)}</ul></details>}
+     {inventoryStatus.error && <p role="alert">{inventoryStatus.error} <button type="button" onClick={() => isSold ? setInventoryRevision(value => value + 1) : window.location.reload()}>Retry</button></p>}
      <IXIBoardSurface
   scaleMode={cardScaleMode}
   centerRows={true}
@@ -1485,16 +1582,21 @@ toggleSearchSurfaceRevealed
 <IXICardScaleControl
   value={cardScaleMode}
   onChange={updateCardScaleMode}
-  surfaceLabel="Inventory"
+  surfaceLabel={isSold ? "Sold" : "Inventory"}
 />
 
-{visibleSavedListings.length === 0 && (
+{isSold && inventoryStatus.total > inventoryStatus.pageSize && <nav className="sold-toolbar" aria-label="Sold inventory pages">
+  <button type="button" disabled={inventoryStatus.loading || inventoryStatus.page <= 1} onClick={() => setSoldQuery(current => ({ ...current, page: inventoryStatus.page - 1 }))}>Previous</button>
+  <span>Page {inventoryStatus.page} of {Math.ceil(inventoryStatus.total / inventoryStatus.pageSize)}</span>
+  <button type="button" disabled={inventoryStatus.loading || inventoryStatus.page * inventoryStatus.pageSize >= inventoryStatus.total} onClick={() => setSoldQuery(current => ({ ...current, page: inventoryStatus.page + 1 }))}>Next</button>
+</nav>}
+{visibleSavedListings.length === 0 && !inventoryStatus.loading && !inventoryStatus.error && (
   <IXIWorkspaceEmptyState
-    surface="IXI INVENTORY"
-    title="NO MACHINES IN THIS INVENTORY VIEW"
-    message="Post a machine to establish its IXI Passport and bring it into your inventory workspace."
-    actionLabel="POST A MACHINE"
-    actionHref="/post-free"
+    surface={isSold ? "SOLD" : "IXI INVENTORY"}
+    title={isSold ? "NO SALES MATCH THIS VIEW" : "NO MACHINES IN THIS INVENTORY VIEW"}
+    message={isSold ? "Completed sales appear here after RECORD SOLD in TRAN$ACT. Adjust your filters to find earlier sales." : "Post a machine to establish its IXI Passport and bring it into your inventory workspace."}
+    actionLabel={isSold ? "OPEN INVENTORY" : "POST A MACHINE"}
+    actionHref={isSold ? "/account/my-listings-v2" : "/post-free"}
   />
 )}
 </main>
@@ -1507,6 +1609,13 @@ toggleSearchSurfaceRevealed
       <Footer />
                 
       <style jsx>{`
+        .sold-toolbar { display:flex; flex-wrap:wrap; align-items:end; gap:14px; margin:16px 0; padding:16px; background:#111711; border:1px solid #354035; border-radius:10px; }
+        .sold-toolbar strong { color:#ffcc00; font-size:22px; margin-right:auto; }
+        .sold-toolbar strong span { font-size:12px; color:#b7c1b7; margin-left:10px; }
+        .sold-toolbar label { display:grid; gap:5px; font-size:12px; }
+        .sold-toolbar select, .sold-toolbar input, .sold-toolbar button { background:#0c100c; color:#eee; border:1px solid #586058; border-radius:5px; padding:9px; min-height:40px; }
+        .sold-toolbar button:disabled { opacity:.45; }
+
         * {
           box-sizing: border-box;
         }

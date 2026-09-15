@@ -1,3 +1,4 @@
+import { loadInventoryAvailability } from "../../../../lib/server/aos/ixiInventoryAvailability";
 import {
   createInstance,
   types as sdkTypes
@@ -225,6 +226,7 @@ export default async function handler(
       });
   }
 
+  res.setHeader("Cache-Control", "no-store");
   const passportId =
     normalizePassportId(
       req.query.passportId
@@ -281,6 +283,16 @@ export default async function handler(
       await loadMachineListing(
         listingId
       );
+
+    const listingAuthor = clean(listing.relationships?.author?.data?.id?.uuid || listing.relationships?.author?.data?.id || listing.authorId);
+    if (listingAuthor) {
+      const availability = await loadInventoryAvailability(listingAuthor);
+      const state = availability[passportId];
+      if (state?.state === "sold" || state?.forcePrivate === true) {
+        res.setHeader("Cache-Control", "no-store");
+        return res.status(410).json({ ok: false, unavailable: true, error: "This machine is no longer available." });
+      }
+    }
 
     /*
      * 3. Resolve IXI Media independently.
