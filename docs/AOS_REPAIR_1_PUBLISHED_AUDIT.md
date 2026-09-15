@@ -22,6 +22,8 @@ The first three findings were demonstrated by failing automated tests against th
 
 The draft-control finding was established by tracing the editor into `commitDraftObject`, which still provisions `draft.objectType`. Its eligibility guard now has explicit persisted/draft/root/defined/typed coverage.
 
+A final CSS review also found that existing global editor rules could shrink membership-option labels and distort checkbox sizing. The membership editor now explicitly scopes its 12 px labels, 44 px label targets and checkbox dimensions. Visual verification still requires access to the candidate browser workflow.
+
 ## Validation evidence
 
 | Check | Result |
