@@ -29,6 +29,7 @@ export default function IXITransactMachineHistory({
   entity,
   currency = "USD",
   loading,
+  refreshing = false,
   error,
   onOpenRecord,
   onMarkPaid,
@@ -73,10 +74,11 @@ export default function IXITransactMachineHistory({
     .map((row) => row.id)
     .join("|");
   useEffect(() => {
-    if (active && !loading && !error)
+    if (active && !loading && !refreshing && !error)
       recordCache?.prefetch(preloadIds.split("|").filter(Boolean));
-    return () => recordCache?.cancelPrefetch();
-  }, [recordCache, preloadIds, loading, error, active]);
+    else recordCache?.cancelPrefetch();
+  }, [recordCache, preloadIds, loading, refreshing, error, active]);
+  useEffect(() => () => recordCache?.cancelPrefetch(), [recordCache]);
   useEffect(() => {
     Object.assign(savedState, {
       filters,
@@ -116,7 +118,7 @@ export default function IXITransactMachineHistory({
     >
       <span>{label}</span>
       <strong>
-        {loading || error
+        {loading
           ? "—"
           : key === "hours"
             ? `${total.hours.toLocaleString("en-US", { maximumFractionDigits: 4 })} h`
@@ -162,7 +164,7 @@ export default function IXITransactMachineHistory({
         >
           <span>MARGIN · ⓘ</span>
           <strong>
-            {loading || error
+            {loading
               ? "—"
               : moneyLabel(total.marginCents, displayCurrency)}
           </strong>
@@ -302,7 +304,7 @@ export default function IXITransactMachineHistory({
           context={context}
           entity={entity}
           ledger={ledger}
-          disabled={loading || Boolean(error)}
+          disabled={loading || refreshing || Boolean(error)}
         />
       </div>
       {Object.entries(filters).some(
@@ -327,12 +329,13 @@ export default function IXITransactMachineHistory({
       ) : null}
       {error ? (
         <div role="alert" className={styles.notice}>
-          <p>{error}</p>
+          <p>{error}{!loading ? " Showing last-known transactions. Balances need refresh; any confirmed save remains saved." : ""}</p>
           <button type="button" onClick={onRetry}>
             RETRY HISTORY
           </button>
         </div>
-      ) : loading ? (
+      ) : refreshing && !loading ? <p role="status" className={styles.notice}>Updating balances · showing last-known transactions…</p> : null}
+      {loading ? (
         <p role="status" className={styles.empty}>
           Loading transaction history…
         </p>
@@ -474,6 +477,7 @@ export default function IXITransactMachineHistory({
               onMarkPaid ? (
                 <button
                   type="button"
+                  disabled={refreshing || Boolean(error)}
                   onClick={() => onMarkPaid(selectedRows[0].id)}
                 >
                   {selectedRows[0].paymentAction}

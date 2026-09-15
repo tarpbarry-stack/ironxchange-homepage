@@ -1,5 +1,7 @@
+import { timeIXITransactRead } from "./IXITransactReadPerformance.mjs";
+
 // Memory belongs to one verified actor/entity/permission scope. No localStorage,
-// attachments or mutations. A confirmed write invalidates the entire generation.
+// attachments or mutations. Writes invalidate affected IDs; scope changes clear all.
 export function createIXITransactRecordCache({
   read,
   now = Date.now,
@@ -34,7 +36,7 @@ export function createIXITransactRecordCache({
       job.started = true;
       Promise.resolve()
         .then(() =>
-          read({ financialDocumentId: job.id, signal: job.controller.signal }),
+          timeIXITransactRead("record", () => read({ financialDocumentId: job.id, signal: job.controller.signal })),
         )
         .then((record) => {
           if (job.generation !== generation || job.controller.signal.aborted)
@@ -48,6 +50,8 @@ export function createIXITransactRecordCache({
             throw new Error(
               "The selected saved record could not be verified. Retry from history.",
             );
+          if (stored.server.revision < (job.minimumRevision || 0))
+            throw new Error("This transaction changed while it was loading. Retry to open its current revision.");
           entries.delete(job.id);
           entries.set(job.id, { record, at: now() });
           while (entries.size > limit)
@@ -62,6 +66,21 @@ export function createIXITransactRecordCache({
         });
     }
   }
+  function prioritize(job) {
+    job.foreground = true;
+    if (job.started) return;
+    queue = queue.filter(item => item !== job);
+    queue.unshift(job);
+    if (running >= concurrency) {
+      const background = [...jobs.values()].find(item => item.started && !item.foreground && !item.controller.signal.aborted);
+      if (background) {
+        background.controller.abort();
+        background.reject(abort());
+        jobs.delete(background.id);
+      }
+    }
+    pump();
+  }
   function load(id, { foreground = true } = {}) {
     if (!id)
       return Promise.reject(new Error("A saved record number is required."));
@@ -69,11 +88,7 @@ export function createIXITransactRecordCache({
     if (prepared) return Promise.resolve(prepared);
     let job = jobs.get(id);
     if (job) {
-      if (foreground) {
-        job.foreground = true;
-        queue = queue.filter((item) => item !== job);
-        if (!job.started) queue.unshift(job);
-      }
+      if (foreground) prioritize(job);
       return job.promise;
     }
     job = {
@@ -88,30 +103,34 @@ export function createIXITransactRecordCache({
       job.reject = reject;
     });
     jobs.set(id, job);
-    if (foreground) queue.unshift(job);
+    if (foreground) prioritize(job);
     else queue.push(job);
     pump();
     return job.promise;
   }
-  function cancelPrefetch() {
+  function cancelPrefetch(keep = new Set()) {
     for (const job of jobs.values())
-      if (!job.foreground) {
+      if (!job.foreground && !keep.has(job.id)) {
         job.controller.abort();
         job.reject(abort());
         jobs.delete(job.id);
       }
     queue = queue.filter((job) => !job.controller.signal.aborted);
   }
-  function invalidate() {
-    generation++;
-    entries.clear();
-    for (const job of jobs.values()) {
+  function invalidate(ids) {
+    if (ids === undefined) generation++;
+    const affected = ids === undefined ? new Set([...entries.keys(), ...jobs.keys()]) : new Set(ids);
+    for (const id of affected) {
+      entries.delete(id);
+      const job = jobs.get(id);
+      if (!job) continue;
       job.controller.abort();
       job.reject(abort());
+      jobs.delete(id);
     }
-    jobs.clear();
-    queue = [];
+    queue = queue.filter(job => !job.controller.signal.aborted);
   }
+
   return {
     peek,
     load,
@@ -122,19 +141,22 @@ export function createIXITransactRecordCache({
         const record = raw?.record || raw;
         const id = record?.financialDocument?.financialDocumentId;
         const current = entries.get(id)?.record;
+        const pending = jobs.get(id);
+        if (pending && Number.isInteger(record.server?.revision))
+          pending.minimumRevision = Math.max(pending.minimumRevision || 0, record.server.revision);
         if (
           current &&
           (current.record || current).server.revision !==
             record.server?.revision
         ) {
-          invalidate();
-          break;
+          invalidate([id]);
         }
       }
     },
     prefetch(ids) {
-      cancelPrefetch();
-      [...new Set(ids)].slice(0, limit).forEach((id) => {
+      const wanted = [...new Set(ids)].slice(0, limit);
+      cancelPrefetch(new Set(wanted));
+      wanted.forEach((id) => {
         load(id, { foreground: false }).catch(() => {});
       });
     },

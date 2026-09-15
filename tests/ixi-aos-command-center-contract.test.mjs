@@ -650,9 +650,9 @@ test("recursive command center owns transact while the detailed ledger remains a
   assert.match(commandCenter, /\["reporting", "REPORTING", "10"\]/u);
   assert.match(commandCenter, /TRAN\$ACT will not claim a clean state/u);
   assert.match(commandCenter, /VIEWS NEVER CHANGE POSTED TRUTH/u);
-  // Building a launch context does not provision an Object or Passport.
+  // Building a launch context or in-memory read cache does not provision an Object or Passport.
   // Financial writes remain in the shared authenticated payment commands.
-  assert.doesNotMatch(commandCenter, /createIXI(?!Transact(?:Context|RecordCache)\b)|provision|passport\/ensure/u);
+  assert.doesNotMatch(commandCenter, /createIXI(?!Transact(?:Context|RecordCache|HistoryCache)\b)|provision|passport\/ensure/u);
   assert.doesNotMatch(commandCenter, /returnTo=.*dashboard/u);
   assert.match(commandModel, /getIXITransactOwnedEquipmentObjectIds/u);
   assert.match(commandModel, /getIXIAosRelationshipEvidence/u);

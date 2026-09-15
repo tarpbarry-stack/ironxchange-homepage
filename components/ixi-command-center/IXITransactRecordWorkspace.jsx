@@ -40,19 +40,19 @@ export default function IXITransactRecordWorkspace({ financialDocumentId, object
     if (!active || dirty) return undefined;
     const controller = new AbortController();
     setError("");
-    setHistory(null);
-    setHistoryError("");
-    heading.current?.focus();
     (recordCache ? recordCache.load(financialDocumentId) : loadIXIAosFinancialDocument({ financialDocumentId, signal: controller.signal }))
       .then(result => {
         verifyIXITransactSelectedRecord(result, financialDocumentId);
-        if (!controller.signal.aborted) setRecord(result);
+        if (!controller.signal.aborted) setRecord(current =>
+          (current?.record || current)?.server?.revision === (result.record || result).server?.revision ? current : result);
       })
       .catch(problem => {
         if (!controller.signal.aborted) setError(problem?.message || "The saved transaction could not be loaded.");
       });
     return () => controller.abort();
   }, [financialDocumentId, refresh, refreshVersion, recordCache, active, dirty, financialRecords]);
+
+  useEffect(() => { if (active) heading.current?.focus({ preventScroll: true }); }, [active]);
 
   const view = useMemo(() => record ? buildIXITransactRecordView({ record, financialDocumentId, object, financialRecords }) : null, [record, financialDocumentId, object, financialRecords]);
   const modules = getIXITransactModules({ objectType: object?.objectType || object?.kind || "object", permissions });
@@ -95,7 +95,7 @@ export default function IXITransactRecordWorkspace({ financialDocumentId, object
       {module ? <div className={styles.embeddedWorkspace} hidden={details} style={details ? { display: "none" } : undefined}>
         <IXITransactApp
           {...view.props}
-          key={`${financialDocumentId}:${view.server.revision}:${refreshVersion}`}
+          key={`${financialDocumentId}:${view.server.revision}`}
           workspaceEmbedded
           recordHeaderEmbedded
           recordPartyLabel={exportRow?.party || ""}
@@ -104,7 +104,11 @@ export default function IXITransactRecordWorkspace({ financialDocumentId, object
           entity={entity}
           permissions={permissions}
           onClose={onBack}
-          onFinancialRecordsChange={() => { recordCache?.invalidate(); setRefresh(value => value + 1); return onFinancialRecordsChange?.(); }}
+          onFinancialRecordsChange={() => {
+            if (onFinancialRecordsChange) return onFinancialRecordsChange();
+            recordCache?.invalidate([financialDocumentId]);
+            setRefresh(value => value + 1);
+          }}
         />
       </div> : null}
       {showDetails ? <div className={styles.recordDetails} data-transact-read-only-controls>
