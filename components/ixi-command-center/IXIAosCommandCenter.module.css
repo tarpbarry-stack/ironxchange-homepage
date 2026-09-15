@@ -752,3 +752,10 @@
 .shell[data-ui-rebuild] .statusbar { position: relative; flex-shrink: 0; min-height: 26px; }
 @media (max-width: 999px) { .shell[data-ui-rebuild] .desktop { display: flex; } .shell[data-ui-rebuild] .main { width: 100%; } }
 @media (max-width: 600px), (max-height: 600px) { .shell[data-ui-rebuild] .main[data-history-active="true"] { overflow-y: auto; } .shell[data-ui-rebuild] .historyPane:not([hidden]) { flex-shrink: 0; min-height: 500px; } }
+
+.shell[data-ui-rebuild] .pageHeader > div:first-child { line-height: 16px; }
+.shell[data-ui-rebuild] .identityCard h2 button { display: block; min-height: 44px; width: 100%; }
+@media (min-width: 1280px) { .shell[data-ui-rebuild] { --tx-bar-height: 56px; } .shell[data-ui-rebuild] .topbar { padding-block: 6px; } }
+@media (min-width: 1000px) { .shell[data-ui-rebuild] .compactContext { display: none; } }
+.directoryToggle { display: none; }
+@media (max-width: 1279px) { .shell[data-ui-rebuild] .headerActions .directoryToggle { display: flex; align-items: center; justify-content: center; } }

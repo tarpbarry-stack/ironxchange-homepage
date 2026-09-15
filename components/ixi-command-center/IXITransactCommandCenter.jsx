@@ -964,10 +964,10 @@ export default function IXITransactCommandCenter({ runtime, active = true }) {
         <main className={styles.main} data-history-active={activeWorkspace === "object-history" && !activeTabId}>
           <div className={styles.pageHeader}>
             <div><span className={styles.eyebrow}>{environment?.entity?.displayName || "IXI ENTITY"} · {contextLabel(selectedContext?.kind)}</span><h1>{workspaceTitle}</h1></div>
-            <div className={styles.headerActions}><button type="button" onClick={refreshAuthoritativeContext}>REFRESH</button></div>
+            <div className={styles.headerActions}><button type="button" className={styles.directoryToggle} onClick={() => setOpenPanel("directory")}>Objects</button><button type="button" onClick={refreshAuthoritativeContext}>REFRESH</button></div>
           </div>
 
-          <div className={styles.compactContext}><button type="button" className={styles.directoryToggle} onClick={() => setOpenPanel("directory")}>Objects</button><strong>{selectedContext?.title || "Connecting…"}</strong><button type="button" className={styles.appsToggle} onClick={() => setOpenPanel("apps")}>Apps</button></div>
+          <div className={styles.compactContext}><strong>{selectedContext?.title || "Connecting…"}</strong><button type="button" className={styles.appsToggle} onClick={() => setOpenPanel("apps")}>Apps</button></div>
           <div className={styles.objectPickers} aria-label="Financial story scope">{SCOPE_OPTIONS.map(([kind, code, label]) => <IXITransactObjectPicker key={kind} label={label} items={groups[kind] || []} selectedId={selectedContext?.id} onSelect={selectContext} />)}</div>
 
           {loading ? <div className={styles.loadingState}><strong>VERIFYING TRAN$ACT SESSION</strong><span>Connecting to your authenticated operating company…</span><small>Unauthenticated sessions return to the secure sign-in automatically.</small></div> : null}
