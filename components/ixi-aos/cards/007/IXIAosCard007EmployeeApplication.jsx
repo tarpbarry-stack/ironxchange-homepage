@@ -97,7 +97,7 @@ function resolveCard007Variant(object = {}) {
   return "A";
 }
 
-export default function IXIAosCard007EmployeeApplication(props) {
+export default function IXIAosCard007EmployeeApplication({ children: containedObjects = [], ...props }) {
   const object = normalizePreviewFieldIdentity(props?.object || {});
   const selectedVariant = resolveCard007Variant(object);
 
@@ -118,7 +118,8 @@ export default function IXIAosCard007EmployeeApplication(props) {
 
             return (
               <IXIAosCardHeaderIdentity object={runtimeObject} className="u007-face-lab-variant-shell">
-                <CardLayout {...contractProps} object={runtimeObject} onSaveObject={face1.onSaveObject} />
+                {/* The adapter uses React children for its render callback, so retain the collection separately. */}
+                <CardLayout {...contractProps} object={runtimeObject} onSaveObject={face1.onSaveObject} children={containedObjects} />
               </IXIAosCardHeaderIdentity>
             );
           }}
