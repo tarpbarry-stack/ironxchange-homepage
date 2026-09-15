@@ -48,18 +48,19 @@ import {
 } from "../../lib/mos/ixiAosCanonicalAdmission.mjs";
 
 import {
-  IXI_AOS_RAIL_MEMBERSHIP_BEHAVIOR_ID,
   createAosMembershipRelationship,
   createAosRailOrderKey,
-  getExactActiveAosRelationship,
   getAosRailProjectionObjectIds,
-  getAosMembershipRelationships,
   getAosMembershipObjectIds,
-  getInvalidAosSystemIndexMemberships,
-  isExplicitAosSystemIndexObject,
   isAosMembershipRelationship,
   removeAosRailProjectionMemberships
 } from "../../lib/mos/IXIAosMembershipBridge.mjs";
+
+import {
+  evaluateAosSystemIndexMembership,
+  getAosSystemIndexWorkspaceDropPolicy,
+  resolveAosDefaultSystemIndexHome
+} from "../../lib/mos/IXIAosSystemIndexMembershipPolicy";
 
 import {
   isIXIAosWorkspaceVisibleAdapter
@@ -222,71 +223,6 @@ import {
   setIXIActionNotice
 } from "../../components/ixi-object-system/IXIActionNoticeEngine";
 
-const IXI_AOS_LOCATIONS_REPAIR_2026_09_14 = Object.freeze({
-  entityId: "entity_4d78e9fb-92e4-4cc2-a8cb-1a2f19e097d0",
-  locationsObjectId: "object_1d1a2a9d-1485-47ed-b3d6-18a144affbd7",
-  ripperObjectId: "object_da02cb31-d7db-4297-a395-f2603e2f1320",
-  ripperLocationsRelationshipId:
-    "relationship_efb98dc5-cad0-4d51-90c0-90fa558d9696",
-  person: Object.freeze({
-    firstName: "kanyon",
-    lastName: "mcgahey",
-    displayName: "kanyon mcgahey"
-  })
-});
-
-function cleanRepairValue(value) {
-  return String(value ?? "").trim().toLowerCase();
-}
-
-function getRepairPersonName(object = {}) {
-  const fields = object?.fields && typeof object.fields === "object"
-    ? object.fields
-    : {};
-  const firstName = cleanRepairValue(
-    object?.firstName || fields?.firstName || object?.publicData?.firstName
-  );
-  const lastName = cleanRepairValue(
-    object?.lastName || fields?.lastName || object?.publicData?.lastName
-  );
-  const displayName = cleanRepairValue(
-    object?.displayName || object?.name || object?.label || fields?.displayName
-  );
-  return { firstName, lastName, displayName };
-}
-
-function getLocationsRepairMemberObjectIds({ entityId, admission } = {}) {
-  if (
-    String(entityId || "").trim() !==
-    IXI_AOS_LOCATIONS_REPAIR_2026_09_14.entityId
-  ) {
-    return [];
-  }
-
-  const memberIds = [];
-  const kanyonMatches = [...admission.objectsById.values()].filter(object => {
-    const person = getRepairPersonName(object);
-    return (
-      person.displayName ===
-        IXI_AOS_LOCATIONS_REPAIR_2026_09_14.person.displayName ||
-      (
-        person.firstName ===
-          IXI_AOS_LOCATIONS_REPAIR_2026_09_14.person.firstName &&
-        person.lastName ===
-          IXI_AOS_LOCATIONS_REPAIR_2026_09_14.person.lastName
-      )
-    );
-  });
-
-  if (kanyonMatches.length === 1) {
-    memberIds.push(kanyonMatches[0].objectId);
-  }
-
-  return memberIds
-    .map(reference => admission.resolveObjectId(reference))
-    .filter(Boolean);
-}
-
 export default function IXIAosWorkPage() {
   const [listings, setListings] = useState([]);
 
@@ -309,6 +245,9 @@ const [workspaceScopeRequest, setWorkspaceScopeRequest] =
   useState(null);
 
 const [aosObjects, setAosObjects] =
+  useState([]);
+
+const [aosObjectDefinitions, setAosObjectDefinitions] =
   useState([]);
 
 const [aosRelationships, setAosRelationships] =
@@ -454,8 +393,6 @@ const POCKET_TARGETS = [
   const systemIndexPlacementReconciliationKeyRef = useRef("");
   const equipmentBoardPinKeyRef = useRef("");
   const rootSystemIndexBoardPinKeyRef = useRef("");
-  const invalidSystemIndexMembershipCleanupKeyRef = useRef("");
-  const ripperLocationsRepairKeyRef = useRef("");
   
   const [activeDndId, setActiveDndId] = useState("");
   const {
@@ -582,6 +519,12 @@ useEffect(() => {
           environment?.objects
         )
           ? environment.objects
+          : []
+      );
+
+      setAosObjectDefinitions(
+        Array.isArray(environment?.objectDefinitions)
+          ? environment.objectDefinitions
           : []
       );
 
@@ -923,25 +866,7 @@ const surfaceId =
 
             surfaceId,
 
-            dropPolicy: {
-              enabled:
-                index?.workspace
-                  ?.dropPolicy
-                  ?.enabled !== false,
-
-              acceptedObjectTypes:
-  Array.isArray(
-    index?.workspace
-      ?.dropPolicy
-      ?.acceptedObjectTypes
-  )
-    ? index.workspace
-        .dropPolicy
-        .acceptedObjectTypes
-    : indexId === "equipment"
-      ? ["machine"]
-      : []
-            }
+            dropPolicy: getAosSystemIndexWorkspaceDropPolicy(index)
           }
         };
       })
@@ -1080,25 +1005,6 @@ useEffect(() => {
   if (!controller || !aosWorkspaceSession?.sessionId) return;
 
   const objects = [...aosWorkspaceAdmission.objectsById.values()];
-  const equipmentObjectId = String(equipmentIndex?.objectId || "").trim();
-  const systemIndexObjectIds = new Set(
-    workspaceSystemIndexes
-      .map(index => aosWorkspaceAdmission.resolveObjectId(index?.objectId))
-      .filter(Boolean)
-  );
-  const projectedOwnerByMember = new Map();
-
-  Object.keys(aosRailProjections || {}).forEach(ownerObjectId => {
-    getAosRailProjectionObjectIds({
-      railOwnerObjectId: ownerObjectId,
-      railProjections: aosRailProjections,
-      admission: aosWorkspaceAdmission
-    }).forEach(memberObjectId => {
-      if (!projectedOwnerByMember.has(memberObjectId)) {
-        projectedOwnerByMember.set(memberObjectId, ownerObjectId);
-      }
-    });
-  });
 
   const orderBySurface = new Map();
   const descriptors = objects
@@ -1106,27 +1012,18 @@ useEffect(() => {
     .map(object => {
     const objectId = String(object?.objectId || "").trim();
     const existing = locateWorkspaceObject(controller.readPlacements(), objectId);
-    const railOwnerObjectId = projectedOwnerByMember.get(objectId);
-    const isPeerSystemIndexPlacement =
-      systemIndexObjectIds.has(objectId) &&
-      systemIndexObjectIds.has(railOwnerObjectId);
+    const defaultHome = resolveAosDefaultSystemIndexHome({
+      object,
+      systemIndexes: workspaceSystemIndexes
+    });
+    const defaultHomeObjectId = String(defaultHome?.objectId || "").trim();
     let surfaceId = existing?.surfaceId || "board";
     let operatingState = "operating";
 
-    if (
-      !existing &&
-      railOwnerObjectId &&
-      railOwnerObjectId !== equipmentObjectId &&
-      !isPeerSystemIndexPlacement
-    ) {
-      surfaceId = `container:${railOwnerObjectId}`;
-      operatingState = "tucked";
-    } else if (
-      !existing &&
-      object?.presentation?.kind === "ixi-private-machine" &&
-      equipmentObjectId
-    ) {
-      surfaceId = "indexEquipment";
+    if (!existing && defaultHomeObjectId) {
+      surfaceId = defaultHome?.metadata?.systemAdapter === true
+        ? String(defaultHome?.workspace?.surfaceId || "board")
+        : `container:${defaultHomeObjectId}`;
       operatingState = "tucked";
     } else if (surfaceId.startsWith("container:") || surfaceId === "indexEquipment") {
       operatingState = "tucked";
@@ -1141,7 +1038,7 @@ useEffect(() => {
       surfaceId,
       visualOrder,
       operatingState,
-      activeSummonedContext: railOwnerObjectId || null
+      activeSummonedContext: defaultHomeObjectId || null
     };
   }).filter(descriptor => descriptor.objectId.startsWith("object_"));
 
@@ -1154,341 +1051,8 @@ useEffect(() => {
 }, [
   aosWorkspaceSession?.sessionId,
   aosWorkspaceAdmission,
-  equipmentIndex?.objectId,
-  aosRailProjections,
   workspaceSystemIndexes
 ]);
-
-useEffect(() => {
-  if (!workspaceSessionReady) return undefined;
-
-  if (
-    String(aosEntity?.entityId || "").trim() !==
-    IXI_AOS_LOCATIONS_REPAIR_2026_09_14.entityId
-  ) {
-    return undefined;
-  }
-
-  const relationshipId =
-    IXI_AOS_LOCATIONS_REPAIR_2026_09_14.ripperLocationsRelationshipId;
-  const repairKey = [
-    IXI_AOS_LOCATIONS_REPAIR_2026_09_14.entityId,
-    relationshipId
-  ].join(":");
-
-  if (ripperLocationsRepairKeyRef.current === repairKey) {
-    return undefined;
-  }
-
-  let sourceObjectId = "";
-  let targetObjectId = "";
-  try {
-    sourceObjectId = aosWorkspaceAdmission.resolveObjectId(
-      IXI_AOS_LOCATIONS_REPAIR_2026_09_14.ripperObjectId
-    );
-    targetObjectId = aosWorkspaceAdmission.resolveObjectId(
-      IXI_AOS_LOCATIONS_REPAIR_2026_09_14.locationsObjectId
-    );
-  } catch (error) {
-    console.error("IXI AOS EXACT RIPPER RELEASE ADMISSION FAILED:", error);
-    return undefined;
-  }
-
-  if (
-    sourceObjectId !== IXI_AOS_LOCATIONS_REPAIR_2026_09_14.ripperObjectId ||
-    targetObjectId !== IXI_AOS_LOCATIONS_REPAIR_2026_09_14.locationsObjectId
-  ) {
-    return undefined;
-  }
-
-  ripperLocationsRepairKeyRef.current = repairKey;
-  let cancelled = false;
-
-  const projectedMembership = {
-    relationshipId,
-    sourceObjectId,
-    targetObjectId,
-    behaviorId: IXI_AOS_RAIL_MEMBERSHIP_BEHAVIOR_ID,
-    status: "active"
-  };
-
-  const removeConfirmedProjection = () => {
-    if (cancelled) return;
-    setAosRelationships(current => (current || []).filter(item =>
-      String(getAosRelationshipRecord(item)?.relationshipId || "").trim() !==
-      relationshipId
-    ));
-    setAosRailProjections(current =>
-      removeAosRailProjectionMemberships({
-        railProjections: current,
-        memberships: [projectedMembership],
-        admission: aosWorkspaceAdmission
-      })
-    );
-  };
-
-  async function releaseExactRipperLocationsRelationship() {
-    const readExactActiveRelationship = async () => {
-      const readback = await fetchMosObjectRelationships(sourceObjectId, {
-        direction: "outgoing",
-        status: "active"
-      });
-      return getExactActiveAosRelationship({
-        relationships: readback?.relationships,
-        relationshipId,
-        sourceObjectId,
-        targetObjectId,
-        admission: aosWorkspaceAdmission
-      });
-    };
-
-    const relationship = await readExactActiveRelationship();
-    if (relationship) {
-      const expectedRevision = Number(relationship?.revision);
-      if (!Number.isInteger(expectedRevision)) {
-        const error = new Error(
-          "The exact Ripper to Locations relationship has no canonical revision."
-        );
-        error.code = "IXI_AOS_EXACT_RIPPER_RELEASE_REVISION_REQUIRED";
-        throw error;
-      }
-
-      await endMosRelationship({
-        relationshipId,
-        expectedRevision,
-        commandId: createMosCommandId("aos-release-ripper-from-locations"),
-        reason: "aos-exact-ripper-direct-locations-membership-repair",
-        metadata: {
-          source: "aos-work",
-          preserveAllOtherRelationships: true
-        }
-      });
-    }
-
-    const remainingRelationship = await readExactActiveRelationship();
-    if (remainingRelationship) {
-      const error = new Error(
-        "IX Core still reports the exact Ripper to Locations relationship active."
-      );
-      error.code = "IXI_AOS_EXACT_RIPPER_RELEASE_READBACK_REQUIRED";
-      throw error;
-    }
-
-    removeConfirmedProjection();
-  }
-
-  void releaseExactRipperLocationsRelationship().catch(error => {
-    ripperLocationsRepairKeyRef.current = "";
-    console.error("IXI AOS EXACT RIPPER RELEASE FAILED:", error);
-  });
-
-  return () => {
-    cancelled = true;
-    if (ripperLocationsRepairKeyRef.current === repairKey) {
-      ripperLocationsRepairKeyRef.current = "";
-    }
-  };
-}, [
-  workspaceSessionReady,
-  aosWorkspaceAdmission,
-  aosEntity?.entityId
-]);
-
-useEffect(() => {
-  if (!workspaceSessionReady) return undefined;
-
-  const systemIndexObjectIds = [
-    ...new Set([
-      ...workspaceSystemIndexes
-        .map(index =>
-          aosWorkspaceAdmission.resolveObjectId(index?.objectId)
-        ),
-      ...[
-        ...aosWorkspaceAdmission.objectsById.values()
-      ]
-        .filter(isExplicitAosSystemIndexObject)
-        .map(object =>
-          aosWorkspaceAdmission.resolveObjectId(object?.objectId)
-        )
-    ].filter(Boolean))
-  ];
-
-  if (systemIndexObjectIds.length < 2) return undefined;
-
-  let invalidMemberships = [];
-  try {
-    const peerIndexMemberships = getInvalidAosSystemIndexMemberships({
-      relationships: aosRelationships,
-      systemIndexObjectIds,
-      admission: aosWorkspaceAdmission
-    });
-    const locationsRepairMemberObjectIds =
-      getLocationsRepairMemberObjectIds({
-        entityId: aosEntity?.entityId,
-        admission: aosWorkspaceAdmission
-      });
-    const locationsRepairMemberships =
-      locationsRepairMemberObjectIds.length
-        ? getAosMembershipRelationships({
-            relationships: aosRelationships,
-            parentObjectId:
-              IXI_AOS_LOCATIONS_REPAIR_2026_09_14.locationsObjectId,
-            memberObjectIds: locationsRepairMemberObjectIds,
-            admission: aosWorkspaceAdmission
-          })
-        : [];
-    const membershipsById = new Map();
-    [...peerIndexMemberships, ...locationsRepairMemberships]
-      .forEach(relationship => {
-        const relationshipId = String(
-          relationship?.relationshipId || ""
-        ).trim();
-        if (relationshipId) membershipsById.set(relationshipId, relationship);
-      });
-    invalidMemberships = [...membershipsById.values()];
-  } catch (error) {
-    console.error("IXI AOS MEMBERSHIP RECONCILIATION INSPECTION FAILED:", error);
-    return undefined;
-  }
-
-  if (!invalidMemberships.length) return undefined;
-
-  const cleanupKey = invalidMemberships
-    .map(relationship => [
-      String(relationship?.relationshipId || "").trim(),
-      Number(relationship?.revision)
-    ].join(":"))
-    .sort()
-    .join("|");
-
-  if (
-    !cleanupKey ||
-    invalidSystemIndexMembershipCleanupKeyRef.current === cleanupKey
-  ) {
-    return undefined;
-  }
-
-  invalidSystemIndexMembershipCleanupKeyRef.current = cleanupKey;
-  let cancelled = false;
-
-  const removeConfirmedMemberships = confirmedMemberships => {
-    if (cancelled || !confirmedMemberships.length) return;
-
-    const confirmedRelationshipIds = new Set(
-      confirmedMemberships.map(relationship =>
-        String(relationship?.relationshipId || "").trim()
-      )
-    );
-
-    setAosRelationships(current => (current || []).filter(item =>
-      !confirmedRelationshipIds.has(
-        String(getAosRelationshipRecord(item)?.relationshipId || "").trim()
-      )
-    ));
-    setAosRailProjections(current =>
-      removeAosRailProjectionMemberships({
-        railProjections: current,
-        memberships: confirmedMemberships,
-        admission: aosWorkspaceAdmission
-      })
-    );
-  };
-
-  async function reconcileInvalidSystemIndexMemberships() {
-    const confirmedMemberships = [];
-
-    try {
-      for (const relationship of invalidMemberships) {
-        const relationshipId = String(
-          relationship?.relationshipId || ""
-        ).trim();
-        const expectedRevision = Number(relationship?.revision);
-        const sourceObjectId = aosWorkspaceAdmission.resolveObjectId(
-          relationship?.sourceObjectId
-        );
-
-        if (
-          !relationshipId ||
-          !Number.isInteger(expectedRevision) ||
-          !sourceObjectId
-        ) {
-          const error = new Error(
-            "Canonical relationship identity and revision are required."
-          );
-          error.code = "IXI_AOS_RELATIONSHIP_REVISION_REQUIRED";
-          throw error;
-        }
-
-        const readActiveRelationship = async () => {
-          const readback = await fetchMosObjectRelationships(sourceObjectId, {
-            direction: "outgoing",
-            status: "active"
-          });
-          return (readback?.relationships || [])
-            .map(getAosRelationshipRecord)
-            .find(candidate =>
-              String(candidate?.relationshipId || "").trim() === relationshipId
-            ) || null;
-        };
-
-        const existingRelationship = await readActiveRelationship();
-        if (existingRelationship) {
-          try {
-            await endMosRelationship({
-              relationshipId,
-              expectedRevision,
-              commandId: createMosCommandId(
-                "aos-end-peer-system-index-membership"
-              ),
-              reason: "aos-peer-system-index-nesting-prohibited",
-              metadata: {
-                source: "aos-work",
-                preserveChildren: true
-              }
-            });
-          } catch (endError) {
-            const remainingAfterError = await readActiveRelationship();
-            if (remainingAfterError) throw endError;
-          }
-        }
-
-        const remainingRelationship = await readActiveRelationship();
-        if (remainingRelationship) {
-          const error = new Error(
-            "IX Core did not confirm the peer System Index release."
-          );
-          error.code = "IXI_AOS_RELATIONSHIP_END_READBACK_REQUIRED";
-          throw error;
-        }
-
-        confirmedMemberships.push(relationship);
-      }
-    } finally {
-      removeConfirmedMemberships(confirmedMemberships);
-    }
-  }
-
-  void reconcileInvalidSystemIndexMemberships().catch(error => {
-    invalidSystemIndexMembershipCleanupKeyRef.current = "";
-    console.error("IXI AOS MEMBERSHIP RECONCILIATION FAILED:", error);
-  });
-
-  return () => {
-    cancelled = true;
-    if (
-      invalidSystemIndexMembershipCleanupKeyRef.current === cleanupKey
-    ) {
-      invalidSystemIndexMembershipCleanupKeyRef.current = "";
-    }
-  };
-}, [
-  workspaceSessionReady,
-  aosWorkspaceAdmission,
-  aosRelationships,
-  aosEntity?.entityId,
-  workspaceSystemIndexes
-]);
-
 useEffect(() => {
   const controller = workspaceSessionControllerRef.current;
   const equipmentObjectId = aosWorkspaceAdmission.resolveObjectId(
@@ -3179,13 +2743,16 @@ if (
       return;
     }
 
-    if (
-      isExplicitAosSystemIndexObject(sourceObject) &&
-      isExplicitAosSystemIndexObject(targetWorkspaceObject)
-    ) {
+    const membershipDecision = evaluateAosSystemIndexMembership({
+      sourceObject,
+      targetObject: targetWorkspaceObject
+    });
+    if (!membershipDecision.allowed) {
       showAosObjectNotice({
         objectId: dragId,
-        message: "SYSTEM INDEXES ARE PEER ROOTS · NESTING BLOCKED",
+        message: membershipDecision.reason === "system-index-root"
+          ? "SYSTEM INDEXES ARE PEER ROOTS · NESTING BLOCKED"
+          : "THIS SYSTEM INDEX DOES NOT ACCEPT THAT OBJECT CLASSIFICATION",
         tone: "error",
         duration: 4200
       });
@@ -3673,6 +3240,7 @@ return null;
   open={systemObjectPickerOpen}
   entityId={aosEntity?.entityId || null}
   parentObject={systemObjectPickerParent}
+  objectDefinitions={aosObjectDefinitions}
   onClose={closeSystemObjectTemplatePicker}
   onCreate={createSelectedContainerTemplate}
 />

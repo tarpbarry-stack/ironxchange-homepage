@@ -304,7 +304,7 @@ function containerDirectoryFixture() {
   const yard = { ...canonical("yard", "West Yard", "location"), metadata: { rootContainer: false, parentObjectId: workforce.objectId, createdFrom: "aos-container-plus" } };
   const machine = { ...canonicalMachine, entityId: entity.entityId, passportId: "IXITEST999" };
   const foreignMachine = canonical("unowned-machine", "Visible external machine", "machine");
-  const publication = { ...canonical("publication", "Retired publication adapter", "system-index"), metadata: { adapterId: "ixi-owned-for-sale" } };
+  const publication = { ...canonical("publication", "Retired publication adapter", "system-index"), metadata: { adapterId: "ixi-retired-publication" } };
   const aosObjects = [workforce, matt, cooper, yard, machine, foreignMachine, publication];
   const systemIndexes = [{ ...equipmentIndex([{ objectId: machine.objectId }]), displayName: "Equipment" }];
   const railProjections = {

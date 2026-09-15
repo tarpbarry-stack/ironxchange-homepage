@@ -27,21 +27,22 @@ test("only workspace-visible system adapters use durable IX Core object and Pass
       adapterId: "ixi-owned-equipment"
     }
   };
-  const forSale = {
-    objectId: "object-for-sale",
+  const retiredAdapter = {
+    objectId: "object-retired-adapter",
     entityId: "entity-1",
     objectType: "system-index",
-    displayName: "FOR SALE",
+    displayName: "RETIRED ADAPTER",
     status: "active",
-    identities: [passportIdentity("object-for-sale", "IXI7777778")],
+    identities: [passportIdentity("object-retired-adapter", "IXI7777778")],
     metadata: {
       systemIndex: true,
-      adapterId: "ixi-for-sale"
+      systemAdapter: true,
+      adapterId: "ixi-retired-adapter"
     }
   };
 
   const indexes = buildAosSystemIndexes({
-    aosObjects: [equipment, forSale],
+    aosObjects: [equipment, retiredAdapter],
     ownedListings: []
   });
 
@@ -49,7 +50,7 @@ test("only workspace-visible system adapters use durable IX Core object and Pass
   assert.equal(indexes[0].indexId, "equipment");
   assert.equal(indexes[0].objectId, "object-equipment");
   assert.equal(indexes[0].identities[0].passportId, "IXI7777777");
-  assert.equal(indexes.some(index => index.objectId === "object-for-sale"), false);
+  assert.equal(indexes.some(index => index.objectId === retiredAdapter.objectId), false);
 });
 
 test("workspace adapter behavior never overwrites the customer's persisted ecosystem names", () => {
@@ -65,21 +66,22 @@ test("workspace adapter behavior never overwrites the customer's persisted ecosy
       adapterId: "ixi-owned-equipment"
     }
   };
-  const forSale = {
-    objectId: "object-for-sale-custom-name",
+  const retiredAdapter = {
+    objectId: "object-retired-adapter-custom-name",
     entityId: "entity-1",
     objectType: "system-index",
     displayName: "READY TO SELL",
     status: "active",
-    identities: [passportIdentity("object-for-sale-custom-name", "IXI7777782")],
+    identities: [passportIdentity("object-retired-adapter-custom-name", "IXI7777782")],
     metadata: {
       systemIndex: true,
-      adapterId: "ixi-for-sale"
+      systemAdapter: true,
+      adapterId: "ixi-retired-adapter"
     }
   };
 
   const indexes = buildAosSystemIndexes({
-    aosObjects: [equipment, forSale],
+    aosObjects: [equipment, retiredAdapter],
     ownedListings: []
   });
 

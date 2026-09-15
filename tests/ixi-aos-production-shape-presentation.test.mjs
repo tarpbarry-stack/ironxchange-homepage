@@ -93,7 +93,7 @@ test("released Object source bindings preserve all owned equipment as canonical 
   assert.equal(presentations.every(item => item.imageUrls.length === 1), true);
 });
 
-test("the passive legacy FOR SALE adapter cannot become an AOS workspace container", () => {
+test("an unregistered technical adapter cannot become an AOS workspace container", () => {
   const equipment = {
     objectId: "object-equipment",
     passportId: "IXIEQP2345",
@@ -103,24 +103,43 @@ test("the passive legacy FOR SALE adapter cannot become an AOS workspace contain
     objectType: "system-index",
     metadata: { systemIndex: true, adapterId: "ixi-owned-equipment" }
   };
-  const legacyForSale = {
-    objectId: "object-for-sale",
-    passportId: "IXISAL2345",
+  const retiredAdapter = {
+    objectId: "object-retired-adapter",
+    identities: [{
+      identityType: "ixi-passport",
+      passportId: "IXIRTR2345",
+      entityId: "entity-star-and-sons",
+      sourceType: "aos-object",
+      sourceId: "object-retired-adapter"
+    }],
     entityId: "entity-star-and-sons",
-    displayName: "FOR SALE",
+    displayName: "RETIRED ADAPTER",
     status: "active",
     objectType: "system-index",
-    metadata: { systemIndex: true, adapterId: "ixi-for-sale" }
+    metadata: {
+      systemIndex: true,
+      systemAdapter: true,
+      adapterId: "ixi-retired-adapter"
+    }
+  };
+  const ordinaryIntegratedObject = {
+    objectId: "object-integrated",
+    entityId: "entity-star-and-sons",
+    displayName: "CUSTOMER OBJECT",
+    status: "active",
+    objectType: "generic",
+    metadata: { adapterId: "customer-source-adapter" }
   };
 
   const indexes = buildAosSystemIndexes({
-    aosObjects: [equipment, legacyForSale],
+    aosObjects: [equipment, retiredAdapter],
     ownedListings: []
   });
 
   assert.deepEqual(indexes.map(index => index.objectId), [equipment.objectId]);
   assert.equal(isIXIAosWorkspaceVisibleAdapter(equipment), true);
-  assert.equal(isIXIAosWorkspaceVisibleAdapter(legacyForSale), false);
+  assert.equal(isIXIAosWorkspaceVisibleAdapter(retiredAdapter), false);
+  assert.equal(isIXIAosWorkspaceVisibleAdapter(ordinaryIntegratedObject), true);
 
   const work = fs.readFileSync(
     new URL("../pages/aos/work.js", import.meta.url),
@@ -189,7 +208,13 @@ test("Locations consumes IX-Core's corroborated legacy rail projection without r
     aliases: [],
     metadata: {
       systemIndex: true,
-      adapterId: "ixi-owned-locations"
+      systemIndexMembershipPolicy: {
+        schema: "aos.system-index-membership.v1",
+        enabled: true,
+        defaultWorkspaceHome: true,
+        allowedObjectTypes: ["location"],
+        allowedDefinitionIds: []
+      }
     }
   };
   const yard = {
@@ -198,6 +223,7 @@ test("Locations consumes IX-Core's corroborated legacy rail projection without r
     entityId: "entity-star-and-sons",
     displayName: "Wichita Falls Yard",
     status: "active",
+    objectType: "location",
     canonicalAdmissionVerified: true,
     aliases: [],
     metadata: {},

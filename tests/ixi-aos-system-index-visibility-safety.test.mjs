@@ -22,6 +22,14 @@ const YARD = "object_yard";
 const PERSON = "object_person";
 const MACHINE = "object_machine";
 
+const LOCATION_POLICY = {
+  schema: "aos.system-index-membership.v1",
+  enabled: true,
+  defaultWorkspaceHome: true,
+  allowedObjectTypes: ["location"],
+  allowedDefinitionIds: []
+};
+
 function canonicalObject({
   objectId,
   passportId,
@@ -256,7 +264,10 @@ test("authenticated readback keeps peer indexes out of stale legacy parents", ()
       passportId: "IXIABC2345",
       displayName: "LOCATIONS",
       objectType: "system-index",
-      metadata: { systemIndexPresentation: true }
+      metadata: {
+        systemIndexPresentation: true,
+        systemIndexMembershipPolicy: LOCATION_POLICY
+      }
     }),
     canonicalObject({
       objectId: WORKFORCE,
@@ -268,7 +279,8 @@ test("authenticated readback keeps peer indexes out of stale legacy parents", ()
     canonicalObject({
       objectId: YARD,
       passportId: "IXIKMN2345",
-      displayName: "RINGLING YARD"
+      displayName: "RINGLING YARD",
+      objectType: "location"
     })
   ];
   const normalized = normalizeAosRailProjectionHierarchy({

@@ -30,6 +30,31 @@ import {
   getAosHierarchyDisplayName
 } from "../../../lib/mos/ixiAosHierarchyContract.mjs";
 
+import {
+  AOS_SYSTEM_INDEX_MEMBERSHIP_POLICY_SCHEMA
+} from "../../../lib/mos/IXIAosSystemIndexMembershipPolicy";
+
+
+const BUILT_IN_MEMBER_TYPES = Object.freeze([
+  ["location", "LOCATION"],
+  ["person", "PERSON"],
+  ["machine", "MACHINE"],
+  ["equipment", "EQUIPMENT"],
+  ["vehicle", "VEHICLE"],
+  ["trailer", "TRAILER"],
+  ["tool", "TOOL"],
+  ["real-estate", "REAL ESTATE"],
+  ["job", "JOB"],
+  ["building", "BUILDING"],
+  ["room", "ROOM"],
+  ["container", "CONTAINER"],
+  ["work-order", "WORK ORDER"],
+  ["job-ticket", "JOB TICKET"],
+  ["expense", "EXPENSE"],
+  ["movement", "MOVEMENT"],
+  ["freight", "FREIGHT"]
+]);
+
 
 function clean(value) {
   return String(value ?? "").trim();
@@ -40,6 +65,7 @@ export default function IXIAosSystemObjectTemplatePicker({
   open = false,
   entityId = null,
   parentObject = null,
+  objectDefinitions = [],
   onClose = null,
   onCreate = null
 }) {
@@ -53,6 +79,8 @@ export default function IXIAosSystemObjectTemplatePicker({
     useState(false);
   const [error, setError] =
     useState("");
+  const [selectedMemberClasses, setSelectedMemberClasses] =
+    useState([]);
   const dialogRef =
     useRef(null);
   const previousFocusRef =
@@ -68,6 +96,8 @@ export default function IXIAosSystemObjectTemplatePicker({
 
   useEffect(() => {
     if (!open) return undefined;
+
+    setSelectedMemberClasses([]);
 
     const controller =
       new AbortController();
@@ -156,7 +186,7 @@ export default function IXIAosSystemObjectTemplatePicker({
 
       const focusable = [
         ...(dialogRef.current?.querySelectorAll(
-          "button:not(:disabled)"
+          "button:not(:disabled), input:not(:disabled)"
         ) || [])
       ];
 
@@ -217,6 +247,24 @@ export default function IXIAosSystemObjectTemplatePicker({
       [selectedTemplate?.templateSlug]
     );
 
+  const creatingChild =
+    Boolean(parentObject);
+
+  const memberClassOptions = useMemo(() => [
+    ...BUILT_IN_MEMBER_TYPES.map(([value, label]) => ({
+      key: `type:${value}`,
+      label,
+      detail: `TYPE · ${value}`
+    })),
+    ...(Array.isArray(objectDefinitions) ? objectDefinitions : [])
+      .map(definition => ({
+        key: `definition:${clean(definition?.definitionId)}`,
+        label: clean(definition?.label) || clean(definition?.definitionKey),
+        detail: "CUSTOM DEFINITION"
+      }))
+      .filter(option => option.key !== "definition:" && option.label)
+  ], [objectDefinitions]);
+
 
   if (!open) return null;
 
@@ -228,6 +276,16 @@ export default function IXIAosSystemObjectTemplatePicker({
     setError("");
 
     try {
+      if (!creatingChild && selectedMemberClasses.length === 0) {
+        throw new Error("Choose at least one canonical member classification.");
+      }
+
+      const allowedObjectTypes = selectedMemberClasses
+        .filter(value => value.startsWith("type:"))
+        .map(value => value.slice("type:".length));
+      const allowedDefinitionIds = selectedMemberClasses
+        .filter(value => value.startsWith("definition:"))
+        .map(value => value.slice("definition:".length));
       const resolvedPreview = buildAosCardCatalogPreviewObject(
         selectedTemplate,
         sample?.sampleData || {}
@@ -241,6 +299,17 @@ export default function IXIAosSystemObjectTemplatePicker({
 
       await onCreate?.({
         ...selectedTemplate,
+        ...(!creatingChild
+          ? {
+              systemIndexMembershipPolicy: {
+                schema: AOS_SYSTEM_INDEX_MEMBERSHIP_POLICY_SCHEMA,
+                enabled: true,
+                defaultWorkspaceHome: true,
+                allowedObjectTypes,
+                allowedDefinitionIds
+              }
+            }
+          : {}),
         fieldSchema: (templateSchema.length ? templateSchema : previewSchema)
           .map((definition, index) => ({
             ...definition,
@@ -271,8 +340,11 @@ export default function IXIAosSystemObjectTemplatePicker({
       parentObject || {}
     );
 
-  const creatingChild =
-    Boolean(parentObject);
+  function toggleMemberClass(key) {
+    setSelectedMemberClasses(current => current.includes(key)
+      ? current.filter(value => value !== key)
+      : [...current, key]);
+  }
 
 
   return (
@@ -321,7 +393,7 @@ export default function IXIAosSystemObjectTemplatePicker({
           </button>
         </header>
 
-        <div className="aos-create-content">
+        <div className={`aos-create-content ${creatingChild ? "child-mode-content" : "root-mode-content"}`}>
           <div className="aos-create-directory">
             <div className="aos-create-directory-title">
               <span>CARD LIBRARY</span>
@@ -359,7 +431,7 @@ export default function IXIAosSystemObjectTemplatePicker({
             </div>
           </div>
 
-          <aside className="aos-create-preview">
+          <aside className={`aos-create-preview ${creatingChild ? "child-mode" : "root-mode"}`}>
             <div className="aos-create-preview-title">
               <span>SELECTED LAYOUT</span>
               <strong>{number ? `#${getAosSelectorCardLabel(selectedTemplate)}` : "—"}</strong>
@@ -387,6 +459,27 @@ export default function IXIAosSystemObjectTemplatePicker({
               ) : null}
             </div>
 
+            {!creatingChild ? (
+              <fieldset className="aos-create-member-policy">
+                <legend>
+                  INDEX MEMBERS
+                  <small>CANONICAL TYPE OR CUSTOMER DEFINITION</small>
+                </legend>
+                <div>
+                  {memberClassOptions.map(option => (
+                    <label key={option.key}>
+                      <input
+                        type="checkbox"
+                        checked={selectedMemberClasses.includes(option.key)}
+                        onChange={() => toggleMemberClass(option.key)}
+                      />
+                      <span>{option.label}<small>{option.detail}</small></span>
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
+            ) : null}
+
             <div className="aos-create-actions">
               <button
                 type="button"
@@ -401,7 +494,12 @@ export default function IXIAosSystemObjectTemplatePicker({
                 type="button"
                 className="primary"
                 onClick={createSelected}
-                disabled={!selectedTemplate || loading || creating}
+                disabled={
+                  !selectedTemplate ||
+                  loading ||
+                  creating ||
+                  (!creatingChild && selectedMemberClasses.length === 0)
+                }
               >
                 {creating
                   ? "OPENING DRAFT…"
@@ -417,7 +515,7 @@ export default function IXIAosSystemObjectTemplatePicker({
       </section>
 
       <style jsx global>{`
-        .aos-create-backdrop,.aos-create-backdrop *{box-sizing:border-box}.aos-create-backdrop{position:fixed;inset:0;z-index:5000;display:flex;align-items:center;justify-content:center;padding:28px;background:rgba(0,0,0,.82);backdrop-filter:blur(8px)}.aos-create-dialog{width:min(1180px,calc(100vw - 56px));height:min(820px,calc(100vh - 56px));overflow:hidden;border:1px solid rgba(255,196,0,.34);border-radius:18px;background:linear-gradient(180deg,#151816,#090b0a);color:#eef1ef;box-shadow:0 36px 100px #000,inset 0 1px rgba(255,255,255,.08);font-family:Inter,Arial,sans-serif}.aos-create-header{height:108px;display:flex;align-items:center;justify-content:space-between;gap:24px;padding:18px 22px;border-bottom:1px solid rgba(255,255,255,.08);background:linear-gradient(180deg,rgba(255,255,255,.035),transparent)}.aos-create-header span{display:block;color:#ffc400;font-size:11px;font-weight:900;letter-spacing:.09em}.aos-create-header h2{margin:6px 0 0;font-size:24px;line-height:1;font-weight:950;letter-spacing:-.02em}.aos-create-header p{max-width:760px;margin:8px 0 0;color:#929a95;font-size:12px;font-weight:650}.aos-create-close{width:46px;height:46px;flex:0 0 46px;border:1px solid #3d443f;border-radius:10px;background:#101310;color:#ffc400;font-size:28px;line-height:1;cursor:pointer}.aos-create-content{height:calc(100% - 108px);display:grid;grid-template-columns:minmax(0,1fr) 400px}.aos-create-directory{min-width:0;min-height:0;display:flex;flex-direction:column;overflow:hidden;border-right:1px solid rgba(255,255,255,.08)}.aos-create-directory-title,.aos-create-preview-title{height:42px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;border-bottom:1px solid rgba(255,255,255,.07);color:#8e9691;font-size:10px;font-weight:900;letter-spacing:.08em}.aos-create-directory-title strong,.aos-create-preview-title strong{color:#ffc400;font-size:12px}.aos-create-grid{min-height:0;flex:1;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-auto-rows:90px;gap:8px;padding:12px;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;scrollbar-gutter:stable;scrollbar-width:thin;scrollbar-color:#3d4540 #090b0a}.aos-create-grid::-webkit-scrollbar{width:5px;height:5px}.aos-create-grid::-webkit-scrollbar-track{background:#090b0a}.aos-create-grid::-webkit-scrollbar-thumb{border:1px solid #151916;border-radius:999px;background:#3d4540}.aos-create-grid::-webkit-scrollbar-thumb:hover{background:#555f58}.aos-create-grid::-webkit-scrollbar-corner{background:#090b0a}.aos-create-tile{min-width:0;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:5px;padding:11px;border:1px solid #343a36;border-radius:9px;background:linear-gradient(180deg,#171a18,#101311);color:#eef1ef;text-align:left;cursor:pointer;transition:border-color 140ms ease,background 140ms ease,transform 140ms ease}.aos-create-tile:hover{border-color:rgba(255,196,0,.48);background:#191b18;transform:translateY(-1px)}.aos-create-tile.selected{border-color:#ffc400;box-shadow:inset 0 0 0 1px rgba(255,196,0,.22)}.aos-create-tile b{color:#ffc400;font-size:17px;font-weight:950}.aos-create-tile span{max-width:100%;overflow:hidden;font-size:11.5px;font-weight:900;text-overflow:ellipsis;white-space:nowrap}.aos-create-tile small{max-width:100%;overflow:hidden;color:#818984;font-size:8.25px;font-weight:800;letter-spacing:.025em;text-overflow:ellipsis;white-space:nowrap}.aos-create-message{grid-column:1/-1;display:flex;align-items:center;justify-content:center;color:#8d958f;font-size:12px;font-weight:900}.aos-create-preview{min-width:0;display:flex;flex-direction:column;align-items:center}.aos-create-preview-title{width:100%}.aos-create-preview-card{width:360px;height:595px;margin:8px auto 6px;display:flex;align-items:flex-start;justify-content:center;overflow:hidden;pointer-events:none}.aos-create-preview-card .numbered-container-preview .face-switch{display:none}.aos-create-preview-card>div{transform-origin:top center}.aos-create-actions{width:100%;display:grid;grid-template-columns:110px minmax(0,1fr);gap:8px;padding:0 14px}.aos-create-actions button{height:42px;border-radius:7px;font-size:11px;font-weight:950;letter-spacing:.05em;cursor:pointer}.aos-create-actions .secondary{border:1px solid #3a403c;background:#111411;color:#aab0ac}.aos-create-actions .primary{border:1px solid #ffc400;background:#ffc400;color:#090a09}.aos-create-actions button:disabled{opacity:.48;cursor:default}.aos-create-error{width:calc(100% - 28px);margin:10px 14px 0;padding:9px 10px;border:1px solid rgba(255,75,75,.45);border-radius:6px;background:rgba(255,75,75,.08);color:#ff8a8a;font-size:10px;font-weight:850}.aos-create-close:focus-visible,.aos-create-tile:focus-visible,.aos-create-actions button:focus-visible{outline:2px solid #ffc400;outline-offset:2px}@media(max-width:900px){.aos-create-backdrop{padding:10px}.aos-create-dialog{width:calc(100vw - 20px);height:calc(100vh - 20px)}.aos-create-header{height:118px;padding:14px}.aos-create-header h2{font-size:18px}.aos-create-header p{font-size:10px}.aos-create-content{position:relative;height:calc(100% - 118px);grid-template-columns:1fr}.aos-create-directory{height:100%;padding-bottom:70px;border-right:0}.aos-create-grid{grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:82px}.aos-create-preview{position:absolute;left:10px;right:10px;bottom:10px;height:58px;display:flex;justify-content:center;padding:7px;border:1px solid rgba(255,255,255,.1);border-radius:9px;background:#0d100e;box-shadow:0 -10px 30px #000}.aos-create-preview-title,.aos-create-preview-card{display:none}.aos-create-actions{padding:0}.aos-create-error{position:absolute;left:0;right:0;bottom:62px;width:auto;margin:0}}
+        .aos-create-backdrop,.aos-create-backdrop *{box-sizing:border-box}.aos-create-backdrop{position:fixed;inset:0;z-index:5000;display:flex;align-items:center;justify-content:center;padding:28px;background:rgba(0,0,0,.82);backdrop-filter:blur(8px)}.aos-create-dialog{width:min(1180px,calc(100vw - 56px));height:min(820px,calc(100vh - 56px));overflow:hidden;border:1px solid rgba(255,196,0,.34);border-radius:18px;background:linear-gradient(180deg,#151816,#090b0a);color:#eef1ef;box-shadow:0 36px 100px #000,inset 0 1px rgba(255,255,255,.08);font-family:Inter,Arial,sans-serif}.aos-create-header{height:108px;display:flex;align-items:center;justify-content:space-between;gap:24px;padding:18px 22px;border-bottom:1px solid rgba(255,255,255,.08);background:linear-gradient(180deg,rgba(255,255,255,.035),transparent)}.aos-create-header span{display:block;color:#ffc400;font-size:11px;font-weight:900;letter-spacing:.09em}.aos-create-header h2{margin:6px 0 0;font-size:24px;line-height:1;font-weight:950;letter-spacing:-.02em}.aos-create-header p{max-width:760px;margin:8px 0 0;color:#929a95;font-size:12px;font-weight:650}.aos-create-close{width:46px;height:46px;flex:0 0 46px;border:1px solid #3d443f;border-radius:10px;background:#101310;color:#ffc400;font-size:28px;line-height:1;cursor:pointer}.aos-create-content{height:calc(100% - 108px);display:grid;grid-template-columns:minmax(0,1fr) 400px}.aos-create-directory{min-width:0;min-height:0;display:flex;flex-direction:column;overflow:hidden;border-right:1px solid rgba(255,255,255,.08)}.aos-create-directory-title,.aos-create-preview-title{height:42px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;border-bottom:1px solid rgba(255,255,255,.07);color:#8e9691;font-size:10px;font-weight:900;letter-spacing:.08em}.aos-create-directory-title strong,.aos-create-preview-title strong{color:#ffc400;font-size:12px}.aos-create-grid{min-height:0;flex:1;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-auto-rows:90px;gap:8px;padding:12px;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;scrollbar-gutter:stable;scrollbar-width:thin;scrollbar-color:#3d4540 #090b0a}.aos-create-grid::-webkit-scrollbar{width:5px;height:5px}.aos-create-grid::-webkit-scrollbar-track{background:#090b0a}.aos-create-grid::-webkit-scrollbar-thumb{border:1px solid #151916;border-radius:999px;background:#3d4540}.aos-create-grid::-webkit-scrollbar-thumb:hover{background:#555f58}.aos-create-grid::-webkit-scrollbar-corner{background:#090b0a}.aos-create-tile{min-width:0;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:5px;padding:11px;border:1px solid #343a36;border-radius:9px;background:linear-gradient(180deg,#171a18,#101311);color:#eef1ef;text-align:left;cursor:pointer;transition:border-color 140ms ease,background 140ms ease,transform 140ms ease}.aos-create-tile:hover{border-color:rgba(255,196,0,.48);background:#191b18;transform:translateY(-1px)}.aos-create-tile.selected{border-color:#ffc400;box-shadow:inset 0 0 0 1px rgba(255,196,0,.22)}.aos-create-tile b{color:#ffc400;font-size:17px;font-weight:950}.aos-create-tile span{max-width:100%;overflow:hidden;font-size:11.5px;font-weight:900;text-overflow:ellipsis;white-space:nowrap}.aos-create-tile small{max-width:100%;overflow:hidden;color:#818984;font-size:8.25px;font-weight:800;letter-spacing:.025em;text-overflow:ellipsis;white-space:nowrap}.aos-create-message{grid-column:1/-1;display:flex;align-items:center;justify-content:center;color:#8d958f;font-size:12px;font-weight:900}.aos-create-preview{min-width:0;display:flex;flex-direction:column;align-items:center}.aos-create-preview-title{width:100%}.aos-create-preview-card{width:360px;height:410px;margin:8px auto 6px;display:flex;align-items:flex-start;justify-content:center;overflow:hidden;pointer-events:none}.aos-create-preview-card .numbered-container-preview .face-switch{display:none}.aos-create-preview-card>div{transform-origin:top center}.aos-create-member-policy{width:calc(100% - 28px);height:180px;margin:0 14px 8px;padding:8px;border:1px solid rgba(255,255,255,.12);border-radius:8px}.aos-create-member-policy legend{padding:0 5px;color:#ffc400;font-size:10px;font-weight:950;letter-spacing:.06em}.aos-create-member-policy legend small{display:block;margin-top:2px;color:#7f8882;font-size:7px}.aos-create-member-policy>div{height:140px;display:grid;grid-template-columns:1fr 1fr;gap:4px 8px;overflow-y:auto}.aos-create-member-policy label{display:flex;align-items:center;gap:6px;min-width:0;color:#d8ddda;font-size:9px;font-weight:850;cursor:pointer}.aos-create-member-policy input{accent-color:#ffc400}.aos-create-member-policy label span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.aos-create-member-policy label small{display:block;color:#747c77;font-size:6.5px;font-weight:750}.aos-create-actions{width:100%;display:grid;grid-template-columns:110px minmax(0,1fr);gap:8px;padding:0 14px}.aos-create-actions button{height:42px;border-radius:7px;font-size:11px;font-weight:950;letter-spacing:.05em;cursor:pointer}.aos-create-actions .secondary{border:1px solid #3a403c;background:#111411;color:#aab0ac}.aos-create-actions .primary{border:1px solid #ffc400;background:#ffc400;color:#090a09}.aos-create-actions button:disabled{opacity:.48;cursor:default}.aos-create-error{width:calc(100% - 28px);margin:10px 14px 0;padding:9px 10px;border:1px solid rgba(255,75,75,.45);border-radius:6px;background:rgba(255,75,75,.08);color:#ff8a8a;font-size:10px;font-weight:850}.aos-create-close:focus-visible,.aos-create-tile:focus-visible,.aos-create-actions button:focus-visible,.aos-create-member-policy input:focus-visible{outline:2px solid #ffc400;outline-offset:2px}@media(max-width:900px){.aos-create-backdrop{padding:10px}.aos-create-dialog{width:calc(100vw - 20px);height:calc(100vh - 20px)}.aos-create-header{height:118px;padding:14px}.aos-create-header h2{font-size:18px}.aos-create-header p{font-size:10px}.aos-create-content{position:relative;height:calc(100% - 118px);grid-template-columns:1fr}.aos-create-directory{height:100%;padding-bottom:270px;border-right:0}.aos-create-content.child-mode-content .aos-create-directory{padding-bottom:70px}.aos-create-grid{grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:82px}.aos-create-preview{position:absolute;left:10px;right:10px;bottom:10px;height:250px;display:flex;justify-content:center;padding:7px;border:1px solid rgba(255,255,255,.1);border-radius:9px;background:#0d100e;box-shadow:0 -10px 30px #000}.aos-create-preview.child-mode{height:58px}.aos-create-preview-title,.aos-create-preview-card{display:none}.aos-create-member-policy{height:182px;margin:0 0 6px}.aos-create-member-policy>div{height:142px}.aos-create-actions{padding:0}.aos-create-error{position:absolute;left:0;right:0;bottom:62px;width:auto;margin:0}}
       `}</style>
     </div>
   );

@@ -29,6 +29,12 @@ function normalizeTypes(
 }
 
 
+function normalizeIds(values) {
+  if (!Array.isArray(values)) return [];
+  return values.map(clean).filter(Boolean);
+}
+
+
 function isSystemIndexObject(
   value = {}
 ) {
@@ -114,10 +120,7 @@ export function canIXIObjectAcceptDrop({
    * create cycles. Ordinary customer containers remain universally
    * composable; this guard applies only to explicit System Index identity.
    */
-  if (
-    isSystemIndexObject(dragData) &&
-    isSystemIndexObject(target)
-  ) {
+  if (isSystemIndexObject(dragData)) {
     return {
       accepted: false,
       reason: "system-index-nesting"
@@ -177,6 +180,11 @@ export function canIXIObjectAcceptDrop({
       policy.acceptedObjectTypes
     );
 
+  const acceptedDefinitionIds =
+    normalizeIds(
+      policy.acceptedDefinitionIds
+    );
+
 
   /*
    * No type restriction means:
@@ -188,7 +196,8 @@ export function canIXIObjectAcceptDrop({
    * family exists.
    */
   if (
-    acceptedObjectTypes.length === 0
+    acceptedObjectTypes.length === 0 &&
+    acceptedDefinitionIds.length === 0
   ) {
     return {
       accepted:
@@ -207,11 +216,14 @@ export function canIXIObjectAcceptDrop({
       dragData
     );
 
+  const sourceDefinitionId = clean(
+    dragData.definitionId || dragData?.metadata?.definitionId
+  );
+
 
   const accepted =
-    acceptedObjectTypes.includes(
-      sourceType
-    );
+    acceptedObjectTypes.includes(sourceType) ||
+    acceptedDefinitionIds.includes(sourceDefinitionId);
 
 
   return {
@@ -219,8 +231,8 @@ export function canIXIObjectAcceptDrop({
 
     reason:
       accepted
-        ? "type-accepted"
-        : "type-rejected"
+        ? "classification-accepted"
+        : "classification-rejected"
   };
 }
 

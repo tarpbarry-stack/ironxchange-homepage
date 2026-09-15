@@ -186,7 +186,8 @@ test("AOS Work mounts the production card runtime and canonical save adapter", (
   assert.match(page, /entityId !== activeEntityId/u);
   assert.match(page, /const objects = \[\.\.\.aosWorkspaceAdmission\.objectsById\.values\(\)\]/u);
   assert.match(page, /controller\.admitObjects\(descriptors\)/u);
-  assert.match(page, /equipmentObjectId = String\(equipmentIndex\?\.objectId/u);
+  assert.match(page, /resolveAosDefaultSystemIndexHome\(\{/u);
+  assert.doesNotMatch(page, /projectedOwnerByMember/u);
   assert.match(page, /objectId\.startsWith\("object_"\)/u);
   assert.doesNotMatch(page, /IXIMosObjectCard/u);
   assert.match(read("lib/mos/ixiMosBrowserGatewayClient.js"), /X-IXI-Expected-Revision/u);

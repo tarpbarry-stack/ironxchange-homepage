@@ -534,6 +534,14 @@ export default function useIXIMosObjectCreation({
           })),
       metadata: {
         ...safeObject(metadata),
+        systemIndex:
+          true,
+        systemIndexPresentation:
+          true,
+        hierarchyRole:
+          "index",
+        systemIndexMembershipPolicy:
+          safeObject(sourceTemplate?.systemIndexMembershipPolicy),
         cardNumber:
           String(templateNumber).padStart(3, "0"),
         cardVariant:
