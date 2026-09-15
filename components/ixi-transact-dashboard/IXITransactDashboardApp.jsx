@@ -249,6 +249,7 @@ export default function IXITransactDashboardApp({ runtime, active = true }) {
         period={period}
         currency={projection.currency || "USD"}
         refreshKey={refreshKey}
+        canReopenPeriod={permissions.includes("financial.gl.period.reopen") && !denied.includes("financial.gl.period.reopen")}
         onCommitted={refresh}
       />
     );
