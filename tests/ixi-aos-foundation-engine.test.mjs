@@ -107,6 +107,19 @@ test("one command carries revision, definition version and one retry-safe identi
   );
 });
 
+test("explicit classification travels with the existing revisioned Object command", () => {
+  const original = { ...baseObject, objectType: "generic" };
+  const session = createIXIAosEditSession(original);
+  const command = createIXIAosObjectUpdateCommand({ session,
+    draft: { ...session.draft, objectType: "person" }, commandId: "classify-existing" });
+  assert.equal(command.patch.objectType, "person");
+  assert.equal(command.objectId, original.objectId);
+  assert.equal(command.expectedRevision, original.revision);
+  const appearance = createIXIAosObjectUpdateCommand({ session,
+    draft: { ...session.draft, metadata: { systemIndexPresentation: true } }, commandId: "appearance-only" });
+  assert.equal(Object.hasOwn(appearance.patch, "objectType"), false);
+});
+
 test("Cards 004 and 009 use one editor session and the MOS client enforces canonical readback", () => {
   const read = path => fs.readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
   for (const card of ["004/IXIAosCard004Personnel.jsx", "009/IXIAosCard009.jsx"]) {

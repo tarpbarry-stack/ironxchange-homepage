@@ -1,6 +1,12 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import IXIAosCreationTypeEditor from "./IXIAosCreationTypeEditor";
+import { canClassifyAosCreationDraft, assertAosDraftCreationReady } from "../../../../lib/mos/IXIAosChildCreationContract.mjs";
 
 import IXIAosPrimaryMediaEditor from "./IXIAosPrimaryMediaEditor";
+import IXIAosMembershipPolicyEditor from "./IXIAosMembershipPolicyEditor";
+import { AOS_MEMBER_TYPES, canClassifyExistingAosObject } from "../../../../lib/mos/IXIAosMemberTypes.js";
+import { AOS_SYSTEM_INDEX_MEMBERSHIP_POLICY_SCHEMA, isExplicitAosSystemIndexObject, getAosSystemIndexMembershipPolicy } from "../../../../lib/mos/IXIAosSystemIndexMembershipPolicy.js";
+
 import {
   BUSINESS_IDENTIFIER_FIELD_ID,
   BUSINESS_IDENTIFIER_ROLE,
@@ -15,6 +21,13 @@ import {
   getObjectLabel
 } from "../IXIAosSemanticObjectPresentation";
 import { persistIXIAosMediaDraft } from "../../../../lib/media/ixiMediaClient";
+
+function membershipDraft(object) {
+  return getAosSystemIndexMembershipPolicy(object) || {
+    schema: AOS_SYSTEM_INDEX_MEMBERSHIP_POLICY_SCHEMA,
+    enabled: true, defaultWorkspaceHome: false, allowedObjectTypes: [], allowedDefinitionIds: []
+  };
+}
 
 function inputValue(value) {
   if (Array.isArray(value)) return value.join(", ");
@@ -120,6 +133,23 @@ export default function IXIAosCommercialObjectEditor({
   const [media, setMedia] = useState(asArray(object?.media));
   const [mediaStatus, setMediaStatus] = useState("");
   const [mediaError, setMediaError] = useState("");
+  const [membershipPolicy, setMembershipPolicy] = useState(() => membershipDraft(object));
+  const [objectType, setObjectType] = useState(object.objectType);
+  const [definitionId, setDefinitionId] = useState(object.definitionId || null);
+  const [creationDefinition, setCreationDefinition] = useState(null);
+  const createsObject = canClassifyAosCreationDraft(object);
+  const acceptCreationDefinition = useCallback(definition => {
+    setCreationDefinition(definition);
+    if (!definition) return;
+    setDefinitions(current => {
+      const schema = (definition.fieldSchema || []).map(field => ({ ...field,
+        fieldId: field.fieldId || field.field, fieldType: field.type || "text" }));
+      const keys = new Set(schema.map(field => field.fieldId));
+      return [...current.filter(field => !keys.has(field.fieldId)), ...schema];
+    });
+  }, []);
+  const editsMembership = isExplicitAosSystemIndexObject(object) && !object?.metadata?.adapterId;
+  const canClassify = canClassifyExistingAosObject(object);
 
   useEffect(() => {
     const nextDefinitions = normalizeDefinitions(object);
@@ -138,6 +168,9 @@ export default function IXIAosCommercialObjectEditor({
     setMedia(asArray(object?.media));
     setMediaStatus("");
     setMediaError("");
+    setMembershipPolicy(membershipDraft(object));
+    setObjectType(object.objectType);
+    setDefinitionId(object.definitionId || null);
   }, [object]);
 
   function addField() {
@@ -224,18 +257,29 @@ export default function IXIAosCommercialObjectEditor({
     });
 
     try {
+      assertAosDraftCreationReady({ ...object, objectType, definitionId });
+      if (createsObject && definitionId && creationDefinition?.definitionId !== definitionId) {
+        throw new Error("Load the selected customer definition before saving.");
+      }
+      if (editsMembership && membershipPolicy.enabled &&
+        !membershipPolicy.allowedObjectTypes.length && !membershipPolicy.allowedDefinitionIds.length) {
+        throw new Error("Choose what this index accepts before saving.");
+      }
       const canonicalMedia = mediaEnabled
         ? await persistIXIAosMediaDraft({ object, media, onProgress: setMediaStatus })
         : asArray(object?.media);
 
       await onSave?.({
         ...object,
+        ...(canClassify ? { objectType } : {}),
+        ...(createsObject ? { objectType, definitionId, definitionKey: creationDefinition?.definitionKey || null } : {}),
         displayName: clean(name) || getObjectDisplayName(object),
         fields: nextFields,
         fieldDefinitions: normalizedDefinitions,
         media: canonicalMedia,
         metadata: {
           ...(object?.metadata || {}),
+          ...(editsMembership ? { systemIndexMembershipPolicy: membershipPolicy } : {}),
           fieldDefinitions: normalizedDefinitions
         }
       });
@@ -243,7 +287,7 @@ export default function IXIAosCommercialObjectEditor({
       setMediaStatus("");
     } catch (caught) {
       setMediaStatus("");
-      setMediaError(clean(caught?.message) || "The photo was not saved.");
+      setMediaError(clean(caught?.message) || "The Object was not saved.");
     }
   }
 
@@ -261,6 +305,9 @@ export default function IXIAosCommercialObjectEditor({
       </header>
 
       <main>
+        {mediaError && !error ? <div className="editor-notice error" role="alert">
+          <strong>NOT SAVED</strong><span>{mediaError}</span>
+        </div> : null}
         {error ? (
           <div className={`editor-notice ${conflict ? "conflict" : "error"}`} role="alert">
             <strong>{conflict ? "REVISION CONFLICT" : "NOT SAVED"}</strong>
@@ -278,7 +325,6 @@ export default function IXIAosCommercialObjectEditor({
             media={media}
             onChange={setMedia}
             status={mediaStatus}
-            error={mediaError}
             disabled={saving || Boolean(mediaStatus)}
           />
         ) : null}
@@ -290,6 +336,23 @@ export default function IXIAosCommercialObjectEditor({
             <input value={name} onChange={event => setName(event.target.value)} />
           </label>
         </section>
+
+        {editsMembership ? <IXIAosMembershipPolicyEditor object={object} value={membershipPolicy}
+          onChange={setMembershipPolicy} disabled={saving || Boolean(mediaStatus)} /> : null}
+
+        {canClassify ? <section className="classification-editor">
+          <label htmlFor={`classification-${object.objectId}`}>OBJECT CLASSIFICATION</label>
+          <p>Choose what this Object represents. Its Object ID and Passport stay the same.</p>
+          <select id={`classification-${object.objectId}`} value={objectType}
+            disabled={saving || Boolean(mediaStatus)} onChange={event => setObjectType(event.target.value)}>
+            <option value="generic">UNCLASSIFIED</option>
+            {AOS_MEMBER_TYPES.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+          </select>
+        </section> : null}
+
+        {createsObject ? <IXIAosCreationTypeEditor object={object} objectType={objectType} definitionId={definitionId}
+          disabled={saving || Boolean(mediaStatus)} onDefinition={acceptCreationDefinition}
+          onChange={choice => { setObjectType(choice.objectType); setDefinitionId(choice.definitionId); }} /> : null}
 
         <section>
           <h4>FIELDS</h4>
@@ -355,6 +418,10 @@ export default function IXIAosCommercialObjectEditor({
         .ixi-aos-commercial-editor,.ixi-aos-commercial-editor *{box-sizing:border-box}.ixi-aos-commercial-editor{position:absolute;inset:0;z-index:260;overflow:hidden;border:1px solid #454b47;border-radius:13px;background:linear-gradient(180deg,#101310,#080a09);color:#eef1ef;font-family:Arial,Helvetica,sans-serif;box-shadow:inset 0 1px #ffffff12,0 18px 40px #0008}.ixi-aos-commercial-editor>header{height:43px;display:flex;align-items:center;justify-content:space-between;padding:0 9px;border-bottom:1px solid #303531;background:#151815}.ixi-aos-commercial-editor>header small{display:block;color:#ffc400;font-size:5px;font-weight:950}.ixi-aos-commercial-editor>header strong{display:block;margin-top:3px;font-size:10px}.ixi-aos-commercial-editor>header nav{display:flex;gap:4px}.ixi-aos-commercial-editor button,.ixi-aos-commercial-editor select{height:24px;border:1px solid #3a403b;border-radius:4px;background:#111411;color:#dce0dd;font-size:6px;font-weight:950}.ixi-aos-commercial-editor>header button{padding:0 9px}.ixi-aos-commercial-editor>header button:first-child{border-color:#ffc40066;color:#ffc400}.ixi-aos-commercial-editor button:disabled,.ixi-aos-commercial-editor select:disabled{opacity:.42;cursor:not-allowed}.ixi-aos-commercial-editor>main{position:absolute;top:43px;left:0;right:0;bottom:0;padding:8px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#4b514d transparent}.ixi-aos-commercial-editor .editor-notice{display:flex;flex-direction:column;gap:3px;padding:7px;border:1px solid #a73a3a;border-radius:5px;background:#2a1111;color:#f5d7d7}.ixi-aos-commercial-editor .editor-notice.conflict{border-color:#ffc40066;background:#ffc4000d;color:#ffe89a}.ixi-aos-commercial-editor .editor-notice strong{font-size:6px;letter-spacing:.05em}.ixi-aos-commercial-editor .editor-notice span{font-size:6px;line-height:1.35}.ixi-aos-commercial-editor .editor-notice button{width:100%;margin-top:3px;border-color:#ffc40066;color:#ffc400}.ixi-aos-commercial-editor section{margin-top:8px}.ixi-aos-commercial-editor h4{height:20px;margin:0;display:flex;align-items:center;color:#ffc400;font-size:6px;font-weight:950;letter-spacing:.06em}.ixi-aos-commercial-editor .identity-field{display:block;padding:7px;border:1px solid #2b302c;border-radius:5px;background:#101310}.ixi-aos-commercial-editor label>span{display:block;margin-bottom:4px;color:#8d958f;font-size:5px;font-weight:900}.ixi-aos-commercial-editor input{width:100%;height:26px;padding:0 7px;border:1px solid #343a35;border-radius:4px;background:#090b0a;color:#edf0ee;font-size:7px;font-weight:850;outline:none}.ixi-aos-commercial-editor .fixed-field-label{height:26px;display:flex;align-items:center;padding:0 7px;border:1px solid #5e552d;border-radius:4px;background:#12140f;color:#ffc400;font-size:7px;font-weight:950}.ixi-aos-commercial-editor .field-columns,.ixi-aos-commercial-editor .field-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr) 62px 26px;gap:4px}.ixi-aos-commercial-editor .field-columns{padding:0 4px 4px;color:#68716b;font-size:4.7px;font-weight:900}.ixi-aos-commercial-editor .field-row{margin-bottom:4px}.ixi-aos-commercial-editor .field-row select{width:100%;padding:0 4px}.ixi-aos-commercial-editor .field-row button{width:26px;padding:0}.ixi-aos-commercial-editor .field-row.business-id{padding:4px;border:1px solid #ffc40033;border-radius:5px;background:#ffc40008}.ixi-aos-commercial-editor .add-field{width:100%;margin-top:4px;border-color:#ffc40044;color:#ffc400;background:#111411}
       `}</style>
       <style jsx>{`
+        .classification-editor { padding: 8px; border: 1px solid #655628; border-radius: 5px; }
+        .classification-editor label { color: #ffc400; font-size: 11px; }
+        .classification-editor p { font-size: 12px; line-height: 1.4; }
+        .ixi-aos-commercial-editor .classification-editor select { width: 100%; min-height: 44px; font-size: 12px; }
         .field-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin-top: 4px; }
         .field-actions button { width: 100%; margin-top: 0; }
         .clear-fields { border-color: #a34b4b66; color: #dc8c8c; background: #111411; }

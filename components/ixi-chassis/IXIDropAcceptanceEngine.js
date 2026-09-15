@@ -9,6 +9,8 @@
  * business operation.
  */
 
+import { isExplicitAosSystemIndexObject, evaluateAosSystemIndexMembership } from "../../lib/mos/IXIAosSystemIndexMembershipPolicy.js";
+
 function clean(value) {
   return String(
     value || ""
@@ -38,23 +40,7 @@ function normalizeIds(values) {
 function isSystemIndexObject(
   value = {}
 ) {
-  const metadata =
-    value?.metadata &&
-    typeof value.metadata === "object"
-      ? value.metadata
-      : {};
-
-  return (
-    clean(value?.objectType).toLowerCase() === "system-index" ||
-    metadata.systemIndex === true ||
-    metadata.isSystemIndex === true ||
-    metadata.systemAdapter === true ||
-    metadata.systemIndexPresentation === true ||
-    metadata.rootContainer === true ||
-    clean(metadata.hierarchyRole).toLowerCase() === "index" ||
-    clean(value?.cardTemplateSlug || value?.templateId || metadata?.templateId) ===
-      "ixi-system-index-v1"
-  );
+  return isExplicitAosSystemIndexObject(value);
 }
 
 
@@ -145,6 +131,17 @@ export function canIXIObjectAcceptDrop({
       reason:
         "target-disabled"
     };
+  }
+
+  // A workspace predicate may restrict a System Index drop, but cannot grant
+  // membership which its canonical structural policy rejects.
+  if (isSystemIndexObject(target)) {
+    const decision = evaluateAosSystemIndexMembership({ sourceObject: dragData, targetObject: target });
+    if (!decision.allowed) return { accepted: false, reason: decision.reason };
+    if (typeof policy.accepts === "function" && !policy.accepts({ dragData, target })) {
+      return { accepted: false, reason: "policy-rejected" };
+    }
+    return { accepted: true, reason: "classification-accepted" };
   }
 
 

@@ -27,6 +27,9 @@ const ROUTES = [
 
   { methods: ["GET"], pattern: /^\/entities\/[^/]+\/objects$/ },
   { methods: ["POST"], pattern: /^\/objects\/provision$/ },
+  { methods: ["POST"], pattern: /^\/objects\/create$/ },
+  { methods: ["GET"], pattern: /^\/objects\/creation-commands$/ },
+  { methods: ["POST"], pattern: /^\/objects\/creation-commands\/[^/]+\/(?:resume|acknowledge)$/ },
   { methods: ["POST"], pattern: /^\/objects\/provision\/[^/]+\/recover$/ },
   { methods: ["GET", "PATCH", "DELETE"], pattern: /^\/objects\/[^/]+$/ },
 

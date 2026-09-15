@@ -108,6 +108,12 @@ export default function IXISystemIndexCard({
 }) {
   const [isDropAccepting, setIsDropAccepting] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
+  const [reviewOpen, setReviewOpen] = useState(false);
+  const membershipReview = index?.membershipReview;
+  const membershipIssues = membershipReview?.issues || [];
+  const needsConfiguration = membershipReview?.state === "unresolved";
+  const needsClassification = membershipIssues.some(issue => issue.reason === "member-classification-required");
+  const needsReview = needsConfiguration || membershipIssues.length > 0;
 
   const id = String(
     objectId ||
@@ -477,6 +483,31 @@ export default function IXISystemIndexCard({
             </div>
 
             <div className="index-preview">
+              {needsReview ? (
+                <div className="membership-review-control">
+                  <button type="button" onPointerDown={event => event.stopPropagation()}
+                    aria-expanded={reviewOpen} onClick={event => { event.stopPropagation(); setReviewOpen(value => !value); }}>
+                    {needsConfiguration ? "SETUP REQUIRED" : needsClassification ? "CLASSIFICATION REQUIRED" : "REVIEW CONNECTIONS"}
+                    {membershipIssues.length ? ` · ${membershipIssues.length}` : ""}
+                  </button>
+                </div>
+              ) : null}
+              {reviewOpen && needsReview ? (
+                <div className="membership-review" role="region" aria-label="Membership review" onPointerDown={event => event.stopPropagation()}>
+                  <p>{needsConfiguration
+                    ? "Choose what this index accepts in EDIT. These connections cannot yet be validated."
+                    : needsClassification ? "These Objects need a classification before their connections can be validated. Open them to review the saved records."
+                    : "These connections do not satisfy the index rules. Opening an Object does not approve its connection."}</p>
+                  {(index?.membershipReviewObjects || []).map(item => (
+                    <button key={getObjectId(item)} type="button" disabled={typeof onExposeObject !== "function"}
+                      onClick={event => { event.stopPropagation(); onExposeObject?.(item, index); }}>
+                      OPEN · {getObjectTitle(item)}
+                      <small>{membershipIssues.some(issue => issue.objectId === getObjectId(item) && issue.state === "invalid")
+                        ? "Invalid connection" : "Unresolved connection"}</small>
+                    </button>
+                  ))}
+                </div>
+              ) : null}
               {previewItem ? (
                 <>
                   <div className="preview-photo">
@@ -562,7 +593,7 @@ export default function IXISystemIndexCard({
                 </>
               ) : (
                 <div className="index-empty">
-                  <span>EMPTY</span>
+                  <span>{needsConfiguration || needsClassification ? "UNRESOLVED" : membershipIssues.length ? "CONNECTIONS NEED REVIEW" : "EMPTY"}</span>
                   <strong>{containerName}</strong>
                 </div>
               )}
@@ -864,6 +895,7 @@ export default function IXISystemIndexCard({
         }
 
         .index-preview {
+          position: relative;
           height: 184px;
           min-height: 184px;
           margin-top: 8px;
@@ -872,6 +904,13 @@ export default function IXISystemIndexCard({
           border-radius: 8px;
           background: rgba(7,7,7,.78);
         }
+
+        .membership-review-control { position: absolute; top: 4px; left: 4px; right: 4px; z-index: 20; }
+        .membership-review-control button { min-height: 44px; width: 100%; border: 1px solid #a98724; border-radius: 4px; background: #252011; color: #ffd55e; font: 800 11px 'Inter Variable',sans-serif; cursor: pointer; }
+        .membership-review { position: absolute; inset: 52px 4px 4px; z-index: 21; overflow: auto; padding: 8px; background: #111510; color: #eee; font: 12px/1.35 'Inter Variable',sans-serif; }
+        .membership-review small { display: block; margin-top: 4px; color: #ffd55e; font-size: 11px; }
+        .membership-review p { margin: 0 0 8px; }
+        .membership-review button { display: block; width: 100%; min-height: 44px; margin: 4px 0; padding: 7px; border: 1px solid #565c50; border-radius: 4px; background: #1b2018; color: #fff; text-align: left; font: 700 12px 'Inter Variable',sans-serif; cursor: pointer; }
 
         .preview-photo {
           position: relative;
