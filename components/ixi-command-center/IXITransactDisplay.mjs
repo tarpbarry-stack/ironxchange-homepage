@@ -1,3 +1,10 @@
+// Shorten only the sidebar label; keep the canonical title and hours intact.
+export function sidebarObjectTitle(context = {}) {
+  const title = String(context.title || "");
+  if (context.kind !== "machine") return title;
+  return title.replace(/\s+(?:[-–—·|]\s*)?\d[\d,]*(?:\.\d+)?\s*(?:hrs?|hours?)\.?\s*$/i, "");
+}
+
 // A display reference never changes a saved financial document number or identity.
 export function transactionDisplayTitle(document = {}, fallback = "") {
   const id = String(document.financialDocumentId || "");
