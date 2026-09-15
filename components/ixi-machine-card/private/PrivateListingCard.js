@@ -936,6 +936,8 @@ onMachinePlacementChange ? (
 
         .card.sold-mode { height:475px;min-height:475px;max-height:475px; }
         .card.private-listing-card.sold-mode .card-body { height:227px;min-height:227px;max-height:227px;box-sizing:border-box;padding:10px 12px 8px; }
+        .card.sold-mode .hours-inline { margin:0; }
+        .card.sold-mode .title-click-zone { flex-shrink:0;margin-bottom:5px; }
         .sold-sign { position:absolute;top:12px;left:12px;padding:4px 14px;background:#f1c400;color:#11150e;font-size:30px;font-weight:950;letter-spacing:2px;line-height:1.15;border:2px solid #15170f;box-shadow:0 2px 12px #0008; }
         .sold-returned { position:absolute;bottom:0;left:0;right:0;padding:5px;text-align:center;background:#151c15e8;color:#d4e8d5;font-size:10px;font-weight:800; }
         .title-click-zone {
