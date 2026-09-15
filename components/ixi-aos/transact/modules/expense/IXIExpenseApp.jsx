@@ -245,7 +245,7 @@ export default function IXIExpenseApp({
 
   const fileRef = useRef(null);
   const requestRef = useRef(createClientRequestId());
-  const returnTimerRef = useRef(null);
+  const saveInFlight = useRef(false);
 
   const lang = language || localLang;
   const t = COPY[lang] || COPY.en;
@@ -341,14 +341,6 @@ export default function IXIExpenseApp({
     setNotes(clean(details.notes));
     setMode("record");
   }, [initialRecord, selectedFinancialDocumentId]);
-
-  useEffect(() => {
-    return () => {
-      if (returnTimerRef.current) {
-        clearTimeout(returnTimerRef.current);
-      }
-    };
-  }, []);
 
   useEffect(() => {
     return () => {
@@ -461,7 +453,7 @@ export default function IXIExpenseApp({
   }
 
   async function save() {
-    if (saving || saved) return;
+    if (saveInFlight.current || saving || saved) return;
 
     const draft = createIXIExpenseDraft({
       context,
@@ -475,8 +467,9 @@ export default function IXIExpenseApp({
 
     if (!validation.valid) return;
 
+    saveInFlight.current = true;
     setSaving(true);
-
+    let committedWrite = false;
     try {
       if (mode === "edit") {
         const amended = amendIXIExpenseRecord(record, {
@@ -490,6 +483,7 @@ export default function IXIExpenseApp({
           action: "amend",
           metadata: { source: "ixi-transact-expense-record" }
         });
+        committedWrite = true;
         setRecord(persisted.record);
         setMode("record");
         setChangeReason("");
@@ -519,6 +513,7 @@ export default function IXIExpenseApp({
             commandId: requestRef.current
           }
         });
+        committedWrite = true;
         setMode("record");
         await onSave?.(record, { ...input, action: "correction", correction: persisted.correction, files: receipt ? [receipt.file] : [] }, persisted.response);
         return;
@@ -544,6 +539,7 @@ export default function IXIExpenseApp({
         }
       });
 
+      committedWrite = true;
       const result = persisted?.draft || draft;
       const response = persisted?.response || null;
       const canonicalId = clean(
@@ -568,10 +564,6 @@ export default function IXIExpenseApp({
         response
       });
 
-      await new Promise(resolve => {
-        returnTimerRef.current = setTimeout(resolve, 1050);
-      });
-
       await onSave?.(
         committed,
         {
@@ -581,8 +573,11 @@ export default function IXIExpenseApp({
         response
       );
     } catch (error) {
-      setSaveError(clean(error?.message) || t.saveError);
+      setSaveError(committedWrite
+        ? (lang === "es" ? "Gasto guardado. Actualice el historial; no vuelva a enviarlo." : "Expense saved. Refresh history to update the display; do not submit it again.")
+        : clean(error?.message) || t.saveError);
     } finally {
+      saveInFlight.current = false;
       setSaving(false);
     }
   }

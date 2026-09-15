@@ -50,6 +50,8 @@ import IXITransactMachineHistory from "./IXITransactMachineHistory";
 import styles from "./IXIAosCommandCenter.module.css";
 import IXITransactSidePanel from "./IXITransactSidePanel";
 import IXITransactObjectPicker from "./IXITransactObjectPicker";
+import { createIXITransactHistoryCache } from "./IXITransactHistoryCache.mjs";
+import useIXITransactHistory from "./useIXITransactHistory";
 import { createIXITransactRecordCache } from "./IXITransactRecordCache.mjs";
 import { loadIXIAosFinancialDocument } from "../ixi-aos/financial-runtime/IXIAosFinancialReadClient";
 
@@ -341,6 +343,20 @@ function WorkspaceHeader({ eyebrow, title, detail, count, actionLabel = "OPEN LE
   );
 }
 
+const EMPTY_RECORDS = Object.freeze([]);
+function refreshWorksheetRecords(tabs, passportId, records) {
+  return tabs.map(tab => {
+    if (tab.dirty || tab.context.passportId !== passportId || tab.financialRecords === records) return tab;
+    const previous = new Map(tab.financialRecords.map(record => [paymentDocument(record).financialDocumentId, (record.record || record).server?.revision]));
+    if (previous.size === records.length && records.every(record => {
+      const id = paymentDocument(record).financialDocumentId;
+      const revision = (record.record || record).server?.revision;
+      return Number.isInteger(revision) && previous.get(id) === revision;
+    })) return tab;
+    return { ...tab, object: buildTransactObject(tab.context, records), financialRecords: records };
+  });
+}
+
 export default function IXITransactCommandCenter({ runtime, active = true }) {
   const router = useRouter();
   const readAccess = runtime?.loadAccess || loadIXIFinancialAccessContext;
@@ -369,22 +385,18 @@ export default function IXITransactCommandCenter({ runtime, active = true }) {
   const [activeTabId, setActiveTabId] = useState("");
   const [closingTab, setClosingTab] = useState(null);
   const deepLinkOpened = useRef(null);
-  const loadedPassport = useRef("");
   const financialQueryKey = useRef("");
   const [activeModuleId, setActiveModuleId] = useState("");
   const [selectedDirectoryId, setSelectedDirectoryId] = useState("");
   const [passportRefreshKey, setPassportRefreshKey] = useState(0);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [contextRefreshKey, setContextRefreshKey] = useState(0);
   const [loading, setLoading] = useState(true);
   const [contextLoading, setContextLoading] = useState(false);
   const [contextError, setContextError] = useState("");
   const [financialLoading, setFinancialLoading] = useState(false);
   const [error, setError] = useState("");
   const [financialError, setFinancialError] = useState("");
-  const [passportRecords, setPassportRecords] = useState([]);
-  const [passportRecordsReadyFor, setPassportRecordsReadyFor] = useState("");
-  const [passportRecordsLoading, setPassportRecordsLoading] = useState(false);
-  const [passportRecordsError, setPassportRecordsError] = useState("");
   const contextHydrationStarted = useRef(false);
 
   useEffect(() => {
@@ -454,7 +466,7 @@ export default function IXITransactCommandCenter({ runtime, active = true }) {
     }
     loadOperatingContext();
     return () => { controller.abort(); contextHydrationStarted.current = false; };
-  }, [access, refreshKey]);
+  }, [access, contextRefreshKey]);
 
   const accessData = access?.data || {};
   const entityPassportId = clean(accessData.defaults?.entityPassportId || accessData.entities?.[0]?.passportId || environment?.entity?.passportId);
@@ -462,6 +474,8 @@ export default function IXITransactCommandCenter({ runtime, active = true }) {
   const recordScope = JSON.stringify([entityPassportId, accessData.actor?.passportId, accessData.permissions, accessData.deniedPermissions]);
   const recordCache = useMemo(() => createIXITransactRecordCache({ read: loadIXIAosFinancialDocument }), [recordScope]);
   useEffect(() => () => recordCache.invalidate(), [recordCache]);
+  const historyCache = useMemo(() => createIXITransactHistoryCache({ read: loadIXIAosPassportFinancialDocuments }), [recordScope]);
+  useEffect(() => () => historyCache.clear(), [historyCache]);
   useEffect(() => { historyStates.current.clear(); }, [recordScope]);
   const contexts = useMemo(() => buildIXIAosCommandContexts({
     entity: environment?.entity || {},
@@ -491,41 +505,17 @@ export default function IXITransactCommandCenter({ runtime, active = true }) {
     contexts,
     relationships
   ), [contexts, relationships, selectedContext]);
+  const passportHistory = useIXITransactHistory({ cache: historyCache,
+    passportId: clean(selectedContext?.passportId), active: active && Boolean(access), refreshKey: `${passportRefreshKey}:${activeTabId}:${activeWorkspace}` });
+  const passportRecords = passportHistory.records || EMPTY_RECORDS;
+  const passportRecordsReadyFor = passportHistory.records ? selectedContext?.passportId : "";
+  const passportRecordsLoading = passportHistory.loading;
+  const passportRecordsError = passportHistory.error;
   useEffect(() => {
-    if (!active) return undefined;
-    const passportId = clean(selectedContext?.passportId);
-    if (!passportId || !access) {
-      setPassportRecords([]);
-      setPassportRecordsError("");
-      return undefined;
-    }
-
-    const controller = new AbortController();
-    if (loadedPassport.current !== passportId) { setPassportRecords([]); setPassportRecordsReadyFor(""); }
-    loadedPassport.current = passportId;
-    setPassportRecordsLoading(true);
-    setPassportRecordsError("");
-
-    loadIXIAosPassportFinancialDocuments({ passportId, signal: controller.signal })
-      .then(records => {
-        if (!controller.signal.aborted) {
-          recordCache.reconcile(records);
-          setPassportRecords(records); setPassportRecordsReadyFor(passportId);
-          setWorkingTabs(tabs => tabs.map(tab => !tab.dirty && tab.context.passportId === passportId
-            ? { ...tab, object: buildTransactObject(tab.context, records), financialRecords: records } : tab));
-        }
-      })
-      .catch(loadError => {
-        if (!controller.signal.aborted && loadError?.name !== "AbortError") {
-          setPassportRecordsError(loadError?.message || "Passport financial records could not be loaded.");
-        }
-      })
-      .finally(() => {
-        if (!controller.signal.aborted) setPassportRecordsLoading(false);
-      });
-
-    return () => controller.abort();
-  }, [access, active, passportRefreshKey, selectedContext?.id, selectedContext?.passportId, recordCache]);
+    if (!passportHistory.records || passportHistory.stale) return;
+    recordCache.reconcile(passportHistory.records);
+    setWorkingTabs(tabs => refreshWorksheetRecords(tabs, selectedContext?.passportId, passportHistory.records));
+  }, [passportHistory.records, passportHistory.stale, selectedContext?.passportId, recordCache]);
 
   useEffect(() => {
     if (!selectedContext || !access) return undefined;
@@ -604,13 +594,13 @@ export default function IXITransactCommandCenter({ runtime, active = true }) {
     const controller = new AbortController();
     setSearchLoading(true); setSearchError("");
     const timer = setTimeout(() => {
-      loadIXIAosPassportFinancialDocuments({ passportId: entityPassportId, signal: controller.signal })
+      historyCache.load(entityPassportId)
         .then(records => { if (!controller.signal.aborted) setCompanyRecords(records); })
         .catch(error => { if (!controller.signal.aborted) setSearchError(error.message || "Transaction search unavailable. Retry."); })
         .finally(() => { if (!controller.signal.aborted) setSearchLoading(false); });
     }, 200);
     return () => { clearTimeout(timer); controller.abort(); };
-  }, [query, entityPassportId, access, passportRefreshKey]);
+  }, [query, entityPassportId, access, passportRefreshKey, historyCache]);
   const searchResults = useMemo(() => searchIXITransact({ query, contexts,
     records: [...new Map([...companyRecords, ...passportRecords].map(record => [paymentDocument(record).financialDocumentId, record])).values()]
   }), [query, contexts, companyRecords, passportRecords]);
@@ -618,7 +608,6 @@ export default function IXITransactCommandCenter({ runtime, active = true }) {
 
   function selectContext(context) {
     setOpenPanel(""); recordCache.cancelPrefetch();
-    if (selectedId !== context.id) { setPassportRecords([]); setPassportRecordsLoading(true); }
     setSelectedKind(context.kind);
     setSelectedId(context.id);
     setQuery("");
@@ -630,16 +619,17 @@ export default function IXITransactCommandCenter({ runtime, active = true }) {
 
   function refreshAuthoritativeContext() {
     recordCache.invalidate();
+    historyCache.invalidate();
     setWorkingTabs(tabs => tabs.map(tab => tab.dirty ? tab : { ...tab, recordRefresh: (tab.recordRefresh || 0) + 1 }));
     runtime?.invalidateFinancial();
     contextHydrationStarted.current = false;
+    setContextRefreshKey(value => value + 1);
     setRefreshKey(value => value + 1);
     setPassportRefreshKey(value => value + 1);
   }
 
   function activateTab(tab) {
     setOpenPanel(""); setSelectedRecord(null); recordCache.cancelPrefetch();
-    if (selectedId !== tab.context.id) { setPassportRecords([]); setPassportRecordsLoading(true); }
     setSelectedKind(tab.context.kind);
     setSelectedId(tab.context.id);
     setActiveTabId(tab.id);
@@ -660,9 +650,9 @@ export default function IXITransactCommandCenter({ runtime, active = true }) {
     setSelectedRecord(record);
     const financialDocumentId = clean(record?.document?.financialDocumentId || paymentDocument(record?.raw)?.financialDocumentId || record?.id);
     if (!financialDocumentId || !selectedContext) return;
-    recordCache.load(financialDocumentId).catch(() => {});
     const existing = workingTabs.find(tab => tab.financialDocumentId === financialDocumentId);
     if (existing) { activateTab(existing); return; }
+    recordCache.load(financialDocumentId).catch(() => {});
     const references = record?.document?.references || [];
     const targetContext = contexts.find(context => references.some(ref => ["asset", "machine", "object"].includes(ref.role) && ref.passportId === context.passportId)) || selectedContext;
     const records = [...new Map([...companyRecords, ...passportRecords].map(item => [paymentDocument(item).financialDocumentId, item])).values()];
@@ -703,22 +693,31 @@ export default function IXITransactCommandCenter({ runtime, active = true }) {
     setWorkingTabs(tabs => tabs.map(tab => tab.id === id && !tab.dirty ? { ...tab, dirty: true } : tab));
   }
 
-  async function worksheetSaved(id) {
-    recordCache.invalidate();
-    runtime?.invalidateFinancial();
+  function worksheetSaved(id) {
     const savedTab = workingTabs.find(tab => tab.id === id);
-    setWorkingTabs(tabs => tabs.map(tab => tab.id === id ? { ...tab, dirty: false } : tab));
+    if (!savedTab) return;
+    // A confirmed write may affect company, counterparty and machine histories.
+    // Retain those rows but require a fresh read before using their balances.
+    historyCache.invalidate();
+    recordCache.invalidate([...new Set([savedTab.financialDocumentId,
+      ...savedTab.financialRecords.map(record => paymentDocument(record).financialDocumentId)].filter(Boolean))]);
+    runtime?.invalidateFinancial();
+    setWorkingTabs(tabs => tabs.map(tab => tab.id === id
+      ? { ...tab, dirty: false, recordRefresh: (tab.recordRefresh || 0) + 1 } : tab));
     setPassportRefreshKey(value => value + 1);
     setRefreshKey(value => value + 1);
-    if (!savedTab?.context?.passportId) return;
-    try {
-      const records = await loadIXIAosPassportFinancialDocuments({ passportId: savedTab.context.passportId });
-      setWorkingTabs(tabs => tabs.map(tab => tab.context.passportId === savedTab.context.passportId && (tab.id === id || !tab.dirty)
-        ? { ...tab, object: buildTransactObject(tab.context, records), financialRecords: records, recordRefresh: (tab.recordRefresh || 0) + 1 } : tab));
-    } catch {
-      // The save already succeeded. History owns the retryable read error;
-      // never turn a completed financial command into a second submission.
-    }
+    if (!savedTab.context.passportId) return;
+    // The write has finished. One shared background read updates all clean tabs;
+    // failure is a retryable read error, never a reason to submit the write again.
+    historyCache.load(savedTab.context.passportId).then(records => {
+      recordCache.reconcile(records);
+      setWorkingTabs(tabs => refreshWorksheetRecords(tabs, savedTab.context.passportId, records));
+    }).catch(() => {});
+  }
+
+  function retryHistory() {
+    historyCache.invalidate([selectedContext?.passportId]);
+    setPassportRefreshKey(value => value + 1);
   }
 
   useEffect(() => {
@@ -980,14 +979,15 @@ export default function IXITransactCommandCenter({ runtime, active = true }) {
           {contextLoading ? <div className={styles.loadingState} role="status"><strong>COMPANY CONNECTED</strong><span>Loading governed financial operating context…</span><small>Machines appear only through the authoritative company Equipment projection.</small></div> : null}
           {contextError ? <div className={styles.errorBanner} role="alert"><strong>OPERATING CONTEXT INCOMPLETE</strong><span>{contextError}</span><small>The authenticated company remains available; unresolved Objects are not displayed.</small></div> : null}
           {financialError ? <div className={styles.errorBanner} role="alert"><strong>FINANCIAL PROJECTION UNAVAILABLE</strong><span>{financialError}</span><small>Operating context remains visible; accounting completeness is not asserted.</small></div> : null}
-          {passportRecordsError ? <div className={styles.errorBanner} role="alert"><strong>PASSPORT RECORDS UNAVAILABLE</strong><span>{passportRecordsError}</span><small>No substitute records or financial values have been created.</small></div> : null}
+          {activeTabId && passportRecordsError ? <div className={styles.errorBanner} role="alert"><strong>BALANCES NEED REFRESH</strong><span>{passportRecordsError} Any confirmed save remains saved.</span><button type="button" onClick={retryHistory}>RETRY BALANCES</button></div> : null}
+          {activeTabId && passportHistory.stale && !passportRecordsError ? <p role="status">Updating transaction balances…</p> : null}
           {!loading && !error && selectedContext ? <>
             {workingTabs.length ? <IXITransactWorkingTabs tabs={workingTabs} activeId={activeTabId} onSelect={activateTab} onHistory={returnToObjectHistory} onClose={closeTab} /> : null}
             <div className={styles.historyPane} id="transact-history-panel" role="tabpanel" aria-label="Transaction history" aria-labelledby={workingTabs.length ? "transact-tab-history" : undefined} hidden={Boolean(activeTabId)}>
               <div className={styles.historyViewport} hidden={activeWorkspace !== "object-history"}><IXITransactMachineHistory key={selectedContext?.id} context={selectedContext} entity={environment?.entity}
                 savedState={historyStates.current.get(historyStateKey)} recordCache={recordCache} active={active && activeWorkspace === "object-history" && !activeTabId}
-                records={passportRecords} loading={passportRecordsReadyFor !== selectedContext?.passportId} error={passportRecordsError} currency={currency}
-                onOpenRecord={openTransactionRecord} onMarkPaid={openPaymentRecord} onRetry={() => { recordCache.invalidate(); setPassportRefreshKey(value => value + 1); }} /></div>
+                records={passportRecords} loading={passportRecordsReadyFor !== selectedContext?.passportId} error={passportRecordsError} refreshing={passportHistory.stale} currency={currency}
+                onOpenRecord={openTransactionRecord} onMarkPaid={openPaymentRecord} onRetry={retryHistory} /></div>
               {renderWorkspace()}
             </div>
             {workingTabs.map(tab => <WorksheetPanel key={tab.id} tab={tab} active={activeTabId === tab.id} onDirty={markTabDirty}>
