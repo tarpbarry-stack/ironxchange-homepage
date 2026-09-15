@@ -365,7 +365,7 @@ export function projectIXIAssetSettlement({
     salePrice,
     collected,
     credited,
-    buyerBalance: money(Math.max(0, salePrice - collected - credited)),
+    buyerBalance: money(Math.max(0, (sale.collection?.invoiceTotal ?? salePrice) - collected - credited)),
     acquisitionCost,
     makeReadyCost,
     postAcquisitionCosts,

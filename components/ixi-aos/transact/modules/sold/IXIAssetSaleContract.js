@@ -107,6 +107,7 @@ export function projectIXIAssetSaleCollection({
     creditedAmount,
     balanceDue,
     invoiceTotal,
+    tradeValue: money(array(sourceInvoice.metadata?.trades).reduce((sum, trade) => sum + number(trade.allowance), 0)),
   };
 }
 
@@ -157,7 +158,8 @@ export function createIXIAssetSaleDraft({ context = {}, input = {} } = {}) {
       buyerEmail: clean(input.buyerEmail),
       buyerPhone: clean(input.buyerPhone),
       saleDate: clean(input.saleDate),
-      salePrice: collection.invoiceTotal,
+      salePrice: money(collection.invoiceTotal + collection.tradeValue),
+      tradeValue: collection.tradeValue,
       machineSalePrice: input.machineSalePrice === "" || input.machineSalePrice == null ? null : money(input.machineSalePrice),
       soldByLabel: clean(input.soldByLabel),
       soldByPassportId: clean(input.soldByPassportId),
@@ -202,8 +204,8 @@ export function validateIXIAssetSale(record = {}, sourceInvoice = {}) {
   if (!clean(record.sale?.saleDate)) errors.saleDate = "required";
   if (!["billed", "partially-collected", "collected"].includes(invoiceState)) errors.invoiceState = "invoice-must-be-issued";
   if (number(record.collection?.balanceDue) > 0.005) errors.collection = "buyer-balance-outstanding";
-  else if (number(record.collection?.amountReceived) <= 0 || number(record.collection?.invoiceTotal) <= number(record.collection?.creditedAmount)) errors.collection = "Actual received funds are required; a credit alone does not complete a sale.";
-  if (record.sale?.machineSalePrice == null || number(record.sale.machineSalePrice) <= 0 || number(record.sale.machineSalePrice) > number(record.collection.invoiceTotal)) errors.machineSalePrice = "Enter the machine sale price, excluding invoice additions.";
+  else if (!(array(sourceInvoice.metadata?.trades).length > 0 && number(record.collection.invoiceTotal) === 0 && number(record.collection.creditedAmount) === 0) && (number(record.collection?.amountReceived) <= 0 || number(record.collection?.invoiceTotal) <= number(record.collection?.creditedAmount))) errors.collection = "Actual received funds are required; a credit alone does not complete a sale.";
+  if (record.sale?.machineSalePrice == null || number(record.sale.machineSalePrice) <= 0 || number(record.sale.machineSalePrice) > number(record.collection.invoiceTotal) + number(record.collection.tradeValue)) errors.machineSalePrice = "Enter the machine sale price, excluding invoice additions.";
   if (clean(record.collection?.status) !== "paid") errors.collectionStatus = "payment-required";
   return { valid: Object.keys(errors).length === 0, errors };
 }
