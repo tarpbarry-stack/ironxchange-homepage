@@ -48,8 +48,10 @@ import {
 } from "../../lib/mos/ixiAosCanonicalAdmission.mjs";
 
 import {
+  IXI_AOS_RAIL_MEMBERSHIP_BEHAVIOR_ID,
   createAosMembershipRelationship,
   createAosRailOrderKey,
+  getExactActiveAosRelationship,
   getAosRailProjectionObjectIds,
   getAosMembershipRelationships,
   getAosMembershipObjectIds,
@@ -224,6 +226,8 @@ const IXI_AOS_LOCATIONS_REPAIR_2026_09_14 = Object.freeze({
   entityId: "entity_4d78e9fb-92e4-4cc2-a8cb-1a2f19e097d0",
   locationsObjectId: "object_1d1a2a9d-1485-47ed-b3d6-18a144affbd7",
   ripperObjectId: "object_da02cb31-d7db-4297-a395-f2603e2f1320",
+  ripperLocationsRelationshipId:
+    "relationship_efb98dc5-cad0-4d51-90c0-90fa558d9696",
   person: Object.freeze({
     firstName: "kanyon",
     lastName: "mcgahey",
@@ -259,7 +263,7 @@ function getLocationsRepairMemberObjectIds({ entityId, admission } = {}) {
     return [];
   }
 
-  const memberIds = [IXI_AOS_LOCATIONS_REPAIR_2026_09_14.ripperObjectId];
+  const memberIds = [];
   const kanyonMatches = [...admission.objectsById.values()].filter(object => {
     const person = getRepairPersonName(object);
     return (
@@ -451,6 +455,7 @@ const POCKET_TARGETS = [
   const equipmentBoardPinKeyRef = useRef("");
   const rootSystemIndexBoardPinKeyRef = useRef("");
   const invalidSystemIndexMembershipCleanupKeyRef = useRef("");
+  const ripperLocationsRepairKeyRef = useRef("");
   
   const [activeDndId, setActiveDndId] = useState("");
   const {
@@ -1152,6 +1157,141 @@ useEffect(() => {
   equipmentIndex?.objectId,
   aosRailProjections,
   workspaceSystemIndexes
+]);
+
+useEffect(() => {
+  if (!workspaceSessionReady) return undefined;
+
+  if (
+    String(aosEntity?.entityId || "").trim() !==
+    IXI_AOS_LOCATIONS_REPAIR_2026_09_14.entityId
+  ) {
+    return undefined;
+  }
+
+  const relationshipId =
+    IXI_AOS_LOCATIONS_REPAIR_2026_09_14.ripperLocationsRelationshipId;
+  const repairKey = [
+    IXI_AOS_LOCATIONS_REPAIR_2026_09_14.entityId,
+    relationshipId
+  ].join(":");
+
+  if (ripperLocationsRepairKeyRef.current === repairKey) {
+    return undefined;
+  }
+
+  let sourceObjectId = "";
+  let targetObjectId = "";
+  try {
+    sourceObjectId = aosWorkspaceAdmission.resolveObjectId(
+      IXI_AOS_LOCATIONS_REPAIR_2026_09_14.ripperObjectId
+    );
+    targetObjectId = aosWorkspaceAdmission.resolveObjectId(
+      IXI_AOS_LOCATIONS_REPAIR_2026_09_14.locationsObjectId
+    );
+  } catch (error) {
+    console.error("IXI AOS EXACT RIPPER RELEASE ADMISSION FAILED:", error);
+    return undefined;
+  }
+
+  if (
+    sourceObjectId !== IXI_AOS_LOCATIONS_REPAIR_2026_09_14.ripperObjectId ||
+    targetObjectId !== IXI_AOS_LOCATIONS_REPAIR_2026_09_14.locationsObjectId
+  ) {
+    return undefined;
+  }
+
+  ripperLocationsRepairKeyRef.current = repairKey;
+  let cancelled = false;
+
+  const projectedMembership = {
+    relationshipId,
+    sourceObjectId,
+    targetObjectId,
+    behaviorId: IXI_AOS_RAIL_MEMBERSHIP_BEHAVIOR_ID,
+    status: "active"
+  };
+
+  const removeConfirmedProjection = () => {
+    if (cancelled) return;
+    setAosRelationships(current => (current || []).filter(item =>
+      String(getAosRelationshipRecord(item)?.relationshipId || "").trim() !==
+      relationshipId
+    ));
+    setAosRailProjections(current =>
+      removeAosRailProjectionMemberships({
+        railProjections: current,
+        memberships: [projectedMembership],
+        admission: aosWorkspaceAdmission
+      })
+    );
+  };
+
+  async function releaseExactRipperLocationsRelationship() {
+    const readExactActiveRelationship = async () => {
+      const readback = await fetchMosObjectRelationships(sourceObjectId, {
+        direction: "outgoing",
+        status: "active"
+      });
+      return getExactActiveAosRelationship({
+        relationships: readback?.relationships,
+        relationshipId,
+        sourceObjectId,
+        targetObjectId,
+        admission: aosWorkspaceAdmission
+      });
+    };
+
+    const relationship = await readExactActiveRelationship();
+    if (relationship) {
+      const expectedRevision = Number(relationship?.revision);
+      if (!Number.isInteger(expectedRevision)) {
+        const error = new Error(
+          "The exact Ripper to Locations relationship has no canonical revision."
+        );
+        error.code = "IXI_AOS_EXACT_RIPPER_RELEASE_REVISION_REQUIRED";
+        throw error;
+      }
+
+      await endMosRelationship({
+        relationshipId,
+        expectedRevision,
+        commandId: createMosCommandId("aos-release-ripper-from-locations"),
+        reason: "aos-exact-ripper-direct-locations-membership-repair",
+        metadata: {
+          source: "aos-work",
+          preserveAllOtherRelationships: true
+        }
+      });
+    }
+
+    const remainingRelationship = await readExactActiveRelationship();
+    if (remainingRelationship) {
+      const error = new Error(
+        "IX Core still reports the exact Ripper to Locations relationship active."
+      );
+      error.code = "IXI_AOS_EXACT_RIPPER_RELEASE_READBACK_REQUIRED";
+      throw error;
+    }
+
+    removeConfirmedProjection();
+  }
+
+  void releaseExactRipperLocationsRelationship().catch(error => {
+    ripperLocationsRepairKeyRef.current = "";
+    console.error("IXI AOS EXACT RIPPER RELEASE FAILED:", error);
+  });
+
+  return () => {
+    cancelled = true;
+    if (ripperLocationsRepairKeyRef.current === repairKey) {
+      ripperLocationsRepairKeyRef.current = "";
+    }
+  };
+}, [
+  workspaceSessionReady,
+  aosWorkspaceAdmission,
+  aosEntity?.entityId
 ]);
 
 useEffect(() => {
