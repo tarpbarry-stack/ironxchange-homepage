@@ -739,7 +739,7 @@
 .shell[data-ui-rebuild] .periodControl > span { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .shell[data-ui-rebuild] .periodControl { display: block; }
 .shell[data-ui-rebuild] .desktop { min-height: 0; flex: 1; overflow: hidden; }
-.shell[data-ui-rebuild] .main { min-height: 0; padding: 8px 10px; display: flex; flex-direction: column; overflow-y: auto; }
+.shell[data-ui-rebuild] .main { min-height: 0; padding: 8px 10px 4px; display: flex; flex-direction: column; overflow-y: auto; }
 .shell[data-ui-rebuild] .main[data-history-active="true"] { overflow-y: hidden; }
 .shell[data-ui-rebuild] .main > * { flex-shrink: 0; }
 .shell[data-ui-rebuild] .pageHeader { min-height: 48px; }
