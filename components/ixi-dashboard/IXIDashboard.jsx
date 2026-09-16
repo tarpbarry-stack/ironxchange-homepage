@@ -34,11 +34,12 @@ export default function IXIDashboard() {
   const [ownedStatus, setOwnedStatus] = useState(pending), [relatedStatus, setRelatedStatus] = useState(pending);
   const [savedIds, setSavedIds] = useState([]), [states, setStates] = useState({});
   const [inquiries, setInquiries] = useState(null), [openKeys, setOpenKeys] = useState([]);
-  const [selectedKey, setSelectedKey] = useState(""), [size, setSize] = useState("work");
+  const [selectedKey, setSelectedKey] = useState(""), [size, setSize] = useState("fit");
   const [ownedFilter, setOwnedFilter] = useState("all"), [leftQuery, setLeftQuery] = useState(""), [rightQuery, setRightQuery] = useState("");
   const [hidden, setHidden] = useState({ left: false, right: false }), [mobileRail, setMobileRail] = useState("");
   const [dirtyKeys, setDirtyKeys] = useState(new Set()), [notice, setNotice] = useState("");
   const [revision, setRevision] = useState(0), [scroll, setScroll] = useState(0), [restored, setRestored] = useState(false);
+  const scrollPosition = useRef(0);
   const initialBoard = useRef(false), dirtyRef = useRef(dirtyKeys), stateRef = useRef(states), storageRef = useRef(null);
   const writeQueues = useRef(new Map()), mediaRequests = useRef(new Set()), mounted = useRef(true);
   dirtyRef.current = dirtyKeys; stateRef.current = states;
@@ -72,7 +73,7 @@ export default function IXIDashboard() {
       const saved = restoreDashboard(JSON.parse(localStorage.getItem(storageKey) || "null"));
       if (saved) {
         setOpenKeys(saved.open); setStates(saved.states); setSize(saved.size); setOwnedFilter(saved.ownedFilter);
-        setLeftQuery(saved.leftQuery); setRightQuery(saved.rightQuery); setScroll(saved.scroll); initialBoard.current = true;
+        setLeftQuery(saved.leftQuery); setRightQuery(saved.rightQuery); setScroll(saved.scroll); scrollPosition.current = saved.scroll; initialBoard.current = true;
       }
     } catch { /* A damaged local layout must not prevent account access. */ }
     setRestored(true);
@@ -154,7 +155,7 @@ export default function IXIDashboard() {
     }
   }, [openMachines]);
 
-  storageRef.current = { version: 1, open: openKeys, states: Object.fromEntries(Object.entries(states).map(([id, value]) => [id, viewPatch(value)])), size, ownedFilter, leftQuery, rightQuery, scroll };
+  storageRef.current = { version: 1, open: openKeys, states: Object.fromEntries(Object.entries(states).map(([id, value]) => [id, viewPatch(value)])), size, ownedFilter, leftQuery, rightQuery, scroll: scrollPosition.current };
   const persistView = useCallback(() => {
     if (!storageKey || !restored) return;
     try { localStorage.setItem(storageKey, JSON.stringify(storageRef.current)); } catch { setNotice("This browser couldn’t save your board layout."); }
@@ -220,8 +221,8 @@ export default function IXIDashboard() {
     <div className="dash-stats" aria-label="Account overview">{stats.map(stat => { const Tag = stat.href ? "a" : stat.action ? "button" : "div"; return <Tag key={stat.label} href={stat.href} onClick={stat.action} className="dash-stat" title={stat.detail}><span>{stat.label}</span><strong>{stat.value}</strong><small>{stat.detail}</small></Tag>; })}</div>
     {auth.loading ? <div className="dash-page-message" role="status">Opening your dashboard…</div> : auth.error ? <div className="dash-page-message" role="alert"><h2>{auth.error}</h2><a href="/login?next=%2Faccount">SIGN IN</a><button onClick={() => setAuthRevision(value => value + 1)}>TRY AGAIN</button></div> : <main className={`dash-workspace ${hidden.left ? "dash-hide-left" : ""} ${hidden.right ? "dash-hide-right" : ""} ${mobileRail ? `dash-mobile-${mobileRail}` : ""}`}>
       <DashboardMachineRail title="OWNED" side="left" items={visibleOwned} loading={ownedStatus.loading} error={ownedStatus.error} query={leftQuery} onQuery={setLeftQuery} filter={ownedFilter} onFilter={setOwnedFilter} openKeys={openKeys} selectedKey={selectedKey} onSelect={setSelectedKey} onOpen={openMachine} onRetry={() => setRevision(value => value + 1)} onHide={() => hideRail("left")} />
-      <section className="dash-board" aria-label="Working board"><div className="dash-board-toolbar"><button className={`dash-rail-toggle ${!hidden.left ? "active" : ""}`} onClick={() => toggleRail("left")}>‹ OWNED</button><div className="dash-board-title"><strong>WORKING BOARD</strong><span>{openMachines.length} OPEN</span></div><div className="dash-board-options"><label>SIZE <select aria-label="Card size" value={size} onChange={event => setSize(event.target.value)}><option value="natural">100%</option><option value="work">120%</option><option value="focus">140%</option></select></label><button className="dash-icon-button" aria-label="Refresh machines" title={dirtyKeys.size ? "Save changes before refreshing" : "Refresh machines"} disabled={Boolean(dirtyKeys.size)} onClick={() => setRevision(value => value + 1)}>↻</button></div><button className={`dash-rail-toggle ${!hidden.right ? "active" : ""}`} onClick={() => toggleRail("right")}>RELATIONSHIPS ›</button></div>
-      <Board machines={openMachines} ownedKeys={ownedKeys} states={states} onPatch={updateState} size={size} onReorder={setOpenKeys} onReturn={returnToRail} selectedKey={selectedKey} onSelect={setSelectedKey} getSellerProps={getSellerListingCardProps} onDirty={markDirty} dirtyKeys={dirtyKeys} onSaved={clearDirty} toggleSave={toggleSave} savedIds={savedIds} scrollTop={scroll} onScroll={setScroll} />
+      <section className="dash-board" aria-label="Working board"><div className="dash-board-toolbar"><button className={`dash-rail-toggle ${!hidden.left ? "active" : ""}`} onClick={() => toggleRail("left")}>‹ OWNED</button><div className="dash-board-title"><strong>WORKING BOARD</strong><span>{openMachines.length} OPEN</span></div><div className="dash-board-options"><label>SIZE <select aria-label="Card size" value={size} onChange={event => setSize(event.target.value)}><option value="fit">FIT</option><option value="natural">100%</option><option value="work">120%</option><option value="focus">140%</option></select></label><button className="dash-icon-button" aria-label="Refresh machines" title={dirtyKeys.size ? "Save changes before refreshing" : "Refresh machines"} disabled={Boolean(dirtyKeys.size)} onClick={() => setRevision(value => value + 1)}>↻</button></div><button className={`dash-rail-toggle ${!hidden.right ? "active" : ""}`} onClick={() => toggleRail("right")}>RELATIONSHIPS ›</button></div>
+      <Board machines={openMachines} ownedKeys={ownedKeys} states={states} onPatch={updateState} size={size} onReorder={setOpenKeys} onReturn={returnToRail} selectedKey={selectedKey} onSelect={setSelectedKey} getSellerProps={getSellerListingCardProps} onDirty={markDirty} dirtyKeys={dirtyKeys} onSaved={clearDirty} toggleSave={toggleSave} savedIds={savedIds} scrollTop={scroll} onScroll={value => { scrollPosition.current = value; storageRef.current.scroll = value; }} />
       <footer className="dash-board-footer"><span><i /> {dirtyKeys.size ? `${dirtyKeys.size} MACHINE${dirtyKeys.size > 1 ? "S" : ""} WITH UNSAVED CHANGES` : "YOUR IXI WORKING SPACE"}</span><span>OPEN · WORK · RETURN</span></footer></section>
       <DashboardMachineRail title="RELATIONSHIPS" side="right" items={related} loading={relatedStatus.loading} error={relatedStatus.error} query={rightQuery} onQuery={setRightQuery} openKeys={openKeys} selectedKey={selectedKey} onSelect={setSelectedKey} onOpen={openMachine} onRetry={() => setRevision(value => value + 1)} onHide={() => hideRail("right")} />
     </main>}

@@ -29,7 +29,7 @@ test("dashboard movement and persisted layout cannot write ownership, identity o
   const restored = restoreDashboard({ version: 1, open: [dashboardKey(owned), dashboardKey(owned), null], states: { [owned.id]: dangerous }, size: "huge", ownedFilter: "sold", scroll: -3 });
   assert.deepEqual(restored.open, [dashboardKey(owned)]);
   assert.deepEqual(restored.states[owned.id], { face: 2, transactOpen: true });
-  assert.equal(restored.size, "work"); assert.equal(restored.ownedFilter, "all"); assert.equal(restored.scroll, 0);
+  assert.equal(restored.size, "fit"); assert.equal(restored.ownedFilter, "all"); assert.equal(restored.scroll, 0);
   assert.equal(restoreDashboard({ version: 999 }), null);
 });
 test("incomplete hydration preserves the board; complete hydration removes missing machines", () => {
