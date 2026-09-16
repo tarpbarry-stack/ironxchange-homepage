@@ -633,16 +633,23 @@
 .workspaceMenu nav button span { color: #99a69d; }
 .workspaceMenu > a { display: none; }
 .workspaceMenu[open] > a { display: block; position: absolute; top: 0; transform: translateY(494px); z-index: 1; padding: 12px; font-size: 12px; color: #ffcf38; background: #111713; width: 280px; }
-.shell[data-ui-rebuild] .desktop { grid-template-columns: 222px minmax(0, 1fr) 254px; }
+.shell[data-ui-rebuild] .desktop { grid-template-columns: 244px minmax(0, 1fr) 254px; }
 .shell[data-ui-rebuild] .navigation { top: var(--tx-bar-height); height: calc(100dvh - var(--tx-bar-height) - 28px); padding: 10px; display: flex; flex-direction: column; overflow: hidden; }
 .shell[data-ui-rebuild] .objectDirectory { margin: 0; min-height: 0; flex: 1; display: flex; flex-direction: column; }
-.shell[data-ui-rebuild] .objectDirectoryList { flex: 1; min-height: 0; max-height: none; overflow: auto; }
+.shell[data-ui-rebuild] .objectDirectoryList { flex: 1; min-height: 0; max-height: none; padding: 3px; gap: 0; overflow: auto; }
 .shell[data-ui-rebuild] .objectDirectorySelect { min-height: 44px; font-size: 14px; }
-.shell[data-ui-rebuild] .objectTile { margin: 0 0 8px; padding: 8px; }
-.shell[data-ui-rebuild] .objectTileTitle { font-size: 14px; line-height: 1.3; white-space: normal; }
-.shell[data-ui-rebuild] .objectTileField { grid-template-columns: 20px minmax(0, 1fr); gap: 3px; font-size: 12px; }
-.shell[data-ui-rebuild] .objectTileMedia { aspect-ratio: 4 / 3; min-height: 116px; }
-.shell[data-ui-rebuild] .objectTileMark { min-height: 60px; }
+.shell[data-ui-rebuild] .objectTile { margin: 0 0 10px; padding: 7px 7px 0; gap: 4px; border: 1px solid #303a2e; border-radius: 3px; color: #e9ede4; background: #171d17; }
+.shell[data-ui-rebuild] .objectTile:hover { background: #20261b; border-color: #807538; }
+.shell[data-ui-rebuild] .objectTile[data-active="true"] { border-color: var(--gold); box-shadow: inset 0 0 0 1px #ffc40044; }
+.objectTileImage { position: relative; display: block; width: 100%; aspect-ratio: 1.8; overflow: hidden; background: #0c120e; }
+.shell[data-ui-rebuild] .objectTileMedia, .shell[data-ui-rebuild] .objectTileMark { display: grid; width: 100%; height: 100%; min-height: 0; aspect-ratio: auto; border-radius: 0; background-color: #0c120e; }
+.shell[data-ui-rebuild] .objectTileMedia[data-context-kind="machine"] { background-size: cover; }
+.objectTileSelected { position: absolute; top: 5px; left: 5px; padding: 4px 5px; background: #eac100; color: #1a1a0d; font-size: 12px; font-weight: 850; letter-spacing: .06em; }
+.shell[data-ui-rebuild] .objectTileTitle { margin-top: 5px; font-size: 14px; line-height: 1.35; white-space: normal; }
+.shell[data-ui-rebuild] .objectTileField { grid-template-columns: 19px minmax(0, 1fr); gap: 3px; color: #a8b0a4; font-size: 12px; }
+.objectTileAction { display: flex; align-items: center; justify-content: space-between; gap: 5px; margin: 5px -7px 0; padding: 8px; border-top: 1px solid #343d2c; background: #1d2518; color: #d6daba; font-size: 12px; font-weight: 800; letter-spacing: .04em; }
+.objectTileAction > span { color: var(--gold); font-size: 14px; }
+.objectTile:hover .objectTileAction, .objectTile:focus-visible .objectTileAction { background: #2d3018; color: var(--gold); }
 .shell[data-ui-rebuild] .navFooter { padding: 8px 0 0; margin: 0; }
 .shell[data-ui-rebuild] .main { padding: 12px 14px 32px; }
 .shell[data-ui-rebuild] .pageHeader { min-height: 52px; gap: 8px; }
@@ -652,10 +659,10 @@
 .shell[data-ui-rebuild] .scopeStrip > div { min-width: 0; }
 .shell[data-ui-rebuild] .contextPanel { top: var(--tx-bar-height); height: calc(100dvh - var(--tx-bar-height) - 28px); padding: 10px; display: flex; flex-direction: column; overflow: hidden; }
 .shell[data-ui-rebuild] .contextTitle { padding: 0 0 8px; flex-shrink: 0; font-size: 12px; }
-.shell[data-ui-rebuild] .identityCard { margin-top: 0; flex-shrink: 0; }
-.shell[data-ui-rebuild] .identityMedia { min-height: 105px; height: 105px; }
-.shell[data-ui-rebuild] .identityMark { min-height: 64px; }
-.shell[data-ui-rebuild] .identityCard > div:last-child { padding: 8px; }
+.shell[data-ui-rebuild] .identityCard { margin-top: 0; padding: 7px 7px 0; flex-shrink: 0; border-color: #303a2e; border-radius: 3px; background: #171d17; }
+.shell[data-ui-rebuild] .identityMedia { min-height: 0; height: auto; aspect-ratio: 1.8; background-color: #0c120e; }
+.shell[data-ui-rebuild] .identityMark { min-height: 0; aspect-ratio: 1.8; }
+.shell[data-ui-rebuild] .identityCard > div:last-child { padding: 9px 0 4px; border-top: 0; }
 .shell[data-ui-rebuild] .identityCard h2 { white-space: normal; overflow-wrap: anywhere; margin: 4px 0; font-size: 17px; line-height: 1.3; }
 .shell[data-ui-rebuild] .identityCard h2 button { all: unset; cursor: pointer; }
 .shell[data-ui-rebuild] .identityCard p { font-size: 12px; }
@@ -687,8 +694,8 @@
 .compactContext { display: none; }
 .searchStatus { position: absolute; top: 100%; left: 0; z-index: 30; background: #101713; color: #c4cec7; font-size: 12px; }
 .searchStatus:empty { display: none; }
-@media (min-width: 1800px) { .shell[data-ui-rebuild] .desktop { grid-template-columns: 260px minmax(0, 1fr) 300px; } .shell[data-ui-rebuild] .main { padding-inline: 24px; } .shell[data-ui-rebuild] .identityMedia { height: 150px; } }
-@media (max-width: 1450px) and (min-width: 1280px) { .shell[data-ui-rebuild] .topbar { grid-template-columns: 150px 118px 136px minmax(180px, 1fr) auto auto auto; } .shell[data-ui-rebuild] .entityScope { display: none; } .shell[data-ui-rebuild] .main { padding: 8px 10px 28px; } .shell[data-ui-rebuild] .desktop { grid-template-columns: 214px minmax(0, 1fr) 246px; } }
+@media (min-width: 1800px) { .shell[data-ui-rebuild] .desktop { grid-template-columns: 280px minmax(0, 1fr) 280px; } .shell[data-ui-rebuild] .main { padding-inline: 24px; } }
+@media (max-width: 1450px) and (min-width: 1280px) { .shell[data-ui-rebuild] .topbar { grid-template-columns: 150px 118px 136px minmax(180px, 1fr) auto auto auto; } .shell[data-ui-rebuild] .entityScope { display: none; } .shell[data-ui-rebuild] .main { padding: 8px 10px 28px; } .shell[data-ui-rebuild] .desktop { grid-template-columns: 230px minmax(0, 1fr) 246px; } }
 @media (max-width: 1279px) {
   .shell[data-ui-rebuild] { --tx-bar-height: 112px; }
   .shell[data-ui-rebuild] .desktop { grid-template-columns: minmax(0, 1fr) 250px; }
