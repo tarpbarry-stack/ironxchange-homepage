@@ -73,6 +73,8 @@ import {
   mergeAosCanonicalObject
 } from "../../lib/mos/mergeAosCanonicalObject.mjs";
 
+import { acceptIXIAosCanonicalObject } from "../../components/ixi-aos/card-runtime/IXIAosFoundationEngine.mjs";
+
 import IXISystemIndexCard
   from "../../components/ixi-mos/IXISystemIndexCard";
 
@@ -1379,7 +1381,10 @@ const saveAosWorkspaceObject = useCallback(async (payload = {}) => {
       throw Object.assign(new Error("The saved Object is not available in the refreshed workspace."),
         { code: "IXI_AOS_CANONICAL_READBACK_REQUIRED" });
     }
-    const acceptedRefreshed = mergeAosCanonicalObject(payload?.object || canonical, refreshed);
+    // Another session can update membership between the Object GET and the
+    // environment GET. Confirm it again before changing workspace projections.
+    const confirmedRefreshed = acceptIXIAosCanonicalObject(command, { object: refreshed });
+    const acceptedRefreshed = mergeAosCanonicalObject(payload?.object || canonical, confirmedRefreshed);
     setAosObjects(previous => preserveOpenInventoryTransactions(previous,
       environment.objects.map(object => object.objectId === objectId ? acceptedRefreshed : object),
       inventoryCardStateRef.current));

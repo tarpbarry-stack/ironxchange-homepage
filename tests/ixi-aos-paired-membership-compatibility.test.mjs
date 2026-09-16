@@ -10,7 +10,7 @@ import { commitMosObjectCommand, fetchMosObject } from "../lib/mos/ixiMosBrowser
 import { assertAosObjectMutationRequest } from "../lib/server/aos/ixiAosObjectMutationPolicy.mjs";
 
 const coreRoot = process.env.IXI_CORE_CONTRACT_ROOT;
-test("paired classification survives response loss, reads persisted state, and rejects another Entity", {
+test("paired classification and index setup survive response loss, detect concurrent policy changes, and reject another Entity", {
   skip: coreRoot ? false : "Run the required paired gate with IXI_CORE_CONTRACT_ROOT."
 }, async t => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "ixi-classification-paired-"));
@@ -35,6 +35,11 @@ test("paired classification survives response loss, reads persisted state, and r
   const other = ensureAosAccount({ ownerUserId: "classification-other", displayName: "Other Entity" });
   const member = provisionAosObject({ commandId: "existing-generic-member", entityId: owner.entity.entityId,
     objectType: "generic", displayName: "Customer chosen name", actorId: "classification-owner" }).object;
+  const disabledPolicy = { schema: "aos.system-index-membership.v1", enabled: false,
+    defaultWorkspaceHome: false, allowedObjectTypes: [], allowedDefinitionIds: [] };
+  const index = provisionAosObject({ commandId: "customer-index", entityId: owner.entity.entityId,
+    objectType: "system-index", displayName: "Customer index", actorId: "classification-owner",
+    metadata: { systemIndexMembershipPolicy: disabledPolicy } }).object;
   const census = () => ({ identities: listObjects({ status: null }).map(object => [object.objectId, object.identities]),
     passports: readPassportRecords() });
   const before = census();
@@ -51,10 +56,16 @@ test("paired classification survives response loss, reads persisted state, and r
     fs.rmSync(root, { recursive: true, force: true });
   });
   let principalId = "classification-owner", entityId = owner.entity.entityId, loseResponse = true;
+  let beforeRead = null;
   const calls = [];
   globalThis.fetch = async (url, options = {}) => {
     const relativePath = String(url).replace(/^\/api\/aos\/mos/, "");
     const method = options.method || "GET";
+    if (method === "GET" && beforeRead) {
+      const concurrentSave = beforeRead;
+      beforeRead = null;
+      await concurrentSave();
+    }
     const body = options.body ? JSON.parse(options.body) : undefined;
     const normalizedHeaders = Object.fromEntries(Object.entries(options.headers || {}).map(([key, value]) => [key.toLowerCase(), value]));
     assertAosObjectMutationRequest({ method, path: relativePath, body, headers: normalizedHeaders });
@@ -98,4 +109,53 @@ test("paired classification survives response loss, reads persisted state, and r
   await assert.rejects(commitMosObjectCommand(forbidden), error => [403, 404].includes(error.status));
   await assert.rejects(fetchMosObject(member.objectId), error => [403, 404].includes(error.status));
   assert.deepEqual(getObject(member.objectId), persistedBeforeDeniedRequest);
+
+  principalId = "classification-owner";
+  entityId = owner.entity.entityId;
+  const requestedPolicy = { ...disabledPolicy, enabled: true, allowedObjectTypes: ["person"] };
+  const setupSession = createIXIAosEditSession(index);
+  const setup = createIXIAosObjectUpdateCommand({ session: setupSession,
+    draft: { ...setupSession.draft, metadata: { ...setupSession.draft.metadata, systemIndexMembershipPolicy: requestedPolicy } },
+    commandId: "configure-index-once" });
+  loseResponse = true;
+  await assert.rejects(commitMosObjectCommand(setup), { code: "MOS_GATEWAY_NETWORK_ERROR" });
+  assert.deepEqual(getObject(index.objectId).metadata.systemIndexMembershipPolicy, requestedPolicy);
+  const confirmed = await commitMosObjectCommand(setup);
+  assert.equal(confirmed.replayed, true);
+  assert.equal(confirmed.object.revision, index.revision + 1);
+  assert.deepEqual(confirmed.object.metadata.systemIndexMembershipPolicy, requestedPolicy);
+
+  const policyModule = require("./mos/relationships/aosSystemIndexMembershipPolicy.js");
+  assert.equal(policyModule.evaluateAosRailMembership({ sourceObject: getObject(member.objectId), targetObject: confirmed.object }).allowed, true);
+  assert.equal(policyModule.evaluateAosRailMembership({ sourceObject: { objectType: "machine" }, targetObject: confirmed.object }).allowed, false);
+  assert.deepEqual(census(), before);
+
+  const sessionA = createIXIAosEditSession(confirmed.object);
+  const saveA = createIXIAosObjectUpdateCommand({ session: sessionA,
+    draft: { ...sessionA.draft, displayName: "Name from session A" }, commandId: "session-a-save" });
+  beforeRead = async () => {
+    // A second authorized client changes the policy after A's durable PATCH,
+    // but before A's GET. Both saves and the final read use the signed route.
+    const latest = await fetchMosObject(index.objectId);
+    const sessionB = createIXIAosEditSession(latest.object);
+    const saveB = createIXIAosObjectUpdateCommand({ session: sessionB, draft: { ...sessionB.draft,
+      metadata: { ...sessionB.draft.metadata, systemIndexMembershipPolicy: { ...requestedPolicy, allowedObjectTypes: ["location"] } }
+    }, commandId: "session-b-save" });
+    await commitMosObjectCommand(saveB);
+  };
+  await assert.rejects(commitMosObjectCommand(saveA), { code: "IXI_AOS_MEMBERSHIP_POLICY_READBACK_MISMATCH", status: 409 });
+  const afterConcurrentSave = getObject(index.objectId);
+  assert.deepEqual(afterConcurrentSave.metadata.systemIndexMembershipPolicy.allowedObjectTypes, ["location"]);
+  await assert.rejects(commitMosObjectCommand(saveA), { code: "IXI_AOS_MEMBERSHIP_POLICY_READBACK_MISMATCH" });
+  assert.deepEqual(getObject(index.objectId), afterConcurrentSave, "Retry must not overwrite the other session or create another revision");
+
+  // Explicit rebase/review creates a new revision-protected command.
+  const rebased = createIXIAosEditSession((await fetchMosObject(index.objectId)).object);
+  const reviewed = createIXIAosObjectUpdateCommand({ session: rebased, draft: { ...rebased.draft,
+    metadata: { ...rebased.draft.metadata, systemIndexMembershipPolicy: requestedPolicy }
+  }, commandId: "reviewed-policy-save" });
+  const resolved = await commitMosObjectCommand(reviewed);
+  assert.deepEqual(resolved.object.metadata.systemIndexMembershipPolicy, requestedPolicy);
+  assert.equal(resolved.object.revision, afterConcurrentSave.revision + 1);
+  assert.deepEqual(census(), before);
 });
