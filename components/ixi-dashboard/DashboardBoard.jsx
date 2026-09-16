@@ -12,12 +12,12 @@ const OwnedCard = dynamic(() => import("../ixi-machine-card/private/IXIOwnedPriv
 
 export default function DashboardBoard({ machines, ownedKeys, states, onPatch, size, onReorder, onReturn, selectedKey, onSelect, getSellerProps, onDirty, dirtyKeys, onSaved, toggleSave, savedIds, onScroll, scrollTop }) {
   const boardRef = useRef(null);
-  const [width, setWidth] = useState(900);
+  const [{ width, height }, setBounds] = useState({ width: 900, height: 600 });
   const restoredScroll = useRef(false);
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }), useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }));
   useEffect(() => {
     const element = boardRef.current;
-    const observer = new ResizeObserver(entries => setWidth(entries[0].contentRect.width));
+    const observer = new ResizeObserver(entries => setBounds({ width: entries[0].contentRect.width, height: entries[0].contentRect.height }));
     observer.observe(element);
     return () => observer.disconnect();
   }, []);
@@ -41,7 +41,7 @@ export default function DashboardBoard({ machines, ownedKeys, states, onPatch, s
             const transactionDepth = state.transactOpen ? Math.max(1, Number(state.transactConsoleDepth) || 1) : 1;
             const nativeWidth = regularDepth * 300 - (owned ? (regularDepth - 1) * 2 : 0) + (transactionDepth - 1) * 298;
             const nativeHeight = owned || getMachineCardFamily(item) === "auction" || state.transactOpen ? 475 : 400;
-            const scale = Math.min(desiredScale, Math.max(0.25, (width - 32) / nativeWidth));
+            const scale = Math.min(size === "fit" ? Math.max(0.65, Math.min(1.2, (height - 90) / nativeHeight)) : desiredScale, Math.max(0.25, (width - 32) / nativeWidth));
             const cardContext = owned ? "inventory" : "workspace";
             const sellerProps = owned ? getSellerProps(item) : {};
             const patch = (_id, change) => onPatch(id, change);

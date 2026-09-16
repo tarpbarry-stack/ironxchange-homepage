@@ -49,7 +49,7 @@ export function restoreDashboard(raw) {
     version: 1,
     open: Array.isArray(raw.open) ? [...new Set(raw.open.filter(value => typeof value === "string"))].slice(0, 100) : [],
     states: Object.fromEntries(Object.entries(states).filter(([key]) => !["__proto__", "constructor", "prototype"].includes(key)).map(([key, value]) => [key, viewPatch(value || {})])),
-    size: ["natural", "work", "focus"].includes(raw.size) ? raw.size : "work",
+    size: ["fit", "natural", "work", "focus"].includes(raw.size) ? raw.size : "fit",
     ownedFilter: ["all", "live", "private", "auction"].includes(raw.ownedFilter) ? raw.ownedFilter : "all",
     leftQuery: String(raw.leftQuery || "").slice(0, 200),
     rightQuery: String(raw.rightQuery || "").slice(0, 200),
