@@ -2,7 +2,7 @@ import { useEffect,useRef,useState } from "react";
 import { salesRequest,STAGES,todayLocal } from "./salesDeskClient";
 
 function Field({label,children,wide=false}) { return <label className={wide ? "sales-field wide" : "sales-field"}><span>{label}</span>{children}</label>; }
-export default function SalesDeskEditor({editor,people,onClose,onSaved,onQuote,onOpenMachines}) {
+export default function SalesDeskEditor({editor,people,boardMachines=[],onClose,onSaved,onQuote,onOpenMachines}) {
   const dialog=useRef(null),saveLock=useRef(false),command=useRef(null);
   const [value,setValue]=useState(editor.record),[dirty,setDirty]=useState(false),[busy,setBusy]=useState(false),[error,setError]=useState("");
   const [contactQuery,setContactQuery]=useState(""),[contacts,setContacts]=useState([]),[notes,setNotes]=useState([]),[note,setNote]=useState("");
@@ -54,7 +54,7 @@ export default function SalesDeskEditor({editor,people,onClose,onSaved,onQuote,o
           <Field label="STAGE"><select value={value.stage || "inquiry"} onChange={e=>patch("stage",e.target.value)}>{STAGES.map(([id,label])=><option key={id} value={id}>{label}</option>)}</select></Field><Field label="NEXT ACTION DATE">{input("dueDate","date")}</Field>
           <Field label="NEXT ACTION" wide>{input("nextAction","text",500)}</Field><Field label="TERMS / WORKING NOTES" wide><textarea rows={3} maxLength={3000} value={value.terms || ""} onChange={e=>patch("terms",e.target.value)}/></Field>
           {value.stage==="lost" && <Field label="LOST REASON *" wide>{input("lostReason","text",500,true)}</Field>}
-          <div className="sales-deal-machines wide"><span className="sales-eyebrow">MACHINES IN THIS DEAL</span>{value.machines?.length ? value.machines.map(machine=><div key={machine.key}><span><strong>{machine.title}</strong><small>{machine.passportId}</small></span><button type="button" onClick={()=>patch("machines",value.machines.filter(m=>m.key!==machine.key))} aria-label={`Remove ${machine.title} from this deal`}>×</button></div>) : <p>No machines attached. Open machines on the board before creating a deal.</p>}</div>
+          <div className="sales-deal-machines wide"><span className="sales-eyebrow">MACHINES IN THIS DEAL</span><button type="button" disabled={!boardMachines.length} onClick={()=>patch("machines",[...new Map([...(value.machines || []),...boardMachines].map(machine=>[machine.key,machine])).values()])}>ADD OPEN BOARD MACHINES</button>{value.machines?.length ? value.machines.map(machine=><div key={machine.key}><span><strong>{machine.title}</strong><small>{machine.passportId}</small></span><button type="button" onClick={()=>patch("machines",value.machines.filter(m=>m.key!==machine.key))} aria-label={`Remove ${machine.title} from this deal`}>×</button></div>) : <p>No machines attached. Open machines on the board before creating a deal.</p>}</div>
         </>}
         {kind==="tasks" && <><Field label="FOLLOW-UP *" wide>{input("title","text",250,true)}</Field><Field label="DUE DATE *">{input("dueDate","date",10,true)}</Field><Field label="STATUS"><select value={value.completed ? "done" : "open"} onChange={e=>patch("completed",e.target.value==="done")}><option value="open">OPEN</option><option value="done">COMPLETED</option></select></Field></>}
         {kind==="boards" && <><Field label="BOARD NAME *" wide>{input("title","text",100,true)}</Field><p className="wide">{value.keys?.length || 0} machines will be saved in this order.</p></>}

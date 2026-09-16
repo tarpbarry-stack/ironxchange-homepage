@@ -31,7 +31,7 @@ export default function SalesDeskSurface({initial,dashboardClass,workspace:w}) {
   },[]);
   useEffect(()=>{if(comparison)compareRef.current?.showModal();},[comparison]);
   const refreshSummary=()=>salesRequest(`bootstrap?today=${todayLocal()}`).then(result=>setSummary(result.summary)).catch(()=>{});
-  const changeTab=next=>{setQuery("");setTab(next);setHidden(v=>({...v,right:false}));};
+  const changeTab=next=>{setQuery("");setTab(next);setHidden(v=>({...v,right:false}));if(window.innerWidth<1000)setMobile("right");};
   const toggleRail=side=>{if(window.innerWidth<1000)setMobile(previous=>previous===side ? "" : side);else setHidden(previous=>({...previous,[side]:!previous[side]}));};
   const openEditor=async(kind,record=null)=>{
     const seq=++detailSequence.current;
@@ -109,7 +109,7 @@ export default function SalesDeskSurface({initial,dashboardClass,workspace:w}) {
       </aside>
     </main>
     <footer className="sales-footer"><span><i/> IXI SALES DESK</span><span>{initial.context.company}</span><span>FINANCIAL RECORDS · TRAN$ACT ↗</span></footer>
-    {editor && <SalesDeskEditor key={`${editor.kind}:${editor.record.id || "new"}`} editor={editor} people={initial.people || []} onClose={()=>setEditor(null)} onSaved={onSaved} onQuote={prepareQuote} onOpenMachines={deal=>{openKeys(deal.machines.map(m=>m.key));setEditor(null);}}/>}
+    {editor && <SalesDeskEditor key={`${editor.kind}:${editor.record.id || "new"}`} editor={editor} people={initial.people || []} boardMachines={w.openMachines.map(machineReference)} onClose={()=>setEditor(null)} onSaved={onSaved} onQuote={prepareQuote} onOpenMachines={deal=>{openKeys(deal.machines.map(m=>m.key));setEditor(null);}}/>}
     {quote && <Quote {...quote} actor={initial.context} onClose={()=>setQuote(null)} onSaved={()=>{refreshSummary();w.setNotice("Quote saved in TRAN$ACT and linked to this deal.");}}/>}
     {comparison && <dialog className="sales-dialog sales-comparison" ref={compareRef} onCancel={e=>{e.preventDefault();setComparison(false);}} aria-labelledby="sales-compare-title"><header><div><span className="sales-eyebrow">YOUR OPEN MACHINES</span><h2 id="sales-compare-title">SIDE BY SIDE</h2></div><button onClick={()=>setComparison(false)} aria-label="Close comparison">×</button></header><div className="sales-compare-scroll"><table><thead><tr><th>COMPARE</th>{w.openMachines.map(item=><th key={dashboardKey(item)}>{item.title}</th>)}</tr></thead><tbody>{compareRows.map(([label,get])=><tr key={label}><th>{label}</th>{w.openMachines.map(item=><td key={dashboardKey(item)}>{get(item) ?? "Not recorded"}</td>)}</tr>)}</tbody></table></div></dialog>}
     {w.notice && <div className="sales-notice" role="status">{w.notice}<button onClick={()=>w.setNotice("")} aria-label="Dismiss notification">×</button></div>}

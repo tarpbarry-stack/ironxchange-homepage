@@ -10,7 +10,9 @@ export default function SalesDeskRail({ workspace:w,onClose }) {
   useEffect(()=>setLimit(24),[query,scope]);
   const openFiltered=()=>{
     if(matches.length>100){w.setNotice("Narrow the filter to 100 machines or fewer before opening the whole selection.");return;}
-    w.setOpenKeys(previous=>[...new Set([...previous,...matches.map(dashboardKey)])]);
+    const combined=[...new Set([...w.openKeys,...matches.map(dashboardKey)])];
+    if(combined.length>100){w.setNotice("Return some machines before opening this selection. One working board holds up to 100 machines.");return;}
+    w.setOpenKeys(combined);
   };
   return <aside className="sales-machine-rail" aria-label="Machines">
     <div className="sales-rail-heading"><div><span className="sales-eyebrow">YOUR INVENTORY & CONNECTIONS</span><h2>MACHINES <b>{status.loading ? "…" : source.length}</b></h2></div><button onClick={onClose} aria-label="Hide machine rail">‹</button></div>
