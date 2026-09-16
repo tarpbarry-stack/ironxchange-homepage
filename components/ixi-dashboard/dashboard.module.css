@@ -19,7 +19,7 @@
 .dashboard :global(.dash-account-menu > div) { position:absolute; right:0; top:46px; min-width:240px; background:#151a16; border:1px solid #464a3f; box-shadow:0 12px 40px #000a; padding:6px; z-index:100; }
 .dashboard :global(.dash-account-menu a), .dashboard :global(.dash-account-menu button) { display:block; padding:13px; text-align:left; width:100%; background:none; color:#edf0ed; border:0; font-size:13px; letter-spacing:0; }
 .dashboard :global(.dash-account-menu a:hover), .dashboard :global(.dash-account-menu button:hover) { background:#262b22; color:var(--dash-yellow); }
-.dashboard :global(.dash-apps) { display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); padding:12px 24px; gap:10px; background:#0c100d; border-bottom:1px solid var(--dash-line); }
+.dashboard :global(.dash-apps) { display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); padding:12px 24px; gap:10px; background:#0c100d; border-bottom:1px solid var(--dash-line); }
 .dashboard :global(.dash-apps a) { min-width:0; display:flex; gap:12px; align-items:center; border:1px solid #32382e; background:#131813; padding:12px; transition:background .12s,border-color .12s; }
 .dashboard :global(.dash-apps a:hover) { background:#22251a; border-color:#a88c16; }
 .dashboard :global(.dash-app-icon) { font-size:25px; color:var(--dash-yellow); min-width:27px; text-align:center; font-weight:700; }
