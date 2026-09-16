@@ -945,19 +945,23 @@ export default function IXITransactCommandCenter({ runtime, active = true }) {
             {directoryProjection.error ? <p role="alert">The AOS folder list could not load. Use REFRESH to retry.</p> : null}
             <div className={styles.objectDirectoryList} role="list">
               {objectDirectory.map(item => (
-                <div role="listitem" key={item.id}><button type="button" className={styles.objectTile} data-active={selectedContext?.id === item.id} onClick={() => selectContext(item)}>
+                <div role="listitem" key={item.id}><button type="button" className={styles.objectTile} data-active={selectedContext?.id === item.id} aria-pressed={selectedContext?.id === item.id} onClick={() => selectContext(item)}>
+                  <span className={styles.objectTileImage}>
+                    <IXIContextImage
+                      key={item.id}
+                      context={item}
+                      mediaClassName={styles.objectTileMedia}
+                      fallbackClassName={styles.objectTileMark}
+                      fallback={contextLabel(item.kind).slice(0, 2)}
+                      label={`${sidebarObjectTitle(item)} thumbnail`}
+                      as="span"
+                    />
+                    {selectedContext?.id === item.id ? <span className={styles.objectTileSelected} aria-hidden="true">SELECTED</span> : null}
+                  </span>
                   <strong className={styles.objectTileTitle}>{sidebarObjectTitle(item)}</strong>
                   {item.serialNumber ? <small className={`${styles.objectTileField} ${styles.objectTileSerial}`}><b>SN</b><span>{item.serialNumber}</span></small> : null}
                   <small className={`${styles.objectTileField} ${styles.objectTileIdentity}`}><b>ID</b><span>{item.stockNumber || item.assetId || item.passportId || "NOT RECORDED"}</span></small>
-                  <IXIContextImage
-                    key={item.id}
-                    context={item}
-                    mediaClassName={styles.objectTileMedia}
-                    fallbackClassName={styles.objectTileMark}
-                    fallback={contextLabel(item.kind).slice(0, 2)}
-                    label={`${sidebarObjectTitle(item)} thumbnail`}
-                    as="span"
-                  />
+                  <span className={styles.objectTileAction}>{item.kind === "company" ? "COMPANY WORKSPACE" : "TRANSACTION HISTORY"}<span aria-hidden="true">↗</span></span>
                 </button></div>
               ))}
             </div>
