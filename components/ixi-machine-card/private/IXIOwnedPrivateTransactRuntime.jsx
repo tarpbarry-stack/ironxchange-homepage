@@ -101,7 +101,8 @@ export default function IXIOwnedPrivateTransactRuntime({
   onSendFront,
   onSendBack,
   armedDestination,
-  onSendToArmedDestination
+  onSendToArmedDestination,
+  onFinancialRecordsChange
 }) {
   /*
    * AOS objects may carry their verified Passport in the canonical
@@ -173,7 +174,7 @@ export default function IXIOwnedPrivateTransactRuntime({
       activeTechWorkOrder={activeTechWorkOrder}
       permissions={state.access?.permissions || []}
       financialRecords={state.records}
-      onFinancialRecordsChange={() => refresh()}
+      onFinancialRecordsChange={() => { onFinancialRecordsChange?.(); return refresh(); }}
       ixiState={ixiState}
       onIxiStateChange={onIxiStateChange}
       onClose={onClose}
