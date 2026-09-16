@@ -9,7 +9,7 @@ const {
   isCanonicalMosObjectId
 } = require("../lib/ixi-freight/ixiFreightProxy.js");
 
-test("the private card never promotes a Sharetribe listing UUID to MOS objectId", () => {
+test("the private card preserves source provenance without promoting a listing UUID to MOS identity", async () => {
   const source = fs.readFileSync(
     new URL("../components/ixi-machine-card/private/IXIOwnedPrivateListingRuntime.jsx", import.meta.url),
     "utf8"
@@ -20,7 +20,23 @@ test("the private card never promotes a Sharetribe listing UUID to MOS objectId"
   );
 
   assert.doesNotMatch(source, /publicData\?\.mosObjectId\s*\|\|\s*getListingId\(listing\)/u);
-  assert.match(source, /sourceReference:\s*clean\(getListingId\(listing\)\)/u);
+  const formatters = fs.readFileSync(new URL("../lib/listingFormatters.js", import.meta.url), "utf8");
+  const { getListingId } = await import(`data:text/javascript;base64,${Buffer.from(formatters).toString("base64")}`);
+  const helpers = source.slice(source.indexOf("function clean("), source.indexOf("export default function"));
+  const fromListing = new Function("getListingId", `${helpers}\nreturn transactObjectFromListing;`)(getListingId);
+  const listingId = "6a9b2cc3-e7ab-4267-aed0-138cba998dfa";
+  const legacy = fromListing({ id: { uuid: listingId }, publicData: { passportId: "IXI123" } });
+  assert.equal(legacy.objectId, "");
+  assert.equal(legacy.id, "");
+  assert.equal(legacy.sourceReference, listingId);
+  assert.equal(legacy.passportId, "IXI123");
+  const canonical = fromListing({
+    id: "projection-id", sourceListingId: listingId,
+    canonicalIdentity: { objectId: "object_canonical", passportId: "IXI123" }
+  });
+  assert.equal(canonical.objectId, "object_canonical");
+  assert.equal(canonical.id, "object_canonical");
+  assert.equal(canonical.sourceReference, listingId);
   assert.doesNotMatch(context, /source\.objectId\s*\|\|\s*source\.id/u);
 });
 
