@@ -147,5 +147,5 @@ test("private TRANSACT runtime reads authority and Passport history before expos
   assert.match(runtime, /Promise\.all\(\[/u);
   assert.match(runtime, /loadIXIAosFinancialAccessContext/u);
   assert.match(runtime, /loadIXIAosPassportFinancialDocuments/u);
-  assert.match(runtime, /onFinancialRecordsChange=\{\(\) => refresh\(\)\}/u);
+  assert.match(runtime, /onFinancialRecordsChange=\{\(\) => \{ onFinancialRecordsChange\?\.\(\); return refresh\(\); \}\}/u);
 });

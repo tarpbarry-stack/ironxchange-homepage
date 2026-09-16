@@ -321,6 +321,7 @@ export default function IXIOwnedPrivateListingRuntime({ cardContext = "inventory
           onSendBack={props.onSendBack}
           armedDestination={props.armedDestination}
           onSendToArmedDestination={props.onSendToArmedDestination}
+          onFinancialRecordsChange={props.onFinancialRecordsChange}
         />
         <style jsx>{`.owned-private-runtime{position:relative;width:298px;min-width:298px;height:471px;overflow:visible}`}</style>
       </div>
