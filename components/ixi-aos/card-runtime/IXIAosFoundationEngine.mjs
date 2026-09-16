@@ -1,3 +1,5 @@
+import { normalizeAosSystemIndexMembershipPolicy } from "../../../lib/mos/IXIAosSystemIndexMembershipPolicy.js";
+
 /*
  * IXI AOS FOUNDATION ENGINE
  *
@@ -330,6 +332,17 @@ export function createIXIAosObjectUpdateCommand({ session, draft, commandId, now
   };
 }
 
+function membershipPolicyFingerprint(value) {
+  if (!value || typeof value.enabled !== "boolean" || typeof value.defaultWorkspaceHome !== "boolean" ||
+    !Array.isArray(value.allowedObjectTypes) || !Array.isArray(value.allowedDefinitionIds)) return null;
+  const policy = normalizeAosSystemIndexMembershipPolicy(value);
+  if (!policy) return null;
+  return JSON.stringify({ ...policy,
+    allowedObjectTypes: [...policy.allowedObjectTypes].sort(),
+    allowedDefinitionIds: [...policy.allowedDefinitionIds].sort()
+  });
+}
+
 export function acceptIXIAosCanonicalObject(command = {}, response = {}) {
   const canonical = object(response.object || response.data?.object || response.record || response.data?.record);
   const expectedId = clean(command.objectId);
@@ -348,6 +361,14 @@ export function acceptIXIAosCanonicalObject(command = {}, response = {}) {
   if (clean(command.patch?.objectType) && clean(canonical.objectType) !== clean(command.patch.objectType)) {
     throw Object.assign(new Error("IX-Core has not confirmed the requested Object classification."),
       { code: "IXI_AOS_CLASSIFICATION_READBACK_MISMATCH" });
+  }
+  if (Object.prototype.hasOwnProperty.call(object(command.patch?.metadata), "systemIndexMembershipPolicy")) {
+    const requested = membershipPolicyFingerprint(command.patch.metadata.systemIndexMembershipPolicy);
+    const persisted = membershipPolicyFingerprint(canonical.metadata?.systemIndexMembershipPolicy);
+    if (!requested || requested !== persisted) {
+      throw Object.assign(new Error("The index membership settings read back from IX-Core differ from your saved choices. Reload the latest settings and review your draft."),
+        { code: "IXI_AOS_MEMBERSHIP_POLICY_READBACK_MISMATCH", status: 409 });
+    }
   }
   return synchronizeIXIAosBusinessIdentifier(canonical);
 }
