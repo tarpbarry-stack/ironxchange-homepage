@@ -617,6 +617,15 @@ export default function IXITransactCommandCenter({ runtime, active = true }) {
     setActiveWorkspace(context.kind === "company" ? "today" : "object-history");
   }
 
+  function selectWorkspace(id) {
+    if (workspaceMenu.current) workspaceMenu.current.open = false;
+    setOpenPanel("");
+    setActiveWorkspace(id);
+    setActiveTabId("");
+    setActiveModuleId("");
+    setSelectedRecord(null);
+  }
+
   function refreshAuthoritativeContext() {
     recordCache.invalidate();
     historyCache.invalidate();
@@ -915,7 +924,7 @@ export default function IXITransactCommandCenter({ runtime, active = true }) {
     <div className={styles.shell} data-ui-rebuild="true">
       <header className={styles.topbar}>
         <Link className={styles.brand} href="/transact" aria-label="TRAN$ACT home"><span className={styles.mark}>IXI</span><span className={styles.brandCopy}><strong>TRAN$ACT</strong><small>FINANCIAL OPERATING SYSTEM</small></span></Link>
-        <details ref={workspaceMenu} className={styles.workspaceMenu} onKeyDown={event => { if (event.key === "Escape") { event.currentTarget.open = false; event.currentTarget.querySelector("summary")?.focus(); } }} onBlur={event => { if (!event.currentTarget.contains(event.relatedTarget)) event.currentTarget.open = false; }}><summary>Workspaces ▾</summary><nav aria-label="TRAN$ACT workspaces">{WORKSPACES.map(([id, label, number]) => <button type="button" key={id} data-active={activeWorkspace === id} onClick={() => { if (workspaceMenu.current) workspaceMenu.current.open = false; setActiveWorkspace(id); setActiveTabId(""); setActiveModuleId(""); setSelectedRecord(null); }}><span>{number}</span><strong>{label}</strong>{id === "today" && queue.length ? <b>{queue.length}</b> : null}</button>)}<Link href="/transact/ledger">EXECUTIVE / LEDGER CONTROL</Link></nav></details>
+        <details ref={workspaceMenu} className={styles.workspaceMenu} onKeyDown={event => { if (event.key === "Escape") { event.currentTarget.open = false; event.currentTarget.querySelector("summary")?.focus(); } }} onBlur={event => { if (!event.currentTarget.contains(event.relatedTarget)) event.currentTarget.open = false; }}><summary>Workspaces ▾</summary><nav aria-label="TRAN$ACT workspaces">{WORKSPACES.map(([id, label, number]) => <button type="button" key={id} data-active={activeWorkspace === id} onClick={() => selectWorkspace(id)}><span>{number}</span><strong>{label}</strong>{id === "today" && queue.length ? <b>{queue.length}</b> : null}</button>)}<Link href="/transact/ledger">EXECUTIVE / LEDGER CONTROL</Link></nav></details>
         <div className={styles.entityScope}>
           {environment?.entity?.logoUrl ? <img className={styles.entityLogo} src={environment.entity.logoUrl} alt={`${environment.entity.displayName || "Entity"} logo`} /> : null}
           <span>ENTITY</span><strong>{environment?.entity?.displayName || "AUTHENTICATED ENTITY"}</strong>
@@ -935,8 +944,9 @@ export default function IXITransactCommandCenter({ runtime, active = true }) {
 
       <div className={styles.desktop}>
         <IXITransactSidePanel className={styles.navigation} label="Object directory" dockAt={1280} open={openPanel === "directory"} onDismiss={() => setOpenPanel("")}>
-
-
+          <nav className={styles.workspaceRail} aria-label="Workspace shortcuts">
+            {WORKSPACES.map(([id, label, number]) => <button type="button" key={id} data-active={activeWorkspace === id} aria-current={activeWorkspace === id ? "page" : undefined} onClick={() => selectWorkspace(id)}><span>{number}</span><strong>{label}</strong>{id === "today" && queue.length ? <b>{queue.length}</b> : null}</button>)}
+          </nav>
           <section className={styles.objectDirectory} aria-label="Governed AOS Object directory">
             <header>
               <strong className={styles.objectDirectoryCount} aria-label={`${objectDirectory.length} objects`}>{objectDirectory.length}</strong>

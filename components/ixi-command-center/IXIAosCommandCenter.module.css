@@ -635,7 +635,12 @@
 .workspaceMenu[open] > a { display: block; position: absolute; top: 0; transform: translateY(494px); z-index: 1; padding: 12px; font-size: 12px; color: #ffcf38; background: #111713; width: 280px; }
 .shell[data-ui-rebuild] .desktop { grid-template-columns: 244px minmax(0, 1fr) 254px; }
 .shell[data-ui-rebuild] .navigation { top: var(--tx-bar-height); height: calc(100dvh - var(--tx-bar-height) - 28px); padding: 10px; display: flex; flex-direction: column; overflow: hidden; }
+.shell[data-ui-rebuild] .workspaceRail { display: grid; flex-shrink: 0; gap: 2px; margin-bottom: 10px; }
+.shell[data-ui-rebuild] .workspaceRail button { min-height: 44px; }
+.shell[data-ui-rebuild] .workspaceRail button strong { font-size: 13px; }
+@media (max-width: 1279px), (max-height: 759px) { .shell[data-ui-rebuild] .workspaceRail { display: none; } }
 .shell[data-ui-rebuild] .objectDirectory { margin: 0; min-height: 0; flex: 1; display: flex; flex-direction: column; }
+.shell[data-ui-rebuild] .objectDirectory > header { flex-shrink: 0; }
 .shell[data-ui-rebuild] .objectDirectoryList { flex: 1; min-height: 0; max-height: none; padding: 3px; gap: 0; overflow: auto; }
 .shell[data-ui-rebuild] .objectDirectorySelect { min-height: 44px; font-size: 14px; }
 .shell[data-ui-rebuild] .objectTile { margin: 0 0 10px; padding: 7px 7px 0; gap: 4px; border: 1px solid #303a2e; border-radius: 3px; color: #e9ede4; background: #171d17; }
