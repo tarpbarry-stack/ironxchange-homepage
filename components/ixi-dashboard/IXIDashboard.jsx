@@ -217,7 +217,7 @@ export default function IXIDashboard({ salesDeskContext = null }) {
   if (salesDeskContext) return <SalesDeskSurface initial={salesDeskContext} dashboardClass={styles.dashboard} workspace={{
     auth,owned:currentOwned,related,ownedStatus,relatedStatus,allMachines,openMachines,openKeys,setOpenKeys,selectedKey,setSelectedKey,
     ownedKeys,states,updateState,size,setSize,returnToRail,openMachine,getSellerListingCardProps,markDirty,dirtyKeys,clearDirty,toggleSave,savedIds,
-    scroll,onScroll:value=>{scrollPosition.current=value;storageRef.current.scroll=value;},refresh:()=>setRevision(value=>value+1),notice,setNotice
+    scroll,onScroll:value=>{scrollPosition.current=value;storageRef.current.scroll=value;},refresh:()=>setRevision(value=>value+1),retryAuth:()=>setAuthRevision(value=>value+1),notice,setNotice
   }} />;
   return <div className={styles.dashboard} data-ixi-dashboard="v12">
     <Head><title>Dashboard | IXI</title><meta name="robots" content="noindex,nofollow" /></Head>
