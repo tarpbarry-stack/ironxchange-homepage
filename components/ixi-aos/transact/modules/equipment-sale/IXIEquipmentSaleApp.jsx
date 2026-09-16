@@ -1,3 +1,5 @@
+import IXITradeInSection from "../../sales/IXITradeInSection";
+import IXITradeSummary from "../../sales/IXITradeSummary";
 import IXIMoneyInput, { IXINumericInput } from "../../IXIMoneyInput";
 import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
@@ -560,6 +562,7 @@ function saleRecordFromInvoice(base, invoice) {
       dueDate: clean(invoice.dueDate).slice(0, 10),
       paymentTerms: clean(invoice.paymentTerms),
     },
+    trades: invoice?.metadata?.trades || base.trades || [],
     totals: {
       ...base.totals,
       ...breakdown,
@@ -640,6 +643,8 @@ function CardEditor({
   setAdditionalTerms,
   invoiceDraft,
   setInvoiceDraft,
+  tradeSection,
+  invoiceTrades,
 }) {
   const commercialLocked = invoiceEntry ? invoiceLocked : orderLocked;
   return (
@@ -716,6 +721,8 @@ function CardEditor({
           </CardField>
         </div>
       </section>
+      {tradeSection}
+      {invoiceEntry ? <IXITradeSummary trades={invoiceTrades ?? input.trades ?? []} /> : null}
       <section>
         <h3>COMMERCIAL</h3>
         <div className="es-card-pair">
@@ -732,7 +739,7 @@ function CardEditor({
               label={key.replace(/([A-Z])/g, " $1").toUpperCase()}
             >
               <IXIMoneyInput
-                disabled={commercialLocked}
+                disabled={commercialLocked || (key === "tradeAllowance" && input.trades?.length > 0)}
                 inputMode="decimal"
                 value={input[key]}
                 onValueChange={(v) => patch(key, v)}
@@ -956,6 +963,7 @@ function OrderDocument({ record }) {
             )}
           </b>
         </div>
+        {(record.trades || []).map(trade => <div key={trade.tradeId}><span>{trade.year} {trade.make} {trade.model} · SN {trade.serialNumber} · {trade.passportId}</span><b>− {usd(trade.allowance)}</b></div>)}
         <div>
           <span>Trade allowance</span>
           <b>− {usd(record?.totals?.tradeAllowance)}</b>
@@ -1158,12 +1166,15 @@ export default function IXIEquipmentSaleApp({
     }));
   const setAdditionalTerms = (value) =>
     setInput((current) => ({ ...current, additionalTerms: value }));
-  async function save(action = "save") {
+  async function save(action = "save", override = null) {
     setBusy(true);
     setError("");
     try {
       const wasNew = !clean(draft?.financialBinding?.financialDocumentId);
-      const workingRecord = revisionOpen ? reopenSignedTerms(draft) : draft;
+      const effectiveDraft = action === "prepare-trade" && !clean(draft.identity.dealId)
+        ? { ...draft, identity: { ...draft.identity, dealId: `DEAL-${draft.identity.salesOrderId || crypto.randomUUID()}` } }
+        : override || draft;
+      const workingRecord = revisionOpen ? reopenSignedTerms(effectiveDraft) : effectiveDraft;
       const effectiveAction = revisionOpen ? "revise-signed-terms" : action;
       const result = await saveIXIEquipmentSale({
         object,
@@ -1222,6 +1233,11 @@ export default function IXIEquipmentSaleApp({
           record: convertedQuote,
           action: "convert-to-sales-order",
         });
+      }
+      if (action === "save-trades" && ensuredInvoice && clean(ensuredInvoice.financialState).toLowerCase() === "draft") {
+        const synced = await saveIXIEquipmentInvoice({ object, context, record: savedRecord, invoice: ensuredInvoice, input: invoiceDraft });
+        ensuredInvoice = synced.invoice;
+        setInvoiceRecord(synced.invoice);
       }
       setRevisionOpen(false);
       setRecord(savedRecord);
@@ -1437,6 +1453,9 @@ export default function IXIEquipmentSaleApp({
         </button>
       </div>
     ) : null;
+  const tradeSection = entryMode === "invoice" ? null : <IXITradeInSection record={draft} context={context} locked={orderLocked || invoiceLocked || busy}
+    ensureOrder={() => save("prepare-trade")}
+    onTradesChange={(trades, saved = draft) => save("save-trades", updateIXIEquipmentSale(saved, { ...saleInputFromRecord(saved), trades, tradeAllowance: trades.reduce((sum, row) => sum + Number(row.allowance), 0) }))} />;
   const workspace =
     mounted && open
       ? createPortal(
@@ -1559,6 +1578,7 @@ export default function IXIEquipmentSaleApp({
                     </p>
                     <CardEditor
                       invoiceEntry
+                      invoiceTrades={invoiceRecord?.metadata?.trades}
                       linkedInvoice={linkedInvoice}
                       invoiceLocked={invoiceLocked}
                       orderLocked={false}
@@ -1639,6 +1659,7 @@ export default function IXIEquipmentSaleApp({
                       </Field>
                     </div>
                   </section>
+                  {tradeSection}
                   <section>
                     <h2>EQUIPMENT &amp; PRICE</h2>
                     <div className="es-grid">
@@ -1669,7 +1690,7 @@ export default function IXIEquipmentSaleApp({
                           label={key.replace(/([A-Z])/g, " $1").toUpperCase()}
                         >
                           <IXIMoneyInput
-                            disabled={orderLocked}
+                            disabled={orderLocked || (key === "tradeAllowance" && input.trades?.length > 0)}
                             inputMode="decimal"
                             value={input[key]}
                             onValueChange={(v) => patch(key, v)}
@@ -1880,6 +1901,7 @@ export default function IXIEquipmentSaleApp({
         ) : null}
         <CardEditor
           invoiceEntry={invoiceEntry}
+          invoiceTrades={invoiceRecord?.metadata?.trades}
           linkedInvoice={linkedInvoice}
           invoiceLocked={invoiceLocked}
           orderLocked={orderLocked}
@@ -1889,6 +1911,7 @@ export default function IXIEquipmentSaleApp({
           setAdditionalTerms={setAdditionalTerms}
           invoiceDraft={invoiceDraft}
           setInvoiceDraft={setInvoiceDraft}
+          tradeSection={!open ? tradeSection : null}
         />
         <div className="es-card-actions">
           <button

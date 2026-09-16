@@ -1,0 +1,133 @@
+.section {
+  min-width: 0;
+  padding: 14px 0;
+  border-top: 1px solid #3b3e35;
+  color: #e8ebe5;
+}
+.section header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.section h3 {
+  font-size: 14px;
+  color: #ffc400;
+}
+.section input,
+.section select {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  background: #090c09;
+  color: #fff;
+  border: 1px solid #565c50;
+  border-radius: 5px;
+  padding: 10px;
+  font: inherit;
+}
+.form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(145px, 100%), 1fr));
+  gap: 12px;
+}
+.form label {
+  font-size: 12px;
+  font-weight: 700;
+  display: grid;
+  gap: 6px;
+}
+.form p,
+.form .actions {
+  grid-column: 1/-1;
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 10px 0;
+}
+.actions button,
+.actions a,
+.recovery button,
+.acquisition > button {
+  padding: 10px 12px;
+  min-height: 44px;
+  border: 1px solid #8b771d;
+  border-radius: 5px;
+  background: #191a10;
+  color: #ffc400;
+  font-size: 12px;
+  font-weight: 750;
+  cursor: pointer;
+  text-decoration: none;
+}
+.actions button:disabled {
+  opacity: 0.5;
+  cursor: wait;
+}
+.error {
+  color: #ffb8b8;
+  background: #491b1b;
+  padding: 12px;
+}
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+  gap: 16px;
+}
+.trade {
+  min-width: 0;
+}
+.card {
+  width: 300px;
+  max-width: 100%;
+  overflow: auto;
+  margin: 10px 0;
+}
+.recovery {
+  padding: 12px;
+  border: 1px solid #786723;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.acquisition {
+  margin-top: 16px;
+  max-width: 100%;
+  overflow: auto;
+}
+.section p {
+  font-size: 13px;
+  color: #bac2b5;
+}
+.section :focus-visible {
+  outline: 2px solid #ffc400;
+  outline-offset: 3px;
+}
+.summary {
+  min-width: 0;
+}
+.summaryItem {
+  display: grid;
+  min-width: 0;
+  gap: 6px;
+  padding: 12px 0;
+  border-bottom: 1px solid #3b3e35;
+  overflow-wrap: anywhere;
+  font-size: 13px;
+}
+.summaryItem strong {
+  font-size: 14px;
+}
+.summaryItem a {
+  color: #ffc400;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+}
+.summaryItem a:focus-visible {
+  outline: 2px solid #ffc400;
+  outline-offset: 3px;
+}

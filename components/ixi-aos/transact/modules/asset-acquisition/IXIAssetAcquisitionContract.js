@@ -282,6 +282,7 @@ export function createIXIAssetAcquisitionDraft({
 
   return {
     schema: IXI_ASSET_ACQUISITION_SCHEMA,
+    ...(source.trade ? { trade: { ...source.trade } } : {}),
     identity: {
       acquisitionId: clean(source.acquisitionId),
       number: clean(source.number),
@@ -305,6 +306,7 @@ export function createIXIAssetAcquisitionDraft({
       ),
     },
     acquisition: {
+      sourceFinancialDocumentId: clean(source.trade?.sourceFinancialDocumentId),
       type: IXI_ACQUISITION_TYPES.includes(clean(source.acquisitionType))
         ? clean(source.acquisitionType)
         : "direct-purchase",
@@ -486,7 +488,7 @@ export function validateIXIAssetAcquisition(record = {}) {
   if (!clean(source.acquisition?.sellerLabel)) errors.seller = "required";
   if (!clean(source.acquisition?.purchaseDate))
     errors.purchaseDate = "required";
-  if (!(num(acquisition.purchasePrice) > 0))
+  if (!(num(acquisition.purchasePrice) > 0 || (record.trade && num(acquisition.purchasePrice) === 0)))
     errors.purchasePrice = "greater-than-zero";
   if (PURCHASE_BASIS_FIELDS.some((field) => num(acquisition[field]) < 0))
     errors.costs = "non-negative";

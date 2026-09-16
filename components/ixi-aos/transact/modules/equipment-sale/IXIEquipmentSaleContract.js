@@ -120,7 +120,7 @@ export function createIXIEquipmentSaleDraft({
   return {
     schema: IXI_EQUIPMENT_SALE_SCHEMA,
     identity: {
-      dealId: clean(input.dealId || source?.identity?.dealId),
+      dealId: clean(input.dealId || source?.identity?.dealId) || `DEAL-${globalThis.crypto?.randomUUID?.() || Date.now()}`,
       salesOrderId: "",
       financialDocumentId: "",
       number: "",
@@ -177,7 +177,8 @@ export function createIXIEquipmentSaleDraft({
         input.tradeDescription || source?.commercial?.tradeDescription,
       ),
     },
-    totals: totals({ ...object(source.totals), ...object(input.totals) }),
+    trades: Array.isArray(input.trades || source.trades) ? (input.trades || source.trades) : [],
+    totals: totals({ ...object(source.totals), ...object(input.totals), ...((input.trades || source.trades)?.length ? { tradeAllowance: (input.trades || source.trades).reduce((sum, row) => sum + money(row.allowance), 0) } : {}) }),
     rpo: rpo({ ...object(source.rpo), ...object(input.rpo) }),
     additionalTerms: additionalTerms(
       input.additionalTerms || source.additionalTerms,
@@ -290,6 +291,7 @@ export function saleInputFromRecord(record = {}) {
     depositTerms: clean(record?.commercial?.depositTerms),
     deliveryTerms: clean(record?.commercial?.deliveryTerms),
     tradeDescription: clean(record?.commercial?.tradeDescription),
+    trades: Array.isArray(record.trades) ? record.trades : [],
     subtotal: record?.totals?.subtotal ?? "",
     tax: record?.totals?.tax ?? "",
     freight: record?.totals?.freight ?? "",
@@ -325,7 +327,8 @@ export function updateIXIEquipmentSale(record = {}, input = {}) {
       deliveryTerms: clean(input.deliveryTerms),
       tradeDescription: clean(input.tradeDescription),
     },
-    totals: totals(input),
+    trades: Array.isArray(input.trades) ? input.trades : (record.trades || []),
+    totals: totals({ ...input, ...((input.trades || record.trades)?.length ? { tradeAllowance: (input.trades || record.trades).reduce((sum, row) => sum + money(row.allowance), 0) } : {}) }),
     rpo: rpo(input.rpo),
     additionalTerms: additionalTerms(input.additionalTerms),
     compensation: {

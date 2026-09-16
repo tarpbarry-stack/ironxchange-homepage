@@ -107,6 +107,7 @@ export function projectIXIAssetSaleCollection({
     creditedAmount,
     balanceDue,
     invoiceTotal,
+    tradeValue: money(array(sourceInvoice.metadata?.trades).reduce((sum, trade) => sum + number(trade.allowance), 0)),
   };
 }
 
@@ -116,6 +117,17 @@ export function resolveIXIAssetSaleDate({ sourceInvoice = {}, saleDate, saleDate
   const invoiceDate = clean(sourceInvoice.occurredAt).slice(0, 10);
   const day = saleDate == null ? invoiceDate : clean(saleDate);
   return { saleDate: day, saleDateSource: (saleDate == null || saleDateSource === "invoice") && day === invoiceDate ? "invoice" : "operator" };
+}
+
+// This is screen readiness only. IX-Core rechecks receipts and each acquired
+// trade against the saved financial documents when SOLD is recorded.
+export function isIXIAssetSaleCollectionReady(collection = {}) {
+  if (collection.balanceDue == null || number(collection.balanceDue) > 0.005) return false;
+  const cashSettled = number(collection.amountReceived) > 0 &&
+    number(collection.invoiceTotal) > number(collection.creditedAmount);
+  const fullyTraded = number(collection.tradeValue) > 0 &&
+    number(collection.invoiceTotal) === 0 && number(collection.creditedAmount) === 0;
+  return cashSettled || fullyTraded;
 }
 
 export function createIXIAssetSaleDraft({ context = {}, input = {} } = {}) {
@@ -166,7 +178,8 @@ export function createIXIAssetSaleDraft({ context = {}, input = {} } = {}) {
       buyerEmail: clean(input.buyerEmail),
       buyerPhone: clean(input.buyerPhone),
       ...businessDate,
-      salePrice: collection.invoiceTotal,
+      salePrice: money(collection.invoiceTotal + collection.tradeValue),
+      tradeValue: collection.tradeValue,
       machineSalePrice: input.machineSalePrice === "" || input.machineSalePrice == null ? null : money(input.machineSalePrice),
       soldByLabel: clean(input.soldByLabel),
       soldByPassportId: clean(input.soldByPassportId),
@@ -211,8 +224,8 @@ export function validateIXIAssetSale(record = {}, sourceInvoice = {}) {
   if (!clean(record.sale?.saleDate)) errors.saleDate = "required";
   if (!["billed", "partially-collected", "collected"].includes(invoiceState)) errors.invoiceState = "invoice-must-be-issued";
   if (number(record.collection?.balanceDue) > 0.005) errors.collection = "buyer-balance-outstanding";
-  else if (number(record.collection?.amountReceived) <= 0 || number(record.collection?.invoiceTotal) <= number(record.collection?.creditedAmount)) errors.collection = "Actual received funds are required; a credit alone does not complete a sale.";
-  if (record.sale?.machineSalePrice == null || number(record.sale.machineSalePrice) <= 0 || number(record.sale.machineSalePrice) > number(record.collection.invoiceTotal)) errors.machineSalePrice = "Enter the machine sale price, excluding invoice additions.";
+  else if (!isIXIAssetSaleCollectionReady(record.collection)) errors.collection = "Actual received funds or acquired trade value are required; a credit alone does not complete a sale.";
+  if (record.sale?.machineSalePrice == null || number(record.sale.machineSalePrice) <= 0 || number(record.sale.machineSalePrice) > number(record.collection.invoiceTotal) + number(record.collection.tradeValue)) errors.machineSalePrice = "Enter the machine sale price, excluding invoice additions.";
   if (clean(record.collection?.status) !== "paid") errors.collectionStatus = "payment-required";
   return { valid: Object.keys(errors).length === 0, errors };
 }
