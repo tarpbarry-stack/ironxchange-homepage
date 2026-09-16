@@ -749,6 +749,12 @@
 .shell[data-ui-rebuild] .periodControl { display: block; }
 .shell[data-ui-rebuild] .desktop { min-height: 0; flex: 1; overflow: hidden; }
 .shell[data-ui-rebuild] .main { min-height: 0; padding: 8px 10px 4px; display: flex; flex-direction: column; overflow-y: auto; }
+.shell[data-ui-rebuild] :is(.main, .historyPane, .queueList) { scrollbar-width: thin; scrollbar-color: #706127 #0a100a; }
+.shell[data-ui-rebuild] :is(.main, .historyPane, .queueList)::-webkit-scrollbar { width: 7px; height: 7px; }
+.shell[data-ui-rebuild] :is(.main, .historyPane, .queueList)::-webkit-scrollbar-track { background: #0a100a; }
+.shell[data-ui-rebuild] :is(.main, .historyPane, .queueList)::-webkit-scrollbar-thumb { background: #706127; border-radius: 999px; }
+.shell[data-ui-rebuild] :is(.main, .historyPane, .queueList)::-webkit-scrollbar-thumb:hover { background: #9b8434; }
+.shell[data-ui-rebuild] :is(.main, .historyPane, .queueList)::-webkit-scrollbar-corner { background: #0a100a; }
 .shell[data-ui-rebuild] .main[data-history-active="true"] { overflow-y: hidden; }
 .shell[data-ui-rebuild] .main > * { flex-shrink: 0; }
 .shell[data-ui-rebuild] .pageHeader { min-height: 48px; }
