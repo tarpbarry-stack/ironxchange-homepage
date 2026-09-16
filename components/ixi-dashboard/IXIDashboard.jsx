@@ -14,6 +14,7 @@ import { isPublicMarketplaceMachine, isPrivateMachine, getMachineChannel } from 
 import { hydrateIXIListingMedia } from "../../lib/listings/hydrateIXIListingMedia";
 import { dashboardId, dashboardKey, uniqueMachines, relationshipIds, collectRelationships, reconcileOpenKeys, viewPatch, relationshipPatch, restoreDashboard, verifiedInquiryCount } from "./dashboardContract.mjs";
 import styles from "./dashboard.module.css";
+const SalesDeskSurface = dynamic(() => import("../ixi-sales-desk/SalesDeskSurface"), { ssr: false });
 
 const Board = dynamic(() => import("./DashboardBoard"), { ssr: false, loading: () => <div className="dash-board-loading" role="status">Preparing your board…</div> });
 const APPS = [
@@ -21,13 +22,14 @@ const APPS = [
   ["TRAN$ACT", "/transact", "Financial desktop", "$"],
   ["INVENTORY", "/account/my-listings-v2", "Your machines", "▤"],
   ["SOLD", "/sold", "Sales & settlement", "✓"],
+  ["SALES DESK", "/sales-desk", "Customers & deals", "▣"],
   ["THEATER", "/theater", "Compare & present", "▣"],
   ["LAUNCH", "/post-free", "Add a machine", "+"]
 ];
 const liveMachine = item => isPublicMarketplaceMachine(item) && item.sharetribeState === "published" && !["paused", "closed", "deleted", "archived"].includes(item.listingStatus);
 const pending = { loading: true, error: "" };
 
-export default function IXIDashboard() {
+export default function IXIDashboard({ salesDeskContext = null }) {
   const [auth, setAuth] = useState({ loading: true, user: null, sdk: null, error: "" });
   const [authRevision, setAuthRevision] = useState(0);
   const [owned, setOwned] = useState([]), [related, setRelated] = useState([]);
@@ -44,7 +46,7 @@ export default function IXIDashboard() {
   const writeQueues = useRef(new Map()), mediaRequests = useRef(new Set()), mounted = useRef(true);
   dirtyRef.current = dirtyKeys; stateRef.current = states;
   const userId = String(auth.user?.id?.uuid || auth.user?.id || "");
-  const storageKey = userId ? `ixi:dashboard:v1:${userId}` : "";
+  const storageKey = userId ? `${salesDeskContext ? `ixi:sales-board:v1:${salesDeskContext.context.entityId}` : "ixi:dashboard:v1"}:${userId}` : "";
 
   useEffect(() => { mounted.current = true; return () => { mounted.current = false; }; }, []);
   useEffect(() => {
@@ -212,6 +214,11 @@ export default function IXIDashboard() {
     { label: "VIEWS", value: "—", detail: "Not yet measured here" },
     { label: "INQUIRIES", value: inquiries ?? "—", href: "/account/messages", detail: "All buyer conversations" }
   ];
+  if (salesDeskContext) return <SalesDeskSurface initial={salesDeskContext} dashboardClass={styles.dashboard} workspace={{
+    auth,owned:currentOwned,related,ownedStatus,relatedStatus,allMachines,openMachines,openKeys,setOpenKeys,selectedKey,setSelectedKey,
+    ownedKeys,states,updateState,size,setSize,returnToRail,openMachine,getSellerListingCardProps,markDirty,dirtyKeys,clearDirty,toggleSave,savedIds,
+    scroll,onScroll:value=>{scrollPosition.current=value;storageRef.current.scroll=value;},refresh:()=>setRevision(value=>value+1),notice,setNotice
+  }} />;
   return <div className={styles.dashboard} data-ixi-dashboard="v12">
     <Head><title>Dashboard | IXI</title><meta name="robots" content="noindex,nofollow" /></Head>
     <style jsx global>{`body { margin: 0; background: #090c0a; }`}</style>

@@ -155,7 +155,7 @@ function QuoteEditor({ input, patch, patchRpo, setAdditionalTerms }) {
   </div>;
 }
 
-export default function IXIQuoteApp({ context = {}, object = {}, dealId = "", initialRecord = null, onBack = null, onAdvance = null, onRecordChange = null }) {
+export default function IXIQuoteApp({ context = {}, object = {}, dealId = "", initialRecord = null, onBack = null, onAdvance = null, onRecordChange = null, portalContainer = null, onBusyChange = null }) {
   const [mounted, setMounted] = useState(false);
   const [record, setRecord] = useState(initialRecord);
   const [input, setInput] = useState(() => initialRecord ? quoteInputFromRecord(initialRecord) : { ...EMPTY });
@@ -164,6 +164,7 @@ export default function IXIQuoteApp({ context = {}, object = {}, dealId = "", in
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [savedMessage, setSavedMessage] = useState("");
+  useEffect(() => { onBusyChange?.(busy); }, [busy, onBusyChange]);
 
   useEffect(() => { setMounted(true); }, []);
   useEffect(() => {
@@ -225,7 +226,7 @@ export default function IXIQuoteApp({ context = {}, object = {}, dealId = "", in
       <div className="qt-workspace-status"><span>{draft.identity?.number || "UNNUMBERED DRAFT"} · REV {draft.identity?.revision || 1}</span><span>COMPLETENESS {completeness.percent}% · SAVE IS ALWAYS AVAILABLE</span>{savedMessage ? <b>{savedMessage}</b> : null}</div>
       {error ? <div className="qt-workspace-error">{error}</div> : null}
       <main className="qt-workspace-body">{worksheetMode === "preview" ? <QuotePresentation record={draft} /> : <QuoteEditor input={input} patch={patch} patchRpo={patchRpo} setAdditionalTerms={setAdditionalTerms} />}</main>
-    </div>, document.body
+    </div>, portalContainer || document.body
   ) : null;
 
   return <>
@@ -243,7 +244,7 @@ export default function IXIQuoteApp({ context = {}, object = {}, dealId = "", in
       <div className="qt-card-meter"><div><i style={{ width: `${completeness.percent}%` }} /></div><span>{completeness.percent}% FORMAL COMPLETENESS</span></div>
       {error ? <div className="qt-card-error">{error}</div> : null}
       {savedMessage ? <div className="qt-card-saved">{savedMessage}</div> : null}
-      <div className="qt-card-actions"><button className="secondary" onClick={() => setWorksheetOpen(true)}>OPEN WORKSHEET</button><button className="primary" disabled={busy} onClick={() => save()}>{busy ? "SAVING…" : record ? "SAVE" : "CREATE"}</button>{record?.financialBinding?.financialDocumentId ? <button className="primary" disabled={busy} onClick={() => onAdvance?.(record)}>CREATE SALES ORDER</button> : null}</div>
+      <div className="qt-card-actions"><button className="secondary" onClick={() => setWorksheetOpen(true)}>OPEN WORKSHEET</button><button className="primary" disabled={busy} onClick={() => save()}>{busy ? "SAVING…" : record ? "SAVE" : "CREATE"}</button>{record?.financialBinding?.financialDocumentId && typeof onAdvance === "function" ? <button className="primary" disabled={busy} onClick={() => onAdvance(record)}>CREATE SALES ORDER</button> : null}</div>
       <div className="qt-card-foot">SAVE ANYTIME · COMPLETE AS NEEDED · {draft.identity?.number || "NEW QUOTE"}</div>
     </div>
     {worksheet}

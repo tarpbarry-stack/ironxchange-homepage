@@ -1,0 +1,70 @@
+import { useEffect,useRef,useState } from "react";
+import { salesRequest,STAGES,todayLocal } from "./salesDeskClient";
+
+function Field({label,children,wide=false}) { return <label className={wide ? "sales-field wide" : "sales-field"}><span>{label}</span>{children}</label>; }
+export default function SalesDeskEditor({editor,people,onClose,onSaved,onQuote,onOpenMachines}) {
+  const dialog=useRef(null),saveLock=useRef(false),command=useRef(null);
+  const [value,setValue]=useState(editor.record),[dirty,setDirty]=useState(false),[busy,setBusy]=useState(false),[error,setError]=useState("");
+  const [contactQuery,setContactQuery]=useState(""),[contacts,setContacts]=useState([]),[notes,setNotes]=useState([]),[note,setNote]=useState("");
+  const [history,setHistory]=useState(editor.history || []),[noteError,setNoteError]=useState("");
+  const kind=editor.kind;
+  const close=()=>{if(busy)return;if((dirty || note.trim()) && !window.confirm("Discard unsaved changes and close?"))return;onClose();};
+  useEffect(()=>{dialog.current.showModal();return()=>dialog.current?.close();},[]);
+  useEffect(()=>{const guard=e=>{if(dirty || note.trim()){e.preventDefault();e.returnValue="";}};window.addEventListener("beforeunload",guard);return()=>window.removeEventListener("beforeunload",guard);},[dirty,note]);
+  useEffect(()=>{
+    if(kind!=="deals")return;
+    const controller=new AbortController();
+    const timer=setTimeout(()=>salesRequest(`records/contacts?limit=100&q=${encodeURIComponent(contactQuery)}`,{signal:controller.signal}).then(result=>setContacts(result.items)).catch(e=>{if(e.name!=="AbortError")setError(e.message);}),180);
+    return()=>{clearTimeout(timer);controller.abort();};
+  },[kind,contactQuery]);
+  const refreshNotes=()=>{
+    if(!value.id || !["contacts","deals"].includes(kind))return;
+    salesRequest(`records/notes?limit=100&parentId=${encodeURIComponent(value.id)}`).then(result=>setNotes(result.items)).catch(e=>setNoteError(e.message));
+  };
+  useEffect(refreshNotes,[kind,value.id]);
+  const patch=(key,next)=>{setValue(v=>({...v,[key]:next}));setDirty(true);setError("");command.current=null;};
+  const save=async e=>{
+    e.preventDefault();if(saveLock.current)return;saveLock.current=true;setBusy(true);setError("");
+    const payload={kind,record:value,revision:value.revision};
+    if(!command.current)command.current={...payload,commandId:crypto.randomUUID()};
+    try {
+      const result=await salesRequest("commands",{body:command.current});setValue(result.record);setDirty(false);command.current=null;onSaved(kind,result.record);
+      const detail=await salesRequest(`records/${kind}/${result.record.id}`);setHistory(detail.history);
+    }catch(e){setError(e.message);}finally{saveLock.current=false;setBusy(false);}
+  };
+  const noteCommand=useRef(null);
+  const addNote=async()=>{
+    if(saveLock.current || !note.trim())return;saveLock.current=true;setBusy(true);setNoteError("");
+    if(!noteCommand.current)noteCommand.current={kind:"notes",commandId:crypto.randomUUID(),record:{title:note,parentKind:kind,parentId:value.id}};
+    try{await salesRequest("commands",{body:noteCommand.current});setNote("");noteCommand.current=null;refreshNotes();}catch(e){setNoteError(e.message);}finally{saveLock.current=false;setBusy(false);}
+  };
+  const input=(key,type="text",maxLength=250,required=false)=><input type={type} value={value[key] || ""} maxLength={maxLength} required={required} onChange={e=>patch(key,e.target.value)}/>;
+  return <dialog ref={dialog} className="sales-dialog" onCancel={e=>{e.preventDefault();close();}} aria-labelledby="sales-editor-title">
+    <header><div><span className="sales-eyebrow">IXI SALES DESK · {value.id ? "EXISTING RECORD" : "NEW RECORD"}</span><h2 id="sales-editor-title">{kind==="contacts" ? "CONTACT" : kind==="deals" ? "DEAL WORKSPACE" : kind==="tasks" ? "FOLLOW-UP" : "SAVE BOARD"}</h2></div><button onClick={close} aria-label="Close record" disabled={busy}>×</button></header>
+    <div className="sales-dialog-body"><form onSubmit={save}>
+      <fieldset disabled={busy} className="sales-fields">
+        {kind==="contacts" && <>
+          {!value.id && <Field label="EXISTING IXI PERSON" wide><select value={value.objectId || ""} onChange={e=>{const person=people.find(p=>p.objectId===e.target.value);patch("objectId",e.target.value);if(person)patch("name",person.name);}}><option value="">Create a new contact</option>{people.map(p=><option key={p.objectId} value={p.objectId}>{p.name}</option>)}</select></Field>}
+          <Field label="NAME *">{input("name","text",150,true)}</Field><Field label="COMPANY">{input("company","text",150)}</Field><Field label="PHONE">{input("phone","tel",60)}</Field><Field label="EMAIL">{input("email","email",254)}</Field><Field label="ADDRESS" wide>{input("address","text",500)}</Field><Field label="SOURCE">{input("source","text",100)}</Field><Field label="PREFERRED CONTACT"><select value={value.preference || ""} onChange={e=>patch("preference",e.target.value)}><option value="">Not specified</option><option>Phone</option><option>Email</option><option>Text</option></select></Field><Field label="MACHINES WANTED / INTERESTS" wide><textarea value={value.interest || ""} maxLength={1000} onChange={e=>patch("interest",e.target.value)}/></Field>
+        </>}
+        {kind==="deals" && <>
+          <Field label="DEAL NAME *" wide>{input("title","text",150,true)}</Field>
+          <Field label="FIND CUSTOMER"><input type="search" placeholder="Name, company, email…" value={contactQuery} onChange={e=>setContactQuery(e.target.value)}/></Field>
+          <Field label="CUSTOMER *"><select required value={value.contactId || ""} onChange={e=>patch("contactId",e.target.value)}><option value="">Select a saved contact</option>{value.contactId && !contacts.some(c=>c.id===value.contactId) && <option value={value.contactId}>{value.customerName || "Current customer"}</option>}{contacts.map(c=><option value={c.id} key={c.id}>{c.name}{c.company ? ` · ${c.company}` : ""}</option>)}</select></Field>
+          <Field label="STAGE"><select value={value.stage || "inquiry"} onChange={e=>patch("stage",e.target.value)}>{STAGES.map(([id,label])=><option key={id} value={id}>{label}</option>)}</select></Field><Field label="NEXT ACTION DATE">{input("dueDate","date")}</Field>
+          <Field label="NEXT ACTION" wide>{input("nextAction","text",500)}</Field><Field label="TERMS / WORKING NOTES" wide><textarea rows={3} maxLength={3000} value={value.terms || ""} onChange={e=>patch("terms",e.target.value)}/></Field>
+          {value.stage==="lost" && <Field label="LOST REASON *" wide>{input("lostReason","text",500,true)}</Field>}
+          <div className="sales-deal-machines wide"><span className="sales-eyebrow">MACHINES IN THIS DEAL</span>{value.machines?.length ? value.machines.map(machine=><div key={machine.key}><span><strong>{machine.title}</strong><small>{machine.passportId}</small></span><button type="button" onClick={()=>patch("machines",value.machines.filter(m=>m.key!==machine.key))} aria-label={`Remove ${machine.title} from this deal`}>×</button></div>) : <p>No machines attached. Open machines on the board before creating a deal.</p>}</div>
+        </>}
+        {kind==="tasks" && <><Field label="FOLLOW-UP *" wide>{input("title","text",250,true)}</Field><Field label="DUE DATE *">{input("dueDate","date",10,true)}</Field><Field label="STATUS"><select value={value.completed ? "done" : "open"} onChange={e=>patch("completed",e.target.value==="done")}><option value="open">OPEN</option><option value="done">COMPLETED</option></select></Field></>}
+        {kind==="boards" && <><Field label="BOARD NAME *" wide>{input("title","text",100,true)}</Field><p className="wide">{value.keys?.length || 0} machines will be saved in this order.</p></>}
+      </fieldset>
+      {error && <p className="sales-error" role="alert">{error}</p>}
+      <div className="sales-editor-actions"><span>{busy ? "SAVING…" : dirty ? "UNSAVED CHANGES" : value.id ? "SAVED TO IX-CORE" : "READY TO SAVE"}</span><button className="sales-primary" type="submit" disabled={busy || (!!value.id && !dirty)}>{busy ? "SAVING…" : "SAVE"}</button></div>
+    </form>
+    {value.id && kind==="deals" && <div className="sales-actions"><button disabled={dirty || busy || !!note.trim()} onClick={()=>onOpenMachines(value)}>OPEN DEAL MACHINES ↗</button><button disabled={dirty || busy || !!note.trim() || !value.machines?.length} onClick={()=>onQuote(value)}>PREPARE QUOTE ↗</button><a href={`/transact${value.machines?.[0]?.passportId ? `?passport=${encodeURIComponent(value.machines[0].passportId)}` : ""}`}>TRAN$ACT ↗</a></div>}
+    {value.id && ["contacts","deals"].includes(kind) && <section className="sales-notes"><h3>CONVERSATION & NOTES</h3><textarea aria-label="New conversation note" placeholder="What was discussed? What happens next?" maxLength={4000} value={note} disabled={busy} onChange={e=>{setNote(e.target.value);noteCommand.current=null;}}/><button disabled={busy || !note.trim()} onClick={addNote}>ADD NOTE</button>{noteError && <p role="alert" className="sales-error">{noteError}</p>}{notes.map(item=><article key={item.id}><p>{item.title}</p><small>{new Date(item.createdAt).toLocaleString()}</small></article>)}</section>}
+    {history.length>0 && <details className="sales-history"><summary>CHANGE HISTORY · {history.length}</summary>{history.map((entry,i)=><p key={i}>{entry.action.toUpperCase()} · {new Date(entry.createdAt).toLocaleString()}<small>{entry.actorId}</small></p>)}</details>}
+    </div>
+  </dialog>;
+}
