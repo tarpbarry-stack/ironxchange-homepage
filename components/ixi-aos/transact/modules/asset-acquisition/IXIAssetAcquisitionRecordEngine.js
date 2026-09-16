@@ -4,6 +4,36 @@ const arr = (value) => (Array.isArray(value) ? value : []);
 const round = (value) => Math.round(num(value) * 100) / 100;
 const iso = () => new Date().toISOString();
 
+export function correctIXIAcquisitionPurchaseDate(record = {}, correction = {}, actor = {}) {
+  const previousValue = clean(record.acquisition?.purchaseDate);
+  const newValue = clean(correction.purchaseDate);
+  const reason = clean(correction.reason);
+  const reference = clean(correction.reference);
+  const parsed = Date.parse(`${newValue}T12:00:00.000Z`);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(newValue) || !Number.isFinite(parsed) ||
+      new Date(parsed).toISOString().slice(0, 10) !== newValue)
+    throw new Error("A valid purchase date is required.");
+  if (newValue === previousValue) throw new Error("Enter a different purchase date.");
+  if (!reason) throw new Error("A date correction reason is required.");
+  if (!reference) throw new Error("A purchase document or approval reference is required.");
+  if (clean(record.makeReady?.inServiceDate) && newValue > record.makeReady.inServiceDate)
+    throw new Error("Purchase date cannot be after the in-service date.");
+  const occurredAt = iso();
+  const event = {
+    adjustmentId: clean(correction.adjustmentId) || `ACQ-DATE-${Date.now()}`,
+    type: "purchase-date-correction", field: "purchaseDate",
+    previousValue, newValue, effectiveDate: newValue, reason, reference,
+    occurredAt, ...actorIdentity(actor),
+  };
+  return {
+    ...record,
+    acquisition: { ...record.acquisition, purchaseDate: newValue },
+    adjustments: [...arr(record.adjustments), event],
+    activity: [...arr(record.activity), event],
+    audit: { ...(record.audit || {}), updatedAt: occurredAt },
+  };
+}
+
 const BASIS_FIELD_DIRECTIONS = Object.freeze({
   purchasePrice: 1,
   buyerPremium: 1,

@@ -2,6 +2,7 @@ import IXIMoneyInput from "../../IXIMoneyInput";
 import { useEffect, useMemo, useState } from "react";
 import {
   createIXIAssetAcquisition,
+  correctIXIAssetAcquisitionDate,
   recordIXIAssetAcquisitionPackageNormalization,
   updateIXIAssetAcquisition,
 } from "./IXIAssetAcquisitionCommands";
@@ -314,6 +315,20 @@ const ES_TEXT = Object.freeze({
   ALLOCATION: "ASIGNACIÓN",
   "ALLOCATION METHOD": "MÉTODO DE ASIGNACIÓN",
   "AMEND ACQUISITION": "MODIFICAR ADQUISICIÓN",
+  "PURCHASE DATE": "FECHA DE COMPRA",
+  "CORRECT DATE": "CORREGIR FECHA",
+  "CORRECTED PURCHASE DATE": "FECHA DE COMPRA CORREGIDA",
+  "SAVE DATE CORRECTION": "GUARDAR CORRECCIÓN DE FECHA",
+  "PURCHASE DATE CORRECTION": "CORRECCIÓN DE FECHA DE COMPRA",
+  "ACQUISITION AUDIT TRAIL": "HISTORIAL DE AUDITORÍA DE ADQUISICIÓN",
+  "A VALID PURCHASE DATE IS REQUIRED.": "SE REQUIERE UNA FECHA DE COMPRA VÁLIDA.",
+  "ENTER A DIFFERENT PURCHASE DATE.": "INGRESE UNA FECHA DE COMPRA DIFERENTE.",
+  "A DATE CORRECTION REASON IS REQUIRED.": "SE REQUIERE UN MOTIVO PARA CORREGIR LA FECHA.",
+  "A PURCHASE DOCUMENT OR APPROVAL REFERENCE IS REQUIRED.": "SE REQUIERE UNA REFERENCIA DEL DOCUMENTO DE COMPRA O APROBACIÓN.",
+  "PURCHASE DATE CANNOT BE AFTER THE IN-SERVICE DATE.": "LA FECHA DE COMPRA NO PUEDE SER POSTERIOR A LA PUESTA EN SERVICIO.",
+  "REOPEN THE SAVED ACQUISITION BEFORE CORRECTING ITS DATE.": "VUELVA A ABRIR LA ADQUISICIÓN GUARDADA ANTES DE CORREGIR SU FECHA.",
+  "THE ACQUISITION CHANGED. REOPEN IT BEFORE CORRECTING ITS DATE.": "LA ADQUISICIÓN CAMBIÓ. VUELVA A ABRIRLA ANTES DE CORREGIR SU FECHA.",
+  "THE CORRECTED ACQUISITION DATE COULD NOT BE VERIFIED. REOPEN THE RECORD.": "NO SE PUDO VERIFICAR LA FECHA CORREGIDA. VUELVA A ABRIR EL REGISTRO.",
   APPRAISAL: "AVALÚO",
   "AUCTION / DOCUMENT FEES": "CARGOS DE SUBASTA / DOCUMENTOS",
   "AUCTION LOT / SOURCE ITEM #": "LOTE DE SUBASTA / ARTÍCULO DE ORIGEN #",
@@ -720,7 +735,8 @@ export default function IXIAssetAcquisitionApp({
     if (!record || saving) return;
     setSaving(true);
     try {
-      const candidate = amendIXIAssetAcquisition(
+      const dateCorrection = amendmentField === "purchaseDate";
+      const candidate = dateCorrection ? null : amendIXIAssetAcquisition(
         hydrateIXIAssetAcquisitionRecord(record),
         {
           field: amendmentField,
@@ -731,9 +747,14 @@ export default function IXIAssetAcquisitionApp({
         },
         actor,
       );
-      const result = await updateIXIAssetAcquisition({
+      const action = dateCorrection ? "purchase-date-correction" : "acquisition-amendment";
+      const result = dateCorrection ? await correctIXIAssetAcquisitionDate({
+        record,
+        correction: { purchaseDate: amendmentValue, reason: amendmentReason, reference: amendmentReference },
+        actor,
+      }) : await updateIXIAssetAcquisition({
         record: candidate,
-        action: "acquisition-amendment",
+        action,
       });
       setRecord(result.record);
       setAmendmentOpen(false);
@@ -744,7 +765,7 @@ export default function IXIAssetAcquisitionApp({
       await onRecordChange?.(
         result.record,
         {
-          action: "acquisition-amendment",
+          action,
           adjustment: result.record.adjustments?.at(-1),
           response: result.response,
         },
@@ -896,6 +917,18 @@ export default function IXIAssetAcquisitionApp({
         </div>
         <div className="acq-section">{t.deal}</div>
         <div className="acq-money">
+          <span>{t.purchaseDate}</span>
+          <b>{r.acquisition?.purchaseDate || "—"}</b>
+        </div>
+        <div className="acq-inline-actions">
+          <button type="button" onClick={() => {
+            setAmendmentField("purchaseDate");
+            setAmendmentValue(r.acquisition?.purchaseDate || "");
+            setAmendmentOpen(true);
+            setErrors({});
+          }}>{tx("CORRECT DATE")}</button>
+        </div>
+        <div className="acq-money">
           <span>{tx("ORIGINAL PURCHASE ALLOCATION")}</span>
           <b>{money(originalBasis)}</b>
         </div>
@@ -929,9 +962,14 @@ export default function IXIAssetAcquisitionApp({
           <div className="acq-event-edit">
             <Field label={tx("FIELD TO CORRECT")}>
               <select
+                aria-label={tx("FIELD TO CORRECT")}
                 value={amendmentField}
-                onChange={(event) => setAmendmentField(event.target.value)}
+                onChange={(event) => {
+                  setAmendmentField(event.target.value);
+                  setAmendmentValue(event.target.value === "purchaseDate" ? r.acquisition?.purchaseDate || "" : "");
+                }}
               >
+                <option value="purchaseDate">{t.purchaseDate}</option>
                 <option value="purchasePrice">{tx("PURCHASE PRICE")}</option>
                 <option value="buyerPremium">{tx("BUYER PREMIUM")}</option>
                 <option value="auctionDocumentFees">
@@ -953,7 +991,12 @@ export default function IXIAssetAcquisitionApp({
                 </option>
               </select>
             </Field>
-            <div className="acq-grid2">
+            {amendmentField === "purchaseDate" ? (
+              <Field label={tx("CORRECTED PURCHASE DATE")}>
+                <input type="date" aria-label={tx("CORRECTED PURCHASE DATE")}
+                  value={amendmentValue} onChange={event => setAmendmentValue(event.target.value)} />
+              </Field>
+            ) : <div className="acq-grid2">
               <Field label={tx("REVISED VALUE")}>
                 <IXIMoneyInput
                   value={amendmentValue}
@@ -968,12 +1011,13 @@ export default function IXIAssetAcquisitionApp({
                   onChange={(event) => setAmendmentDate(event.target.value)}
                 />
               </Field>
-            </div>
+            </div>}
             <Field label={tx("REASON")}>
-              <Input value={amendmentReason} onChange={setAmendmentReason} />
+              <Input aria-label={tx("REASON")} value={amendmentReason} onChange={setAmendmentReason} />
             </Field>
             <Field label={tx("INVOICE / DOCUMENT / APPROVAL REF")}>
               <Input
+                aria-label={tx("INVOICE / DOCUMENT / APPROVAL REF")}
                 value={amendmentReference}
                 onChange={setAmendmentReference}
               />
@@ -984,7 +1028,7 @@ export default function IXIAssetAcquisitionApp({
               onClick={saveAmendment}
               disabled={saving}
             >
-              {saving ? tx("SAVING...") : tx("SAVE IMMUTABLE AMENDMENT")}
+              {saving ? tx("SAVING...") : tx(amendmentField === "purchaseDate" ? "SAVE DATE CORRECTION" : "SAVE IMMUTABLE AMENDMENT")}
             </button>
             {errors.amendment ? (
               <div className="acq-error">{errors.amendment}</div>
@@ -1101,7 +1145,7 @@ export default function IXIAssetAcquisitionApp({
           </div>
         ) : null}
         {(r.adjustments || []).length ? (
-          <div className="acq-section">{tx("BASIS AUDIT TRAIL")}</div>
+          <div className="acq-section">{tx("ACQUISITION AUDIT TRAIL")}</div>
         ) : null}
         {(r.adjustments || [])
           .slice()
@@ -1112,14 +1156,16 @@ export default function IXIAssetAcquisitionApp({
                 <strong>
                   {tx(clean(item.type).replace(/-/g, " ").toUpperCase())}
                 </strong>
-                <b className={Number(item.basisDelta) < 0 ? "" : "yellow"}>
+                {item.type !== "purchase-date-correction" && <b className={Number(item.basisDelta) < 0 ? "" : "yellow"}>
                   {money(item.basisDelta)}
-                </b>
+                </b>}
               </div>
               <small>
                 {item.effectiveDate} · {item.reason} ·{" "}
                 {item.reference || item.packageReference} ·{" "}
-                {money(item.basisBefore)} → {money(item.basisAfter)}
+                {item.type === "purchase-date-correction"
+                  ? `${item.previousValue} → ${item.newValue} · ${item.actorLabel || item.actorPassportId}`
+                  : `${money(item.basisBefore)} → ${money(item.basisAfter)}`}
               </small>
             </div>
           ))}
