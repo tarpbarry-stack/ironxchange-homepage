@@ -2,7 +2,7 @@ import { useEffect,useRef,useState } from "react";
 import { salesRequest,STAGES,todayLocal } from "./salesDeskClient";
 
 function Field({label,children,wide=false}) { return <label className={wide ? "sales-field wide" : "sales-field"}><span>{label}</span>{children}</label>; }
-export default function SalesDeskEditor({editor,people,boardMachines=[],onClose,onSaved,onQuote,onOpenMachines}) {
+export default function SalesDeskEditor({editor,people,boardMachines=[],readOnly=false,onClose,onSaved,onQuote,onOpenMachines}) {
   const dialog=useRef(null),saveLock=useRef(false),command=useRef(null);
   const [value,setValue]=useState(editor.record),[dirty,setDirty]=useState(false),[busy,setBusy]=useState(false),[error,setError]=useState("");
   const [contactQuery,setContactQuery]=useState(""),[contacts,setContacts]=useState([]),[notes,setNotes]=useState([]),[note,setNote]=useState("");
@@ -24,7 +24,7 @@ export default function SalesDeskEditor({editor,people,boardMachines=[],onClose,
   useEffect(refreshNotes,[kind,value.id]);
   const patch=(key,next)=>{setValue(v=>({...v,[key]:next}));setDirty(true);setError("");command.current=null;};
   const save=async e=>{
-    e.preventDefault();if(saveLock.current)return;saveLock.current=true;setBusy(true);setError("");
+    e.preventDefault();if(saveLock.current || readOnly)return;saveLock.current=true;setBusy(true);setError("");
     const payload={kind,record:value,revision:value.revision};
     if(!command.current)command.current={...payload,commandId:crypto.randomUUID()};
     try {
@@ -34,7 +34,7 @@ export default function SalesDeskEditor({editor,people,boardMachines=[],onClose,
   };
   const noteCommand=useRef(null);
   const addNote=async()=>{
-    if(saveLock.current || !note.trim())return;saveLock.current=true;setBusy(true);setNoteError("");
+    if(saveLock.current || readOnly || !note.trim())return;saveLock.current=true;setBusy(true);setNoteError("");
     if(!noteCommand.current)noteCommand.current={kind:"notes",commandId:crypto.randomUUID(),record:{title:note,parentKind:kind,parentId:value.id}};
     try{await salesRequest("commands",{body:noteCommand.current});setNote("");noteCommand.current=null;refreshNotes();}catch(e){setNoteError(e.message);}finally{saveLock.current=false;setBusy(false);}
   };
@@ -42,7 +42,7 @@ export default function SalesDeskEditor({editor,people,boardMachines=[],onClose,
   return <dialog ref={dialog} className="sales-dialog" onCancel={e=>{e.preventDefault();close();}} aria-labelledby="sales-editor-title">
     <header><div><span className="sales-eyebrow">IXI SALES DESK · {value.id ? "EXISTING RECORD" : "NEW RECORD"}</span><h2 id="sales-editor-title">{kind==="contacts" ? "CONTACT" : kind==="deals" ? "DEAL WORKSPACE" : kind==="tasks" ? "FOLLOW-UP" : "SAVE BOARD"}</h2></div><button onClick={close} aria-label="Close record" disabled={busy}>×</button></header>
     <div className="sales-dialog-body"><form onSubmit={save}>
-      <fieldset disabled={busy} className="sales-fields">
+      <fieldset disabled={busy || readOnly} className="sales-fields">
         {kind==="contacts" && <>
           {!value.id && <Field label="EXISTING IXI PERSON" wide><select value={value.objectId || ""} onChange={e=>{const person=people.find(p=>p.objectId===e.target.value);patch("objectId",e.target.value);if(person)patch("name",person.name);}}><option value="">Create a new contact</option>{people.map(p=><option key={p.objectId} value={p.objectId}>{p.name}</option>)}</select></Field>}
           <Field label="NAME *">{input("name","text",150,true)}</Field><Field label="COMPANY">{input("company","text",150)}</Field><Field label="PHONE">{input("phone","tel",60)}</Field><Field label="EMAIL">{input("email","email",254)}</Field><Field label="ADDRESS" wide>{input("address","text",500)}</Field><Field label="SOURCE">{input("source","text",100)}</Field><Field label="PREFERRED CONTACT"><select value={value.preference || ""} onChange={e=>patch("preference",e.target.value)}><option value="">Not specified</option><option>Phone</option><option>Email</option><option>Text</option></select></Field><Field label="MACHINES WANTED / INTERESTS" wide><textarea value={value.interest || ""} maxLength={1000} onChange={e=>patch("interest",e.target.value)}/></Field>
@@ -60,10 +60,10 @@ export default function SalesDeskEditor({editor,people,boardMachines=[],onClose,
         {kind==="boards" && <><Field label="BOARD NAME *" wide>{input("title","text",100,true)}</Field><p className="wide">{value.keys?.length || 0} machines will be saved in this order.</p></>}
       </fieldset>
       {error && <p className="sales-error" role="alert">{error}</p>}
-      <div className="sales-editor-actions"><span>{busy ? "SAVING…" : dirty ? "UNSAVED CHANGES" : value.id ? "SAVED TO IX-CORE" : "READY TO SAVE"}</span><button className="sales-primary" type="submit" disabled={busy || (!!value.id && !dirty)}>{busy ? "SAVING…" : "SAVE"}</button></div>
+      <div className="sales-editor-actions"><span>{busy ? "SAVING…" : dirty ? "UNSAVED CHANGES" : value.id ? "SAVED TO IX-CORE" : "READY TO SAVE"}</span><button className="sales-primary" type="submit" disabled={readOnly || busy || (!!value.id && !dirty)}>{busy ? "SAVING…" : "SAVE"}</button></div>
     </form>
-    {value.id && kind==="deals" && <div className="sales-actions"><button disabled={dirty || busy || !!note.trim()} onClick={()=>onOpenMachines(value)}>OPEN DEAL MACHINES ↗</button><button disabled={dirty || busy || !!note.trim() || !value.machines?.length} onClick={()=>onQuote(value)}>PREPARE QUOTE ↗</button><a href={`/transact${value.machines?.[0]?.passportId ? `?passport=${encodeURIComponent(value.machines[0].passportId)}` : ""}`}>TRAN$ACT ↗</a></div>}
-    {value.id && ["contacts","deals"].includes(kind) && <section className="sales-notes"><h3>CONVERSATION & NOTES</h3><textarea aria-label="New conversation note" placeholder="What was discussed? What happens next?" maxLength={4000} value={note} disabled={busy} onChange={e=>{setNote(e.target.value);noteCommand.current=null;}}/><button disabled={busy || !note.trim()} onClick={addNote}>ADD NOTE</button>{noteError && <p role="alert" className="sales-error">{noteError}</p>}{notes.map(item=><article key={item.id}><p>{item.title}</p><small>{new Date(item.createdAt).toLocaleString()}</small></article>)}</section>}
+    {value.id && kind==="deals" && <div className="sales-actions"><button disabled={dirty || busy || !!note.trim()} onClick={()=>onOpenMachines(value)}>OPEN DEAL MACHINES ↗</button><button disabled={readOnly || dirty || busy || !!note.trim() || !value.machines?.length} onClick={()=>onQuote(value)}>PREPARE QUOTE ↗</button><a href={`/transact${value.machines?.[0]?.passportId ? `?passport=${encodeURIComponent(value.machines[0].passportId)}` : ""}`}>TRAN$ACT ↗</a></div>}
+    {value.id && ["contacts","deals"].includes(kind) && <section className="sales-notes"><h3>CONVERSATION & NOTES</h3><textarea aria-label="New conversation note" placeholder="What was discussed? What happens next?" maxLength={4000} value={note} disabled={busy || readOnly} onChange={e=>{setNote(e.target.value);noteCommand.current=null;}}/><button disabled={readOnly || busy || !note.trim()} onClick={addNote}>ADD NOTE</button>{noteError && <p role="alert" className="sales-error">{noteError}</p>}{notes.map(item=><article key={item.id}><p>{item.title}</p><small>{new Date(item.createdAt).toLocaleString()}</small></article>)}</section>}
     {history.length>0 && <details className="sales-history"><summary>CHANGE HISTORY · {history.length}</summary>{history.map((entry,i)=><p key={i}>{entry.action.toUpperCase()} · {new Date(entry.createdAt).toLocaleString()}<small>{entry.actorId}</small></p>)}</details>}
     </div>
   </dialog>;
