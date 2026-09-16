@@ -1,5 +1,7 @@
 import { createIXIAosObjectFinancialDocument, createIXIAosFinancialObjectReference } from "../../../financial-runtime/IXIAosFinancialRuntimeAdapter";
-import { patchIXIAosFinancialDocument } from "../../../financial-runtime/IXIAosFinancialReadClient";
+import { loadIXIAosFinancialDocument, patchIXIAosFinancialDocument } from "../../../financial-runtime/IXIAosFinancialReadClient";
+import { announceInventoryChange } from "../../../../../lib/listings/IXIInventoryEvents";
+import { correctIXIAcquisitionPurchaseDate } from "./IXIAssetAcquisitionRecordEngine";
 import { runIXIActionNoticeLifecycle } from "../../../../ixi-object-system/IXIActionNoticeEngine";
 import { createIXIAssetAcquisitionDraft, validateIXIAssetAcquisition } from "./IXIAssetAcquisitionContract";
 
@@ -153,6 +155,41 @@ export async function createIXIAssetAcquisition({ object = {}, context = {}, inp
       return { record: canonicalize(draft, response), response };
     },
   });
+}
+
+export async function correctIXIAssetAcquisitionDate({ record = {}, correction = {}, actor = {}, signal } = {}) {
+  const financialDocumentId = clean(record.financialBinding?.financialDocumentId);
+  const expectedRevision = Number(record.financialBinding?.revision);
+  if (!financialDocumentId || !Number.isInteger(expectedRevision) || expectedRevision < 1)
+    throw new Error("Reopen the saved acquisition before correcting its date.");
+  const current = await loadIXIAosFinancialDocument({ financialDocumentId, signal });
+  const document = current?.financialDocument;
+  if (document?.documentType !== "asset-acquisition" || document.financialDocumentId !== financialDocumentId ||
+      !document.assetAcquisition || Number(current?.server?.revision) !== expectedRevision)
+    throw new Error("The acquisition changed. Reopen it before correcting its date.");
+  const updated = correctIXIAcquisitionPurchaseDate(document.assetAcquisition, correction, actor);
+  const occurredAt = `${updated.acquisition.purchaseDate}T12:00:00.000Z`;
+  const commandId = updated.adjustments.at(-1).adjustmentId;
+  const response = await patchIXIAosFinancialDocument({
+    financialDocumentId, expectedRevision, commandId,
+    idempotencyKey: `ixi-acquisition-date:${financialDocumentId}:${expectedRevision}:${commandId}`,
+    patch: {
+      occurredAt,
+      assetAcquisition: updated,
+      acquisition: { ...document.acquisition, purchaseDate: updated.acquisition.purchaseDate },
+      lines: (document.lines || []).map(line => ({ ...line, occurredAt })),
+      metadata: { ...document.metadata, purchaseDate: updated.acquisition.purchaseDate },
+    },
+    metadata: { transactModule: "asset-acquisition", action: "purchase-date-correction", correction: updated.adjustments.at(-1) },
+    signal,
+  });
+  const saved = canonicalize(updated, response);
+  if (saved.financialBinding.financialDocumentId !== financialDocumentId ||
+      saved.acquisition?.purchaseDate !== updated.acquisition.purchaseDate ||
+      responseRecord(response)?.financialDocument?.occurredAt !== occurredAt)
+    throw new Error("The corrected acquisition date could not be verified. Reopen the record.");
+  announceInventoryChange({ passportId: saved.context.primaryPassportId, reason: "acquisition-date-corrected" });
+  return { record: saved, response };
 }
 
 export async function updateIXIAssetAcquisition({ record = {}, action = "update", metadata = {}, signal } = {}) {
