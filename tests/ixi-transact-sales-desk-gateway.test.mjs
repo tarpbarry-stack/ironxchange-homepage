@@ -52,3 +52,8 @@ test("catalog and deal financials require fresh core authorization before loadin
   let loaded=0;const handler=factory({sessionFor:async()=>({userId:'user'}),contextFor:async()=>({entityId:'company'}),request:async()=>{throw Object.assign(new Error('Seat revoked'),{status:403});},inventoryFor:async()=>{loaded++;},financialFor:async()=>{loaded++;}});
   for(const path of [['inventory'],['financial','deal-id']]){const res=response();await handler(request('GET',path),res);assert.equal(res.code,403);}assert.equal(loaded,0);
 });
+
+test("owner discovery remains available during the backward-compatible backend rollout",async()=>{
+  const calls=[];const handler=factory({sessionFor:async()=>({userId:'owner'}),contextFor:async()=>({entityId:'actual-company'}),request:async input=>{calls.push(input);if(input.path==='/sales-desk/companies')throw Object.assign(new Error('Entity required'),{code:'IXI_INTERNAL_ENTITY_REQUIRED',status:401});return {ok:true,context:{entityId:'actual-company',company:'Company',role:'owner'}};}});
+  const res=response();await handler(request('GET',['companies']),res);assert.equal(res.code,200);assert.equal(res.body.companies[0].entityId,'actual-company');assert.equal(calls[1].principalId,'owner');assert.equal(calls[1].entityId,'actual-company');
+});

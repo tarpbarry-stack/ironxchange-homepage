@@ -27,7 +27,17 @@ export function createSalesDeskHandler(deps = {}) {
       }
       const query = new URLSearchParams();
       for (const key of ["q","offset","limit","today","parentId","contactId","dealId","dueBefore","openOnly"]) if (typeof req.query[key] === "string") query.set(key,req.query[key]);
-      const payload = await request({path:`/sales-desk${path}${query.size ? `?${query}` : ""}`,method:req.method,body:req.method === "POST" ? path==="/invitations/accept" ? {entityId:req.body?.entityId,id:req.body?.id,token:req.body?.token,email:session.currentUser?.attributes?.email || "",verifiedEmail:session.currentUser?.attributes?.emailVerified===true} : req.body : null,principalId:session.userId,entityId:context.entityId});
+      let payload;
+      try { payload = await request({path:`/sales-desk${path}${query.size ? `?${query}` : ""}`,method:req.method,body:req.method === "POST" ? path==="/invitations/accept" ? {entityId:req.body?.entityId,id:req.body?.id,token:req.body?.token,email:session.currentUser?.attributes?.email || "",verifiedEmail:session.currentUser?.attributes?.emailVerified===true} : req.body : null,principalId:session.userId,entityId:context.entityId}); }
+      catch(error) {
+        if(path!=="/companies" || error.code!=="IXI_INTERNAL_ENTITY_REQUIRED")throw error;
+        // Compatibility while a complete backend release is being installed.
+        // Resolve the existing owner context; never create an account or seat.
+        const existing=await contextFor({session});
+        const verified=await request({path:"/sales-desk/context",method:"GET",principalId:session.userId,entityId:existing.entityId});
+        const actor=verified.context;
+        payload={ok:true,companies:[{entityId:actor.entityId,company:actor.company,role:actor.role}]};
+      }
       return res.status(200).json(payload);
     } catch(error) {
       const status = Number(error.status || error.statusCode || 502);
