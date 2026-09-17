@@ -3,7 +3,7 @@ import {
   createIXIAosFinancialObjectReference,
   mergeIXIAosFinancialReferences,
 } from "../../../financial-runtime/IXIAosFinancialRuntimeAdapter";
-import { patchIXIAosFinancialDocument } from "../../../financial-runtime/IXIAosFinancialReadClient";
+import { loadIXIAosFinancialDocument, patchIXIAosFinancialDocument } from "../../../financial-runtime/IXIAosFinancialReadClient";
 
 const clean = (value) => String(value ?? "").trim();
 const stored = (record) => {
@@ -295,7 +295,22 @@ async function postSalesOrderWorkflow(record = {}, operation = "", input = {}) {
       payload?.errors?.[0]?.message ||
         "Sales Order workflow could not be completed.",
     );
-  return { response: payload, ...workflowPayload(payload, record) };
+  const result = workflowPayload(payload, record);
+  result.invoice = await hydrateIXIEquipmentWorkflowInvoice(result.invoice);
+  return { response: payload, ...result };
+}
+
+export async function hydrateIXIEquipmentWorkflowInvoice(invoice, loadDocument = loadIXIAosFinancialDocument) {
+  if (!invoice) return null;
+  const id = clean(invoice.financialDocumentId);
+  if (!id) throw new Error("The linked invoice identity could not be verified.");
+  // The workflow returns a document, not its revision envelope. A subsequent
+  // allowance update must use the actual persisted revision, never zero or one.
+  const loaded = await loadDocument({ financialDocumentId: id });
+  const envelope = loaded?.record || loaded;
+  if (envelope?.financialDocument?.financialDocumentId !== id || !Number.isInteger(envelope?.server?.revision) || envelope.server.revision < 1)
+    throw new Error("The linked invoice revision could not be verified. Reopen the order and retry.");
+  return canonicalInvoice(invoice, { record: envelope });
 }
 
 export function ensureIXIEquipmentSaleInvoice(record = {}) {

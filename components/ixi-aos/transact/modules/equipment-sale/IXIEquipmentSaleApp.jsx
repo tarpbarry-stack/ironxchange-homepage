@@ -1,7 +1,7 @@
 import IXITradeInSection from "../../sales/IXITradeInSection";
 import IXITradeSummary from "../../sales/IXITradeSummary";
 import IXIMoneyInput, { IXINumericInput } from "../../IXIMoneyInput";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import {
   attestIXIEquipmentSaleSigned,
@@ -1084,6 +1084,8 @@ export default function IXIEquipmentSaleApp({
   const [open, setOpen] = useState(false);
   const [tab, setTab] = useState(() => tabForEntry(initialTab));
   const [busy, setBusy] = useState(false);
+  const tradeEditor = useRef(null);
+  const [tradeForm, setTradeForm] = useState(null);
   const [error, setError] = useState("");
   const [signingUrl, setSigningUrl] = useState("");
   const [showNewOrder, setShowNewOrder] = useState(false);
@@ -1167,6 +1169,8 @@ export default function IXIEquipmentSaleApp({
   const setAdditionalTerms = (value) =>
     setInput((current) => ({ ...current, additionalTerms: value }));
   async function save(action = "save", override = null) {
+    if (!override && !["prepare-trade", "save-trades"].includes(action) && tradeEditor.current?.hasPendingTrade)
+      return tradeEditor.current.savePendingTrade();
     setBusy(true);
     setError("");
     try {
@@ -1234,6 +1238,10 @@ export default function IXIEquipmentSaleApp({
           action: "convert-to-sales-order",
         });
       }
+      // Keep the confirmed order revision available if the invoice sync needs
+      // retry. Do not refresh/remount the surrounding worksheet mid-operation.
+      setRecord(savedRecord);
+      setInput(saleInputFromRecord(savedRecord));
       if (action === "save-trades" && ensuredInvoice && clean(ensuredInvoice.financialState).toLowerCase() === "draft") {
         const synced = await saveIXIEquipmentInvoice({ object, context, record: savedRecord, invoice: ensuredInvoice, input: invoiceDraft });
         ensuredInvoice = synced.invoice;
@@ -1242,7 +1250,7 @@ export default function IXIEquipmentSaleApp({
       setRevisionOpen(false);
       setRecord(savedRecord);
       setInput(saleInputFromRecord(savedRecord));
-      await onRecordChange?.(
+      if (action !== "prepare-trade") await onRecordChange?.(
         savedRecord,
         {
           action: effectiveAction,
@@ -1264,7 +1272,7 @@ export default function IXIEquipmentSaleApp({
     setError("");
     try {
       let current = draft;
-      if (revisionOpen || !current?.financialBinding?.financialDocumentId)
+      if (tradeEditor.current?.hasPendingTrade || revisionOpen || !current?.financialBinding?.financialDocumentId)
         current = await save(revisionOpen ? "revise-and-resend" : "prepare");
       if (!current) return;
       if (!getIXIEquipmentSaleReadiness(current).ready)
@@ -1301,6 +1309,11 @@ export default function IXIEquipmentSaleApp({
     }
   }
   async function markSignedOutsideIXI() {
+    if (tradeEditor.current?.hasPendingTrade) {
+      const saved = await tradeEditor.current.savePendingTrade();
+      if (saved) setError("Trade saved. Review the updated order, then mark the signed copy on file.");
+      return;
+    }
     setBusy(true);
     setError("");
     try {
@@ -1453,9 +1466,25 @@ export default function IXIEquipmentSaleApp({
         </button>
       </div>
     ) : null;
-  const tradeSection = entryMode === "invoice" ? null : <IXITradeInSection record={draft} context={context} locked={orderLocked || invoiceLocked || busy}
+  const tradeSection = entryMode === "invoice" ? null : <IXITradeInSection ref={tradeEditor} form={tradeForm} onFormChange={setTradeForm} record={draft} context={context} locked={orderLocked || invoiceLocked || busy}
     ensureOrder={() => save("prepare-trade")}
     onTradesChange={(trades, saved = draft) => save("save-trades", updateIXIEquipmentSale(saved, { ...saleInputFromRecord(saved), trades, tradeAllowance: trades.reduce((sum, row) => sum + Number(row.allowance), 0) }))} />;
+  const openStageAfterTrade = async (...args) => {
+    if (tradeEditor.current?.hasPendingTrade && !(await tradeEditor.current.savePendingTrade())) return;
+    onOpenStage?.(...args);
+  };
+  const startStageAfterTrade = async (...args) => {
+    if (tradeEditor.current?.hasPendingTrade && !(await tradeEditor.current.savePendingTrade())) return;
+    onStartStage?.(...args);
+  };
+  const switchTabAfterTrade = async nextTab => {
+    if (tradeEditor.current?.hasPendingTrade && !(await tradeEditor.current.savePendingTrade())) return;
+    setTab(nextTab);
+  };
+  const tradeNavigation = entryMode === "invoice" && deal?.stageRecords?.["sales-order"] ? <div className="es-revision-control">
+    <div><b>TRADE MACHINES &amp; ACQUISITIONS</b><span>Open the linked order to view incoming machines, complete acquisitions, or add photos.</span></div>
+    <button type="button" onClick={() => onOpenStage?.({ id: "sales-order", moduleId: "sales-order" }, deal.stageRecords["sales-order"], deal)}>OPEN TRADES</button>
+  </div> : null;
   const workspace =
     mounted && open
       ? createPortal(
@@ -1473,13 +1502,13 @@ export default function IXIEquipmentSaleApp({
                   ORDER
                 </button>
                 <button
-                  onClick={() => setTab("preview")}
+                  onClick={() => switchTabAfterTrade("preview")}
                   className={tab === "preview" ? "active" : ""}
                 >
                   PREVIEW
                 </button>
                 <button
-                  onClick={() => setTab("invoice")}
+                  onClick={() => switchTabAfterTrade("invoice")}
                   className={tab === "invoice" ? "active" : ""}
                 >
                   INVOICE
@@ -1512,8 +1541,8 @@ export default function IXIEquipmentSaleApp({
               invoice={invoiceRecord}
               deal={deal}
               activeStageId={activeStageId}
-              onOpenStage={onOpenStage}
-              onStartStage={onStartStage}
+              onOpenStage={openStageAfterTrade}
+              onStartStage={startStageAfterTrade}
             />
             <div className="es-status">
               <span>{record?.identity?.number || "NEW SALES ORDER"}</span>
@@ -1533,6 +1562,7 @@ export default function IXIEquipmentSaleApp({
               </div>
             ) : null}
             {revisionControl}
+            {tradeNavigation}
             <main>
               {tab === "preview" ? (
                 <OrderDocument record={draft} />
@@ -1859,8 +1889,8 @@ export default function IXIEquipmentSaleApp({
           invoice={invoiceRecord}
           deal={deal}
           activeStageId={activeStageId}
-          onOpenStage={onOpenStage}
-          onStartStage={onStartStage}
+          onOpenStage={openStageAfterTrade}
+          onStartStage={startStageAfterTrade}
         />
         {!recordHeaderEmbedded ? <div className="es-card-record">
           <span>
@@ -1873,6 +1903,7 @@ export default function IXIEquipmentSaleApp({
         : null}
         {error ? <div className="es-error">{error}</div> : null}
         {revisionControl}
+        {tradeNavigation}
         {activeStageId === "signed" ? (
           <ManualSignatureControl
             value={

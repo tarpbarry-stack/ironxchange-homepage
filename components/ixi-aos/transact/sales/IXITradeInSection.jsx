@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
+import { orderTradeFromRow as asTrade, saveTradeInOrder } from "./IXITradeSaveWorkflow";
 import IXIMachineCard from "../../../ixi-machine-card/IXIMachineCard";
 import IXIAssetAcquisitionApp from "../modules/asset-acquisition/IXIAssetAcquisitionApp";
 import IXIMoneyInput from "../IXIMoneyInput";
@@ -41,25 +42,18 @@ async function request(input, method = "POST") {
     );
   return result;
 }
-const asTrade = (row) => ({
-  tradeId: row.tradeId,
-  passportId: row.passportId,
-  objectId: row.objectId,
-  listingId: row.listingId,
-  ...row.machine,
-  allowance: row.allowanceCents / 100,
-});
-
-export default function IXITradeInSection({
+const IXITradeInSection = forwardRef(function IXITradeInSection({
   record,
   context,
   locked,
   ensureOrder,
   onTradesChange,
-}) {
-  const [form, setForm] = useState(null),
-    [rows, setRows] = useState([]),
+  form,
+  onFormChange: setForm,
+}, ref) {
+  const [rows, setRows] = useState([]),
     [busy, setBusy] = useState(false);
+  const saving = useRef(false);
   const [error, setError] = useState(""),
     [acquiring, setAcquiring] = useState(null),
     [choices, setChoices] = useState(null);
@@ -71,6 +65,7 @@ export default function IXITradeInSection({
   const outgoingPassportId = context?.primary?.passportId;
   const trades = record?.trades || [];
   const scope = { dealId, outgoingPassportId };
+  useImperativeHandle(ref, () => ({ savePendingTrade: () => add(), hasPendingTrade: Boolean(form) }));
   useEffect(() => {
     if (!dealId || !outgoingPassportId) return;
     let active = true;
@@ -109,57 +104,32 @@ export default function IXITradeInSection({
     }
   }
   async function add(value = form) {
-    if (!value || busy) return;
+    if (!value || saving.current || locked) return null;
+    saving.current = true;
     setBusy(true);
     setError("");
     try {
-      const saved = await ensureOrder();
-      if (!saved) throw new Error("Save the order before adding this trade.");
-      const machine = {
-        year: clean(value.year),
-        make: clean(value.make),
-        model: clean(value.model),
-        hours: clean(value.hours),
-        serialNumber: clean(value.serialNumber),
-        location: clean(value.location),
-      };
       const result = await runIXIActionNoticeLifecycle({
         objectId: outgoingPassportId,
         commandId: value.tradeId,
         source: "ixi-transact-trade",
-        savingMessage: "SAVING TRADE MACHINE…",
-        successMessage: "TRADE MACHINE SAVED",
+        savingMessage: "SAVING TRADE AND ORDER…",
+        successMessage: "TRADE AND ALLOWANCE SAVED",
         errorMessage: "TRADE NEEDS RETRY",
-        operation: () =>
-          request({
-            dealId: saved.identity.dealId,
-            outgoingPassportId,
-            tradeId: value.tradeId,
-            machine,
-            allowanceCents: Math.round(Number(value.allowance) * 100),
-            existingListingId: value.existingListingId || "",
-          }),
+        operation: () => saveTradeInOrder({
+          form: value, outgoingPassportId, prepareOrder: ensureOrder,
+          saveMachine: request, attachTrade: onTradesChange,
+          onMachineSaved: row => setRows(current => [...current.filter(item => item.tradeId !== row.tradeId), row]),
+        }),
       });
-      setRows((current) => [
-        ...current.filter((row) => row.tradeId !== result.row.tradeId),
-        result.row,
-      ]);
-      const trade = asTrade(result.row);
-      const next = [
-        ...(saved.trades || []).filter(
-          (item) => item.tradeId !== trade.tradeId,
-        ),
-        trade,
-      ];
-      if (!(await onTradesChange(next, saved)))
-        throw new Error(
-          "Machine saved. Retry attaching it to this order below.",
-        );
       setForm(null);
       setChoices(null);
+      return result;
     } catch (caught) {
       setError(caught.message);
+      return null;
     } finally {
+      saving.current = false;
       setBusy(false);
     }
   }
@@ -266,6 +236,8 @@ export default function IXITradeInSection({
           {error}
         </p>
       ) : null}
+      {!trades.length && !form ? <p>No trade machines attached to this order.</p> : null}
+      {locked && !trades.length ? <p>Trade entry is locked by the issued invoice or signed order. A saved trade is still available here for acquisition and photos.</p> : null}
       {!locked && !form ? (
         <div className={styles.actions}>
           <button
@@ -337,6 +309,7 @@ export default function IXITradeInSection({
       ) : null}
       {form ? (
         <div className={styles.form}>
+          <p role="status">UNSAVED TRADE · Save Trade or Save Order saves this machine and its allowance.</p>
           {[
             ["year", "YEAR"],
             ["make", "MAKE"],
@@ -529,4 +502,6 @@ export default function IXITradeInSection({
       ) : null}
     </section>
   );
-}
+});
+
+export default IXITradeInSection;
