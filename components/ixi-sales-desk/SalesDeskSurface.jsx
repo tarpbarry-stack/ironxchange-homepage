@@ -139,7 +139,7 @@ export default function SalesDeskSurface({initial,dashboardClass,workspace:w}) {
     <footer className="sales-footer"><span><i/> IXI SALES DESK</span><span>{initial.context.company}</span><span>FINANCIAL RECORDS · TRAN$ACT ↗</span></footer>
     {editor && <SalesDeskEditor key={`${editor.kind}:${editor.instance || editor.record.id || "new"}`} editor={editor} people={initial.people || []} actor={actor} team={team} onOpenLinked={openEditor} onFollowUp={followUp} onPackage={openPackage} boardMachines={w.openMachines.map(machineReference)} readOnly={!canWrite} onClose={()=>setEditor(null)} onSaved={onSaved} onQuote={prepareQuote} onOpenMachines={activateDeal}/>}
     {quote && <Quote {...quote} actor={initial.context} onClose={()=>setQuote(null)} onSaved={()=>{refreshSummary();w.setNotice("Quote saved in TRAN$ACT and linked to this deal.");}}/>}
-    {financial && <Financials deal={financial} onClose={()=>setFinancial(null)} onSaved={onSaved}/>}
+    {financial && <Financials readOnly={!canWrite} deal={financial} onClose={()=>setFinancial(null)} onSaved={onSaved}/>}
     {admin==="team" && <Team actor={actor} people={initial.people || []} onClose={()=>{setAdmin("");refreshSummary();}}/>}
     {admin==="import" && <ContactImport onClose={()=>setAdmin("")} onSaved={()=>{setRevision(n=>n+1);refreshSummary();}}/>}
     {buyerPackage && <BuyerPackage {...buyerPackage} readOnly={!canWrite} machines={buyerPackage.deal.machines.map(ref=>({key:ref.key,item:w.allMachines.find(item=>dashboardKey(item)===ref.key)})).filter(m=>m.item)} onClose={()=>setBuyerPackage(null)} onSaved={()=>setRevision(n=>n+1)}/>}
