@@ -57,3 +57,17 @@ test("owner discovery remains available during the backward-compatible backend r
   const calls=[];const handler=factory({sessionFor:async()=>({userId:'owner'}),contextFor:async()=>({entityId:'actual-company'}),request:async input=>{calls.push(input);if(input.path==='/sales-desk/companies')throw Object.assign(new Error('Entity required'),{code:'IXI_INTERNAL_ENTITY_REQUIRED',status:401});return {ok:true,context:{entityId:'actual-company',company:'Company',role:'owner'}};}});
   const res=response();await handler(request('GET',['companies']),res);assert.equal(res.code,200);assert.equal(res.body.companies[0].entityId,'actual-company');assert.equal(calls[1].principalId,'owner');assert.equal(calls[1].entityId,'actual-company');
 });
+
+test('calendar ranges, scopes and revision envelopes remain subject to authenticated core authority',async()=>{
+  const calls=[];const handler=factory({sessionFor:async()=>({userId:'rep'}),contextFor:async()=>({entityId:'company'}),request:async input=>{calls.push(input);return {ok:true};}});
+  const req=request('GET',['calendar']);Object.assign(req.query,{from:'2026-09-01',to:'2026-09-30',scope:'team',zone:'America/Chicago',includeCompleted:'true',principalId:'owner'});const res=response();await handler(req,res);
+  assert.equal(res.code,200);assert.equal(calls[0].principalId,'rep');assert.match(calls[0].path,/scope=team/);assert.match(calls[0].path,/zone=America%2FChicago/);
+  const preview=request('POST',['calendar','preview']);preview.body={kind:'tasks',record:{id:'task',dueDate:'2026-09-20'},revision:2};await handler(preview,response());assert.deepEqual(calls[1].body,preview.body);
+});
+test('inquiry sync forwards only the verified source page and cannot accept forged browser rows',async()=>{
+  const calls=[];let sourceActor;
+  const handler=factory({sessionFor:async()=>({userId:'owner'}),contextFor:async()=>({entityId:'company'}),request:async input=>{calls.push(input);return input.path==='/sales-desk/context' ? {context:{canManageTeam:true,canWrite:true,ownerUserId:'actual-seller'}} : {ok:true,results:[]};},inquiriesFor:async(actor,input)=>{sourceActor=actor;assert.deepEqual(input,{page:2,until:'2026-09-17T12:00:00Z'});return {rows:[{sourceId:'verified-source'}],issues:[],page:2,totalPages:2,total:30,until:input.until};}});
+  const req=request('POST',['inquiries','sync']);req.body={page:2,until:'2026-09-17T12:00:00Z',rows:[{sourceId:'forged',buyer:{name:'Spoofed'}}],providerUserId:'other'};const res=response();await handler(req,res);
+  assert.equal(res.code,200);assert.equal(sourceActor.ownerUserId,'actual-seller');assert.deepEqual(calls[1].body,{rows:[{sourceId:'verified-source'}]});
+  const blocked=response();await handler(request('POST',['intake']),blocked);assert.equal(blocked.code,405);
+});

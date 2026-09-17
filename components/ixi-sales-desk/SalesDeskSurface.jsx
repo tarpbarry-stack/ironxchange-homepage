@@ -3,24 +3,32 @@ import dynamic from "next/dynamic";
 import { useEffect,useMemo,useRef,useState } from "react";
 import SalesDeskRail from "./SalesDeskRail";
 import SalesDeskEditor from "./SalesDeskEditor";
+import SalesDeskDaily,{useSalesWork} from "./SalesDeskDaily";
+import {nextSchedule} from "../../lib/sales-desk/calendar.mjs";
 import { salesRequest,todayLocal,stageLabel,machineReference } from "./salesDeskClient";
 import { dashboardKey,passportOf } from "../ixi-dashboard/dashboardContract.mjs";
 import styles from "./salesDesk.module.css";
 
 const Board=dynamic(()=>import("../ixi-dashboard/DashboardBoard"),{ssr:false,loading:()=> <div className="sales-empty" role="status">Preparing your machine board…</div>});
 const Quote=dynamic(()=>import("./SalesDeskQuote"),{ssr:false,loading:()=> <div className="sales-empty" role="status">Preparing the quote…</div>});
+const Calendar=dynamic(()=>import("./SalesDeskCalendar"),{ssr:false});
+const Inquiries=dynamic(()=>import("./SalesDeskInquiries"),{ssr:false});
 const Financials=dynamic(()=>import("./SalesDeskFinancials"),{ssr:false});
 const Team=dynamic(()=>import("./SalesDeskTeam"),{ssr:false});
 const ContactImport=dynamic(()=>import("./SalesDeskImport"),{ssr:false});
 const BuyerPackage=dynamic(()=>import("./SalesDeskPackage"),{ssr:false});
 const TABS=[["deals","DEALS"],["contacts","CONTACTS"],["tasks","FOLLOW-UPS"],["boards","BOARDS"]];
 const emptyList={items:[],total:0};
+const findMachine=(ref,items)=>items.find(item=>dashboardKey(item)===ref.key) || items.find(item=>ref.passportId ? passportOf(item)===ref.passportId : ref.listingId && String(item.id?.uuid || item.id || "")===ref.listingId);
 
 export default function SalesDeskSurface({initial,dashboardClass,workspace:w}) {
   const [tab,setTab]=useState("deals"),[query,setQuery]=useState(""),[lists,setLists]=useState(initial.lists),[loading,setLoading]=useState(false),[listError,setListError]=useState("");
   const [editor,setEditor]=useState(null),[quote,setQuote]=useState(null),[comparison,setComparison]=useState(false),[hidden,setHidden]=useState({left:false,right:false}),[mobile,setMobile]=useState("");
   const [revision,setRevision]=useState(0),[summary,setSummary]=useState(initial.summary || {}),[recordLoading,setRecordLoading]=useState(false);
   const actor=initial.context;
+  const [pane,setPaneState]=useState("board"),[calendarMounted,setCalendarMounted]=useState(false),[workBucket,setWorkBucket]=useState("today"),[workScope,setWorkScope]=useState(actor.canAssign ? "team" : "mine");
+  const setPane=next=>{setPaneState(next);if(next==="calendar")setCalendarMounted(true);};
+  const work=useSalesWork(actor,revision,workBucket,workScope);
   const [team,setTeam]=useState(initial.team || []),[admin,setAdmin]=useState(""),[activeDeal,setActiveDeal]=useState(null),[financial,setFinancial]=useState(null),[buyerPackage,setBuyerPackage]=useState(null),[dueOnly,setDueOnly]=useState(false);
   const activeId=useRef(""),activeSequence=useRef(0);
   const activeStorage=`ixi-sales-active:${actor.entityId}:${actor.actorId}`;
@@ -54,7 +62,7 @@ export default function SalesDeskSurface({initial,dashboardClass,workspace:w}) {
     const seq=++detailSequence.current;
     if(record?.id){setRecordLoading(true);try{const result=await salesRequest(`records/${kind}/${record.id}`);if(seq===detailSequence.current)setEditor({kind,record:result.record,history:result.history});}catch(e){w.setNotice(e.message);}finally{if(seq===detailSequence.current)setRecordLoading(false);}return;}
     const defaults=kind==="deals" ? {title:"",contactId:"",stage:"inquiry",machines:w.openMachines.map(machineReference),dueDate:"",nextAction:""} : kind==="tasks" ? {title:"",dueDate:todayLocal(),completed:false} : kind==="boards" ? {title:"",keys:w.openKeys} : {name:"",email:"",phone:"",company:""};
-    setEditor({kind,record:defaults});
+    setEditor({kind,record:["tasks","deals"].includes(kind) ? nextSchedule(defaults) : defaults});
   };
   const onSaved=(kind,record)=>{
     if(kind==="deals" && activeId.current===record.id)setWorkingDeal(record);
@@ -81,13 +89,15 @@ export default function SalesDeskSurface({initial,dashboardClass,workspace:w}) {
   const activateDeal=async item=>{
     if(w.dirtyKeys.size){w.setNotice("Save the open machine changes before switching deals.");return;}
     const seq=++detailSequence.current;setRecordLoading(true);
-    try{const result=await salesRequest(`records/deals/${item.id}`);if(seq!==detailSequence.current)return;const available=new Set(w.allMachines.map(dashboardKey)),keys=result.record.machines.map(m=>m.key),matched=keys.filter(key=>available.has(key));w.setOpenKeys(matched);if(matched[0])w.setSelectedKey(matched[0]);setWorkingDeal(result.record);setEditor(null);setMobile("");if(matched.length<keys.length)w.setNotice(`${keys.length-matched.length} referenced machine(s) are no longer in available inventory. The deal history is preserved.`);}catch(e){w.setNotice(e.message);}finally{if(seq===detailSequence.current)setRecordLoading(false);}
+    try{const result=await salesRequest(`records/deals/${item.id}`);if(seq!==detailSequence.current)return;const keys=result.record.machines.map(m=>m.key),matched=result.record.machines.map(ref=>findMachine(ref,w.allMachines)).filter(Boolean).map(dashboardKey);w.setOpenKeys(matched);if(matched[0])w.setSelectedKey(matched[0]);setWorkingDeal(result.record);setEditor(null);setMobile("");setPane("board");if(matched.length<keys.length)w.setNotice(`${keys.length-matched.length} referenced machine(s) are no longer in available inventory. The deal history is preserved.`);}catch(e){w.setNotice(e.message);}finally{if(seq===detailSequence.current)setRecordLoading(false);}
   };
-  const followUp=(kind,record)=>{setEditor({kind:"tasks",instance:crypto.randomUUID(),record:{title:"",dueDate:todayLocal(),completed:false,dealId:kind==="deals" ? record.id : record.dealId || "",contactId:kind==="contacts" ? record.id : record.contactId || "",customerName:kind==="contacts" ? record.name : record.customerName || "",assignedTo:record.assignedTo || actor.actorId}});};
+  const followUp=(kind,record)=>{setEditor({kind:"tasks",instance:crypto.randomUUID(),record:{title:"",dueDate:todayLocal(),completed:false,dealId:kind==="deals" ? record.id : record.dealId || "",contactId:kind==="contacts" ? record.id : record.contactId || "",customerName:kind==="contacts" ? record.name : record.customerName || "",assignedTo:record.assignedTo ?? actor.actorId,machines:record.machines || [],...nextSchedule()}});};
+  const appointment=day=>setEditor({kind:"tasks",instance:crypto.randomUUID(),record:nextSchedule({title:"",dueDate:day,completed:false,dealId:activeDeal?.id || "",contactId:activeDeal?.contactId || "",customerName:activeDeal?.customerName || "",machines:activeDeal?.machines || w.openMachines.map(machineReference),assignedTo:activeDeal?.assignedTo ?? actor.actorId})});
+  const openContext=event=>event.dealId ? activateDeal({id:event.dealId}) : openEditor(event.kind,event.record);
   const openPackage=async record=>{try{const result=await salesRequest(`records/deals/${record.dealId}`);setEditor(null);setBuyerPackage({deal:result.record,record});}catch(e){w.setNotice(e.message);}};
   const prepareQuote=deal=>{
     if(!actor.canFinancial){w.setNotice("Financial actions require company-owner authority.");return;}
-    const owned=deal.machines.map(ref=>w.owned.find(item=>dashboardKey(item)===ref.key)).filter(Boolean);
+    const owned=deal.machines.map(ref=>findMachine(ref,w.owned)).filter(Boolean);
     if(!owned.length){w.setNotice("A quote requires a currently owned machine. Open the deal's machine in TRAN$ACT to review its availability.");return;}
     setQuote({deal,machines:owned});setEditor(null);
   };
@@ -100,23 +110,27 @@ export default function SalesDeskSurface({initial,dashboardClass,workspace:w}) {
     ["YEAR",item=>item.year || item.publicData?.year], ["MAKE",item=>item.make || item.publicData?.make], ["MODEL",item=>item.model || item.publicData?.model],
     ["HOURS",item=>item.hours ?? item.publicData?.hours], ["PRICE",item=>item.price], ["SERIAL NUMBER",item=>item.serialNumber || item.publicData?.serialNumber], ["LOCATION",item=>typeof item.location==="string" ? item.location : item.location?.address], ["PASSPORT",passportOf]
   ],[]);
-  return <div className={`${dashboardClass} ${styles.salesDesk}`} data-ixi-sales-desk="v2">
+  return <div className={`${dashboardClass} ${styles.salesDesk}`} data-ixi-sales-desk="v3">
     <Head><title>IXI Sales Desk | {initial.context.company}</title><meta name="robots" content="noindex,nofollow" /></Head>
     <style jsx global>{`body{margin:0;background:#090d0b;}`}</style>
     <header className="sales-header"><a className="sales-brand" href="/account" aria-label="IXI Home">IXI</a><div className="sales-title"><span className="sales-eyebrow">{initial.context.company}</span><h1>SALES DESK</h1></div><span className="sales-access"><i/> {actor.role.toUpperCase()} ACCESS</span><nav aria-label="IXI environments"><a href="/account">HOME</a><a href="/aos/work">AOS / WORK ↗</a>{actor.canFinancial && <a href="/transact">TRAN$ACT ↗</a>}{actor.canManageTeam && <button onClick={()=>setAdmin("team")}>TEAM</button>}{actor.canImport && <button disabled={!canWrite} onClick={()=>setAdmin("import")}>IMPORT</button>}</nav><button className="sales-new-contact" disabled={!canWrite} onClick={()=>openEditor("contacts")}>+ CONTACT</button><button className="sales-primary" disabled={!canWrite} onClick={()=>openEditor("deals")}>+ NEW DEAL</button></header>
     <div className="sales-scoreboard" aria-label="Sales overview">
       <button onClick={()=>toggleRail("left")}><span>OWNED MACHINES</span><strong>{w.ownedStatus.loading ? "—" : w.owned.length}</strong><small>Ready to work</small></button>
       <button onClick={()=>changeTab("deals")}><span>OPEN DEALS</span><strong>{summary.activeDeals ?? "—"}</strong><small>Active conversations</small></button>
-      <button onClick={()=>{changeTab("tasks");setDueOnly(true);}}><span>FOLLOW-UPS DUE</span><strong className={summary.dueTasks ? "sales-yellow" : ""}>{summary.dueTasks ?? "—"}</strong><small>Today & overdue</small></button>
+      <button onClick={()=>{setPane("today");setWorkBucket("today");}}><span>FOLLOW-UPS DUE</span><strong className={summary.dueTasks ? "sales-yellow" : ""}>{summary.dueTasks ?? "—"}</strong><small>Today & overdue</small></button>
       <button onClick={()=>changeTab("contacts")}><span>CONTACTS</span><strong>{summary.contacts ?? initial.lists.contacts.total}</strong><small>Your company address book</small></button>
       <div><span>ON YOUR BOARD</span><strong>{w.openMachines.length}</strong><small>Open · Work · Return</small></div>
     </div>
+    <div className="sales-work-strip" aria-label="Daily sales priorities">{[["today","TODAY"],["overdue","OVERDUE"],["unassigned","UNASSIGNED"],["upcoming","NEXT 7 DAYS"],["reminders","REMINDERS"]].map(([key,label])=><button key={key} aria-pressed={pane==="today" && workBucket===key} onClick={()=>{setWorkBucket(key);setPane("today");}}><span>{label}</span><strong>{work.error ? "—" : work.data.counts[key] ?? "—"}</strong></button>)}<span>{workScope==="team" ? "TEAM WORK" : "MY WORK"}</span>{work.error && <button onClick={work.refresh}>RETRY WORK QUEUE</button>}</div>
     <main className={`sales-workspace ${hidden.left ? "hide-machines" : ""} ${hidden.right ? "hide-sales" : ""} ${mobile ? `mobile-${mobile}` : ""}`}>
       <SalesDeskRail workspace={w} onClose={()=>{setHidden(v=>({...v,left:true}));setMobile("");}}/>
       <section className="dash-board sales-board" aria-label="Sales working board">
-        <div className="sales-board-toolbar"><button onClick={()=>toggleRail("left")}>‹ MACHINES</button><span className="sales-board-label">WORKING BOARD <b>{w.openMachines.length}</b></span><div className="sales-board-tools"><label>SIZE <select aria-label="Machine card size" value={w.size} onChange={e=>w.setSize(e.target.value)}><option value="fit">FIT</option><option value="natural">100%</option><option value="work">120%</option><option value="focus">140%</option></select></label><button onClick={()=>setComparison(true)} disabled={w.openMachines.length<2}>COMPARE</button><button onClick={()=>openEditor("boards")} disabled={!canWrite || !w.openMachines.length}>SAVE BOARD</button><button onClick={returnAll} disabled={!w.openMachines.length}>RETURN ALL</button></div><button onClick={()=>toggleRail("right")}>SALES ›</button></div>
-        {activeDeal && <div className="sales-active-deal"><div><span className="sales-eyebrow">WORKING DEAL · {stageLabel(activeDeal.stage)}</span><h2>{activeDeal.title}</h2><p><button onClick={()=>openEditor("contacts",{id:activeDeal.contactId})}>{activeDeal.customerName}</button><span>{team.find(m=>m.principalId===activeDeal.assignedTo)?.name || "Assigned member"}</span></p><div className="sales-active-next"><b>NEXT</b> {activeDeal.nextAction || "Set the next action"}{activeDeal.dueDate && <time>{activeDeal.dueDate}</time>}</div></div><div className="sales-active-actions"><button onClick={()=>openEditor("deals",activeDeal)}>DEAL DETAILS</button><button disabled={!canWrite} onClick={()=>followUp("deals",activeDeal)}>+ FOLLOW-UP</button>{actor.canFinancial && <><button disabled={!canWrite} onClick={()=>prepareQuote(activeDeal)}>QUOTE</button><button onClick={()=>setFinancial(activeDeal)}>TRANSACTIONS</button></>}<button disabled={!canWrite || !activeDeal.machines.length} onClick={()=>setBuyerPackage({deal:activeDeal})}>BUYER PACKAGE</button><button onClick={()=>setWorkingDeal(null)} aria-label="Close working deal">×</button></div></div>}
-        {w.auth.error ? <div className="sales-empty" role="alert">{w.auth.error}<button onClick={w.retryAuth}>TRY AGAIN</button><a href="/login?next=%2Fsales-desk">SIGN IN</a></div> : <Board machines={w.openMachines} ownedKeys={w.ownedKeys} states={w.states} onPatch={w.updateState} size={w.size} onReorder={w.setOpenKeys} onReturn={w.returnToRail} selectedKey={w.selectedKey} onSelect={w.setSelectedKey} getSellerProps={w.getSellerListingCardProps} onDirty={w.markDirty} dirtyKeys={w.dirtyKeys} onSaved={w.clearDirty} toggleSave={w.toggleSave} savedIds={w.savedIds} scrollTop={w.scroll} onScroll={w.onScroll} />}
+        <div className="sales-board-toolbar"><button onClick={()=>toggleRail("left")}>‹ MACHINES</button><div className="sales-view-tabs" aria-label="Sales workspace view">{[["board","BOARD"],["calendar","CALENDAR"],["today","DAILY WORK"],["inquiries","INQUIRIES"]].map(([key,label])=><button key={key} aria-pressed={pane===key} onClick={()=>setPane(key)}>{label}</button>)}</div><div className="sales-board-tools" hidden={pane!=="board"}><label>SIZE <select aria-label="Machine card size" value={w.size} onChange={e=>w.setSize(e.target.value)}><option value="fit">FIT</option><option value="natural">100%</option><option value="work">120%</option><option value="focus">140%</option></select></label><button onClick={()=>setComparison(true)} disabled={w.openMachines.length<2}>COMPARE</button><button onClick={()=>openEditor("boards")} disabled={!canWrite || !w.openMachines.length}>SAVE BOARD</button><button onClick={returnAll} disabled={!w.openMachines.length}>RETURN ALL</button></div><button onClick={()=>toggleRail("right")}>SALES ›</button></div>
+        {pane==="board" && activeDeal && <div className="sales-active-deal"><div><span className="sales-eyebrow">WORKING DEAL · {stageLabel(activeDeal.stage)}</span><h2>{activeDeal.title}</h2><p><button onClick={()=>openEditor("contacts",{id:activeDeal.contactId})}>{activeDeal.customerName}</button><span>{team.find(m=>m.principalId===activeDeal.assignedTo)?.name || (activeDeal.assignedTo ? "Assigned member" : "UNASSIGNED")}</span></p><div className="sales-active-next"><b>NEXT</b> {activeDeal.actionCompleted ? "COMPLETED · " : ""}{activeDeal.nextAction || "Set the next action"}{activeDeal.dueDate && <time>{activeDeal.dueDate}</time>}</div></div><div className="sales-active-actions"><button onClick={()=>openEditor("deals",activeDeal)}>DEAL DETAILS</button><button disabled={!canWrite} onClick={()=>followUp("deals",activeDeal)}>+ FOLLOW-UP</button>{actor.canFinancial && <><button disabled={!canWrite} onClick={()=>prepareQuote(activeDeal)}>QUOTE</button><button onClick={()=>setFinancial(activeDeal)}>TRANSACTIONS</button></>}<button disabled={!canWrite || !activeDeal.machines.length} onClick={()=>setBuyerPackage({deal:activeDeal})}>BUYER PACKAGE</button><button onClick={()=>setWorkingDeal(null)} aria-label="Close working deal">×</button></div></div>}
+        {calendarMounted && <div className="sales-preserved-panel" hidden={pane!=="calendar"}><Calendar actor={actor} team={team} revision={revision} onOpen={openEditor} onContext={openContext} onCreate={appointment} onSaved={onSaved}/></div>}
+        {pane==="today" && <SalesDeskDaily work={work} actor={actor} team={team} bucket={workBucket} setBucket={setWorkBucket} scope={workScope} setScope={setWorkScope} onOpen={openEditor} onContext={openContext} onCreate={()=>appointment(todayLocal())}/>}
+        {pane==="inquiries" && <Inquiries actor={actor} revision={revision} onDeal={activateDeal} onChanged={()=>{setRevision(n=>n+1);refreshSummary();}}/>}
+        <div className="sales-preserved-board" hidden={pane!=="board"}>{w.auth.error ? <div className="sales-empty" role="alert">{w.auth.error}<button onClick={w.retryAuth}>TRY AGAIN</button><a href="/login?next=%2Fsales-desk">SIGN IN</a></div> : <Board machines={w.openMachines} ownedKeys={w.ownedKeys} states={w.states} onPatch={w.updateState} size={w.size} onReorder={w.setOpenKeys} onReturn={w.returnToRail} selectedKey={w.selectedKey} onSelect={w.setSelectedKey} getSellerProps={w.getSellerListingCardProps} onDirty={w.markDirty} dirtyKeys={w.dirtyKeys} onSaved={w.clearDirty} toggleSave={w.toggleSave} savedIds={w.savedIds} scrollTop={w.scroll} onScroll={w.onScroll} />}</div>
         <footer className="sales-board-footer"><span><i/>{w.dirtyKeys.size ? `${w.dirtyKeys.size} MACHINE(S) WITH UNSAVED CHANGES` : "BOARD RESTORES IN THIS BROWSER"}</span><button onClick={()=>{w.refresh();setRevision(n=>n+1);refreshSummary();}} disabled={!!w.dirtyKeys.size}>REFRESH ↻</button></footer>
       </section>
       <aside className="sales-work-rail" aria-label="Sales records"><div className="sales-rail-heading"><div><span className="sales-eyebrow">CUSTOMERS · CONVERSATIONS · NEXT ACTION</span><h2>YOUR SALES DESK</h2></div><button aria-label="Hide sales rail" onClick={()=>{setHidden(v=>({...v,right:true}));setMobile("");}}>›</button></div>
@@ -133,7 +147,7 @@ export default function SalesDeskSurface({initial,dashboardClass,workspace:w}) {
             {tab==="tasks" && <p>{item.customerName && `${item.customerName} · `}DUE {item.dueDate}{item.outcome && <small>{item.outcome}</small>}</p>}
           </button>{tab==="boards" && <button className="sales-subtle" onClick={()=>openEditor("boards",item)}>RENAME BOARD</button>}</article>)}
           {collection.items.length<collection.total && <button className="sales-wide" disabled={loading} onClick={loadMore}>{loading ? "LOADING…" : "LOAD MORE"}</button>}
-        </div><footer className="sales-rail-footer"><span>PRIVATE TO YOUR COMPANY</span><a href="/account/messages">INQUIRIES ↗</a></footer>
+        </div><footer className="sales-rail-footer"><span>PRIVATE TO YOUR COMPANY</span><button onClick={()=>setPane("inquiries")}>INQUIRIES ↗</button></footer>
       </aside>
     </main>
     <footer className="sales-footer"><span><i/> IXI SALES DESK</span><span>{initial.context.company}</span><span>FINANCIAL RECORDS · TRAN$ACT ↗</span></footer>
@@ -142,7 +156,7 @@ export default function SalesDeskSurface({initial,dashboardClass,workspace:w}) {
     {financial && <Financials readOnly={!canWrite} deal={financial} onClose={()=>setFinancial(null)} onSaved={onSaved}/>}
     {admin==="team" && <Team actor={actor} people={initial.people || []} onClose={()=>{setAdmin("");refreshSummary();}}/>}
     {admin==="import" && <ContactImport onClose={()=>setAdmin("")} onSaved={()=>{setRevision(n=>n+1);refreshSummary();}}/>}
-    {buyerPackage && <BuyerPackage {...buyerPackage} readOnly={!canWrite} machines={buyerPackage.deal.machines.map(ref=>({key:ref.key,item:w.allMachines.find(item=>dashboardKey(item)===ref.key)})).filter(m=>m.item)} onClose={()=>setBuyerPackage(null)} onSaved={()=>setRevision(n=>n+1)}/>}
+    {buyerPackage && <BuyerPackage {...buyerPackage} readOnly={!canWrite} machines={buyerPackage.deal.machines.map(ref=>({key:ref.key,item:findMachine(ref,w.allMachines)})).filter(m=>m.item)} onClose={()=>setBuyerPackage(null)} onSaved={()=>setRevision(n=>n+1)}/>}
     {comparison && <dialog className="sales-dialog sales-comparison" ref={compareRef} onCancel={e=>{e.preventDefault();setComparison(false);}} aria-labelledby="sales-compare-title"><header><div><span className="sales-eyebrow">YOUR OPEN MACHINES</span><h2 id="sales-compare-title">SIDE BY SIDE</h2></div><button onClick={()=>setComparison(false)} aria-label="Close comparison">×</button></header><div className="sales-compare-scroll"><table><thead><tr><th>COMPARE</th>{w.openMachines.map(item=><th key={dashboardKey(item)}>{item.title}</th>)}</tr></thead><tbody>{compareRows.map(([label,get])=><tr key={label}><th>{label}</th>{w.openMachines.map(item=><td key={dashboardKey(item)}>{get(item) ?? "Not recorded"}</td>)}</tr>)}</tbody></table></div></dialog>}
     {w.notice && <div className="sales-notice" role="status">{w.notice}<button onClick={()=>w.setNotice("")} aria-label="Dismiss notification">×</button></div>}
   </div>;

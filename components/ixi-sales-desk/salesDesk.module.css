@@ -199,3 +199,73 @@
 .salesDesk :global(.sales-sale-facts b) {display:block;font-size:14px;color:#e5eacb;margin-top:6px;}
 .salesDesk :global(.sales-data-table strong) {display:block;margin:5px 0;}
 @media(max-width:700px){.salesDesk :global(.sales-sale-facts){grid-template-columns:1fr 1fr;}}
+/* Connected schedule and daily work preserve the existing machine board. */
+.salesDesk :global([hidden]) {display:none!important;}
+.salesDesk :global(.sales-preserved-board) {display:flex;flex:1;min-height:0;min-width:0;}
+.salesDesk :global(.sales-preserved-board > .dash-board-scroll) {flex:1;min-width:0;}
+.salesDesk :global(.sales-work-strip) {display:flex;align-items:center;gap:7px;padding:7px 16px;border-block:1px solid #34402c;background:#11180f;flex-shrink:0;flex-wrap:wrap;}
+.salesDesk :global(.sales-work-strip > button) {display:flex;align-items:center;gap:12px;padding:7px 12px;min-height:35px;background:#192112;border-color:#3c482e;font-size:11px;}
+.salesDesk :global(.sales-work-strip strong) {font-size:16px;color:#e1c859;}
+.salesDesk :global(.sales-work-strip > span) {margin-left:auto;font-size:10px;color:#9cab8a;}
+.salesDesk :global(.sales-view-tabs) {display:flex;flex-wrap:wrap;gap:4px;}
+.salesDesk :global(.sales-view-tabs button) {font-size:11px;padding:8px 11px;min-height:36px;}
+.salesDesk :global(:is(.sales-view-tabs,.sales-segment,.sales-work-strip) button[aria-pressed=true]) {color:#ffdd57;background:#343017;border-color:#9b8231;box-shadow:inset 0 -2px #d9bb4a;}
+.salesDesk :global(.sales-panel) {display:flex;flex-direction:column;flex:1;min-height:0;min-width:0;background:#0d140e;}
+.salesDesk :global(.sales-panel-heading) {display:flex;align-items:center;justify-content:space-between;gap:16px;padding:22px 22px 14px;flex-shrink:0;}
+.salesDesk :global(.sales-panel-heading h2) {margin:7px 0;font-size:25px;line-height:1.3;}
+.salesDesk :global(.sales-panel-heading button) {min-height:44px;font-size:12px;}
+.salesDesk :global(.sales-calendar-controls),.salesDesk :global(.sales-work-filters) {display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:0 22px 16px;flex-shrink:0;}
+.salesDesk :global(.sales-calendar-controls select),.salesDesk :global(.sales-work-filters select) {width:auto;max-width:100%;font-size:12px;min-height:38px;}
+.salesDesk :global(.sales-work-filters input[type=search]) {max-width:400px;flex:1;}
+.salesDesk :global(.sales-segment) {display:flex;}
+.salesDesk :global(.sales-segment button) {min-height:38px;border-radius:0;font-size:11px;padding:8px 11px;}
+.salesDesk :global(.sales-date-nav) {display:flex;align-items:center;gap:3px;}
+.salesDesk :global(.sales-date-nav button) {min-height:38px;font-size:13px;}
+.salesDesk :global(.sales-date-nav input) {width:145px;font-size:12px;padding:7px;}
+.salesDesk :global(.sales-calendar-controls .sales-check) {margin:0;font-size:12px;}
+.salesDesk :global(.sales-calendar-scroll),.salesDesk :global(.sales-daily-list) {flex:1;min-height:0;overflow:auto;scrollbar-width:thin;scrollbar-color:#b8a347 #0a100b;}
+.salesDesk :global(.sales-calendar-grid) {display:grid;grid-template-columns:repeat(7,minmax(0,1fr));min-height:100%;padding:0 14px 14px;align-content:stretch;}
+.salesDesk :global(.sales-calendar-grid.one-day) {grid-template-columns:1fr;}
+.salesDesk :global(.sales-calendar-day) {min-width:0;border:1px solid #303c2a;padding:5px;background:#111a10;min-height:125px;}
+.salesDesk :global(.calendar-week .sales-calendar-day) {min-height:100%;}
+.salesDesk :global(.sales-calendar-day.is-today) {background:#1e2511;box-shadow:inset 0 3px #d6b944;}
+.salesDesk :global(.sales-calendar-day.outside-month) {background:#0b120c;}
+.salesDesk :global(.sales-calendar-day > header) {display:flex;align-items:center;justify-content:space-between;gap:2px;margin-bottom:9px;}
+.salesDesk :global(.sales-calendar-day > header button) {background:none;border:0;min-height:34px;font-size:12px;padding:5px 3px;color:#d3dcbf;}
+.salesDesk :global(.sales-calendar-event) {background:#222c19;border:1px solid #52623b;border-left:3px solid #bca84f;margin-bottom:8px;min-width:0;border-radius:3px;overflow:hidden;}
+.salesDesk :global(.sales-calendar-event[draggable=true]) {cursor:grab;}
+.salesDesk :global(.sales-calendar-event > button:first-child) {display:flex;flex-direction:column;gap:6px;width:100%;border:0;background:none;text-align:left;padding:10px 8px;overflow-wrap:anywhere;}
+.salesDesk :global(.sales-calendar-event strong) {font-size:14px;line-height:1.4;}
+.salesDesk :global(.sales-calendar-event span) {font-size:12px;font-weight:500;color:#c3ceb0;line-height:1.4;}
+.salesDesk :global(.sales-calendar-event small) {font-size:10px;color:#a3b58d;line-height:1.5;}
+.salesDesk :global(.sales-calendar-event .sales-event-time) {color:#efdb86;font-size:13px;font-weight:800;}
+.salesDesk :global(.sales-event-time small) {display:block;margin-top:4px;}
+.salesDesk :global(.sales-calendar-event .sales-event-context) {display:block;width:100%;border:0;border-top:1px solid #4b5734;background:#1a2315;color:#d3bd64;font-size:10px;min-height:30px;}
+.salesDesk :global(.sales-calendar-event.is-complete) {opacity:.65;border-left-color:#839c7a;}
+.salesDesk :global(.sales-calendar-footer) {display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:10px 20px;border-top:1px solid #35432b;font-size:11px;color:#a5b591;flex-shrink:0;}
+.salesDesk :global(.sales-calendar-notice) {padding:10px 22px;font-size:13px;color:#e2d795;margin:0;border-block:1px solid #4b512c;background:#212a15;}
+.salesDesk :global(.sales-agenda) {padding:0 22px 22px;}
+.salesDesk :global(.sales-agenda h3) {font-size:16px;color:#d3dcbf;margin:20px 0 12px;}
+.salesDesk :global(.sales-agenda .sales-calendar-event) {max-width:900px;}
+.salesDesk :global(.sales-move-dialog) {width:560px;}
+.salesDesk :global(.sales-daily-list) {padding:0 22px 22px;}
+.salesDesk :global(.sales-work-item) {display:flex;align-items:center;justify-content:space-between;gap:16px;border:1px solid #3b492f;border-left:3px solid #b2a04b;background:#172111;margin-bottom:9px;padding:14px 16px;}
+.salesDesk :global(.sales-work-main) {display:flex;flex-direction:column;gap:7px;text-align:left;flex:1;min-width:0;border:0;background:none;padding:0!important;}
+.salesDesk :global(.sales-work-main strong) {font-size:17px;line-height:1.4;}
+.salesDesk :global(.sales-work-main > span:not(.sales-eyebrow)) {font-size:13px;color:#b7c5a2;font-weight:450;}
+.salesDesk :global(.sales-work-main small) {font-size:11px;color:#bbc99d;}
+.salesDesk :global(.sales-work-item > div) {display:flex;gap:6px;flex-wrap:wrap;max-width:210px;}
+.salesDesk :global(.sales-work-item > div button) {min-height:40px;font-size:11px;}
+.salesDesk :global(.sales-inquiry) {border:1px solid #465438;background:#172112;padding:20px;margin-bottom:12px;}
+.salesDesk :global(.sales-inquiry h3) {font-size:19px;margin:10px 0;}
+.salesDesk :global(.sales-inquiry p),.salesDesk :global(.sales-inquiry blockquote) {font-size:14px;line-height:1.7;overflow-wrap:anywhere;}
+.salesDesk :global(.sales-inquiry blockquote) {white-space:pre-wrap;margin:16px 0;padding:14px 16px;background:#10190e;border-left:2px solid #bfa846;}
+.salesDesk :global(.sales-source-message) {padding:14px;background:#172111;border-left:2px solid #b5a04b;font-size:13px;margin:10px 0;}
+.salesDesk :global(.sales-source-message p) {white-space:pre-wrap;line-height:1.7;}
+.salesDesk :global(.sales-schedule-note) {color:#aebc99;font-size:12px;line-height:1.6;}
+.salesDesk :global(.sales-rail-footer button) {padding:0;background:none;border:0;color:#d3bd64;font-size:10px;min-height:28px;}
+@media(min-width:2200px){.salesDesk :global(.sales-panel-heading h2){font-size:30px;}.salesDesk :global(.sales-calendar-event strong){font-size:17px;}.salesDesk :global(.sales-calendar-event span){font-size:14px;}.salesDesk :global(.sales-calendar-event small){font-size:12px;}.salesDesk :global(.sales-view-tabs button){font-size:13px;}.salesDesk :global(.sales-calendar-day){padding:10px;}}
+@media(max-width:1250px) and (min-width:701px){.salesDesk :global(.sales-calendar-grid){grid-template-columns:repeat(3,minmax(0,1fr));}.salesDesk :global(.sales-calendar-grid.one-day){grid-template-columns:1fr;}.salesDesk :global(.calendar-week .sales-calendar-day){min-height:180px;}}
+@media(max-width:700px){.salesDesk :global(.sales-work-strip){gap:4px;padding:6px 10px;}.salesDesk :global(.sales-work-strip > button){min-height:44px;font-size:10px;padding:7px;gap:7px;}.salesDesk :global(.sales-work-strip > span){display:none;}.salesDesk :global(.sales-view-tabs){gap:3px;}.salesDesk :global(.sales-view-tabs button){font-size:10px;min-height:44px;padding:6px;}.salesDesk :global(.sales-panel-heading){padding:14px 12px;flex-wrap:wrap;}.salesDesk :global(.sales-panel-heading h2){font-size:21px;}.salesDesk :global(.sales-calendar-controls),.salesDesk :global(.sales-work-filters){padding:0 12px 12px;}.salesDesk :global(.sales-calendar-grid){grid-template-columns:1fr;padding:0 12px 12px;}.salesDesk :global(.calendar-week .sales-calendar-day){min-height:130px;}.salesDesk :global(.sales-calendar-day > header button){min-height:44px;}.salesDesk :global(.sales-calendar-event .sales-event-context){min-height:44px;}.salesDesk :global(.sales-daily-list){padding:0 12px 12px;}.salesDesk :global(.sales-work-item){align-items:stretch;flex-direction:column;}.salesDesk :global(.sales-work-item > div button){min-height:44px;}.salesDesk :global(.sales-calendar-footer){font-size:10px;padding:8px 12px;}.salesDesk :global(.sales-calendar-controls select){min-height:44px;}.salesDesk :global(.sales-date-nav){flex-wrap:wrap;}.salesDesk :global(.sales-calendar .sales-check){font-size:12px;}}
+
+.salesDesk :global(.sales-preserved-panel) {display:flex;flex:1;min-height:0;min-width:0;}
