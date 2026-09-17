@@ -2,6 +2,7 @@ export default function IXIAssetSaleStyles() {
   return (
     <style jsx global>{`
       .ixi-sale, .ixi-sale * { box-sizing: border-box; }
+      .sale-details{margin:8px 9px;border-bottom:1px solid #353b31}.sale-details>summary{min-height:44px;display:flex;align-items:center;color:#ffc400;font-size:12px;font-weight:800;cursor:pointer}.sale-details>summary:focus-visible{outline:2px solid #ffc400;outline-offset:2px}
       .ixi-sale { width: 100%; min-height: 100%; color: #f3f4ef; font-family: Arial, sans-serif; }
       .sale-top { display: grid; grid-template-columns: 30px minmax(0, 1fr) auto; align-items: center; gap: 7px; padding: 8px 10px; border-bottom: 1px solid #303030; }
       .sale-back { border: 0; background: transparent; color: #ffc400; font-size: 24px; line-height: 1; cursor: pointer; }
@@ -51,6 +52,7 @@ export default function IXIAssetSaleStyles() {
       .sale-status > strong { color: #24d26d; font-size: 11px; }
       .sale-status .sale-money { margin: 5px 0 0; }
       .sale-foot { margin: 8px 9px 3px; color: #747874; font-size: 6px; font-weight: 800; line-height: 1.35; text-align: center; }
+      .ixi-sale .sale-field label,.ixi-sale .sale-money span{font-size:11px}.ixi-sale .sale-field input,.ixi-sale .sale-field select,.ixi-sale .sale-field textarea{font-size:14px;min-height:44px}.ixi-sale .sale-money b{font-size:14px}.ixi-sale .sale-readiness,.ixi-sale .sale-error,.ixi-sale .sale-warning{font-size:13px}.ixi-sale .sale-primary,.ixi-sale .sale-secondary{font-size:13px;min-height:44px}.ixi-sale .sale-section{font-size:12px}.ixi-sale .sale-total span{font-size:12px}
     `}</style>
   );
 }
