@@ -10,6 +10,8 @@ import { dashboardId, dashboardKey } from "./dashboardContract.mjs";
 
 const OwnedCard = dynamic(() => import("../ixi-machine-card/private/IXIOwnedPrivateListingRuntime"), { ssr: false });
 
+function SalesReadOnlyMachine({item}) { return <div className="sales-readonly-machine"><img src={item.image || item.imageUrl} alt={item.title}/><h3>{item.title}</h3><p>{item.hours}</p><strong>{item.price}</strong><p>{item.location}</p><dl><dt>SN</dt><dd>{item.serialNumber || "—"}</dd><dt>ID</dt><dd>{item.passportId}</dd></dl><small>COMPANY MACHINE · VIEW ONLY</small></div>; }
+
 export default function DashboardBoard({ machines, ownedKeys, states, onPatch, size, onReorder, onReturn, selectedKey, onSelect, getSellerProps, onDirty, dirtyKeys, onSaved, toggleSave, savedIds, onScroll, scrollTop }) {
   const boardRef = useRef(null);
   const [{ width, height }, setBounds] = useState({ width: 900, height: 600 });
@@ -43,7 +45,7 @@ export default function DashboardBoard({ machines, ownedKeys, states, onPatch, s
             const nativeHeight = owned || getMachineCardFamily(item) === "auction" || state.transactOpen ? 475 : 400;
             const scale = Math.min(size === "fit" ? Math.max(0.65, Math.min(1.2, (height - 90) / nativeHeight)) : desiredScale, Math.max(0.25, (width - 32) / nativeWidth));
             const cardContext = owned ? "inventory" : "workspace";
-            const sellerProps = owned ? getSellerProps(item) : {};
+            const sellerProps = owned && !item.salesReadOnly ? getSellerProps(item) : {};
             const patch = (_id, change) => onPatch(id, change);
             const moveTo = end => onReorder(end ? [...ids.filter(value => value !== key), key] : [key, ...ids.filter(value => value !== key)]);
             return <IXISortableMachineCard id={key} key={key} containerId="dashboard-board" className="dash-open-machine" style={{ width: nativeWidth * scale, minWidth: 0 }}>
@@ -58,10 +60,10 @@ export default function DashboardBoard({ machines, ownedKeys, states, onPatch, s
                 </div>
                 <div className="dash-card-footprint" style={{ width: nativeWidth * scale, height: nativeHeight * scale }}>
                   <div className="dash-card-transform" style={{ width: nativeWidth, height: nativeHeight, transform: `scale(${scale})`, "--dash-listing-width": `${300 + (transactionDepth - 1) * 298}px`, "--dash-console-width": `${nativeWidth}px` }}>
-                    <IXIObjectConsoleRouter cardFamily={owned ? "private" : getMachineCardFamily(item)} cardContext={cardContext} objectId={id} item={item} sellerCardProps={sellerProps} ixiCardState={states} updateIxiCardState={patch} enableCardScaling={false} dragHandleProps={dragHandleProps} renderParentCard={consoleProps => {
+                    {item.salesReadOnly ? <SalesReadOnlyMachine item={item}/> : <IXIObjectConsoleRouter cardFamily={owned ? "private" : getMachineCardFamily(item)} cardContext={cardContext} objectId={id} item={item} sellerCardProps={sellerProps} ixiCardState={states} updateIxiCardState={patch} enableCardScaling={false} dragHandleProps={dragHandleProps} renderParentCard={consoleProps => {
                       const Card = owned ? OwnedCard : IXIMachineCard;
                       return <Card {...sellerProps} {...consoleProps} listing={item} cardContext={cardContext} presentation={owned ? "seller" : undefined} sellerMode={owned} from="account" suppressFamilyLog showSave={!owned} saved={savedIds.includes(id)} onToggleSaved={() => toggleSave(item)} ixiState={state} onIxiStateChange={patch} machineFace={state.face || 1} onCycleMachineFace={() => patch(id, { face: ((state.face || 1) % 4) + 1 })} onSendFront={() => moveTo(false)} onSendBack={() => moveTo(true)} armedDestination="dashboard-rail" onSendToArmedDestination={() => onReturn(key)} dragHandleProps={dragHandleProps} consoleActuatorVariant="tall" onFinancialRecordsChange={() => onSaved(key)} onOwnedObjectSaved={(next, result) => { sellerProps.onOwnedObjectSaved?.(next, result); onSaved(key); }} />;
-                    }} />
+                    }} />}
                   </div>
                 </div>
               </section>}
