@@ -115,6 +115,8 @@ test("issued order reuses an existing card, records a linked trade credit, and o
   const original = contract.createIXIEquipmentSaleDraft({ context, input: { totals: { subtotal: 75000 } } });
   original.identity = { ...original.identity, salesOrderId: "test-order", dealId: "test-deal" };
   original.financialBinding = { financialDocumentId: "test-order", revision: 2 };
+  original.customer = { ...original.customer, name: "Example buyer" };
+  original.commercial = { ...original.commercial, orderDate: "2026-09-02" };
   const invoice = { financialDocumentId: "test-invoice", sourceFinancialDocumentId: "test-order", financialState: "partially-collected", totals: { total: 75000 }, financialBinding: { financialDocumentId: "test-invoice", revision: 4 } };
   const originalJSON = JSON.stringify({ original, invoice });
   let correction = { corrections: [], blockedReason: "", position: { invoiceAmount: 75000, received: 10000, credited: 0, tradeCredit: 0, balance: 65000 } };
@@ -169,6 +171,9 @@ test("issued order reuses an existing card, records a linked trade credit, and o
     await act(async () => button("ACQUISITION").click());
     assert.equal(acquisitionProps.tradeContext.sourceFinancialDocumentId, "test-trade-credit");
     assert.equal(acquisitionProps.initialInput.purchasePrice, 65000);
+    assert.equal(acquisitionProps.initialInput.purchaseDate, original.commercial.orderDate);
+    assert.equal(acquisitionProps.initialInput.sellerLabel, original.customer.name);
+    assert.equal(acquisitionProps.initialInput.acquisitionType, "trade-in");
     assert.equal(acquisitionProps.object.passportId, "existing-passport");
   } finally { await act(async () => root.unmount()); }
 });
