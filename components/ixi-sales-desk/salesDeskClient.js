@@ -1,5 +1,7 @@
 export async function salesRequest(path, { body, signal } = {}) {
-  const response = await fetch(`/api/ixi/sales-desk/${path}`,{method:body ? "POST" : "GET",cache:"no-store",credentials:"same-origin",signal,headers:body ? {"Content-Type":"application/json"} : {},...(body ? {body:JSON.stringify(body)} : {})});
+  const company=typeof window!=="undefined" ? new URLSearchParams(window.location.search).get("company") : "";
+  const scoped=company ? `${path}${path.includes("?") ? "&" : "?"}company=${encodeURIComponent(company)}` : path;
+  const response = await fetch(`/api/ixi/sales-desk/${scoped}`,{method:body ? "POST" : "GET",cache:"no-store",credentials:"same-origin",signal,headers:body ? {"Content-Type":"application/json"} : {},...(body ? {body:JSON.stringify(body)} : {})});
   const payload = await response.json().catch(()=>null);
   if (!response.ok || payload?.ok !== true) {
     const error = new Error(payload?.error?.message || "Sales Desk could not complete the request. Your changes are still here.");

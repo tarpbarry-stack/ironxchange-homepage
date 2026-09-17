@@ -85,16 +85,17 @@ export default function IXIDashboard({ salesDeskContext = null }) {
     if (!userId || !restored) return;
     let canceled = false;
     setOwnedStatus(pending); setRelatedStatus(pending);
-    const inventory = fetch("/api/account-listings", { cache: "no-store" }).then(async response => {
+    const inventory = fetch(salesDeskContext ? `/api/ixi/sales-desk/inventory?company=${encodeURIComponent(salesDeskContext.context.entityId)}` : "/api/account-listings", { cache: "no-store" }).then(async response => {
       if (!response.ok) throw new Error("Inventory unavailable");
-      const data = await response.json();
+      const payload = await response.json();
+      const data = salesDeskContext ? payload.items : payload;
       if (!Array.isArray(data)) throw new Error("Inventory unavailable");
       return uniqueMachines(data);
     });
     const relationships = fetchIxiMachineState(userId, { strict: true });
     inventory.then(items => {
       if (canceled) return;
-      const currentOwned = uniqueMachines(filterAosOwnedMachines(items));
+      const currentOwned = uniqueMachines((salesDeskContext && !salesDeskContext.context.canEditMachines) ? items : filterAosOwnedMachines(items));
       setOwned(previous => preserveOpenInventoryTransactions(previous, currentOwned, stateRef.current));
       setOwnedStatus({ loading: false, error: "" });
       if (!initialBoard.current) { initialBoard.current = true; setOpenKeys(currentOwned.length ? [dashboardKey(currentOwned[0])] : []); }
@@ -114,7 +115,7 @@ export default function IXIDashboard({ salesDeskContext = null }) {
         const authoredIds = new Set(authored.map(dashboardId));
         const publicListings = ids.some(id => !authoredIds.has(id)) ? await fetchPublicMarketplaceListings({ surface: "saved", projection: "card" }) : [];
         if (canceled) return;
-        const next = collectRelationships({ authored, owned: filterAosOwnedMachines(authored), publicListings, ids });
+        const next = collectRelationships({ authored, owned: salesDeskContext && !salesDeskContext.context.canEditMachines ? authored : filterAosOwnedMachines(authored), publicListings, ids });
         setRelated(next);
         setRelatedStatus({ loading: false, error: inventoryResult.status === "rejected" || stateResult.status === "rejected" ? "Some relationship machines couldn’t load. Try again." : "" });
       } catch { if (!canceled) setRelatedStatus({ loading: false, error: "Relationship machines couldn’t refresh. Try again." }); }
