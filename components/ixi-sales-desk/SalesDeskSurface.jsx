@@ -1,6 +1,8 @@
 import Head from "next/head";
 import dynamic from "next/dynamic";
 import { useEffect,useMemo,useRef,useState } from "react";
+import {SortableRail,SortableRailTile,useRailOrder} from "./SortableRail";
+import {railStorageKey} from "./railOrder.mjs";
 import SalesDeskRail from "./SalesDeskRail";
 import SalesDeskEditor from "./SalesDeskEditor";
 import SalesDeskDaily,{useSalesWork} from "./SalesDeskDaily";
@@ -18,6 +20,7 @@ const Team=dynamic(()=>import("./SalesDeskTeam"),{ssr:false});
 const ContactImport=dynamic(()=>import("./SalesDeskImport"),{ssr:false});
 const BuyerPackage=dynamic(()=>import("./SalesDeskPackage"),{ssr:false});
 const TABS=[["deals","DEALS"],["contacts","CONTACTS"],["tasks","FOLLOW-UPS"],["boards","BOARDS"]];
+const recordKey=item=>item.id;
 const emptyList={items:[],total:0};
 const findMachine=(ref,items)=>items.find(item=>dashboardKey(item)===ref.key) || items.find(item=>ref.passportId ? passportOf(item)===ref.passportId : ref.listingId && String(item.id?.uuid || item.id || "")===ref.listingId);
 
@@ -36,6 +39,8 @@ export default function SalesDeskSurface({initial,dashboardClass,workspace:w}) {
   useEffect(()=>{setLists(initial.lists);setSummary(initial.summary || {});setTeam(initial.team || []);setRevision(n=>n+1);},[initial]);
   const searchRef=useRef(null),compareRef=useRef(null);
   const collection=lists[tab] || emptyList;
+  const contactRail=useRailOrder(lists.contacts?.items || emptyList.items,recordKey,railStorageKey(actor,"contacts"),w.setNotice);
+  const railItems=tab==="contacts" ? contactRail.ordered : collection.items;
   const canWrite=initial.context.canWrite === true;
   useEffect(()=>{
     if(firstList.current){firstList.current=false;return;}
@@ -123,7 +128,7 @@ export default function SalesDeskSurface({initial,dashboardClass,workspace:w}) {
     </div>
     <div className="sales-work-strip" aria-label="Daily sales priorities">{[["today","TODAY"],["overdue","OVERDUE"],["unassigned","UNASSIGNED"],["upcoming","NEXT 7 DAYS"],["reminders","REMINDERS"]].map(([key,label])=><button key={key} aria-pressed={pane==="today" && workBucket===key} onClick={()=>{setWorkBucket(key);setPane("today");}}><span>{label}</span><strong>{work.error ? "—" : work.data.counts[key] ?? "—"}</strong></button>)}<span>{workScope==="team" ? "TEAM WORK" : "MY WORK"}</span>{work.error && <button onClick={work.refresh}>RETRY WORK QUEUE</button>}</div>
     <main className={`sales-workspace ${hidden.left ? "hide-machines" : ""} ${hidden.right ? "hide-sales" : ""} ${mobile ? `mobile-${mobile}` : ""}`}>
-      <SalesDeskRail workspace={w} onClose={()=>{setHidden(v=>({...v,left:true}));setMobile("");}}/>
+      <SalesDeskRail workspace={w} actor={actor} onClose={()=>{setHidden(v=>({...v,left:true}));setMobile("");}}/>
       <section className="dash-board sales-board" aria-label="Sales working board">
         <div className="sales-board-toolbar"><button onClick={()=>toggleRail("left")}>‹ MACHINES</button><div className="sales-view-tabs" aria-label="Sales workspace view">{[["board","BOARD"],["calendar","CALENDAR"],["today","DAILY WORK"],["inquiries","INQUIRIES"]].map(([key,label])=><button key={key} aria-pressed={pane===key} onClick={()=>setPane(key)}>{label}</button>)}</div><div className="sales-board-tools" hidden={pane!=="board"}><label>SIZE <select aria-label="Machine card size" value={w.size} onChange={e=>w.setSize(e.target.value)}><option value="fit">FIT</option><option value="natural">100%</option><option value="work">120%</option><option value="focus">140%</option></select></label><button onClick={()=>setComparison(true)} disabled={w.openMachines.length<2}>COMPARE</button><button onClick={()=>openEditor("boards")} disabled={!canWrite || !w.openMachines.length}>SAVE BOARD</button><button onClick={returnAll} disabled={!w.openMachines.length}>RETURN ALL</button></div><button onClick={()=>toggleRail("right")}>SALES ›</button></div>
         {pane==="board" && activeDeal && <div className="sales-active-deal"><div><span className="sales-eyebrow">WORKING DEAL · {stageLabel(activeDeal.stage)}</span><h2>{activeDeal.title}</h2><p><button onClick={()=>openEditor("contacts",{id:activeDeal.contactId})}>{activeDeal.customerName}</button><span>{team.find(m=>m.principalId===activeDeal.assignedTo)?.name || (activeDeal.assignedTo ? "Assigned member" : "UNASSIGNED")}</span></p><div className="sales-active-next"><b>NEXT</b> {activeDeal.actionCompleted ? "COMPLETED · " : ""}{activeDeal.nextAction || "Set the next action"}{activeDeal.dueDate && <time>{activeDeal.dueDate}</time>}</div></div><div className="sales-active-actions"><button onClick={()=>openEditor("deals",activeDeal)}>DEAL DETAILS</button><button disabled={!canWrite} onClick={()=>followUp("deals",activeDeal)}>+ FOLLOW-UP</button>{actor.canFinancial && <><button disabled={!canWrite} onClick={()=>prepareQuote(activeDeal)}>QUOTE</button><button onClick={()=>setFinancial(activeDeal)}>TRANSACTIONS</button></>}<button disabled={!canWrite || !activeDeal.machines.length} onClick={()=>setBuyerPackage({deal:activeDeal})}>BUYER PACKAGE</button><button onClick={()=>setWorkingDeal(null)} aria-label="Close working deal">×</button></div></div>}
@@ -139,13 +144,15 @@ export default function SalesDeskSurface({initial,dashboardClass,workspace:w}) {
         <div className="sales-rail-scroll" role="tabpanel" aria-label={tab} aria-busy={loading || recordLoading}>
           {listError && <p className="sales-error" role="alert">{listError}<button onClick={()=>setRevision(n=>n+1)}>RETRY</button></p>}
           {!loading && !listError && !collection.items.length && <div className="sales-start"><span className="sales-start-icon">{tab==="deals" ? "↗" : tab==="contacts" ? "+" : tab==="tasks" ? "✓" : "▦"}</span><h3>{query ? "No matching records." : tab==="deals" ? "Your next deal starts here." : tab==="contacts" ? "Keep your customers close." : tab==="tasks" ? "Keep the next promise." : "Pick up where you left off."}</h3><p>{query ? "Try another search." : tab==="deals" ? "Open the machines, add your customer, and keep the conversation together." : tab==="contacts" ? "Save a name and number now. Build the relationship as you go." : tab==="tasks" ? "Give every call, inspection, and quote a next action." : "Save a group of machines and bring it back in one click."}</p>{!query && <button className="sales-primary" onClick={()=>openEditor(tab)} disabled={!canWrite || (tab==="boards" && !w.openMachines.length)}>+ {tab==="deals" ? "START A DEAL" : tab==="contacts" ? "ADD A CONTACT" : tab==="tasks" ? "ADD FOLLOW-UP" : "SAVE THIS BOARD"}</button>}</div>}
-          {collection.items.map(item=><article className="sales-record" key={item.id}><button onClick={()=>showItem(item)} disabled={recordLoading}>
+          <SortableRail ids={railItems.map(recordKey)} onReorder={contactRail.reorder} disabled={tab!=="contacts" || loading || recordLoading || !contactRail.ready}>
+          {railItems.map(item=><SortableRailTile className="sales-record" key={item.id} id={item.id} label={item.name || item.title} enabled={tab==="contacts"} disabled={loading || recordLoading || !contactRail.ready}><button onClick={()=>showItem(item)} disabled={recordLoading}>
             <span className="sales-record-top">{tab==="deals" ? <span className={`sales-stage stage-${item.stage}`}>{stageLabel(item.stage)}</span> : tab==="tasks" ? <span className={`sales-stage ${!item.completed && item.dueDate<todayLocal() ? "overdue" : ""}`}>{item.completed ? "COMPLETED" : item.dueDate<todayLocal() ? "OVERDUE" : "OPEN"}</span> : <span className="sales-eyebrow">{tab==="contacts" ? item.company || "CONTACT" : `${item.keys?.length || 0} MACHINES`}</span>}<span>↗</span></span>
             <strong>{item.name || item.title}</strong>
             {tab==="deals" && <><p>{item.customerName} · {item.machines?.length || 0} machines</p><div className="sales-next"><span>NEXT</span>{item.nextAction || "Set the next action"}{item.dueDate && <time>{item.dueDate}</time>}</div></>}
             {tab==="contacts" && <><p>{item.phone || item.email || "Add contact details"}</p>{item.interest && <small>{item.interest}</small>}</>}
             {tab==="tasks" && <p>{item.customerName && `${item.customerName} · `}DUE {item.dueDate}{item.outcome && <small>{item.outcome}</small>}</p>}
-          </button>{tab==="boards" && <button className="sales-subtle" onClick={()=>openEditor("boards",item)}>RENAME BOARD</button>}</article>)}
+          </button>{tab==="boards" && <button className="sales-subtle" onClick={()=>openEditor("boards",item)}>RENAME BOARD</button>}</SortableRailTile>)}
+          </SortableRail>
           {collection.items.length<collection.total && <button className="sales-wide" disabled={loading} onClick={loadMore}>{loading ? "LOADING…" : "LOAD MORE"}</button>}
         </div><footer className="sales-rail-footer"><span>PRIVATE TO YOUR COMPANY</span><button onClick={()=>setPane("inquiries")}>INQUIRIES ↗</button></footer>
       </aside>
