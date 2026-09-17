@@ -6,6 +6,16 @@ import {
 import { loadIXIAosFinancialDocument, patchIXIAosFinancialDocument } from "../../../financial-runtime/IXIAosFinancialReadClient";
 
 const clean = (value) => String(value ?? "").trim();
+
+export async function requestIXITradeCorrection(orderId, input = null) {
+  const response = await fetch(`/api/ixi/financial/sales-orders/${encodeURIComponent(orderId)}/trade-corrections`, {
+    method: input ? "POST" : "GET", credentials: "same-origin", headers: { "Content-Type": "application/json" },
+    ...(input ? { body: JSON.stringify(input) } : {}),
+  });
+  const payload = await response.json();
+  if (!response.ok || !payload.ok) throw new Error(payload.errors?.[0]?.message || payload.error?.message || "Trade correction could not be loaded. Retry.");
+  return payload.data;
+}
 const stored = (record) => {
   const { financialBinding: _binding, ...value } = record;
   return value;

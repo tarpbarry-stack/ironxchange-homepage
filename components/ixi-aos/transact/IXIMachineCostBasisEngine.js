@@ -108,6 +108,8 @@ export function classifyIXIMachineCostRecord(record = {}) {
   }
 
   if (type === "credit" || metadata.credit === true || metadata.isCredit === true) {
+    if (metadata.tradeCredit === true || record?.document?.creditType === "trade-credit" || record.creditType === "trade-credit")
+      return { state: "excluded", category: "other", amount: 0, reason: "noncash-trade-consideration" };
     return {
       state: "actual",
       category: costCategory(record, metadata),

@@ -490,6 +490,8 @@ export function classifyIXIFinancialDocument({
         source: record,
       };
   } else if (type === "credit") {
+    if (s.creditType === "trade-credit" || s.metadata?.tradeCredit === true || record.metadata?.tradeCredit === true)
+      return { status: "exception", reason: "trade-credit-requires-acquisition-clearing-review", source: record };
     const dir = clean(s.direction || record.direction).toLowerCase();
     const depositApplication =
       s.metadata?.customerDepositApplication === true ||

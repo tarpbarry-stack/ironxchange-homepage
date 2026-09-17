@@ -58,6 +58,7 @@ function creditFromFinancialRecord(record = {}) {
   if (["draft", "submitted", "rejected", "void", "reversed"].includes(clean(document.financialState).toLowerCase())) return null;
   return {
     creditId: clean(document.financialDocumentId),
+    tradeCredit: document.creditType === "trade-credit",
     date: clean(document.occurredAt).slice(0, 10),
     amount: financialAmount(document),
     reference: clean(document.transactionReference || document.documentNumber),
@@ -98,6 +99,7 @@ export function projectIXIAssetSaleCollection({
   const creditedAmount = money(
     credits.reduce((sum, credit) => sum + number(credit?.amount), 0),
   );
+  const correctedTradeValue = money(credits.filter(credit => credit.tradeCredit).reduce((sum, credit) => sum + credit.amount, 0));
   const balanceDue = money(Math.max(0, invoiceTotal - amountReceived - creditedAmount));
   return {
     status: balanceDue <= 0.005 ? "paid" : amountReceived > 0 ? "partial" : "unpaid",
@@ -105,9 +107,10 @@ export function projectIXIAssetSaleCollection({
     amountReceived,
     credits,
     creditedAmount,
+    correctedTradeValue,
     balanceDue,
     invoiceTotal,
-    tradeValue: money(array(sourceInvoice.metadata?.trades).reduce((sum, trade) => sum + number(trade.allowance), 0)),
+    tradeValue: money(array(sourceInvoice.metadata?.trades).reduce((sum, trade) => sum + number(trade.allowance), 0) + correctedTradeValue),
   };
 }
 
@@ -126,7 +129,7 @@ export function isIXIAssetSaleCollectionReady(collection = {}) {
   const cashSettled = number(collection.amountReceived) > 0 &&
     number(collection.invoiceTotal) > number(collection.creditedAmount);
   const fullyTraded = number(collection.tradeValue) > 0 &&
-    number(collection.invoiceTotal) === 0 && number(collection.creditedAmount) === 0;
+    number(collection.invoiceTotal) === number(collection.correctedTradeValue) && number(collection.creditedAmount) === number(collection.correctedTradeValue);
   return cashSettled || fullyTraded;
 }
 
