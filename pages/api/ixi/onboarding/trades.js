@@ -5,6 +5,7 @@ import {
   requestIxCoreMos,
 } from "../../../../lib/server/aos/ixiMosInternalClient";
 import { normalizeOwnedMachineListing } from "../../../../lib/server/onboarding/normalizeOwnedMachineListing";
+import { normalizeSharetribeListings } from "../../../../lib/listings/normalizeSharetribeListings";
 import {
   saveTradeMachine,
   finalizeTradeInventory,
@@ -57,13 +58,12 @@ export default async function handler(req, res) {
                 id: new types.UUID(row.listingId),
                 include: ["images"],
               });
-              row.listing = {
-                id: row.listingId,
-                ...listing.data.data.attributes,
-                images: (listing.data.included || []).filter(
-                  (item) => item.type === "image",
-                ),
-              };
+              // Cards consume the same display projection used by inventory:
+              // SDK Money and image resources are not renderable card values.
+              [row.listing] = normalizeSharetribeListings({
+                data: [listing.data.data],
+                included: listing.data.included || [],
+              });
             } catch {
               row.photoUnavailable = true;
             }

@@ -32,11 +32,29 @@ const compile = (name, dependencies = {}) => {
 const workflow = compile("sales/IXITradeSaveWorkflow.js");
 const contract = compile("modules/equipment-sale/IXIEquipmentSaleContract.js");
 const noop = () => null;
+const access = compile("../../../lib/machine-access/IXIMachineAccess.js");
+const listingProjection = compile("../../../lib/listings/normalizeSharetribeListings.js", {
+  "../machine-access/IXIMachineAccess": access,
+});
+// Render the real price/photo face. Stubbing the whole machine card hid the
+// production crash when an expanded worksheet reloaded SDK Money objects.
+const privateCard = compile("../../ixi-machine-card/private/PrivateListingCard.js", {
+  "next/dynamic": () => noop,
+  "../../../lib/posthog": { captureIXEvent: noop },
+  "../../../lib/marketplace/passportEmailEvents": { openIXIPassportEmail: noop },
+  "../../../lib/listingFormatters": compile("../../../lib/listingFormatters.js"),
+  "../../MachineBadges": noop,
+  "./IXISoldDetails": noop,
+  "../../IXIMachineRail": noop,
+  "../../ixi-chassis/IXIObjectCardActuator": noop,
+  "../../ixi-machine-placement/IXIMachinePlacementControl": noop,
+  "../../../lib/ixvision/frameEngine": compile("../../../lib/ixvision/frameEngine.js"),
+}).default;
 let acquisitionProps;
 const moneyInput = ({ value, onValueChange, ...props }) => React.createElement("input", { ...props, value: value ?? "", onChange: event => onValueChange(event.target.value) });
 const tradeSection = compile("sales/IXITradeInSection.jsx", {
   "./IXITradeSaveWorkflow": workflow,
-  "../../../ixi-machine-card/IXIMachineCard": noop,
+  "../../../ixi-machine-card/IXIMachineCard": privateCard,
   "../modules/asset-acquisition/IXIAssetAcquisitionApp": props => { acquisitionProps = props; return null; },
   "../IXIMoneyInput": moneyInput,
   "../../../ixi-object-system/IXIActionNoticeEngine": { runIXIActionNoticeLifecycle: ({ operation }) => operation() },
@@ -122,11 +140,34 @@ test("issued order reuses an existing card, records a linked trade credit, and o
   let correction = { corrections: [], blockedReason: "", position: { invoiceAmount: 75000, received: 10000, credited: 0, tradeCredit: 0, balance: 65000 } };
   let machineRequest;
   const fields = { year: "2021", make: "TEST", model: "LOADER", hours: "4400", serialNumber: "EXISTING-TEST-001", location: "Test yard" };
+  const storedListing = {
+    id: { uuid: "existing-listing" }, type: "ownListing",
+    attributes: { title: "2021 TEST LOADER", price: { _sdkType: "Money", amount: 7900000, currency: "USD" }, publicData: { ...fields, passportId: "existing-passport" } },
+    relationships: { images: { data: [{ id: { uuid: "existing-photo" }, type: "image" }] } },
+  };
+  const included = [{ id: { uuid: "existing-photo" }, type: "image", attributes: { variants: { "listing-card": { url: "https://test.invalid/existing-photo.jpg" } } } }];
+  const savedRow = () => ({ ...machineRequest, passportId: "existing-passport", objectId: "existing-object", listingId: "existing-listing" });
+  const tradeRead = compile("../../../pages/api/ixi/onboarding/trades.js", {
+    "sharetribe-flex-sdk": { types: { UUID: class { constructor(uuid) { this.uuid = uuid; } } } },
+    "../../../../lib/server/aos/resolveAosBrowserSession": { resolveAosBrowserSession: async () => ({ sdk: { ownListings: { show: async () => ({ data: { data: storedListing, included } }) } } }) },
+    "../../../../lib/server/aos/ixiMosInternalClient": {
+      resolveIxCoreAosContext: async () => ({ userId: "test-user", entityId: "test-entity" }),
+      requestIxCoreMos: async () => ({ rows: machineRequest ? [savedRow()] : [] }),
+    },
+    "../../../../lib/server/onboarding/normalizeOwnedMachineListing": {},
+    "../../../../lib/server/onboarding/tradeMachineWorkflow": {},
+    "../../../../lib/listings/normalizeSharetribeListings": listingProjection,
+  }).default;
   globalThis.fetch = async (url, options) => {
-    if (options.method === "GET") return { ok: true, json: async () => url.includes("mode=existing")
-      ? { listings: [{ listingId: "existing-listing", displayName: "2021 TEST LOADER", fields }], meta: { totalPages: 1 } } : { rows: [] } };
+    if (options.method === "GET") {
+      if (url.includes("mode=existing")) return { ok: true, json: async () => ({ listings: [{ listingId: "existing-listing", displayName: "2021 TEST LOADER", fields }], meta: { totalPages: 1 } }) };
+      let payload, status = 200;
+      const res = { setHeader() {}, status(value) { status = value; return this; }, json(value) { payload = value; } };
+      await tradeRead({ method: "GET", query: { dealId: "test-deal", outgoingPassportId: "test-outgoing" } }, res);
+      return { ok: status === 200, json: async () => payload };
+    }
     machineRequest = JSON.parse(options.body); calls.push("resolve-existing-machine");
-    return { ok: true, json: async () => ({ row: { ...machineRequest, passportId: "existing-passport", objectId: "existing-object", listingId: "existing-listing" } }) };
+    return { ok: true, json: async () => ({ row: savedRow() }) };
   };
   const app = compile("modules/equipment-sale/IXIEquipmentSaleApp.jsx", {
     "../../sales/IXITradeInSection": tradeSection, "../../sales/IXITradeSummary": noop,
@@ -161,13 +202,19 @@ test("issued order reuses an existing card, records a linked trade credit, and o
     await fillAllowance("65001"); await act(async () => button("SAVE TRADE").click());
     assert.deepEqual(calls, []); assert.match(section().textContent, /remaining balance/);
     await fillAllowance("65000");
-    await act(async () => button("EXPAND").click());
-    assert.ok([...section().querySelectorAll("input")].some(input => input.value === fields.serialNumber));
-    await act(async () => button("SAVE").click());
+    await act(async () => button("SAVE TRADE").click());
     assert.deepEqual(calls, ["resolve-existing-machine", "record-credit", "refresh"]);
     assert.equal(machineRequest.existingListingId, "existing-listing");
     assert.equal(JSON.stringify({ original, invoice }), originalJSON);
     assert.match(document.body.textContent, /Original invoice \$75,000.00 · Money received \$10,000.00 · Customer balance \$0.00/);
+    await act(async () => button("EXPAND").click());
+    assert.equal(document.querySelectorAll('[aria-label="Trade-in machines"]').length, 1);
+    assert.equal(document.querySelectorAll('[data-listing-card-id="existing-listing"]').length, 1);
+    assert.equal(section().querySelector(".price-row strong").textContent, "$79,000");
+    assert.equal(section().querySelector('img[src="https://test.invalid/existing-photo.jpg"]') !== null, true);
+    assert.equal(storedListing.attributes.price.amount, 7900000);
+    assert.equal(correction.corrections.length, 1);
+    assert.deepEqual(calls, ["resolve-existing-machine", "record-credit", "refresh"]);
     await act(async () => button("ACQUISITION").click());
     assert.equal(acquisitionProps.tradeContext.sourceFinancialDocumentId, "test-trade-credit");
     assert.equal(acquisitionProps.initialInput.purchasePrice, 65000);
