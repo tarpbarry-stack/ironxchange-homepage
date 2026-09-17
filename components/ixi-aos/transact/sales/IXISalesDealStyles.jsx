@@ -1,6 +1,9 @@
 export default function IXISalesDealStyles() {
   return (
     <style jsx global>{`
+      .ixi-sales-trade-link { display:flex; flex-wrap:wrap; align-items:center; gap:10px; padding:12px; border:1px solid #665522; background:#18170c; }
+      .ixi-sales-trade-link button { padding:10px 12px; background:#ffc400; color:#111; border:0; border-radius:4px; font-weight:800; cursor:pointer; }
+      .ixi-sales-trade-link span { color:#ddd; font-size:12px; }
       .ixi-sales-register {
         height: 100%;
         min-height: 471px;

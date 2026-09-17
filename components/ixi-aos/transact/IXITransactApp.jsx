@@ -1293,6 +1293,10 @@ export default function IXITransactApp({
   else if (moduleId === "quote")
     body = (
       <div className="ixi-sales-detail">
+        {selectedSalesDeal?.stageRecords?.["sales-order"] ? <div className="ixi-sales-trade-link">
+          <button type="button" onClick={() => openSalesStage({ id: "sales-order", moduleId: "sales-order" }, selectedSalesDeal.stageRecords["sales-order"], selectedSalesDeal)}>OPEN TRADES &amp; ACQUISITIONS</button>
+          <span>View the current order's incoming machines and trade allowances.</span>
+        </div> : null}
         {selectedSalesDeal ? (
           <IXISalesStageRail
             deal={selectedSalesDeal}
