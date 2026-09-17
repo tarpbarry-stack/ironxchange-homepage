@@ -10,6 +10,7 @@ import {
   issueIXIEquipmentInvoice,
   saveIXIEquipmentInvoice,
   saveIXIEquipmentSale,
+  requestIXITradeCorrection,
 } from "./IXIEquipmentSaleCommands";
 import {
   createIXIEquipmentSaleDraft,
@@ -1086,6 +1087,9 @@ export default function IXIEquipmentSaleApp({
   const [busy, setBusy] = useState(false);
   const tradeEditor = useRef(null);
   const [tradeForm, setTradeForm] = useState(null);
+  const [tradeCorrection, setTradeCorrection] = useState(null);
+  const [tradeCorrectionError, setTradeCorrectionError] = useState("");
+  const [tradeCorrectionLoading, setTradeCorrectionLoading] = useState(false);
   const [error, setError] = useState("");
   const [signingUrl, setSigningUrl] = useState("");
   const [showNewOrder, setShowNewOrder] = useState(false);
@@ -1146,6 +1150,20 @@ export default function IXIEquipmentSaleApp({
     }
   }, [context, dealId, entryMode, invoice, quote]);
   useEffect(() => setTab(tabForEntry(initialTab)), [initialTab]);
+  const correctionOrderId = clean(record?.financialBinding?.financialDocumentId);
+  const correctionInvoiceId = clean(invoiceRecord?.financialDocumentId);
+  const issuedForCorrection = Boolean(correctionInvoiceId) && clean(invoiceRecord?.financialState) !== "draft";
+  useEffect(() => {
+    let active = true;
+    setTradeCorrection(null);
+    setTradeCorrectionError("");
+    if (!issuedForCorrection || !correctionOrderId) { setTradeCorrectionLoading(false); return; }
+    setTradeCorrectionLoading(true);
+    requestIXITradeCorrection(correctionOrderId).then(data => { if (active) setTradeCorrection(data); })
+      .catch(cause => { if (active) setTradeCorrectionError(cause.message); })
+      .finally(() => { if (active) setTradeCorrectionLoading(false); });
+    return () => { active = false; };
+  }, [correctionOrderId, correctionInvoiceId, issuedForCorrection]);
   useEffect(() => {
     if (!open) return;
     const prior = document.body.style.overflow;
@@ -1171,6 +1189,7 @@ export default function IXIEquipmentSaleApp({
   async function save(action = "save", override = null) {
     if (!override && !["prepare-trade", "save-trades"].includes(action) && tradeEditor.current?.hasPendingTrade)
       return tradeEditor.current.savePendingTrade();
+    if (issuedForCorrection) { setError("The issued order remains on file. Add an omitted trade through its linked credit in Trade-In Machines."); return null; }
     setBusy(true);
     setError("");
     try {
@@ -1445,7 +1464,7 @@ export default function IXIEquipmentSaleApp({
     clean(record?.signing?.signedAt) &&
     clean(record?.signing?.signedPackageHash),
   );
-  const orderLocked = signedOrder && !revisionOpen;
+  const orderLocked = (signedOrder && !revisionOpen) || invoiceLocked;
   const activeLabel =
     activeStageId === "signed"
       ? "SIGNED / RESEND"
@@ -1453,7 +1472,7 @@ export default function IXIEquipmentSaleApp({
         ? "INVOICE"
         : "SALES ORDER";
   const revisionControl =
-    orderLocked && entryMode !== "invoice" ? (
+    signedOrder && !revisionOpen && !invoiceLocked && entryMode !== "invoice" ? (
       <div className="es-revision-control">
         <div>
           <b>SIGNED TERMS ON FILE</b>
@@ -1466,9 +1485,28 @@ export default function IXIEquipmentSaleApp({
         </button>
       </div>
     ) : null;
-  const tradeSection = entryMode === "invoice" ? null : <IXITradeInSection ref={tradeEditor} form={tradeForm} onFormChange={setTradeForm} record={draft} context={context} locked={orderLocked || invoiceLocked || busy}
-    ensureOrder={() => save("prepare-trade")}
-    onTradesChange={(trades, saved = draft) => save("save-trades", updateIXIEquipmentSale(saved, { ...saleInputFromRecord(saved), trades, tradeAllowance: trades.reduce((sum, row) => sum + Number(row.allowance), 0) }))} />;
+  const correctedTrades = (tradeCorrection?.corrections || []).map(credit => ({ ...credit.tradeCorrection.trade, tradeCreditId: credit.financialDocumentId }));
+  const canCorrectTrade = invoiceLocked && Boolean(tradeCorrection) && !tradeCorrectionLoading && !tradeCorrectionError && !tradeCorrection.blockedReason;
+  const correctTrade = async (trade, details) => {
+    const result = await requestIXITradeCorrection(correctionOrderId, { trade, effectiveDate: details.effectiveDate, reason: details.reason });
+    setTradeCorrection(result);
+    await onRecordChange?.(record, { action: "record-trade-credit", invoice: invoiceRecord, credit: result.credit }, context);
+  };
+  const tradeSection = entryMode === "invoice" ? null : <>
+    {tradeCorrectionLoading ? <p role="status">Checking the issued invoice's trade credits…</p> : null}
+    {tradeCorrectionError || tradeCorrection?.blockedReason ? <p role="alert">{tradeCorrectionError || tradeCorrection.blockedReason}</p> : null}
+    <IXITradeInSection ref={tradeEditor} form={tradeForm} onFormChange={setTradeForm} record={draft} context={context}
+    locked={busy || (invoiceLocked ? !canCorrectTrade : orderLocked)} correctionMode={canCorrectTrade}
+    correctionTrades={correctedTrades} onCorrectTrade={correctTrade} maximumAllowance={tradeCorrection?.position?.balance}
+    ensureOrder={() => invoiceLocked ? Promise.resolve(record) : save("prepare-trade")}
+    onTradesChange={(trades, saved = draft) => save("save-trades", updateIXIEquipmentSale(saved, { ...saleInputFromRecord(saved), trades, tradeAllowance: trades.reduce((sum, row) => sum + Number(row.allowance), 0) }))} />
+  </>;
+  const tradeCreditStatus = correctedTrades.length ? <section className="es-revision-control" aria-label="Recorded trade credit balance">
+    <div><b>RECORDED TRADE CREDITS · {usd(tradeCorrection.position.tradeCredit)}</b>
+      <span>Original invoice {usd(tradeCorrection.position.invoiceAmount)} · Money received {usd(tradeCorrection.position.received)} · Customer balance {usd(tradeCorrection.position.balance)}</span>
+      <span>{tradeCorrection.corrections.map(credit => `${credit.documentNumber} · ${credit.tradeCorrection.effectiveDate}`).join(" · ")}</span>
+    </div>
+  </section> : null;
   const openStageAfterTrade = async (...args) => {
     if (tradeEditor.current?.hasPendingTrade && !(await tradeEditor.current.savePendingTrade())) return;
     onOpenStage?.(...args);
@@ -1516,7 +1554,7 @@ export default function IXIEquipmentSaleApp({
                 <button onClick={() => window.print()}>PRINT / PDF</button>
                 <button
                   className="save"
-                  disabled={busy || (tab !== "invoice" && orderLocked)}
+                  disabled={busy || (tab !== "invoice" && orderLocked && !(canCorrectTrade && tradeForm))}
                   onClick={() => (tab === "invoice" ? saveInvoice() : save())}
                 >
                   {busy ? "WORKING…" : "SAVE"}
@@ -1563,6 +1601,7 @@ export default function IXIEquipmentSaleApp({
             ) : null}
             {revisionControl}
             {tradeNavigation}
+            {tradeCreditStatus}
             <main>
               {tab === "preview" ? (
                 <OrderDocument record={draft} />
@@ -1608,7 +1647,7 @@ export default function IXIEquipmentSaleApp({
                     </p>
                     <CardEditor
                       invoiceEntry
-                      invoiceTrades={invoiceRecord?.metadata?.trades}
+                      invoiceTrades={[...(invoiceRecord?.metadata?.trades || []), ...correctedTrades]}
                       linkedInvoice={linkedInvoice}
                       invoiceLocked={invoiceLocked}
                       orderLocked={false}
@@ -1904,6 +1943,7 @@ export default function IXIEquipmentSaleApp({
         {error ? <div className="es-error">{error}</div> : null}
         {revisionControl}
         {tradeNavigation}
+        {tradeCreditStatus}
         {activeStageId === "signed" ? (
           <ManualSignatureControl
             value={
@@ -1932,7 +1972,7 @@ export default function IXIEquipmentSaleApp({
         ) : null}
         <CardEditor
           invoiceEntry={invoiceEntry}
-          invoiceTrades={invoiceRecord?.metadata?.trades}
+          invoiceTrades={[...(invoiceRecord?.metadata?.trades || []), ...correctedTrades]}
           linkedInvoice={linkedInvoice}
           invoiceLocked={invoiceLocked}
           orderLocked={orderLocked}
@@ -1956,7 +1996,7 @@ export default function IXIEquipmentSaleApp({
           </button>
           <button
             type="button"
-            disabled={busy || (!invoiceEntry && orderLocked)}
+            disabled={busy || (!invoiceEntry && orderLocked && !(canCorrectTrade && tradeForm))}
             onClick={() => (invoiceEntry ? saveInvoice() : save())}
           >
             {busy

@@ -233,7 +233,7 @@ export default function IXIAssetSaleApp({
   const invoiceState = clean(invoiceSnapshot?.financialState).toLowerCase();
   const invoiceIssued = ["billed", "partially-collected", "collected"].includes(invoiceState);
   const invoiceCollectible = invoiceState === "draft" || invoiceIssued;
-  const fullyTraded = collection.tradeValue > 0 && collection.invoiceTotal === 0;
+  const fullyTraded = collection.tradeValue > 0 && collection.invoiceTotal === collection.correctedTradeValue;
   const readyToClose = invoiceIssued && isIXIAssetSaleCollectionReady(collection);
   const closeoutReady = readyToClose;
 

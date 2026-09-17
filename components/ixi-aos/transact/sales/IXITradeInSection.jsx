@@ -22,6 +22,8 @@ const fresh = () => ({
   location: "",
   allowance: "",
   existingListingId: "",
+  effectiveDate: new Date().toISOString().slice(0, 10),
+  reason: "Trade omitted from issued invoice",
 });
 async function request(input, method = "POST") {
   const response = await fetch(
@@ -48,6 +50,10 @@ const IXITradeInSection = forwardRef(function IXITradeInSection({
   locked,
   ensureOrder,
   onTradesChange,
+  correctionMode = false,
+  correctionTrades = [],
+  onCorrectTrade,
+  maximumAllowance,
   form,
   onFormChange: setForm,
 }, ref) {
@@ -63,7 +69,7 @@ const IXITradeInSection = forwardRef(function IXITradeInSection({
     [search, setSearch] = useState("");
   const dealId = record?.identity?.dealId;
   const outgoingPassportId = context?.primary?.passportId;
-  const trades = record?.trades || [];
+  const trades = [...(record?.trades || []), ...correctionTrades];
   const scope = { dealId, outgoingPassportId };
   useImperativeHandle(ref, () => ({ savePendingTrade: () => add(), hasPendingTrade: Boolean(form) }));
   useEffect(() => {
@@ -109,6 +115,10 @@ const IXITradeInSection = forwardRef(function IXITradeInSection({
     setBusy(true);
     setError("");
     try {
+      if (correctionMode) {
+        if (!value.effectiveDate || clean(value.reason).length < 3) throw new Error("Enter the credit date and correction reason before saving this trade.");
+        if (!(Number(value.allowance) > 0) || Number(value.allowance) > Number(maximumAllowance)) throw new Error("Enter a positive allowance within the invoice's remaining balance.");
+      }
       const result = await runIXIActionNoticeLifecycle({
         objectId: outgoingPassportId,
         commandId: value.tradeId,
@@ -118,7 +128,13 @@ const IXITradeInSection = forwardRef(function IXITradeInSection({
         errorMessage: "TRADE NEEDS RETRY",
         operation: () => saveTradeInOrder({
           form: value, outgoingPassportId, prepareOrder: ensureOrder,
-          saveMachine: request, attachTrade: onTradesChange,
+          saveMachine: request, attachTrade: correctionMode
+            ? async (updated, saved) => {
+              const added = updated.find(item => item.tradeId === value.tradeId);
+              await onCorrectTrade(added, value);
+              return { ...saved, trades: updated };
+            }
+            : onTradesChange,
           onMachineSaved: row => setRows(current => [...current.filter(item => item.tradeId !== row.tradeId), row]),
         }),
       });
@@ -137,8 +153,9 @@ const IXITradeInSection = forwardRef(function IXITradeInSection({
     setBusy(true);
     setError("");
     try {
-      if (!row.passportId) {
+      if (!row.passportId || correctionMode) {
         setForm({
+          ...fresh(),
           ...row.machine,
           tradeId: row.tradeId,
           allowance: row.allowanceCents / 100,
@@ -237,7 +254,8 @@ const IXITradeInSection = forwardRef(function IXITradeInSection({
         </p>
       ) : null}
       {!trades.length && !form ? <p>No trade machines attached to this order.</p> : null}
-      {locked && !trades.length ? <p>Trade entry is locked by the issued invoice or signed order. A saved trade is still available here for acquisition and photos.</p> : null}
+      {correctionMode ? <p>ISSUED INVOICE · Save Trade records a linked customer credit. The original invoice and payments remain on file.</p> : null}
+      {locked && !trades.length && !correctionMode ? <p>Trade entry is locked by the issued invoice or signed order. A saved trade is still available here for acquisition and photos.</p> : null}
       {!locked && !form ? (
         <div className={styles.actions}>
           <button
@@ -309,7 +327,7 @@ const IXITradeInSection = forwardRef(function IXITradeInSection({
       ) : null}
       {form ? (
         <div className={styles.form}>
-          <p role="status">UNSAVED TRADE · Save Trade or Save Order saves this machine and its allowance.</p>
+          <p role="status">{correctionMode ? "UNSAVED TRADE CREDIT · Review the machine, allowance and credit date, then Save Trade." : "UNSAVED TRADE · Save Trade or Save Order saves this machine and its allowance."}</p>
           {[
             ["year", "YEAR"],
             ["make", "MAKE"],
@@ -348,6 +366,10 @@ const IXITradeInSection = forwardRef(function IXITradeInSection({
             />
           </label>
           <p>Photos can be added later in Launch.</p>
+          {correctionMode ? <>
+            <label>CREDIT DATE<input type="date" value={form.effectiveDate || ""} disabled={busy} onChange={event => setForm(current => ({ ...current, effectiveDate: event.target.value }))} /></label>
+            <label>CORRECTION REASON<input value={form.reason || ""} disabled={busy} onChange={event => setForm(current => ({ ...current, reason: event.target.value }))} /></label>
+          </> : null}
           <div className={styles.actions}>
             <button
               type="button"
@@ -444,7 +466,7 @@ const IXITradeInSection = forwardRef(function IXITradeInSection({
                     FINISH INVENTORY
                   </button>
                 ) : null}
-                {!locked && row?.status !== "acquired" ? (
+                {!locked && !correctionMode && row?.status !== "acquired" ? (
                   <button
                     type="button"
                     disabled={busy}
@@ -482,7 +504,7 @@ const IXITradeInSection = forwardRef(function IXITradeInSection({
             tradeContext={{
               tradeId: acquiring.tradeId,
               dealId,
-              sourceFinancialDocumentId: record.identity.salesOrderId,
+              sourceFinancialDocumentId: acquiring.tradeCreditId || record.identity.salesOrderId,
               outgoingPassportId,
               allowance: acquiring.allowance,
             }}
