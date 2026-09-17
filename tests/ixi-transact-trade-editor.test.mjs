@@ -31,6 +31,8 @@ const compile = (name, dependencies = {}) => {
 };
 const workflow = compile("sales/IXITradeSaveWorkflow.js");
 const contract = compile("modules/equipment-sale/IXIEquipmentSaleContract.js");
+const soldContract = compile("modules/sold/IXIAssetSaleContract.js");
+const issuedInvoiceView = compile("modules/equipment-sale/IXIIssuedInvoiceView.jsx").default;
 const noop = () => null;
 const access = compile("../../../lib/machine-access/IXIMachineAccess.js");
 const listingProjection = compile("../../../lib/listings/normalizeSharetribeListings.js", {
@@ -78,6 +80,8 @@ test("the real order editor retains expanded trade fields and Save Order persist
   const app = compile("modules/equipment-sale/IXIEquipmentSaleApp.jsx", {
     "../../sales/IXITradeInSection": tradeSection,
     "../../sales/IXITradeSummary": noop,
+    "./IXIIssuedInvoiceView": issuedInvoiceView,
+    "../sold/IXIAssetSaleContract": soldContract,
     "../../IXIMoneyInput": { __esModule: true, default: moneyInput, IXINumericInput: moneyInput },
     "./IXIEquipmentSaleCommands": {
       saveIXIEquipmentSale: async ({ record, action }) => { calls.push(action); savedOrder = { ...record, financialBinding: { ...record.financialBinding, revision: record.financialBinding.revision + 1 } }; return { record: savedOrder }; },
@@ -171,6 +175,7 @@ test("issued order reuses an existing card, records a linked trade credit, and o
   };
   const app = compile("modules/equipment-sale/IXIEquipmentSaleApp.jsx", {
     "../../sales/IXITradeInSection": tradeSection, "../../sales/IXITradeSummary": noop,
+    "./IXIIssuedInvoiceView": issuedInvoiceView, "../sold/IXIAssetSaleContract": soldContract,
     "../../IXIMoneyInput": { __esModule: true, default: moneyInput, IXINumericInput: moneyInput },
     "./IXIEquipmentSaleCommands": {
       saveIXIEquipmentSale: () => { throw new Error("Issued order must not be rewritten"); },
@@ -222,6 +227,120 @@ test("issued order reuses an existing card, records a linked trade credit, and o
     assert.equal(acquisitionProps.initialInput.sellerLabel, original.customer.name);
     assert.equal(acquisitionProps.initialInput.acquisitionType, "trade-in");
     assert.equal(acquisitionProps.object.passportId, "existing-passport");
+    const navigation = [];
+    const deal = { dealId: "test-deal", stageRecords: { "sales-order": { documentId: "test-order" } } };
+    await act(async () => root.render(React.createElement(app, { key: "issued-view", context, initialRecord: original, invoice, deal,
+      entryMode: "invoice", onStartStage: (...args) => navigation.push(args), onOpenStage: (...args) => navigation.push(args) })));
+    assert.equal(button("SAVE INVOICE"), undefined);
+    assert.equal(document.querySelector('[aria-label="Issued invoice"] dl').textContent.includes("$0.00"), true);
+    assert.equal(document.querySelector('[aria-label="Issued invoice"] input'), null);
+    await act(async () => button("CONTINUE TO SOLD").click());
+    assert.equal(navigation[0][0].id, "sold");
+    assert.equal(navigation[0][1].dealId, "test-deal");
+    await act(async () => button("EXPAND").click());
+    assert.equal(button("SAVE INVOICE"), undefined);
+    await act(async () => button("CONTINUE TO SOLD").click());
+    assert.equal(navigation[1][0].id, "sold");
+    assert.deepEqual(calls, ["resolve-existing-machine", "record-credit", "refresh"]);
+    assert.equal(JSON.stringify({ original, invoice }), originalJSON);
+  } finally { await act(async () => root.unmount()); }
+});
+test("SOLD confirms acquisition in place, retries inventory without another purchase, then closes once", async () => {
+  const acquisitionContract = compile("modules/asset-acquisition/IXIAssetAcquisitionContract.js");
+  const acquisitionEngine = compile("modules/asset-acquisition/IXIAssetAcquisitionRecordEngine.js");
+  const context = { primary: { passportId: "outgoing-machine", label: "Outgoing loader" }, entity: { passportId: "test-entity", label: "Test dealer" }, actor: { passportId: "test-actor" } };
+  const trade = { tradeId: "trade-test-001", passportId: "incoming-machine", objectId: "incoming-object", listingId: "incoming-listing", year: "2021", make: "TEST", model: "LOADER", hours: "4400", serialNumber: "TEST-INCOMING", allowance: 65000 };
+  const invoice = { financialDocumentId: "test-invoice", documentNumber: "INV-TEST", sourceFinancialDocumentId: "test-order", financialState: "partially-collected", occurredAt: "2026-09-02", totals: { total: 75000 }, metadata: { dealId: "test-deal", customer: { name: "Test buyer" }, commercialBreakdown: { subtotal: 75000 } } };
+  const credit = { financialDocumentId: "test-credit", documentType: "credit", creditType: "trade-credit", financialState: "incurred", sourceFinancialDocumentId: "test-invoice", totals: { total: 65000 }, tradeCorrection: { trade } };
+  const payment = { financialDocumentId: "test-wire", documentType: "payment", paymentDirection: "inflow", financialState: "paid", sourceFinancialDocumentId: "test-invoice", totals: { total: 10000 } };
+  let acquisitions = 0, inventoryAttempts = 0, sales = 0;
+  let storedAcquisition;
+  const row = { ...trade, status: "identified", inventoryStatus: "pending", machine: trade };
+  const acqApp = compile("modules/asset-acquisition/IXIAssetAcquisitionApp.jsx", {
+    "../../IXIMoneyInput": moneyInput,
+    "./IXIAssetAcquisitionContract": acquisitionContract,
+    "./IXIAssetAcquisitionRecordEngine": acquisitionEngine,
+    "./IXIAssetAcquisitionStyles": noop,
+    "./IXIAssetAcquisitionCommands": { createIXIAssetAcquisition: async ({ input, context: incomingContext }) => {
+      acquisitions++;
+      assert.equal(incomingContext.primary.passportId, trade.passportId);
+      assert.equal(input.clientRequestId, `trade-acquisition:${trade.tradeId}`);
+      assert.equal(input.trade.sourceFinancialDocumentId, credit.financialDocumentId);
+      assert.equal(input.purchasePrice, 65000);
+      assert.equal(input.purchaseDate, invoice.occurredAt);
+      assert.equal(input.sellerLabel, invoice.metadata.customer.name);
+      assert.equal(input.tradeAllowance, "");
+      storedAcquisition = acquisitionContract.createIXIAssetAcquisitionDraft({ context: incomingContext, input });
+      assert.equal(storedAcquisition.acquisition.directAcquisitionCost, 65000);
+      assert.equal(storedAcquisition.logistics.receivedDate, "");
+      storedAcquisition.financialBinding = { financialDocumentId: "test-acquisition", revision: 1 };
+      return { record: storedAcquisition };
+    } },
+  }).default;
+  const closeoutTradeSection = compile("sales/IXITradeInSection.jsx", {
+    "./IXITradeSaveWorkflow": workflow, "../../../ixi-machine-card/IXIMachineCard": privateCard,
+    "../modules/asset-acquisition/IXIAssetAcquisitionApp": acqApp, "../IXIMoneyInput": moneyInput,
+    "../../../ixi-object-system/IXIActionNoticeEngine": { runIXIActionNoticeLifecycle: ({ operation }) => operation() },
+    "./IXITradeInSection.module.css": {},
+  }).default;
+  const soldApp = compile("modules/sold/IXIAssetSaleApp.jsx", {
+    "./IXISaleReturnPanel": noop, "../../IXIMoneyInput": moneyInput,
+    "../../sales/IXITradeInSection": closeoutTradeSection,
+    "./IXIAssetSaleContract": soldContract,
+    "./IXIAssetSaleCommands": { createIXIAssetSale: async ({ input }) => {
+      sales++;
+      assert.equal(row.inventoryStatus, "complete");
+      assert.equal(input.machineSalePrice, 75000);
+      const record = soldContract.createIXIAssetSaleDraft({ context, input });
+      assert.equal(record.sale.salePrice, 75000);
+      assert.equal(record.collection.balanceDue, 0);
+      return { record, invoice };
+    } },
+    "../../../financial-runtime/IXIAosFinancialReadClient": {},
+    "../../IXITransactRecordIndex": { getIXITransactRecordIndex: value => value },
+    "../../IXIMachineCostBasisEngine": { getIXIMachineCostBasis: () => ({ totalInvested: 60000 }) },
+    "../../IXITransactFilePolicy": {}, "./IXIAssetSaleStyles": noop,
+  }).default;
+  globalThis.fetch = async (url, options) => {
+    assert.ok(url.startsWith("/api/ixi/onboarding/trades"));
+    if (options.method === "GET") return { ok: true, json: async () => ({ rows: [row] }) };
+    const input = JSON.parse(options.body);
+    assert.equal(input.action, "acquired", "no extra trade or credit may be created");
+    assert.equal(input.acquisitionId, "test-acquisition");
+    inventoryAttempts++;
+    if (inventoryAttempts === 1) return { ok: false, json: async () => ({ error: "Inventory response lost. Retry." }) };
+    Object.assign(row, { status: "acquired", acquisitionId: "test-acquisition", inventoryStatus: "complete" });
+    return { ok: true, json: async () => ({ row }) };
+  };
+  const root = createRoot(document.getElementById("root"));
+  const button = text => [...document.querySelectorAll("button")].find(el => el.textContent.trim() === text);
+  const render = records => root.render(React.createElement(soldApp, { context, sourceInvoice: invoice, financialRecords: records, dealId: "test-deal" }));
+  try {
+    await act(async () => render([credit, payment]));
+    assert.equal(button("MARK SOLD").disabled, true);
+    assert.match(document.body.textContent, /Balance cleared. Confirm the incoming trades below/);
+    await act(async () => button("CONFIRM ACQUISITION").click());
+    assert.equal(acquisitions, 0, "opening a review cannot record ownership");
+    const review = document.querySelector('[aria-label="Confirm trade acquisition"]');
+    assert.ok(review);
+    await act(async () => {
+      const confirm = [...review.querySelectorAll("button")].find(el => el.textContent === "CONFIRM ACQUISITION");
+      confirm.click(); confirm.click();
+    });
+    assert.equal(acquisitions, 1);
+    assert.equal(button("MARK SOLD").disabled, true);
+    assert.ok(button("FINISH INVENTORY"));
+    await act(async () => button("FINISH INVENTORY").click());
+    assert.equal(acquisitions, 1);
+    assert.equal(button("MARK SOLD").disabled, false);
+    await act(async () => render([credit, { ...payment, totals: { total: 9000 } }]));
+    assert.equal(button("MARK SOLD").disabled, true);
+    await act(async () => render([credit, payment]));
+    assert.equal(button("MARK SOLD").disabled, false);
+    await act(async () => { const close = button("MARK SOLD"); close.click(); close.click(); });
+    assert.equal(sales, 1);
+    assert.equal(acquisitions, 1);
+    assert.equal(inventoryAttempts, 2);
   } finally { await act(async () => root.unmount()); }
 });
 after(() => dom.window.close());

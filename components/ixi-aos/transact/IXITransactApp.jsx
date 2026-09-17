@@ -1355,6 +1355,7 @@ export default function IXITransactApp({
         quote={selectedQuoteSnapshot}
         initialRecord={selectedSalesOrderSnapshot}
         invoice={selectedSalesInvoiceSnapshot}
+        financialRecords={salesFinancialRecords}
         activeStageId={activeSalesStageId}
         initialTab={activeSalesStageId === "invoice" ? "invoice" : "order"}
         entryMode={activeSalesStageId === "invoice" ? "invoice" : "sales-order"}

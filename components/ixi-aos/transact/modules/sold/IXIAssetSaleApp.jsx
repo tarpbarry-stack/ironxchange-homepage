@@ -1,6 +1,7 @@
 import IXISaleReturnPanel from "./IXISaleReturnPanel";
 import IXIMoneyInput from "../../IXIMoneyInput";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import IXITradeInSection from "../../sales/IXITradeInSection";
 import {
   createIXIAssetSaleDraft,
   resolveIXIAssetSaleDate,
@@ -8,6 +9,8 @@ import {
   isIXIAssetSaleCollectionReady,
   validateIXIAssetSale,
   getIXIAssetSaleValidationMessages,
+  getIXISaleCloseoutTrades,
+  defaultIXIMachineSalePrice,
 } from "./IXIAssetSaleContract";
 import { createIXIAssetSale, recordIXIAssetSaleReceipt } from "./IXIAssetSaleCommands";
 import { uploadIXIAosFinancialAttachment } from "../../../financial-runtime/IXIAosFinancialReadClient";
@@ -52,12 +55,12 @@ const COPY = {
     documents: "CLOSING DOCUMENTS",
     uploading: "SECURING + VERIFYING EVIDENCE…",
     verified: "SERVER VERIFIED",
-    record: "VERIFY FUNDS + RECORD SOLD",
+    record: "MARK SOLD",
     invoiceRequired: "RECORD THE RECEIPT. TRAN$ACT WILL ISSUE THIS DRAFT INVOICE BEFORE APPLYING PAYMENT.",
     fundsRequired: "SOLD REMAINS LOCKED UNTIL THE CANONICAL INVOICE BALANCE IS $0.00.",
     paid: "FUNDS VERIFIED · READY TO CLOSE",
     tradeReady: "TRADE VALUE COVERS INVOICE · READY TO VERIFY",
-    recordTrade: "VERIFY TRADES + RECORD SOLD",
+    recordTrade: "MARK SOLD",
     tradeValue: "TRADE VALUE · NONCASH",
     soldTradeStatus: "✓ SOLD · TRADES ACQUIRED",
     invoiceTotal: "INVOICE TOTAL",
@@ -96,12 +99,12 @@ const COPY = {
     documents: "DOCUMENTOS DE CIERRE",
     uploading: "PROTEGIENDO + VERIFICANDO EVIDENCIA…",
     verified: "VERIFICADO POR EL SERVIDOR",
-    record: "VERIFICAR FONDOS + REGISTRAR VENDIDO",
+    record: "MARCAR VENDIDO",
     invoiceRequired: "REGISTRE EL PAGO. TRAN$ACT EMITIRÁ ESTA FACTURA BORRADOR ANTES DE APLICARLO.",
     fundsRequired: "VENDIDO PERMANECE BLOQUEADO HASTA QUE EL SALDO DE LA FACTURA SEA $0.00.",
     paid: "FONDOS VERIFICADOS · LISTO PARA CERRAR",
     tradeReady: "CANJE CUBRE LA FACTURA · LISTO PARA VERIFICAR",
-    recordTrade: "VERIFICAR CANJES + REGISTRAR VENDIDO",
+    recordTrade: "MARCAR VENDIDO",
     tradeValue: "VALOR DEL CANJE · NO EFECTIVO",
     soldTradeStatus: "✓ VENDIDO · CANJES ADQUIRIDOS",
     invoiceTotal: "TOTAL DE FACTURA",
@@ -147,7 +150,10 @@ export default function IXIAssetSaleApp({
   const [localReceipts, setLocalReceipts] = useState(initialRecord?.collection?.receipts || []);
   const [type, setType] = useState(initialRecord?.sale?.type || "sale");
   const [soldByLabel, setSoldByLabel] = useState(initialRecord?.sale?.soldByLabel || "");
-  const [machineSalePrice, setMachineSalePrice] = useState(initialRecord?.sale?.machineSalePrice ?? (sourceInvoice?.metadata?.trades?.length ? sourceInvoice.metadata?.commercialBreakdown?.subtotal : ""));
+  const [machineSalePriceOverride, setMachineSalePrice] = useState(initialRecord?.sale?.machineSalePrice);
+  const machineSalePrice = machineSalePriceOverride ?? defaultIXIMachineSalePrice(invoiceSnapshot);
+  const [tradesReady, setTradesReady] = useState("");
+  const closing = useRef(false);
   const [saleCommandId] = useState(() => globalThis.crypto?.randomUUID?.() || `SALE-${Date.now()}`);
   const [saleDateOverride, setSaleDate] = useState(initialRecord?.sale?.saleDate);
   const { saleDate, saleDateSource } = resolveIXIAssetSaleDate({
@@ -236,6 +242,16 @@ export default function IXIAssetSaleApp({
   const fullyTraded = collection.tradeValue > 0 && collection.invoiceTotal === collection.correctedTradeValue;
   const readyToClose = invoiceIssued && isIXIAssetSaleCollectionReady(collection);
   const closeoutReady = readyToClose;
+  const closeoutTrades = useMemo(() => getIXISaleCloseoutTrades(invoiceSnapshot, financialRecords), [invoiceSnapshot, financialRecords]);
+  const tradeOrder = useMemo(() => ({
+    identity: { dealId: dealId || invoiceSnapshot.metadata?.dealId, salesOrderId: invoiceSnapshot.sourceFinancialDocumentId || invoiceSnapshot.metadata?.salesOrderId, number: invoiceSnapshot.metadata?.salesOrderNumber || invoiceSnapshot.documentNumber },
+    customer: invoiceSnapshot.metadata?.customer || {},
+    commercial: { orderDate: clean(invoiceSnapshot.occurredAt).slice(0, 10) },
+    trades: closeoutTrades,
+  }), [dealId, invoiceSnapshot, closeoutTrades]);
+  const tradeSignature = `${invoiceIdOf(invoiceSnapshot)}:${closeoutTrades.map(trade => `${trade.tradeId}:${trade.passportId}`).join(",")}`;
+  const updateTradeReadiness = useCallback(ready => setTradesReady(ready ? tradeSignature : ""), [tradeSignature]);
+  const tradesComplete = !closeoutTrades.length || tradesReady === tradeSignature;
 
   async function addDocuments(files, typeLabel) {
     const selected = Array.from(files || []);
@@ -327,10 +343,12 @@ export default function IXIAssetSaleApp({
   }
 
   async function closeSale() {
+    if (closing.current || !tradesComplete) return;
     const check = validateIXIAssetSale(preview, invoiceSnapshot);
     setErrors(check.errors);
     setError("");
     if (!check.valid) return;
+    closing.current = true;
     setSaving(true);
     try {
       const result = await createIXIAssetSale({
@@ -359,6 +377,7 @@ export default function IXIAssetSaleApp({
     } catch (caught) {
       setError(clean(caught?.message) || "SOLD closeout could not be completed.");
     } finally {
+      closing.current = false;
       setSaving(false);
     }
   }
@@ -366,7 +385,7 @@ export default function IXIAssetSaleApp({
   const shownRecord = record || preview;
   const shownCollection = record?.collection || collection;
 
-  const headerStatus = record ? "SOLD" : readyToClose ? "READY" : "OPEN";
+  const headerStatus = record ? "SOLD" : readyToClose && tradesComplete ? "READY" : "OPEN";
 
   return <div className="ixi-sale">
     <div className="sale-top">
@@ -394,6 +413,7 @@ export default function IXIAssetSaleApp({
       <small>{shownRecord.sale?.buyerLabel || copy.customer}</small>
     </div>
 
+    <details className="sale-details"><summary>{lang === "es" ? "DATOS DE LA FACTURA" : "INVOICE DETAILS"}</summary>
     <div className="sale-section">{copy.invoiceControl}</div>
     <div className="sale-grid">
       <Field label={copy.invoice}><Input readOnly value={invoiceSnapshot?.documentNumber || invoiceIdOf(invoiceSnapshot) || "—"} /></Field>
@@ -404,15 +424,16 @@ export default function IXIAssetSaleApp({
       <Field label={copy.invoiceTotal}><Input readOnly value={money(shownCollection.invoiceTotal ?? shownRecord.sale?.salePrice)} /></Field>
     </div>
 
+    </details>
     <div className="sale-section">{copy.collection}</div>
     <div className="sale-money"><span>{copy.received}</span><b>{money(shownCollection.amountReceived)}</b></div>
     {shownCollection.tradeValue > 0 ? <div className="sale-money"><span>{copy.tradeValue}</span><b>{money(shownCollection.tradeValue)}</b></div> : null}
-    <div className="sale-money"><span>{copy.credits}</span><b>{money(shownCollection.creditedAmount)}</b></div>
+    {shownCollection.creditedAmount > shownCollection.correctedTradeValue ? <div className="sale-money"><span>{copy.credits}</span><b>{money(shownCollection.creditedAmount - shownCollection.correctedTradeValue)}</b></div> : null}
     <div className="sale-total"><span>{copy.balance}</span><strong>{money(shownCollection.balanceDue)}</strong></div>
-    {shownCollection.receipts?.map(receiptItem => <div className="sale-row" key={receiptItem.paymentId || receiptItem.recordedAt}>
+    {shownCollection.receipts?.length ? <details className="sale-details"><summary>{lang === "es" ? "PAGOS REGISTRADOS" : "RECORDED PAYMENTS"}</summary>{shownCollection.receipts.map(receiptItem => <div className="sale-row" key={receiptItem.paymentId || receiptItem.recordedAt}>
       <div className="sale-rowhead"><strong>{clean(receiptItem.method).toUpperCase()}</strong><b>{money(receiptItem.amount)}</b></div>
       <small>{receiptItem.date} · {receiptItem.reference || "—"}</small>
-    </div>)}
+    </div>)}</details> : null}
 
     {!record && invoiceCollectible && shownCollection.balanceDue > 0.005 ? <>
       <div className="sale-grid">
@@ -432,14 +453,18 @@ export default function IXIAssetSaleApp({
 
     {!record ? <>
       <div className={`sale-readiness ${readyToClose ? "ready" : "locked"}`}>
-        {readyToClose ? (fullyTraded ? copy.tradeReady : copy.paid) : invoiceIssued ? copy.fundsRequired : copy.invoiceRequired}
+        {readyToClose ? !tradesComplete ? (lang === "es" ? "Saldo liquidado. Confirme las adquisiciones de abajo." : "Balance cleared. Confirm the incoming trades below.") : (fullyTraded ? copy.tradeReady : copy.paid) : invoiceIssued ? copy.fundsRequired : copy.invoiceRequired}
       </div>
+      {closeoutTrades.length ? <IXITradeInSection key={tradeSignature} record={tradeOrder} context={context} locked closeoutMode onReadyChange={updateTradeReadiness} /> : null}
       <div className="sale-section">{copy.closeout}</div>
       <div className="sale-grid">
-        <Field label={copy.type}><select value={type} onChange={event => setType(event.target.value)}><option value="sale">SALE</option><option value="auction-sale">AUCTION SALE</option><option value="trade">TRADE</option><option value="transfer">TRANSFER</option><option value="total-loss">TOTAL LOSS</option><option value="scrap">SCRAP</option><option value="other">OTHER</option></select></Field>
         <Field label="Machine sale price"><IXIMoneyInput value={machineSalePrice} onValueChange={setMachineSalePrice} /></Field>
-        <Field label="Sold by"><Input value={soldByLabel} onChange={setSoldByLabel} placeholder="Actual salesperson, if known" /></Field>
         <Field label={copy.date}><Input type="date" value={saleDate} onChange={setSaleDate} /></Field>
+      </div>
+      <details className="sale-details"><summary>{lang === "es" ? "MÁS DETALLES Y DOCUMENTOS · OPCIONAL" : "MORE DETAILS & DOCUMENTS · OPTIONAL"}</summary>
+      <div className="sale-grid">
+        <Field label={copy.type}><select value={type} onChange={event => setType(event.target.value)}><option value="sale">SALE</option><option value="auction-sale">AUCTION SALE</option><option value="trade">TRADE</option><option value="transfer">TRANSFER</option><option value="total-loss">TOTAL LOSS</option><option value="scrap">SCRAP</option><option value="other">OTHER</option></select></Field>
+        <Field label="Sold by"><Input value={soldByLabel} onChange={setSoldByLabel} placeholder="Actual salesperson, if known" /></Field>
       </div>
       <div className="sale-grid">
         <Field label={copy.billOfSale}><Input value={billOfSaleNumber} onChange={setBillOfSaleNumber} /></Field>
@@ -458,8 +483,9 @@ export default function IXIAssetSaleApp({
         <small>{clean(document.type).replace(/-/g, " ").toUpperCase()} · SHA-256</small>
       </div>)}
       <Field label={copy.notes}><textarea value={notes} onChange={event => setNotes(event.target.value)} /></Field>
+      </details>
       {Object.keys(errors).length ? <div className="sale-error" role="alert"><strong>{copy.blocked}</strong><ul>{getIXIAssetSaleValidationMessages(errors, lang).map(message => <li key={message}>{message}</li>)}</ul></div> : null}
-      <button type="button" className="sale-primary" disabled={saving || uploading || !closeoutReady} onClick={closeSale}>{saving ? copy.verifying : fullyTraded ? copy.recordTrade : copy.record}</button>
+      <button type="button" className="sale-primary" disabled={saving || uploading || !closeoutReady || !tradesComplete} onClick={closeSale}>{saving ? copy.verifying : fullyTraded ? copy.recordTrade : copy.record}</button>
     </> : <div className="sale-status"><strong>{fullyTraded ? copy.soldTradeStatus : copy.soldStatus}</strong><div className="sale-money"><span>{copy.settlement}</span><b>{copy.ready}</b></div></div>}
 
     {record && <><a className="sale-secondary" href="/sold" target="_blank" rel="noreferrer">VIEW IN SOLD ↗</a><IXISaleReturnPanel invoice={invoiceSnapshot} financialRecords={financialRecords} context={context} onSaved={onRecordChange} /></>}

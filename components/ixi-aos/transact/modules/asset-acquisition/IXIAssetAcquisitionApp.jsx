@@ -1,5 +1,5 @@
 import IXIMoneyInput from "../../IXIMoneyInput";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   createIXIAssetAcquisition,
   correctIXIAssetAcquisitionDate,
@@ -412,6 +412,7 @@ export default function IXIAssetAcquisitionApp({
   onBack = null,
   onRecordChange = null,
   recordHeaderEmbedded = false,
+  compactTradeReview = false,
 }) {
   const primary = context.primary || {};
   const entity = context.entity || {};
@@ -425,6 +426,8 @@ export default function IXIAssetAcquisitionApp({
     lang === "es" ? ES_TEXT[String(text).toUpperCase()] || text : text;
   const [record, setRecord] = useState(initialRecord);
   const [saving, setSaving] = useState(false);
+  const savingRef = useRef(false);
+  const [showTradeDetails, setShowTradeDetails] = useState(false);
   const [errors, setErrors] = useState({});
   const [clientRequestId] = useState(
     () =>
@@ -642,9 +645,11 @@ export default function IXIAssetAcquisitionApp({
     );
   }
   async function save() {
+    if (savingRef.current) return;
     const check = validateIXIAssetAcquisition(preview);
     setErrors(check.errors);
     if (!check.valid) return;
+    savingRef.current = true;
     setSaving(true);
     try {
       const result = await createIXIAssetAcquisition({
@@ -672,6 +677,7 @@ export default function IXIAssetAcquisitionApp({
         save: tx(clean(error?.message) || "Asset Acquisition could not be recorded."),
       });
     } finally {
+      savingRef.current = false;
       setSaving(false);
     }
   }
@@ -1309,6 +1315,34 @@ export default function IXIAssetAcquisitionApp({
       </div>
     );
   }
+
+  if (compactTradeReview && tradeContext && !showTradeDetails) return (
+    <div className="ixi-acq acq-trade-review" aria-label="Confirm trade acquisition">
+      <h3>{primary.label}</h3>
+      <p>{lang === "es" ? "Revise los datos y confirme la adquisición." : "Review these details and confirm your company acquired this machine."}</p>
+      <Field label={t.seller}><Input value={sellerLabel} onChange={setSellerLabel} disabled={saving} /></Field>
+      <Field label={t.purchaseDate}><input aria-label={t.purchaseDate} type="date" value={purchaseDate} onChange={event => setPurchaseDate(event.target.value)} disabled={saving} /></Field>
+      <Field label={t.price}><IXIMoneyInput value={purchasePrice} onValueChange={setPurchasePrice} disabled={saving} /></Field>
+      <p>{lang === "es" ? "Propietario" : "Owner"}: {owners[0]?.partyLabel} · {preview.ownership.legalOwnershipTotal}%</p>
+      <button type="button" className="acq-secondary" disabled={saving} onClick={() => setShowTradeDetails(true)}>{lang === "es" ? "PROPIEDAD, GRAVAMEN Y MÁS DETALLES" : "OWNERSHIP, PAYOFF & MORE DETAILS"}</button>
+      {Object.keys(errors).length ? <div role="alert" className="acq-error">{Object.entries(errors).map(([key, value]) => <p key={key}>{({
+        seller: "Enter the customer supplying this trade.",
+        purchaseDate: "Enter the acquisition date.",
+        purchasePrice: "Enter an acquisition value greater than zero.",
+        ownership: "Open ownership details and make sure ownership totals 100%.",
+        settlement: "Open ownership details and make sure settlement shares total 100%.",
+        profitShares: "Open ownership details and make sure profit shares total 100%.",
+        costs: "Open more details and check that costs are zero or greater.",
+        basis: "Open more details and check the acquisition value and costs.",
+        asset: "Reopen this trade so its machine Passport can be loaded.",
+        entity: "Reopen TRAN$ACT with your company selected.",
+        actor: "Sign in again to confirm this acquisition.",
+      })[key] || String(value)}</p>)}</div> : null}
+      <button type="button" className="acq-primary" disabled={saving} onClick={save}>{saving ? (lang === "es" ? "GUARDANDO…" : "SAVING…") : (lang === "es" ? "CONFIRMAR ADQUISICIÓN" : "CONFIRM ACQUISITION")}</button>
+      <IXIAssetAcquisitionStyles />
+      <style jsx>{`.acq-trade-review{padding:12px;box-sizing:border-box}.acq-trade-review h3{font-size:16px}.acq-trade-review p{font-size:13px;line-height:1.5}.acq-trade-review :global(.acq-field label){font-size:12px}.acq-trade-review :global(input){font-size:15px;min-height:44px}.acq-trade-review button{min-height:44px;font-size:12px}`}</style>
+    </div>
+  );
 
   return (
     <div className="ixi-acq" lang={lang === "es" ? "es-MX" : "en-US"}>

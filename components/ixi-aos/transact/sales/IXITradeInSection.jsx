@@ -56,6 +56,8 @@ const IXITradeInSection = forwardRef(function IXITradeInSection({
   maximumAllowance,
   form,
   onFormChange: setForm,
+  closeoutMode = false,
+  onReadyChange,
 }, ref) {
   const [rows, setRows] = useState([]),
     [busy, setBusy] = useState(false);
@@ -64,6 +66,8 @@ const IXITradeInSection = forwardRef(function IXITradeInSection({
     [acquiring, setAcquiring] = useState(null),
     [choices, setChoices] = useState(null);
   const [acquisitionRecord, setAcquisitionRecord] = useState(null);
+  const [rowsLoaded, setRowsLoaded] = useState(false);
+  const [refreshVersion, setRefreshVersion] = useState(0);
   const [page, setPage] = useState(1),
     [hasMore, setHasMore] = useState(false),
     [search, setSearch] = useState("");
@@ -71,17 +75,21 @@ const IXITradeInSection = forwardRef(function IXITradeInSection({
   const outgoingPassportId = context?.primary?.passportId;
   const trades = [...(record?.trades || []), ...correctionTrades];
   const scope = { dealId, outgoingPassportId };
+  const acquisitionsReady = rowsLoaded && !busy && trades.every(trade => rows.some(row =>
+    row.tradeId === trade.tradeId && row.passportId === trade.passportId && row.status === "acquired" && row.acquisitionId && row.inventoryStatus === "complete"));
+  useEffect(() => { onReadyChange?.(acquisitionsReady); }, [acquisitionsReady, onReadyChange]);
   useImperativeHandle(ref, () => ({ savePendingTrade: () => add(), hasPendingTrade: Boolean(form) }));
   useEffect(() => {
     if (!dealId || !outgoingPassportId) return;
     let active = true;
+    setRowsLoaded(false);
     const refresh = () =>
       request({ dealId, outgoingPassportId }, "GET")
         .then((result) => {
-          if (active) setRows(result.rows || []);
+          if (active) { setRows(result.rows || []); setRowsLoaded(true); setError(""); }
         })
         .catch((caught) => {
-          if (active) setError(caught.message);
+          if (active) { setError(caught.message); setRowsLoaded(false); }
         });
     refresh();
     window.addEventListener("focus", refresh);
@@ -89,7 +97,7 @@ const IXITradeInSection = forwardRef(function IXITradeInSection({
       active = false;
       window.removeEventListener("focus", refresh);
     };
-  }, [dealId, outgoingPassportId]);
+  }, [dealId, outgoingPassportId, refreshVersion]);
 
   async function existing(nextPage = 1) {
     setBusy(true);
@@ -241,18 +249,20 @@ const IXITradeInSection = forwardRef(function IXITradeInSection({
   return (
     <section className={styles.section} aria-label="Trade-in machines">
       <header>
-        <h3>TRADE-IN MACHINES</h3>
+        <h3>{closeoutMode ? "CONFIRM INCOMING TRADES" : "TRADE-IN MACHINES"}</h3>
         <strong>
           {money(
             trades.reduce((sum, trade) => sum + Number(trade.allowance), 0),
           )}
         </strong>
       </header>
+      {closeoutMode ? <p>{!rowsLoaded ? "Checking trade acquisitions…" : acquisitionsReady ? "Trade acquisitions complete." : "Confirm each incoming machine below, then mark the sale SOLD."}</p> : null}
       {error ? (
         <p role="alert" className={styles.error}>
           {error}
         </p>
       ) : null}
+      {closeoutMode && error && !rowsLoaded ? <button type="button" onClick={() => setRefreshVersion(value => value + 1)}>RETRY TRADE CHECK</button> : null}
       {!trades.length && !form ? <p>No trade machines attached to this order.</p> : null}
       {correctionMode ? <p>ISSUED INVOICE · Save Trade records a linked customer credit. The original invoice and payments remain on file.</p> : null}
       {locked && !trades.length && !correctionMode ? <p>Trade entry is locked by the issued invoice or signed order. A saved trade is still available here for acquisition and photos.</p> : null}
@@ -391,7 +401,7 @@ const IXITradeInSection = forwardRef(function IXITradeInSection({
           </div>
         </div>
       ) : null}
-      {rows
+      {!closeoutMode && rows
         .filter((row) => !trades.some((trade) => trade.tradeId === row.tradeId))
         .map((row) => (
           <div key={row.tradeId} className={styles.recovery}>
@@ -431,7 +441,7 @@ const IXITradeInSection = forwardRef(function IXITradeInSection({
                 {row?.status === "acquired" ? "ACQUIRED" : "PENDING TRADE"} ·{" "}
                 {money(trade.allowance)}
               </b>
-              <div className={styles.card}>
+              {closeoutMode ? <p><strong>{trade.year} {trade.make} {trade.model}</strong><br />SN {trade.serialNumber}</p> : <div className={styles.card}>
                 <IXIMachineCard
                   listing={listing}
                   cardContext="workspace"
@@ -439,7 +449,7 @@ const IXITradeInSection = forwardRef(function IXITradeInSection({
                   suppressFamilyLog
                   showMachineRail={false}
                 />
-              </div>
+              </div>}
               <div className={styles.actions}>
                 <a
                   href={`/live?id=${encodeURIComponent(trade.listingId)}`}
@@ -448,10 +458,10 @@ const IXITradeInSection = forwardRef(function IXITradeInSection({
                 >
                   LAUNCH · PHOTOS
                 </a>
-                <button type="button" onClick={() => openAcquisition(trade)}>
+                <button type="button" disabled={busy || (closeoutMode && !rowsLoaded)} onClick={() => openAcquisition(trade)}>
                   {row?.status === "acquired"
                     ? "VIEW ACQUISITION"
-                    : "ACQUISITION"}
+                    : closeoutMode ? "CONFIRM ACQUISITION" : "ACQUISITION"}
                 </button>
                 {row?.acquisitionId && row.inventoryStatus !== "complete" ? (
                   <button
@@ -487,9 +497,10 @@ const IXITradeInSection = forwardRef(function IXITradeInSection({
       {acquiring ? (
         <div className={styles.acquisition}>
           <button type="button" onClick={() => setAcquiring(null)}>
-            ‹ BACK TO ORDER
+            {closeoutMode ? "‹ BACK TO SOLD" : "‹ BACK TO ORDER"}
           </button>
           <IXIAssetAcquisitionApp
+            compactTradeReview={closeoutMode}
             initialRecord={acquisitionRecord}
             key={acquiring.tradeId}
             context={{

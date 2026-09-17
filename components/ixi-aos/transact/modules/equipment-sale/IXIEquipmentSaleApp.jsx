@@ -1,5 +1,7 @@
 import IXITradeInSection from "../../sales/IXITradeInSection";
 import IXITradeSummary from "../../sales/IXITradeSummary";
+import IXIIssuedInvoiceView from "./IXIIssuedInvoiceView";
+import { projectIXIAssetSaleCollection } from "../sold/IXIAssetSaleContract";
 import IXIMoneyInput, { IXINumericInput } from "../../IXIMoneyInput";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
@@ -1048,6 +1050,7 @@ export default function IXIEquipmentSaleApp({
   quote = null,
   initialRecord = null,
   invoice = null,
+  financialRecords = [],
   activeStageId = "sales-order",
   initialTab = "order",
   entryMode = "sales-order",
@@ -1371,6 +1374,7 @@ export default function IXIEquipmentSaleApp({
     }
   }
   async function saveInvoice() {
+    if (invoiceRecord && clean(invoiceRecord.financialState).toLowerCase() !== "draft") return invoiceRecord;
     setBusy(true);
     setError("");
     try {
@@ -1845,6 +1849,27 @@ export default function IXIEquipmentSaleApp({
     invoiceEntry && linkedInvoice && invoiceRecord
       ? (invoiceRecord?.totals?.customerTotal ?? invoiceRecord?.totals?.total)
       : draft?.totals?.total;
+  if (invoiceLocked && (invoiceEntry || (open && tab === "invoice"))) {
+    const collection = projectIXIAssetSaleCollection({ sourceInvoice: invoiceRecord, financialRecords });
+    const position = tradeCorrection?.position || {
+      invoiceAmount: collection.invoiceTotal, received: collection.amountReceived,
+      tradeCredit: collection.tradeValue, credited: collection.creditedAmount, balance: collection.balanceDue,
+    };
+    const soldStage = { id: "sold", moduleId: "sold" };
+    const continueToSold = deal && (deal.stageRecords?.sold ? onOpenStage : onStartStage)
+      ? () => deal.stageRecords?.sold ? onOpenStage(soldStage, deal.stageRecords.sold, deal) : onStartStage(soldStage, deal)
+      : null;
+    const originalTradeValue = (invoiceRecord.metadata?.trades || []).reduce((sum, trade) => sum + Number(trade.allowance || 0), 0);
+    const displayPosition = { ...position, invoiceAmount: position.invoiceAmount + originalTradeValue,
+      tradeCredit: position.tradeCredit + (tradeCorrection?.position ? originalTradeValue : 0), credited: position.credited + originalTradeValue };
+    return <IXIIssuedInvoiceView invoice={invoiceRecord} position={displayPosition}
+      loading={tradeCorrectionLoading} error={tradeCorrectionError}
+      trades={[...(invoiceRecord.metadata?.trades || []), ...correctedTrades]}
+      expanded={open} onExpand={() => setOpen(true)} onClose={() => setOpen(false)}
+      onContinue={continueToSold} sold={Boolean(deal?.stageRecords?.sold)}
+      onTrades={deal?.stageRecords?.["sales-order"] ? () => onOpenStage?.({ id: "sales-order", moduleId: "sales-order" }, deal.stageRecords["sales-order"], deal) : null}
+      stageRail={<StageRail record={record} invoice={invoiceRecord} deal={deal} activeStageId="invoice" onOpenStage={openStageAfterTrade} onStartStage={startStageAfterTrade} />} />;
+  }
   if (directInvoiceWithoutOrder && !showNewOrder)
     return (
       <>

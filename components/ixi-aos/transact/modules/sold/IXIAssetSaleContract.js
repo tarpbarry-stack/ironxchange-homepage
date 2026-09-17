@@ -133,6 +133,23 @@ export function isIXIAssetSaleCollectionReady(collection = {}) {
   return cashSettled || fullyTraded;
 }
 
+export function getIXISaleCloseoutTrades(sourceInvoice = {}, financialRecords = []) {
+  const id = clean(sourceInvoice.financialDocumentId || sourceInvoice.financialBinding?.financialDocumentId);
+  const trades = [...array(sourceInvoice.metadata?.trades)];
+  for (const item of financialRecords) {
+    const doc = financialDocumentOf(item);
+    if (doc.sourceFinancialDocumentId === id && doc.creditType === "trade-credit" &&
+      ["incurred", "approved", "posted", "closed"].includes(doc.financialState) && doc.tradeCorrection?.trade)
+      trades.push({ ...doc.tradeCorrection.trade, tradeCreditId: doc.financialDocumentId });
+  }
+  return [...new Map(trades.map(trade => [trade.tradeId, trade])).values()];
+}
+
+export function defaultIXIMachineSalePrice(sourceInvoice = {}) {
+  const subtotal = sourceInvoice.metadata?.commercialBreakdown?.subtotal;
+  return subtotal != null && Number.isFinite(Number(subtotal)) && Number(subtotal) > 0 ? Number(subtotal) : "";
+}
+
 export function createIXIAssetSaleDraft({ context = {}, input = {} } = {}) {
   const primary = object(context.primary);
   const actor = object(context.actor);
@@ -181,7 +198,7 @@ export function createIXIAssetSaleDraft({ context = {}, input = {} } = {}) {
       buyerEmail: clean(input.buyerEmail),
       buyerPhone: clean(input.buyerPhone),
       ...businessDate,
-      salePrice: money(collection.invoiceTotal + collection.tradeValue),
+      salePrice: money(collection.invoiceTotal + collection.tradeValue - collection.correctedTradeValue),
       tradeValue: collection.tradeValue,
       machineSalePrice: input.machineSalePrice === "" || input.machineSalePrice == null ? null : money(input.machineSalePrice),
       soldByLabel: clean(input.soldByLabel),
@@ -228,7 +245,7 @@ export function validateIXIAssetSale(record = {}, sourceInvoice = {}) {
   if (!["billed", "partially-collected", "collected"].includes(invoiceState)) errors.invoiceState = "invoice-must-be-issued";
   if (number(record.collection?.balanceDue) > 0.005) errors.collection = "buyer-balance-outstanding";
   else if (!isIXIAssetSaleCollectionReady(record.collection)) errors.collection = "Actual received funds or acquired trade value are required; a credit alone does not complete a sale.";
-  if (record.sale?.machineSalePrice == null || number(record.sale.machineSalePrice) <= 0 || number(record.sale.machineSalePrice) > number(record.collection.invoiceTotal) + number(record.collection.tradeValue)) errors.machineSalePrice = "Enter the machine sale price, excluding invoice additions.";
+  if (record.sale?.machineSalePrice == null || number(record.sale.machineSalePrice) <= 0 || number(record.sale.machineSalePrice) > number(record.collection.invoiceTotal) + number(record.collection.tradeValue) - number(record.collection.correctedTradeValue)) errors.machineSalePrice = "Enter the machine sale price, excluding invoice additions.";
   if (clean(record.collection?.status) !== "paid") errors.collectionStatus = "payment-required";
   return { valid: Object.keys(errors).length === 0, errors };
 }
