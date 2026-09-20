@@ -159,6 +159,12 @@ function Toolbar({ side, folded, onFold, registry, indexes, placements, session,
 
 export default function IXIAosToolbarChassis({ children, controls, registry, indexes, placements, session, ready,
   preferenceKey, onMove, onBoard, onReturn, onConnect, requiresSignIn = false, loadError = "" }) {
+  // Register the entire visible Board, including gaps between cards. Without
+  // this target, closest-center fallback can dock a drop in a nearby toolbar.
+  const boardDrop = useDroppable({
+    id: "board", disabled: !ready,
+    data: { type: "workspace", containerId: "board", targetSurface: "board", dropIntent: "root" }
+  });
   const [folded, setFolded] = useState({ left: false, right: false });
   const [browse, setBrowse] = useState({ left: "", right: "" });
   const [error, setError] = useState("");
@@ -213,7 +219,7 @@ export default function IXIAosToolbarChassis({ children, controls, registry, ind
         </div>
         <div role="status" aria-live="polite" className={styles.status}>{pending ? "Saving workspace…" : ""}</div>
         {error && <p role="alert" className={styles.error}>{error}</p>}
-        <div className={styles.board} aria-label="Working Board">{children}</div>
+        <div ref={boardDrop.setNodeRef} className={styles.board} aria-label="Working Board">{children}</div>
       </div>
     </section>
   );

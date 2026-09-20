@@ -23,7 +23,9 @@ test("folding keeps Board state mounted, browsed containers and parked Objects s
   globalThis.IS_REACT_ACT_ENVIRONMENT = true;
   const React = require("react");
   const { createRoot } = require("react-dom/client");
-  const { DndContext } = require("@dnd-kit/core");
+  const { DndContext, useDndContext, pointerWithin } = require("@dnd-kit/core");
+  let dnd;
+  function ObserveDropTargets() { dnd = useDndContext(); return null; }
   const { transformSync } = require("next/dist/build/swc");
   const file = new URL("../components/ixi-mos/workspace/IXIAosToolbarChassis.jsx", import.meta.url);
   const compiled = transformSync(fs.readFileSync(file, "utf8"), {
@@ -57,7 +59,18 @@ test("folding keeps Board state mounted, browsed containers and parked Objects s
   const click = async button => { assert.ok(button); await React.act(async () => button.click()); };
   try {
     await React.act(async () => root.render(React.createElement(DndContext, null,
-      React.createElement(Chassis, props, React.createElement(Board)))));
+      React.createElement(Chassis, props, React.createElement(Board)), React.createElement(ObserveDropTargets))));
+    const boardTarget = dnd.droppableContainers.get("board");
+    assert.equal(boardTarget?.node.current, doc.querySelector('[aria-label="Working Board"]'),
+      "the full Board must be registered so blank space cannot fall back to the nearest toolbar");
+    assert.equal(boardTarget.data.current.dropIntent, "root", "Board drops are placement, not membership");
+    const boardRect = { left: 330, right: 1016, top: 462, bottom: 1100, width: 686, height: 638 };
+    const rightRect = { left: 1036, right: 1280, top: 219, bottom: 1051, width: 244, height: 832 };
+    const dropArgs = { droppableContainers: dnd.droppableContainers.getEnabled(),
+      droppableRects: new Map([["board", boardRect], [model.AOS_TOOLBAR_SURFACES.right, rightRect]]) };
+    assert.equal(pointerWithin({ ...dropArgs, pointerCoordinates: { x: 974, y: 531 } })[0]?.id, "board");
+    assert.equal(pointerWithin({ ...dropArgs, pointerCoordinates: { x: 1176, y: 531 } })[0]?.id,
+      model.AOS_TOOLBAR_SURFACES.right, "an actual toolbar drop still docks there");
     const left = doc.getElementById("aos-left-toolbar");
     const right = doc.getElementById("aos-right-toolbar");
     const board = doc.querySelector('[aria-label="Board draft"]');

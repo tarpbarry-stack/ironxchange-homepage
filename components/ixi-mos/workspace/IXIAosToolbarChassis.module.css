@@ -64,7 +64,7 @@
 .boardTools button { font: inherit; font-size: 11px; font-weight: 750; color: #c9d1bc; background: #101511; border: 1px solid #323a30; border-bottom: 0; border-radius: 3px 3px 0 0; padding: 8px 12px; cursor: pointer; }
 .status { min-height: 0; font-size: 12px; color: #c9d1bc; }
 .status:not(:empty) { padding: 10px 0; }
-.board { min-width: 0; padding-top: 28px; display: flow-root; }
+.board { min-width: 0; min-height: 320px; padding-top: 28px; display: flow-root; }
 /* Position only: search keeps its own inputs, sizing and internal geometry. */
 .chassis .center :global(.ixi-control-surface) { margin-top: 0; }
 @media (min-width: 1700px) { .chassis { --rail-width: 280px; gap: 24px; }.leftClosed.rightClosed { column-gap: 0; } }
