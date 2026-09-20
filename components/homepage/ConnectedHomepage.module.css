@@ -26,4 +26,5 @@
 @media(prefers-reduced-motion:reduce){.page *,.page *:before,.page *:after{scroll-behavior:auto!important;transition:none!important}}
 
 @media(max-width:900px){.headerActions>a[data-ixi-atlas-help]{display:inline-flex}.headerActions{gap:8px}}
-@media(max-width:560px){.headerActions .postMachine{display:none}}
+@media(max-width:560px){.siteHeader{column-gap:8px}}
+@media(max-width:380px){.siteHeader .brand{width:100px}}

@@ -56,7 +56,11 @@ export default function IXITechnicalAtlas() {
     try { await navigator.clipboard.writeText(link); setCopyStatus("Lesson link copied"); }
     catch { setCopyFallback(link); setCopyStatus("Select and copy the lesson link below"); }
   }
-  return <main className={styles.atlas}>
+  return <main className={styles.atlas} onClick={event => {
+    if (event.target.closest?.('a[href^="/atlas"]')) {
+      setQuery(""); setIndexOpen(false);
+    }
+  }}>
     <Head><title>{title} | IXI Technical Atlas</title><meta name="description" content="Practical IronXchange instructions, interactive machine controls and system blueprints." /></Head>
     <a className={styles.skipLink} href="#atlas-content">Skip to instructions</a>
     <header className={styles.topbar}>

@@ -12,6 +12,7 @@ export default function AtlasPage() {
         />
       </Head>
       <IXITechnicalAtlas />
+      <style jsx global>{`html, body { margin: 0; background: #080b0c; }`}</style>
     </>
   );
 }
