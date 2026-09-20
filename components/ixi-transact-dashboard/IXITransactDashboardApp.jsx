@@ -1,4 +1,5 @@
 import IXITransactAccountingReports from "./IXITransactAccountingReports";
+import AtlasHelpLink from "../ixi-atlas/AtlasHelpLink";
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -297,6 +298,7 @@ export default function IXITransactDashboardApp({ runtime, active = true }) {
           </div>
 
           <div className="scope-controls">
+            <AtlasHelpLink topic="ledger" />
             <label>
               <span>ACCOUNTING PERIOD</span>
               <input

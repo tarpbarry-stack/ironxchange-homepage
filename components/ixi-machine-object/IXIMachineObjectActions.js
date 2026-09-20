@@ -1,20 +1,24 @@
+import { useIXIMachineDemo } from "../ixi-machine-card/IXIMachineDemoContext";
+
 export default function IXIMachineObjectActions({
   onEmail,
   onText,
   onPdf,
   labels = ["EMAIL", "TEXT", "PDF"]
 }) {
+  const demo = useIXIMachineDemo();
+  const action = (label, handler) => demo ? () => demo.onAction(label) : handler;
   return (
     <footer className="mof-actions">
-      <button type="button" onClick={onEmail}>
+      <button type="button" onClick={action(labels[0], onEmail)}>
         {labels[0]}
       </button>
 
-      <button type="button" onClick={onText}>
+      <button type="button" onClick={action(labels[1], onText)}>
         {labels[1]}
       </button>
 
-      <button type="button" onClick={onPdf}>
+      <button type="button" onClick={action(labels[2], onPdf)}>
         {labels[2]}
       </button>
 

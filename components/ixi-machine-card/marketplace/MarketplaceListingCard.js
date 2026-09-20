@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+import { useIXIMachineDemo } from "../IXIMachineDemoContext";
 import dynamic from "next/dynamic";
 // DnD is owned by IXISortableMachineCard wrapper.
 
@@ -148,6 +149,7 @@ onExpandConsoleRight,
 
 consoleActuatorVariant = "compact"
 }) {
+  const demo = useIXIMachineDemo();
   const [photoIndex, setPhotoIndex] = useState(0);
   const [detailImages, setDetailImages] = useState([]);
   const [loadingDetailImages, setLoadingDetailImages] = useState(false);
@@ -383,7 +385,7 @@ function getSellerState() {
     e.preventDefault();
     e.stopPropagation();
 
-    if (images.length < 2 && imageCount > 1) {
+    if (images.length < 2 && imageCount > 1 && !demo) {
       if (loadingDetailImages) return;
 
       setLoadingDetailImages(true);

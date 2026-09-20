@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import AtlasHelpLink from "./ixi-atlas/AtlasHelpLink";
 
 export default function Navbar() {
   const [loggedIn, setLoggedIn] = useState(false);
@@ -35,6 +36,7 @@ export default function Navbar() {
       </div>
 
       <div className="nav-links">
+        <AtlasHelpLink />
         <div
           className="header-tools"
           data-ixi-header-tools="true"
@@ -214,7 +216,7 @@ export default function Navbar() {
           .logo-img {
             width: auto;
             height: 26px;
-            max-width: 120px;
+            max-width: 100px;
             object-fit: contain;
           }
           .social-mini { display: none; }
