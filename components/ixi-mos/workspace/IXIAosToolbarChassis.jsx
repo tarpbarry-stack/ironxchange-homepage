@@ -185,15 +185,15 @@ export default function IXIAosToolbarChassis({ children, controls, registry, ind
       chassis.style.setProperty("--toolbar-height", `${Math.max(0, bottom - top - 12)}px`);
     };
     const schedule = () => { if (!frame) frame = window.requestAnimationFrame(measure); };
-    const observer = new ResizeObserver(schedule);
-    observer.observe(chassis.parentElement || chassis);
+    const observer = typeof window.ResizeObserver === "function" ? new window.ResizeObserver(schedule) : null;
+    observer?.observe(chassis.parentElement || chassis);
     window.addEventListener("resize", schedule);
     window.addEventListener("scroll", schedule, { passive: true });
     window.visualViewport?.addEventListener("resize", schedule);
     window.visualViewport?.addEventListener("scroll", schedule);
     measure();
     return () => {
-      observer.disconnect();
+      observer?.disconnect();
       window.cancelAnimationFrame(frame);
       window.removeEventListener("resize", schedule);
       window.removeEventListener("scroll", schedule);
