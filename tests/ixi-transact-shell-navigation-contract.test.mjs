@@ -16,7 +16,8 @@ test("every operational TRAN$ACT module receives one fixed shell return path", a
   const operational = registry.getIXITransactModules({ objectType: "machine" });
 
   assert.ok(operational.length >= 23);
-  assert.match(app, /<div className="tx-brand">\s*<span>\{t\("IXI TRAN\$ACT"\)\}<\/span>/s);
+  const brand = app.split('<div className="tx-brand">')[1]?.split('</div>')[0];
+  assert.match(brand, /<span>\{t\("IXI TRAN\$ACT"\)\}<\/span>/);
   assert.match(
     app,
     /<div className="tx-header-actions">[\s\S]*\{active \? \([\s\S]*className="tx-shell-return"/,
