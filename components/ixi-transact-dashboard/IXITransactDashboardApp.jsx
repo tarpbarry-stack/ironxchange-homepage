@@ -183,6 +183,7 @@ export default function IXITransactDashboardApp({ runtime, active = true }) {
   );
 
   useEffect(() => {
+    if (!active) return undefined;
     if (loadedPeriod.current !== period) setProjectionPayload(null);
     loadedPeriod.current = period;
     const controller = new AbortController();

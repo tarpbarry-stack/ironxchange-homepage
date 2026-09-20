@@ -13,7 +13,7 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter } from "next/router";
 
-import { loadIXIMosEnvironment } from "../../lib/mos/loadIXIMosEnvironment";
+import { loadIXICanonicalMosEnvironment } from "../../lib/mos/IXIMosEnvironmentProjection";
 import { hydrateIXIListingMedia } from "../../lib/listings/hydrateIXIListingMedia";
 import {
   loadIXIFinancialAccessContext,
@@ -361,6 +361,7 @@ export default function IXITransactCommandCenter({ runtime, active = true }) {
   const router = useRouter();
   const readAccess = runtime?.loadAccess || loadIXIFinancialAccessContext;
   const readDashboard = runtime?.loadDashboard || loadIXITransactDashboard;
+  const readOperatingEnvironment = runtime?.loadOperatingEnvironment || loadIXICanonicalMosEnvironment;
   const [environment, setEnvironment] = useState(null);
   const [access, setAccess] = useState(null);
   const [projectionPayload, setProjectionPayload] = useState(null);
@@ -449,7 +450,7 @@ export default function IXITransactCommandCenter({ runtime, active = true }) {
       setContextLoading(true);
       setContextError("");
       try {
-        const aosResult = await loadIXIMosEnvironment({ includeObjects: true });
+        const aosResult = await readOperatingEnvironment({ signal: controller.signal, force: contextRefreshKey > 0 });
         if (controller.signal.aborted) return;
         if (!aosResult?.isAuthenticated) {
           window.location.assign(TRANSACT_LOGIN_HREF);
@@ -466,7 +467,22 @@ export default function IXITransactCommandCenter({ runtime, active = true }) {
     }
     loadOperatingContext();
     return () => { controller.abort(); contextHydrationStarted.current = false; };
-  }, [access, contextRefreshKey]);
+  }, [access, contextRefreshKey, readOperatingEnvironment]);
+
+  // Canonical cards are usable first. Listing details/media enrich those same
+  // identities in the background; they cannot admit or create another machine.
+  useEffect(() => {
+    if (!active || !environment?.userId || !runtime?.loadOperatingPresentations) return undefined;
+    const controller = new AbortController();
+    runtime.loadOperatingPresentations({ signal: controller.signal }).then(ownedListings => {
+      if (!controller.signal.aborted) setEnvironment(current => ({ ...current, ownedListings }));
+    }).catch(loadError => {
+      if (!controller.signal.aborted && loadError?.name !== "AbortError") {
+        setContextError("Some machine photos and listing details could not load. Refresh to retry.");
+      }
+    });
+    return () => controller.abort();
+  }, [active, environment?.userId, contextRefreshKey, runtime]);
 
   const accessData = access?.data || {};
   const entityPassportId = clean(accessData.defaults?.entityPassportId || accessData.entities?.[0]?.passportId || environment?.entity?.passportId);
@@ -518,7 +534,7 @@ export default function IXITransactCommandCenter({ runtime, active = true }) {
   }, [passportHistory.records, passportHistory.stale, selectedContext?.passportId, recordCache]);
 
   useEffect(() => {
-    if (!selectedContext || !access) return undefined;
+    if (!active || !selectedContext || !access) return undefined;
     const financialScope = getIXIFinancialQueryScope(selectedContext, entityPassportId);
     if (!financialScope) {
       setProjectionPayload(null);

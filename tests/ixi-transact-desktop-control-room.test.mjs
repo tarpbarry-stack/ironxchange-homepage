@@ -38,9 +38,9 @@ test("TODAY classifies financial work into explicit operating bands", () => {
 
 test("desktop remains an authenticated read surface over governed financial contracts", () => {
   const source = read("components/ixi-command-center/IXITransactCommandCenter.jsx");
-  const environmentSource = read("lib/mos/loadIXIMosEnvironment.js");
+  const environmentSource = read("lib/mos/IXIMosEnvironmentProjection.js");
 
-  assert.match(source, /loadIXIMosEnvironment/u);
+  assert.match(source, /loadIXICanonicalMosEnvironment/u);
   assert.match(source, /loadIXIFinancialAccessContext/u);
   assert.match(source, /loadIXITransactDashboard/u);
   assert.match(source, /loadIXIAosPassportFinancialDocuments/u);
@@ -53,7 +53,7 @@ test("desktop remains an authenticated read surface over governed financial cont
   assert.match(source, /accessError\?\.status !== 401/u);
   assert.match(source, /buildIXITransactFastEnvironment\(accessPayload\)/u);
   assert.match(source, /buildIXIAosCommandContexts\(\{[\s\S]*entityPassportId,/u);
-  assert.match(source, /contextHydrationStarted\.current = true;[\s\S]*await loadIXIMosEnvironment/u);
+  assert.match(source, /contextHydrationStarted\.current = true;[\s\S]*await readOperatingEnvironment/u);
   assert.match(source, /runtime\?\.loadDashboard/u);
   assert.match(source, /COMPANY CONNECTED/u);
   assert.match(source, /Machines appear only through the authoritative company Equipment projection/u);

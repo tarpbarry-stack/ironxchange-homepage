@@ -175,7 +175,7 @@ test('actual command center keeps drafts across machines and completes a save be
   const h = await harness(t, {
     'next/router': { useRouter: () => router }, 'next/link': ({ children, ...props }) => React.createElement('a', props, children),
     'next/dynamic': loader => loader.toString().includes('AppDirectory') ? Apps : Form,
-    loadIXIMosEnvironment: { loadIXIMosEnvironment: async () => { aosReads++; return environment; } },
+    IXIMosEnvironmentProjection: { loadIXICanonicalMosEnvironment: async () => { aosReads++; return environment; } },
     IXIAosFinancialReadClient: clients,
     IXITransactObjectPicker: Picker,
     IXITransactSidePanel: ({ children }) => React.createElement('aside', null, children),

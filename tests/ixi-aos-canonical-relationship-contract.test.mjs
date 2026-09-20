@@ -73,7 +73,7 @@ test("container drops can never provision or append a Machine", () => {
 });
 
 test("governed rail membership replaces the emergency bridge atomically", () => {
-  const loader = read("lib/mos/loadIXIMosEnvironment.js");
+  const loader = read("lib/mos/IXIMosEnvironmentProjection.js");
   const registry = read("components/ixi-mos/workspace/useIXIAosWorkspaceRegistry.js");
   const work = read("pages/aos/work.js");
   const bridge = read("lib/mos/IXIAosMembershipBridge.mjs");

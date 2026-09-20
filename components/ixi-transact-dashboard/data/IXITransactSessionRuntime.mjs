@@ -18,7 +18,7 @@ function consume(promise, signal) {
 
 // One instance belongs to one mounted TRAN$ACT layout. Nothing is stored in
 // browser storage or shared across SSR requests, users, or application visits.
-export function createIXITransactSessionRuntime({ readAccess, readDashboard, onChange = () => {}, now = Date.now }) {
+export function createIXITransactSessionRuntime({ readAccess, readDashboard, readOperatingEnvironment, readOperatingPresentations, onChange = () => {}, now = Date.now }) {
   const controller = new AbortController();
   const dashboards = new Map();
   let disposed = false;
@@ -28,13 +28,17 @@ export function createIXITransactSessionRuntime({ readAccess, readDashboard, onC
   let scope = "";
   let generation = 0;
   let financialRevision = 0;
+  let operatingRevision = 0;
+  let operating = null;
   const notify = error => { if (!disposed) onChange({ access, generation, error: error || null }); };
 
   function invalidateFinancial() { financialRevision += 1; dashboards.clear(); }
 
+  function invalidateOperatingEnvironment() { operatingRevision += 1; operating = null; }
+
   function rejectSession(error) {
     access = null; scope = ""; accessAt = 0; generation += 1;
-    invalidateFinancial(); notify(error);
+    invalidateFinancial(); invalidateOperatingEnvironment(); notify(error);
   }
 
   function loadAccess({ signal, force = false } = {}) {
@@ -57,7 +61,10 @@ export function createIXITransactSessionRuntime({ readAccess, readDashboard, onC
           const nextScope = stableKey({ actor: data.actor, entities: data.entities, defaults: data.defaults,
             entity: data.operatingContext?.entity, permissions: data.permissions,
             denied: data.deniedPermissions, capabilities: data.capabilities });
-          if (nextScope !== scope) { generation += 1; invalidateFinancial(); }
+          if (nextScope !== scope) {
+            if (scope) invalidateOperatingEnvironment();
+            generation += 1; invalidateFinancial();
+          }
           scope = nextScope; access = payload; accessAt = now(); notify();
           return payload;
         } catch (error) {
@@ -71,6 +78,52 @@ export function createIXITransactSessionRuntime({ readAccess, readDashboard, onC
       accessPending = request;
     }
     return consume(accessPending, signal);
+  }
+
+  function loadOperatingEnvironment({ signal, force = false } = {}) {
+    if (disposed) return Promise.reject(abortError());
+    if (force) invalidateOperatingEnvironment();
+    if (!operating) {
+      const revision = operatingRevision;
+      const entry = {};
+      operating = entry;
+      // Both trusted reads start together. No directory data is published until
+      // Financial access and the canonical company agree.
+      entry.pending = Promise.all([
+        loadAccess(),
+        Promise.resolve().then(() => readOperatingEnvironment({ signal: controller.signal }))
+      ]).then(([authorized, environment]) => {
+        if (disposed || revision !== operatingRevision) throw abortError();
+        const entity = authorized.data.operatingContext.entity;
+        if (!environment?.isAuthenticated || environment.entity?.entityId !== entity.entityId ||
+            (environment.entity?.passportId && environment.entity.passportId !== entity.passportId)) {
+          throw Object.assign(new Error("The directory does not match the authorized company."), { status: 403 });
+        }
+        return environment;
+      }).catch(error => {
+        if (operating === entry) operating = null;
+        if (!disposed && revision === operatingRevision && [401, 403].includes(error?.status)) rejectSession(error);
+        throw error;
+      });
+    }
+    const entry = operating;
+    return consume(entry.pending, signal).then(environment => {
+      if (disposed || entry !== operating) throw abortError();
+      return environment;
+    });
+  }
+
+  async function loadOperatingPresentations({ signal } = {}) {
+    const revision = operatingRevision;
+    const environment = await loadOperatingEnvironment({ signal });
+    const entry = operating;
+    if (!entry || revision !== operatingRevision) throw abortError();
+    if (!entry.presentations) entry.presentations = Promise.resolve().then(() =>
+      readOperatingPresentations({ userId: environment.userId, signal: controller.signal })
+    ).catch(error => { entry.presentations = null; throw error; });
+    const listings = await consume(entry.presentations, signal);
+    if (disposed || revision !== operatingRevision || entry !== operating) throw abortError();
+    return listings;
   }
 
   async function loadDashboard({ query, signal } = {}) {
@@ -105,8 +158,8 @@ export function createIXITransactSessionRuntime({ readAccess, readDashboard, onC
     return value;
   }
 
-  return { loadAccess, loadDashboard, invalidateFinancial, dispose() {
+  return { loadAccess, loadDashboard, loadOperatingEnvironment, loadOperatingPresentations, invalidateOperatingEnvironment, invalidateFinancial, dispose() {
     disposed = true; access = null; scope = ""; generation += 1;
-    invalidateFinancial(); controller.abort();
+    invalidateFinancial(); invalidateOperatingEnvironment(); controller.abort();
   } };
 }

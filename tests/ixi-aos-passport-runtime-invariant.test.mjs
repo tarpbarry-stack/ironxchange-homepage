@@ -213,7 +213,7 @@ test("Equipment membership is governed by its rail projection while Sharetribe s
 
 test("AOS/Work fails closed before rendering an active record without Passport", () => {
   const source = fs.readFileSync(
-    new URL("../lib/mos/loadIXIMosEnvironment.js", import.meta.url),
+    new URL("../lib/mos/IXIMosEnvironmentProjection.js", import.meta.url),
     "utf8"
   );
   assert.match(source, /AOS_IDENTITY_INTEGRITY_FAILED/u);
@@ -240,6 +240,7 @@ test("AOS startup skips the public Marketplace census and loads governed reads c
     new URL("../lib/mos/loadIXIMosEnvironment.js", import.meta.url),
     "utf8"
   );
+  const projection = fs.readFileSync(new URL("../lib/mos/IXIMosEnvironmentProjection.js", import.meta.url), "utf8");
   const listings = fs.readFileSync(
     new URL("../lib/listings/IXIListingsEngine.js", import.meta.url),
     "utf8"
@@ -251,10 +252,10 @@ test("AOS startup skips the public Marketplace census and loads governed reads c
   assert.match(environment, /const environmentRequest = fetchAosEnvironment/u);
   assert.match(environment, /const listingEnvironment = await listingEnvironmentRequest/u);
   assert.match(environment, /Promise\.all\(\[\s*ownedListingsRequest,\s*environmentRequest/u);
-  assert.match(environment, /response\?\.workBootstrapVersion === "ixi\.aos-work-bootstrap\.v1"/u);
-  assert.match(environment, /response\.definitions/u);
-  assert.match(environment, /response\.admissions/u);
-  assert.match(environment, /Promise\.all\(\[\s*definitionsRequest,\s*admissionRequest/u);
+  assert.match(projection, /response\?\.workBootstrapVersion === "ixi\.aos-work-bootstrap\.v1"/u);
+  assert.match(projection, /response\.definitions/u);
+  assert.match(projection, /response\.admissions/u);
+  assert.match(projection, /Promise\.all\(\[\s*definitionsRequest,\s*admissionRequest/u);
   assert.match(listings, /includePublicListings = true/u);
   assert.match(listings, /includePublicListings\s*\?\s*loadPublicListingCollection/u);
 });

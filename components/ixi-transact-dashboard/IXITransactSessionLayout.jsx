@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 import { loadIXIFinancialAccessContext, loadIXITransactDashboard } from "./data/IXITransactDashboardClient";
+import { loadIXIOwnedListings } from "../../lib/listings/loadIXIOwnedListings";
+import { loadIXICanonicalMosEnvironment } from "../../lib/mos/IXIMosEnvironmentProjection";
 import { createIXITransactSessionRuntime } from "./data/IXITransactSessionRuntime.mjs";
 
 const IXITransactCommandCenter = dynamic(() => import("../ixi-command-center/IXITransactCommandCenter"), { ssr: false });
@@ -12,14 +14,19 @@ export function IXITransactSessionLayout({ children }) {
   const ledger = router.pathname === "/transact/ledger";
   const [runtime, setRuntime] = useState(null);
   const [session, setSession] = useState({ access: null, generation: 0, error: null });
-  const [warm, setWarm] = useState(false);
   const [visited, setVisited] = useState({ records: !ledger, ledger });
   useEffect(() => { setVisited(previous => ({ ...previous, [ledger ? "ledger" : "records"]: true })); }, [ledger]);
 
   useEffect(() => {
     const next = createIXITransactSessionRuntime({ readAccess: loadIXIFinancialAccessContext,
-      readDashboard: loadIXITransactDashboard, onChange: setSession });
+      readDashboard: loadIXITransactDashboard, readOperatingEnvironment: loadIXICanonicalMosEnvironment,
+      readOperatingPresentations: ({ userId, signal }) => loadIXIOwnedListings(userId, { hydrateMedia: false, signal }), onChange: setSession });
     setRuntime(next);
+    if (ledger) IXITransactDashboardApp.preload?.();
+    else {
+      IXITransactCommandCenter.preload?.();
+      next.loadOperatingEnvironment().catch(() => {});
+    }
     const check = () => { if (document.visibilityState !== "hidden") next.loadAccess().catch(() => {}); };
     check();
     const timer = window.setInterval(check, 60_000);
@@ -43,15 +50,9 @@ export function IXITransactSessionLayout({ children }) {
   }, [router, session.error]);
 
   useEffect(() => {
-    if (!session.access || warm) return;
+    if (!session.access) return;
     router.prefetch(ledger ? "/transact" : "/transact/ledger");
-    if (typeof window.requestIdleCallback === "function") {
-      const id = window.requestIdleCallback(() => setWarm(true), { timeout: 1500 });
-      return () => window.cancelIdleCallback(id);
-    }
-    const id = window.setTimeout(() => setWarm(true), 200);
-    return () => window.clearTimeout(id);
-  }, [session.access, warm, ledger, router]);
+  }, [session.access, ledger, router]);
 
   return <>
     {children}
@@ -63,10 +64,10 @@ export function IXITransactSessionLayout({ children }) {
       {session.error ? "TRAN$ACT session could not be verified." : "Opening your TRAN$ACT workspace…"}
     </div> : <div key={session.generation} data-ixi-transact-session>
       <div hidden={ledger} style={{ display: ledger ? "none" : "block" }} data-ixi-transact-view="records">
-        {(!ledger || visited.records || warm) && <IXITransactCommandCenter runtime={runtime} active={!ledger} />}
+        {(!ledger || visited.records) && <IXITransactCommandCenter runtime={runtime} active={!ledger} />}
       </div>
       <div hidden={!ledger} style={{ display: ledger ? "block" : "none" }} data-ixi-transact-view="ledger">
-        {(ledger || visited.ledger || warm) && <IXITransactDashboardApp runtime={runtime} active={ledger} />}
+        {(ledger || visited.ledger) && <IXITransactDashboardApp runtime={runtime} active={ledger} />}
       </div>
     </div>}
   </>;
