@@ -28,6 +28,7 @@ test("real signed creation routes recover response loss and a refreshed workspac
   process.env.AWS_EC2_METADATA_DISABLED = "true";
   const require = createRequire(path.join(coreRoot, "package.json"));
   require("./authority/IXIAuthorityDynamoStore.js").getCurrentPolicyRecord = async () => null;
+  require("./authority/IXIAuthorityDynamoStore.js").getCurrentPolicyRecords = async ids => ids.map(() => null);
   const { ensureAosAccount } = require("./mos/accounts/aosAccountService.js");
   const { provisionAosObject } = require("./mos/provisioning/aosObjectProvisioningService.js");
   const { listObjects, getObject } = require("./mos/objects/objectService.js");

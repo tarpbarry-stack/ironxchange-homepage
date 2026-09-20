@@ -26,7 +26,7 @@
   visit/request boundary; never fix speed with cross-user caches or stale authority.
   Preserve write invalidation, abort handling, tenant fences and permanent identity.
 - `tests/ixi-transact-startup-budget.test.mjs`, runtime/continuity tests and the
-  pinned core's cold-bootstrap/200-object and financial batch-read budgets are required paired gates.
+  pinned core's cold-bootstrap/200-object, financial and authority batch-read budgets are required paired gates.
   Fix the implementation when a budget fails; do not weaken or skip these checks.
 - Measure fresh-navigation shell, directory and worksheet readiness after release,
   including an independent second visit. Warm-cache speed and skeleton rendering
