@@ -323,9 +323,9 @@ export default function IXISellerMachineObjectFace2({
       ) : null}
 
       <div className="mof2-action-row mof2-contact-row" onPointerDown={event => event.stopPropagation()}>
-        <button type="button">EMAIL</button>
-        <button type="button">TEXT</button>
-        <button type="button">PDF</button>
+        <button type="button" onClick={demo ? () => demo.onAction("Email", "This seller-face shortcut is not connected. Use the machine rail's Send control where available.") : undefined}>EMAIL</button>
+        <button type="button" onClick={demo ? () => demo.onAction("Text", "This seller-face shortcut is not connected. Use the machine rail's Send control where available.") : undefined}>TEXT</button>
+        <button type="button" onClick={demo ? () => demo.onAction("PDF", "This seller-face shortcut is not connected. No document was generated.") : undefined}>PDF</button>
       </div>
 
       <div className="mof2-action-row mof2-lifecycle-row" onPointerDown={event => event.stopPropagation()}>

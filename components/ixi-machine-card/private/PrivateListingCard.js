@@ -794,7 +794,7 @@ onMachinePlacementChange ? (
 
     <div className="seller-owner-toolbar" aria-label="Owner object controls">
       <button type="button" className="owner-action add" title="Add" onClick={e => { stopCardClick(e); onAddObject?.(listing); }}>+</button>
-      <button type="button" className="owner-action edit" title="Edit" onClick={e => { stopCardClick(e); onEdit?.(listing); }}>EDIT</button>
+      <button type="button" className="owner-action edit" title={listing.__ixiOwnerActions?.editing ? "Save machine facts" : "Edit machine facts"} aria-label={listing.__ixiOwnerActions?.saving ? "Saving machine facts" : listing.__ixiOwnerActions?.editing ? "Save machine facts" : "Edit machine facts"} onClick={e => { stopCardClick(e); onEdit?.(listing); }}>{listing.__ixiOwnerActions?.saving ? "SAVING" : listing.__ixiOwnerActions?.editing ? "SAVE" : "EDIT"}</button>
       <button type="button" className="owner-action transact" title="TRAN$ACT" onClick={e => { stopCardClick(e); onOpenTransact?.(listing); }}>$</button>
       <button type="button" className="owner-action menu" title="Actions" onClick={e => { stopCardClick(e); onOpenActions?.(listing); }}>:</button>
     </div>

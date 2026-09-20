@@ -75,6 +75,8 @@ export default function AtlasFamilyWorkbench({ familyId }) {
   const depth = state.consoleSlots.length;
   const selectFace = next => { setFace(next); record("Primary face", family.faceNames[next - 1]); };
   const sellerCardProps = {
+    machineAccess: sample.machineAccess,
+    machineChannel: sample.machineChannel,
     dealerBidPack: bidPack,
     onSaveDealerBidPack: values => { setBidPack(values); record("Bid pack saved", "Planning values saved for this practice session. No bid submitted."); },
     onAuctionDisposition: async (_listing, action) => { record("Closeout", sampleDisposition(action)); },

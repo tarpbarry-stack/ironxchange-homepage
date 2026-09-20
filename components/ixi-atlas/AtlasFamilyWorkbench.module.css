@@ -1,4 +1,4 @@
-.workbench { --accent: #d0ec72; color: #e9ece6; min-width: 0; }
+.workbench { --accent: #d0ec72; color: #e9ece6; min-width: 0; padding: 0 clamp(16px, 2vw, 32px); }
 .workbench *, .familyNav * { box-sizing: border-box; }
 .familyNav { display: flex; flex-wrap: wrap; gap: 6px; padding: 18px 0; border-bottom: 1px solid #303a34; }
 .familyNav a { display: flex; align-items: center; min-height: 44px; padding: 10px 16px; font-size: 13px; line-height: 1.4; color: #bdc7bf; border: 1px solid #394039; text-decoration: none; }
