@@ -41,18 +41,18 @@ test("folding keeps Board state mounted, browsed containers and parked Objects s
   const root = createRoot(dom.window.document.getElementById("root"));
   const locations = { objectId: "object_locations", passportId: "IXILOC2345", displayName: "Locations", itemObjectIds: ["object_yard"] };
   const yard = { objectId: "object_yard", passportId: "IXIYAR2345", displayName: "Customer Yard", itemObjectIds: ["object_machine"] };
-  const machine = { objectId: "object_machine", passportId: "IXIMAC2345", displayName: "Ripper" };
+  const machine = { objectId: "object_machine", passportId: "IXIMAC2345", displayName: "Ripper", objectType: "machine", imageUrl: "/existing-ripper.jpg" };
   const parked = { objectId: "object_parked", passportId: "IXIPAR2345", displayName: "Working selection" };
   let boardMounts = 0;
   function Board() {
     React.useEffect(() => { boardMounts++; }, []);
     return React.createElement("input", { "aria-label": "Board draft", defaultValue: "Keep this draft" });
   }
-  const moves = [];
+  const moves = [], opened = [];
   const props = { registry: new Map([locations, yard, machine, parked].map(object => [object.objectId, object])),
     indexes: [locations], placements: { board: [locations.objectId], pocketLeft2: [parked.objectId] },
     session: { objects: {} }, ready: true, preferenceKey: "test-entity:test-principal",
-    onMove: (...args) => moves.push(args), onBoard: () => {}, onReturn: () => {}, onConnect: () => {} };
+    onMove: (...args) => moves.push(args), onBoard: (...args) => opened.push(args), onReturn: () => {}, onConnect: () => {} };
   const doc = dom.window.document;
   const click = async button => { assert.ok(button); await React.act(async () => button.click()); };
   try {
@@ -67,6 +67,11 @@ test("folding keeps Board state mounted, browsed containers and parked Objects s
     await click(right.querySelector('button[title="Browse Customer Yard"]'));
     assert.match(left.textContent, /Ripper/);
     assert.match(left.textContent, /Working selection/, "browsing must not evict parked Objects");
+    const mini = left.querySelector('button[title="Open Ripper on Board"]');
+    assert.equal(mini.querySelector('img').getAttribute('src'), "/existing-ripper.jpg");
+    await click(mini);
+    assert.deepEqual(opened, [[machine.objectId, yard.objectId]], "clicking a machine opens its canonical Board card");
+    assert.match(right.textContent, /Customer Yard/, "opening a machine must not replace the opposite container browser");
     await click(left.querySelector('[aria-label="Fold left toolbar"]'));
     assert.equal(left.getAttribute("aria-hidden"), "true");
     assert.equal(right.getAttribute("aria-hidden"), null);

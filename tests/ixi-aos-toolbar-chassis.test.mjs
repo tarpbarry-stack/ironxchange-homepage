@@ -3,10 +3,24 @@ import fs from "node:fs";
 import test from "node:test";
 import {
   AOS_TOOLBAR_SURFACES, getAosToolbarContents, getAosToolbarObjectIds,
-  getAosToolbarReturnOperation, isAosToolbarSurface
+  getAosToolbarReturnOperation, isAosToolbarSurface, getAosToolbarPresentation
 } from "../components/ixi-mos/workspace/IXIAosToolbarModel.mjs";
 import { evaluateAosSystemIndexMembership } from "../lib/mos/IXIAosSystemIndexMembershipPolicy.js";
 import { moveObjectToWorkspaceSurface } from "../components/ixi-chassis/IXIWorkspacePlacementEngine.js";
+
+test("mini cards reuse admitted photos and confirmed children without exposing denied AOS media", () => {
+  const machine = { objectId: "machine", objectType: "machine", presentationSource: { imageObjects: [{ url: "/machine.jpg" }], price: "$95,000" } };
+  const yard = { objectId: "yard", media: [{ url: "/private.jpg", permissions: { view: false } }, { url: "/yard.jpg" }] };
+  const root = { objectId: "root", displayName: "Our renamed index", itemObjectIds: ["machine", "yard", "unavailable"] };
+  const registry = new Map([machine, yard, root].map(object => [object.objectId, object]));
+  const before = JSON.stringify([...registry]);
+  assert.equal(getAosToolbarPresentation(machine, registry).image, "/machine.jpg");
+  assert.equal(getAosToolbarPresentation(yard, registry).image, "/yard.jpg");
+  assert.deepEqual(getAosToolbarPresentation(root, registry).previews.map(item => item.image), ["/machine.jpg", "/yard.jpg"]);
+  assert.equal(getAosToolbarPresentation(root, registry).count, 2);
+  assert.equal(getAosToolbarPresentation({ ...yard, media: [yard.media[0]] }, registry).image, "");
+  assert.equal(JSON.stringify([...registry]), before);
+});
 
 test("both toolbars preserve all six legacy parking surfaces without rewriting placement or contents", () => {
   const placements = { board: ["object_board"], pocketLeft: ["object_a"], pocketLeft2: ["object_b"],

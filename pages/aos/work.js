@@ -3238,8 +3238,7 @@ return null;
     onBoard={openAosObjectOnBoard}
     onReturn={returnAosToolbarObject}
     onConnect={connectAosWorkspaceObjects}
-  >
-<IXIChassisControls
+    controls={<IXIChassisControls
   workspaceToolbars={true}
   listings={workspaceListings.filter(item => !item.inventorySessionOnly)}
   searchQuery={searchQuery}
@@ -3261,7 +3260,9 @@ return null;
   toggleRailRevealed={toggleRailRevealed}
 
   searchSurfaceRevealed={searchSurfaceRevealed}
-  toggleSearchSurfaceRevealed={toggleSearchSurfaceRevealed}/>
+  toggleSearchSurfaceRevealed={toggleSearchSurfaceRevealed}/>}
+  >
+
               
 <IXIAosWorkspaceBoard
   items={

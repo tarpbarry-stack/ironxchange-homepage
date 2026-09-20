@@ -3,12 +3,21 @@ import { useDndContext, useDraggable, useDroppable } from "@dnd-kit/core";
 import { evaluateAosSystemIndexMembership } from "../../../lib/mos/IXIAosSystemIndexMembershipPolicy";
 import {
   AOS_TOOLBAR_SURFACES, getAosToolbarContents, getAosToolbarName,
-  getAosToolbarObjectIds, getAosToolbarReturnOperation
+  getAosToolbarObjectIds, getAosToolbarReturnOperation, getAosToolbarPresentation
 } from "./IXIAosToolbarModel.mjs";
 import styles from "./IXIAosToolbarChassis.module.css";
 
-function ToolbarReference({ object, referenceId, surfaceId, onBoard, onBrowse, onMove, onReturn, returnable, ready, onConnect, connectTarget }) {
+function PreviewImage({ src, name }) {
+  const [failed, setFailed] = useState(false);
+  useEffect(() => setFailed(false), [src]);
+  return src && !failed
+    ? <img src={src} alt="" loading="lazy" decoding="async" draggable={false} onError={() => setFailed(true)} />
+    : <span className={styles.monogram} aria-hidden="true">{name.split(/\s+/).slice(0, 2).map(word => word[0]).join("")}</span>;
+}
+
+function ToolbarReference({ object, registry, selected, referenceId, surfaceId, onBoard, onBrowse, onMove, onReturn, returnable, ready, onConnect, connectTarget }) {
   const name = getAosToolbarName(object);
+  const view = getAosToolbarPresentation(object, registry);
   const { attributes, listeners, setNodeRef, setActivatorNodeRef, isDragging } = useDraggable({
     id: referenceId,
     disabled: !ready,
@@ -19,20 +28,31 @@ function ToolbarReference({ object, referenceId, surfaceId, onBoard, onBrowse, o
     object.actorAuthority?.canRelate === true && connectTarget.actorAuthority?.canRelate === true &&
     evaluateAosSystemIndexMembership({ sourceObject: object, targetObject: connectTarget }).allowed;
   return (
-    <article ref={setNodeRef} className={styles.reference} data-object-id={object.objectId} data-dragging={isDragging}>
-      <div className={styles.referenceHead}>
-        <button type="button" ref={setActivatorNodeRef} {...attributes} {...listeners}
-          className={styles.dragHandle} disabled={!ready} aria-label={`Drag ${name}`}>⠿</button>
-        <button type="button" className={styles.objectName} onClick={() => onBrowse(object.objectId)}
-          title={`Browse ${name}`}>{name}</button>
-      </div>
-      <div className={styles.referenceMeta}>
-        <span>{object.passportId}</span><span>{surfaceId === "board" ? "On Board" : ""}</span>
-      </div>
+    <article ref={setNodeRef} className={`${styles.reference} ${selected ? styles.selected : ""}`} data-object-id={object.objectId} data-dragging={isDragging}>
+      <button type="button" className={styles.cardPreview} disabled={!ready}
+        onClick={() => view.machine ? onBoard(object.objectId) : onBrowse(object.objectId)}
+        title={view.machine ? `Open ${name} on Board` : `Browse ${name}`}
+        aria-label={view.machine ? `Open ${name} on Board` : `Browse ${name}`}
+        aria-pressed={view.machine ? undefined : selected}>
+        <div className={`${styles.previewMedia} ${view.previews.length > 1 ? styles.collage : ""}`}>
+          {view.previews.length ? view.previews.map(preview => <div key={preview.objectId} className={styles.previewCell}>
+            <PreviewImage src={preview.image} name={preview.name} />
+          </div>) : <PreviewImage src={view.image} name={name} />}
+          {surfaceId === "board" && <span className={styles.boardBadge}>On Board</span>}
+        </div>
+        <strong className={styles.objectName}>{name}</strong>
+        <span className={styles.referenceMeta}>
+          <span>{view.machine ? view.price : `${view.count} ${view.count === 1 ? "member" : "members"}`}</span>
+          <span>{object.passportId}</span>
+        </span>
+        {!view.machine && <span className={styles.browseHint}>View contents <span aria-hidden="true">→</span></span>}
+      </button>
       <div className={styles.referenceActions}>
-        <button type="button" disabled={!ready} onClick={() => onBoard(object.objectId)}>
-          {surfaceId === "board" ? "Focus on Board" : "Open on Board"}
+        <button type="button" className={styles.openBoard} disabled={!ready} onClick={() => onBoard(object.objectId)}>
+          {surfaceId === "board" ? "Focus on Board" : "Open on Board"}<span aria-hidden="true">↗</span>
         </button>
+        <button type="button" ref={setActivatorNodeRef} {...attributes} {...listeners}
+          className={styles.dragHandle} disabled={!ready} aria-label={`Drag ${name}`} title="Drag to Board or a toolbar">⠿</button>
         <select aria-label={`Actions for ${name}`} value="" disabled={!ready}
           onChange={event => {
             const action = event.target.value;
@@ -79,6 +99,7 @@ function Toolbar({ side, folded, onFold, registry, indexes, placements, session,
   const issues = parent?.membershipReviewObjects || [];
   const row = (object, group) => (
     <ToolbarReference key={object.objectId} object={object} referenceId={`aos-toolbar:${side}:${group}:${object.objectId}`}
+      registry={registry} selected={connectTarget?.objectId === object.objectId}
       surfaceId={Object.keys(placements).find(surface => placements[surface]?.includes(object.objectId)) || ""}
       ready={ready && !folded} returnable={Boolean(getAosToolbarReturnOperation(session, object.objectId))}
       onBrowse={onBrowse} onBoard={id => run(() => onBoard(id, parent?.objectId))}
@@ -91,10 +112,10 @@ function Toolbar({ side, folded, onFold, registry, indexes, placements, session,
       className={`${styles.toolbar} ${styles[side]} ${folded ? styles.folded : ""} ${isOver ? styles.over : ""}`}
       inert={folded ? true : undefined} aria-hidden={folded || undefined}>
       <header className={styles.toolbarHeader}>
-        <strong>{title}</strong>
+        <div><span className={styles.eyebrow}>IXI AOS / WORK</span><h2>{parent ? getAosToolbarName(parent) : browseId === "all" ? "All Objects" : "System Indexes"}<span>{contents.length}</span></h2></div>
         <button type="button" aria-label={`Fold ${side} toolbar`} onClick={onFold}>{side === "left" ? "‹" : "›"}</button>
       </header>
-      <div className={styles.toolbarScroll}>
+      <div className={styles.toolbarTools}>
         <label className={styles.browseLabel} htmlFor={`aos-${side}-browse`}>Browse</label>
         <select id={`aos-${side}-browse`} className={styles.browserSelect} value={browseId} onChange={event => onSelect(event.target.value)}>
           <option value="">System Indexes</option><option value="all">All Objects</option>
@@ -104,12 +125,13 @@ function Toolbar({ side, folded, onFold, registry, indexes, placements, session,
           {browseId && browseId !== "all" && !parent && <option value={browseId}>Unavailable Object</option>}
         </select>
         {parent && <div className={styles.containerHeading}>
-          <strong>{getAosToolbarName(parent)}</strong>
           <button type="button" disabled={!ready} onClick={() => run(() => onBoard(parent.objectId))}>Open container on Board</button>
-          <div ref={connectDrop.setNodeRef} className={`${styles.connectDrop} ${connectDrop.isOver ? styles.over : ""}`}>
-            {allowed ? `Drop to connect to ${getAosToolbarName(parent)}` : "Drag onto this area to connect a member"}
+          <div ref={connectDrop.setNodeRef} className={`${styles.connectDrop} ${allowed ? styles.connectAvailable : ""} ${connectDrop.isOver ? styles.over : ""}`}>
+            {allowed ? `Drop to connect to ${getAosToolbarName(parent)}` : ""}
           </div>
         </div>}
+      </div>
+      <div className={styles.toolbarScroll}>
         {!ready && <p className={styles.hint}>{requiresSignIn
           ? <a href="/login?returnTo=%2Faos%2Fwork">Sign in to open your workspace</a>
           : loadError || "Loading authorized workspace…"}</p>}
@@ -124,17 +146,18 @@ function Toolbar({ side, folded, onFold, registry, indexes, placements, session,
           <p className={styles.hint}>These connections are not confirmed valid members.</p>
           {issues.map(object => registry.get(object.objectId)).filter(Boolean).map(object => row(object, "review"))}
         </section>}
-        <section className={styles.parked} aria-label={`Parked in ${side} toolbar`}>
+        <section className={`${styles.parked} ${!parked.length ? styles.emptyParked : ""}`} aria-label={`Parked in ${side} toolbar`}>
           <div className={styles.sectionTitle}>Parked here<span>{parked.length}</span></div>
           {!parked.length && <p className={styles.hint}>Dock or drop Objects here to keep them at hand.</p>}
           {parked.map(object => row(object, "parked"))}
         </section>
       </div>
+      <footer className={styles.toolbarFooter}><span>{contents.length} {contents.length === 1 ? "Object" : "Objects"}</span><span>{parked.length} parked</span></footer>
     </aside>
   );
 }
 
-export default function IXIAosToolbarChassis({ children, registry, indexes, placements, session, ready,
+export default function IXIAosToolbarChassis({ children, controls, registry, indexes, placements, session, ready,
   preferenceKey, onMove, onBoard, onReturn, onConnect, requiresSignIn = false, loadError = "" }) {
   const [folded, setFolded] = useState({ left: false, right: false });
   const [browse, setBrowse] = useState({ left: "", right: "" });
@@ -180,6 +203,7 @@ export default function IXIAosToolbarChassis({ children, registry, indexes, plac
         onConnect={onConnect} connectTarget={registry.get(browse[side === "left" ? "right" : "left"])}/>
       )}
       <div className={styles.center}>
+        {controls}
         <div className={styles.boardTools}>
           {["left", "right"].map(side => <button key={side} type="button" ref={node => { openButtons.current[side] = node; }}
             aria-expanded={!folded[side]} aria-controls={`aos-${side}-toolbar`}
@@ -189,7 +213,7 @@ export default function IXIAosToolbarChassis({ children, registry, indexes, plac
         </div>
         <div role="status" aria-live="polite" className={styles.status}>{pending ? "Saving workspace…" : ""}</div>
         {error && <p role="alert" className={styles.error}>{error}</p>}
-        {children}
+        <div className={styles.board} aria-label="Working Board">{children}</div>
       </div>
     </section>
   );
