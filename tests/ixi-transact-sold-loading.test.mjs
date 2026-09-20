@@ -59,7 +59,7 @@ function endpoint(dependencies = {}) {
       assert.equal(principalId, "verified-user"); assert.equal(entityId, "verified-entity");
       return { ok: true, data: { sales: Array.from({ length: 105 }, (_, i) => sale(i)), issues: [] } };
     },
-    fetchSharetribeListingsByAuthor: () => { throw Error("Unnecessary catalogue fetch"); },
+    fetchSharetribeListingsByAuthor: async id => { assert.equal(id, "verified-user"); return []; },
     normalizeSharetribeListings: value => value,
     completeSoldListingSources: async sales => ({ listings: sales.map(listing), issues: [] }),
     soldListingsFromProjection, querySoldListings, ...dependencies
@@ -123,4 +123,29 @@ test("a slow media manifest does not hold back another machine's ready photo", a
   const result = await all;
   assert.deepEqual(result.map(item => item.id), ["slow", "fast"]);
   assert.deepEqual(seen, ["fast", "slow"]);
+});
+
+
+test("first SOLD load overlaps catalogue and financial reads instead of adding their latency", async () => {
+  const started = [];
+  let releaseInventory;
+  const inventory = new Promise(resolve => { releaseInventory = resolve; });
+  let catalogueStarted;
+  const catalogue = new Promise(resolve => { catalogueStarted = resolve; });
+  const res = response();
+  const done = endpoint({
+    requestIxCoreFinancial: async () => { started.push("inventory"); return inventory; },
+    fetchSharetribeListingsByAuthor: async () => { started.push("catalogue"); catalogueStarted(); return []; }
+  })({ method: "GET", query: { snapshot: "1" } }, res);
+  await catalogue;
+  assert.deepEqual(started, ["inventory", "catalogue"]);
+  releaseInventory({ ok: true, data: { sales: [sale(1)], issues: [] } });
+  await done;
+  assert.equal(res.data.listings.length, 1);
+});
+
+test("catalogue failure falls back to the authorized sale ID batch without hiding sales", async () => {
+  const res = response();
+  await endpoint({ fetchSharetribeListingsByAuthor: async () => { throw Error("catalogue unavailable"); } })({ method: "GET", query: { snapshot: "1" } }, res);
+  assert.equal(res.data.listings.length, 105);
 });
