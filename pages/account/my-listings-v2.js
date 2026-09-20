@@ -1,6 +1,6 @@
 import { preserveOpenInventoryTransactions, releaseClosedInventoryTransactions } from "../../lib/listings/IXIInventorySession.mjs";
 import { subscribeInventoryChanges } from "../../lib/listings/IXIInventoryEvents";
-import { mergeSoldWorkspacePage } from "../../lib/listings/IXISoldInventory.mjs";
+import { mergeSoldWorkspacePage, querySoldListings } from "../../lib/listings/IXISoldInventory.mjs";
 import Head from "next/head";
 import { useEffect, useMemo, useRef, useState } from "react";
 
@@ -127,6 +127,7 @@ export default function MyListingsV2({ inventoryMode = "owned" }) {
   const soldWorkspaceLayoutRef = useRef(null);
   const soldSortRef = useRef(soldQuery.sort);
   const [soldFilterListings, setSoldFilterListings] = useState([]);
+  const [soldSnapshot, setSoldSnapshot] = useState(null);
   const [soldIssues, setSoldIssues] = useState([]);
   
   const [listings, setListings] = useState([]);
@@ -470,30 +471,42 @@ const sensors = useSensors(
     return () => controller.abort();
   }, [inventoryRevision, isSold, ixiUserId]);
   const soldFilterKey = JSON.stringify({ ...workspaceFilters, q: searchQuery });
-  useEffect(() => { if (isSold) setSoldQuery(current => ({ ...current, page: 1 })); }, [soldFilterKey, isSold]);
+  useEffect(() => { if (isSold) setSoldQuery(current => current.page === 1 ? current : { ...current, page: 1 }); }, [soldFilterKey, isSold]);
   useEffect(() => {
     if (!isSold) return;
     const controller = new AbortController();
     setInventoryStatus(current => ({ ...current, loading: true, error: "" }));
-    const timer = setTimeout(async () => {
+    (async () => {
       try {
-        const params = new URLSearchParams({ ...JSON.parse(soldFilterKey), ...soldQuery, pageSize: "24" });
-        const response = await fetch(`/api/sold-inventory?${params}`, { signal: controller.signal });
+        const response = await fetch("/api/sold-inventory?snapshot=1", { signal: controller.signal });
         const payload = await response.json();
         if (!response.ok || !payload.ok) throw new Error(payload.error || "SOLD inventory could not be loaded.");
         if (controller.signal.aborted) return;
-        setListings(payload.listings);
-        setSoldFilterListings(payload.filterListings || payload.listings);
+        setSoldSnapshot(payload.listings);
         setSoldIssues(payload.issues || []);
-        setInventoryStatus({ loading: false, error: "", total: payload.total, page: payload.page, pageSize: payload.pageSize, sort: soldQuery.sort, salesSummary: payload.salesSummary });
-        const hydrated = await hydrateIXIListingCollection(payload.listings, { dedupeRequests: true, concurrency: 4 });
-        if (!controller.signal.aborted) setListings(hydrated);
+        setInventoryStatus(current => ({ ...current, loading: false, error: "" }));
+        await hydrateIXIListingCollection(payload.listings, {
+          dedupeRequests: true,
+          concurrency: 4,
+          onListingHydrated: listing => {
+            if (!controller.signal.aborted) setSoldSnapshot(current => current.map(item => item.id === listing.id ? listing : item));
+          }
+        });
       } catch (error) {
         if (!controller.signal.aborted) setInventoryStatus(current => ({ ...current, loading: false, error: error.message }));
       }
-    }, 180);
-    return () => { clearTimeout(timer); controller.abort(); };
-  }, [isSold, soldFilterKey, soldQuery, inventoryRevision]);
+    })();
+    return () => controller.abort();
+  }, [isSold, inventoryRevision]);
+  // Filters and totals share the same complete, authorized snapshot. Changing
+  // dates, sorting or pages never waits for another catalogue/media request.
+  useEffect(() => {
+    if (!isSold || !soldSnapshot) return;
+    const result = querySoldListings(soldSnapshot, { ...JSON.parse(soldFilterKey), ...soldQuery, pageSize: 24 });
+    setListings(result.listings);
+    setSoldFilterListings(result.filterListings);
+    setInventoryStatus(current => ({ ...current, total: result.total, page: result.page, pageSize: result.pageSize, sort: soldQuery.sort, salesSummary: result.salesSummary }));
+  }, [isSold, soldSnapshot, soldFilterKey, soldQuery]);
 
   const savedListings = useMemo(() => {
     const activeListings = listings.filter(item => {
@@ -1546,12 +1559,14 @@ toggleSearchSurfaceRevealed
          {!inventoryStatus.loading && !inventoryStatus.error && inventoryStatus.salesSummary?.missingPriceCount > 0 && <small>{inventoryStatus.salesSummary.missingPriceCount} {inventoryStatus.salesSummary.missingPriceCount === 1 ? "sale missing its price" : "sales missing prices"}</small>}
          {!inventoryStatus.loading && !inventoryStatus.error && inventoryStatus.salesSummary?.returnedCount > 0 && <small>Returned sales excluded from total</small>}
        </div>
+       <div className="sold-filters">
        <label>Settlement<select value={soldQuery.settlement} onChange={event => setSoldQuery(current => ({ ...current, settlement: event.target.value, page: 1 }))}><option value="all">All</option><option value="open">Open</option><option value="closed">Closed</option></select></label>
        <label>Sale status<select value={soldQuery.status} onChange={event => setSoldQuery(current => ({ ...current, status: event.target.value, page: 1 }))}><option value="all">All sales</option><option value="sold">Sold</option><option value="returned">Returned</option></select></label>
        <label>From<input type="date" value={soldQuery.from} onChange={event => setSoldQuery(current => ({ ...current, from: event.target.value, page: 1 }))} /></label>
        <label>To<input type="date" value={soldQuery.to} onChange={event => setSoldQuery(current => ({ ...current, to: event.target.value, page: 1 }))} /></label>
        <label>Sort<select value={soldQuery.sort} onChange={event => setSoldQuery(current => ({ ...current, sort: event.target.value, page: 1 }))}>{[["date-desc", "Newest sale"], ["date-asc", "Oldest sale"], ["price-desc", "Price: high first"], ["price-asc", "Price: low first"], ["buyer-asc", "Buyer"], ["seller-asc", "Sold by"], ["make-asc", "Make / model"]].map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
        <button type="button" disabled={inventoryStatus.loading} onClick={() => setInventoryRevision(value => value + 1)}>Refresh</button>
+       </div>
      </div>}
      {inventoryStatus.loading && <p role="status">Loading {isSold ? "sold machines" : "inventory"}…</p>}
      {isSold && soldIssues.length > 0 && <details className="sold-toolbar"><summary>{soldIssues.length} historical sale facts need review</summary><ul>{soldIssues.map((issue, index) => <li key={`${issue.documentId}:${issue.code}:${index}`}>{issue.passportId ? `${issue.passportId}: ` : ""}{issue.message}</li>)}</ul></details>}
@@ -1616,17 +1631,28 @@ toggleSearchSurfaceRevealed
       <Footer />
                 
       <style jsx>{`
-        .sold-toolbar { display:flex; flex-wrap:wrap; align-items:end; gap:14px; margin:16px 0; padding:16px; background:#111711; border:1px solid #354035; border-radius:10px; }
-        .sold-toolbar strong { color:#ffcc00; font-size:22px; }
-        .sold-toolbar strong span { font-size:12px; color:#b7c1b7; margin-left:10px; }
-        .sold-scoreboard { display:grid; gap:6px; margin-right:auto; min-width:0; max-width:100%; }
-        .sold-value { display:flex; flex-wrap:wrap; align-items:baseline; gap:10px; }
-        .sold-value span { font-size:11px; font-weight:700; color:#b7c1b7; }
-        .sold-value b { font-size:24px; line-height:1.2; color:#ffcc00; font-variant-numeric:tabular-nums; overflow-wrap:anywhere; }
-        .sold-scoreboard small { font-size:11px; color:#b7c1b7; }
-        .sold-toolbar label { display:grid; gap:5px; font-size:12px; }
-        .sold-toolbar select, .sold-toolbar input, .sold-toolbar button { background:#0c100c; color:#eee; border:1px solid #586058; border-radius:5px; padding:9px; min-height:40px; }
-        .sold-toolbar button:disabled { opacity:.45; }
+        .sold-toolbar { display:flex; flex-wrap:wrap; align-items:center; gap:20px 32px; margin:20px 0; padding:20px 24px; background:#111711; border:1px solid #354035; border-radius:10px; font-family:'Inter Variable', Inter, ui-sans-serif, sans-serif; }
+        .sold-scoreboard { display:grid; gap:10px; margin-right:auto; min-width:0; max-width:100%; }
+        .sold-scoreboard strong { display:flex; align-items:baseline; gap:14px; color:#ffcc00; font-size:20px; line-height:1.25; font-weight:750; letter-spacing:-.02em; }
+        .sold-scoreboard strong span { font-size:13px; font-weight:500; letter-spacing:0; color:#b7c1b7; }
+        .sold-value { display:flex; flex-wrap:wrap; align-items:baseline; gap:8px 14px; }
+        .sold-value span { font-size:11px; line-height:1.4; letter-spacing:.08em; font-weight:650; color:#b7c1b7; }
+        .sold-value b { font-size:28px; line-height:1.15; font-weight:700; letter-spacing:-.025em; color:#ffcc00; font-variant-numeric:tabular-nums; overflow-wrap:anywhere; }
+        .sold-scoreboard small { font-size:12px; line-height:1.4; color:#b7c1b7; }
+        .sold-filters { display:flex; flex-wrap:wrap; align-items:end; gap:12px; max-width:100%; }
+        .sold-toolbar label { display:grid; gap:8px; font-size:12px; line-height:1.4; font-weight:550; color:#b7c1b7; }
+        .sold-toolbar select, .sold-toolbar input, .sold-toolbar button { box-sizing:border-box; background:#0c100c; color:#eee; border:1px solid #586058; border-radius:6px; padding:10px 12px; height:42px; min-width:0; font-family:inherit; font-size:13px; line-height:20px; font-weight:500; color-scheme:dark; }
+        .sold-toolbar input { width:150px; }
+        .sold-toolbar button { cursor:pointer; }
+        .sold-toolbar button:disabled { opacity:.45; cursor:default; }
+        .sold-toolbar :is(input,select,button):focus-visible { outline:2px solid #ffcc00; outline-offset:3px; }
+        .sold-toolbar summary { font-size:13px; line-height:1.5; cursor:pointer; }
+        @media(max-width:760px) {
+          .sold-toolbar { padding:18px; gap:20px; }
+          .sold-filters { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); width:100%; }
+          .sold-toolbar input { width:100%; }
+          .sold-value b { font-size:26px; }
+        }
 
         * {
           box-sizing: border-box;
