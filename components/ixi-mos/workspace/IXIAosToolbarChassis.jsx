@@ -52,7 +52,7 @@ function ToolbarReference({ object, referenceId, surfaceId, onBoard, onBrowse, o
 }
 
 function Toolbar({ side, folded, onFold, registry, indexes, placements, session, browseId, onSelect,
-  onBrowse, onMove, onBoard, onReturn, onConnect, connectTarget, ready, run }) {
+  onBrowse, onMove, onBoard, onReturn, onConnect, connectTarget, ready, requiresSignIn, loadError, run }) {
   const title = side === "left" ? "Left toolbar" : "Right toolbar";
   const surfaceId = AOS_TOOLBAR_SURFACES[side];
   const { setNodeRef, isOver } = useDroppable({
@@ -66,7 +66,7 @@ function Toolbar({ side, folded, onFold, registry, indexes, placements, session,
   const { active } = useDndContext();
   const draggedId = active?.data?.current?.objectId || active?.id;
   const draggedObject = registry.get(draggedId);
-  const allowed = Boolean(!folded && ready && parent && draggedObject &&
+  const allowed = Boolean(!folded && ready && parent && draggedObject && draggedId !== parent.objectId &&
     draggedObject.actorAuthority?.canRelate === true && parent.actorAuthority?.canRelate === true &&
     evaluateAosSystemIndexMembership({ sourceObject: draggedObject, targetObject: parent }).allowed);
   const connectDrop = useDroppable({
@@ -110,7 +110,9 @@ function Toolbar({ side, folded, onFold, registry, indexes, placements, session,
             {allowed ? `Drop to connect to ${getAosToolbarName(parent)}` : "Drag onto this area to connect a member"}
           </div>
         </div>}
-        {!ready && <p className={styles.hint}>Loading authorized workspace…</p>}
+        {!ready && <p className={styles.hint}>{requiresSignIn
+          ? <a href="/login?returnTo=%2Faos%2Fwork">Sign in to open your workspace</a>
+          : loadError || "Loading authorized workspace…"}</p>}
         {ready && browseId && browseId !== "all" && !parent && <p role="status" className={styles.hint}>This Object is unavailable in the current workspace.</p>}
         {parent && review && (review.state === "unresolved" || issues.length > 0) &&
           <p className={styles.review}>Membership needs review. Open the container on Board to inspect its configuration.</p>}
@@ -133,7 +135,7 @@ function Toolbar({ side, folded, onFold, registry, indexes, placements, session,
 }
 
 export default function IXIAosToolbarChassis({ children, registry, indexes, placements, session, ready,
-  preferenceKey, onMove, onBoard, onReturn, onConnect }) {
+  preferenceKey, onMove, onBoard, onReturn, onConnect, requiresSignIn = false, loadError = "" }) {
   const [folded, setFolded] = useState({ left: false, right: false });
   const [browse, setBrowse] = useState({ left: "", right: "" });
   const [error, setError] = useState("");
@@ -174,7 +176,7 @@ export default function IXIAosToolbarChassis({ children, registry, indexes, plac
         onFold={() => { setFolded(current => ({ ...current, [side]: true })); openButtons.current[side]?.focus(); }}
         browseId={browse[side]} onSelect={value => setBrowse(current => ({ ...current, [side]: value }))}
         onBrowse={id => browseOther(side, id)} registry={registry} indexes={indexes} placements={placements}
-        session={session} ready={ready} run={run} onMove={onMove} onBoard={onBoard} onReturn={onReturn}
+        session={session} ready={ready} requiresSignIn={requiresSignIn} loadError={loadError} run={run} onMove={onMove} onBoard={onBoard} onReturn={onReturn}
         onConnect={onConnect} connectTarget={registry.get(browse[side === "left" ? "right" : "left"])}/>
       )}
       <div className={styles.center}>

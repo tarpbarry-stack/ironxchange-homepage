@@ -249,7 +249,7 @@ export default function IXIRelationshipControls({
           />
         ))}
 
-        {setPocketThumbSize && (
+        {setPocketThumbSize && !workspaceToolbars && (
           <button
             type="button"
             className={`ixi-thumb-size-toggle thumb-setting-${pocketThumbSize}`}

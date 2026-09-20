@@ -354,6 +354,8 @@ const POCKET_TARGETS = [
   const inventoryInitiallyLoaded = useRef(false);
   const inventoryReloadRef = useRef(null);
   const [inventoryRefreshError, setInventoryRefreshError] = useState("");
+  const [environmentLoaded, setEnvironmentLoaded] = useState(false);
+  const [workspaceSessionError, setWorkspaceSessionError] = useState("");
   inventoryCardStateRef.current = ixiCardState;
   useEffect(() => {
     setListings(current => releaseClosedInventoryTransactions(current, ixiCardState));
@@ -461,6 +463,7 @@ useEffect(() => {
         return;
       }
       setInventoryRefreshError("");
+      setEnvironmentLoaded(true);
 
       const listingEnvironment =
         environment?.listingEnvironment || {};
@@ -951,6 +954,7 @@ useEffect(() => {
 
   let cancelled = false;
   setWorkspaceSessionReady(false);
+  setWorkspaceSessionError("");
 
   const controller = createAosWorkspaceSessionController({
     transport: {
@@ -988,6 +992,7 @@ useEffect(() => {
   }).catch(error => {
     if (!cancelled) {
       console.error("IXI AOS WORKSPACE SESSION OPEN FAILED:", error);
+      setWorkspaceSessionError("The workspace session could not be opened. Refresh the page to retry.");
       setWorkspaceSessionReady(false);
     }
   });
@@ -2713,7 +2718,9 @@ let targetContainer =
    * pocket / stack behavior remains
    * on the proven chassis path.
    */
- const dragId = aosWorkspaceAdmission.resolveObjectId(dragData.objectId || active?.id);
+ const requestedDragId = String(dragData.objectId || active?.id || "");
+ const dragId = aosWorkspaceAdmission.resolveObjectId(requestedDragId) ||
+   (isAosDraftId(requestedDragId) ? requestedDragId : "");
 
 const overId =
   String(
@@ -3223,6 +3230,8 @@ return null;
     placements={workspacePlacements}
     session={aosWorkspaceSession}
     ready={workspaceSessionReady}
+    requiresSignIn={environmentLoaded && !aosPrincipal?.principalId}
+    loadError={inventoryRefreshError || workspaceSessionError}
     preferenceKey={aosEntity?.entityId && aosPrincipal?.principalId
       ? `ixi-aos-toolbars:${aosEntity.entityId}:${aosPrincipal.principalId}` : ""}
     onMove={moveAosObjectToSurface}

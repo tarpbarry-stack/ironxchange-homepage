@@ -5,7 +5,7 @@
 .center { grid-column: 2; grid-row: 1; min-width: 0; }
 .toolbar { grid-row: 1; position: sticky; top: 12px; min-width: 0; height: min(780px, calc(100vh - 36px)); display: flex; flex-direction: column; border: 1px solid #303b37; border-radius: 10px; background: #101a17; color: #e5ece8; overflow: hidden; }
 .left { grid-column: 1; }.right { grid-column: 3; }
-.folded { visibility: hidden; pointer-events: none; width: 0; border: 0; }
+.folded { visibility: hidden; pointer-events: none; position: absolute; width: var(--rail-width); }
 .toolbarHeader { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid #303b37; }
 .toolbarHeader strong, .sectionTitle { font-size: 10px; text-transform: uppercase; letter-spacing: .08em; }
 .toolbarHeader button { font-size: 22px; }
@@ -39,7 +39,7 @@
 .boardTools button { font: inherit; font-size: 10px; color: #dfe8e1; background: #101a17; border: 1px solid #3c4b43; border-radius: 5px; padding: 6px 8px; min-height: 30px; cursor: pointer; }
 .status { position: absolute; top: -27px; left: 0; font-size: 11px; color: #b9c7bd; }
 /* Only the outer position changes; the search surface keeps its own geometry. */
-.center :global(.ixi-control-surface) { margin-top: 0; }
+.chassis .center :global(.ixi-control-surface) { margin-top: 0; }
 @media (min-width: 1700px) { .chassis { --rail-width: 270px; } }
 @media (max-width: 1100px) {
   .chassis { --rail-width: 200px; gap: 8px; }
@@ -50,5 +50,5 @@
   .center { grid-column: 1; }
   .toolbar { position: absolute; width: min(290px, 82vw); top: 0; height: min(700px, 80vh); z-index: 410; box-shadow: 0 16px 36px #0008; }
   .left { left: 0; }.right { right: 0; }
-  .folded { width: 0; }
+
 }
