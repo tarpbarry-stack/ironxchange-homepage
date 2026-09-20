@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 import IXIMachineRail from "../../IXIMachineRail";
 import { createIXITransactContext } from "./IXITransactContext";
+import { cleanMachineTitle } from "../../../lib/listingFormatters";
 import { getIXITransactModules } from "./IXITransactModuleRegistry";
 import IXIWorkOrderApp from "./modules/work-order/IXIWorkOrderApp";
 import IXITechWorkOrderApp from "./modules/tech-work-order/IXITechWorkOrderApp";
@@ -1934,6 +1935,13 @@ export default function IXITransactApp({
     );
 
   const t = (message) => translateIXITransact(locale, message);
+  const machineHeader = ["machine", "equipment", "vehicle", "truck", "trailer"].includes(
+    clean(context.primary.objectType).toLowerCase(),
+  );
+  const headerLabel = machineHeader ? cleanMachineTitle(context.primary.label) : context.primary.label;
+  const machineSerial = machineHeader ? [object.fields, object, object.publicData, object.attributes?.publicData]
+    .flatMap(source => [source?.serialNumber, source?.serial, source?.vin])
+    .map(clean).find(Boolean) || "" : "";
 
   return (
     <dialog
@@ -1960,11 +1968,12 @@ export default function IXITransactApp({
         >
           {!recordHeaderEmbedded ? <header className="tx-header">
             <div className="tx-brand">
+              {!active && machineHeader ? <small className="tx-serial">SN {machineSerial || "—"}</small> : null}
               <span>{t("IXI TRAN$ACT")}</span>
               {!active ? (
                 <>
-                  <strong>{context.primary.label}</strong>
-                  <small>{context.primary.objectType || "AOS CARD"}</small>
+                  <strong>{headerLabel}</strong>
+                  {!machineHeader ? <small>{context.primary.objectType || "AOS CARD"}</small> : null}
                 </>
               ) : workspacePresentation ? (
                 <strong className="tx-worksheet-title">

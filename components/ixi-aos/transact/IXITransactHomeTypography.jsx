@@ -5,12 +5,40 @@ export default function IXITransactHomeTypography() {
        * TRAN$ACT HOME · READABLE WORK TYPOGRAPHY
        * ----------------------------------------
        * Intentionally limited to the launcher state. Opened applications,
-       * forms, rails, card geometry and transaction behavior are excluded.
+       * forms, rails, outer card geometry and transaction behavior are excluded.
        */
       .ixi-transact-app.home-open {
         --ixi-tx-home-font: "Inter Variable", Inter, ui-sans-serif, -apple-system,
           BlinkMacSystemFont, "Segoe UI", sans-serif;
         font-family: var(--ixi-tx-home-font);
+        display: flex;
+        flex-direction: column;
+        padding-bottom: 19px;
+      }
+
+      .ixi-transact-app.home-open .tx-header {
+        position: relative;
+        inset: auto;
+        height: auto;
+        flex: none;
+        gap: 8px;
+      }
+
+      .ixi-transact-app.home-open .tx-brand {
+        display: block;
+        min-width: 0;
+        flex: 1;
+      }
+
+      .ixi-transact-app.home-open .tx-header-actions {
+        flex-shrink: 0;
+      }
+
+      .ixi-transact-app.home-open .tx-body {
+        position: relative;
+        inset: auto;
+        flex: 1;
+        min-height: 0;
       }
 
       .ixi-transact-app.home-open .tx-brand span {
@@ -24,6 +52,7 @@ export default function IXITransactHomeTypography() {
         font-size: 15.5px;
         line-height: 18px;
         letter-spacing: -.02em;
+        overflow-wrap: anywhere;
       }
 
       .ixi-transact-app.home-open .tx-brand small {
@@ -31,6 +60,14 @@ export default function IXITransactHomeTypography() {
         font-size: 7px;
         line-height: 9px;
         letter-spacing: .035em;
+      }
+
+      .ixi-transact-app.home-open .tx-brand .tx-serial {
+        margin: 0 0 2px;
+        color: #b9c1bb;
+        font-size: 10px;
+        line-height: 13px;
+        overflow-wrap: anywhere;
       }
 
       .ixi-transact-app.home-open .tx-label {
