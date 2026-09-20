@@ -19,11 +19,17 @@ function InspectionRig({ children, control, active, revision }) {
     const root = rootRef.current;
     if (!root || !active) { setBox(null); return; }
     let frame;
+    let observedTarget;
     const measure = () => {
       cancelAnimationFrame(frame);
       frame = requestAnimationFrame(() => {
         const target = root.querySelector(`[data-atlas-primary] ${control.selector.split(", ").join(", [data-atlas-primary] ")}`);
         if (!target) { setBox(null); return; }
+        if (target !== observedTarget) {
+          if (observedTarget) resize.unobserve(observedTarget);
+          resize.observe(target);
+          observedTarget = target;
+        }
         const rect = target.getBoundingClientRect();
         const outer = root.getBoundingClientRect();
         const next = { left: rect.left - outer.left, top: rect.top - outer.top, width: rect.width, height: rect.height };
@@ -33,7 +39,8 @@ function InspectionRig({ children, control, active, revision }) {
     const resize = new ResizeObserver(measure);
     const mutation = new MutationObserver(measure);
     resize.observe(root);
-    mutation.observe(root, { childList: true, subtree: true, attributes: true, attributeFilter: ["class", "style"] });
+    // Watch lazy-loaded faces, not our own overlay's style updates.
+    mutation.observe(root, { childList: true, subtree: true });
     measure();
     return () => { cancelAnimationFrame(frame); resize.disconnect(); mutation.disconnect(); };
   }, [control, active, revision]);

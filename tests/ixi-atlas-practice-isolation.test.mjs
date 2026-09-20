@@ -31,6 +31,10 @@ const compile = (relative, dependencies = {}) => {
 const context = compile("ixi-machine-card/IXIMachineDemoContext.jsx");
 const engine = compile("ixi-object-system/IXIMachineMutationEngine.js");
 const bridge = compile("ixi-machine-card/private/IXIOwnedPrivateActionBridge.js");
+const boundary = compile("ixi-atlas/AtlasDemoBoundary.jsx", {
+  "../ixi-machine-card/IXIMachineDemoContext": context,
+  "./IXITechnicalAtlas.module.css": {},
+}).default;
 let cardProps;
 let writes;
 let financialMounts;
@@ -80,6 +84,30 @@ test("outside practice the existing private save still invokes the production wr
     assert.equal(writes[0].listingId, sample.id.uuid);
     assert.equal(writes[0].after.hours, "5000");
     assert.ok(bridge.getOwnedPrivateActions(sample.objectId));
+  } finally { await act(async () => root.unmount()); }
+});
+
+test("the demo boundary blocks linked navigation while preserving nested photo and editor controls", async () => {
+  const root = createRoot(document.getElementById("root"));
+  let photos = 0; const actions = [];
+  try {
+    await act(async () => root.render(React.createElement(boundary, { onPracticeAction: action => actions.push(action) },
+      React.createElement("a", { href: "/listing/sample" },
+        React.createElement("span", { id: "title" }, "Sample machine"),
+        React.createElement("button", { onClick: event => { event.preventDefault(); event.stopPropagation(); photos += 1; } }, "Next photo"),
+        React.createElement("input", { onClick: event => event.stopPropagation(), "aria-label": "Sample hours" })
+      ))));
+    await act(async () => document.querySelector("button").click());
+    assert.equal(photos, 1);
+    assert.deepEqual(actions, []);
+    const inputClick = new dom.window.MouseEvent("click", { bubbles: true, cancelable: true });
+    await act(async () => document.querySelector("input").dispatchEvent(inputClick));
+    assert.equal(inputClick.defaultPrevented, false);
+    const linkClick = new dom.window.MouseEvent("click", { bubbles: true, cancelable: true });
+    await act(async () => document.getElementById("title").dispatchEvent(linkClick));
+    assert.equal(linkClick.defaultPrevented, true);
+    assert.deepEqual(actions, ["Open machine"]);
+    assert.equal(dom.window.location.pathname, "/");
   } finally { await act(async () => root.unmount()); }
 });
 after(() => { dom.window.close(); delete globalThis.window; delete globalThis.document; delete globalThis.IS_REACT_ACT_ENVIRONMENT; });
