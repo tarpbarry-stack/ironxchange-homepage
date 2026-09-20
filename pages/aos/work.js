@@ -24,11 +24,12 @@ import {
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 
+import IXIAosToolbarChassis from "../../components/ixi-mos/workspace/IXIAosToolbarChassis";
+import { AOS_TOOLBAR_SURFACES, isAosToolbarSurface, getAosToolbarReturnOperation } from "../../components/ixi-mos/workspace/IXIAosToolbarModel.mjs";
+
 import IXIAosScoreboard
   from "../../components/ixi-mos/IXIAosScoreboard";
 
-import IXIPocketStationStyles
-  from "../../components/ixi-chassis/IXIPocketStationStyles";
 
 import {
   loadIXIMosEnvironment
@@ -142,11 +143,6 @@ import IXIEnvironmentRail from "../../components/IXIEnvironmentRail";
 import IXIChassisControls from "../../components/ixi-chassis/IXIChassisControls";
 import IXICardScaleControl
   from "../../components/ixi-chassis/IXICardScaleControl";
-import IXIPocketL1 from "../../components/ixi-chassis/IXIPocketL1";
-import IXIPocketL2 from "../../components/ixi-chassis/IXIPocketL2";
-import IXIPocketR1 from "../../components/ixi-chassis/IXIPocketR1";
-import IXIPocketR2 from "../../components/ixi-chassis/IXIPocketR2";
-import IXIChassis from "../../components/ixi-chassis/IXIChassis";
 import IXIWorkspaceEngine from "../../components/ixi-chassis/IXIWorkspaceEngine";
 import { getIXICardScalePreset } from "../../lib/ixiCardScalePresets";
 import IXISortableMachineCard from "../../components/ixi-chassis/IXISortableMachineCard";
@@ -358,6 +354,8 @@ const POCKET_TARGETS = [
   const inventoryInitiallyLoaded = useRef(false);
   const inventoryReloadRef = useRef(null);
   const [inventoryRefreshError, setInventoryRefreshError] = useState("");
+  const [environmentLoaded, setEnvironmentLoaded] = useState(false);
+  const [workspaceSessionError, setWorkspaceSessionError] = useState("");
   inventoryCardStateRef.current = ixiCardState;
   useEffect(() => {
     setListings(current => releaseClosedInventoryTransactions(current, ixiCardState));
@@ -422,10 +420,9 @@ const POCKET_TARGETS = [
     })
 });
 
-const handleWorkspaceDragStart =
-  createWorkspaceDragStartHandler({
-    setActiveDndId
-  });
+const handleWorkspaceDragStart = event => {
+  setActiveDndId(String(event?.active?.data?.current?.objectId || event?.active?.id || ""));
+};
 
 const handleWorkspaceDragCancel =
   createWorkspaceDragCancelHandler({
@@ -466,6 +463,7 @@ useEffect(() => {
         return;
       }
       setInventoryRefreshError("");
+      setEnvironmentLoaded(true);
 
       const listingEnvironment =
         environment?.listingEnvironment || {};
@@ -956,6 +954,7 @@ useEffect(() => {
 
   let cancelled = false;
   setWorkspaceSessionReady(false);
+  setWorkspaceSessionError("");
 
   const controller = createAosWorkspaceSessionController({
     transport: {
@@ -993,6 +992,7 @@ useEffect(() => {
   }).catch(error => {
     if (!cancelled) {
       console.error("IXI AOS WORKSPACE SESSION OPEN FAILED:", error);
+      setWorkspaceSessionError("The workspace session could not be opened. Refresh the page to retry.");
       setWorkspaceSessionReady(false);
     }
   });
@@ -1077,6 +1077,10 @@ useEffect(() => {
   ) {
     return;
   }
+
+  // A dock is top-level placement, never index nesting.
+  const equipmentSurface = locateWorkspaceObject(controller.readPlacements(), equipmentObjectId)?.surfaceId;
+  if (isAosToolbarSurface(equipmentSurface)) return;
 
   const pinned = pinSystemIndexToBoard({
     placements: controller.readPlacements(),
@@ -1846,6 +1850,70 @@ async function recallContainerChildren(container) {
   }
 }
   
+async function moveAosObjectToSurface(reference, targetSurface, contextObjectId) {
+  const objectId = aosWorkspaceAdmission.resolveObjectId(reference);
+  const controller = workspaceSessionControllerRef.current;
+  if (!objectId || !aosWorkspaceObjectRegistry.has(objectId)) throw new Error("The existing authorized Object could not be resolved.");
+  if (!controller || !workspaceSessionReady) throw new Error("The authenticated workspace session is not ready.");
+  const next = moveObjectToWorkspaceSurface({ placements: controller.readPlacements(), objectId, targetSurface });
+  const operation = controller.persistLayout(next, {
+    objectIds: [objectId],
+    ...(contextObjectId ? { activeSummonedContext: contextObjectId } : {})
+  });
+  await operation.completion;
+}
+
+async function openAosObjectOnBoard(objectId, contextObjectId) {
+  const controller = workspaceSessionControllerRef.current;
+  if (locateWorkspaceObject(controller?.readPlacements() || {}, objectId)?.surfaceId !== "board") {
+    await moveAosObjectToSurface(objectId, "board", contextObjectId);
+  }
+  await new Promise(resolve => requestAnimationFrame(resolve));
+  const card = document.querySelector(`[data-ixi-sortable-object="${window.CSS.escape(objectId)}"]`);
+  if (!card) throw new Error("This Object is on the Board but hidden by the current search or filters. Adjust the search to see it.");
+  card.scrollIntoView({ block: "nearest", behavior: "smooth" });
+}
+
+async function returnAosToolbarObject(objectId) {
+  const controller = workspaceSessionControllerRef.current;
+  const operationId = getAosToolbarReturnOperation(controller?.readSession(), objectId);
+  if (!controller || !workspaceSessionReady || !operationId) throw new Error("There is no individual workspace movement to return to. Use the container's Return for a group movement.");
+  await controller.undo(operationId);
+}
+
+// ONE OBJECT / MANY RELATIONSHIPS / ONE VISUAL PLACEMENT
+async function connectAosWorkspaceObjects(dragId, targetWorkspaceObjectId) {
+  const sourceObject = getCanonicalMosObjectForWorkspaceId(dragId);
+  const targetWorkspaceObject = getAosWorkspaceObjectById(targetWorkspaceObjectId);
+  const controller = workspaceSessionControllerRef.current;
+  if (!sourceObject?.objectId) throw new Error(isAosDraftId(dragId)
+    ? "SAVE THIS CARD BEFORE MOVING IT INTO ANOTHER CONTAINER"
+    : "MOVE BLOCKED · THE EXISTING IX CORE OBJECT COULD NOT BE RESOLVED");
+  if (!targetWorkspaceObject?.objectId || dragId === targetWorkspaceObjectId) throw new Error("Two different existing Objects are required.");
+  if (sourceObject.actorAuthority?.canRelate !== true || targetWorkspaceObject.actorAuthority?.canRelate !== true) throw new Error("Relationship not authorized.");
+  const decision = evaluateAosSystemIndexMembership({ sourceObject, targetObject: targetWorkspaceObject });
+  if (!decision.allowed) throw new Error(decision.reason === "system-index-root"
+    ? "System Indexes are peer roots. Nesting is blocked."
+    : "This System Index does not accept that Object classification. Open its card to review configuration.");
+  if (!sourceObject.passportId || !targetWorkspaceObject.passportId || !controller || !workspaceSessionReady) throw new Error("Canonical session and Passport admission is required before connecting Objects.");
+  const targetSurface = targetWorkspaceObject.indexId === "equipment" ? "indexEquipment" : `container:${targetWorkspaceObject.objectId}`;
+  const nextPlacements = moveObjectToWorkspaceSurface({ placements: controller.readPlacements(), objectId: sourceObject.objectId, targetSurface });
+  const operation = controller.connect({
+    nextPlacements, objectId: sourceObject.objectId,
+    relationship: {
+      parentObjectId: targetWorkspaceObjectId, parentPassportId: targetWorkspaceObject.passportId, parentObject: targetWorkspaceObject,
+      memberObjectId: sourceObject.objectId, memberPassportId: sourceObject.passportId, memberObject: sourceObject,
+      orderKey: createAosRailOrderKey(nextPlacements[targetSurface].indexOf(sourceObject.objectId))
+    }
+  });
+  const result = await operation.completion;
+  const relationship = result?.response?.relationship;
+  if (!relationship?.relationshipId) throw new Error("IX-Core did not confirm the container relationship.");
+  setAosRelationships(current => [
+    ...(current || []).filter(item => String(item?.relationshipId || "") !== String(relationship.relationshipId)), relationship
+  ]);
+}
+
 function moveMachineToContainer(machineId, targetContainer) {
   if (!machineId || !targetContainer) return;
 
@@ -2511,7 +2579,7 @@ async function handleWorkspaceDragEnd(event) {
    */
   if (
     dragType ===
-    "collection-child"
+    "collection-child" && !over?.data?.current?.aosToolbarConnect
   ) {
     const requestedMachineId =
       String(
@@ -2552,6 +2620,7 @@ const overContainer =
 
 const validDirectTargets =
   new Set([
+    ...Object.values(AOS_TOOLBAR_SURFACES),
     "stackTop",
     "stackBottom",
 
@@ -2594,10 +2663,11 @@ let targetContainer =
      * It is our explicit default for
      * an extracted child.
      */
-    moveMachineToContainer(
-      machineId,
-      targetContainer
-    );
+    try {
+      await moveAosObjectToSurface(machineId, targetContainer);
+    } catch (error) {
+      showAosObjectNotice({ objectId: machineId, message: error.message, tone: "error", duration: 4200 });
+    }
 
     if (
       targetContainer ===
@@ -2648,10 +2718,9 @@ let targetContainer =
    * pocket / stack behavior remains
    * on the proven chassis path.
    */
- const dragId =
-  String(
-    active?.id || ""
-  );
+ const requestedDragId = String(dragData.objectId || active?.id || "");
+ const dragId = aosWorkspaceAdmission.resolveObjectId(requestedDragId) ||
+   (isAosDraftId(requestedDragId) ? requestedDragId : "");
 
 const overId =
   String(
@@ -2666,6 +2735,7 @@ if (!dragId) {
 
 const knownWorkspaceSurfaces =
   new Set([
+    ...Object.values(AOS_TOOLBAR_SURFACES),
     "board",
     "stackTop",
     "stackBottom",
@@ -2748,163 +2818,13 @@ if (
   );
 
   if (targetIsCanonicalContainer) {
-    let sourceObject = null;
-
-    try {
-      sourceObject =
-        getCanonicalMosObjectForWorkspaceId(dragId);
-    } catch (error) {
-      showAosObjectNotice({
-        objectId: dragId,
-        message: error?.message || "IX CORE IDENTITY CONFLICT",
-        tone: "error",
-        duration: 4200
-      });
-      setActiveDndId(null);
-      clearMachineDragState?.();
-      return;
-    }
-
-    if (!sourceObject?.objectId) {
-      showAosObjectNotice({
-        objectId: dragId,
-        message: isAosDraftId(dragId)
-          ? "SAVE THIS CARD BEFORE MOVING IT INTO ANOTHER CONTAINER"
-          : "MOVE BLOCKED · THE EXISTING IX CORE OBJECT COULD NOT BE RESOLVED",
-        tone: "error",
-        duration: 4200
-      });
-      setActiveDndId(null);
-      clearMachineDragState?.();
-      return;
-    }
-
-    if (
-      sourceObject?.actorAuthority?.canRelate !== true ||
-      targetWorkspaceObject?.actorAuthority?.canRelate !== true
-    ) {
-      showAosObjectNotice({
-        objectId: dragId,
-        message: "RELATIONSHIP NOT AUTHORIZED",
-        tone: "error",
-        duration: 4200
-      });
-      setActiveDndId(null);
-      clearMachineDragState?.();
-      return;
-    }
-
-    const membershipDecision = evaluateAosSystemIndexMembership({
-      sourceObject,
-      targetObject: targetWorkspaceObject
-    });
-    if (!membershipDecision.allowed) {
-      showAosObjectNotice({
-        objectId: dragId,
-        message: membershipDecision.reason === "system-index-root"
-          ? "SYSTEM INDEXES ARE PEER ROOTS · NESTING BLOCKED"
-          : "THIS SYSTEM INDEX DOES NOT ACCEPT THAT OBJECT CLASSIFICATION",
-        tone: "error",
-        duration: 4200
-      });
-      setActiveDndId(null);
-      clearMachineDragState?.();
-      return;
-    }
-
-    nextPlacements =
-      moveObjectToWorkspaceSurface({
-        placements:
-          workspacePlacements,
-
-        objectId:
-          dragId,
-
-        targetSurface:
-          dropTargetSurface
-      });
-
-    /*
-     * ONE OBJECT / MANY RELATIONSHIPS / ONE VISUAL PLACEMENT
-     *
-     * The gesture owns the visible result. Land the card and release the
-     * drag immediately. Canonical objectId remains the operating identity.
-     * Persistence creates only an idempotent, non-exclusive relationship
-     * between the existing Objects; it never provisions, clones, checks in,
-     * checks out, or rewrites the legacy exclusive-parent field.
-     */
     setActiveDndId(null);
     clearMachineDragState?.();
-
-    const memberPassportId = String(
-      sourceObject?.canonicalIdentity?.passportId ||
-      sourceObject?.passportId ||
-      ""
-    ).trim();
-    const parentPassportId = String(
-      targetWorkspaceObject?.canonicalIdentity?.passportId ||
-      targetWorkspaceObject?.passportId ||
-      ""
-    ).trim();
-    const railPosition = Math.max(
-      0,
-      (nextPlacements?.[dropTargetSurface] || []).indexOf(sourceObject.objectId)
-    );
-    const controller = workspaceSessionControllerRef.current;
-
-    if (!memberPassportId || !parentPassportId || !controller || !workspaceSessionReady) {
-      showAosObjectNotice({
-        objectId: dragId,
-        message: "CANONICAL SESSION AND PASSPORT ADMISSION IS REQUIRED BEFORE RELATING CARDS",
-        tone: "error",
-        duration: 4200
-      });
-      return;
+    try {
+      await connectAosWorkspaceObjects(dragId, targetWorkspaceObjectId);
+    } catch (error) {
+      showAosObjectNotice({ objectId: dragId, message: error?.message || "Relationship could not be confirmed.", tone: "error", duration: 4200 });
     }
-
-    const operation = controller.connect({
-      nextPlacements,
-      objectId: sourceObject.objectId,
-      relationship: {
-        parentObjectId: targetWorkspaceObjectId,
-        parentPassportId,
-        parentObject: targetWorkspaceObject,
-        memberObjectId: sourceObject.objectId,
-        memberPassportId,
-        memberObject: sourceObject,
-        orderKey: createAosRailOrderKey(railPosition)
-      }
-    });
-
-    void operation.completion.then(result => {
-      const relationship = result?.response?.relationship;
-      if (!relationship?.relationshipId) {
-        const error = new Error("IX CORE DID NOT CONFIRM THE CONTAINER RELATIONSHIP");
-        error.code = "IXI_AOS_RELATIONSHIP_READBACK_REQUIRED";
-        throw error;
-      }
-      setAosRelationships(current => [
-        ...(current || []).filter(item =>
-          String(item?.relationshipId || "") !== String(relationship.relationshipId)
-        ),
-        relationship
-      ]);
-      showAosObjectNotice({
-        objectId: dragId,
-        message: "RELATIONSHIP CONFIRMED · ONE OBJECT · ONE PASSPORT",
-        tone: "success",
-        duration: 2200
-      });
-    }).catch(error => {
-      console.error("AOS CONTAINER RELATIONSHIP FAILED:", error);
-      showAosObjectNotice({
-        objectId: dragId,
-        message: error?.message || "IX Core could not confirm this relationship.",
-        tone: "error",
-        duration: 3200
-      });
-    });
-
     return;
   }
 
@@ -3079,6 +2999,13 @@ return;
   );
 
   if (!id) return;
+
+  if (Object.values(AOS_TOOLBAR_SURFACES).includes(armedDestination)) {
+    void moveAosObjectToSurface(id, armedDestination).catch(error =>
+      showAosObjectNotice({ objectId: id, message: error.message, tone: "error", duration: 4200 })
+    );
+    return;
+  }
 
   if (
     !DIRECT_CONTAINER_TARGETS.includes(
@@ -3297,47 +3224,23 @@ return null;
   onCreate={createSelectedContainerTemplate}
 />
 
-<IXIChassis>
-  <aside className="ixi-command-left">
-    <section className="ixi-pocket-row">
- 
- <IXIPocketL1
-  leftPocketMode={leftPocketMode}
-  machineContainers={machineContainers}
-  armedDestination={armedDestination}
-  WorkspaceDropPad={WorkspaceDropPad}
-  movePocketToStack={movePocketToStack}
-  recallPocketToBoard={recallPocketToBoard}
-  rotatePocket={rotatePocket}
-  toggleArmedDestination={toggleArmedDestination}
-  pocketThumbSize={pocketThumbSize}
-  getListingById={getListingById}
-  IXISortableMachineCard={IXISortableMachineCard}
-  getIxiColorValue={getIxiColorValue}
-  ixiCardState={ixiCardState}
-/>
-
-<IXIPocketL2
-  leftPocket2Mode={leftPocket2Mode}
-  machineContainers={machineContainers}
-  armedDestination={armedDestination}
-  WorkspaceDropPad={WorkspaceDropPad}
-  movePocketToStack={movePocketToStack}
-  recallPocketToBoard={recallPocketToBoard}
-  rotatePocket={rotatePocket}
-  toggleArmedDestination={toggleArmedDestination}
-  pocketThumbSize={pocketThumbSize}
-  getListingById={getListingById}
-  IXISortableMachineCard={IXISortableMachineCard}
-  getIxiColorValue={getIxiColorValue}
-  ixiCardState={ixiCardState}
-/>
-</section>
-  </aside>
-
-   <div className="ixi-command-center">
-  
-       <IXIChassisControls
+<IXIAosToolbarChassis
+    registry={aosWorkspaceObjectRegistry}
+    indexes={workspaceSystemIndexes.map(index => getAosWorkspaceObjectById(index.objectId)).filter(Boolean)}
+    placements={workspacePlacements}
+    session={aosWorkspaceSession}
+    ready={workspaceSessionReady}
+    requiresSignIn={environmentLoaded && !aosPrincipal?.principalId}
+    loadError={inventoryRefreshError || workspaceSessionError}
+    preferenceKey={aosEntity?.entityId && aosPrincipal?.principalId
+      ? `ixi-aos-toolbars:${aosEntity.entityId}:${aosPrincipal.principalId}` : ""}
+    onMove={moveAosObjectToSurface}
+    onBoard={openAosObjectOnBoard}
+    onReturn={returnAosToolbarObject}
+    onConnect={connectAosWorkspaceObjects}
+  >
+<IXIChassisControls
+  workspaceToolbars={true}
   listings={workspaceListings.filter(item => !item.inventorySessionOnly)}
   searchQuery={searchQuery}
   setSearchQuery={setSearchQuery}
@@ -3359,44 +3262,6 @@ return null;
 
   searchSurfaceRevealed={searchSurfaceRevealed}
   toggleSearchSurfaceRevealed={toggleSearchSurfaceRevealed}/>
-                </div>
-
-  <aside className="ixi-command-right">
-  <section className="ixi-pocket-row">
-    <IXIPocketR1
-  rightPocketMode={rightPocketMode}
-  machineContainers={machineContainers}
-  armedDestination={armedDestination}
-  WorkspaceDropPad={WorkspaceDropPad}
-  movePocketToStack={movePocketToStack}
-  recallPocketToBoard={recallPocketToBoard}
-  rotatePocket={rotatePocket}
-  toggleArmedDestination={toggleArmedDestination}
-  pocketThumbSize={pocketThumbSize}
-  getListingById={getListingById}
-  IXISortableMachineCard={IXISortableMachineCard}
-  getIxiColorValue={getIxiColorValue}
-  ixiCardState={ixiCardState}
-/>
-
-<IXIPocketR2
-  rightPocket2Mode={rightPocket2Mode}
-  machineContainers={machineContainers}
-  armedDestination={armedDestination}
-  WorkspaceDropPad={WorkspaceDropPad}
-  movePocketToStack={movePocketToStack}
-  recallPocketToBoard={recallPocketToBoard}
-  rotatePocket={rotatePocket}
-  toggleArmedDestination={toggleArmedDestination}
-  pocketThumbSize={pocketThumbSize}
-  getListingById={getListingById}
-  IXISortableMachineCard={IXISortableMachineCard}
-  getIxiColorValue={getIxiColorValue}
-  ixiCardState={ixiCardState}
-/>
- </section>
-  </aside>
-    </IXIChassis>
               
 <IXIAosWorkspaceBoard
   items={
@@ -3510,13 +3375,14 @@ onDetachContainerFromParents={
   surfaceLabel="AOS Work"
 />
 
+  </IXIAosToolbarChassis>
 </main>
   </IXIDragEngine>
 );
   }}
 </IXIWorkspaceEngine>
 
-<IXIPocketStationStyles />
+
   
       <Footer />
                 

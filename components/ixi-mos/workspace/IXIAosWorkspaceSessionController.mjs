@@ -434,7 +434,7 @@ export function createAosWorkspaceSessionController({
                 destination.surfaceId.startsWith("container:") ||
                 destination.surfaceId === "indexEquipment"
                   ? "tucked"
-                  : "operating",
+                  : destination.surfaceId.startsWith("rail:") ? "preview" : "operating",
               ...(activeSummonedContext === undefined
                 ? {}
                 : {
@@ -451,7 +451,7 @@ export function createAosWorkspaceSessionController({
                 destination.surfaceId.startsWith("container:") ||
                 destination.surfaceId === "indexEquipment"
                   ? "tucked"
-                  : "operating",
+                  : destination.surfaceId.startsWith("rail:") ? "preview" : "operating",
               ...(activeSummonedContext === undefined
                 ? {}
                 : {

@@ -164,15 +164,14 @@ test("desktop container drops land immediately through operation-scoped session 
     work,
     /workspaceSessionControllerRef = useRef\(null\)/
   );
-  const naturalDrop = work.indexOf("ONE OBJECT / MANY RELATIONSHIPS / ONE VISUAL PLACEMENT");
-  const dragRelease = work.indexOf("setActiveDndId(null)", naturalDrop);
-  const sessionConnect = work.indexOf("controller.connect({", dragRelease);
-  const operationCompletion = work.indexOf("void operation.completion", sessionConnect);
-
-  assert.ok(naturalDrop >= 0);
-  assert.ok(dragRelease > naturalDrop);
-  assert.ok(sessionConnect > dragRelease);
-  assert.ok(operationCompletion > sessionConnect);
+  // Card and toolbar drops share one command. Release drag state before
+  // awaiting it; connect publishes the placement before awaiting the server.
+  const dropBranch = work.slice(work.indexOf("if (targetIsCanonicalContainer) {"));
+  assert.ok(dropBranch.indexOf("setActiveDndId(null)") < dropBranch.indexOf("await connectAosWorkspaceObjects("));
+  const sharedCommand = work.slice(work.indexOf("async function connectAosWorkspaceObjects("), work.indexOf("function moveMachineToContainer("));
+  assert.ok(sharedCommand.indexOf("controller.connect({") >= 0);
+  assert.ok(sharedCommand.indexOf("await operation.completion") > sharedCommand.indexOf("controller.connect({"));
+  assert.match(work, /onConnect=\{connectAosWorkspaceObjects\}/);
   assert.match(
     work,
     /const operation = controller\.connect\(\{[\s\S]*?nextPlacements,[\s\S]*?objectId: sourceObject\.objectId/

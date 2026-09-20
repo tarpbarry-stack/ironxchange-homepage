@@ -5,6 +5,7 @@ import IXIRelationshipControls from "../IXIRelationshipControls";
 
 export default function IXIChassisControls({
   listings = [],
+  workspaceToolbars = false,
   searchQuery,
   setSearchQuery,
   workspaceFilters,
@@ -66,6 +67,7 @@ export default function IXIChassisControls({
         </div>
 
        <IXIRelationshipControls
+  workspaceToolbars={workspaceToolbars}
   ixiCardState={ixiCardState}
   activeColors={ixiColorFilters}
   onToggleColor={toggleColorFilter}

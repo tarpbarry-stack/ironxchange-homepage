@@ -13,8 +13,11 @@ import {
 } from "../lib/mos/IXIAosMembershipBridge.mjs";
 import {
   createAosWorkspaceSessionController,
+  locateWorkspaceObject,
   workspacePlacementsFromSession
 } from "../components/ixi-mos/workspace/IXIAosWorkspaceSessionController.mjs";
+import { isAosToolbarSurface } from "../components/ixi-mos/workspace/IXIAosToolbarModel.mjs";
+import { pinSystemIndexToBoard } from "../components/ixi-mos/workspace/IXIAosSystemIndexPlacement.mjs";
 
 const coreRoot = process.env.IXI_CORE_CONTRACT_ROOT;
 
@@ -129,11 +132,81 @@ test("paired frontend and signed HTTP SQLite backend recover failed operations",
     return { A, B, first, second, make, transport, calls, errors, context, create };
   }
 
+  await t.test("toolbar docking and Return survive a fresh client without changing canonical Objects or Passports", async () => {
+    const f = await fixture();
+    const before = census();
+    const origin = structuredClone(f.first.readSession().objects[f.A].sessionOrigin);
+    for (const side of ["left", "right"]) {
+      const surface = `rail:aos-${side}`;
+      const operation = f.first.persistLayout(moveObjectToWorkspaceSurface({
+        placements: f.first.readPlacements(), objectId: f.A, targetSurface: surface
+      }), { objectIds: [f.A] });
+      await operation.completion;
+      assert.equal(f.first.readSession().objects[f.A].currentPlacement.operatingState, "preview");
+    }
+    const refreshed = f.make();
+    await refreshed.open({ workspaceId: "aos-work" });
+    assert.deepEqual(refreshed.readPlacements()["rail:aos-right"], [f.A]);
+    const boarded = refreshed.persistLayout(moveObjectToWorkspaceSurface({
+      placements: refreshed.readPlacements(), objectId: f.A, targetSurface: "board"
+    }), { objectIds: [f.A] });
+    await boarded.completion;
+    const nextClient = f.make();
+    await nextClient.open({ workspaceId: "aos-work" });
+    await nextClient.undo(nextClient.readSession().objects[f.A].returnSnapshot.operationId);
+    assert.deepEqual(nextClient.readPlacements()["rail:aos-right"], [f.A]);
+    assert.equal(nextClient.readSession().objects[f.B].currentPlacement.surfaceId, "board");
+    assert.deepEqual(nextClient.readSession().objects[f.A].sessionOrigin, origin);
+    assert.deepEqual(census(), before);
+  });
+
   // Execute the production page handlers, including their page-level guards and
   // Return references. Controller-only tests missed a guard that silently blocked
   // Board after Recall. These plain functions are read from the page, not copied
   // into a separate test implementation.
   const workPage = fs.readFileSync(new URL("../pages/aos/work.js", import.meta.url), "utf8");
+  // Run the actual startup effect against persisted sessions. An older page's
+  // unconditional pin moved a docked index during the live mixed-version audit.
+  const pinMarker = workPage.indexOf("  const equipmentObjectId = aosWorkspaceAdmission.resolveObjectId(");
+  const pinStart = workPage.lastIndexOf("useEffect(() => {", pinMarker) + "useEffect(() => {".length;
+  const pinEnd = workPage.indexOf("\n}, [", pinMarker);
+  assert.ok(pinMarker >= 0 && pinStart < pinMarker && pinEnd > pinMarker);
+  const runPagePin = new Function(
+    "workspaceSessionControllerRef", "aosWorkspaceAdmission", "equipmentWorkspaceIndex",
+    "workspaceSessionReady", "locateWorkspaceObject", "isAosToolbarSurface",
+    "pinSystemIndexToBoard", "aosWorkspaceSession", "equipmentBoardPinKeyRef", "createMosCommandId",
+    workPage.slice(pinStart, pinEnd)
+  );
+  await t.test("real page startup preserves every parked index after refresh and still repairs invalid nesting", async () => {
+    const f = await fixture(), before = census();
+    let client = f.first;
+    const runStartup = current => runPagePin(
+      { current }, { resolveObjectId: value => value }, { objectId: f.A }, true,
+      locateWorkspaceObject, isAosToolbarSurface, pinSystemIndexToBoard,
+      current.readSession(), { current: "" }, commandId
+    );
+    for (const surface of ["rail:aos-left", "rail:aos-right", "pocketLeft", "pocketLeft2", "stackTop", "pocketRight", "pocketRight2", "stackBottom"]) {
+      await client.persistLayout(moveObjectToWorkspaceSurface({
+        placements: client.readPlacements(), objectId: f.A, targetSurface: surface
+      }), { objectIds: [f.A] }).completion;
+      client = f.make();
+      await client.open({ workspaceId: "aos-work" });
+      const saved = client.readSession(), commandsBeforeStartup = f.calls.length;
+      runStartup(client);
+      await client.whenIdle();
+      assert.equal(f.calls.length, commandsBeforeStartup, `${surface}: startup must not issue a move`);
+      assert.deepEqual(client.readSession(), saved);
+      assert.equal(locateWorkspaceObject(client.readPlacements(), f.A).surfaceId, surface);
+    }
+    await client.persistLayout(moveObjectToWorkspaceSurface({
+      placements: client.readPlacements(), objectId: f.A, targetSurface: `container:${f.B}`
+    }), { objectIds: [f.A] }).completion;
+    runStartup(client);
+    await client.whenIdle();
+    assert.equal(locateWorkspaceObject(client.readPlacements(), f.A).surfaceId, "board");
+    assert.deepEqual(census(), before);
+  });
+
   const commandStart = workPage.indexOf("function getDirectContainerChildIds(");
   const commandEnd = workPage.indexOf("function moveMachineToContainer(", commandStart);
   assert.ok(commandStart >= 0 && commandEnd > commandStart);
