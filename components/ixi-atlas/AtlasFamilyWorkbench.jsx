@@ -125,6 +125,7 @@ export default function AtlasFamilyWorkbench({ familyId }) {
           </div>
         </AtlasDemoBoundary>
         <p className={styles.panHint}>Use + for a closer view. Scroll sideways inside the workbench when the assembly is wider than your screen.</p>
+        <p className={styles.panHint}>The face-level EMAIL, TEXT and PDF shortcuts are not connected on these surfaces. Use the rail's Send control where available.</p>
         <div className={styles.quickControls} aria-label="Console and rail practice shortcuts"><button type="button" disabled={depth >= 5} onClick={() => addPanel("left")}>+ Left panel</button><button type="button" disabled={depth >= 5} onClick={() => addPanel("right")}>+ Right panel</button><button type="button" aria-pressed={armed} onClick={() => setArmed(value => !value)}>{armed ? "Sample destination armed" : "Arm sample destination"}</button></div>
       </section>
       <aside className={styles.instructions} aria-label="Instructions for selected face">

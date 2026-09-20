@@ -3306,6 +3306,7 @@
   .search { width:100%; }
   .topbar { grid-template-columns:minmax(0,1fr) auto; gap:10px; height:auto; min-height:72px; padding:12px; }
   .topbar .brand { display:none; }
+  .topbar .titleBlock { display:flex; }
   .topbar .titleBlock span { font-size:13px; }
   .topbar .titleBlock b { font-size:10px; line-height:1.45; white-space:normal; }
   .indexButton { min-height:44px; padding:8px; font-size:10px; }
@@ -3346,6 +3347,8 @@
   .guideSteps p { font-size:15px; }
   .guideIndexGrid, .releaseNext > div { grid-template-columns:1fr; }
   .releaseRail small { display:none; }
+  .topbar .titleBlock b { display:none; }
+  .search kbd { display:none; }
   .releaseRail > a { min-height:65px; }
   .footer { padding:22px 12px; flex-wrap:wrap; gap:18px; }
 }

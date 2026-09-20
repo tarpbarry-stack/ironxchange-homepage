@@ -18,6 +18,8 @@ test("header entry points land in the correct family and omit private context", 
 test("URL references use the production ownership policy before and after edits", () => {
   const reference = createFamilySample("reference");
   assert.equal(isAosOwnedMachine(reference), false);
+  assert.equal(reference.machineAccess, "private");
+  assert.equal(reference.machineChannel, "none");
   const updated = patchSampleFacts(reference, { hours: "4900", ownershipStatus: "owned", ownershipRole: "owner", passportId: "different", objectId: "different", machineAccess: "public", publicData: { ownershipRole: "owner" } });
   assert.equal(isAosOwnedMachine(updated), false);
   assert.equal(updated.hours, "4900");
