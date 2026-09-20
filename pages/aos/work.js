@@ -1,3 +1,4 @@
+import { IXICardPointerSensor, IXICardTouchSensor } from "../../components/ixi-mobile/IXICardSensors";
 import { preserveOpenInventoryTransactions, releaseClosedInventoryTransactions } from "../../lib/listings/IXIInventorySession.mjs";
 import { subscribeInventoryChanges } from "../../lib/listings/IXIInventoryEvents";
 import Head from "next/head";
@@ -5,7 +6,6 @@ import IXIAosCreationRecovery from "../../components/ixi-mos/object-creation/IXI
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import {
-  PointerSensor,
   KeyboardSensor,
   useSensor,
   useSensors,
@@ -434,10 +434,13 @@ const handleWorkspaceDragCancel =
   });
 
 const sensors = useSensors(
-  useSensor(PointerSensor, {
+  useSensor(IXICardPointerSensor, {
     activationConstraint: {
       distance: 6
     }
+  }),
+  useSensor(IXICardTouchSensor, {
+    activationConstraint: { delay: 350, tolerance: 8 }
   }),
   useSensor(KeyboardSensor, {
     coordinateGetter: sortableKeyboardCoordinates
@@ -3504,7 +3507,7 @@ onDetachContainerFromParents={
   }
 />
     
-<IXICardScaleControl
+<IXICardScaleControl mobileDensity
   value={cardScaleMode}
   onChange={updateCardScaleMode}
   surfaceLabel="AOS Work"

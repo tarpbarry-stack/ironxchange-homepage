@@ -422,6 +422,7 @@ function handlePhotoLoad(e, photoUrl) {
 const {
   ref: dndActivatorRef,
   onPointerDown: onDndPointerDown,
+  onTouchStart: onDndTouchStart,
   ...keyboardDragHandleProps
 } = dragHandleProps || {};
 
@@ -440,6 +441,7 @@ function beginCardDragFromNonInteractiveSurface(event) {
   <div
     ref={dndActivatorRef}
     onPointerDown={beginCardDragFromNonInteractiveSurface}
+    onTouchStart={onDndTouchStart}
     data-listing-card-id={id}
     role={listing.soldSummary ? "region" : undefined}
     aria-label={listing.soldSummary ? `Sold ${listing.title || listing.soldSummary.label}` : undefined}

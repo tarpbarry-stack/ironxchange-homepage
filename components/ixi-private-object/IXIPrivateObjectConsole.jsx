@@ -1,3 +1,5 @@
+import { getMobileTransactFootprint } from "../../lib/ixiMobileCardGeometry";
+
 import IXIScaledCardShell
   from "../ixi-machine-object/IXIScaledCardShell";
 
@@ -102,6 +104,9 @@ export default function IXIPrivateObjectConsole({
 
   const objectState =
     ixiCardState?.[id] || {};
+
+  const transactOpen = objectState.transactOpen === true;
+  const transactFootprint = getMobileTransactFootprint(objectState.transactConsoleDepth);
 
   const hasSavedSlotModel =
     Array.isArray(
@@ -564,6 +569,11 @@ export default function IXIPrivateObjectConsole({
           ixi-private-console-slot
           ixi-private-console-listing-slot
         `}
+        data-transact-open={transactOpen ? "true" : undefined}
+        style={{
+          "--ixi-mobile-transact-width": `${transactFootprint.width}px`,
+          "--ixi-mobile-transact-height": `${transactFootprint.height}px`
+        }}
       >
         {parentCard}
       </div>
@@ -818,6 +828,7 @@ export default function IXIPrivateObjectConsole({
       }
 
       objectFamily="private"
+      mobileNativeWidth={transactOpen ? (consoleDepth - 1) * PRIVATE_NATIVE_PANEL_WIDTH + transactFootprint.width : consoleNativeWidth}
 
       nativeWidth={
         consoleNativeWidth

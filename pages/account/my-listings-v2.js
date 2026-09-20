@@ -1,3 +1,4 @@
+import { IXICardPointerSensor, IXICardTouchSensor } from "../../components/ixi-mobile/IXICardSensors";
 import { preserveOpenInventoryTransactions, releaseClosedInventoryTransactions } from "../../lib/listings/IXIInventorySession.mjs";
 import { subscribeInventoryChanges } from "../../lib/listings/IXIInventoryEvents";
 import { mergeSoldWorkspacePage, querySoldListings } from "../../lib/listings/IXISoldInventory.mjs";
@@ -5,7 +6,6 @@ import Head from "next/head";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import {
-  PointerSensor,
   KeyboardSensor,
   useSensor,
   useSensors,
@@ -311,10 +311,13 @@ function handleWorkspaceDragEnd(event) {
 
   
 const sensors = useSensors(
-  useSensor(PointerSensor, {
+  useSensor(IXICardPointerSensor, {
     activationConstraint: {
       distance: 6
     }
+  }),
+  useSensor(IXICardTouchSensor, {
+    activationConstraint: { delay: 350, tolerance: 8 }
   }),
   useSensor(KeyboardSensor, {
     coordinateGetter: sortableKeyboardCoordinates
@@ -1572,7 +1575,7 @@ toggleSearchSurfaceRevealed
      {inventoryStatus.loading && <p role="status">Loading {isSold ? "sold machines" : "inventory"}…</p>}
      {isSold && soldIssues.length > 0 && <details className="sold-toolbar"><summary>{soldIssues.length} historical sale facts need review</summary><ul>{soldIssues.map((issue, index) => <li key={`${issue.documentId}:${issue.code}:${index}`}>{issue.passportId ? `${issue.passportId}: ` : ""}{issue.message}</li>)}</ul></details>}
      {inventoryStatus.error && <p role="alert">{inventoryStatus.error} <button type="button" onClick={() => isSold ? setInventoryRevision(value => value + 1) : window.location.reload()}>Retry</button></p>}
-     <IXIBoardSurface
+     <IXIBoardSurface mobileCards
   scaleMode={cardScaleMode}
   centerRows={true}
 >
@@ -1602,7 +1605,7 @@ toggleSearchSurfaceRevealed
 />
 </IXIBoardSurface>
     
-<IXICardScaleControl
+<IXICardScaleControl mobileDensity
   value={cardScaleMode}
   onChange={updateCardScaleMode}
   surfaceLabel={isSold ? "Sold" : "Inventory"}
