@@ -779,3 +779,10 @@
 @media (min-width: 1000px) { .shell[data-ui-rebuild] .compactContext { display: none; } }
 .directoryToggle { display: none; }
 @media (max-width: 1279px) { .shell[data-ui-rebuild] .headerActions .directoryToggle { display: flex; align-items: center; justify-content: center; } }
+
+.headerHelpActions { display:flex; align-items:center; justify-content:flex-end; gap:6px; min-width:0; }
+@media(max-width:600px) {
+  .shell[data-ui-rebuild] { --tx-bar-height:208px; }
+  .headerHelpActions { grid-column:3; grid-row:1; display:grid; gap:4px; }
+  .shell[data-ui-rebuild] .headerHelpActions .aosAction { grid-column:auto; grid-row:auto; min-width:0; white-space:normal; }
+}

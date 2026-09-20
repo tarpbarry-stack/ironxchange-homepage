@@ -4,6 +4,7 @@ import IXITransactAccountingReports from "../ixi-transact-dashboard/IXITransactA
 import { paymentHistorySummary } from "../ixi-aos/transact/payments/IXIPaymentHistory";
 import IXIPaymentStatusBadge from "../ixi-aos/transact/payments/IXIPaymentStatusBadge";
 import paymentStyles from "../ixi-aos/transact/payments/IXIPaymentStatusBadge.module.css";
+import AtlasHelpLink from "../ixi-atlas/AtlasHelpLink";
 import IXIPaymentsPanel from "../ixi-aos/transact/payments/IXIPaymentsPanel";
 import { paymentDocument, paymentScopeObject } from "../ixi-aos/transact/payments/IXIPaymentModel";
 import { createIXITransactContext } from "../ixi-aos/transact/IXITransactContext";
@@ -681,7 +682,7 @@ export default function IXITransactCommandCenter({ runtime, active = true }) {
     const references = record?.document?.references || [];
     const targetContext = contexts.find(context => references.some(ref => ["asset", "machine", "object"].includes(ref.role) && ref.passportId === context.passportId)) || selectedContext;
     const records = [...new Map([...companyRecords, ...passportRecords].map(item => [paymentDocument(item).financialDocumentId, item])).values()];
-    const tab = { id: financialDocumentId, financialDocumentId, label: transactionDisplayTitle(record.document || paymentDocument(record.raw), record.title),
+    const tab = { id: financialDocumentId, financialDocumentId, helpModuleId: (record.document || paymentDocument(record.raw))?.documentType, label: transactionDisplayTitle(record.document || paymentDocument(record.raw), record.title),
       context: targetContext, object: buildTransactObject(targetContext, records), financialRecords: records, dirty: false };
     setWorkingTabs(tabs => [...tabs, tab]);
     activateTab(tab);
@@ -953,7 +954,8 @@ export default function IXITransactCommandCenter({ runtime, active = true }) {
         </div>
         <button type="button" className={`${styles.newAction} ${styles.paymentsAction}`} onClick={() => openPaymentRecord()} title="Open payments and record a payment" disabled={!selectedContext}>PAYMENTS</button>
         <button type="button" className={styles.newAction} onClick={() => setNewMenuOpen(value => !value)} aria-expanded={newMenuOpen} disabled={!selectedContext}>+ NEW</button>
-        <a className={styles.aosAction} href="/aos/work">RETURN TO AOS</a>
+        <div className={styles.headerHelpActions}><a className={styles.aosAction} href="/aos/work">RETURN TO AOS</a>
+        <AtlasHelpLink moduleId={activeWorkspace === "payments" ? "payments" : workingTabs.find(tab => tab.id === activeTabId)?.helpModuleId || activeModuleId} /></div>
       </header>
 
       <IXITransactSidePanel className={styles.newTransactionMenu} label="New transaction" dockAt={100000} open={newMenuOpen} onDismiss={() => setNewMenuOpen(false)}><p>{selectedContext?.title}</p><div className={styles.appLauncher}>{selectedModules.map(module => <button type="button" key={module.id} onClick={() => openTransactModule(module.id)}><strong>{module.label}</strong></button>)}</div></IXITransactSidePanel>
