@@ -379,6 +379,15 @@ export default function IXITransactCommandCenter({ runtime, active = true }) {
   const [searchIndex, setSearchIndex] = useState(-1);
   const workspaceMenu = useRef(null);
   const historyStates = useRef(new Map());
+  const startupStages = useRef(new Set());
+  // Record committed UI readiness on the browser's own navigation clock.
+  // Remote browser control latency must not be mistaken for product load time.
+  function reportStartupStage(stage) {
+    if (!active || startupStages.current.has(stage)) return;
+    startupStages.current.add(stage);
+    console.info("IXI TRANSACT UI READY " + JSON.stringify({ stage, navigationMs: Math.round(window.performance.now()) }));
+  }
+  useEffect(() => { reportStartupStage("shell"); }, [active]);
   useEffect(() => { if (!active) { setOpenPanel(""); setNewMenuOpen(false); } }, [active]);
   const [queuePage, setQueuePage] = useState(0);
   const [selectedQueueId, setSelectedQueueId] = useState("");
@@ -591,6 +600,11 @@ export default function IXITransactCommandCenter({ runtime, active = true }) {
     }
   }, [contexts, environment?.systemIndexes, environment?.objects, environment?.railProjections]);
   const objectDirectories = directoryProjection.directories;
+  useEffect(() => {
+    if (!loading && !contextLoading && !error && !contextError && environment?.userId && !directoryProjection.error) {
+      reportStartupStage("directory");
+    }
+  }, [active, loading, contextLoading, error, contextError, environment?.userId, directoryProjection.error]);
   useEffect(() => {
     if (!objectDirectories.length) {
       setSelectedDirectoryId("");
