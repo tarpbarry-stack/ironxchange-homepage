@@ -474,8 +474,8 @@ const sensors = useSensors(
   useEffect(() => {
     if (!isSold) return;
     const controller = new AbortController();
+    setInventoryStatus(current => ({ ...current, loading: true, error: "" }));
     const timer = setTimeout(async () => {
-      setInventoryStatus(current => ({ ...current, loading: true, error: "" }));
       try {
         const params = new URLSearchParams({ ...JSON.parse(soldFilterKey), ...soldQuery, pageSize: "24" });
         const response = await fetch(`/api/sold-inventory?${params}`, { signal: controller.signal });
@@ -485,7 +485,7 @@ const sensors = useSensors(
         setListings(payload.listings);
         setSoldFilterListings(payload.filterListings || payload.listings);
         setSoldIssues(payload.issues || []);
-        setInventoryStatus({ loading: false, error: "", total: payload.total, page: payload.page, pageSize: payload.pageSize, sort: soldQuery.sort });
+        setInventoryStatus({ loading: false, error: "", total: payload.total, page: payload.page, pageSize: payload.pageSize, sort: soldQuery.sort, salesSummary: payload.salesSummary });
         const hydrated = await hydrateIXIListingCollection(payload.listings, { dedupeRequests: true, concurrency: 4 });
         if (!controller.signal.aborted) setListings(hydrated);
       } catch (error) {
@@ -1538,7 +1538,14 @@ toggleSearchSurfaceRevealed
 />
               
      {isSold && <div className="sold-toolbar" aria-label="Sold inventory filters">
-       <strong>SOLD <span>{inventoryStatus.total} {inventoryStatus.total === 1 ? "sale" : "sales"}</span></strong>
+       <div className="sold-scoreboard" role="status" aria-label="Sold sales summary" aria-busy={inventoryStatus.loading}>
+         <strong>SOLD <span>{inventoryStatus.loading ? "…" : inventoryStatus.error ? "—" : `${inventoryStatus.total} ${inventoryStatus.total === 1 ? "sale" : "sales"}`}</span></strong>
+         <div className="sold-value"><span>TOTAL SOLD</span><b>{inventoryStatus.loading ? "…" : inventoryStatus.error || !inventoryStatus.salesSummary ? "Unavailable" : inventoryStatus.salesSummary.totals.length
+           ? inventoryStatus.salesSummary.totals.map(({ currency, amountCents }) => new Intl.NumberFormat("en-US", { style: "currency", currency, currencyDisplay: currency === "USD" ? "symbol" : "code", minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(amountCents / 100)).join(" · ")
+           : inventoryStatus.salesSummary.missingPriceCount ? "Not recorded" : "$0.00"}</b></div>
+         {!inventoryStatus.loading && !inventoryStatus.error && inventoryStatus.salesSummary?.missingPriceCount > 0 && <small>{inventoryStatus.salesSummary.missingPriceCount} {inventoryStatus.salesSummary.missingPriceCount === 1 ? "sale missing its price" : "sales missing prices"}</small>}
+         {!inventoryStatus.loading && !inventoryStatus.error && inventoryStatus.salesSummary?.returnedCount > 0 && <small>Returned sales excluded from total</small>}
+       </div>
        <label>Settlement<select value={soldQuery.settlement} onChange={event => setSoldQuery(current => ({ ...current, settlement: event.target.value, page: 1 }))}><option value="all">All</option><option value="open">Open</option><option value="closed">Closed</option></select></label>
        <label>Sale status<select value={soldQuery.status} onChange={event => setSoldQuery(current => ({ ...current, status: event.target.value, page: 1 }))}><option value="all">All sales</option><option value="sold">Sold</option><option value="returned">Returned</option></select></label>
        <label>From<input type="date" value={soldQuery.from} onChange={event => setSoldQuery(current => ({ ...current, from: event.target.value, page: 1 }))} /></label>
@@ -1610,8 +1617,13 @@ toggleSearchSurfaceRevealed
                 
       <style jsx>{`
         .sold-toolbar { display:flex; flex-wrap:wrap; align-items:end; gap:14px; margin:16px 0; padding:16px; background:#111711; border:1px solid #354035; border-radius:10px; }
-        .sold-toolbar strong { color:#ffcc00; font-size:22px; margin-right:auto; }
+        .sold-toolbar strong { color:#ffcc00; font-size:22px; }
         .sold-toolbar strong span { font-size:12px; color:#b7c1b7; margin-left:10px; }
+        .sold-scoreboard { display:grid; gap:6px; margin-right:auto; min-width:0; max-width:100%; }
+        .sold-value { display:flex; flex-wrap:wrap; align-items:baseline; gap:10px; }
+        .sold-value span { font-size:11px; font-weight:700; color:#b7c1b7; }
+        .sold-value b { font-size:24px; line-height:1.2; color:#ffcc00; font-variant-numeric:tabular-nums; overflow-wrap:anywhere; }
+        .sold-scoreboard small { font-size:11px; color:#b7c1b7; }
         .sold-toolbar label { display:grid; gap:5px; font-size:12px; }
         .sold-toolbar select, .sold-toolbar input, .sold-toolbar button { background:#0c100c; color:#eee; border:1px solid #586058; border-radius:5px; padding:9px; min-height:40px; }
         .sold-toolbar button:disabled { opacity:.45; }
