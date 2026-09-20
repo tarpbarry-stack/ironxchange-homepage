@@ -14,7 +14,7 @@ Built September 20, 2026. PR #400 targets `main`.
 
 ## Verification completed
 
-- Required paired gate: **610 frontend tests and 417 backend tests passed**, pinned core `d3954a48b1fbce3b12be5dd9d31ebd444df1f78b`.
+- Required paired gate: **610 frontend tests and 418 backend tests passed**, pinned core `373bd009bdf6644940e17390b2bf3b2a12fdae45`. The branch incorporates main through `5ccb2d5d` and preserves its separate administrator prerequisites.
 - Runtime regression verifies that the actual private runtime saves a non-owned sample without invoking the production writer, registering global actions or mounting financial work. The normal runtime still invokes its writer exactly once.
 - Boundary regression verifies that linked navigation is blocked while nested photo/editor controls retain their events.
 - Ownership, reset isolation, contextual links, malformed-link fallback and cross-Atlas search tests pass.

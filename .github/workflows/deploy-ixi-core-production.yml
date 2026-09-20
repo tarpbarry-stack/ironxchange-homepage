@@ -40,8 +40,6 @@ jobs:
         run: |
           test "$AWS_INSTANCE_ID" = i-06d9ae98889f6fdab
           test "$(aws sts get-caller-identity --query Account --output text)" = "$IXI_EXPECTED_ACCOUNT_ID"
-      - name: Ensure approved financial batch-read capability
-        run: python3 ops/ensure-financial-batch-read-permission.py
       - name: Install and verify complete runtime
         run: |
           set -euo pipefail

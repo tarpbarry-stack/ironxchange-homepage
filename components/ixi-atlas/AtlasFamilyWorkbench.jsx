@@ -2,7 +2,7 @@ import Link from "next/link";
 import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
 import IXIMachineCard from "../ixi-machine-card/IXIMachineCard";
 import IXIObjectConsoleRouter from "../ixi-chassis/IXIObjectConsoleRouter";
-import { createConsoleSlot, createConsoleSlotsPatch, insertConsoleSlot, IXI_CONSOLE_SLOT_TYPES } from "../ixi-chassis/IXIObjectConsoleEngine";
+import { createConsoleSlot, createConsoleSlotsPatch, getNextConsoleDefaultFace, insertConsoleSlot, IXI_CONSOLE_SLOT_TYPES } from "../ixi-chassis/IXIObjectConsoleEngine";
 import { familyControls, getAtlasFamily } from "../../lib/ixi-atlas/familyRegistry.mjs";
 import { createFamilySample, FAMILY_SCALE_MODES, patchSampleFacts, SAMPLE_OBJECT_ID, SAMPLE_PASSPORT_ID, sampleDisposition } from "../../lib/ixi-atlas/familyDemo.mjs";
 import AtlasFamilyNav from "./AtlasFamilyNav";
@@ -106,10 +106,10 @@ export default function AtlasFamilyWorkbench({ familyId }) {
   </div>;
   function addPanel(side) {
     if (depth >= 5) return;
-    updateState(SAMPLE_OBJECT_ID, createConsoleSlotsPatch(insertConsoleSlot({ slots: state.consoleSlots, side, face: depth === 1 ? 2 : 3 })));
+    updateState(SAMPLE_OBJECT_ID, createConsoleSlotsPatch(insertConsoleSlot({ slots: state.consoleSlots, side, face: getNextConsoleDefaultFace(state.consoleSlots) })));
   }
   function reset() {
-    setSample(createFamilySample(familyId)); setFace(1); setGear(3); setBidPack({}); setArmed(false);
+    setSample(createFamilySample(familyId)); setFace(1); setGear(3); setBidPack({}); setArmed(false); setMode("inspect"); setControlId("identity");
     setState({ color: "none", outline: 1, consoleSlots: [createConsoleSlot({ type: IXI_CONSOLE_SLOT_TYPES.LISTING })] });
     setGeneration(previous => previous + 1); sequence.current = 0; setEvents(["Reset complete. Original facts and controls restored."]);
   }
