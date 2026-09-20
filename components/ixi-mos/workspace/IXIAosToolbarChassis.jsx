@@ -171,6 +171,36 @@ export default function IXIAosToolbarChassis({ children, controls, registry, ind
   const [pending, setPending] = useState(0);
   const [loadedKey, setLoadedKey] = useState("");
   const openButtons = useRef({});
+  const chassisRef = useRef(null);
+  useEffect(() => {
+    const chassis = chassisRef.current;
+    if (!chassis) return;
+    let frame = 0;
+    const measure = () => {
+      frame = 0;
+      const viewport = window.visualViewport;
+      const bottom = (viewport?.offsetTop || 0) + (viewport?.height || window.innerHeight);
+      const stickyTop = window.matchMedia("(max-width: 999px)").matches ? 0 : 90;
+      const top = Math.max(stickyTop, chassis.getBoundingClientRect().top);
+      chassis.style.setProperty("--toolbar-height", `${Math.max(0, bottom - top - 12)}px`);
+    };
+    const schedule = () => { if (!frame) frame = window.requestAnimationFrame(measure); };
+    const observer = typeof window.ResizeObserver === "function" ? new window.ResizeObserver(schedule) : null;
+    observer?.observe(chassis.parentElement || chassis);
+    window.addEventListener("resize", schedule);
+    window.addEventListener("scroll", schedule, { passive: true });
+    window.visualViewport?.addEventListener("resize", schedule);
+    window.visualViewport?.addEventListener("scroll", schedule);
+    measure();
+    return () => {
+      observer?.disconnect();
+      window.cancelAnimationFrame(frame);
+      window.removeEventListener("resize", schedule);
+      window.removeEventListener("scroll", schedule);
+      window.visualViewport?.removeEventListener("resize", schedule);
+      window.visualViewport?.removeEventListener("scroll", schedule);
+    };
+  }, []);
   useEffect(() => {
     const smallScreen = window.matchMedia("(max-width: 999px)").matches;
     setFolded({ left: smallScreen, right: smallScreen }); setBrowse({ left: "", right: "" });
@@ -200,7 +230,7 @@ export default function IXIAosToolbarChassis({ children, controls, registry, ind
     setFolded(current => ({ ...current, [other]: false }));
   }
   return (
-    <section className={`${styles.chassis} ${folded.left ? styles.leftClosed : ""} ${folded.right ? styles.rightClosed : ""}`} aria-label="AOS workspace">
+    <section ref={chassisRef} className={`${styles.chassis} ${folded.left ? styles.leftClosed : ""} ${folded.right ? styles.rightClosed : ""}`} aria-label="AOS workspace">
       {["left", "right"].map(side => <Toolbar key={side} side={side} folded={folded[side]}
         onFold={() => { setFolded(current => ({ ...current, [side]: true })); openButtons.current[side]?.focus(); }}
         browseId={browse[side]} onSelect={value => setBrowse(current => ({ ...current, [side]: value }))}
