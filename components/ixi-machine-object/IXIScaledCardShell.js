@@ -40,7 +40,7 @@ export default function IXIScaledCardShell({
     const observer = new ResizeObserver(sync);
     observer.observe(host);
     observer.observe(plane);
-      return () => observer.disconnect();
+    return () => observer.disconnect();
   }, [mobile]);
 
   const footprint =

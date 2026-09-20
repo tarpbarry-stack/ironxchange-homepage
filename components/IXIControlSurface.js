@@ -83,6 +83,7 @@ box-shadow:
 
 @media (max-width: 850px) {
   .ixi-control-surface {
+    box-sizing: border-box;
     width: 100%;
     max-width: 100%;
     min-width: 0;

@@ -57,9 +57,6 @@ const resolvedRowGap =
 
   return (
     <IXIMobileCardContext.Provider value={mobileCards && mobile}>
-    {mobileCards && <nav className="ixi-mobile-card-density" aria-label="Card density">
-      {["I", "II"].map(value => <button type="button" key={value} aria-label={value === "I" ? "One card per row" : "Two cards per row"} aria-pressed={density === value} onClick={() => selectDensity(value)}>{value}</button>)}
-    </nav>}
     <section
       {...surfaceProps}
       className={[
@@ -85,12 +82,15 @@ const resolvedRowGap =
         scaleMode
       }
     >
+    {mobileCards && <nav className="ixi-mobile-card-density" aria-label="Card density">
+      {["I", "II"].map(value => <button type="button" key={value} aria-label={value === "I" ? "One card per row" : "Two cards per row"} aria-pressed={density === value} onClick={() => selectDensity(value)}>{value}</button>)}
+    </nav>}
       {children}
 
       <style jsx>{`
         .ixi-mobile-card-density { display: none; }
         @media (max-width: 850px) {
-          .ixi-mobile-card-density { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin: 0 4px 12px; }
+          .ixi-mobile-card-density { display: grid; grid-column: 1 / -1; width: 100%; grid-template-columns: 1fr 1fr; gap: 6px; margin: 0; }
           .ixi-mobile-card-density button { min-height: 46px; border: 1px solid #353936; border-radius: 9px; background: #111; color: #929792; font: 900 16px Inter, sans-serif; touch-action: manipulation; }
           .ixi-mobile-card-density button[aria-pressed="true"] { color: #ffc400; border-color: #ffc400; background: #19160b; }
           .ixi-mobile-card-density button:focus-visible { outline: 2px solid #ffc400; outline-offset: 2px; }
