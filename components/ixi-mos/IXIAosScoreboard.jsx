@@ -397,7 +397,7 @@ export default function IXIAosScoreboard({
 
       <style jsx>{`
         .aos-scorecard, .aos-scorecard * { box-sizing: border-box; }
-        .aos-scorecard { width: 100%; min-height: 76px; margin: 2px auto 42px; padding: 14px 16px; display: grid; grid-template-columns: minmax(210px, 1.2fr) minmax(0, 3fr) auto; gap: 22px; align-items: center; border: 1px solid #303d34; border-radius: 10px; background: linear-gradient(110deg, #17251d, #101813); }
+        .aos-scorecard { width: 100%; min-height: 76px; margin: 2px auto 18px; padding: 14px 16px; display: grid; grid-template-columns: minmax(210px, 1.2fr) minmax(0, 3fr) auto; gap: 22px; align-items: center; border: 1px solid #303d34; border-radius: 10px; background: linear-gradient(110deg, #17251d, #101813); }
         .aos-scorecard-identity { min-width: 0; display: flex; align-items: center; gap: 12px; }
         .aos-scorecard-logo { width: 44px; height: 44px; flex: 0 0 44px; display: grid; place-items: center; overflow: hidden; border: 1px solid #40513e; border-radius: 6px; background: #1e2f21; color: #ffc400; font-size: 12px; font-weight: 800; }
         .aos-scorecard-logo img { width: 100%; height: 100%; object-fit: contain; display: block; }
