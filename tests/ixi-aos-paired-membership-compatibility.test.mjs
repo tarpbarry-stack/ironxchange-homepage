@@ -31,6 +31,7 @@ test("paired classification and index setup survive response loss, detect concur
   // External authority persistence is stubbed; signed auth, Entity membership,
   // the Object route, idempotency, SQLite writes, and GET readback are real.
   require("./authority/IXIAuthorityDynamoStore.js").getCurrentPolicyRecord = async () => null;
+  require("./authority/IXIAuthorityDynamoStore.js").getCurrentPolicyRecords = async ids => ids.map(() => null);
   const owner = ensureAosAccount({ ownerUserId: "classification-owner", displayName: "Owner Entity" });
   const other = ensureAosAccount({ ownerUserId: "classification-other", displayName: "Other Entity" });
   const member = provisionAosObject({ commandId: "existing-generic-member", entityId: owner.entity.entityId,

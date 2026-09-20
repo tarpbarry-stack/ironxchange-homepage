@@ -32,6 +32,7 @@ reads. A successful save invalidates financial results without reloading identit
 | Directory presentation | One optional listing collection; media only as needed |
 | Core cold HTTP bootstrap | At most two Object/Passport registry reads each, including authentication |
 | Core 200-object repeated admission | One read of each registry per explicit read scope |
+| Authority policy inputs | At most 100 keys per batch and two requests in flight per explicit scope; 200 targets with two shared ancestors require three batches |
 | Financial collection current records | At most 100 keys per batch and two requests in flight; 350 records require four batches |
 
 The paired gate runs behavioral request-deduplication, abort, authority-change,
@@ -41,7 +42,9 @@ that scope. Each new request obtains fresh snapshots and permission inputs.
 Financial batches use consistent reads, retry only unprocessed keys with bounded
 backoff, and reject incomplete collections. Release preflight proves batch-read
 permission before stopping the runtime. Collection reads must not regress to one
-database request per record.
+database request per record. Authority policy inputs follow the same bounds,
+coalescing concurrent target and ancestor reads without caching completed policies
+across requests or changing principal-specific permission decisions.
 
 ## Release evidence
 
@@ -61,9 +64,11 @@ work from transport or queuing delay before changing checks or adding caches.
 
 ## Required deployment capability
 
-The runtime role requires `dynamodb:BatchGetItem` on `ixi-financial-v1`. The
+The runtime role requires `dynamodb:BatchGetItem` on `ixi-financial-v1` and
+`ixi-aos-authority-v1`. The
 release operator intentionally lacks IAM administration. Provision the approved
-core `ops/iam/transact-financial-batch-read.json` policy through an authorized AWS
+core `ops/iam/transact-financial-batch-read.json` and
+`ops/iam/transact-authority-batch-read.json` policies through an authorized AWS
 administrator before release; do not expand the deployment account's privileges.
 The complete release verifies the actual runtime capability before shutdown and
 stops safely when it is absent. Keep IAM provisioning separate from each release.

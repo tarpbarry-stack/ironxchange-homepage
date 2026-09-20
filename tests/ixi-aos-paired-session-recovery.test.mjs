@@ -42,6 +42,7 @@ test("paired frontend and signed HTTP SQLite backend recover failed operations",
   // Authority persistence is the only external dependency replaced in this
   // fixture. Signed request validation and account membership remain real.
   require("./authority/IXIAuthorityDynamoStore.js").getCurrentPolicyRecord = async () => null;
+  require("./authority/IXIAuthorityDynamoStore.js").getCurrentPolicyRecords = async ids => ids.map(() => null);
   const express = require("express");
   const app = express();
   app.use(express.json());

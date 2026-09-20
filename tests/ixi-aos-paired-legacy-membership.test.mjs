@@ -57,6 +57,7 @@ test("signed bootstrap, rendered previews and BOARD selection agree on persisted
   // Only external authority persistence is replaced. Signed authentication,
   // account membership, bootstrap, canonical admission and SQLite are real.
   coreRequire("./authority/IXIAuthorityDynamoStore.js").getCurrentPolicyRecord = async () => null;
+  coreRequire("./authority/IXIAuthorityDynamoStore.js").getCurrentPolicyRecords = async ids => ids.map(() => null);
   const { ensureAosAccount } = coreRequire("./mos/accounts/aosAccountService.js");
   const { provisionAosObject } = coreRequire("./mos/provisioning/aosObjectProvisioningService.js");
   const { listObjects } = coreRequire("./mos/objects/objectService.js");
