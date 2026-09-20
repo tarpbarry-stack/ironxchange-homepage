@@ -10,7 +10,7 @@ export default function IXISoldDetails({ listing, onOpenTransact }) {
       <dl><div><dt>DATE SOLD</dt><dd>{displayDate(sale.saleDate)}</dd></div><div><dt>BUYER</dt><dd title={sale.buyerLabel}>{sale.buyerLabel || "Not recorded"}</dd></div><div><dt>SOLD BY</dt><dd title={sale.soldByLabel}>{sale.soldByLabel || "Not recorded"}</dd></div></dl>
       <div className="sold-actions"><span className={`settlement ${sale.settlementStatus}`}>SETTLEMENT {sale.settlementStatus === "closed" ? "CLOSED" : "OPEN"}</span><button type="button" onClick={onOpenTransact} aria-label="Open sold machine TRANSACT">TRAN$ACT ↗</button></div>
     <style jsx>{`
-      .sold-facts{flex:1;min-height:0;display:flex;flex-direction:column;gap:6px;color:#f3f4ee;font-family:'Inter Variable',Inter,ui-sans-serif,sans-serif}
+      .sold-facts{flex:1;min-height:0;display:flex;flex-direction:column;gap:6px;color:#f3f4ee;font-family:'IXI Sold Inter','Inter Variable',Inter,ui-sans-serif,sans-serif}
       .identity{display:flex;justify-content:space-between;gap:6px;color:#aab3a7;font-size:9px;line-height:1.4;font-weight:450;flex-wrap:wrap}
       .sale-price{display:flex;align-items:baseline;justify-content:space-between;gap:8px;padding:6px 0;border-top:1px solid #3e4433;border-bottom:1px solid #3e4433}
       .sale-price span{font-size:10px;line-height:1.4;letter-spacing:.035em;font-weight:600;color:#b8c2b1}

@@ -934,9 +934,9 @@ onMachinePlacementChange ? (
   display: none !important;
 }
 
-        .card.sold-mode { font-family:'Inter Variable',Inter,ui-sans-serif,sans-serif; height:475px;min-height:475px;max-height:475px; }
+        .card.sold-mode { font-family:'IXI Sold Inter','Inter Variable',Inter,ui-sans-serif,sans-serif; height:475px;min-height:475px;max-height:475px; }
         .card.private-listing-card.sold-mode .card-body { height:227px;min-height:227px;max-height:227px;box-sizing:border-box;padding:10px 12px 8px; }
-        .card.sold-mode .hours-inline { margin:0;font-family:'Inter Variable',Inter,ui-sans-serif,sans-serif!important;font-size:11px!important; }
+        .card.sold-mode .hours-inline { margin:0;font-family:'IXI Sold Inter','Inter Variable',Inter,ui-sans-serif,sans-serif!important;font-size:11px!important; }
         .card.sold-mode .title-row > h3:not(.hours-inline) { font-size:13px;font-weight:700;line-height:1.25;letter-spacing:-.025em; }
         .card.sold-mode .title-click-zone { flex-shrink:0;margin-bottom:5px; }
         .sold-sign { position:absolute;top:12px;left:12px;padding:4px 14px;background:#f1c400;color:#11150e;font-size:30px;font-weight:950;letter-spacing:2px;line-height:1.15;border:2px solid #15170f;box-shadow:0 2px 12px #0008; }

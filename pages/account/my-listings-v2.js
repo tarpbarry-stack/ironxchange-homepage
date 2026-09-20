@@ -1317,6 +1317,7 @@ function updateCardScaleMode(nextMode) {
     <>
       <Head>
         <title>{isSold ? "SOLD" : "My Inventory"} | IronXchange</title>
+        {isSold && <link rel="preload" href="/fonts/InterVariable.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />}
 
         <link
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
@@ -1631,7 +1632,14 @@ toggleSearchSurfaceRevealed
       <Footer />
                 
       <style jsx>{`
-        .sold-toolbar { display:flex; flex-wrap:wrap; align-items:center; gap:20px 32px; margin:20px 0; padding:20px 24px; background:#111711; border:1px solid #354035; border-radius:10px; font-family:'Inter Variable', Inter, ui-sans-serif, sans-serif; }
+        @font-face {
+          font-family:'IXI Sold Inter';
+          src:url('/fonts/InterVariable.woff2') format('woff2');
+          font-style:normal;
+          font-weight:100 900;
+          font-display:swap;
+        }
+        .sold-toolbar { display:flex; flex-wrap:wrap; align-items:center; gap:20px 32px; margin:20px 0; padding:20px 24px; background:#111711; border:1px solid #354035; border-radius:10px; font-family:'IXI Sold Inter','Inter Variable', Inter, ui-sans-serif, sans-serif; }
         .sold-scoreboard { display:grid; gap:10px; margin-right:auto; min-width:0; max-width:100%; }
         .sold-scoreboard strong { display:flex; align-items:baseline; gap:14px; color:#ffcc00; font-size:20px; line-height:1.25; font-weight:750; letter-spacing:-.02em; }
         .sold-scoreboard strong span { font-size:13px; font-weight:500; letter-spacing:0; color:#b7c1b7; }
