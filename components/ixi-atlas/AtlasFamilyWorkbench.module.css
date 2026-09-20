@@ -31,6 +31,8 @@
 .viewport { overflow-x: auto; overscroll-behavior-x: contain; min-width: 0; padding: 26px 16px 30px; background: radial-gradient(ellipse at center, #283426 0, #141c15 75%); }
 .rig { position: relative; width: max-content; margin-inline: auto; isolation: isolate; }
 .rig [data-atlas-primary] { width: 100%; height: 100%; }
+.rig :global(.card-photo-nav) { opacity: 1; width: 44px; height: 44px; background: #111b; color: #fff; }
+.rig :global(.card-photo-nav:focus-visible) { outline: 3px solid #d0ec72; outline-offset: -3px; }
 .callout { position: absolute; pointer-events: none; z-index: 8; outline: 2px solid #e5ff93; outline-offset: 3px; box-shadow: 0 0 0 5px #151c12aa; }
 .callout span { position: absolute; left: -10px; top: -15px; width: 24px; height: 24px; background: #d0ec72; border: 2px solid #151d0b; border-radius: 50%; display: grid; place-items: center; color: #151d0b; font-size: 12px; font-weight: 800; }
 .panHint { padding: 0 16px; font-size: 12px; line-height: 1.6; color: #b8c3b9; }
