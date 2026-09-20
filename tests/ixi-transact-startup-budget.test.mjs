@@ -19,7 +19,7 @@ test("canonical directory needs one server bootstrap and no browser login, listi
       entity: { entityId, passportId: "IXIENT2345" }, objects, relationships: [], railProjections: {} },
     admissions: objects.map(object => ({ ok: true, object, identity: { objectId: object.objectId, passportId: object.passportId,
       entityId, aliases: [], evidence: [] } })) };
-  let requests = 0;
+  let requests = 0; const responses = [];
   const modules = new Map();
   function load(file) {
     if (modules.has(file)) return modules.get(file).exports;
@@ -30,7 +30,7 @@ test("canonical directory needs one server bootstrap and no browser login, listi
     new Function("require", "module", "exports", compiled.code)(name => {
       assert.doesNotMatch(name, /ListingsEngine|loadIXIOwnedListings|sharetribe.*sdk/, "Directory must not import a second identity/presentation loader");
       if (name === "./ixiMosClient") return {
-        fetchAosEnvironment: async ({ signal }) => { assert.equal(signal.aborted, false); requests++; return response; },
+        fetchAosEnvironment: async ({ signal }) => { assert.equal(signal.aborted, false); requests++; return responses.shift() || response; },
         fetchMosObjectDefinitions: () => { throw new Error("Unbudgeted definition request"); },
         admitMosCanonicalIdentities: () => { throw new Error("Unbudgeted repeated admission request"); }
       };
@@ -46,6 +46,13 @@ test("canonical directory needs one server bootstrap and no browser login, listi
   assert.equal(requests, 1); assert.equal(environment.objects.length, 200);
   assert.deepEqual(environment.objects.map(object => object.passportId), objects.map(object => object.passportId));
   assert.deepEqual(environment.ownedListings, []);
+  responses.push({ ok: true, onboarding: { entity: response.environment.entity }, environment: response.environment }, response);
+  const onboarded = await loadIXICanonicalMosEnvironment({ signal: new AbortController().signal });
+  assert.equal(requests, 3, "only first-time onboarding permits one canonical readback");
+  assert.equal(onboarded.objects.length, 200);
+  responses.push({ ok: true, environment: response.environment });
+  await assert.rejects(loadIXICanonicalMosEnvironment({ signal: new AbortController().signal }), /bootstrap is unavailable/);
+  assert.equal(requests, 4, "a malformed response must not start an unbounded retry");
 });
 
 test("hidden workspaces cannot initiate dashboard reads or mount through idle prewarming", () => {
