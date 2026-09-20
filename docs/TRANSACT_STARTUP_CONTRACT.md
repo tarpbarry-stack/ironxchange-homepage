@@ -15,6 +15,8 @@ The canonical bootstrap already contains Object/Passport admissions, definitions
 and governed relationships. Its projection must not request another browser login,
 private board placement state, listing census or individual identity admissions.
 Optional listing detail and media enrich the same admitted Objects afterward.
+Only a server-confirmed first-time onboarding response permits one additional
+canonical readback; established accounts stay within the one-bootstrap budget.
 
 Only visited workspaces mount. Hidden workspaces keep drafts but suspend financial
 reads. A successful save invalidates financial results without reloading identity.
