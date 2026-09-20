@@ -129,6 +129,34 @@ test("paired frontend and signed HTTP SQLite backend recover failed operations",
     return { A, B, first, second, make, transport, calls, errors, context, create };
   }
 
+  await t.test("toolbar docking and Return survive a fresh client without changing canonical Objects or Passports", async () => {
+    const f = await fixture();
+    const before = census();
+    const origin = structuredClone(f.first.readSession().objects[f.A].sessionOrigin);
+    for (const side of ["left", "right"]) {
+      const surface = `rail:aos-${side}`;
+      const operation = f.first.persistLayout(moveObjectToWorkspaceSurface({
+        placements: f.first.readPlacements(), objectId: f.A, targetSurface: surface
+      }), { objectIds: [f.A] });
+      await operation.completion;
+      assert.equal(f.first.readSession().objects[f.A].currentPlacement.operatingState, "preview");
+    }
+    const refreshed = f.make();
+    await refreshed.open({ workspaceId: "aos-work" });
+    assert.deepEqual(refreshed.readPlacements()["rail:aos-right"], [f.A]);
+    const boarded = refreshed.persistLayout(moveObjectToWorkspaceSurface({
+      placements: refreshed.readPlacements(), objectId: f.A, targetSurface: "board"
+    }), { objectIds: [f.A] });
+    await boarded.completion;
+    const nextClient = f.make();
+    await nextClient.open({ workspaceId: "aos-work" });
+    await nextClient.undo(nextClient.readSession().objects[f.A].returnSnapshot.operationId);
+    assert.deepEqual(nextClient.readPlacements()["rail:aos-right"], [f.A]);
+    assert.equal(nextClient.readSession().objects[f.B].currentPlacement.surfaceId, "board");
+    assert.deepEqual(nextClient.readSession().objects[f.A].sessionOrigin, origin);
+    assert.deepEqual(census(), before);
+  });
+
   // Execute the production page handlers, including their page-level guards and
   // Return references. Controller-only tests missed a guard that silently blocked
   // Board after Recall. These plain functions are read from the page, not copied
