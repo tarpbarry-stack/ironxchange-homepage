@@ -3,7 +3,8 @@
 .rightClosed { grid-template-columns: var(--rail-width) minmax(0, 1fr) 0; column-gap: 8px; }
 .leftClosed.rightClosed { grid-template-columns: 0 minmax(0, 1fr) 0; column-gap: 0; }
 .center { grid-column: 2; grid-row: 1; min-width: 0; }
-.toolbar { grid-row: 1; position: sticky; top: 12px; min-width: 0; height: min(780px, calc(100vh - 36px)); display: flex; flex-direction: column; border: 1px solid #303b37; border-radius: 10px; background: #101a17; color: #e5ece8; overflow: hidden; }
+/* The page's fixed navigation occupies 75px; keep folded controls reachable while scrolling. */
+.toolbar { grid-row: 1; position: sticky; top: 90px; min-width: 0; height: min(780px, calc(100vh - 106px)); display: flex; flex-direction: column; border: 1px solid #303b37; border-radius: 10px; background: #101a17; color: #e5ece8; overflow: hidden; }
 .left { grid-column: 1; }.right { grid-column: 3; }
 .folded { visibility: hidden; pointer-events: none; position: absolute; width: var(--rail-width); }
 .toolbarHeader { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid #303b37; }
