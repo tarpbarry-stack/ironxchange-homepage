@@ -14,7 +14,7 @@ if (!/^[a-f0-9]{40}$/.test(release.commit) || release.commit !== actual) {
 }
 execFileSync("git", ["diff", "--exit-code", "HEAD", "--"], { cwd: core, stdio: "inherit" });
 const tests = fs.readdirSync(path.join(root, "tests"))
-  .filter(file => /^ixi-(?:aos|transact)-.*\.test\.mjs$/.test(file))
+  .filter(file => /^ixi-(?:aos|transact|atlas)-.*\.test\.mjs$/.test(file))
   .map(file => path.join("tests", file)).sort();
 if (!tests.includes("tests/ixi-aos-paired-session-recovery.test.mjs")) throw new Error("Required integration regression is missing");
 execFileSync(process.execPath, ["--test", ...tests], {

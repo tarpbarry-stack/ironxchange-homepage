@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 
 import PrivateListingCard from "./PrivateListingCard";
+import { useIXIMachineDemo } from "../IXIMachineDemoContext";
 import { registerOwnedPrivateActions, unregisterOwnedPrivateActions } from "./IXIOwnedPrivateActionBridge";
 import { IXI_MACHINE_MUTATION_COMMANDS } from "../../ixi-object-system/IXIMachineMutationCommandBus";
 import { mergeVerifiedMachineFacts, updateMachineFacts } from "../../ixi-object-system/IXIMachineMutationEngine";
@@ -99,6 +100,7 @@ function transactObjectFromListing(listing = {}) {
 }
 
 export default function IXIOwnedPrivateListingRuntime({ cardContext = "inventory", presentation = "seller", ...props }) {
+  const demo = useIXIMachineDemo();
   const [runtimeListing, setRuntimeListing] = useState(props.listing || {});
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -171,7 +173,7 @@ export default function IXIOwnedPrivateListingRuntime({ cardContext = "inventory
 
     try {
       const before = factsOf(runtimeListing);
-      const result = await updateMachineFacts({
+      const result = demo ? { demonstration: true } : await updateMachineFacts({
         commandBus: IXI_MACHINE_MUTATION_COMMANDS,
         listingId,
         title: clean(runtimeListing?.title || runtimeListing?.attributes?.title),
@@ -193,6 +195,7 @@ export default function IXIOwnedPrivateListingRuntime({ cardContext = "inventory
       draftRef.current = nextDraft;
       setDraft(nextDraft);
       if (closeFace1Edit) setEditing(false);
+      if (demo) demo.onAction("Save sample", "Sample facts updated for this practice session.");
       props.onOwnedObjectSaved?.(nextListing, result);
       showNotice("SAVED", "success");
       return true;
@@ -253,6 +256,7 @@ export default function IXIOwnedPrivateListingRuntime({ cardContext = "inventory
   );
 
   function setTransactVisibility(nextOpen) {
+    if (demo) { demo.onAction("TRAN$ACT", "Launch captured. Use the financial field guide to learn the next steps."); return; }
     const open = Boolean(nextOpen);
 
     if (
@@ -287,7 +291,7 @@ export default function IXIOwnedPrivateListingRuntime({ cardContext = "inventory
   }
 
   useEffect(() => {
-    if (!ownerActionBridgeKey) return undefined;
+    if (!ownerActionBridgeKey || demo) return undefined;
 
     registerOwnedPrivateActions(ownerActionBridgeKey, {
       add: handleAdd,
@@ -300,10 +304,10 @@ export default function IXIOwnedPrivateListingRuntime({ cardContext = "inventory
     });
 
     return () => unregisterOwnedPrivateActions(ownerActionBridgeKey);
-  }, [ownerActionBridgeKey, editing, saving, runtimeListing, draft]);
+  }, [ownerActionBridgeKey, editing, saving, runtimeListing, draft, demo]);
 
   if (
-    transactOpen &&
+    !demo && transactOpen &&
     (
       runtimeListing?.normalizedAosObject !== true ||
       runtimeListing?.actorAuthority?.canTransact === true

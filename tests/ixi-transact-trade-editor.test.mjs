@@ -41,6 +41,7 @@ const listingProjection = compile("../../../lib/listings/normalizeSharetribeList
 // Render the real price/photo face. Stubbing the whole machine card hid the
 // production crash when an expanded worksheet reloaded SDK Money objects.
 const privateCard = compile("../../ixi-machine-card/private/PrivateListingCard.js", {
+  "../IXIMachineDemoContext": compile("../../ixi-machine-card/IXIMachineDemoContext.jsx"),
   "next/dynamic": () => noop,
   "../../../lib/posthog": { captureIXEvent: noop },
   "../../../lib/marketplace/passportEmailEvents": { openIXIPassportEmail: noop },

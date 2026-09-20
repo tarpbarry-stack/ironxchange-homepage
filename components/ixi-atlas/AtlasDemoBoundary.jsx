@@ -2,10 +2,13 @@ import { useCallback, useMemo, useState } from "react";
 import { IXIMachineDemoProvider } from "../ixi-machine-card/IXIMachineDemoContext";
 import styles from "./IXITechnicalAtlas.module.css";
 
-export default function AtlasDemoBoundary({ children }) {
+export default function AtlasDemoBoundary({ children, onPracticeAction, onSaveMachineFacts }) {
   const [notice, setNotice] = useState("");
-  const onAction = useCallback(action => setNotice(`${action}: demonstration captured. Your records and messages are unchanged.`), []);
-  const demo = useMemo(() => ({ onAction }), [onAction]);
+  const onAction = useCallback((action, detail = "") => {
+    setNotice(`${action}: ${detail || "demonstration captured. Your records and messages are unchanged."}`);
+    onPracticeAction?.(action, detail);
+  }, [onPracticeAction]);
+  const demo = useMemo(() => ({ onAction, saveMachineFacts: onSaveMachineFacts }), [onAction, onSaveMachineFacts]);
   return <IXIMachineDemoProvider value={demo}>
     <div data-ixi-atlas-demo onSubmitCapture={event => { event.preventDefault(); event.stopPropagation(); onAction("Save"); }}
       onClickCapture={event => {

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useIXIMachineDemo } from "../ixi-machine-card/IXIMachineDemoContext";
 import { formatHours, getListingHref, cleanMachineTitle, getListingId } from "../../lib/listingFormatters";
 import { getOwnedPrivateActions } from "../ixi-machine-card/private/IXIOwnedPrivateActionBridge";
 import IXIOwnedPrivateTransactRuntime from "../ixi-machine-card/private/IXIOwnedPrivateTransactRuntime";
@@ -66,6 +67,7 @@ export default function IXISellerMachineObjectFace2({
   onDescriptionKeyDown,
   savingDescription = false
 }) {
+  const demo = useIXIMachineDemo();
   const [consoleTransactOpen, setConsoleTransactOpen] = useState(false);
   const publicData = listing.publicData || listing.attributes?.publicData || {};
 
@@ -102,7 +104,7 @@ export default function IXISellerMachineObjectFace2({
 
   function resolvedOwnerActions() {
     const direct = listing.__ixiOwnerActions || {};
-    const bridged = getOwnedPrivateActions(getListingId(listing)) || {};
+    const bridged = demo ? {} : getOwnedPrivateActions(getListingId(listing)) || {};
     return { ...bridged, ...direct };
   }
 
@@ -113,12 +115,14 @@ export default function IXISellerMachineObjectFace2({
 
     stop(event);
 
+    if (demo && action === "transact") { demo.onAction("TRAN$ACT", "Launch captured. Use the financial field guide to learn the next steps."); return; }
     if (action === "transact" && isConsoleSlot) {
       setConsoleTransactOpen(true);
       return;
     }
 
     const actions = resolvedOwnerActions();
+    if (demo && typeof actions?.[action] !== "function") { demo.onAction(action, "Use the primary card for this control. The sample stays in this lesson."); return; }
     actions?.[action]?.();
   }
 
@@ -135,6 +139,7 @@ export default function IXISellerMachineObjectFace2({
     if (descriptionSaving) return;
 
     const actions = resolvedOwnerActions();
+    if (demo?.saveMachineFacts) actions.saveDescription = description => demo.saveMachineFacts(listing, { description });
     if (typeof actions.saveDescription !== "function") {
       setDescriptionNotice({ message: "NOT SAVED", tone: "error" });
       setTimeout(() => setDescriptionNotice(null), 1450);
@@ -171,16 +176,19 @@ export default function IXISellerMachineObjectFace2({
 
   function viewListing(event) {
     stop(event);
+    if (demo) { demo.onAction("View listing"); return; }
     window.location.href = getListingHref(listing, "account");
   }
 
   function launchListing(event) {
     stop(event);
+    if (demo) { demo.onAction("Launch listing"); return; }
     window.open(getListingHref(listing, "browse"), "_blank", "noopener,noreferrer");
   }
 
   async function togglePause(event) {
     stop(event);
+    if (demo) { demo.onAction(isPaused ? "Reactivate listing" : "Pause listing"); return; }
 
     if (!isPaused) {
       const ok = window.confirm(`Pause this listing?\n\n${cleanMachineTitle(listing.title)}`);
@@ -205,6 +213,7 @@ export default function IXISellerMachineObjectFace2({
 
   async function deleteListing(event) {
     stop(event);
+    if (demo) { demo.onAction("Delete listing", "Delete request captured. No listing or Passport is removed."); return; }
     const ok = window.confirm(`Delete this listing?\n\n${cleanMachineTitle(listing.title)}\n\nThis cannot be undone.`);
     if (!ok) return;
 
