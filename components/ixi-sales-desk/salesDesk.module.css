@@ -278,3 +278,25 @@
 .salesDesk :global(.sales-sortable-tile > .sales-rail-drag:active){cursor:grabbing}
 .salesDesk :global(.sales-sortable-tile > .sales-rail-drag:disabled){opacity:.4;cursor:default}
 .salesDesk :global(.sales-tile-dragging){z-index:10;box-shadow:0 0 0 2px #e0cb65,0 8px 24px #0009;opacity:.92}
+
+.salesDesk :global(.sales-inquiry-dialog) { width:780px; }
+.salesDesk :global(.sales-inquiry-intro) { margin:0 0 24px; color:#b8c1b0; font-size:14px; line-height:1.6; }
+.salesDesk :global(.sales-inquiry-section) { margin:12px 0 0; padding-top:20px; border-top:1px solid var(--sales-line); color:#d9dfcd; font-size:12px; font-weight:750; letter-spacing:.8px; }
+.salesDesk :global(.sales-inquiry-section:first-child) { margin:0; padding:0; border:0; }
+.salesDesk :global(.sales-inquiry-actions) { display:flex; justify-content:flex-end; gap:10px; flex-wrap:wrap; margin-top:28px; padding-top:20px; border-top:1px solid var(--sales-line); }
+.salesDesk :global(.sales-inquiry-actions button) { min-height:44px; }
+.salesDesk :global(.sales-inquiry-success h3) { margin:12px 0; font-size:22px; line-height:1.4; }
+.salesDesk :global(.sales-inquiry-success p) { font-size:15px; line-height:1.7; color:#c2ccbb; }
+.salesDesk :global(.sales-customer-results) { max-height:190px; overflow:auto; display:grid; gap:6px; margin-top:10px; }
+.salesDesk :global(.sales-customer-results button) { text-align:left; display:flex; flex-direction:column; gap:5px; min-height:54px; }
+.salesDesk :global(.sales-customer-results button[aria-pressed="true"]) { border-color:var(--sales-yellow); background:#242811; }
+.salesDesk :global(.sales-customer-results span),.salesDesk :global(.sales-inquiry-customer small) { font-size:12px; color:#a7b59e; }
+.salesDesk :global(.sales-customer-selected) { font-size:13px; color:#ead05e; line-height:1.5; }
+.salesDesk :global(.sales-inquiry-machines) { border:1px solid var(--sales-line); border-radius:4px; padding:14px; }
+.salesDesk :global(.sales-inquiry-machines summary) { cursor:pointer; font-size:13px; font-weight:650; }
+.salesDesk :global(.sales-inquiry-machines[open] summary) { margin-bottom:14px; }
+.salesDesk :global(.sales-inquiry-machine-list) { display:grid; gap:12px; max-height:200px; overflow:auto; padding:14px 0; }
+.salesDesk :global(.sales-inquiry-tags) { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:12px; }
+.salesDesk :global(.sales-inquiry-schedule) { padding:16px; background:#1c2416; border:1px solid #4b5839; border-radius:4px; font-size:14px; }
+@media(min-width:701px) and (max-width:1200px) { .salesDesk :global(.sales-header) { flex-wrap:wrap; } .salesDesk :global(.sales-header nav) { order:5; width:100%; justify-content:flex-end; } .salesDesk :global(.sales-new-contact) { margin-left:auto; } }
+@media(max-width:700px) { .salesDesk :global(.sales-header > .sales-new-deal) { display:none; } .salesDesk :global(.sales-inquiry-actions) { position:sticky; bottom:-16px; padding:16px 0; margin-bottom:-16px; background:#101710; } .salesDesk :global(.sales-inquiry-section) { margin-top:8px; } }

@@ -71,3 +71,11 @@ test('inquiry sync forwards only the verified source page and cannot accept forg
   assert.equal(res.code,200);assert.equal(sourceActor.ownerUserId,'actual-seller');assert.deepEqual(calls[1].body,{rows:[{sourceId:'verified-source'}]});
   const blocked=response();await handler(request('POST',['intake']),blocked);assert.equal(blocked.code,405);
 });
+
+test('manual inquiries preserve retry payloads and use freshly verified server authority',async()=>{
+  let upstream;const handler=factory({sessionFor:async()=>({userId:'verified-rep'}),contextFor:async()=>({entityId:'verified-company'}),request:async input=>{upstream=input;return {ok:true};}});
+  const req=request('POST',['inquiries','manual']);req.body={commandId:'stable-inquiry',source:'Phone call',contactId:'customer',title:'Loader inquiry',schedule:{dueDate:'2026-10-12'}};
+  req.query.principalId='owner';req.query.entityId='other';const res=response();await handler(req,res);
+  assert.equal(res.code,200);assert.equal(upstream.principalId,'verified-rep');assert.equal(upstream.entityId,'verified-company');assert.equal(upstream.path,'/sales-desk/inquiries/manual');assert.deepEqual(upstream.body,req.body);
+  req.headers.origin='https://other.test';const denied=response();await handler(req,denied);assert.equal(denied.code,403);
+});

@@ -1,6 +1,6 @@
 import {useMemo} from 'react';
 import {ACTIVITY_TYPES,localZone} from '../../lib/sales-desk/calendar.mjs';
-export default function SalesScheduleFields({value,patch,deal=false}) {
+export default function SalesScheduleFields({value,patch,deal=false,creation=false}) {
   const zones=useMemo(()=>[...new Set([value.timeZone || localZone(),'UTC',...(Intl.supportedValuesOf?.('timeZone') || ['America/Chicago','America/New_York','America/Denver','America/Los_Angeles'])])],[value.timeZone]);
   return <>
     <label className="sales-field"><span>ACTIVITY TYPE</span><select value={value.activityType || 'follow-up'} onChange={e=>patch('activityType',e.target.value)}>{ACTIVITY_TYPES.map(([id,name])=><option value={id} key={id}>{name}</option>)}</select></label>
@@ -12,6 +12,6 @@ export default function SalesScheduleFields({value,patch,deal=false}) {
     {value.allDay===false && <details className="wide sales-schedule-note"><summary>Clock-change handling</summary><label>When a time occurs twice<select aria-label="Clock-change occurrence" value={value.disambiguation || 'earlier'} onChange={e=>patch('disambiguation',e.target.value)}><option value="earlier">Use the first occurrence</option><option value="later">Use the second occurrence</option></select></label></details>}
     <p className="wide sales-schedule-note">Reminders appear while Sales Desk is open. All-day reminders use 9:00 AM in the selected time zone.</p>
     {deal && <><label className="sales-field"><span>NEXT ACTION STATUS</span><select value={value.actionCompleted ? 'done' : 'open'} onChange={e=>patch('actionCompleted',e.target.value==='done')}><option value="open">OPEN</option><option value="done">COMPLETED</option></select></label><label className="sales-field"><span>WAITING ON</span><select value={value.waitingOn || ''} onChange={e=>patch('waitingOn',e.target.value)}><option value="">Active work</option><option value="customer">Customer</option><option value="approval">Internal approval</option></select></label><label className="sales-field wide"><span>NEXT ACTION OUTCOME</span><textarea maxLength={2000} value={value.actionOutcome || ''} onChange={e=>patch('actionOutcome',e.target.value)}/></label></>}
-    <label className="sales-check wide"><input type="checkbox" checked={value.canceled===true} onChange={e=>patch('canceled',e.target.checked)}/> Cancel this {deal ? 'next action' : 'appointment'} and retain its history</label>
+    {!creation && <label className="sales-check wide"><input type="checkbox" checked={value.canceled===true} onChange={e=>patch('canceled',e.target.checked)}/> Cancel this {deal ? 'next action' : 'appointment'} and retain its history</label>}
   </>;
 }
