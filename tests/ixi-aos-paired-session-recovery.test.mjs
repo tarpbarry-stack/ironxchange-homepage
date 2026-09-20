@@ -13,8 +13,11 @@ import {
 } from "../lib/mos/IXIAosMembershipBridge.mjs";
 import {
   createAosWorkspaceSessionController,
+  locateWorkspaceObject,
   workspacePlacementsFromSession
 } from "../components/ixi-mos/workspace/IXIAosWorkspaceSessionController.mjs";
+import { isAosToolbarSurface } from "../components/ixi-mos/workspace/IXIAosToolbarModel.mjs";
+import { pinSystemIndexToBoard } from "../components/ixi-mos/workspace/IXIAosSystemIndexPlacement.mjs";
 
 const coreRoot = process.env.IXI_CORE_CONTRACT_ROOT;
 
@@ -162,6 +165,48 @@ test("paired frontend and signed HTTP SQLite backend recover failed operations",
   // Board after Recall. These plain functions are read from the page, not copied
   // into a separate test implementation.
   const workPage = fs.readFileSync(new URL("../pages/aos/work.js", import.meta.url), "utf8");
+  // Run the actual startup effect against persisted sessions. An older page's
+  // unconditional pin moved a docked index during the live mixed-version audit.
+  const pinMarker = workPage.indexOf("  const equipmentObjectId = aosWorkspaceAdmission.resolveObjectId(");
+  const pinStart = workPage.lastIndexOf("useEffect(() => {", pinMarker) + "useEffect(() => {".length;
+  const pinEnd = workPage.indexOf("\n}, [", pinMarker);
+  assert.ok(pinMarker >= 0 && pinStart < pinMarker && pinEnd > pinMarker);
+  const runPagePin = new Function(
+    "workspaceSessionControllerRef", "aosWorkspaceAdmission", "equipmentWorkspaceIndex",
+    "workspaceSessionReady", "locateWorkspaceObject", "isAosToolbarSurface",
+    "pinSystemIndexToBoard", "aosWorkspaceSession", "equipmentBoardPinKeyRef", "createMosCommandId",
+    workPage.slice(pinStart, pinEnd)
+  );
+  await t.test("real page startup preserves every parked index after refresh and still repairs invalid nesting", async () => {
+    const f = await fixture(), before = census();
+    let client = f.first;
+    const runStartup = current => runPagePin(
+      { current }, { resolveObjectId: value => value }, { objectId: f.A }, true,
+      locateWorkspaceObject, isAosToolbarSurface, pinSystemIndexToBoard,
+      current.readSession(), { current: "" }, commandId
+    );
+    for (const surface of ["rail:aos-left", "rail:aos-right", "pocketLeft", "pocketLeft2", "stackTop", "pocketRight", "pocketRight2", "stackBottom"]) {
+      await client.persistLayout(moveObjectToWorkspaceSurface({
+        placements: client.readPlacements(), objectId: f.A, targetSurface: surface
+      }), { objectIds: [f.A] }).completion;
+      client = f.make();
+      await client.open({ workspaceId: "aos-work" });
+      const saved = client.readSession(), commandsBeforeStartup = f.calls.length;
+      runStartup(client);
+      await client.whenIdle();
+      assert.equal(f.calls.length, commandsBeforeStartup, `${surface}: startup must not issue a move`);
+      assert.deepEqual(client.readSession(), saved);
+      assert.equal(locateWorkspaceObject(client.readPlacements(), f.A).surfaceId, surface);
+    }
+    await client.persistLayout(moveObjectToWorkspaceSurface({
+      placements: client.readPlacements(), objectId: f.A, targetSurface: `container:${f.B}`
+    }), { objectIds: [f.A] }).completion;
+    runStartup(client);
+    await client.whenIdle();
+    assert.equal(locateWorkspaceObject(client.readPlacements(), f.A).surfaceId, "board");
+    assert.deepEqual(census(), before);
+  });
+
   const commandStart = workPage.indexOf("function getDirectContainerChildIds(");
   const commandEnd = workPage.indexOf("function moveMachineToContainer(", commandStart);
   assert.ok(commandStart >= 0 && commandEnd > commandStart);

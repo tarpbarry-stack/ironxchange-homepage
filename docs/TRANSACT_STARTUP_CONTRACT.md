@@ -51,3 +51,12 @@ under three seconds on the measured production connection; report outliers and
 upstream timings rather than claiming a universal network guarantee. Verify a new
 visit after the deployment and check that photos, IDs and draft retention survive.
 No customer records are created or modified by performance verification.
+
+## Required deployment capability
+
+The runtime role requires `dynamodb:BatchGetItem` on `ixi-financial-v1`. The
+release operator intentionally lacks IAM administration. Provision the approved
+core `ops/iam/transact-financial-batch-read.json` policy through an authorized AWS
+administrator before release; do not expand the deployment account's privileges.
+The complete release verifies the actual runtime capability before shutdown and
+stops safely when it is absent. Keep IAM provisioning separate from each release.
