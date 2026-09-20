@@ -385,7 +385,7 @@ export default function IXITransactCommandCenter({ runtime, active = true }) {
   function reportStartupStage(stage) {
     if (!active || startupStages.current.has(stage)) return;
     startupStages.current.add(stage);
-    console.info("IXI TRANSACT UI READY", { stage, navigationMs: Math.round(window.performance.now()) });
+    console.info("IXI TRANSACT UI READY " + JSON.stringify({ stage, navigationMs: Math.round(window.performance.now()) }));
   }
   useEffect(() => { reportStartupStage("shell"); }, [active]);
   useEffect(() => { if (!active) { setOpenPanel(""); setNewMenuOpen(false); } }, [active]);
