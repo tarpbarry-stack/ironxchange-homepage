@@ -89,6 +89,6 @@ test("TRAN$ACT validates access before hydrating objects independently of the da
   const hydration = source.slice(source.indexOf("if (!access || contextHydrationStarted.current)"), source.indexOf("const accessData ="));
   assert.match(source, /runtime\?\.loadAccess/u);
   assert.match(source, /buildIXITransactFastEnvironment\(accessPayload\)/u);
-  assert.match(hydration, /await loadIXIMosEnvironment/u);
+  assert.match(hydration, /await readOperatingEnvironment/u);
   assert.doesNotMatch(hydration, /financialLoading|projectionPayload|financialError/u);
 });

@@ -107,3 +107,49 @@ test("synchronous read failures release the pending slot so retry can succeed", 
   await assert.rejects(runtime.loadAccess(), /offline/); fail = false; await runtime.loadAccess();
   await assert.rejects(runtime.loadDashboard({ query: query() }), /offline dashboard/); runtime.dispose();
 });
+
+test("cold startup starts directory and access together, deduplicates subscribers, and publishes only after access", async () => {
+  const auth = deferred(), directory = deferred(); let authReads = 0, directoryReads = 0, published = false;
+  const runtime = createIXITransactSessionRuntime({ readAccess: () => { authReads++; return auth.promise; },
+    readOperatingEnvironment: () => { directoryReads++; return directory.promise; }, readDashboard: async () => ({}) });
+  const first = runtime.loadOperatingEnvironment().then(value => { published = true; return value; });
+  const second = runtime.loadOperatingEnvironment();
+  await tick(); assert.equal(authReads, 1); assert.equal(directoryReads, 1);
+  const environment = { isAuthenticated: true, entity: { entityId: "company-a", passportId: "company-a" } };
+  directory.resolve(environment); await tick(); assert.equal(published, false);
+  auth.resolve(access()); assert.equal(await first, environment); assert.equal(await second, environment);
+  assert.equal(await runtime.loadOperatingEnvironment(), environment); assert.equal(directoryReads, 1);
+  runtime.dispose();
+});
+
+test("directory results are fenced on company changes, explicitly refreshed, and rejected on tenant mismatch", async () => {
+  let current = access(), reads = 0;
+  const pending = deferred();
+  const runtime = createIXITransactSessionRuntime({ readAccess: async () => current, readDashboard: async () => ({}),
+    readOperatingEnvironment: () => ++reads === 1 ? pending.promise : Promise.resolve({ isAuthenticated: true, entity: { entityId: "company-b", passportId: "company-b" } }) });
+  const old = runtime.loadOperatingEnvironment(); const stale = assert.rejects(old, { name: "AbortError" });
+  await tick(); current = access("company-b"); await runtime.loadAccess({ force: true });
+  pending.resolve({ isAuthenticated: true, entity: { entityId: "company-a" } }); await stale;
+  assert.equal((await runtime.loadOperatingEnvironment()).entity.entityId, "company-b");
+  await runtime.loadOperatingEnvironment({ force: true }); assert.equal(reads, 3); runtime.dispose();
+  const mismatch = createIXITransactSessionRuntime({ readAccess: async () => access(), readDashboard: async () => ({}),
+    readOperatingEnvironment: async () => ({ isAuthenticated: true, entity: { entityId: "foreign-company" } }) });
+  await assert.rejects(mismatch.loadOperatingEnvironment(), { status: 403 }); mismatch.dispose();
+});
+
+test("slow optional listing details cannot block canonical cards and share one cancellable-consumer read", async () => {
+  const details = deferred(); let reads = 0;
+  const environment = { isAuthenticated: true, userId: 'user-a', entity: { entityId: 'company-a', passportId: 'company-a' } };
+  const runtime = createIXITransactSessionRuntime({ readAccess: async () => access(), readDashboard: async () => ({}),
+    readOperatingEnvironment: async () => environment,
+    readOperatingPresentations: async ({ userId }) => { assert.equal(userId, 'user-a'); reads++; return details.promise; } });
+  const controller = new AbortController();
+  const first = runtime.loadOperatingPresentations({ signal: controller.signal });
+  const cancelled = assert.rejects(first, { name: 'AbortError' });
+  const second = runtime.loadOperatingPresentations(); await tick();
+  assert.equal(await runtime.loadOperatingEnvironment(), environment);
+  assert.equal(reads, 1); controller.abort(); await cancelled;
+  details.resolve([{ id: 'listing-a' }]); assert.deepEqual(await second, [{ id: 'listing-a' }]);
+  assert.deepEqual(await runtime.loadOperatingPresentations(), [{ id: 'listing-a' }]);
+  assert.equal(reads, 1); runtime.dispose();
+});

@@ -20,8 +20,8 @@ test("shared layout retains both workspaces and unsaved inputs, resets on author
     Object.defineProperty(globalThis, key, { value, configurable: true, writable: true });
   }
   const React = require("react"), { createRoot } = require("react-dom/client"), { transformSync } = require("next/dist/build/swc");
-  let authority = "company-a", expired = false, authReads = 0, runtime, warm;
-  dom.window.requestIdleCallback = callback => { warm = callback; return 1; };
+  let authority = "company-a", expired = false, authReads = 0, runtime;
+  dom.window.requestIdleCallback = () => { throw new Error("Hidden workspace prewarming is forbidden"); };
   dom.window.cancelIdleCallback = () => {};
   const redirects = [], prefetched = [];
   const router = { pathname: "/transact", asPath: "/transact", isReady: true,
@@ -45,6 +45,8 @@ test("shared layout retains both workspaces and unsaved inputs, resets on author
     if (name === "next/router") return { useRouter: () => router };
     if (name === "next/dynamic") return loader => loader.toString().includes("CommandCenter") ? Records : Ledger;
     if (name.endsWith("DashboardClient")) return clients;
+    if (name.endsWith("loadIXIOwnedListings")) return { loadIXIOwnedListings: async () => [] };
+    if (name.endsWith("IXIMosEnvironmentProjection")) return { loadIXICanonicalMosEnvironment: async () => ({ isAuthenticated: true, entity: { entityId: authority, passportId: authority } }) };
     if (name.endsWith("SessionRuntime.mjs")) return { createIXITransactSessionRuntime: options => { runtime = createIXITransactSessionRuntime(options); return runtime; } };
     return sourceRequire(name);
   }, module, module.exports);
@@ -59,14 +61,14 @@ test("shared layout retains both workspaces and unsaved inputs, resets on author
   const ledger = () => document.querySelector('[aria-label="Executive period"]');
   await render(); assert.equal(authReads, 1); assert.ok(records()); assert.equal(ledger(), null);
   const original = records(); original.value = "Draft freight adjustment";
-  // Switch before the idle prewarm runs: the previously visited view must survive.
+  // Only explicitly visited workspaces mount; switching retains unsaved state.
   router.pathname = "/transact/ledger"; router.asPath = "/transact/ledger?workspace=gl"; await render();
   assert.equal(records(), original); assert.ok(records().closest("[hidden]"));
   const executive = ledger(); executive.value = "2026-02";
   router.pathname = "/transact"; router.asPath = "/transact"; await render();
   assert.equal(records(), original); assert.equal(original.value, "Draft freight adjustment");
   assert.equal(ledger(), executive); assert.equal(executive.value, "2026-02");
-  await React.act(() => warm()); assert.equal(authReads, 1);
+  assert.equal(authReads, 1);
   assert.ok(prefetched.includes("/transact/ledger"));
   authority = "company-b";
   await React.act(() => runtime.loadAccess({ force: true }));
