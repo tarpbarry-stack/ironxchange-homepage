@@ -32,11 +32,16 @@ reads. A successful save invalidates financial results without reloading identit
 | Directory presentation | One optional listing collection; media only as needed |
 | Core cold HTTP bootstrap | At most two Object/Passport registry reads each, including authentication |
 | Core 200-object repeated admission | One read of each registry per explicit read scope |
+| Financial collection current records | At most 100 keys per batch and two requests in flight; 350 records require four batches |
 
 The paired gate runs behavioral request-deduplication, abort, authority-change,
 tenant-isolation, draft-retention and registry-read-budget tests. Read snapshots
 exist only within an explicit server read operation. Writes are rejected inside
 that scope. Each new request obtains fresh snapshots and permission inputs.
+Financial batches use consistent reads, retry only unprocessed keys with bounded
+backoff, and reject incomplete collections. Release preflight proves batch-read
+permission before stopping the runtime. Collection reads must not regress to one
+database request per record.
 
 ## Release evidence
 
