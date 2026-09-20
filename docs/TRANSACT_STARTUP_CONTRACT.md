@@ -52,6 +52,13 @@ upstream timings rather than claiming a universal network guarantee. Verify a ne
 visit after the deployment and check that photos, IDs and draft retention survive.
 No customer records are created or modified by performance verification.
 
+For fresh navigation, `IXI TRANSACT UI READY` records committed shell/directory
+readiness using the browser navigation clock. Separate this from remote browser
+control elapsed time; `navigationMs` is not a new timer on SPA route changes.
+Gateway MOS/Financial timing logs expose numeric backend processing phases and
+header/body durations without customer data. Use these to distinguish server
+work from transport or queuing delay before changing checks or adding caches.
+
 ## Required deployment capability
 
 The runtime role requires `dynamodb:BatchGetItem` on `ixi-financial-v1`. The
