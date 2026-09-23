@@ -109,12 +109,12 @@ export default function IXIAosV12Face1EditPatch() {
         inset: 0 !important;
         padding: 6px !important;
         overflow-y: auto !important;
-        border: 1px solid rgba(75,82,78,.72) !important;
+        border: 1px solid rgba(80,80,80,.72) !important;
         border-radius: 6px !important;
-        background: rgba(8,11,9,.76) !important;
+        background: rgba(10,10,10,.76) !important;
         backdrop-filter: blur(2px);
         scrollbar-width: thin;
-        scrollbar-color: #4b514d transparent;
+        scrollbar-color: #4f4f4f transparent;
       }
 
       /* The edit deck uses the same face typography and stays intentionally simple. */
@@ -126,9 +126,9 @@ export default function IXIAosV12Face1EditPatch() {
         display: block !important;
         margin: 0 0 5px !important;
         padding: 5px !important;
-        border: 1px solid #303631 !important;
+        border: 1px solid #343434 !important;
         border-radius: 5px !important;
-        background: rgba(17,21,18,.88) !important;
+        background: rgba(20,20,20,.88) !important;
       }
       .ixi-v12-face1-edit [class$="-editor"] label > span,
       .ixi-v12-face1-edit [class$="-editor-scroll"] label > span,
@@ -137,7 +137,7 @@ export default function IXIAosV12Face1EditPatch() {
       .ixi-v12-face1-edit .u007-editor-scroll label > span {
         display: block !important;
         margin-bottom: 3px !important;
-        color: #aeb5b0 !important;
+        color: #b3b3b3 !important;
         font-size: 10px !important;
         line-height: 12px !important;
         font-weight: 700 !important;
@@ -150,10 +150,10 @@ export default function IXIAosV12Face1EditPatch() {
         min-width: 0 !important;
         height: 26px !important;
         padding: 0 6px !important;
-        border: 1px solid #59615b !important;
+        border: 1px solid #5f5f5f !important;
         border-radius: 4px !important;
-        background: #090c0a !important;
-        color: #f3f5f3 !important;
+        background: #0b0b0b !important;
+        color: #f4f4f4 !important;
         font-size: 11px !important;
         line-height: 24px !important;
         font-weight: 700 !important;
@@ -166,7 +166,7 @@ export default function IXIAosV12Face1EditPatch() {
 
       /* Keep media editing only where media is actually part of Face 1. */
       .ixi-v12-face1-edit [class*="media-editor"] {
-        background: rgba(17,21,18,.88) !important;
+        background: rgba(20,20,20,.88) !important;
       }
       .ixi-v12-face1-edit .ixi-generic-container-v12[data-card-variant="2"] [class*="media-editor"],
       .ixi-v12-face1-edit .ixi-generic-container-v12[data-card-variant="3"] [class*="media-editor"] {

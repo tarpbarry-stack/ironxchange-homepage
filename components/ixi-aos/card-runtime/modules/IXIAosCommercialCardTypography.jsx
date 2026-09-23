@@ -221,7 +221,7 @@ export default function IXIAosCommercialCardTypography() {
       ) {
         overflow-x: hidden !important;
         overflow-y: auto !important;
-        scrollbar-color: #4d5550 #090b0a;
+        scrollbar-color: #535353 #0b0b0b;
         scrollbar-width: thin;
       }
     `}</style>

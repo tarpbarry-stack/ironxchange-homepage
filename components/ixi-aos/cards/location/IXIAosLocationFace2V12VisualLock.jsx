@@ -14,12 +14,12 @@ export default function IXIAosLocationFace2V12VisualLock() {
 
       .ixi-aos-location-f2 {
         --y: #ffc400 !important;
-        --line: #343a35 !important;
-        --soft: #252a26 !important;
-        --surface: #101310 !important;
-        --surface2: #0b0e0c !important;
-        --text: #f4f5f4 !important;
-        --muted: #969d98 !important;
+        --line: #383838 !important;
+        --soft: #292929 !important;
+        --surface: #121212 !important;
+        --surface2: #0d0d0d !important;
+        --text: #f5f5f5 !important;
+        --muted: #9b9b9b !important;
         position: relative !important;
         width: 298px !important;
         min-width: 298px !important;
@@ -28,11 +28,11 @@ export default function IXIAosLocationFace2V12VisualLock() {
         min-height: 471px !important;
         max-height: 471px !important;
         overflow: hidden !important;
-        border: 1px solid #454b47 !important;
+        border: 1px solid #494949 !important;
         border-radius: 13px !important;
         outline: 0 !important;
-        background: linear-gradient(180deg, #101310, #080a09) !important;
-        color: #f4f5f4 !important;
+        background: linear-gradient(180deg, #121212, #0a0a0a) !important;
+        color: #f5f5f5 !important;
         box-shadow: inset 0 1px #ffffff12, 0 18px 40px #0008 !important;
       }
 
@@ -48,7 +48,7 @@ export default function IXIAosLocationFace2V12VisualLock() {
         border: 0 !important;
         border-bottom: 0 !important;
         outline: 0 !important;
-        background: linear-gradient(180deg, #171a18, #101210) !important;
+        background: linear-gradient(180deg, #191919, #111111) !important;
         box-shadow: none !important;
         z-index: 40 !important;
       }
@@ -94,7 +94,7 @@ export default function IXIAosLocationFace2V12VisualLock() {
         margin: 4px 0 0 !important;
         padding: 0 !important;
         overflow: hidden !important;
-        color: #f6f7f6 !important;
+        color: #f7f7f7 !important;
         font-family: Arial, Helvetica, sans-serif !important;
         font-size: 14px !important;
         font-style: normal !important;
@@ -122,7 +122,7 @@ export default function IXIAosLocationFace2V12VisualLock() {
         overflow-x: hidden !important;
         overflow-y: auto !important;
         scrollbar-width: thin !important;
-        scrollbar-color: #3d4540 #090b0a !important;
+        scrollbar-color: #434343 #0b0b0b !important;
       }
 
       .ixi-aos-location-f2 .ops-scroll::-webkit-scrollbar {
@@ -130,31 +130,31 @@ export default function IXIAosLocationFace2V12VisualLock() {
         height: 5px !important;
       }
       .ixi-aos-location-f2 .ops-scroll::-webkit-scrollbar-track {
-        background: #090b0a !important;
+        background: #0b0b0b !important;
       }
       .ixi-aos-location-f2 .ops-scroll::-webkit-scrollbar-thumb {
-        background: #3d4540 !important;
-        border: 1px solid #151916 !important;
+        background: #434343 !important;
+        border: 1px solid #181818 !important;
         border-radius: 999px !important;
       }
       .ixi-aos-location-f2 .ops-scroll::-webkit-scrollbar-thumb:hover {
-        background: #555f58 !important;
+        background: #5c5c5c !important;
       }
       .ixi-aos-location-f2 .ops-scroll::-webkit-scrollbar-corner {
-        background: #090b0a !important;
+        background: #0b0b0b !important;
       }
 
       .ixi-aos-location-f2 .gate-code,
       .ixi-aos-location-f2 .ops-section,
       .ixi-aos-location-f2 .site-instructions,
       .ixi-aos-location-f2 .relationship-list {
-        border-color: #343a35 !important;
+        border-color: #383838 !important;
       }
 
       .ixi-aos-location-f2 .gate-code,
       .ixi-aos-location-f2 .ops-section {
         border-radius: 5px !important;
-        background: #101310 !important;
+        background: #121212 !important;
         box-shadow: none !important;
       }
 
@@ -163,9 +163,9 @@ export default function IXIAosLocationFace2V12VisualLock() {
         margin: 0 !important;
         padding: 0 7px !important;
         border: 0 !important;
-        border-bottom: 1px solid #252a26 !important;
+        border-bottom: 1px solid #292929 !important;
         border-radius: 0 !important;
-        background: #151916 !important;
+        background: #181818 !important;
         color: #ffc400 !important;
         font-family: Arial, Helvetica, sans-serif !important;
         font-size: 6px !important;
@@ -178,13 +178,13 @@ export default function IXIAosLocationFace2V12VisualLock() {
 
       .ixi-aos-location-f2 .ops-row,
       .ixi-aos-location-f2 .ops-relationship {
-        border-color: #252a26 !important;
+        border-color: #292929 !important;
         background: transparent !important;
       }
 
       .ixi-aos-location-f2 .ops-label,
       .ixi-aos-location-f2 .rel-label {
-        color: #969d98 !important;
+        color: #9b9b9b !important;
         font-family: Arial, Helvetica, sans-serif !important;
         font-style: normal !important;
         font-weight: 900 !important;
@@ -193,17 +193,17 @@ export default function IXIAosLocationFace2V12VisualLock() {
       .ixi-aos-location-f2 .ops-row strong,
       .ixi-aos-location-f2 .ops-relationship strong,
       .ixi-aos-location-f2 .site-instructions strong {
-        color: #e8ebe9 !important;
+        color: #eaeaea !important;
         font-family: Arial, Helvetica, sans-serif !important;
         font-style: normal !important;
         font-weight: 900 !important;
       }
 
       .ixi-aos-location-f2 .ops-row-edit {
-        border: 1px solid #343a35 !important;
+        border: 1px solid #383838 !important;
         border-radius: 3px !important;
-        background: #111411 !important;
-        color: #969d98 !important;
+        background: #131313 !important;
+        color: #9b9b9b !important;
         font-family: Arial, Helvetica, sans-serif !important;
         font-size: 5px !important;
         font-style: normal !important;
@@ -213,15 +213,15 @@ export default function IXIAosLocationFace2V12VisualLock() {
       .ixi-aos-location-f2 .ops-commands {
         left: 7px !important;
         right: 7px !important;
-        border-top: 1px solid #202521 !important;
-        background: #090b0a !important;
+        border-top: 1px solid #242424 !important;
+        background: #0b0b0b !important;
       }
 
       .ixi-aos-location-f2 .ops-commands button {
-        border: 1px solid #343a35 !important;
+        border: 1px solid #383838 !important;
         border-radius: 4px !important;
-        background: #0f1210 !important;
-        color: #bcc2be !important;
+        background: #111111 !important;
+        color: #c0c0c0 !important;
         font-family: Arial, Helvetica, sans-serif !important;
         font-size: 6px !important;
         font-style: normal !important;

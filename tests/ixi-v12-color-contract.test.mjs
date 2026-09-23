@@ -15,6 +15,20 @@ const governedStylesheets = [
   "components/ixi-mos/workspace/IXIAosToolbarChassis.module.css",
 ];
 
+const governedNestedChrome = [
+  "components/ixi-aos/card-runtime/modules/IXIAosLocationVisualCorrections.jsx",
+  "components/ixi-aos/card-runtime/modules/IXIAosCardSkinSystemStyles.jsx",
+  "components/ixi-aos/card-runtime/modules/IXIAosExpandedSkinStyles.jsx",
+  "components/ixi-aos/card-runtime/modules/IXIAosTransactContrastPass.jsx",
+  "components/ixi-aos/card-runtime/modules/IXIV12ReadabilityFoundation.jsx",
+  "components/ixi-aos/cards/generic/IXIAosGenericContainerLayoutV12.jsx",
+  "components/ixi-aos/cards/generic/IXIAosGenericUniversalLayout007.jsx",
+  "components/ixi-aos/cards/location/IXIAosLocationFace2OperationsV12.jsx",
+  "components/ixi-aos/cards/location/IXIAosLocationOverviewCard.jsx",
+  "components/ixi-machine-card/private/PrivateListingCard.js",
+  "components/ixi-machine-card/private/IXISoldDetails.jsx",
+];
+
 function dominantGreenColors(source) {
   const matches = [];
   for (const match of source.matchAll(/#([0-9a-f]{6})(?![0-9a-f])/gi)) {
@@ -34,6 +48,21 @@ function offPaletteChromaticColors(source) {
     const [red, green, blue] = channels;
     const chroma = Math.max(...channels) - Math.min(...channels);
     if (chroma >= 24 && !(red >= green && green >= blue)) matches.push(label);
+  };
+  for (const match of source.matchAll(/#([0-9a-f]{6})(?![0-9a-f])/gi)) {
+    inspect(match[0], [0, 2, 4].map(offset => Number.parseInt(match[1].slice(offset, offset + 2), 16)));
+  }
+  for (const match of source.matchAll(/rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/gi)) {
+    inspect(match[0], match.slice(1, 4).map(Number));
+  }
+  return matches;
+}
+
+function lowChromaGreenColors(source) {
+  const matches = [];
+  const inspect = (label, [red, green, blue]) => {
+    const chroma = Math.max(red, green, blue) - Math.min(red, green, blue);
+    if (green > red && green > blue && chroma <= 30) matches.push(label);
   };
   for (const match of source.matchAll(/#([0-9a-f]{6})(?![0-9a-f])/gi)) {
     inspect(match[0], [0, 2, 4].map(offset => Number.parseInt(match[1].slice(offset, offset + 2), 16)));
@@ -92,4 +121,24 @@ test("semantic green is centralized instead of becoming page chrome", () => {
   assert.match(dashboard, /background:var\(--ix-success\)/);
   assert.match(salesDesk, /border-left-color:var\(--ix-success\)/);
   assert.match(transact, /data-live="true"[^}]+var\(--ix-success\)/);
+});
+
+test("nested AOS and machine cards cannot reintroduce low-chroma green surfaces", () => {
+  for (const path of governedNestedChrome) {
+    assert.deepEqual(
+      lowChromaGreenColors(read(path)),
+      [],
+      `${path} contains green-tinted neutral chrome`,
+    );
+  }
+});
+
+test("AOS primary commands use IXI yellow instead of cyan", () => {
+  const systemIndex = read("components/ixi-mos/IXISystemIndexCard.jsx");
+  const commandStart = systemIndex.indexOf(".system-index-command-strip {");
+  const commandEnd = systemIndex.indexOf(".index-more-wrap", commandStart);
+  assert.ok(commandStart >= 0 && commandEnd > commandStart, "system command styles must remain discoverable");
+  const commands = systemIndex.slice(commandStart, commandEnd);
+  assert.match(commands, /var\(--ix-yellow,#ffc400\)/);
+  assert.doesNotMatch(commands, /0\s*,\s*194\s*,\s*255|#00c2ff/i);
 });

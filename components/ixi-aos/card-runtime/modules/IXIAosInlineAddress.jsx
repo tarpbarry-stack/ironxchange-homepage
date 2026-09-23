@@ -84,7 +84,7 @@ export default function IXIAosInlineAddress({
             border:1px solid rgba(255,255,255,.14);
             border-radius:5px;
             background:rgba(0,0,0,.36);
-            color:#f4f5f4;
+            color:#f5f5f5;
             font-size:8.2px;
             font-weight:800;
             line-height:1;

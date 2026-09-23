@@ -103,7 +103,7 @@ export default function IXIV12ReadabilityFoundation() {
         max-width: 96%;
         margin-bottom: 2px;
         overflow: hidden;
-        color: #aeb5b0;
+        color: #b3b3b3;
         font-family: var(--ixi-v12-font-ui) !important;
         font-size: var(--ixi-v12-type-micro) !important;
         font-weight: var(--ixi-v12-weight-micro) !important;
@@ -120,7 +120,7 @@ export default function IXIV12ReadabilityFoundation() {
         min-width: 0;
         max-width: 96%;
         overflow: hidden;
-        color: #f2f4f2;
+        color: #f3f3f3;
         font-family: var(--ixi-v12-font-ui) !important;
         font-size: var(--ixi-v12-type-label) !important;
         font-weight: 700 !important;
@@ -191,7 +191,7 @@ export default function IXIV12ReadabilityFoundation() {
       }
       .ixi-v12-readable-card .gov-relation-scroll small {
         overflow: hidden;
-        color: #aeb5b0 !important;
+        color: #b3b3b3 !important;
         font-family: var(--ixi-v12-font-ui) !important;
         font-size: var(--ixi-v12-type-micro) !important;
         font-weight: var(--ixi-v12-weight-micro) !important;
@@ -202,7 +202,7 @@ export default function IXIV12ReadabilityFoundation() {
       .ixi-v12-readable-card .gov-relation-scroll strong {
         overflow: hidden;
         margin-top: 2px !important;
-        color: #f2f4f2;
+        color: #f3f3f3;
         font-family: var(--ixi-v12-font-ui) !important;
         font-size: var(--ixi-v12-type-label) !important;
         font-weight: 700 !important;
@@ -213,7 +213,7 @@ export default function IXIV12ReadabilityFoundation() {
       .ixi-v12-readable-card .gov-relation-scroll em {
         overflow: hidden;
         margin-top: 1px;
-        color: #8f9892 !important;
+        color: #969696 !important;
         font-family: var(--ixi-v12-font-ui) !important;
         font-size: var(--ixi-v12-type-micro) !important;
         font-weight: var(--ixi-v12-weight-micro) !important;

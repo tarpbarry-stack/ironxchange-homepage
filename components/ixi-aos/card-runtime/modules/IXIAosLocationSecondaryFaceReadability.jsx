@@ -35,7 +35,7 @@ export default function IXIAosLocationSecondaryFaceReadability() {
       .ixi-location-secondary-readable .ixi-aos-location-f2 .site-instructions strong {
         min-width: 0;
         overflow: hidden;
-        color: #f2f4f2 !important;
+        color: #f3f3f3 !important;
         font-family: var(--ixi-secondary-font-ui) !important;
         font-size: var(--ixi-secondary-value) !important;
         font-weight: 700 !important;
@@ -230,7 +230,7 @@ export default function IXIAosLocationSecondaryFaceReadability() {
       .ixi-location-secondary-readable .ixi-location-f3-v12 .f3-notes strong,
       .ixi-location-secondary-readable .ixi-location-f3-v12 .f3-relationship > strong {
         min-width: 0;
-        color: #f2f4f2;
+        color: #f3f3f3;
         font-family: var(--ixi-secondary-font-ui) !important;
         font-size: var(--ixi-secondary-value) !important;
         font-weight: 700 !important;
@@ -405,7 +405,7 @@ export default function IXIAosLocationSecondaryFaceReadability() {
       .ixi-location-secondary-readable .ixi-generic-face-v12 .gfv12-value strong,
       .ixi-location-secondary-readable .ixi-generic-face-v12 .gfv12-relations strong,
       .ixi-location-secondary-readable .ixi-generic-face-v12 .gfv12-unconfigured strong {
-        color: #f2f4f2;
+        color: #f3f3f3;
         font-family: var(--ixi-secondary-font-ui) !important;
         font-size: var(--ixi-secondary-value) !important;
         font-weight: 700 !important;
