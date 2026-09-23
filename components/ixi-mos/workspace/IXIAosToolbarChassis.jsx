@@ -240,16 +240,15 @@ export default function IXIAosToolbarChassis({ children, controls, registry, ind
       )}
       <div className={styles.center}>
         {controls}
-        <div className={styles.boardTools}>
+        <div className={styles.edgeControls}>
           {["left", "right"].map(side => <button key={side} type="button" ref={node => { openButtons.current[side] = node; }}
             className={`${styles.railToggle} ${!folded[side] ? styles.railActive : ""}`}
             aria-label={`${folded[side] ? "Open" : "Fold"} ${side} toolbar`}
             title={`${folded[side] ? "Open" : "Fold"} ${side} toolbar`}
             aria-expanded={!folded[side]} aria-controls={`aos-${side}-toolbar`}
             onClick={() => setFolded(current => ({ ...current, [side]: !current[side] }))}>
-            {side === "left" ? "‹ " : ""}{side.toUpperCase()} TOOLBAR{side === "right" ? " ›" : ""}
+            <span aria-hidden="true">{side === "left" ? (folded.left ? "›" : "‹") : (folded.right ? "‹" : "›")}</span>
           </button>)}
-          <strong className={styles.boardTitle}>WORKING BOARD</strong>
         </div>
         <div role="status" aria-live="polite" className={styles.status}>{pending ? "Saving workspace…" : ""}</div>
         {error && <p role="alert" className={styles.error}>{error}</p>}
