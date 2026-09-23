@@ -23,7 +23,7 @@ import {
 import categoryDnaKeywords from "../lib/categoryDnaKeywords";
 
 import {
-  buildIXPhotoVariants
+  prepareIXPhoto
 } from "../lib/ixvision/pipeline/processIXPhoto";
 
 import {
@@ -33,19 +33,14 @@ import {
 } from "../lib/machine-media/createMachineMediaModel";
 
 import {
-  getActiveMachineMediaUrl,
-  getActiveMachineMediaFile
+  getActiveMachineMediaUrl
 } from "../lib/machine-media/machineMediaIdentity";
 
-import {
-  buildSharetribeImageIdsFromMedia
-} from "../lib/machine-media/machineMediaSharetribeAdapter";
+import { validateIXIAosMediaFile } from "../lib/media/ixiAosMediaContract.mjs";
+import { runPostFreePosting, postingRequest } from "../lib/post-free/postFreeDurableClient.mjs";
 
 import { captureIXEvent } from "../lib/posthog";
 
-import {
-  attachPassportToSharetribeListing
-} from "../lib/passport/attachPassportToSharetribeListing";
 
 import {
   loadPostFreeDraft,
@@ -276,6 +271,20 @@ const [machineChannel, setMachineChannel] =
   const [description, setDescription] = useState("");
 
   const [photoItems, setPhotoItems] = useState([]);
+  const postingIdRef = useRef("");
+  const postingBusyRef = useRef(false);
+  const photoBusyRef = useRef(false);
+  const [preparingPhotos, setPreparingPhotos] = useState(false);
+  const [pendingPostings, setPendingPostings] = useState([]);
+  const [allowNewPosting, setAllowNewPosting] = useState(false);
+  const [postingStorageScope, setPostingStorageScope] = useState("");
+  useEffect(() => {
+    if (!loggedIn) { setPendingPostings([]); setPostingStorageScope(""); postingIdRef.current = ""; return; }
+    let active = true;
+    postingRequest("list").then(result => { if (active) { setPendingPostings(result.rows || []); setPostingStorageScope(result.storageScope || ""); } })
+      .catch(error => { if (active) showMachineNotice({ message: error.message, tone: "error" }); });
+    return () => { active = false; };
+  }, [loggedIn]);
   const [activePhotoIndex, setActivePhotoIndex] = useState(0);
   const [draggedPhotoIndex, setDraggedPhotoIndex] = useState(null);
 
@@ -739,184 +748,59 @@ publicData: {
     });
   }
 
-async function handlePhotos(e) {
-  const files = Array.from(
-    e.target.files || []
-  ).filter(file =>
-    file.type.startsWith("image/")
-  );
-
-  if (files.length === 0) {
-    return;
+function releasePhotoPreview(photo) {
+  for (const url of new Set(Object.entries(photo).filter(([key, value]) => key.endsWith("Url") || key === "url").map(([, value]) => value))) {
+    if (typeof url === "string" && url.startsWith("blob:")) URL.revokeObjectURL(url);
   }
-
-  const limitedFiles =
-    files.slice(0, 24);
-
-  const photoLabel =
-    limitedFiles.length === 1
-      ? "PHOTO"
-      : "PHOTOS";
-
-  showMachineNotice({
-    message:
-      `PROCESSING ${limitedFiles.length} ${photoLabel}...`,
-    tone: "info",
-    blocking: true
-  });
-
+}
+async function preparePhotoSelection(files, mode, replacing = false) {
+  if (postingBusyRef.current || photoBusyRef.current) return;
+  if (!files.length) { if (replacing) setPhotoPolishMode(mode); return; }
+  photoBusyRef.current = true;
+  setPreparingPhotos(true);
+  const prepared = [];
   try {
-    const mapped = await Promise.all(
-      limitedFiles.map(file =>
-        buildIXPhotoVariants(file, {
-          make,
-          mode: photoPolishMode,
-          companyName: "IronXchange",
-          userEmail: "tarpbarry@gmail.com"
-        })
-      )
-    );
-
-    setPhotoItems(current => [
-      ...current,
-      ...mapped
-    ]);
-
-    showMachineNotice({
-      message:
-        `${mapped.length} ${
-          mapped.length === 1
-            ? "PHOTO"
-            : "PHOTOS"
-        } READY`,
-      tone: "success",
-      duration: 1600
-    });
-
-    addActivity(
-      "success",
-      `${mapped.length} photo${
-        mapped.length === 1 ? "" : "s"
-      } added`
-    );
-
-    trackLaunchEvent(
-      "post_free_photos_added",
-      {
-        count: mapped.length
-      }
-    );
+    if (files.length + (replacing ? 0 : photoItems.length) > 24) throw new Error("Select no more than 24 photos per machine.");
+    for (const file of files) validateIXIAosMediaFile(file);
+    // Keep only one large-image canvas operation active at a time.
+    for (const [index, file] of files.entries()) {
+      showMachineNotice({ message: `PREPARING PHOTO ${index + 1}/${files.length}`, tone: "info", blocking: true });
+      prepared.push(await prepareIXPhoto(file, { make, mode, companyName: "IronXchange", userEmail: "tarpbarry@gmail.com" }));
+    }
+    if (replacing) {
+      setPhotoItems(prepared.map((photo, index) => ({ ...photo, id: photoItems[index].id })));
+      photoItems.forEach(releasePhotoPreview);
+      setPhotoPolishMode(mode);
+    } else {
+      setPhotoItems(current => [...current, ...prepared]);
+      trackLaunchEvent("post_free_photos_added", { count: prepared.length });
+    }
+    showMachineNotice({ message: `${prepared.length} PHOTOS READY`, tone: "success", duration: 1600 });
   } catch (error) {
-    console.error(
-      "POST FREE PHOTO PROCESSING FAILED:",
-      error
-    );
-
-    showMachineNotice({
-      message: "PHOTO UPLOAD FAILED",
-      tone: "error",
-      duration: 3800
-    });
-
-    addActivity(
-      "error",
-      `Photo upload failed — ${cardTitle}`
-    );
+    prepared.forEach(releasePhotoPreview);
+    showMachineNotice({ message: error.message || "PHOTO PREPARATION FAILED", tone: "error", duration: 0 });
   } finally {
-    e.target.value = "";
+    photoBusyRef.current = false;
+    setPreparingPhotos(false);
   }
 }
-  
-  async function handlePhotoDrop(e) {
+async function handlePhotos(e) {
+  const input = e.target;
+  await preparePhotoSelection(Array.from(input.files || []), photoPolishMode);
+  input.value = "";
+}
+async function handlePhotoDrop(e) {
   e.preventDefault();
-
-  const files = Array.from(
-    e.dataTransfer.files || []
-  ).filter(file =>
-    file.type.startsWith("image/")
-  );
-
-  if (files.length === 0) {
-    return;
-  }
-
-  const limitedFiles =
-    files.slice(0, 24);
-
-  const photoLabel =
-    limitedFiles.length === 1
-      ? "PHOTO"
-      : "PHOTOS";
-
-  showMachineNotice({
-    message:
-      `PROCESSING ${limitedFiles.length} ${photoLabel}...`,
-    tone: "info",
-    blocking: true
-  });
-
-  try {
-    const mapped = await Promise.all(
-      limitedFiles.map(file =>
-        buildIXPhotoVariants(file, {
-          make,
-          mode: photoPolishMode,
-          companyName: "IronXchange",
-          userEmail: "tarpbarry@gmail.com"
-        })
-      )
-    );
-
-    setPhotoItems(current => [
-      ...current,
-      ...mapped
-    ]);
-
-    showMachineNotice({
-      message:
-        `${mapped.length} ${
-          mapped.length === 1
-            ? "PHOTO"
-            : "PHOTOS"
-        } READY`,
-      tone: "success",
-      duration: 1600
-    });
-
-    addActivity(
-      "success",
-      `${mapped.length} photo${
-        mapped.length === 1 ? "" : "s"
-      } dropped`
-    );
-
-    trackLaunchEvent(
-      "post_free_photos_dropped",
-      {
-        count: mapped.length
-      }
-    );
-  } catch (error) {
-    console.error(
-      "POST FREE DROPPED PHOTO PROCESSING FAILED:",
-      error
-    );
-
-    showMachineNotice({
-      message: "PHOTO UPLOAD FAILED",
-      tone: "error",
-      duration: 3800
-    });
-
-    addActivity(
-      "error",
-      `Photo upload failed — ${cardTitle}`
-    );
-  }
+  await preparePhotoSelection(Array.from(e.dataTransfer.files || []), photoPolishMode);
 }
-
+async function changePhotoPolishMode(mode) {
+  if (mode === photoPolishMode) return;
+  await preparePhotoSelection(photoItems.map(photo => photo.originalFile || photo.file), mode, true);
+}
 
   function removePhoto(indexToRemove) {
+  if (postingBusyRef.current || photoBusyRef.current) return;
+  if (photoItems[indexToRemove]) releasePhotoPreview(photoItems[indexToRemove]);
   setPhotoItems(current =>
     removeMachineMediaItem(current, indexToRemove)
   );
@@ -926,6 +810,7 @@ async function handlePhotos(e) {
   addActivity("success", `Photo removed — ${cardTitle}`);
 }
   function reorderPhotos(fromIndex, toIndex) {
+  if (postingBusyRef.current || photoBusyRef.current) return;
   setPhotoItems(current =>
     moveMachineMediaItem(current, fromIndex, toIndex)
   );
@@ -976,115 +861,60 @@ function clearMachineNotice() {
   });
 }
   
-async function createListing() {
-  if (!loggedIn || !sdk) {
-    showMachineNotice({
-      message: "LOGIN REQUIRED TO POST",
-      tone: "warning",
-      duration: 1400
-    });
-
-    setTimeout(() => {
-      router.push("/login");
-    }, 900);
-
+async function finishPosting(operationId, resume, payload, revise = false) {
+  if (postingBusyRef.current || photoBusyRef.current) return;
+  if (!sdk || !loggedIn) {
+    showMachineNotice({ message: "LOGIN REQUIRED TO POST", tone: "warning" });
     return;
   }
-
-  if (
-    !category ||
-    !year ||
-    !make ||
-    !model ||
-    !hours ||
-    !price
-  ) {
-    showMachineNotice({
-      message:
-        "YEAR, MAKE, MODEL, HOURS, AND PRICE REQUIRED",
-      tone: "warning",
-      duration: 2800
-    });
-
-    return;
-  }
-
-  if (
-    !machineAccess ||
-    !machineChannel
-  ) {
-    showMachineNotice({
-      message: "SELECT MACHINE PLACEMENT",
-      tone: "warning",
-      duration: 2600
-    });
-
-    return;
-  }
-
+  postingBusyRef.current = true;
+  postingIdRef.current = operationId;
   setSaving(true);
-
-  let newListingId = "";
-  let passport = null;
-
   try {
-    const { types: sdkTypes } =
-      await import("sharetribe-flex-sdk");
-
-    const { Money } = sdkTypes;
-
-    showMachineNotice({
-      message: "PREPARING MACHINE...",
-      tone: "info",
-      blocking: true
-    });
-
-    const photoCount = photoItems.length;
-
-    showMachineNotice({
-      message:
-        photoCount === 1
-          ? "UPLOADING 1 PHOTO..."
-          : `UPLOADING ${photoCount} PHOTOS...`,
-      tone: "info",
-      blocking: true
-    });
-
-    const imageIds =
-      await buildSharetribeImageIdsFromMedia({
-        sdk,
-        mediaItems: photoItems
-      });
-
-    showMachineNotice({
-      message: "BUILDING MACHINE...",
-      tone: "info",
-      blocking: true
-    });
-
-    const categorySlug =
-      slugify(category);
-
-    const makeSlug =
-      slugify(`${category}-${make}`);
-
-    const modelSlug =
-      slugify(
-        `${category}-${make}-${model}`
-      );
-
-    showMachineNotice({
-      message: "CREATING LISTING...",
-      tone: "info",
-      blocking: true
-    });
-
-    const response =
-      await sdk.ownListings.create({
-        title: sharetribeTitle,
-        description: description || "",
-
-        publicData: {
+    const scope = postingStorageScope || (await refreshPostingContext()).storageScope;
+    const result = await runPostFreePosting({ operationId, storageScope: scope, resume, revise, payload, photos: photoItems, sdk,
+      onProgress: message => showMachineNotice({ message, tone: "info", blocking: true }) });
+    showMachineNotice({ message: result.listingState === "pendingApproval" ? "MACHINE SAVED — AWAITING APPROVAL" : "MACHINE AND ALL PHOTOS VERIFIED", tone: "success" });
+    postingIdRef.current = "";
+    await router.push(`/live?id=${result.listingId}`);
+  } catch (error) {
+    showMachineNotice({ message: error.message || "POSTING PAUSED — RESUME THIS MACHINE", tone: "error", duration: 0 });
+    postingRequest("list").then(result => setPendingPostings(result.rows || [])).catch(() => {});
+  } finally {
+    postingBusyRef.current = false;
+    setSaving(false);
+  }
+}
+async function refreshPostingContext() {
+  const result = await postingRequest("list");
+  if (!result.storageScope) throw new Error("Saved postings could not be verified. Please retry.");
+  setPendingPostings(result.rows || []);
+  setPostingStorageScope(result.storageScope);
+  return result;
+}
+async function createListing() {
+  if (postingBusyRef.current || photoBusyRef.current) return;
+  if (!loggedIn || !sdk) { showMachineNotice({ message: "LOGIN REQUIRED TO POST", tone: "warning" }); return; }
+  let savedPostings = pendingPostings;
+  if (!postingStorageScope) {
+    try { savedPostings = (await refreshPostingContext()).rows || []; }
+    catch (error) { showMachineNotice({ message: error.message, tone: "error", duration: 0 }); return; }
+  }
+  if (savedPostings.length && !postingIdRef.current && !allowNewPosting) {
+    showMachineNotice({ message: "RESUME YOUR SAVED POSTING BELOW, OR CHOOSE START NEW FOR A DIFFERENT MACHINE", tone: "warning" });
+    return;
+  }
+  if (!category || !year || !make || !model || !hours || !price || !machineAccess || !machineChannel || !photoItems.length) {
+    showMachineNotice({ message: "YEAR, MAKE, MODEL, HOURS, PRICE, PLACEMENT AND PHOTOS REQUIRED", tone: "warning" });
+    return;
+  }
+  const categorySlug = slugify(category);
+  const makeSlug = slugify(`${category}-${make}`);
+  const modelSlug = slugify(`${category}-${make}-${model}`);
+  const payload = {
+    title: sharetribeTitle, description: description || "",
+    priceCents: Math.round(Number(cleanNumber(price)) * 100),
+    publicData: {
           categoryLevel1: categorySlug,
           categoryLevel2: makeSlug,
           categoryLevel3: modelSlug,
@@ -1139,165 +969,9 @@ async function createListing() {
             "default-inquiry/release-1",
 
           unitType: "inquiry"
-        },
-
-        price: new Money(
-          Number(cleanNumber(price)) * 100,
-          "USD"
-        ),
-
-        images: imageIds
-      });
-
-    newListingId =
-      response.data.data.id.uuid;
-
-    showMachineNotice({
-      message:
-        "CREATING MACHINE PASSPORT...",
-      tone: "info",
-      blocking: true
-    });
-
-    try {
-      passport =
-        await attachPassportToSharetribeListing({
-          sdk,
-          listingId: newListingId
-        });
-    } catch (passportError) {
-      console.error(
-        "PASSPORT ATTACH ERROR:",
-        passportError
-      );
-
-      showMachineNotice({
-        message:
-          "MACHINE CREATED — PASSPORT NEEDS RETRY",
-        tone: "warning",
-        duration: 3200
-      });
-
-      addActivity(
-        "error",
-        `Machine created — Passport failed — ${sharetribeTitle}`
-      );
-
-      trackLaunchEvent(
-        "post_free_passport_failed",
-        {
-          listingId: newListingId,
-          title: sharetribeTitle
         }
-      );
-
-      await new Promise(resolve =>
-        setTimeout(resolve, 1800)
-      );
-
-      router.push(
-        `/live?id=${newListingId}`
-      );
-
-      return;
-    }
-
-    let successMessage =
-      "MARKETPLACE MACHINE CREATED";
-
-    if (
-      machineAccess === "private"
-    ) {
-      successMessage =
-        "PRIVATE MACHINE CREATED";
-    } else if (
-      machineChannel === "auction"
-    ) {
-      successMessage =
-        "AUCTION MACHINE CREATED";
-    }
-
-    showMachineNotice({
-      message: passport?.passportId
-        ? `${successMessage} — PASSPORT READY`
-        : successMessage,
-      tone: "success",
-      duration: 1700
-    });
-
-    addActivity(
-      "success",
-      passport?.passportId
-        ? `Created machine + Passport ${passport.passportId} — ${sharetribeTitle}`
-        : `Created machine — ${sharetribeTitle}`
-    );
-
-    trackLaunchEvent(
-      "post_free_listing_created",
-      {
-        listingId: newListingId,
-
-        passportId:
-          passport?.passportId || "",
-
-        passportUrl:
-          passport?.passportUrl || "",
-
-        machineAccess,
-        machineChannel,
-
-        title: sharetribeTitle,
-
-        selectedKeywordCount:
-          selectedKeywords.length,
-
-        photoCount:
-          photoItems.length
-      }
-    );
-
-    await new Promise(resolve =>
-      setTimeout(resolve, 1500)
-    );
-
-    router.push(
-      `/live?id=${newListingId}`
-    );
-  } catch (error) {
-    console.error(
-      "CREATE LISTING ERROR:",
-      error
-    );
-
-    const failureMessage =
-      newListingId
-        ? "MACHINE CREATED — FINALIZATION FAILED"
-        : "POST FAILED — MACHINE NOT CREATED";
-
-    showMachineNotice({
-      message: failureMessage,
-      tone: "error",
-      duration: 4200
-    });
-
-    addActivity(
-      "error",
-      `${failureMessage} — ${sharetribeTitle}`
-    );
-
-    trackLaunchEvent(
-      "post_free_listing_failed",
-      {
-        listingId: newListingId,
-        title: sharetribeTitle,
-        error:
-          error?.message ||
-          String(error)
-      }
-    );
-  } finally {
-    setSaving(false);
-  }
+  };
+  return finishPosting(postingIdRef.current || crypto.randomUUID(), false, payload);
 }
 
   function launchExternal(platform, url, copyLabel, copy) {
@@ -1434,7 +1108,7 @@ async function createListing() {
                 type="button"
                 className="save-top"
                 onClick={createListing}
-                disabled={saving}
+                disabled={saving || preparingPhotos}
               >
                 {saving ? "Posting..." : "Post"}
               </button>
@@ -1448,6 +1122,25 @@ async function createListing() {
               </button>
             </div>
           </section>
+
+          {pendingPostings.length > 0 && (
+            <section className="panel" aria-label="Saved postings">
+              <strong>Saved postings — resume without creating another machine</strong>
+              {pendingPostings.map(posting => (
+                <div key={posting.operationId}>
+                  <span>{posting.title}</span>{" "}
+                  <button type="button" disabled={saving || preparingPhotos} onClick={() => finishPosting(posting.operationId, true)}>
+                    Resume photos and posting
+                  </button>{" "}
+                  <button type="button" disabled={saving || preparingPhotos || !photoItems.length} onClick={() => finishPosting(posting.operationId, true, undefined, true)}>
+                    Replace with selected photos
+                  </button>
+                </div>
+              ))}
+              <p>Uploaded photos are retained. On another device, reselect any photos that had not finished uploading, then Resume. To correct a failed photo selection, select the complete desired set and choose Replace with selected photos.</p>
+              <button type="button" disabled={saving || preparingPhotos} onClick={() => { postingIdRef.current = ""; setAllowNewPosting(true); }}>Start New — different machine</button>
+            </section>
+          )}
 
           <section className="photo-workbench">
             <div className="workbench-head">
@@ -1463,7 +1156,8 @@ async function createListing() {
           key={mode}
           type="button"
           className={photoPolishMode === mode ? "active" : ""}
-          onClick={() => setPhotoPolishMode(mode)}
+          disabled={saving || preparingPhotos}
+          onClick={() => changePhotoPolishMode(mode)}
         >
           {mode === "dealerPop" ? "POP" : mode}
         </button>
@@ -1475,7 +1169,7 @@ async function createListing() {
       onDragOver={e => e.preventDefault()}
       onDrop={handlePhotoDrop}
     >
-      <input type="file" multiple accept="image/*" onChange={handlePhotos} />
+      <input type="file" multiple accept="image/*" disabled={saving || preparingPhotos} onChange={handlePhotos} />
       + Add Photos
     </label>
   </div>
@@ -1488,7 +1182,7 @@ async function createListing() {
                   className={`photo-tile ${index === 0 ? "hero" : ""} ${
                     index === activePhotoIndex ? "active" : ""
                   }`}
-                  draggable
+                  draggable={!saving && !preparingPhotos}
                   onDragStart={() => setDraggedPhotoIndex(index)}
                   onDragOver={e => e.preventDefault()}
                   onDrop={() => {
@@ -1507,6 +1201,7 @@ async function createListing() {
                       e.stopPropagation();
                       removePhoto(index);
                     }}
+                    disabled={saving || preparingPhotos}
                     aria-label="Remove photo"
                   >
                     ×
@@ -2052,7 +1747,7 @@ async function createListing() {
                   type="button"
                   className="save-btn"
                   onClick={createListing}
-                  disabled={saving}
+                  disabled={saving || preparingPhotos}
                 >
                   {saving ? "Posting..." : "Post"}
                 </button>
