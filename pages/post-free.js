@@ -23,7 +23,7 @@ import {
 import categoryDnaKeywords from "../lib/categoryDnaKeywords";
 
 import {
-  buildIXPhotoVariants
+  prepareIXPhoto
 } from "../lib/ixvision/pipeline/processIXPhoto";
 
 import {
@@ -37,9 +37,7 @@ import {
   getActiveMachineMediaFile
 } from "../lib/machine-media/machineMediaIdentity";
 
-import {
-  buildSharetribeImageIdsFromMedia
-} from "../lib/machine-media/machineMediaSharetribeAdapter";
+import { uploadPostFreePhotos } from "../lib/post-free/postFreePhotoUpload.mjs";
 
 import { captureIXEvent } from "../lib/posthog";
 
@@ -276,6 +274,8 @@ const [machineChannel, setMachineChannel] =
   const [description, setDescription] = useState("");
 
   const [photoItems, setPhotoItems] = useState([]);
+  const photoUploadCache = useRef(new Map());
+  useEffect(() => { photoUploadCache.current.clear(); }, [sdk]);
   const [activePhotoIndex, setActivePhotoIndex] = useState(0);
   const [draggedPhotoIndex, setDraggedPhotoIndex] = useState(null);
 
@@ -768,7 +768,7 @@ async function handlePhotos(e) {
   try {
     const mapped = await Promise.all(
       limitedFiles.map(file =>
-        buildIXPhotoVariants(file, {
+        prepareIXPhoto(file, {
           make,
           mode: photoPolishMode,
           companyName: "IronXchange",
@@ -858,7 +858,7 @@ async function handlePhotos(e) {
   try {
     const mapped = await Promise.all(
       limitedFiles.map(file =>
-        buildIXPhotoVariants(file, {
+        prepareIXPhoto(file, {
           make,
           mode: photoPolishMode,
           companyName: "IronXchange",
@@ -977,6 +977,7 @@ function clearMachineNotice() {
 }
   
 async function createListing() {
+  if (saving) return;
   if (!loggedIn || !sdk) {
     showMachineNotice({
       message: "LOGIN REQUIRED TO POST",
@@ -1050,11 +1051,20 @@ async function createListing() {
       blocking: true
     });
 
-    const imageIds =
-      await buildSharetribeImageIdsFromMedia({
-        sdk,
-        mediaItems: photoItems
-      });
+    const files = photoItems.map(getActiveMachineMediaFile);
+    if (files.some(file => !file)) {
+      throw new Error("A selected photo is unavailable. Add it again before posting.");
+    }
+    const imageIds = await uploadPostFreePhotos({
+      sdk,
+      files,
+      cache: photoUploadCache.current,
+      onProgress: ({ completed, total, loaded, bytes }) => showMachineNotice({
+        message: `UPLOADING PHOTOS: ${completed}/${total} COMPLETE — ${(loaded / 1048576).toFixed(1)} / ${(bytes / 1048576).toFixed(1)} MB SENT`,
+        tone: "info",
+        blocking: true
+      })
+    });
 
     showMachineNotice({
       message: "BUILDING MACHINE...",
@@ -1270,14 +1280,16 @@ async function createListing() {
     );
 
     const failureMessage =
-      newListingId
+      error?.code === "POST_FREE_PHOTO_UPLOAD_TIMEOUT"
+        ? "PHOTO UPLOAD STILL PENDING — KEEP PAGE OPEN; RETRY CHECKS PROGRESS"
+        : newListingId
         ? "MACHINE CREATED — FINALIZATION FAILED"
         : "POST FAILED — MACHINE NOT CREATED";
 
     showMachineNotice({
       message: failureMessage,
       tone: "error",
-      duration: 4200
+      duration: error?.code === "POST_FREE_PHOTO_UPLOAD_TIMEOUT" ? 0 : 4200
     });
 
     addActivity(

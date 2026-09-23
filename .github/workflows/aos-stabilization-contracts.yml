@@ -44,6 +44,9 @@ jobs:
         working-directory: core
       - run: npm ci --no-audit --no-fund
         working-directory: frontend
+      - name: Verify POST FREE photo preparation and upload recovery
+        working-directory: frontend
+        run: node --test tests/ixi-post-free-photo-upload.test.mjs
       - name: Run required paired contracts
         working-directory: frontend
         env:
