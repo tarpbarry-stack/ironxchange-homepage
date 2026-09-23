@@ -36,6 +36,7 @@ import {
   getActiveMachineMediaUrl
 } from "../lib/machine-media/machineMediaIdentity";
 
+import { validateIXIAosMediaFile } from "../lib/media/ixiAosMediaContract.mjs";
 import { runPostFreePosting, postingRequest } from "../lib/post-free/postFreeDurableClient.mjs";
 
 import { captureIXEvent } from "../lib/posthog";
@@ -272,6 +273,8 @@ const [machineChannel, setMachineChannel] =
   const [photoItems, setPhotoItems] = useState([]);
   const postingIdRef = useRef("");
   const postingBusyRef = useRef(false);
+  const photoBusyRef = useRef(false);
+  const [preparingPhotos, setPreparingPhotos] = useState(false);
   const [pendingPostings, setPendingPostings] = useState([]);
   const [allowNewPosting, setAllowNewPosting] = useState(false);
   const [postingStorageScope, setPostingStorageScope] = useState("");
@@ -745,186 +748,59 @@ publicData: {
     });
   }
 
-async function handlePhotos(e) {
-  if (postingBusyRef.current) return;
-  const files = Array.from(
-    e.target.files || []
-  ).filter(file =>
-    file.type.startsWith("image/")
-  );
-
-  if (files.length === 0) {
-    return;
+function releasePhotoPreview(photo) {
+  for (const url of new Set(Object.entries(photo).filter(([key, value]) => key.endsWith("Url") || key === "url").map(([, value]) => value))) {
+    if (typeof url === "string" && url.startsWith("blob:")) URL.revokeObjectURL(url);
   }
-
-  const limitedFiles =
-    files.slice(0, 24);
-
-  const photoLabel =
-    limitedFiles.length === 1
-      ? "PHOTO"
-      : "PHOTOS";
-
-  showMachineNotice({
-    message:
-      `PROCESSING ${limitedFiles.length} ${photoLabel}...`,
-    tone: "info",
-    blocking: true
-  });
-
+}
+async function preparePhotoSelection(files, mode, replacing = false) {
+  if (postingBusyRef.current || photoBusyRef.current) return;
+  if (!files.length) { if (replacing) setPhotoPolishMode(mode); return; }
+  photoBusyRef.current = true;
+  setPreparingPhotos(true);
+  const prepared = [];
   try {
-    const mapped = await Promise.all(
-      limitedFiles.map(file =>
-        prepareIXPhoto(file, {
-          make,
-          mode: photoPolishMode,
-          companyName: "IronXchange",
-          userEmail: "tarpbarry@gmail.com"
-        })
-      )
-    );
-
-    setPhotoItems(current => [
-      ...current,
-      ...mapped
-    ]);
-
-    showMachineNotice({
-      message:
-        `${mapped.length} ${
-          mapped.length === 1
-            ? "PHOTO"
-            : "PHOTOS"
-        } READY`,
-      tone: "success",
-      duration: 1600
-    });
-
-    addActivity(
-      "success",
-      `${mapped.length} photo${
-        mapped.length === 1 ? "" : "s"
-      } added`
-    );
-
-    trackLaunchEvent(
-      "post_free_photos_added",
-      {
-        count: mapped.length
-      }
-    );
+    if (files.length + (replacing ? 0 : photoItems.length) > 24) throw new Error("Select no more than 24 photos per machine.");
+    for (const file of files) validateIXIAosMediaFile(file);
+    // Keep only one large-image canvas operation active at a time.
+    for (const [index, file] of files.entries()) {
+      showMachineNotice({ message: `PREPARING PHOTO ${index + 1}/${files.length}`, tone: "info", blocking: true });
+      prepared.push(await prepareIXPhoto(file, { make, mode, companyName: "IronXchange", userEmail: "tarpbarry@gmail.com" }));
+    }
+    if (replacing) {
+      setPhotoItems(prepared.map((photo, index) => ({ ...photo, id: photoItems[index].id })));
+      photoItems.forEach(releasePhotoPreview);
+      setPhotoPolishMode(mode);
+    } else {
+      setPhotoItems(current => [...current, ...prepared]);
+      trackLaunchEvent("post_free_photos_added", { count: prepared.length });
+    }
+    showMachineNotice({ message: `${prepared.length} PHOTOS READY`, tone: "success", duration: 1600 });
   } catch (error) {
-    console.error(
-      "POST FREE PHOTO PROCESSING FAILED:",
-      error
-    );
-
-    showMachineNotice({
-      message: "PHOTO UPLOAD FAILED",
-      tone: "error",
-      duration: 3800
-    });
-
-    addActivity(
-      "error",
-      `Photo upload failed — ${cardTitle}`
-    );
+    prepared.forEach(releasePhotoPreview);
+    showMachineNotice({ message: error.message || "PHOTO PREPARATION FAILED", tone: "error", duration: 0 });
   } finally {
-    e.target.value = "";
+    photoBusyRef.current = false;
+    setPreparingPhotos(false);
   }
 }
-  
-  async function handlePhotoDrop(e) {
+async function handlePhotos(e) {
+  const input = e.target;
+  await preparePhotoSelection(Array.from(input.files || []), photoPolishMode);
+  input.value = "";
+}
+async function handlePhotoDrop(e) {
   e.preventDefault();
-  if (postingBusyRef.current) return;
-
-  const files = Array.from(
-    e.dataTransfer.files || []
-  ).filter(file =>
-    file.type.startsWith("image/")
-  );
-
-  if (files.length === 0) {
-    return;
-  }
-
-  const limitedFiles =
-    files.slice(0, 24);
-
-  const photoLabel =
-    limitedFiles.length === 1
-      ? "PHOTO"
-      : "PHOTOS";
-
-  showMachineNotice({
-    message:
-      `PROCESSING ${limitedFiles.length} ${photoLabel}...`,
-    tone: "info",
-    blocking: true
-  });
-
-  try {
-    const mapped = await Promise.all(
-      limitedFiles.map(file =>
-        prepareIXPhoto(file, {
-          make,
-          mode: photoPolishMode,
-          companyName: "IronXchange",
-          userEmail: "tarpbarry@gmail.com"
-        })
-      )
-    );
-
-    setPhotoItems(current => [
-      ...current,
-      ...mapped
-    ]);
-
-    showMachineNotice({
-      message:
-        `${mapped.length} ${
-          mapped.length === 1
-            ? "PHOTO"
-            : "PHOTOS"
-        } READY`,
-      tone: "success",
-      duration: 1600
-    });
-
-    addActivity(
-      "success",
-      `${mapped.length} photo${
-        mapped.length === 1 ? "" : "s"
-      } dropped`
-    );
-
-    trackLaunchEvent(
-      "post_free_photos_dropped",
-      {
-        count: mapped.length
-      }
-    );
-  } catch (error) {
-    console.error(
-      "POST FREE DROPPED PHOTO PROCESSING FAILED:",
-      error
-    );
-
-    showMachineNotice({
-      message: "PHOTO UPLOAD FAILED",
-      tone: "error",
-      duration: 3800
-    });
-
-    addActivity(
-      "error",
-      `Photo upload failed — ${cardTitle}`
-    );
-  }
+  await preparePhotoSelection(Array.from(e.dataTransfer.files || []), photoPolishMode);
 }
-
+async function changePhotoPolishMode(mode) {
+  if (mode === photoPolishMode) return;
+  await preparePhotoSelection(photoItems.map(photo => photo.originalFile || photo.file), mode, true);
+}
 
   function removePhoto(indexToRemove) {
+  if (postingBusyRef.current || photoBusyRef.current) return;
+  if (photoItems[indexToRemove]) releasePhotoPreview(photoItems[indexToRemove]);
   setPhotoItems(current =>
     removeMachineMediaItem(current, indexToRemove)
   );
@@ -934,6 +810,7 @@ async function handlePhotos(e) {
   addActivity("success", `Photo removed — ${cardTitle}`);
 }
   function reorderPhotos(fromIndex, toIndex) {
+  if (postingBusyRef.current || photoBusyRef.current) return;
   setPhotoItems(current =>
     moveMachineMediaItem(current, fromIndex, toIndex)
   );
@@ -985,7 +862,7 @@ function clearMachineNotice() {
 }
   
 async function finishPosting(operationId, resume, payload, revise = false) {
-  if (postingBusyRef.current) return;
+  if (postingBusyRef.current || photoBusyRef.current) return;
   if (!sdk || !loggedIn) {
     showMachineNotice({ message: "LOGIN REQUIRED TO POST", tone: "warning" });
     return;
@@ -1016,7 +893,7 @@ async function refreshPostingContext() {
   return result;
 }
 async function createListing() {
-  if (postingBusyRef.current) return;
+  if (postingBusyRef.current || photoBusyRef.current) return;
   if (!loggedIn || !sdk) { showMachineNotice({ message: "LOGIN REQUIRED TO POST", tone: "warning" }); return; }
   let savedPostings = pendingPostings;
   if (!postingStorageScope) {
@@ -1231,7 +1108,7 @@ async function createListing() {
                 type="button"
                 className="save-top"
                 onClick={createListing}
-                disabled={saving}
+                disabled={saving || preparingPhotos}
               >
                 {saving ? "Posting..." : "Post"}
               </button>
@@ -1252,16 +1129,16 @@ async function createListing() {
               {pendingPostings.map(posting => (
                 <div key={posting.operationId}>
                   <span>{posting.title}</span>{" "}
-                  <button type="button" disabled={saving} onClick={() => finishPosting(posting.operationId, true)}>
+                  <button type="button" disabled={saving || preparingPhotos} onClick={() => finishPosting(posting.operationId, true)}>
                     Resume photos and posting
                   </button>{" "}
-                  <button type="button" disabled={saving || !photoItems.length} onClick={() => finishPosting(posting.operationId, true, undefined, true)}>
+                  <button type="button" disabled={saving || preparingPhotos || !photoItems.length} onClick={() => finishPosting(posting.operationId, true, undefined, true)}>
                     Replace with selected photos
                   </button>
                 </div>
               ))}
               <p>Uploaded photos are retained. On another device, reselect any photos that had not finished uploading, then Resume. To correct a failed photo selection, select the complete desired set and choose Replace with selected photos.</p>
-              <button type="button" disabled={saving} onClick={() => { postingIdRef.current = ""; setAllowNewPosting(true); }}>Start New — different machine</button>
+              <button type="button" disabled={saving || preparingPhotos} onClick={() => { postingIdRef.current = ""; setAllowNewPosting(true); }}>Start New — different machine</button>
             </section>
           )}
 
@@ -1279,8 +1156,8 @@ async function createListing() {
           key={mode}
           type="button"
           className={photoPolishMode === mode ? "active" : ""}
-          disabled={saving}
-          onClick={() => setPhotoPolishMode(mode)}
+          disabled={saving || preparingPhotos}
+          onClick={() => changePhotoPolishMode(mode)}
         >
           {mode === "dealerPop" ? "POP" : mode}
         </button>
@@ -1292,7 +1169,7 @@ async function createListing() {
       onDragOver={e => e.preventDefault()}
       onDrop={handlePhotoDrop}
     >
-      <input type="file" multiple accept="image/*" disabled={saving} onChange={handlePhotos} />
+      <input type="file" multiple accept="image/*" disabled={saving || preparingPhotos} onChange={handlePhotos} />
       + Add Photos
     </label>
   </div>
@@ -1305,7 +1182,7 @@ async function createListing() {
                   className={`photo-tile ${index === 0 ? "hero" : ""} ${
                     index === activePhotoIndex ? "active" : ""
                   }`}
-                  draggable
+                  draggable={!saving && !preparingPhotos}
                   onDragStart={() => setDraggedPhotoIndex(index)}
                   onDragOver={e => e.preventDefault()}
                   onDrop={() => {
@@ -1324,6 +1201,7 @@ async function createListing() {
                       e.stopPropagation();
                       removePhoto(index);
                     }}
+                    disabled={saving || preparingPhotos}
                     aria-label="Remove photo"
                   >
                     ×
@@ -1869,7 +1747,7 @@ async function createListing() {
                   type="button"
                   className="save-btn"
                   onClick={createListing}
-                  disabled={saving}
+                  disabled={saving || preparingPhotos}
                 >
                   {saving ? "Posting..." : "Post"}
                 </button>
