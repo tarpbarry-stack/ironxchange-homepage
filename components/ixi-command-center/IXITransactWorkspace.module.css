@@ -1,7 +1,7 @@
 .history {
-  border: 1px solid #29332c;
-  background: #0b100d;
-  color: #eef2ef;
+  border: 1px solid #303030;
+  background: #0f0f0f;
+  color: #f1f1f1;
   min-width: 0;
 }
 .historyHeading {
@@ -17,13 +17,13 @@
 }
 .historyHeading p,
 .basis {
-  color: #abb7af;
+  color: #b4b4b4;
   font-size: 12px;
   line-height: 1.6;
   margin: 4px 0;
 }
 .historyHeading > div > span {
-  color: #ffc400;
+  color: var(--ix-yellow);
   font-size: 12px;
   font-weight: 800;
   letter-spacing: 0.1em;
@@ -35,11 +35,11 @@
   padding: 0 20px;
 }
 .metric {
-  border: 1px solid #354138;
-  background: #111a14;
+  border: 1px solid #3e3e3e;
+  background: #181818;
   padding: 15px 12px;
   text-align: left;
-  color: #edf3ef;
+  color: #f1f1f1;
   min-width: 0;
   border-radius: 3px;
 }
@@ -51,7 +51,7 @@
 .metric span {
   font-size: 12px;
   letter-spacing: 0.05em;
-  color: #b9c5bd;
+  color: #c2c2c2;
   font-weight: 800;
 }
 .metric strong {
@@ -63,15 +63,15 @@
 .metric small {
   font-size: 12px;
   line-height: 1.4;
-  color: #a6b2aa;
+  color: #afafaf;
 }
 .metric[data-active="true"] {
-  border-color: #ffc400;
+  border-color: var(--ix-yellow);
 }
 .metric:focus-visible,
 .history button:focus-visible,
 .tabs button:focus-visible {
-  outline: 2px solid #ffc400;
+  outline: 2px solid var(--ix-yellow);
   outline-offset: 2px;
 }
 .basis {
@@ -93,7 +93,7 @@
   flex-wrap: wrap;
   gap: 10px;
   padding: 16px 20px;
-  border-top: 1px solid #29332c;
+  border-top: 1px solid #303030;
   align-items: flex-end;
 }
 .search {
@@ -105,7 +105,7 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
-  color: #aebbb2;
+  color: #b8b8b8;
   font-size: 12px;
   font-weight: 800;
   letter-spacing: 0.04em;
@@ -116,17 +116,17 @@
 .dialog input,
 .dialog select {
   min-height: 36px;
-  border: 1px solid #3b4940;
+  border: 1px solid #454545;
   border-radius: 3px;
-  background: #101713;
-  color: #eef4f0;
+  background: #151515;
+  color: var(--ix-text-primary);
   padding: 7px 9px;
   font: inherit;
   font-size: 14px;
   max-width: 100%;
 }
 .history input[type="checkbox"] {
-  accent-color: #ffc400;
+  accent-color: var(--ix-yellow);
   min-height: 18px;
   width: 18px;
   height: 18px;
@@ -136,7 +136,7 @@
 .actions button,
 .notice button {
   border: 1px solid #806a1c;
-  background: #181d10;
+  background: #1b1b1b;
   border-radius: 3px;
   color: #ffce28;
   min-height: 36px;
@@ -152,12 +152,12 @@
 }
 .history button.metric {
   padding: 15px 12px;
-  background: #111a14;
-  color: #eef3ef;
-  border-color: #354138;
+  background: #181818;
+  color: var(--ix-text-primary);
+  border-color: #3e3e3e;
 }
 .history button.metric[data-active="true"] {
-  border-color: #ffc400;
+  border-color: var(--ix-yellow);
 }
 .actions {
   display: flex;
@@ -167,13 +167,13 @@
 }
 .documentActions {
   padding: 14px 20px;
-  border-top: 1px solid #29332c;
-  border-bottom: 1px solid #29332c;
+  border-top: 1px solid #303030;
+  border-bottom: 1px solid #303030;
 }
 .documentActions p {
   font-size: 12px;
   line-height: 1.5;
-  color: #b7c6bd;
+  color: #c2c2c2;
   margin: 10px 0 0;
 }
 .error,
@@ -194,13 +194,13 @@
   padding: 12px 10px;
   font-size: 12px;
   letter-spacing: 0.05em;
-  color: #a5b1aa;
-  border-bottom: 1px solid #39463d;
+  color: #aeaeae;
+  border-bottom: 1px solid #434343;
   white-space: nowrap;
 }
 .table td {
   padding: 13px 10px;
-  border-bottom: 1px solid #253027;
+  border-bottom: 1px solid #2d2d2d;
   vertical-align: top;
 }
 .table td:nth-child(n + 5):nth-child(-n + 8) {
@@ -222,11 +222,11 @@
   overflow-wrap: anywhere;
 }
 .table td span {
-  color: #bac6be;
+  color: #c3c3c3;
   font-size: 12px;
 }
 .table td small {
-  color: #8f9e94;
+  color: #9a9a9a;
   font-size: 12px;
   line-height: 1.5;
   max-width: 240px;
@@ -241,12 +241,12 @@
   justify-content: space-between;
   align-items: center;
   padding: 15px 20px;
-  color: #aebbb3;
+  color: #b8b8b8;
   font-size: 12px;
 }
 .empty {
   padding: 30px 20px;
-  color: #aebbb3;
+  color: #b8b8b8;
 }
 .tabs {
   display: flex;
@@ -258,15 +258,15 @@
   position: sticky;
   top: 0;
   z-index: 5;
-  background: #0a0e0b;
+  background: #0d0d0d;
 }
 .tabs > button,
 .tabPair {
   flex: 0 0 auto;
-  border: 1px solid #39463c;
+  border: 1px solid #434343;
   border-radius: 3px;
-  background: #111812;
-  color: #b3c0b7;
+  background: #161616;
+  color: #bdbdbd;
 }
 .tabs button {
   cursor: pointer;
@@ -299,7 +299,7 @@
 }
 .tabPair small {
   font-size: 12px;
-  color: #9ca99f;
+  color: #a6a6a6;
   font-weight: 500;
   margin-top: 5px;
 }
@@ -318,9 +318,9 @@
   display: none !important;
 }
 .dialog {
-  background: #101713;
-  color: #eff3ef;
-  border: 1px solid #718377;
+  background: #151515;
+  color: var(--ix-text-primary);
+  border: 1px solid #7e7e7e;
   border-radius: 6px;
   padding: 24px;
   width: min(620px, calc(100vw - 40px));
@@ -350,11 +350,11 @@
   overflow: auto;
   padding: 0;
   list-style: none;
-  border: 1px solid #39443c;
+  border: 1px solid #414141;
 }
 .sharePreview li {
   padding: 10px;
-  border-bottom: 1px solid #29352d;
+  border-bottom: 1px solid #323232;
 }
 .sharePreview strong,
 .sharePreview span {
@@ -362,7 +362,7 @@
 }
 .sharePreview span {
   font-size: 12px;
-  color: #a8b6ae;
+  color: #b2b2b2;
   margin-top: 4px;
 }
 @media (max-width: 1250px) {
@@ -410,7 +410,7 @@
 
 /* Compact history: one summary and one control row. */
 .historyHeading { padding: 6px 10px; min-height: 32px; gap: 8px; }
-.historyHeading > span { font-size: 12px; color: #b8c4bb; font-weight: 800; letter-spacing: .04em; }
+.historyHeading > span { font-size: 12px; color: #c1c1c1; font-weight: 800; letter-spacing: .04em; }
 .historyHeading > button { margin-left: auto; min-height: 32px; padding: 4px 8px; background: transparent; border: 0; color: #e1c872; font-size: 12px; }
 .metrics { padding: 0 10px 8px; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
 .metric, .history button.metric { min-height: 57px; padding: 7px 9px; }
@@ -424,28 +424,28 @@
 .filters > select { width: auto; max-width: 136px; min-height: 44px; font-size: 13px; }
 .history input, .history select, .history button, .actions button { min-height: 44px; }
 .history button { font-size: 12px; padding: 6px 9px; }
-.filterStatus { padding: 0 10px 8px; display: flex; gap: 8px; align-items: center; justify-content: space-between; font-size: 12px; color: #cad5ce; }
+.filterStatus { padding: 0 10px 8px; display: flex; gap: 8px; align-items: center; justify-content: space-between; font-size: 12px; color: #d2d2d2; }
 .filterStatus button { min-height: 32px; }
 .popover, .exportPopover { position: relative; font-size: 13px; }
-.popover > summary, .exportPopover > summary { min-height: 44px; display: flex; align-items: center; padding: 7px 9px; border: 1px solid #3e4a41; border-radius: 3px; cursor: pointer; color: #e1e9e4; background: #121914; font-weight: 700; list-style: none; }
+.popover > summary, .exportPopover > summary { min-height: 44px; display: flex; align-items: center; padding: 7px 9px; border: 1px solid #474747; border-radius: 3px; cursor: pointer; color: #e7e7e7; background: #171717; font-weight: 700; list-style: none; }
 .popover[open], .exportPopover[open] { z-index: 25; }
-.popover > div, .exportBody { position: absolute; right: 0; top: calc(100% + 4px); width: 270px; max-width: calc(100vw - 40px); padding: 12px; border: 1px solid #6b5d2d; background: #111914; color: #dce7df; box-shadow: 0 12px 28px #0009; display: grid; gap: 10px; }
+.popover > div, .exportBody { position: absolute; right: 0; top: calc(100% + 4px); width: 270px; max-width: calc(100vw - 40px); padding: 12px; border: 1px solid #6b5d2d; background: #171717; color: #e4e4e4; box-shadow: 0 12px 28px #0009; display: grid; gap: 10px; }
 .popover label:has(input[type="checkbox"]) { flex-direction: row; align-items: center; min-height: 44px; }
 .exportBody { width: 310px; }
-.exportBody select { min-height: 44px; background: #131d16; color: #e4ede7; border: 1px solid #56644e; font: inherit; padding: 7px; max-width: 100%; }
+.exportBody select { min-height: 44px; background: var(--ix-surface-elevated); color: #ebebeb; border: 1px solid #5f5f5f; font: inherit; padding: 7px; max-width: 100%; }
 .exportBody p { font-size: 13px; line-height: 1.5; }
 .tableWrap { max-height: max(264px, calc(100dvh - 440px)); scrollbar-width: thin; }
 .table { table-layout: auto; font-size: 13px; }
-.table th { position: sticky; top: 0; z-index: 2; height: 36px; padding: 7px; background: #121a14; font-size: 12px; }
+.table th { position: sticky; top: 0; z-index: 2; height: 36px; padding: 7px; background: #181818; font-size: 12px; }
 .table td { padding: 4px 7px; height: 48px; vertical-align: middle; }
 .table td:nth-child(n + 5):nth-child(-n + 8), .table th:nth-child(n + 5):nth-child(-n + 8) { text-align: left; white-space: normal; }
 .table .money, .table th.money, .table td.money { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
 .table td:nth-child(2) { min-width: 110px; max-width: 180px; }
 .table td:nth-child(3) { min-width: 100px; max-width: 200px; }
 .table td strong { font-size: 13px; overflow-wrap: anywhere; line-height: 1.3; }
-.table td span, .table td small { font-size: 12px; color: #b8c5bb; margin: 0; }
+.table td span, .table td small { font-size: 12px; color: #c2c2c2; margin: 0; }
 .table td button { min-height: 44px; white-space: nowrap; }
-.workflowStatus { font-size: 12px; color: #c5d0c8; white-space: nowrap; }
+.workflowStatus { font-size: 12px; color: #cdcdcd; white-space: nowrap; }
 .pagination { padding: 8px 10px; font-size: 12px; }
 .tabs { position: static; min-height: 44px; padding: 0; margin: 8px 0; align-items: stretch; overflow-x: auto; }
 .tabs > button, .tabPair > button { min-height: 44px; padding: 7px 10px; font-size: 12px; }
@@ -456,7 +456,7 @@
 @media (max-width: 600px) { .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); } .metric strong { font-size: 20px; } .filters .search { flex-basis: 100%; } .tableWrap { max-height: 60dvh; } .tabPanel { max-height: none; } .popover > div { right: auto; left: 0; } }
 .tabsContainer { display: flex; min-width: 0; align-items: center; gap: 6px; }
 .tabsContainer > .tabs { flex: 1; min-width: 0; }
-.tabOverflow { width: 115px; flex-shrink: 0; min-height: 44px; background: #111a14; color: #e3ebe6; border: 1px solid #586247; border-radius: 3px; padding: 6px; font-size: 12px; }
+.tabOverflow { width: 115px; flex-shrink: 0; min-height: 44px; background: #181818; color: #e9e9e9; border: 1px solid #5e5e5e; border-radius: 3px; padding: 6px; font-size: 12px; }
 .historyHeading { min-height: 28px; padding: 6px 10px; }
 .history button.metric { min-height: 54px; padding: 5px 8px; }
 .metric strong { font-size: 20px; margin-top: 3px; }
