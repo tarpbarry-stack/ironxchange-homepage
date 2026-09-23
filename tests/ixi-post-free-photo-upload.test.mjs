@@ -70,6 +70,24 @@ test("a replaced treatment uploads new bytes; missing IDs never pass as success"
   assert.equal(calls, 2);
 });
 
+test("a large photo that keeps transferring is not timed out just because it is slow", async t => {
+  t.mock.timers.enable({ apis: ["setTimeout"] });
+  let progress, resolveUpload;
+  const sdk = { images: { upload: (body, query, options) => {
+    progress = options.onUploadProgress;
+    return new Promise(resolve => { resolveUpload = resolve; });
+  } } };
+  const pending = uploadPostFreePhotos({ sdk, files: [file("large")], cache: new Map(), timeoutMs: 100 });
+  await Promise.resolve();
+  t.mock.timers.tick(90);
+  progress({ loaded: 256 });
+  t.mock.timers.tick(90);
+  progress({ loaded: 512 });
+  t.mock.timers.tick(90);
+  resolveUpload(response("large"));
+  assert.equal((await pending)[0].uuid, "large");
+});
+
 // Execute the real photo pipeline with browser primitives replaced by tiny
 // deterministic images; count renders to enforce the preparation budget.
 import fs from "node:fs";
