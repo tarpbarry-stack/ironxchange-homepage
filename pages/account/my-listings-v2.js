@@ -1639,17 +1639,17 @@ toggleSearchSurfaceRevealed
           font-weight:100 900;
           font-display:swap;
         }
-        .sold-toolbar { display:flex; flex-wrap:wrap; align-items:center; gap:20px 32px; margin:20px 0; padding:20px 24px; background:#111711; border:1px solid #354035; border-radius:10px; font-family:'IXI Sold Inter','Inter Variable', Inter, ui-sans-serif, sans-serif; }
+        .sold-toolbar { display:flex; flex-wrap:wrap; align-items:center; gap:20px 32px; margin:20px 0; padding:20px 24px; background:var(--ix-surface-raised); border:1px solid var(--ix-line-strong); border-radius:10px; font-family:'IXI Sold Inter','Inter Variable', Inter, ui-sans-serif, sans-serif; }
         .sold-scoreboard { display:grid; gap:10px; margin-right:auto; min-width:0; max-width:100%; }
         .sold-scoreboard strong { display:flex; align-items:baseline; gap:14px; color:#ffcc00; font-size:20px; line-height:1.25; font-weight:750; letter-spacing:-.02em; }
-        .sold-scoreboard strong span { font-size:13px; font-weight:500; letter-spacing:0; color:#b7c1b7; }
+        .sold-scoreboard strong span { font-size:13px; font-weight:500; letter-spacing:0; color:var(--ix-text-secondary); }
         .sold-value { display:flex; flex-wrap:wrap; align-items:baseline; gap:8px 14px; }
-        .sold-value span { font-size:11px; line-height:1.4; letter-spacing:.08em; font-weight:650; color:#b7c1b7; }
+        .sold-value span { font-size:11px; line-height:1.4; letter-spacing:.08em; font-weight:650; color:var(--ix-text-secondary); }
         .sold-value b { font-size:28px; line-height:1.15; font-weight:700; letter-spacing:-.025em; color:#ffcc00; font-variant-numeric:tabular-nums; overflow-wrap:anywhere; }
-        .sold-scoreboard small { font-size:12px; line-height:1.4; color:#b7c1b7; }
+        .sold-scoreboard small { font-size:12px; line-height:1.4; color:var(--ix-text-secondary); }
         .sold-filters { display:flex; flex-wrap:wrap; align-items:end; gap:12px; max-width:100%; }
-        .sold-toolbar label { display:grid; gap:8px; font-size:12px; line-height:1.4; font-weight:550; color:#b7c1b7; }
-        .sold-toolbar select, .sold-toolbar input, .sold-toolbar button { box-sizing:border-box; background:#0c100c; color:#eee; border:1px solid #586058; border-radius:6px; padding:10px 12px; height:42px; min-width:0; font-family:inherit; font-size:13px; line-height:20px; font-weight:500; color-scheme:dark; }
+        .sold-toolbar label { display:grid; gap:8px; font-size:12px; line-height:1.4; font-weight:550; color:var(--ix-text-secondary); }
+        .sold-toolbar select, .sold-toolbar input, .sold-toolbar button { box-sizing:border-box; background:var(--ix-surface); color:var(--ix-text-primary); border:1px solid var(--ix-line-strong); border-radius:6px; padding:10px 12px; height:42px; min-width:0; font-family:inherit; font-size:13px; line-height:20px; font-weight:500; color-scheme:dark; }
         .sold-toolbar input { width:150px; }
         .sold-toolbar button { cursor:pointer; }
         .sold-toolbar button:disabled { opacity:.45; cursor:default; }

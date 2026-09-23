@@ -56,11 +56,11 @@ export function IXITransactSessionLayout({ children }) {
 
   return <>
     {children}
-    <style jsx global>{`html, body, #__next { min-height: 100%; background: #070808; } body { margin: 0; }`}</style>
+    <style jsx global>{`html, body, #__next { min-height: 100%; background: var(--ix-surface-deep); } body { margin: 0; }`}</style>
     {session.error ? <div role="alert" style={{ padding: 18, background: "#321b20", color: "#fff" }}>
       {session.error.message} <button type="button" onClick={() => runtime?.loadAccess({ force: true }).catch(() => {})}>TRY AGAIN</button>
     </div> : null}
-    {!session.access ? <div role="status" style={{ minHeight: "100vh", padding: 32, background: "#080a09", color: "#ffc400" }}>
+    {!session.access ? <div role="status" style={{ minHeight: "100vh", padding: 32, background: "var(--ix-surface-deep)", color: "var(--ix-yellow)" }}>
       {session.error ? "TRAN$ACT session could not be verified." : "Opening your TRAN$ACT workspace…"}
     </div> : <div key={session.generation} data-ixi-transact-session>
       <div hidden={ledger} style={{ display: ledger ? "none" : "block" }} data-ixi-transact-view="records">
