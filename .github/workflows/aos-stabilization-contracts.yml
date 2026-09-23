@@ -46,7 +46,7 @@ jobs:
         working-directory: frontend
       - name: Verify POST FREE photo preparation and upload recovery
         working-directory: frontend
-        run: node --test tests/ixi-post-free-photo-upload.test.mjs
+        run: node --test tests/ixi-post-free-*.test.mjs
       - name: Run required paired contracts
         working-directory: frontend
         env:

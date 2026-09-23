@@ -33,17 +33,13 @@ import {
 } from "../lib/machine-media/createMachineMediaModel";
 
 import {
-  getActiveMachineMediaUrl,
-  getActiveMachineMediaFile
+  getActiveMachineMediaUrl
 } from "../lib/machine-media/machineMediaIdentity";
 
-import { uploadPostFreePhotos } from "../lib/post-free/postFreePhotoUpload.mjs";
+import { runPostFreePosting, postingRequest } from "../lib/post-free/postFreeDurableClient.mjs";
 
 import { captureIXEvent } from "../lib/posthog";
 
-import {
-  attachPassportToSharetribeListing
-} from "../lib/passport/attachPassportToSharetribeListing";
 
 import {
   loadPostFreeDraft,
@@ -274,8 +270,18 @@ const [machineChannel, setMachineChannel] =
   const [description, setDescription] = useState("");
 
   const [photoItems, setPhotoItems] = useState([]);
-  const photoUploadCache = useRef(new Map());
-  useEffect(() => { photoUploadCache.current.clear(); }, [sdk]);
+  const postingIdRef = useRef("");
+  const postingBusyRef = useRef(false);
+  const [pendingPostings, setPendingPostings] = useState([]);
+  const [allowNewPosting, setAllowNewPosting] = useState(false);
+  const [postingStorageScope, setPostingStorageScope] = useState("");
+  useEffect(() => {
+    if (!loggedIn) { setPendingPostings([]); setPostingStorageScope(""); postingIdRef.current = ""; return; }
+    let active = true;
+    postingRequest("list").then(result => { if (active) { setPendingPostings(result.rows || []); setPostingStorageScope(result.storageScope || ""); } })
+      .catch(error => { if (active) showMachineNotice({ message: error.message, tone: "error" }); });
+    return () => { active = false; };
+  }, [loggedIn]);
   const [activePhotoIndex, setActivePhotoIndex] = useState(0);
   const [draggedPhotoIndex, setDraggedPhotoIndex] = useState(null);
 
@@ -740,6 +746,7 @@ publicData: {
   }
 
 async function handlePhotos(e) {
+  if (postingBusyRef.current) return;
   const files = Array.from(
     e.target.files || []
   ).filter(file =>
@@ -829,6 +836,7 @@ async function handlePhotos(e) {
   
   async function handlePhotoDrop(e) {
   e.preventDefault();
+  if (postingBusyRef.current) return;
 
   const files = Array.from(
     e.dataTransfer.files || []
@@ -976,125 +984,60 @@ function clearMachineNotice() {
   });
 }
   
-async function createListing() {
-  if (saving) return;
-  if (!loggedIn || !sdk) {
-    showMachineNotice({
-      message: "LOGIN REQUIRED TO POST",
-      tone: "warning",
-      duration: 1400
-    });
-
-    setTimeout(() => {
-      router.push("/login");
-    }, 900);
-
+async function finishPosting(operationId, resume, payload, revise = false) {
+  if (postingBusyRef.current) return;
+  if (!sdk || !loggedIn) {
+    showMachineNotice({ message: "LOGIN REQUIRED TO POST", tone: "warning" });
     return;
   }
-
-  if (
-    !category ||
-    !year ||
-    !make ||
-    !model ||
-    !hours ||
-    !price
-  ) {
-    showMachineNotice({
-      message:
-        "YEAR, MAKE, MODEL, HOURS, AND PRICE REQUIRED",
-      tone: "warning",
-      duration: 2800
-    });
-
-    return;
-  }
-
-  if (
-    !machineAccess ||
-    !machineChannel
-  ) {
-    showMachineNotice({
-      message: "SELECT MACHINE PLACEMENT",
-      tone: "warning",
-      duration: 2600
-    });
-
-    return;
-  }
-
+  postingBusyRef.current = true;
+  postingIdRef.current = operationId;
   setSaving(true);
-
-  let newListingId = "";
-  let passport = null;
-
   try {
-    const { types: sdkTypes } =
-      await import("sharetribe-flex-sdk");
-
-    const { Money } = sdkTypes;
-
-    showMachineNotice({
-      message: "PREPARING MACHINE...",
-      tone: "info",
-      blocking: true
-    });
-
-    const photoCount = photoItems.length;
-
-    showMachineNotice({
-      message:
-        photoCount === 1
-          ? "UPLOADING 1 PHOTO..."
-          : `UPLOADING ${photoCount} PHOTOS...`,
-      tone: "info",
-      blocking: true
-    });
-
-    const files = photoItems.map(getActiveMachineMediaFile);
-    if (files.some(file => !file)) {
-      throw new Error("A selected photo is unavailable. Add it again before posting.");
-    }
-    const imageIds = await uploadPostFreePhotos({
-      sdk,
-      files,
-      cache: photoUploadCache.current,
-      onProgress: ({ completed, total, loaded, bytes }) => showMachineNotice({
-        message: `UPLOADING PHOTOS: ${completed}/${total} COMPLETE — ${(loaded / 1048576).toFixed(1)} / ${(bytes / 1048576).toFixed(1)} MB SENT`,
-        tone: "info",
-        blocking: true
-      })
-    });
-
-    showMachineNotice({
-      message: "BUILDING MACHINE...",
-      tone: "info",
-      blocking: true
-    });
-
-    const categorySlug =
-      slugify(category);
-
-    const makeSlug =
-      slugify(`${category}-${make}`);
-
-    const modelSlug =
-      slugify(
-        `${category}-${make}-${model}`
-      );
-
-    showMachineNotice({
-      message: "CREATING LISTING...",
-      tone: "info",
-      blocking: true
-    });
-
-    const response =
-      await sdk.ownListings.create({
-        title: sharetribeTitle,
-        description: description || "",
-
-        publicData: {
+    const scope = postingStorageScope || (await refreshPostingContext()).storageScope;
+    const result = await runPostFreePosting({ operationId, storageScope: scope, resume, revise, payload, photos: photoItems, sdk,
+      onProgress: message => showMachineNotice({ message, tone: "info", blocking: true }) });
+    showMachineNotice({ message: result.listingState === "pendingApproval" ? "MACHINE SAVED — AWAITING APPROVAL" : "MACHINE AND ALL PHOTOS VERIFIED", tone: "success" });
+    postingIdRef.current = "";
+    await router.push(`/live?id=${result.listingId}`);
+  } catch (error) {
+    showMachineNotice({ message: error.message || "POSTING PAUSED — RESUME THIS MACHINE", tone: "error", duration: 0 });
+    postingRequest("list").then(result => setPendingPostings(result.rows || [])).catch(() => {});
+  } finally {
+    postingBusyRef.current = false;
+    setSaving(false);
+  }
+}
+async function refreshPostingContext() {
+  const result = await postingRequest("list");
+  if (!result.storageScope) throw new Error("Saved postings could not be verified. Please retry.");
+  setPendingPostings(result.rows || []);
+  setPostingStorageScope(result.storageScope);
+  return result;
+}
+async function createListing() {
+  if (postingBusyRef.current) return;
+  if (!loggedIn || !sdk) { showMachineNotice({ message: "LOGIN REQUIRED TO POST", tone: "warning" }); return; }
+  let savedPostings = pendingPostings;
+  if (!postingStorageScope) {
+    try { savedPostings = (await refreshPostingContext()).rows || []; }
+    catch (error) { showMachineNotice({ message: error.message, tone: "error", duration: 0 }); return; }
+  }
+  if (savedPostings.length && !postingIdRef.current && !allowNewPosting) {
+    showMachineNotice({ message: "RESUME YOUR SAVED POSTING BELOW, OR CHOOSE START NEW FOR A DIFFERENT MACHINE", tone: "warning" });
+    return;
+  }
+  if (!category || !year || !make || !model || !hours || !price || !machineAccess || !machineChannel || !photoItems.length) {
+    showMachineNotice({ message: "YEAR, MAKE, MODEL, HOURS, PRICE, PLACEMENT AND PHOTOS REQUIRED", tone: "warning" });
+    return;
+  }
+  const categorySlug = slugify(category);
+  const makeSlug = slugify(`${category}-${make}`);
+  const modelSlug = slugify(`${category}-${make}-${model}`);
+  const payload = {
+    title: sharetribeTitle, description: description || "",
+    priceCents: Math.round(Number(cleanNumber(price)) * 100),
+    publicData: {
           categoryLevel1: categorySlug,
           categoryLevel2: makeSlug,
           categoryLevel3: modelSlug,
@@ -1149,167 +1092,9 @@ async function createListing() {
             "default-inquiry/release-1",
 
           unitType: "inquiry"
-        },
-
-        price: new Money(
-          Number(cleanNumber(price)) * 100,
-          "USD"
-        ),
-
-        images: imageIds
-      });
-
-    newListingId =
-      response.data.data.id.uuid;
-
-    showMachineNotice({
-      message:
-        "CREATING MACHINE PASSPORT...",
-      tone: "info",
-      blocking: true
-    });
-
-    try {
-      passport =
-        await attachPassportToSharetribeListing({
-          sdk,
-          listingId: newListingId
-        });
-    } catch (passportError) {
-      console.error(
-        "PASSPORT ATTACH ERROR:",
-        passportError
-      );
-
-      showMachineNotice({
-        message:
-          "MACHINE CREATED — PASSPORT NEEDS RETRY",
-        tone: "warning",
-        duration: 3200
-      });
-
-      addActivity(
-        "error",
-        `Machine created — Passport failed — ${sharetribeTitle}`
-      );
-
-      trackLaunchEvent(
-        "post_free_passport_failed",
-        {
-          listingId: newListingId,
-          title: sharetribeTitle
         }
-      );
-
-      await new Promise(resolve =>
-        setTimeout(resolve, 1800)
-      );
-
-      router.push(
-        `/live?id=${newListingId}`
-      );
-
-      return;
-    }
-
-    let successMessage =
-      "MARKETPLACE MACHINE CREATED";
-
-    if (
-      machineAccess === "private"
-    ) {
-      successMessage =
-        "PRIVATE MACHINE CREATED";
-    } else if (
-      machineChannel === "auction"
-    ) {
-      successMessage =
-        "AUCTION MACHINE CREATED";
-    }
-
-    showMachineNotice({
-      message: passport?.passportId
-        ? `${successMessage} — PASSPORT READY`
-        : successMessage,
-      tone: "success",
-      duration: 1700
-    });
-
-    addActivity(
-      "success",
-      passport?.passportId
-        ? `Created machine + Passport ${passport.passportId} — ${sharetribeTitle}`
-        : `Created machine — ${sharetribeTitle}`
-    );
-
-    trackLaunchEvent(
-      "post_free_listing_created",
-      {
-        listingId: newListingId,
-
-        passportId:
-          passport?.passportId || "",
-
-        passportUrl:
-          passport?.passportUrl || "",
-
-        machineAccess,
-        machineChannel,
-
-        title: sharetribeTitle,
-
-        selectedKeywordCount:
-          selectedKeywords.length,
-
-        photoCount:
-          photoItems.length
-      }
-    );
-
-    await new Promise(resolve =>
-      setTimeout(resolve, 1500)
-    );
-
-    router.push(
-      `/live?id=${newListingId}`
-    );
-  } catch (error) {
-    console.error(
-      "CREATE LISTING ERROR:",
-      error
-    );
-
-    const failureMessage =
-      error?.code === "POST_FREE_PHOTO_UPLOAD_TIMEOUT"
-        ? "PHOTO UPLOAD STILL PENDING — KEEP PAGE OPEN; RETRY CHECKS PROGRESS"
-        : newListingId
-        ? "MACHINE CREATED — FINALIZATION FAILED"
-        : "POST FAILED — MACHINE NOT CREATED";
-
-    showMachineNotice({
-      message: failureMessage,
-      tone: "error",
-      duration: error?.code === "POST_FREE_PHOTO_UPLOAD_TIMEOUT" ? 0 : 4200
-    });
-
-    addActivity(
-      "error",
-      `${failureMessage} — ${sharetribeTitle}`
-    );
-
-    trackLaunchEvent(
-      "post_free_listing_failed",
-      {
-        listingId: newListingId,
-        title: sharetribeTitle,
-        error:
-          error?.message ||
-          String(error)
-      }
-    );
-  } finally {
-    setSaving(false);
-  }
+  };
+  return finishPosting(postingIdRef.current || crypto.randomUUID(), false, payload);
 }
 
   function launchExternal(platform, url, copyLabel, copy) {
@@ -1461,6 +1246,25 @@ async function createListing() {
             </div>
           </section>
 
+          {pendingPostings.length > 0 && (
+            <section className="panel" aria-label="Saved postings">
+              <strong>Saved postings — resume without creating another machine</strong>
+              {pendingPostings.map(posting => (
+                <div key={posting.operationId}>
+                  <span>{posting.title}</span>{" "}
+                  <button type="button" disabled={saving} onClick={() => finishPosting(posting.operationId, true)}>
+                    Resume photos and posting
+                  </button>{" "}
+                  <button type="button" disabled={saving || !photoItems.length} onClick={() => finishPosting(posting.operationId, true, undefined, true)}>
+                    Replace with selected photos
+                  </button>
+                </div>
+              ))}
+              <p>Uploaded photos are retained. On another device, reselect any photos that had not finished uploading, then Resume. To correct a failed photo selection, select the complete desired set and choose Replace with selected photos.</p>
+              <button type="button" disabled={saving} onClick={() => { postingIdRef.current = ""; setAllowNewPosting(true); }}>Start New — different machine</button>
+            </section>
+          )}
+
           <section className="photo-workbench">
             <div className="workbench-head">
   <div>
@@ -1475,6 +1279,7 @@ async function createListing() {
           key={mode}
           type="button"
           className={photoPolishMode === mode ? "active" : ""}
+          disabled={saving}
           onClick={() => setPhotoPolishMode(mode)}
         >
           {mode === "dealerPop" ? "POP" : mode}
@@ -1487,7 +1292,7 @@ async function createListing() {
       onDragOver={e => e.preventDefault()}
       onDrop={handlePhotoDrop}
     >
-      <input type="file" multiple accept="image/*" onChange={handlePhotos} />
+      <input type="file" multiple accept="image/*" disabled={saving} onChange={handlePhotos} />
       + Add Photos
     </label>
   </div>
