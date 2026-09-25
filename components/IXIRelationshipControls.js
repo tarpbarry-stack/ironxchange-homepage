@@ -1044,7 +1044,8 @@ export default function IXIRelationshipControls({
 
           .ixi-relationship-controls {
             margin: 14px auto 0;
-            gap: 14px;
+            flex-wrap: wrap;
+            gap: 8px;
           }
 
           .ixi-mobile-nav-row {

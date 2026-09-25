@@ -195,7 +195,7 @@ export default function IXIAosWorkspaceBoard({
   onDeleteObject
 }) {
   return (
-    <IXIBoardSurface
+    <IXIBoardSurface mobileCards
       scaleMode={cardScaleMode}
       centerRows={true}
     >
