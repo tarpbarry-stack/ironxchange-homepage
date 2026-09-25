@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import { useIXIMachineDemo } from "../IXIMachineDemoContext";
 import dynamic from "next/dynamic";
 
 import { captureIXEvent } from "../../../lib/posthog";
@@ -116,7 +117,7 @@ consoleRightOpen = false,
   
 dragHandleProps
 }) {
-
+  const demo = useIXIMachineDemo();
   const [photoIndex, setPhotoIndex] = useState(0);
   console.log("AUCTION DRAG HANDLE RECEIVED", {
   listingId:
@@ -282,6 +283,7 @@ const currentImageObject =
   }
 
 function handleCardClick() {
+  if (demo) return;
   captureIXEvent("auction_listing_card_clicked", {
     listingId: id,
     title: listing.title,

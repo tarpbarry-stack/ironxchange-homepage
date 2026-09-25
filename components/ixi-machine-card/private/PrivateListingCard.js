@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+import { useIXIMachineDemo } from "../IXIMachineDemoContext";
 import dynamic from "next/dynamic";
 // DnD is owned by IXISortableMachineCard wrapper.
 
@@ -150,6 +151,7 @@ consoleActuatorVariant = "compact",
 
 showMachineRail = true,
 }) {
+  const demo = useIXIMachineDemo();
   const [photoIndex, setPhotoIndex] = useState(0);
 
   const [localBoardColor, setLocalBoardColor] = useState("none");
@@ -381,6 +383,7 @@ function getSellerState() {
 }
 
 function handleCardClick() {
+  if (demo) return;
   captureIXEvent("private_listing_card_clicked", {
     listingId: id,
     title: listing.title,
@@ -712,6 +715,7 @@ style={getFrameStyle(currentImageObject, "card")}
   type="button"
   onClick={e => {
     stopCardClick(e);
+    if (demo) { demo.onAction("Launch listing"); return; }
     window.open(getListingHref(listing, from), "_blank", "noopener,noreferrer");
   }}
 >
@@ -722,6 +726,7 @@ style={getFrameStyle(currentImageObject, "card")}
   type="button"
   onClick={e => {
     stopCardClick(e);
+    if (demo) { demo.onAction("View listing"); return; }
     if (launchMode) {
       window.location.href = "/yard";
       return;
@@ -789,7 +794,7 @@ onMachinePlacementChange ? (
 
     <div className="seller-owner-toolbar" aria-label="Owner object controls">
       <button type="button" className="owner-action add" title="Add" onClick={e => { stopCardClick(e); onAddObject?.(listing); }}>+</button>
-      <button type="button" className="owner-action edit" title="Edit" onClick={e => { stopCardClick(e); onEdit?.(listing); }}>EDIT</button>
+      <button type="button" className="owner-action edit" title={listing.__ixiOwnerActions?.editing ? "Save machine facts" : "Edit machine facts"} aria-label={listing.__ixiOwnerActions?.saving ? "Saving machine facts" : listing.__ixiOwnerActions?.editing ? "Save machine facts" : "Edit machine facts"} onClick={e => { stopCardClick(e); onEdit?.(listing); }}>{listing.__ixiOwnerActions?.saving ? "SAVING" : listing.__ixiOwnerActions?.editing ? "SAVE" : "EDIT"}</button>
       <button type="button" className="owner-action transact" title="TRAN$ACT" onClick={e => { stopCardClick(e); onOpenTransact?.(listing); }}>$</button>
       <button type="button" className="owner-action menu" title="Actions" onClick={e => { stopCardClick(e); onOpenActions?.(listing); }}>:</button>
     </div>

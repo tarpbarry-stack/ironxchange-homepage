@@ -131,9 +131,9 @@ export default function IXIAuctionObjectFace4({
             />
 
             <DispositionButton
-              title="DELETE FOREVER"
-              subtitle="PERMANENT HARD DELETE"
-              detail="Destroy the auction object and all related private work."
+              title="DELETE AUCTION LISTING"
+              subtitle="PERMANENT LISTING REMOVAL"
+              detail="Remove this listing, media and private work. Preserve the permanent Passport."
               tone="delete"
               disabled={isBusy}
               onClick={() =>
@@ -926,18 +926,18 @@ function getConfirmationCopy(
   return {
     tone: "delete",
     eyebrow:
-      "PERMANENT DESTRUCTION",
+      "PERMANENT LISTING REMOVAL",
     title:
-      "DELETE THIS MACHINE FOREVER?",
+      "DELETE THIS AUCTION LISTING?",
     description:
-      "The auction object and its related private working data will be permanently destroyed. This cannot be undone.",
+      "The auction listing, media and related private work will be removed. This cannot be undone. The permanent Passport is preserved.",
     button:
-      "DELETE FOREVER",
+      "DELETE LISTING",
     items: [
       "DELETE LISTING",
       "DELETE WORKSPACE STATE",
       "DELETE DEALER BID PACK",
-      "DELETE PASSPORT AND MEDIA"
+      "DELETE MEDIA; PRESERVE PASSPORT"
     ]
   };
 }

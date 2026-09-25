@@ -6,11 +6,14 @@ import { useRouter } from "next/router";
 import { ATLAS_REVISION, getAtlasPart, machineCardParts } from "../../lib/ixi-atlas/machineCardRegistry.mjs";
 import { atlasGuides, getAtlasGuide } from "../../lib/ixi-atlas/guideRegistry.mjs";
 import { atlasLessonHref } from "../../lib/ixi-atlas/helpRoutes.mjs";
-import { atlasAssemblyHref, resolveAtlasView, searchAtlas } from "../../lib/ixi-atlas/navigation.mjs";
+import { atlasAssemblyHref, atlasFamilyHref, resolveAtlasView, searchAtlas } from "../../lib/ixi-atlas/navigation.mjs";
+import { atlasFamilies, getAtlasFamily } from "../../lib/ixi-atlas/familyRegistry.mjs";
+import AtlasFamilyNav from "./AtlasFamilyNav";
 import AtlasFieldGuide from "./AtlasFieldGuide";
 import AtlasDemoBoundary from "./AtlasDemoBoundary";
 import styles from "./IXITechnicalAtlas.module.css";
 
+const AtlasFamilyWorkbench = dynamic(() => import("./AtlasFamilyWorkbench"), { ssr: false, loading: () => <p className={styles.demoNotice} role="status">Opening the family workbench…</p> });
 const IXIAtlasLiveTestCell = dynamic(() => import("./IXIAtlasLiveTestCell"), { ssr: false, loading: () => <p className={styles.demoNotice} role="status">Opening the Machine Card demonstration…</p> });
 const IXIChassisAtlas = dynamic(() => import("./IXIChassisAtlas"), { loading: () => <p className={styles.demoNotice} role="status">Opening the Chassis blueprint…</p> });
 const layerNames = ["ALL", "STRUCTURE", "DATA", "COMMANDS"];
@@ -30,7 +33,7 @@ export default function IXITechnicalAtlas() {
   const previousPath = useRef("");
   const selectedId = view.kind === "machine" ? view.part : "object";
   const part = getAtlasPart(selectedId);
-  const title = view.kind === "guide" ? getAtlasGuide(view.topic).title : view.kind === "chassis" ? "Chassis" : part.name;
+  const title = view.kind === "family" ? getAtlasFamily(view.family).title : view.kind === "guide" ? getAtlasGuide(view.topic).title : view.kind === "chassis" ? "Chassis" : part.name;
   const matchingParts = machineCardParts.filter(item => layer === "ALL" || item.layer === layer);
   const searchResults = useMemo(() => searchAtlas(query), [query]);
 
@@ -50,7 +53,7 @@ export default function IXITechnicalAtlas() {
     if (!first) document.getElementById("atlas-content")?.focus({ preventScroll: true });
   }, [router.isReady, router.asPath]);
   const selectPart = id => router.push(atlasAssemblyHref("machine", id), undefined, { shallow: true, scroll: false });
-  const canonicalHref = view.kind === "guide" ? atlasLessonHref(view.topic) : atlasAssemblyHref(view.kind, view.part);
+  const canonicalHref = view.kind === "family" ? atlasFamilyHref(view.family) : view.kind === "guide" ? atlasLessonHref(view.topic) : atlasAssemblyHref(view.kind, view.part);
   async function copyLesson() {
     const link = `${window.location.origin}${canonicalHref}`;
     try { await navigator.clipboard.writeText(link); setCopyStatus("Lesson link copied"); }
@@ -71,11 +74,11 @@ export default function IXITechnicalAtlas() {
     </header>
     {indexOpen && <section id="atlas-system-index" className={styles.systemIndex} aria-label="Atlas System Index">
       <div className={styles.systemIndexLead}><span>SYSTEM HANGAR / EVERY PUBLISHED LESSON</span><h2>START ANYWHERE. EXPLORE EVERYTHING.</h2><p>Machine systems, workspaces and practical instructions are connected here.</p></div>
-      <div className={styles.indexAssemblies}><Link shallow href={atlasAssemblyHref("machine")}>01 / MACHINE CARD · INTERACTIVE</Link><Link shallow href={atlasAssemblyHref("chassis")}>02 / CHASSIS · BLUEPRINT</Link></div>
+      <div className={styles.indexAssemblies}><Link shallow href={atlasAssemblyHref("machine")}>01 / MACHINE CARD · INTERACTIVE</Link><Link shallow href={atlasAssemblyHref("chassis")}>02 / CHASSIS · BLUEPRINT</Link>{atlasFamilies.map(family => <Link shallow key={family.id} href={atlasFamilyHref(family.id)}>{family.title.toUpperCase()} · INTERACTIVE</Link>)}</div>
       <div className={styles.guideIndexGrid}>{atlasGuides.map(item => <Link shallow key={item.id} href={atlasLessonHref(item.id)}><small>{item.group}</small><strong>{item.title}</strong><span>{item.coverage} →</span></Link>)}</div>
     </section>}
     <nav className={styles.releaseRail} aria-label="Technical Atlas sections">
-      <Link shallow href={atlasAssemblyHref("machine")} aria-current={view.kind === "machine" ? "page" : undefined}><span>01</span><strong>MACHINE CARD</strong><small>TRY THE CONTROLS</small></Link>
+      <Link shallow href={atlasAssemblyHref("machine")} aria-current={["machine", "family"].includes(view.kind) ? "page" : undefined}><span>01</span><strong>MACHINE CARD</strong><small>TRY THE CONTROLS</small></Link>
       <Link shallow href={atlasAssemblyHref("chassis")} aria-current={view.kind === "chassis" ? "page" : undefined}><span>02</span><strong>CHASSIS</strong><small>EXPLORE THE BLUEPRINT</small></Link>
       <Link shallow href={atlasLessonHref("overview")} aria-current={view.kind === "guide" ? "page" : undefined}><span>03</span><strong>FIELD GUIDES</strong><small>STEP-BY-STEP INSTRUCTIONS</small></Link>
     </nav>
@@ -87,7 +90,8 @@ export default function IXITechnicalAtlas() {
     <div className={styles.lessonTools}><span>{view.kind === "guide" ? "HELP THAT STARTS WITH YOUR TASK" : "ONE MACHINE · CONNECTED WORKING SYSTEMS"}</span><button type="button" onClick={copyLesson}>COPY LESSON LINK ↗</button><span role="status">{copyStatus}</span>{copyFallback && <input readOnly aria-label="Lesson link to copy" value={copyFallback} onFocus={event => event.target.select()} />}</div>
     <div id="atlas-content" tabIndex={-1} className={styles.atlasContent}>
       {view.unavailable && <p className={styles.demoNotice} role="status">That lesson link is not available in this edition. Start here or use the System Index to find another topic.</p>}
-      {view.kind === "guide" ? <AtlasFieldGuide topic={view.topic} /> : view.kind === "chassis" ? <IXIChassisAtlas query="" selectedId={view.part} onSelect={id => router.push(atlasAssemblyHref("chassis", id), undefined, { shallow: true, scroll: false })} /> : <>
+      {view.kind === "family" ? (router.isReady && <AtlasFamilyWorkbench key={view.family} familyId={view.family} />) : view.kind === "guide" ? <AtlasFieldGuide topic={view.topic} /> : view.kind === "chassis" ? <IXIChassisAtlas query="" selectedId={view.part} onSelect={id => router.push(atlasAssemblyHref("chassis", id), undefined, { shallow: true, scroll: false })} /> : <>
+        <AtlasFamilyNav />
         <section className={styles.heroHead}><div><span className={styles.eyebrow}>TECHNICAL ASSEMBLY TA-001 / INTERACTIVE LESSON</span><h1>THE MACHINE<br /><em>COMES FIRST.</em></h1></div><div><p>Inspect the real Machine Card controls, try them on a sample, and see how each action changes the working view.</p><Link shallow className={styles.readGuideLink} href={atlasLessonHref("machine-card")}>READ THE STEP-BY-STEP GUIDE →</Link></div></section>
         <section className={`${styles.workspace} ${styles.liveWorkspace}`}><div className={styles.drawingPanel}>
           <div className={styles.panelHead}><div><span>LIVE TEST CELL</span><b>IXI MACHINE CARD / MARKETPLACE FAMILY</b></div><div className={styles.viewControls}><span>PRODUCTION COMPONENT</span><span>SAMPLE DATA</span></div></div>

@@ -2,6 +2,7 @@
 // Card-level machine control strip.
 // One half of IXI Machine Controls™.
 // The other half is IXIEnvironmentRail.
+import { useIXIMachineDemo } from "./ixi-machine-card/IXIMachineDemoContext";
 
 export default function IXIMachineRail({
   listing,
@@ -21,6 +22,7 @@ export default function IXIMachineRail({
   armedDestination,
   onSendToArmedDestination
 }) {
+ const demo = useIXIMachineDemo();
  return (
   <>
     <div className={`board-command-rail ${railMode}`}>
@@ -72,7 +74,8 @@ export default function IXIMachineRail({
   onClick={e => {
     e.preventDefault();
     e.stopPropagation();
-    onRailSend?.(listing);
+    if (demo) demo.onAction("Send machine");
+    else onRailSend?.(listing);
   }}
   aria-label="Send machine"
 />

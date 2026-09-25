@@ -1,12 +1,12 @@
 import Link from "next/link";
 import { atlasGuides, getAtlasGuide } from "../../lib/ixi-atlas/guideRegistry.mjs";
 import { atlasLessonHref } from "../../lib/ixi-atlas/helpRoutes.mjs";
-import { atlasAssemblyHref } from "../../lib/ixi-atlas/navigation.mjs";
+import { atlasAssemblyHref, atlasFamilyHref } from "../../lib/ixi-atlas/navigation.mjs";
 import styles from "./IXITechnicalAtlas.module.css";
 
 export default function AtlasFieldGuide({ topic }) {
   const guide = getAtlasGuide(topic);
-  const demoHref = guide.demo === "chassis" ? atlasAssemblyHref("chassis") : atlasAssemblyHref("machine", guide.demo === "machine" ? "object" : guide.demo);
+  const demoHref = guide.demo?.startsWith("family:") ? atlasFamilyHref(guide.demo.split(":")[1]) : guide.demo === "chassis" ? atlasAssemblyHref("chassis") : atlasAssemblyHref("machine", guide.demo === "machine" ? "object" : guide.demo);
   return <section className={styles.guideLayout} aria-label={guide.title}>
     <article className={styles.guideArticle}>
       <div className={styles.guideKicker}><span>{guide.group}</span><b>{guide.coverage}</b></div>
