@@ -159,7 +159,7 @@
   .salesDesk :global(.sales-workspace) { flex-direction:column; }
   .salesDesk :global(.sales-board) { flex:1; min-height:0; }
   .salesDesk :global(.sales-board-toolbar > button:first-child) { display:none; }
-  .salesDesk :global(.sales-scoreboard) { display:flex; overflow-x:auto; scrollbar-width:thin; }
+  .salesDesk :global(.sales-scoreboard) { display:flex; overflow-x:auto; scrollbar-width:none; }
   .salesDesk :global(.sales-scoreboard > *) { flex:0 0 94px; }
 }
 .salesDesk :global(.sales-active-deal) {display:flex;justify-content:space-between;gap:16px;padding:14px 18px;background:#202713;border-bottom:1px solid #62572b;flex-shrink:0;}
@@ -294,6 +294,7 @@
   .salesDesk :global(.sales-preserved-board),.salesDesk :global(.sales-preserved-panel){flex:none;width:100%;min-height:0}
   .salesDesk :global(.sales-preserved-board > .dash-board-scroll){flex:none;width:100%;overflow:visible}
   .salesDesk :global(.sales-panel),.salesDesk :global(.sales-calendar-scroll),.salesDesk :global(.sales-daily-list){flex:none;min-height:0;overflow:visible}
-  .salesDesk :global(.sales-work-strip){flex-wrap:nowrap;overflow-x:auto}
+  .salesDesk :global(.sales-work-strip){flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
+  .salesDesk :global(.sales-scoreboard::-webkit-scrollbar),.salesDesk :global(.sales-work-strip::-webkit-scrollbar){display:none}
   .salesDesk :global(.sales-work-strip > button){flex:0 0 auto}
 }
