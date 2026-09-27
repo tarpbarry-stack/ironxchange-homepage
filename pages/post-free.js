@@ -4524,8 +4524,40 @@ textarea:focus,
 
   .live-card-shell :global(.card.seller-mode .card-body) {
     height: auto;
-    min-height: 190px;
+    min-height: 250px;
     max-height: none;
+    padding-bottom: 30px;
+  }
+
+  .live-card-shell :global(.seller-meta-row) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 7px;
+    margin-top: 9px;
+    padding-top: 9px;
+  }
+
+  .live-card-shell :global(.seller-placement-control) {
+    width: 100%;
+    flex: none;
+  }
+
+  .live-card-shell :global(.ixi-machine-placement-control) {
+    gap: 6px;
+  }
+
+  .live-card-shell :global(.ixi-machine-placement-control button) {
+    height: 34px;
+    font-size: 10px;
+    letter-spacing: .4px;
+  }
+
+  .live-card-shell :global(.seller-stats) {
+    width: 100%;
+    margin-left: 0;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    font-size: 9px;
   }
 
   .distribution-center {
