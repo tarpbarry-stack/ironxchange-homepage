@@ -19,6 +19,8 @@ import resolveAosBrowserSession
   from "../../../lib/server/aos/resolveAosBrowserSession";
 import requestIxCorePassportEmail
   from "../../../lib/server/email/ixiPassportEmailClient.mjs";
+import { resolvePassportSharetribeListingId }
+  from "../../../lib/server/passport/loadIxCorePassport.mjs";
 
 const MAX_RECIPIENTS = 5;
 const MAX_MESSAGE_LENGTH = 500;
@@ -209,10 +211,14 @@ export default async function handler(req, res) {
     const idempotencyKey = validateIdempotencyKey(
       req.headers["idempotency-key"] || req.body?.idempotencyKey
     );
-    const listingId = String(req.body?.listingId || "").trim();
+    const requestedListingId = String(req.body?.listingId || "").trim();
+    const requestedPassportId = String(req.body?.passportId || "").trim().toUpperCase();
+    const listingId = requestedPassportId
+      ? await resolvePassportSharetribeListingId(requestedPassportId)
+      : requestedListingId;
     const clientFingerprint = getClientFingerprint(req);
     const fingerprint = createHash("sha256")
-      .update(JSON.stringify({ listingId, recipients, message }))
+      .update(JSON.stringify({ listingId, requestedPassportId, recipients, message }))
       .digest("hex");
 
     const { value, replayed } =
