@@ -122,6 +122,7 @@ export default function MyListingsV2({ inventoryMode = "owned" }) {
   const IXI_WORKSPACE_SETTINGS_ID = isSold ? "__soldWorkspaceSettings" : OWNED_SETTINGS_ID;
   const IXI_WORKSPACE_LAYOUT_ID = isSold ? "__soldWorkspaceLayout" : OWNED_LAYOUT_ID;
   const [soldQuery, setSoldQuery] = useState({ sort: "date-desc", settlement: "all", status: "all", from: "", to: "", page: 1 });
+  const [soldFiltersOpen, setSoldFiltersOpen] = useState(false);
   const [inventoryStatus, setInventoryStatus] = useState({ loading: true, error: "", total: 0, page: 1, pageSize: 24 });
   const [inventoryRevision, setInventoryRevision] = useState(0);
   const soldWorkspaceLayoutRef = useRef(null);
@@ -1563,7 +1564,8 @@ toggleSearchSurfaceRevealed
          {!inventoryStatus.loading && !inventoryStatus.error && inventoryStatus.salesSummary?.missingPriceCount > 0 && <small>{inventoryStatus.salesSummary.missingPriceCount} {inventoryStatus.salesSummary.missingPriceCount === 1 ? "sale missing its price" : "sales missing prices"}</small>}
          {!inventoryStatus.loading && !inventoryStatus.error && inventoryStatus.salesSummary?.returnedCount > 0 && <small>Returned sales excluded from total</small>}
        </div>
-       <div className="sold-filters">
+       <button type="button" className="sold-filter-toggle" aria-expanded={soldFiltersOpen} aria-controls="sold-filter-fields" onClick={() => setSoldFiltersOpen(open => !open)}>FILTER SALES <span aria-hidden="true">{soldFiltersOpen ? "−" : "+"}</span></button>
+       <div id="sold-filter-fields" className="sold-filters" data-mobile-open={soldFiltersOpen}>
        <label>Settlement<select value={soldQuery.settlement} onChange={event => setSoldQuery(current => ({ ...current, settlement: event.target.value, page: 1 }))}><option value="all">All</option><option value="open">Open</option><option value="closed">Closed</option></select></label>
        <label>Sale status<select value={soldQuery.status} onChange={event => setSoldQuery(current => ({ ...current, status: event.target.value, page: 1 }))}><option value="all">All sales</option><option value="sold">Sold</option><option value="returned">Returned</option></select></label>
        <label>From<input type="date" value={soldQuery.from} onChange={event => setSoldQuery(current => ({ ...current, from: event.target.value, page: 1 }))} /></label>
@@ -1651,6 +1653,7 @@ toggleSearchSurfaceRevealed
         .sold-value b { font-size:28px; line-height:1.15; font-weight:700; letter-spacing:-.025em; color:#ffcc00; font-variant-numeric:tabular-nums; overflow-wrap:anywhere; }
         .sold-scoreboard small { font-size:12px; line-height:1.4; color:#b7c1b7; }
         .sold-filters { display:flex; flex-wrap:wrap; align-items:end; gap:12px; max-width:100%; }
+        .sold-filter-toggle { display:none; }
         .sold-toolbar label { display:grid; gap:8px; font-size:12px; line-height:1.4; font-weight:550; color:#b7c1b7; }
         .sold-toolbar select, .sold-toolbar input, .sold-toolbar button { box-sizing:border-box; background:#0c100c; color:#eee; border:1px solid #586058; border-radius:6px; padding:10px 12px; height:42px; min-width:0; font-family:inherit; font-size:13px; line-height:20px; font-weight:500; color-scheme:dark; }
         .sold-toolbar input { width:150px; }
@@ -1659,8 +1662,13 @@ toggleSearchSurfaceRevealed
         .sold-toolbar :is(input,select,button):focus-visible { outline:2px solid #ffcc00; outline-offset:3px; }
         .sold-toolbar summary { font-size:13px; line-height:1.5; cursor:pointer; }
         @media(max-width:760px) {
-          .sold-toolbar { padding:18px; gap:20px; }
-          .sold-filters { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); width:100%; }
+          .sold-toolbar { padding:12px 14px; gap:8px; margin:10px 0; }
+          .sold-scoreboard { gap:4px; width:100%; }
+          .sold-value { gap:4px 8px; }
+          .sold-filter-toggle { display:flex; justify-content:space-between; align-items:center; width:100%; min-height:44px; height:auto; text-align:left; color:#ffcc00; font-weight:700; }
+          .sold-filter-toggle span { font-size:20px; line-height:1; }
+          .sold-filters { display:none; grid-template-columns:repeat(2,minmax(0,1fr)); width:100%; gap:10px; }
+          .sold-filters[data-mobile-open="true"] { display:grid; }
           .sold-toolbar input { width:100%; }
           .sold-value b { font-size:26px; }
         }
