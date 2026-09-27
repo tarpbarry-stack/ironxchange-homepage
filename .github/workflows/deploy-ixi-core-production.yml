@@ -122,6 +122,27 @@ jobs:
             sleep 2
           done
           [[ -n "$subscription_arn" && "$subscription_arn" != "None" && "$subscription_arn" != "PendingConfirmation" ]]
+          destination_name=ixi-passport-communication-lifecycle
+          destination_json="$(jq -cn --arg topic "$IXI_SES_EVENT_TOPIC_ARN" '{
+            Enabled: true,
+            MatchingEventTypes: ["DELIVERY","DELIVERY_DELAY","BOUNCE","COMPLAINT","REJECT","RENDERING_FAILURE"],
+            SnsDestination: {TopicArn: $topic}
+          }')"
+          existing_destination="$(aws sesv2 get-configuration-set-event-destinations --region "$AWS_REGION" \
+            --configuration-set-name "$IXI_SES_CONFIGURATION_SET" \
+            --query "EventDestinations[?Name=='$destination_name'].Name | [0]" \
+            --output text)"
+          if [[ "$existing_destination" == "$destination_name" ]]; then
+            aws sesv2 update-configuration-set-event-destination --region "$AWS_REGION" \
+              --configuration-set-name "$IXI_SES_CONFIGURATION_SET" \
+              --event-destination-name "$destination_name" \
+              --event-destination "$destination_json"
+          else
+            aws sesv2 create-configuration-set-event-destination --region "$AWS_REGION" \
+              --configuration-set-name "$IXI_SES_CONFIGURATION_SET" \
+              --event-destination-name "$destination_name" \
+              --event-destination "$destination_json"
+          fi
           event_destination="$(aws sesv2 get-configuration-set-event-destinations --region "$AWS_REGION" \
             --configuration-set-name "$IXI_SES_CONFIGURATION_SET" \
             --query "EventDestinations[?Name=='ixi-passport-communication-lifecycle' && Enabled==\`true\` && SnsDestination.TopicArn=='$IXI_SES_EVENT_TOPIC_ARN'].Name | [0]" \
