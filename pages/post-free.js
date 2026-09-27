@@ -4553,11 +4553,7 @@ textarea:focus,
   }
 
   .live-card-shell :global(.seller-stats) {
-    width: 100%;
-    margin-left: 0;
-    justify-content: flex-start;
-    flex-wrap: wrap;
-    font-size: 9px;
+    display: none;
   }
 
   .distribution-center {
