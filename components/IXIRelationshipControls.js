@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 
 const COLOR_CONTROLS = [
   "none",
@@ -60,6 +60,7 @@ export default function IXIRelationshipControls({
   parkBrakeOn = false,
   onToggleParkBrake = () => {}
 }) {
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const existingColors = getExistingColors(ixiCardState);
   const existingOutlines = getExistingOutlines(ixiCardState);
 
@@ -90,8 +91,27 @@ export default function IXIRelationshipControls({
     <div
       className={`ixi-relationship-shell ${
         railRevealed ? "revealed" : ""
-      } ${machineControlsHinted ? "machine-hinted" : ""} ${className}`}
+      } ${machineControlsHinted ? "machine-hinted" : ""} ${workspaceToolbars ? "aos-workspace-filters" : ""} ${className}`}
     >
+      {workspaceToolbars && <div className="aos-mobile-filters">
+        <button type="button" className="aos-mobile-filters-toggle" aria-expanded={mobileFiltersOpen}
+          onClick={() => setMobileFiltersOpen(open => !open)}>
+          <span>MACHINE FILTERS</span><strong>{mobileFiltersOpen ? "CLOSE −" : "FILTER +"}</strong>
+        </button>
+        {mobileFiltersOpen && <div className="aos-mobile-filter-options" aria-label="Machine relationship filters">
+          <div className="aos-mobile-filter-group"><span>COLORS</span><div>
+            {COLOR_CONTROLS.map(color => <button key={color} type="button"
+              className={`aos-mobile-color color-${color} stage-${getColorStage(color)}`}
+              aria-label={`Filter ${color}`} aria-pressed={activeColors.includes(color)}
+              onClick={() => onToggleColor(color)}>{color === "none" ? "ALL" : color.toUpperCase()}</button>)}
+          </div></div>
+          <div className="aos-mobile-filter-group"><span>OUTLINE</span><div>
+            {OUTLINE_CONTROLS.map(outline => <button key={outline} type="button"
+              aria-pressed={String(activeOutline) === String(outline)}
+              onClick={() => handleOutlineClick(outline)}>{outline}</button>)}
+          </div></div>
+        </div>}
+      </div>}
       <div className="ixi-relationship-head">
         <span>IXI Machine Controls™</span>
 
@@ -281,6 +301,7 @@ export default function IXIRelationshipControls({
       )}
 
       <style jsx>{`
+        .aos-mobile-filters { display: none; }
         .aos-toolbar-destinations { display: flex; justify-content: space-between; gap: 12px; padding: 8px 0; }
         .aos-toolbar-destinations button { border: 1px solid #445045; border-radius: 4px; background: #15201b; color: #c2cfc4; padding: 5px 12px; font: inherit; font-size: 10px; cursor: pointer; }
         .aos-toolbar-destinations button[aria-pressed="true"] { color: #ffc400; border-color: #ffc400; }
@@ -1037,6 +1058,21 @@ export default function IXIRelationshipControls({
   box-shadow: none;
 }
         @media (max-width: 850px) {
+          .ixi-relationship-shell.aos-workspace-filters { margin: 4px auto 0; }
+          .aos-workspace-filters .ixi-relationship-head,
+          .aos-workspace-filters .aos-toolbar-destinations,
+          .aos-workspace-filters .ixi-relationship-controls,
+          .aos-workspace-filters .ixi-mobile-nav-row { display: none; }
+          .aos-workspace-filters .aos-mobile-filters { display: block; border: 1px solid #333b31; background: #101411; }
+          .aos-mobile-filters-toggle { display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 44px; padding: 0 12px; border: 0; background: transparent; color: #d8ddd2; font: inherit; font-size: 11px; font-weight: 800; letter-spacing: .06em; cursor: pointer; }
+          .aos-mobile-filters-toggle strong { color: #ffc400; font-size: 10px; }
+          .aos-mobile-filters-toggle:focus-visible, .aos-mobile-filter-options button:focus-visible { outline: 2px solid #ffc400; outline-offset: -2px; }
+          .aos-mobile-filter-options { display: grid; gap: 10px; padding: 10px 12px 12px; border-top: 1px solid #333b31; }
+          .aos-mobile-filter-group > span { display: block; margin-bottom: 7px; color: #aeb7aa; font-size: 10px; font-weight: 800; }
+          .aos-mobile-filter-group > div { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; }
+          .aos-mobile-filter-group > div::-webkit-scrollbar { display: none; }
+          .aos-mobile-filter-options button { flex: 0 0 auto; min-height: 44px; padding: 0 10px; border: 1px solid #465043; border-radius: 3px; background: #1c241d; color: #e5e8df; font: inherit; font-size: 10px; font-weight: 750; cursor: pointer; }
+          .aos-mobile-filter-options button[aria-pressed="true"] { border-color: #ffc400; color: #ffc400; }
           .ixi-relationship-shell {
             width: 100%;
             margin: 14px auto 0;
