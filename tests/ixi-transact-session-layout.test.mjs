@@ -44,6 +44,7 @@ test("shared layout retains both workspaces and unsaved inputs, resets on author
   new Function("require", "module", "exports", compiled.code)(name => {
     if (name === "next/router") return { useRouter: () => router };
     if (name === "next/dynamic") return loader => loader.toString().includes("CommandCenter") ? Records : Ledger;
+    if (name.endsWith("IXIMobileEnvironmentNav.jsx")) return { __esModule: true, default: () => null };
     if (name.endsWith("DashboardClient")) return clients;
     if (name.endsWith("loadIXIOwnedListings")) return { loadIXIOwnedListings: async () => [] };
     if (name.endsWith("IXIMosEnvironmentProjection")) return { loadIXICanonicalMosEnvironment: async () => ({ isAuthenticated: true, entity: { entityId: authority, passportId: authority } }) };
