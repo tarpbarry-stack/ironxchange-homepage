@@ -7,7 +7,6 @@ import IXIRelationshipControls from "../IXIRelationshipControls";
 export default function IXIChassisControls({
   listings = [],
   workspaceToolbars = false,
-  mobileObjectRow = null,
   searchQuery,
   setSearchQuery,
   workspaceFilters,
@@ -75,8 +74,6 @@ export default function IXIChassisControls({
             setSortMode={setSavedBoardMode}
           />}
         </div>
-
-        {mobileObjectRow}
 
        <IXIRelationshipControls
   workspaceToolbars={workspaceToolbars}
