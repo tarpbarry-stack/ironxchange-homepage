@@ -46,7 +46,9 @@ export default function IXIDashboard({ salesDeskContext = null }) {
   const initialBoard = useRef(false), dirtyRef = useRef(dirtyKeys), stateRef = useRef(states), storageRef = useRef(null);
   const writeQueues = useRef(new Map()), mediaRequests = useRef(new Set()), mounted = useRef(true);
   dirtyRef.current = dirtyKeys; stateRef.current = states;
-  const userId = String(auth.user?.id?.uuid || auth.user?.id || "");
+  // Sales Desk bootstrap has already verified this actor. Do not block company
+  // inventory on the separate Sharetribe profile request.
+  const userId = String(auth.user?.id?.uuid || auth.user?.id || salesDeskContext?.context?.actorId || "");
   const storageKey = userId ? `${salesDeskContext ? `ixi:sales-board:v1:${salesDeskContext.context.entityId}` : "ixi:dashboard:v1"}:${userId}` : "";
 
   useEffect(() => { mounted.current = true; return () => { mounted.current = false; }; }, []);
