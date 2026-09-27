@@ -3609,6 +3609,25 @@ outline: none;
   display: block;
 }
 
+  .yard-head {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    margin: 6px auto 12px;
+    padding: 12px;
+  }
+
+  .yard-identity { min-width: 0; }
+  .yard-copy { min-width: 0; }
+  .yard-copy h1 { font-size: clamp(18px, 5vw, 23px); line-height: 1.12; overflow-wrap: anywhere; }
+  .yard-copy p { font-size: 11px; }
+  .yard-stats { justify-content: flex-start; gap: 8px 18px; flex-wrap: wrap; }
+  .yard-count { gap: 5px; }
+  .yard-count strong { font-size: 16px; }
+  .yard-count span { font-size: 9px; margin-top: 2px; }
+  .yard-value { min-width: 0; }
+
   .workspace-head {
   display: flex;
   flex-direction: row;
