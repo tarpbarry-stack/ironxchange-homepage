@@ -4369,10 +4369,20 @@ textarea:focus,
    machine details ahead of the large desktop card preview. */
 @media (max-width: 600px) {
   .launch-wrap {
+    display: flex;
+    flex-direction: column;
     width: 100%;
     min-width: 0;
     padding: 8px 12px 40px;
   }
+
+  .launch-header { order: 0; }
+  .photo-workbench { order: 1; }
+  .inventory-rail { order: 2; }
+  .preview-zone { order: 3; }
+  .lower-grid { order: 4; }
+  .footer-ops { order: 5; }
+  .distribution-center { order: 6; }
 
   .launch-header {
     display: grid;
@@ -4462,7 +4472,7 @@ textarea:focus,
   }
 
   .studio-grid {
-    min-width: 0;
+    display: contents;
   }
 
   .inventory-rail {
@@ -4519,8 +4529,69 @@ textarea:focus,
   }
 
   .distribution-center {
-    order: 3;
+    width: 100%;
     min-width: 0;
+    height: auto;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    padding: 16px;
+    margin-top: 12px;
+    overflow: visible;
+  }
+
+  .distribution-head,
+  .utility-grid {
+    grid-column: 1 / -1;
+  }
+
+  .distribution-head h2 {
+    font-size: 20px;
+    line-height: 1.15;
+  }
+
+  .distribution-head p {
+    max-width: 40ch;
+    font-size: 13px;
+  }
+
+  .launch-btn {
+    width: 100%;
+    min-width: 0;
+    min-height: 72px;
+    padding: 11px;
+    gap: 8px;
+  }
+
+  .launch-btn i {
+    flex: 0 0 22px;
+  }
+
+  .launch-btn div {
+    min-width: 0;
+  }
+
+  .launch-btn strong {
+    font-size: 13px;
+    line-height: 1.15;
+  }
+
+  .launch-btn span {
+    font-size: 11px;
+    line-height: 1.25;
+    overflow-wrap: anywhere;
+  }
+
+  .utility-grid {
+    width: 100%;
+    min-width: 0;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .utility-grid button {
+    min-width: 0;
+    min-height: 48px;
+    overflow-wrap: anywhere;
   }
 
   .card-nav-row {
@@ -4531,6 +4602,16 @@ textarea:focus,
 
   .card-nav-row button[disabled] {
     display: none;
+  }
+}
+
+@media (max-width: 374px) {
+  .distribution-center {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .launch-btn {
+    min-height: 56px;
   }
 }
       `}</style>
