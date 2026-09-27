@@ -11,7 +11,7 @@ export function createSalesDeskHandler(deps = {}) {
   return async function handler(req,res) {
     res.setHeader("Cache-Control","private, no-store, max-age=0");
     const path = `/${(Array.isArray(req.query.path) ? req.query.path : []).map(encodeURIComponent).join("/")}`;
-    const valid = req.method === "GET" && /^\/(?:companies|inventory|team|context|bootstrap|people|calendar|work|financial\/[a-zA-Z0-9_-]+|related\/(?:contacts|deals)\/[a-zA-Z0-9_-]+|records\/(?:contacts|deals|tasks|notes|boards|packages|inquiries)(?:\/[a-zA-Z0-9_-]+)?)$/.test(path) || req.method === "POST" && /^\/(?:commands|inquiries\/sync|calendar\/preview|team|invitations(?:\/(?:accept|revoke))?|import\/(?:preview|commit))$/.test(path);
+    const valid = req.method === "GET" && /^\/(?:companies|inventory|team|context|bootstrap|people|calendar|work|financial\/[a-zA-Z0-9_-]+|related\/(?:contacts|deals)\/[a-zA-Z0-9_-]+|records\/(?:contacts|deals|tasks|notes|boards|packages|inquiries)(?:\/[a-zA-Z0-9_-]+)?)$/.test(path) || req.method === "POST" && /^\/(?:commands|inquiries\/(?:sync|manual)|calendar\/preview|team|invitations(?:\/(?:accept|revoke))?|import\/(?:preview|commit))$/.test(path);
     if (!valid) return res.status(405).json({ok:false,error:{message:"Unsupported Sales Desk operation."}});
     if (!mutationOriginIsValid(req)) return res.status(403).json({ok:false,error:{message:"Cross-origin request denied."}});
     try {

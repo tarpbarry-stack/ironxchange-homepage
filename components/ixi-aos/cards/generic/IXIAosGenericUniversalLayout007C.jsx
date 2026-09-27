@@ -45,10 +45,10 @@ export default function IXIAosGenericUniversalLayout007C(props) {
           height: 118px !important;
           min-height: 118px !important;
           flex: none !important;
-          border-color: #3b423d !important;
+          border-color: #404040 !important;
           background:
             linear-gradient(180deg, rgba(255,255,255,.025), transparent 34%),
-            #090c0a !important;
+            #0b0b0b !important;
           box-shadow:
             inset 0 1px 0 rgba(255,255,255,.035),
             inset 0 -1px 0 rgba(0,0,0,.65) !important;
@@ -65,7 +65,7 @@ export default function IXIAosGenericUniversalLayout007C(props) {
           height: 18px !important;
           padding: 0 6px !important;
           border-color: rgba(255,196,0,.48) !important;
-          background: rgba(7,9,8,.92) !important;
+          background: rgba(9,9,9,.92) !important;
           font-size: 5px !important;
         }
 
@@ -76,10 +76,10 @@ export default function IXIAosGenericUniversalLayout007C(props) {
           height: 118px !important;
           min-height: 118px !important;
           flex: none !important;
-          border-color: #3b423d !important;
+          border-color: #404040 !important;
           background:
             linear-gradient(180deg, rgba(255,255,255,.018), transparent 44%),
-            #101310 !important;
+            #121212 !important;
           box-shadow:
             inset 0 1px 0 rgba(255,255,255,.025),
             inset 0 -1px 0 rgba(0,0,0,.55) !important;
@@ -88,9 +88,9 @@ export default function IXIAosGenericUniversalLayout007C(props) {
         .ixi-universal-card-007c .u007-details .u007-section-title {
           height: 22px !important;
           padding: 0 8px !important;
-          border-bottom-color: #2b302c !important;
+          border-bottom-color: #2f2f2f !important;
           background:
-            linear-gradient(180deg, #191d1a, #131714) !important;
+            linear-gradient(180deg, #1c1c1c, #161616) !important;
           color: #ffc400 !important;
           font-size: 6px !important;
           letter-spacing: .055em !important;
@@ -106,17 +106,17 @@ export default function IXIAosGenericUniversalLayout007C(props) {
           grid-template-columns: minmax(0, 54px) minmax(0, 1fr) !important;
           gap: 5px !important;
           padding: 4px 6px !important;
-          border-bottom-color: #242925 !important;
+          border-bottom-color: #282828 !important;
         }
 
         .ixi-universal-card-007c .u007-detail-row span {
-          color: #8d9690 !important;
+          color: #949494 !important;
           font-size: 5px !important;
           letter-spacing: .025em !important;
         }
 
         .ixi-universal-card-007c .u007-detail-row strong {
-          color: #f0f2f0 !important;
+          color: #f1f1f1 !important;
           font-size: 7px !important;
           text-align: right !important;
         }
@@ -128,10 +128,10 @@ export default function IXIAosGenericUniversalLayout007C(props) {
           height: auto !important;
           min-height: 0 !important;
           flex: none !important;
-          border-color: #343a35 !important;
+          border-color: #383838 !important;
           background:
             linear-gradient(180deg, rgba(255,255,255,.012), transparent 36%),
-            #0f120f !important;
+            #111111 !important;
           box-shadow:
             inset 0 1px 0 rgba(255,255,255,.025),
             inset 0 -1px 0 rgba(0,0,0,.58) !important;
@@ -140,7 +140,7 @@ export default function IXIAosGenericUniversalLayout007C(props) {
         .ixi-universal-card-007c .u007-relationships .u007-section-title {
           height: 21px !important;
           padding: 0 8px !important;
-          background: linear-gradient(180deg, #171b18, #121512) !important;
+          background: linear-gradient(180deg, #1a1a1a, #141414) !important;
           letter-spacing: .06em !important;
         }
 
@@ -160,8 +160,8 @@ export default function IXIAosGenericUniversalLayout007C(props) {
         /* Keep the standard 007A command strip, child deck and IXI rail intact. */
         .ixi-universal-card-007c .u007-commands {
           background:
-            linear-gradient(180deg, #141814, #0d100e) !important;
-          border-color: #343a35 !important;
+            linear-gradient(180deg, #171717, #0f0f0f) !important;
+          border-color: #383838 !important;
           box-shadow: inset 0 1px 0 rgba(255,255,255,.025) !important;
         }
 
@@ -171,9 +171,9 @@ export default function IXIAosGenericUniversalLayout007C(props) {
         }
 
         .ixi-universal-card-007c .u007-child-rail {
-          border-top-color: #303632 !important;
+          border-top-color: #343434 !important;
           background:
-            linear-gradient(180deg, #0d100e, #080a09) !important;
+            linear-gradient(180deg, #0f0f0f, #0a0a0a) !important;
         }
       `}</style>
     </div>

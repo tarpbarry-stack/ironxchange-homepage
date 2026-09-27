@@ -2,6 +2,7 @@ import {
   createInstance,
   types as sdkTypes
 } from "sharetribe-flex-integration-sdk";
+import { getPassportSharetribeListingId } from "../../../lib/passport/passportSources.mjs";
 
 const { UUID } = sdkTypes;
 
@@ -196,9 +197,7 @@ export default async function handler(
       );
 
     const listingId =
-      clean(
-        passport.sourceId
-      );
+      getPassportSharetribeListingId(passport);
 
     if (!listingId) {
       return res
@@ -206,7 +205,7 @@ export default async function handler(
         .json({
           ok: false,
           error:
-            "Passport does not contain a sourceId"
+            "Passport does not contain a verified Sharetribe listing source"
         });
     }
 

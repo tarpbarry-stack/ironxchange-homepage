@@ -124,12 +124,14 @@ test("TRAN$ACT login returns the authenticated operator to the desktop", () => {
 
 test("desktop styling preserves the permanent professional shell and responsive safety", () => {
   const styles = read("components/ixi-command-center/IXIAosCommandCenter.module.css");
+  const globalStyles = read("styles/global.css");
 
   assert.match(styles, /\.topbar\s*\{[\s\S]*position:\s*sticky/u);
   assert.match(styles, /grid-template-columns:\s*250px minmax\(0, 1fr\) 330px/u);
   assert.match(styles, /@media \(max-width: 1220px\)/u);
   assert.match(styles, /overflow-x:\s*hidden/u);
-  assert.match(styles, /--gold:\s*#ffc400/u);
+  assert.match(styles, /--gold:\s*var\(--ix-yellow\)/u);
+  assert.match(globalStyles, /--ix-yellow:\s*#ffc400/ui);
   assert.match(styles, /font-family:\s*'Inter Variable', Inter, ui-sans-serif/u);
   assert.match(styles, /--tx-type-meta:\s*12px/u);
   assert.match(styles, /--tx-type-body:\s*14px/u);

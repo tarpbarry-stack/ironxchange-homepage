@@ -27,6 +27,10 @@ test("hidden entry opens a thirty-day session and the route veil protects pages"
   assert.match(entry, /SameSite=Lax/u);
   assert.match(entry, /res\.redirect\(303, "\/gateway"\)/u);
   assert.match(middleware, /request\.cookies\.get\(ENTRY_COOKIE\)/u);
+  assert.match(middleware, /"\/text-consent"/u);
+  assert.match(middleware, /"\/terms"/u);
+  assert.match(middleware, /"\/privacy"/u);
+  assert.match(middleware, /!isPublicComplianceRoute/u);
   assert.match(middleware, /NextResponse\.redirect\(cover\)/u);
   assert.match(middleware, /X-Robots-Tag/u);
 });

@@ -22,10 +22,10 @@ export default function PrivacyPage() {
           <div className="legal-card">
             <span>IronXchange Legal</span>
             <h1>Privacy Policy</h1>
-            <p className="updated">Last updated: September 13, 2026</p>
+            <p className="updated">Last updated: September 27, 2026</p>
 
             <p>
-              IronXchange operates an online marketplace platform that enables users
+              Sales Inc. operates IronXchange, an online marketplace platform that enables users
               to browse, list, promote, and inquire about equipment and related
               services. This Privacy Policy explains how we collect, use, disclose,
               and otherwise process personal information when you use IronXchange.
@@ -33,7 +33,7 @@ export default function PrivacyPage() {
 
             <h2>1. Data Controller</h2>
             <p>
-              IronXchange is responsible for the processing of personal information
+              Sales Inc., operating IronXchange, is responsible for the processing of personal information
               described in this Privacy Policy.
             </p>
             <p>
@@ -100,12 +100,12 @@ export default function PrivacyPage() {
 
             <h2>8. Text Passport Communications</h2>
             <p>
-              When you enter a mobile number in the Text Passport form, check
-              the consent box, and select Send Passport, you request one
-              transactional SMS or MMS containing information about the selected
-              equipment listing. Message frequency is one message per request.
-              Message and data rates may apply. Reply STOP to opt out or HELP
-              for help. Consent is not a condition of purchase.
+              When you enter a mobile number and affirmatively select the SMS
+              consent box, you may receive text messages from Sales Inc., operating
+              IronXchange, concerning machine inquiries, requested Machine Passports,
+              transaction updates, and service communications. Message frequency
+              varies. Message and data rates may apply. Reply STOP to opt out or
+              HELP for help. Consent is not a condition of purchase.
             </p>
             <p>
               IronXchange does not sell or share mobile numbers with third

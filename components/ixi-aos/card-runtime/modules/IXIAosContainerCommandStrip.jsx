@@ -97,10 +97,10 @@ export default function IXIAosContainerCommandStrip({
 
         button:not(:disabled):hover,
         button:not(:disabled):focus-visible {
-          border-color: rgba(0,194,255,.72);
-          background: rgba(0,194,255,.10);
-          color: #00c2ff;
-          box-shadow: 0 0 0 1px rgba(0,194,255,.08);
+          border-color: rgba(255,196,0,.72);
+          background: rgba(255,196,0,.08);
+          color: var(--ix-yellow,#ffc400);
+          box-shadow: 0 0 0 1px rgba(255,196,0,.08);
           outline: none;
         }
 
@@ -110,7 +110,7 @@ export default function IXIAosContainerCommandStrip({
         }
 
         .command-symbol {
-          color: #00c2ff;
+          color: var(--ix-yellow,#ffc400);
           font-size: 11px;
           font-weight: 950;
         }

@@ -28,14 +28,14 @@ export default function IXIAosCardSkinSystemStyles() {
       .f5:has(.ixi-aos-card-header-controls.skin-v12) {
         --skin-accent:#ffc400;
         --skin-accent-soft:rgba(255,196,0,.08);
-        --skin-canvas:#090b0a;
-        --skin-shell:#101310;
-        --skin-shell-2:#141815;
-        --skin-shell-3:#191e1a;
-        --skin-line:#343a35;
-        --skin-line-soft:#262c27;
-        --skin-text:#f4f5f4;
-        --skin-muted:#939a95;
+        --skin-canvas:#0a0a0a;
+        --skin-shell:#121212;
+        --skin-shell-2:#171717;
+        --skin-shell-3:#1c1c1c;
+        --skin-line:#383838;
+        --skin-line-soft:#2a2a2a;
+        --skin-text:#f5f5f5;
+        --skin-muted:#979797;
       }
 
       /* ============================================================
@@ -257,7 +257,7 @@ export default function IXIAosCardSkinSystemStyles() {
         border-radius:8px !important;
         overflow:visible !important;
       }
-      .ixi-aos-card-header-controls.skin-v12 { background:#0c0f0d !important; }
+      .ixi-aos-card-header-controls.skin-v12 { background:#0e0e0e !important; }
       .ixi-aos-card-header-controls.skin-steel { background:#14191d !important;border-color:#384148 !important; }
       .ixi-aos-card-header-controls.skin-blueprint { background:#09141b !important;border-color:#274554 !important; }
       .ixi-aos-card-header-controls.skin-industrial { background:#17130d !important;border-color:#463a28 !important; }

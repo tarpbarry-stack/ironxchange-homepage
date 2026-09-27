@@ -62,7 +62,8 @@ test("every operating card uses the full-width command geometry and exact handle
   assert.match(strip, /min-width: 0/u);
   assert.match(strip, /height: 23px/u);
   assert.match(strip, /bottom: 79px/u);
-  assert.match(strip, /color: #00c2ff/u);
+  assert.match(strip, /color: var\(--ix-yellow,#ffc400\)/u);
+  assert.doesNotMatch(strip, /color: #00c2ff/u);
   assert.match(strip, /onReturn\)/u);
   assert.doesNotMatch(strip, /onReturn \|\| onRecall/u);
   assert.match(runtime, /<IXIAosContainerCommandStrip[\s\S]*?onRecall=\{onRecall\}[\s\S]*?onBoard=\{onBoard\}[\s\S]*?onReturn=\{onReturn\}/u);

@@ -92,10 +92,10 @@ export default function IXIAosV12LibraryReadability() {
         min-width: 0;
         height: 24px;
         padding: 0 6px;
-        border: 1px solid #59615b;
+        border: 1px solid #5f5f5f;
         border-radius: 4px;
-        background: #0a0d0b;
-        color: #f3f5f3;
+        background: #0c0c0c;
+        color: #f4f4f4;
         font-size: 11px !important;
         font-weight: 700;
         line-height: 22px !important;

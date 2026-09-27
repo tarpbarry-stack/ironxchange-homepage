@@ -907,10 +907,10 @@ export default function IXISystemIndexCard({
 
         .membership-review-control { position: absolute; top: 4px; left: 4px; right: 4px; z-index: 20; }
         .membership-review-control button { min-height: 44px; width: 100%; border: 1px solid #a98724; border-radius: 4px; background: #252011; color: #ffd55e; font: 800 11px 'Inter Variable',sans-serif; cursor: pointer; }
-        .membership-review { position: absolute; inset: 52px 4px 4px; z-index: 21; overflow: auto; padding: 8px; background: #111510; color: #eee; font: 12px/1.35 'Inter Variable',sans-serif; }
+        .membership-review { position: absolute; inset: 52px 4px 4px; z-index: 21; overflow: auto; padding: 8px; background: #141414; color: #eee; font: 12px/1.35 'Inter Variable',sans-serif; }
         .membership-review small { display: block; margin-top: 4px; color: #ffd55e; font-size: 11px; }
         .membership-review p { margin: 0 0 8px; }
-        .membership-review button { display: block; width: 100%; min-height: 44px; margin: 4px 0; padding: 7px; border: 1px solid #565c50; border-radius: 4px; background: #1b2018; color: #fff; text-align: left; font: 700 12px 'Inter Variable',sans-serif; cursor: pointer; }
+        .membership-review button { display: block; width: 100%; min-height: 44px; margin: 4px 0; padding: 7px; border: 1px solid #5a5a5a; border-radius: 4px; background: #1e1e1e; color: #fff; text-align: left; font: 700 12px 'Inter Variable',sans-serif; cursor: pointer; }
 
         .preview-photo {
           position: relative;
@@ -1074,7 +1074,7 @@ export default function IXISystemIndexCard({
           display: grid;
           grid-template-columns: repeat(3,1fr);
           border-top: 1px solid rgba(255,255,255,.045);
-          border-bottom: 1px solid rgba(0,194,255,.10);
+          border-bottom: 1px solid rgba(255,196,0,.12);
           background: rgba(10,10,10,.96);
           z-index: 31;
         }
@@ -1097,8 +1097,8 @@ export default function IXISystemIndexCard({
         }
 
         .system-index-command-strip button:last-child { border-right: 0; }
-        .system-index-command-strip button:hover { background: rgba(0,194,255,.045); color: rgba(255,255,255,.92); }
-        .system-index-command-strip .command-icon { color: rgba(0,194,255,.82); font-size: 12px; font-weight: 950; }
+        .system-index-command-strip button:hover { background: rgba(255,196,0,.055); color: rgba(255,255,255,.96); }
+        .system-index-command-strip .command-icon { color: var(--ix-yellow,#ffc400); font-size: 12px; font-weight: 950; }
 
         .index-more-wrap { position: relative; z-index: 140; }
 

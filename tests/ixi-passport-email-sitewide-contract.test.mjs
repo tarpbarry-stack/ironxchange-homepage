@@ -34,6 +34,24 @@ test("Passport delivery telemetry completes only after confirmed success", () =>
   assert.ok(response > requested);
   assert.ok(completed > response);
   assert.ok(failed > completed);
+  assert.match(dialog, /email_accepted/u);
+  assert.doesNotMatch(dialog, /result: "email_delivered"/u);
+});
+
+test("owner communication history is authenticated, Passport-bound and shared", () => {
+  const dialog = read("components/passport/PassportEmailDialog.jsx");
+  const provider = read("components/ixi-marketplace/ListingShareProvider.jsx");
+  const api = read("pages/api/communications/passports/[passportId]/history.js");
+  const client = read("lib/server/email/ixiPassportEmailClient.mjs");
+
+  assert.match(provider, /historyEnabled/u);
+  assert.match(dialog, /Communication History/u);
+  assert.match(dialog, /transact-document/u);
+  assert.match(dialog, /ACCEPTED BY EMAIL PROVIDER/u);
+  assert.match(api, /resolveAosBrowserSession/u);
+  assert.match(api, /authorId !== clean\(session\.userId\)/u);
+  assert.match(api, /recordedPassportId !== passportId/u);
+  assert.match(client, /\/communications\/v1\/passports\/\$\{encodeURIComponent\(normalizedPassportId\)\}\/history/u);
 });
 
 test("Text Passport presents explicit one-time consent before provider activation", () => {
@@ -60,8 +78,27 @@ test("Text Passport presents explicit one-time consent before provider activatio
     provider,
     /NEXT_PUBLIC_IXI_TEXT_PASSPORT_ENABLED === "true"/u
   );
-  assert.match(proof, /initialChannel="text"/u);
-  assert.match(proof, /textDeliveryEnabled=\{false\}/u);
+  assert.match(proof, /\.\/text-consent/u);
+});
+
+test("public SMS consent is explicit, optional and durably forwarded", () => {
+  const page = read("pages/text-consent.js");
+  const api = read("pages/api/communications/text-consent.js");
+  const client = read("lib/server/communications/ixiTextConsentClient.mjs");
+
+  assert.match(page, /Sales Inc\., operating IronXchange/u);
+  assert.match(page, /type="checkbox"/u);
+  assert.match(page, /Consent is not a condition of purchase/u);
+  assert.match(page, /Reply <b>STOP<\/b> to opt out or <b>HELP<\/b>/u);
+  assert.match(page, /href="\/terms"/u);
+  assert.match(page, /href="\/privacy"/u);
+  assert.match(page, /This form records consent only\. It does not send a text message\./u);
+  assert.doesNotMatch(page, /defaultChecked/u);
+  assert.match(api, /sourceIpHash: hash\(address\)/u);
+  assert.match(api, /userAgentHash: hash\(userAgent\)/u);
+  assert.match(api, /policyVersion: POLICY_VERSION/u);
+  assert.match(client, /\/communications\/v1\/text-consents/u);
+  assert.match(client, /X-IXI-Internal-Signature/u);
 });
 
 test("Text Passport legal surfaces disclose the transactional program", () => {
@@ -69,7 +106,8 @@ test("Text Passport legal surfaces disclose the transactional program", () => {
   const terms = read("pages/terms.js");
 
   for (const source of [privacy, terms]) {
-    assert.match(source, /one message per\s+request/iu);
+    assert.match(source, /Sales Inc\., operating\s+IronXchange/iu);
+    assert.match(source, /Message frequency\s+varies/iu);
     assert.match(source, /Message and data rates may apply/u);
     assert.match(source, /Reply STOP to opt out or\s+HELP\s+for help/u);
     assert.match(source, /Consent is not a condition of purchase/u);
@@ -123,6 +161,14 @@ test("machine console Email actions use the same Passport dialog", () => {
       facePath
     );
   }
+});
+
+test("seller machine face uses the canonical Passport actions", () => {
+  const face = read("components/ixi-machine-object/IXISellerMachineObjectFace2.js");
+  assert.match(face, /openIXIPassportEmail\(listing, \{ historyEnabled: true \}\)/u);
+  assert.match(face, /initialChannel: "text", historyEnabled: true/u);
+  assert.match(face, /\/p\/\$\{encodeURIComponent\(passportId\)\}/u);
+  assert.doesNotMatch(face, /<button type="button">EMAIL<\/button>/u);
 });
 
 test("Live and the public slug expose the exact Passport email dialog", () => {

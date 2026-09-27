@@ -36,7 +36,7 @@ export default function IXIAosV12CardPolish() {
       .ixi-generic-container-v12 .gcv12-section-scroll,
       .ixi-generic-container-v12 .gcv12-editor-scroll {
         scrollbar-width: thin;
-        scrollbar-color: #3d4540 #090b0a;
+        scrollbar-color: #434343 #0b0b0b;
       }
       .ixi-generic-container-v12 .gcv12-body::-webkit-scrollbar,
       .ixi-generic-container-v12 .gcv12-section-scroll::-webkit-scrollbar,
@@ -47,24 +47,24 @@ export default function IXIAosV12CardPolish() {
       .ixi-generic-container-v12 .gcv12-body::-webkit-scrollbar-track,
       .ixi-generic-container-v12 .gcv12-section-scroll::-webkit-scrollbar-track,
       .ixi-generic-container-v12 .gcv12-editor-scroll::-webkit-scrollbar-track {
-        background: #090b0a;
+        background: #0b0b0b;
       }
       .ixi-generic-container-v12 .gcv12-body::-webkit-scrollbar-thumb,
       .ixi-generic-container-v12 .gcv12-section-scroll::-webkit-scrollbar-thumb,
       .ixi-generic-container-v12 .gcv12-editor-scroll::-webkit-scrollbar-thumb {
-        background: #3d4540;
-        border: 1px solid #151916;
+        background: #434343;
+        border: 1px solid #181818;
         border-radius: 999px;
       }
       .ixi-generic-container-v12 .gcv12-body::-webkit-scrollbar-thumb:hover,
       .ixi-generic-container-v12 .gcv12-section-scroll::-webkit-scrollbar-thumb:hover,
       .ixi-generic-container-v12 .gcv12-editor-scroll::-webkit-scrollbar-thumb:hover {
-        background: #555f58;
+        background: #5c5c5c;
       }
       .ixi-generic-container-v12 .gcv12-body::-webkit-scrollbar-corner,
       .ixi-generic-container-v12 .gcv12-section-scroll::-webkit-scrollbar-corner,
       .ixi-generic-container-v12 .gcv12-editor-scroll::-webkit-scrollbar-corner {
-        background: #090b0a;
+        background: #0b0b0b;
       }
     `}</style>
   );

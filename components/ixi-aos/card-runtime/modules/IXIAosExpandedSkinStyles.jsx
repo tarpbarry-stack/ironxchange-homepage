@@ -13,9 +13,9 @@ export default function IXIAosExpandedSkinStyles() {
       .f3-financial:has(.skin-default),
       .f4-obligations:has(.skin-default),
       .f5:has(.skin-default) {
-        --xs-bg:#090b0a;--xs-head:#0d100e;--xs-shell:#111512;--xs-shell2:#161b17;
-        --xs-row:#101411;--xs-row2:#151a16;--xs-line:#343b35;--xs-soft:#252b26;
-        --xs-text:#f4f5f4;--xs-muted:#929a94;--xs-accent:#ffc400;
+        --xs-bg:#0b0b0b;--xs-head:#0f0f0f;--xs-shell:#141414;--xs-shell2:#1a1a1a;
+        --xs-row:#131313;--xs-row2:#191919;--xs-line:#393939;--xs-soft:#292929;
+        --xs-text:#f5f5f5;--xs-muted:#989898;--xs-accent:#ffc400;
       }
 
       .ixi-location-overview:has(.skin-ledger),
@@ -43,9 +43,9 @@ export default function IXIAosExpandedSkinStyles() {
       .f3-financial:has(.skin-stock),
       .f4-obligations:has(.skin-stock),
       .f5:has(.skin-stock) {
-        --xs-bg:#e8eee4;--xs-head:#dce7d8;--xs-shell:#f3f6ef;--xs-shell2:#e6eee2;
-        --xs-row:#edf3e9;--xs-row2:#e1eadc;--xs-line:#71846c;--xs-soft:#aab9a5;
-        --xs-text:#1d3522;--xs-muted:#647565;--xs-accent:#356b3f;
+        --xs-bg:#ececec;--xs-head:#e4e4e4;--xs-shell:#f5f5f5;--xs-shell2:#ebebeb;
+        --xs-row:#f1f1f1;--xs-row2:#e7e7e7;--xs-line:#7e7e7e;--xs-soft:#b4b4b4;
+        --xs-text:#2f2f2f;--xs-muted:#707070;--xs-accent:#356b3f;
       }
 
       .ixi-location-overview:has(.skin-bond),
@@ -63,9 +63,9 @@ export default function IXIAosExpandedSkinStyles() {
       .f3-financial:has(.skin-modern-money),
       .f4-obligations:has(.skin-modern-money),
       .f5:has(.skin-modern-money) {
-        --xs-bg:#07110c;--xs-head:#0b1811;--xs-shell:#102119;--xs-shell2:#152a20;
-        --xs-row:#0e1d16;--xs-row2:#14261d;--xs-line:#345c47;--xs-soft:#234334;
-        --xs-text:#eef7f1;--xs-muted:#89a897;--xs-accent:#8fd36a;
+        --xs-bg:#0f0f0f;--xs-head:#151515;--xs-shell:#1d1d1d;--xs-shell2:#252525;
+        --xs-row:#191919;--xs-row2:#222222;--xs-line:#345c47;--xs-soft:#234334;
+        --xs-text:#f5f5f5;--xs-muted:#89a897;--xs-accent:#8fd36a;
       }
 
       .ixi-location-overview:has(.skin-old-currency),

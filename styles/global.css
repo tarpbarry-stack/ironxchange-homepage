@@ -3,6 +3,36 @@
    ================================ */
 
 :root {
+  color-scheme: dark;
+
+  /*
+   * IXI V12 DESKTOP COLOR CONTRACT
+   *
+   * Product chrome uses neutral black/graphite surfaces. Green is reserved
+   * for affirmative state only; it is never a decorative surface color.
+   * Environment styles consume these tokens instead of inventing page-local
+   * dark palettes.
+   */
+  --ix-canvas: #0b0b0b;
+  --ix-surface-deep: #080808;
+  --ix-surface: #101010;
+  --ix-surface-raised: #141414;
+  --ix-surface-elevated: #1a1a1a;
+  --ix-surface-hover: #242424;
+  --ix-line: rgba(255,255,255,.08);
+  --ix-line-strong: rgba(255,255,255,.14);
+  --ix-text-primary: #f2f2f2;
+  --ix-text-secondary: rgba(255,255,255,.72);
+  --ix-text-muted: rgba(255,255,255,.52);
+  --ix-text-faint: rgba(255,255,255,.34);
+  --ix-yellow-soft: rgba(255,196,0,.08);
+  --ix-yellow-line: rgba(255,196,0,.34);
+  --ix-success: #38A169;
+  --ix-success-soft: rgba(56,161,105,.10);
+  --ix-danger: #e53e3e;
+  --ix-danger-soft: rgba(229,62,62,.10);
+  --ix-warning-soft: rgba(255,196,0,.10);
+
   --ix-bg: #0b0b0b;
   --ix-panel: #141414;
   --ix-panel-soft: #101010;
@@ -12,8 +42,8 @@
   --ix-border: rgba(255,255,255,.065);
   --ix-border-soft: rgba(255,255,255,.045);
   --ix-yellow: #FFC400;
-  --ix-green: #38A169;
-  --ix-red: #e53e3e;
+  --ix-green: var(--ix-success);
+  --ix-red: var(--ix-danger);
   --ix-radius: 14px;
   --ix-radius-sm: 11px;
 

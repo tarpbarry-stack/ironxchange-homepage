@@ -16,7 +16,7 @@ const PassportEmailDialog = dynamic(
   { ssr: false }
 );
 
-function snapshotListing(listing = {}) {
+function snapshotListing(listing = {}, options = {}) {
   const publicData =
     listing.publicData || listing.attributes?.publicData || {};
   const id = getMarketplaceDistributionListingId(listing);
@@ -30,6 +30,8 @@ function snapshotListing(listing = {}) {
     title:
       listing.title || listing.attributes?.title || "Equipment listing",
     passportId: listing.passportId || publicData.passportId || "",
+    initialChannel: options.initialChannel === "text" ? "text" : "email",
+    historyEnabled: options.historyEnabled === true,
     unavailableReason: isCreationPreview
       ? "Post this machine to create its Passport before emailing."
       : ""
@@ -45,7 +47,10 @@ export default function ListingShareProvider({ children }) {
 
   useEffect(() => {
     function handlePassportEmailOpen(event) {
-      const nextListing = snapshotListing(event?.detail?.listing || {});
+      const nextListing = snapshotListing(
+        event?.detail?.listing || {},
+        event?.detail || {}
+      );
       if (!nextListing.id) return;
 
       setListing(nextListing);
@@ -79,6 +84,8 @@ export default function ListingShareProvider({ children }) {
         passportId={listing?.passportId || ""}
         title={listing?.title || "Equipment listing"}
         unavailableReason={listing?.unavailableReason || ""}
+        initialChannel={listing?.initialChannel || "email"}
+        historyEnabled={Boolean(listing?.historyEnabled)}
         textDeliveryEnabled={
           process.env.NEXT_PUBLIC_IXI_TEXT_PASSPORT_ENABLED === "true"
         }

@@ -32,6 +32,21 @@ function createSendToken() {
     .slice(2)}`;
 }
 
+function communicationStatusLabel(value) {
+  return ({
+    accepted: "ACCEPTED BY EMAIL PROVIDER",
+    delivered: "DELIVERED",
+    "partially-delivered": "PARTIALLY DELIVERED",
+    "partial-failure": "PARTIAL FAILURE",
+    bounced: "BOUNCED",
+    complained: "COMPLAINT",
+    delayed: "DELAYED",
+    rejected: "REJECTED",
+    failed: "FAILED",
+    pending: "PENDING"
+  })[String(value || "").toLowerCase()] || String(value || "RECORDED").toUpperCase();
+}
+
 export default function PassportEmailDialog({
   open,
   onClose,
@@ -40,6 +55,7 @@ export default function PassportEmailDialog({
   title,
   unavailableReason = "",
   initialChannel = "email",
+  historyEnabled = false,
   textDeliveryEnabled = false
 }) {
   const [channel, setChannel] = useState(initialChannel);
@@ -50,6 +66,8 @@ export default function PassportEmailDialog({
   const [status, setStatus] = useState("idle");
   const [feedback, setFeedback] = useState("");
   const [sendToken, setSendToken] = useState(createSendToken);
+  const [panel, setPanel] = useState("compose");
+  const [history, setHistory] = useState({ loading: false, items: [], error: "" });
   const inputRef = useRef(null);
 
   useEffect(() => {
@@ -58,6 +76,8 @@ export default function PassportEmailDialog({
     setStatus("idle");
     setFeedback("");
     setTextConsent(false);
+    setPanel("compose");
+    setHistory({ loading: false, items: [], error: "" });
     setSendToken(createSendToken());
     const timer = window.setTimeout(() => inputRef.current?.focus(), 0);
     const onKeyDown = event => {
@@ -73,6 +93,26 @@ export default function PassportEmailDialog({
   }, [initialChannel, open, onClose]);
 
   if (!open) return null;
+
+  async function loadHistory() {
+    if (!historyEnabled || history.loading) return;
+    setPanel("history");
+    setHistory(current => ({ ...current, loading: true, error: "" }));
+    try {
+      const query = new URLSearchParams({ listingId, limit: "100" });
+      const response = await fetch(
+        `/api/communications/passports/${encodeURIComponent(passportId)}/history?${query}`,
+        { credentials: "include" }
+      );
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok || payload?.ok !== true) {
+        throw new Error(payload?.error || "Communication history could not be loaded.");
+      }
+      setHistory({ loading: false, items: payload.history?.items || [], error: "" });
+    } catch (error) {
+      setHistory({ loading: false, items: [], error: error?.message || "Communication history could not be loaded." });
+    }
+  }
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -185,6 +225,7 @@ export default function PassportEmailDialog({
         },
         body: JSON.stringify({
           listingId,
+          passportId,
           recipients,
           message,
           idempotencyKey: sendToken
@@ -203,12 +244,12 @@ export default function PassportEmailDialog({
 
       setStatus("sent");
       setFeedback(
-        `Passport sent to ${payload.recipientCount} ${payload.recipientCount === 1 ? "recipient" : "recipients"}.`
+        `Passport accepted by the email provider for ${payload.recipientCount} ${payload.recipientCount === 1 ? "recipient" : "recipients"}.`
       );
       captureMarketplaceIntelligence("listing_share_completed", {
         listing_id: listingId,
         channel: "email",
-        result: "email_delivered",
+        result: "email_accepted",
         replayed: Boolean(payload.replayed)
       });
     } catch (error) {
@@ -245,17 +286,12 @@ export default function PassportEmailDialog({
         <header>
           <div>
             <span>IXI MACHINE PASSPORT</span>
-            <h2 id="passport-send-title">Send Passport</h2>
+            <h2 id="passport-send-title">{panel === "history" ? "Communication History" : "Send Passport"}</h2>
           </div>
-          <button
-            type="button"
-            className="close"
-            onClick={onClose}
-            disabled={status === "sending"}
-            aria-label="Close Send Passport"
-          >
-            ×
-          </button>
+          <div className="header-actions">
+            {historyEnabled ? <button type="button" className="history-toggle" onClick={panel === "history" ? () => setPanel("compose") : loadHistory}>{panel === "history" ? "SEND" : "HISTORY"}</button> : null}
+            <button type="button" className="close" onClick={onClose} disabled={status === "sending"} aria-label="Close Send Passport">×</button>
+          </div>
         </header>
 
         <div className="machine">
@@ -263,7 +299,7 @@ export default function PassportEmailDialog({
           <span>{passportId}</span>
         </div>
 
-        <div className="channels" role="tablist" aria-label="Delivery method">
+        {panel === "compose" ? <><div className="channels" role="tablist" aria-label="Delivery method">
           <button
             type="button"
             role="tab"
@@ -437,7 +473,13 @@ export default function PassportEmailDialog({
               </button>
             ) : null}
           </footer>
-        </form>
+        </form></> : <section className="history" aria-live="polite">
+          {history.loading ? <p className="history-state">Loading communications…</p> : history.error ? <p className="feedback error">{history.error}</p> : history.items.length ? <ol>{history.items.map(item => <li key={item.id}>
+            <div><strong>{item.kind === "transact-document" ? "TRAN$ACT DOCUMENT" : "MACHINE PASSPORT"}</strong><span className={`status status-${item.status}`}>{communicationStatusLabel(item.status)}</span></div>
+            <p>{item.subject || title}</p>
+            <small>{new Date(item.createdAtMs).toLocaleString()} · {item.recipients?.join(", ") || `${item.recipientCount || 0} recipient(s)`}</small>
+          </li>)}</ol> : <p className="history-state">No recorded communications for this Passport.</p>}
+        </section>}
       </section>
 
       <style jsx>{`
@@ -490,6 +532,8 @@ export default function PassportEmailDialog({
           font-size: 26px;
           cursor: pointer;
         }
+        .header-actions { display:flex; align-items:center; gap:8px; }
+        .history-toggle { min-height:42px; padding:0 14px; color:#ffc400; background:#151611; border:1px solid #66530d; border-radius:9px; font-size:10px; font-weight:950; letter-spacing:.08em; cursor:pointer; }
         .machine {
           display: flex;
           justify-content: space-between;
@@ -540,6 +584,17 @@ export default function PassportEmailDialog({
         form {
           padding: 18px 22px 22px;
         }
+        .history { max-height:min(520px,62vh); overflow:auto; padding:18px 22px 22px; }
+        .history ol { display:grid; gap:10px; margin:0; padding:0; list-style:none; }
+        .history li { padding:13px 14px; background:#0c0d0c; border:1px solid #292b28; border-radius:9px; }
+        .history li > div { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+        .history li strong { color:#e8e8e8; font-size:10px; letter-spacing:.08em; }
+        .history li p { margin:7px 0 0; color:#c9c9c9; font-size:12px; }
+        .history li small { margin-top:7px; overflow-wrap:anywhere; }
+        .history-state { margin:0; padding:22px; color:#999; text-align:center; border:1px dashed #343633; border-radius:9px; }
+        .status { color:#ffc400; font-size:9px; font-weight:950; letter-spacing:.06em; }
+        .status-delivered { color:#9be7ae; }
+        .status-bounced,.status-complained,.status-rejected,.status-failed { color:#ff9b9b; }
         label {
           display: flex;
           justify-content: space-between;

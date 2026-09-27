@@ -50,7 +50,7 @@ export default function IXIAosMembershipPolicyEditor({ object, value, onChange, 
         .membership-policy { margin: 12px 0; }
         .membership-policy h4 { margin: 0 0 8px; color: #ffd04b; font-size: 12px; }
         .membership-policy p, .membership-policy legend { font-size: 12px; line-height: 1.4; }
-        .membership-policy fieldset { margin: 8px 0; padding: 8px; border: 1px solid #53584d; }
+        .membership-policy fieldset { margin: 8px 0; padding: 8px; border: 1px solid #565656; }
         .membership-policy label { display: flex; gap: 8px; align-items: center; min-height: 44px; font-size: 12px; }
         .membership-policy label > span { margin: 0; color: inherit; font-size: 12px; line-height: 1.4; }
         .membership-policy input[type="checkbox"] { width: 18px; height: 18px; padding: 0; flex-shrink: 0; }

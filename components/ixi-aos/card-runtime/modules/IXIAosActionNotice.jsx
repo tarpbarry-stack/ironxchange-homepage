@@ -68,7 +68,7 @@ export default function IXIAosActionNotice({
 
         .tone-success {
           border-color: rgba(82, 210, 133, .34);
-          background: rgba(7, 18, 12, .96);
+          background: rgba(15,15,15, .96);
           color: rgb(82, 210, 133);
         }
 

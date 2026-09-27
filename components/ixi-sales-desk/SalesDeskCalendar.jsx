@@ -2,7 +2,7 @@ import {useEffect,useMemo,useRef,useState} from 'react';
 import {salesRequest} from './salesDeskClient';
 import {calendarRange,calendarDays,dateInZone,dateLabel,eventsByDay,localZone,moveAnchor,moveRecord} from '../../lib/sales-desk/calendar.mjs';
 
-export default function SalesDeskCalendar({actor,team,revision,onOpen,onContext,onCreate,onSaved}) {
+export default function SalesDeskCalendar({actor,team,revision,onOpen,onContext,onCreate,onSaved,focus}) {
   const [view,setView]=useState('week'),[zone,setZone]=useState(localZone),[anchor,setAnchor]=useState(()=>dateInZone()),[scope,setScope]=useState('mine');
   const [completed,setCompleted]=useState(false),[data,setData]=useState({items:[],total:0}),[loading,setLoading]=useState(true),[error,setError]=useState(''),[refresh,setRefresh]=useState(0);
   const [move,setMove]=useState(null),[saving,setSaving]=useState(false),[moveError,setMoveError]=useState(''),[notice,setNotice]=useState('');
@@ -10,6 +10,7 @@ export default function SalesDeskCalendar({actor,team,revision,onOpen,onContext,
   const range=useMemo(()=>calendarRange(anchor,view),[anchor,view]),days=useMemo(()=>calendarDays(range.from,range.to),[range]);
   const grouped=useMemo(()=>eventsByDay(data.items,days,zone),[data.items,days,zone]);
   const params=new URLSearchParams({...range,zone,scope,includeCompleted:String(completed),limit:'200'}).toString();
+  useEffect(()=>{if(!focus)return;setAnchor(focus.date);setZone(focus.zone);setView('day');setScope(focus.assignedTo!==actor.actorId && actor.canReadAll ? 'team' : 'mine');},[focus,actor.actorId,actor.canReadAll]);
   useEffect(()=>{const seq=++sequence.current,c=new AbortController();setLoading(true);setError('');setData({items:[],total:0});salesRequest(`calendar?${params}`,{signal:c.signal}).then(r=>{if(seq===sequence.current)setData(r);}).catch(e=>{if(e.name!=='AbortError')setError(e.message);}).finally(()=>{if(seq===sequence.current)setLoading(false);});return()=>c.abort();},[params,revision,refresh]);
   useEffect(()=>{const tick=()=>{if(document.visibilityState==='visible')setRefresh(n=>n+1);};const timer=setInterval(tick,60000);window.addEventListener('focus',tick);return()=>{clearInterval(timer);window.removeEventListener('focus',tick);};},[]);
   useEffect(()=>{if(move)moveDialog.current?.showModal();},[move]);
