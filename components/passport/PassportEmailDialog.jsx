@@ -225,6 +225,7 @@ export default function PassportEmailDialog({
         },
         body: JSON.stringify({
           listingId,
+          passportId,
           recipients,
           message,
           idempotencyKey: sendToken
