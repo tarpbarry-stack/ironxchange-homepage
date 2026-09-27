@@ -289,6 +289,8 @@
 
 /* On phones, let the workspace follow the document instead of clipping under the controls. */
 @media(max-width:760px){
+  .salesDesk :global(.sales-scoreboard), .salesDesk :global(.sales-work-strip) { overscroll-behavior-inline:contain; scroll-snap-type:x proximity; -webkit-overflow-scrolling:touch; }
+  .salesDesk :global(.sales-scoreboard > *), .salesDesk :global(.sales-work-strip > button) { scroll-snap-align:start; }
   .salesDesk{height:auto;min-height:100dvh;overflow:visible}
   .salesDesk :global(.sales-workspace){flex:none;min-height:0}
   .salesDesk :global(.sales-board){flex:none;min-height:0}
