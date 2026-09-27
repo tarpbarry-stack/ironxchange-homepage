@@ -127,3 +127,10 @@ jobs:
             --query "EventDestinations[?Name=='ixi-passport-communication-lifecycle' && Enabled==\`true\` && SnsDestination.TopicArn=='$IXI_SES_EVENT_TOPIC_ARN'].Name | [0]" \
             --output text)"
           test "$event_destination" = ixi-passport-communication-lifecycle
+      - name: Report communications stack failure
+        if: failure()
+        run: |
+          aws cloudformation describe-stack-events --region "$AWS_REGION" \
+            --stack-name ixi-communications-events \
+            --query 'StackEvents[?ResourceStatus==`CREATE_FAILED` || ResourceStatus==`UPDATE_FAILED`].[Timestamp,LogicalResourceId,ResourceStatusReason]' \
+            --output table
