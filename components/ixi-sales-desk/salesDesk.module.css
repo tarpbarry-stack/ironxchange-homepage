@@ -332,3 +332,63 @@
     margin-left: 0;
   }
 }
+
+/* Keep the desktop help control in its existing flex position. */
+.salesDesk :global(.sales-help-slot) { display:contents; }
+
+@media(max-width:700px) {
+  .salesDesk :global(.sales-header) {
+    display:grid;
+    grid-template-columns:44px minmax(0,1fr) auto;
+    align-items:center;
+    gap:8px 10px;
+    padding:10px 12px;
+  }
+  .salesDesk :global(.sales-brand) { grid-column:1; grid-row:1; width:44px; height:44px; }
+  .salesDesk :global(.sales-title) { grid-column:2; grid-row:1; min-width:0; width:auto; }
+  .salesDesk :global(.sales-title h1) { font-size:18px; margin:1px 0 0; white-space:nowrap; }
+  .salesDesk :global(.sales-title .sales-eyebrow) { max-width:100%; font-size:9px; }
+  .salesDesk :global(.sales-help-slot) { display:flex; grid-column:3; grid-row:1; justify-content:flex-end; min-width:0; }
+  .salesDesk :global(.sales-help-slot > *) { position:static; margin:0; min-height:44px; }
+  .salesDesk :global(.sales-header > .sales-new-contact),
+  .salesDesk :global(.sales-header > .sales-primary) {
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    width:100%;
+    min-width:0;
+    min-height:44px;
+    margin:0;
+    padding:8px;
+    font-size:12px;
+    flex:none;
+  }
+  .salesDesk :global(.sales-header > .sales-new-contact) { grid-column:1 / 3; grid-row:2; }
+  .salesDesk :global(.sales-header > .sales-primary) { grid-column:3; grid-row:2; min-width:118px; }
+  .salesDesk :global(.sales-header > nav) {
+    grid-column:1 / -1;
+    grid-row:3;
+    order:initial;
+    width:100%;
+    margin:0;
+    justify-content:flex-end;
+    gap:8px;
+  }
+  .salesDesk :global(.sales-header nav button) { min-height:36px; padding:7px 12px; }
+  .salesDesk :global(.sales-scoreboard) {
+    display:flex;
+    overflow-x:auto;
+    overscroll-behavior-inline:contain;
+    scrollbar-width:none;
+    padding:0 8px;
+  }
+  .salesDesk :global(.sales-scoreboard > *) {
+    flex:0 0 122px;
+    margin:7px 0;
+    padding:0 10px;
+    min-width:0;
+  }
+  .salesDesk :global(.sales-scoreboard span) { min-height:0; font-size:9px; line-height:1.2; }
+  .salesDesk :global(.sales-scoreboard strong) { font-size:20px; }
+  .salesDesk :global(.sales-work-strip) { padding:6px 8px; }
+}
