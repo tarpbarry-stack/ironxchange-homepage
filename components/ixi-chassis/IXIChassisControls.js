@@ -1,3 +1,4 @@
+import { useState } from "react";
 import IXIControlSurface from "../IXIControlSurface";
 import IXSearchSurface from "../IXSearchSurface";
 import IXSearchSurfaceMobile from "../IXSearchSurfaceMobile";
@@ -31,6 +32,10 @@ export default function IXIChassisControls({
   toggleParkBrake = () => {},
   cycleActiveStackTarget
 }) {
+  const [mobileBoardSearchOpen, setMobileBoardSearchOpen] = useState(false);
+  const boardSearchActive = Boolean(searchQuery?.trim()) ||
+    Object.entries(workspaceFilters || {}).some(([key, value]) => value &&
+      !(["category", "make", "model"].includes(key) && String(value).startsWith("ALL ")));
   return (
     <section className="workspace-controls">
       <IXIControlSurface>
@@ -55,7 +60,11 @@ export default function IXIChassisControls({
         </div>
 
         <div className="mobile-search-surface">
-          <IXSearchSurfaceMobile
+          {workspaceToolbars && <button type="button" className="aos-board-search-toggle"
+            aria-expanded={mobileBoardSearchOpen} onClick={() => setMobileBoardSearchOpen(open => !open)}>
+            <span>BOARD SEARCH {boardSearchActive ? "· ACTIVE" : ""}</span><strong>{mobileBoardSearchOpen ? "CLOSE −" : "OPEN +"}</strong>
+          </button>}
+          {(!workspaceToolbars || mobileBoardSearchOpen) && <IXSearchSurfaceMobile
             listings={listings}
             searchQuery={searchQuery}
             setSearchQuery={setSearchQuery}
@@ -63,7 +72,7 @@ export default function IXIChassisControls({
             setFilters={setWorkspaceFilters}
             sortMode={savedBoardMode}
             setSortMode={setSavedBoardMode}
-          />
+          />}
         </div>
 
        <IXIRelationshipControls
@@ -104,6 +113,9 @@ export default function IXIChassisControls({
         }
 
         @media (max-width: 850px) {
+          .aos-board-search-toggle { display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 44px; padding: 0 12px; border: 1px solid #343c30; background: #101411; color: #e2e8dd; font: inherit; font-size: 11px; font-weight: 800; letter-spacing: .04em; cursor: pointer; }
+          .aos-board-search-toggle strong { color: #ffc400; font-size: 10px; }
+          .aos-board-search-toggle:focus-visible { outline: 2px solid #ffc400; outline-offset: -2px; }
           .desktop-search-surface {
             display: none;
           }
