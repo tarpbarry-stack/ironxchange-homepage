@@ -73,6 +73,7 @@
 @media (max-width: 999px) {
   .chassis, .leftClosed, .rightClosed, .leftClosed.rightClosed { grid-template-columns: minmax(0, 1fr); gap: 0; }
   .center { grid-column: 1; }
+  .center :global(.workspace-controls) { margin-bottom: 8px; }
   .toolbar, .boardTools { display: none; }
   .mobilePicker { display: block; width: 100%; min-width: 0; margin: 0 0 10px; padding: 9px; border: 1px solid #343c30; background: #0e130f; color: #e9eee4; }
 }
@@ -92,5 +93,5 @@
   .mobilePickerScroll small { display: block; margin: 3px 2px; color: #ffcd35; font-size: 9px; font-weight: 800; }
   .mobilePickerScroll > p { margin: 12px 4px; font-size: 11px; }
   .boardTools { margin-top: 8px; }
-  .board { padding-top: 14px; }
+  .board { padding-top: 8px; }
 }
