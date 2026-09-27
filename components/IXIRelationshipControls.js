@@ -1038,6 +1038,8 @@ export default function IXIRelationshipControls({
 }
         @media (max-width: 850px) {
           .aos-workspace-filters .aos-toolbar-destinations { display: none; }
+          .ixi-relationship-shell.aos-workspace-filters { margin-top: 5px; }
+          .aos-workspace-filters .ixi-relationship-controls { margin-top: 5px; }
           .ixi-relationship-shell {
             width: 100%;
             margin: 14px auto 0;
