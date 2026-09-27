@@ -135,6 +135,7 @@
   .dashboard :global(.dash-board-cards[data-mobile-density="II"] .dash-open-caption > span) { overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
   .dashboard :global(.dash-drag-handle), .dashboard :global(.dash-return) { min-width:36px; min-height:36px; }
   .dashboard :global(.dash-card-transform.dash-mobile-assembled) { position:relative; left:auto; top:auto; transform:none; max-width:100%; }
+  .dashboard :global(.dash-card-transform.dash-mobile-assembled .ixi-private-object-console) { width:100% !important; }
   .dashboard :global(.dash-card-transform.dash-mobile-assembled .ixi-private-console-listing-slot) { width:300px; min-width:300px; max-width:300px; flex-basis:300px; }
   .dashboard :global(.dash-card-transform.dash-mobile-assembled .ixi-private-console-listing-slot[data-transact-open="true"]) { width:var(--ixi-mobile-transact-width); min-width:var(--ixi-mobile-transact-width); max-width:var(--ixi-mobile-transact-width); flex-basis:var(--ixi-mobile-transact-width); }
 }
