@@ -790,3 +790,69 @@
   .headerHelpActions { grid-column:3; grid-row:1; display:grid; gap:4px; }
   .shell[data-ui-rebuild] .headerHelpActions .aosAction { grid-column:auto; grid-row:auto; min-width:0; white-space:normal; }
 }
+
+/* TRAN$ACT phone layout: give each header control room and let the page scroll. */
+@media (max-width: 600px) {
+  .shell[data-ui-rebuild] {
+    --tx-bar-height: auto;
+    height: auto;
+    min-height: 100dvh;
+    overflow-x: clip;
+    overflow-y: visible;
+  }
+  .shell[data-ui-rebuild] .topbar {
+    min-height: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-rows: repeat(4, auto);
+    align-items: center;
+    gap: 6px;
+  }
+  .shell[data-ui-rebuild] .brand { grid-column: 1; grid-row: 1; min-width: 0; }
+  .shell[data-ui-rebuild] .headerHelpActions { grid-column: 2; grid-row: 1; }
+  .shell[data-ui-rebuild] .workspaceMenu { grid-column: 1; grid-row: 2; min-width: 0; }
+  .shell[data-ui-rebuild] .workspaceMenu nav { max-width: calc(100vw - 24px); }
+  .shell[data-ui-rebuild] .searchWrap { grid-column: 1 / -1; grid-row: 3; min-width: 0; }
+  .shell[data-ui-rebuild] .periodControl { grid-column: 2; grid-row: 2; min-width: 0; }
+  .shell[data-ui-rebuild] .paymentsAction {
+    grid-column: 1;
+    grid-row: 4;
+    justify-self: stretch;
+    min-width: 0;
+  }
+  .shell[data-ui-rebuild] .topbar > .newAction:not(.paymentsAction) {
+    grid-column: 2;
+    grid-row: 4;
+    min-width: 0;
+  }
+  .shell[data-ui-rebuild] .desktop {
+    display: block;
+    flex: none;
+    min-height: 0;
+    overflow: visible;
+  }
+  .shell[data-ui-rebuild] .main,
+  .shell[data-ui-rebuild] .main[data-history-active="true"] {
+    display: block;
+    min-height: 0;
+    overflow: visible;
+    width: 100%;
+  }
+  .shell[data-ui-rebuild] .historyPane:not([hidden]),
+  .shell[data-ui-rebuild] .main[data-history-active="true"] .historyPane {
+    height: auto;
+    min-height: 0;
+    overflow: visible;
+  }
+  .shell[data-ui-rebuild] .historyViewport { height: auto; }
+  .shell[data-ui-rebuild] .queueList {
+    max-height: none;
+    min-height: 0;
+    overflow: visible;
+  }
+  .shell[data-ui-rebuild] .queueBands {
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .shell[data-ui-rebuild] .queueBands::-webkit-scrollbar { display: none; }
+}
