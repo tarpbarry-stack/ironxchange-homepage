@@ -167,6 +167,7 @@ export default function IXIAosToolbarChassis({ children, controls, registry, ind
   });
   const [folded, setFolded] = useState({ left: false, right: false });
   const [browse, setBrowse] = useState({ left: "", right: "" });
+  const [mobileQuery, setMobileQuery] = useState("");
   const [error, setError] = useState("");
   const [pending, setPending] = useState(0);
   const [loadedKey, setLoadedKey] = useState("");
@@ -199,6 +200,13 @@ export default function IXIAosToolbarChassis({ children, controls, registry, ind
     setBrowse(current => ({ ...current, [other]: objectId }));
     setFolded(current => ({ ...current, [other]: false }));
   }
+  const quickIds = [...new Set([
+    ...indexes.map(object => object.objectId),
+    ...getAosToolbarObjectIds(placements, "left"),
+    ...getAosToolbarObjectIds(placements, "right")
+  ])];
+  const quickObjects = quickIds.map(id => registry.get(id)).filter(Boolean)
+    .filter(object => `${getAosToolbarName(object)} ${object.passportId || ""}`.toLowerCase().includes(mobileQuery.toLowerCase()));
   return (
     <section className={`${styles.chassis} ${folded.left ? styles.leftClosed : ""} ${folded.right ? styles.rightClosed : ""}`} aria-label="AOS workspace">
       {["left", "right"].map(side => <Toolbar key={side} side={side} folded={folded[side]}
@@ -209,6 +217,20 @@ export default function IXIAosToolbarChassis({ children, controls, registry, ind
         onConnect={onConnect} connectTarget={registry.get(browse[side === "left" ? "right" : "left"])}/>
       )}
       <div className={styles.center}>
+        <section className={styles.mobilePicker} aria-label="AOS objects and machines">
+          <div className={styles.mobilePickerHead}><strong>OBJECTS & MACHINES</strong><span>{quickObjects.length} AVAILABLE</span></div>
+          <input type="search" aria-label="Find an AOS object or machine" placeholder="Find object, machine or Passport…" value={mobileQuery} onChange={event => setMobileQuery(event.target.value)} />
+          <div className={styles.mobilePickerScroll}>
+            {quickObjects.map(object => {
+              const view = getAosToolbarPresentation(object, registry);
+              return <button type="button" key={object.objectId} disabled={!ready} onClick={() => run(() => onBoard(object.objectId))}>
+                <span className={styles.mobilePickerImage}><PreviewImage src={view.image || view.previews[0]?.image} name={getAosToolbarName(object)} /></span>
+                <strong>{getAosToolbarName(object)}</strong><small>{view.machine ? "OPEN ON BOARD ↗" : `${view.count} MEMBERS · OPEN ↗`}</small>
+              </button>;
+            })}
+            {ready && !quickObjects.length && <p>No matching Objects in the system indexes or toolbars.</p>}
+          </div>
+        </section>
         {controls}
         <div className={styles.boardTools}>
           {["left", "right"].map(side => <button key={side} type="button" ref={node => { openButtons.current[side] = node; }}
