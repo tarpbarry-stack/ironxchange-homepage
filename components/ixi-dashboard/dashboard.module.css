@@ -112,19 +112,21 @@
 @media(max-width:960px) { .dashboard :global(.dash-board-title) { display:none; } .dashboard :global(.dash-board-options) { margin:auto; } .dashboard :global(.dash-app-icon) { font-size:20px; min-width:20px; } .dashboard :global(.dash-apps small) { display:none; } }
 @media(max-width:760px) { .dashboard { min-height:500px; } .dashboard :global(.dash-identity) { min-height:67px; padding:10px 14px; gap:10px; } .dashboard :global(.dash-identity h1) { font-size:20px; } .dashboard :global(.dash-identity-title) { gap:9px; } .dashboard :global(.dash-home-mark) { height:34px; width:34px; font-size:15px; } .dashboard :global(.dash-identity .dash-eyebrow) { max-width:170px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-size:8px; } .dashboard :global(.dash-identity nav > a), .dashboard :global(.dash-version) { display:none; } .dashboard :global(.dash-account-menu summary) { padding:9px; font-size:9px; } .dashboard :global(.dash-apps) { grid-template-columns:repeat(3,minmax(0,1fr)); padding:9px 12px; gap:5px; } .dashboard :global(.dash-apps a) { padding:8px; } .dashboard :global(.dash-apps strong) { font-size:10px; } .dashboard :global(.dash-app-icon) { font-size:19px; } .dashboard :global(.dash-stats) { padding:0 12px; } .dashboard :global(.dash-stat) { margin:10px 0; padding:0 8px; } .dashboard :global(.dash-stat > span) { font-size:7px; letter-spacing:.3px; min-height:18px; line-height:1.4; } .dashboard :global(.dash-stat strong) { font-size:23px; } .dashboard :global(.dash-stat small) { display:none; } .dashboard :global(.dash-workspace), .dashboard :global(.dash-hide-left), .dashboard :global(.dash-hide-right), .dashboard :global(.dash-hide-left.dash-hide-right) { display:flex; } .dashboard :global(.dash-board) { width:100%; } .dashboard :global(.dash-rail) { display:none; position:absolute; top:52px; bottom:0; width:min(310px,100%); z-index:20; box-shadow:0 16px 30px #000b; } .dashboard :global(.dash-rail-left) { left:0; } .dashboard :global(.dash-rail-right) { right:0; } .dashboard :global(.dash-mobile-left .dash-rail-left), .dashboard :global(.dash-mobile-right .dash-rail-right) { display:flex; } .dashboard :global(.dash-board-toolbar) { padding:10px; gap:8px; } .dashboard :global(.dash-board-options label) { font-size:8px; } .dashboard :global(.dash-board-options) { gap:6px; } .dashboard :global(.dash-board-options select) { font-size:10px; } .dashboard :global(.dash-board-footer) { font-size:7px; } .dashboard :global(.dash-board-footer > span:last-child) { display:none; } .dashboard :global(.dash-board-cards) { padding-top:14px; } }
 @media(max-width:760px) {
+  .dashboard { height:auto; min-height:100dvh; overflow:visible; }
   .dashboard :global(.dash-apps) { display:flex; overflow-x:auto; flex:none; scroll-snap-type:x proximity; scrollbar-width:thin; }
   .dashboard :global(.dash-apps a) { flex:0 0 auto; min-height:44px; scroll-snap-align:start; }
   .dashboard :global(.dash-apps a[href="/theater"]) { display:none; }
   .dashboard :global(.dash-app-icon) { font-size:15px; min-width:15px; }
   .dashboard :global(.dash-stats) { display:flex; overflow-x:auto; flex:none; scrollbar-width:thin; }
   .dashboard :global(.dash-stat) { flex:0 0 102px; min-height:46px; }
-  .dashboard :global(.dash-workspace) { flex-direction:column; }
-  .dashboard :global(.dash-board) { flex:1; min-height:0; }
+  .dashboard :global(.dash-workspace) { flex:none; flex-direction:column; min-height:0; }
+  .dashboard :global(.dash-board) { flex:none; min-height:0; }
+  .dashboard :global(.dash-board-scroll) { flex:none; overflow:visible; }
   .dashboard :global(.dash-board-toolbar .dash-rail-toggle) { display:none; }
   .dashboard :global(.dash-mobile-density) { display:grid; grid-template-columns:1fr 1fr; gap:6px; padding:8px 12px 0; }
   .dashboard :global(.dash-mobile-density button) { min-height:46px; border:1px solid #4a4b35; border-radius:8px; background:#121611; color:#aab2a7; font-size:15px; font-weight:850; }
   .dashboard :global(.dash-mobile-density button[aria-pressed="true"]) { border-color:#ffc400; color:#ffc400; background:#221e10; }
-  .dashboard :global(.dash-board-cards) { display:grid; grid-template-columns:minmax(0,1fr); justify-items:center; align-content:start; gap:14px; padding:12px 8px 28px; }
+  .dashboard :global(.dash-board-cards) { display:grid; grid-template-columns:minmax(0,1fr); justify-items:center; align-content:start; min-height:0; gap:14px; padding:12px 8px 28px; }
   .dashboard :global(.dash-board-cards[data-mobile-density="II"]) { grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px 4px; padding-inline:6px; }
   .dashboard :global(.dash-board-cards[data-mobile-density="II"] .dash-console-expanded),
   .dashboard :global(.dash-board-empty) { grid-column:1 / -1; }
