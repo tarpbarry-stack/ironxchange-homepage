@@ -828,7 +828,7 @@ export default function IXIPrivateObjectConsole({
       }
 
       objectFamily="private"
-      mobileNativeWidth={transactOpen ? (consoleDepth - 1) * PRIVATE_NATIVE_PANEL_WIDTH + transactFootprint.width : PRIVATE_NATIVE_PANEL_WIDTH}
+      mobileNativeWidth={transactOpen ? (consoleDepth - 1) * PRIVATE_NATIVE_PANEL_WIDTH + transactFootprint.width : consoleNativeWidth}
 
       nativeWidth={
         consoleNativeWidth
