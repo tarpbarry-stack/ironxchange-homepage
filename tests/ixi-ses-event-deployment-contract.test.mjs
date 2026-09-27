@@ -20,5 +20,8 @@ test("the paired release provisions, configures, activates and verifies SES even
   assert.match(workflow, /IXI_SES_EVENT_TOPIC_ARN:.*communication-events\.outputs\.topic_arn/u);
   assert.match(workflow, /EnableDeliveryEvents=true/u);
   assert.match(workflow, /PendingConfirmation/u);
+  assert.match(workflow, /create-configuration-set-event-destination/u);
+  assert.match(workflow, /update-configuration-set-event-destination/u);
+  assert.match(workflow, /DELIVERY_DELAY/u);
   assert.match(workflow, /get-configuration-set-event-destinations/u);
 });
