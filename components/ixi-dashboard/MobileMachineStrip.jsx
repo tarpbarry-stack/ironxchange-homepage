@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { dashboardKey, filterMachineSearch } from "./dashboardContract.mjs";
 import { cleanMachineTitle } from "../../lib/listingFormatters";
 
@@ -13,6 +13,21 @@ export default function MobileMachineStrip({ owned = [], related = [], ownedStat
   const items = scope === "owned" ? owned : related;
   const status = scope === "owned" ? ownedStatus : relatedStatus;
   const matches = useMemo(() => filterMachineSearch(items, query).slice(0, 50), [items, query]);
+  const stripRef = useRef(null);
+  const [scrollEdges, setScrollEdges] = useState({ back: false, forward: false });
+  function updateScrollEdges() {
+    const strip = stripRef.current;
+    if (!strip) return;
+    setScrollEdges({ back: strip.scrollLeft > 2, forward: strip.scrollLeft + strip.clientWidth < strip.scrollWidth - 2 });
+  }
+  useEffect(() => {
+    const strip = stripRef.current;
+    if (!strip) return;
+    updateScrollEdges();
+    const observer = new ResizeObserver(updateScrollEdges);
+    observer.observe(strip);
+    return () => observer.disconnect();
+  }, [matches, scope]);
 
   return <section className="ixi-mobile-machines" aria-label={`${label} machine picker`}>
     <div className="ixi-mobile-machines-head">
@@ -23,7 +38,7 @@ export default function MobileMachineStrip({ owned = [], related = [], ownedStat
       <span>{label}</span>
     </div>
     <input type="search" aria-label="Find a machine by name, serial number or ID" placeholder="Find machine, SN or ID…" value={query} onChange={event => setQuery(event.target.value)} />
-    <div className="ixi-mobile-machines-scroll" role="list" aria-label={`${scope === "owned" ? "Owned" : "Relationship"} machines`}>
+    <div className="ixi-mobile-machines-scroll" ref={stripRef} onScroll={updateScrollEdges} role="list" aria-label={`${scope === "owned" ? "Owned" : "Relationship"} machines`}>
       {status.error ? <p role="alert">Machines could not load. Refresh to try again.</p> : status.loading && !items.length ? <p role="status">Loading machines…</p> : !matches.length ? <p>{query ? "No matching machines." : "No machines here yet."}</p> : matches.map(item => {
         const key = dashboardKey(item);
         const src = imageOf(item);
@@ -34,6 +49,11 @@ export default function MobileMachineStrip({ owned = [], related = [], ownedStat
         </button></div>;
       })}
     </div>
+    {(scrollEdges.back || scrollEdges.forward) && <div className="ixi-mobile-machines-navigation" aria-label="Browse machines">
+      <span>SWIPE OR USE ARROWS</span>
+      <button type="button" aria-label="Previous machines" disabled={!scrollEdges.back} onClick={() => stripRef.current?.scrollBy({ left: -240, behavior: "smooth" })}>‹</button>
+      <button type="button" aria-label="Next machines" disabled={!scrollEdges.forward} onClick={() => stripRef.current?.scrollBy({ left: 240, behavior: "smooth" })}>›</button>
+    </div>}
     <style jsx>{`
       .ixi-mobile-machines { display:none; }
       @media(max-width:760px) {
@@ -47,6 +67,10 @@ export default function MobileMachineStrip({ owned = [], related = [], ownedStat
         .ixi-mobile-machines input { width:100%; height:38px; margin:7px 0; padding:8px 10px; border:1px solid #414a35; border-radius:2px; background:#0b100c; color:#f0f2e8; font-size:14px; }
         .ixi-mobile-machines-scroll { display:flex; gap:8px; overflow-x:auto; overscroll-behavior-inline:contain; scroll-snap-type:x proximity; scrollbar-width:none; padding:1px 2px 5px; }
         .ixi-mobile-machines-scroll::-webkit-scrollbar { display:none; }
+        .ixi-mobile-machines-navigation { display:flex; align-items:center; justify-content:flex-end; gap:5px; padding-top:5px; }
+        .ixi-mobile-machines-navigation span { margin-right:auto; color:#9da999; font-size:9px; font-weight:750; letter-spacing:.04em; }
+        .ixi-mobile-machines-navigation button { width:44px; height:44px; border:1px solid #5b5a36; border-radius:3px; background:#1a2119; color:#ffd23a; font-size:25px; line-height:1; }
+        .ixi-mobile-machines-navigation button:disabled { opacity:.35; }
         .ixi-mobile-machines-scroll > div { flex:0 0 112px; width:112px; height:118px; scroll-snap-align:start; }
         .ixi-mobile-machines-scroll > p { min-height:76px; margin:0; padding:22px 4px; font-size:12px; color:#b8c4b2; }
         .ixi-mobile-machine { box-sizing:border-box; display:flex; flex-direction:column; width:112px; height:118px; min-height:118px; max-height:118px; padding:3px; text-align:left; border:1px solid #3b4534; background:#1b2118; color:#ecf0e9; overflow:hidden; }
