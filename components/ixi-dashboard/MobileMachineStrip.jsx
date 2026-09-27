@@ -45,7 +45,7 @@ export default function MobileMachineStrip({ owned = [], related = [], ownedStat
         .ixi-mobile-machines-tabs button[aria-pressed="true"] { color:#ffd23a; border-color:#af9326; }
         .ixi-mobile-machines-tabs b { margin-left:3px; }
         .ixi-mobile-machines input { width:100%; height:38px; margin:7px 0; padding:8px 10px; border:1px solid #414a35; border-radius:2px; background:#0b100c; color:#f0f2e8; font-size:14px; }
-        .ixi-mobile-machines-scroll { display:flex; gap:8px; overflow-x:auto; overscroll-behavior-inline:contain; scroll-snap-type:x proximity; scrollbar-width:none; padding:1px 2px 5px; }
+        .ixi-mobile-machines-scroll { display:flex; gap:8px; overflow-x:auto; overscroll-behavior-inline:contain; scroll-snap-type:x proximity; scrollbar-width:none; -webkit-overflow-scrolling:touch; padding:1px 2px 5px; }
         .ixi-mobile-machines-scroll::-webkit-scrollbar { display:none; }
         .ixi-mobile-machines-scroll > div { flex:0 0 112px; width:112px; height:118px; scroll-snap-align:start; }
         .ixi-mobile-machines-scroll > p { min-height:76px; margin:0; padding:22px 4px; font-size:12px; color:#b8c4b2; }
