@@ -46,14 +46,14 @@ export default function MobileMachineStrip({ owned = [], related = [], ownedStat
         .ixi-mobile-machines-tabs b { margin-left:3px; }
         .ixi-mobile-machines input { width:100%; height:38px; margin:7px 0; padding:8px 10px; border:1px solid #414a35; border-radius:2px; background:#0b100c; color:#f0f2e8; font-size:14px; }
         .ixi-mobile-machines-scroll { display:flex; gap:8px; overflow-x:auto; overscroll-behavior-inline:contain; scroll-snap-type:x proximity; scrollbar-width:thin; padding:1px 2px 5px; }
-        .ixi-mobile-machines-scroll > div { flex:0 0 100px; scroll-snap-align:start; }
+        .ixi-mobile-machines-scroll > div { flex:0 0 112px; width:112px; height:118px; scroll-snap-align:start; }
         .ixi-mobile-machines-scroll > p { min-height:76px; margin:0; padding:22px 4px; font-size:12px; color:#b8c4b2; }
-        .ixi-mobile-machine { display:flex; flex-direction:column; width:100%; min-height:106px; padding:3px; text-align:left; border:1px solid #3b4534; background:#1b2118; color:#ecf0e9; }
+        .ixi-mobile-machine { box-sizing:border-box; display:flex; flex-direction:column; width:112px; height:118px; min-height:118px; max-height:118px; padding:3px; text-align:left; border:1px solid #3b4534; background:#1b2118; color:#ecf0e9; overflow:hidden; }
         .ixi-mobile-machine[aria-pressed="true"] { border-color:#ffc400; }
-        .ixi-mobile-machine-photo { display:grid; place-items:center; width:100%; height:57px; overflow:hidden; background:#0b100c; color:#c9a837; }
-        .ixi-mobile-machine-photo img { width:100%; height:100%; object-fit:cover; }
-        .ixi-mobile-machine strong { width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; padding:5px 3px 1px; font-size:10px; }
-        .ixi-mobile-machine small { padding:0 3px; font-size:9px; color:#ffcd35; font-weight:800; }
+        .ixi-mobile-machine-photo { display:grid; place-items:center; flex:0 0 68px; width:100%; height:68px; overflow:hidden; background:#0b100c; color:#c9a837; }
+        .ixi-mobile-machine-photo img { display:block; width:100%; height:100%; object-fit:contain; object-position:center center; }
+        .ixi-mobile-machine strong { display:block; flex:0 0 19px; width:100%; margin:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; padding:4px 3px 0; font-size:10px; line-height:15px; }
+        .ixi-mobile-machine small { display:block; flex:0 0 16px; padding:0 3px; font-size:9px; line-height:16px; color:#ffcd35; font-weight:800; }
       }
     `}</style>
   </section>;
