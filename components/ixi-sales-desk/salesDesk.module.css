@@ -291,8 +291,8 @@
   .salesDesk{height:auto;min-height:100dvh;overflow:visible}
   .salesDesk :global(.sales-workspace){flex:none;min-height:0}
   .salesDesk :global(.sales-board){flex:none;min-height:0}
-  .salesDesk :global(.sales-preserved-board),.salesDesk :global(.sales-preserved-panel){flex:none;min-height:0}
-  .salesDesk :global(.sales-preserved-board > .dash-board-scroll){flex:none;overflow:visible}
+  .salesDesk :global(.sales-preserved-board),.salesDesk :global(.sales-preserved-panel){flex:none;width:100%;min-height:0}
+  .salesDesk :global(.sales-preserved-board > .dash-board-scroll){flex:none;width:100%;overflow:visible}
   .salesDesk :global(.sales-panel),.salesDesk :global(.sales-calendar-scroll),.salesDesk :global(.sales-daily-list){flex:none;min-height:0;overflow:visible}
   .salesDesk :global(.sales-work-strip){flex-wrap:nowrap;overflow-x:auto}
   .salesDesk :global(.sales-work-strip > button){flex:0 0 auto}
