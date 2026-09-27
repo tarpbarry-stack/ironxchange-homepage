@@ -5,7 +5,7 @@ import { loadIXIFinancialAccessContext, loadIXITransactDashboard } from "./data/
 import { loadIXIOwnedListings } from "../../lib/listings/loadIXIOwnedListings";
 import { loadIXICanonicalMosEnvironment } from "../../lib/mos/IXIMosEnvironmentProjection";
 import { createIXITransactSessionRuntime } from "./data/IXITransactSessionRuntime.mjs";
-import IXIMobileEnvironmentNav from "../IXIMobileEnvironmentNav";
+import IXIMobileEnvironmentNav from "../IXIMobileEnvironmentNav.jsx";
 
 const IXITransactCommandCenter = dynamic(() => import("../ixi-command-center/IXITransactCommandCenter"), { ssr: false });
 const IXITransactDashboardApp = dynamic(() => import("./IXITransactDashboardApp"), { ssr: false });
