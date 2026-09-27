@@ -743,7 +743,11 @@
 .shell[data-ui-rebuild] .newAction { white-space: nowrap; line-height: 1; }
 .shell[data-ui-rebuild] .paymentsAction { min-width: 104px; justify-self: end; padding-inline: 12px; color: #ffce32; border-color: #796126; background: #171c11; letter-spacing: .04em; }
 .shell[data-ui-rebuild] .paymentsAction:hover { background: #2b2a14; border-color: #ffc400; }
-@media (max-width: 600px) { .objectPickers { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 760px) {
+  .objectPickers { display: flex; flex-wrap: nowrap; min-width: 0; gap: 4px; overflow-x: auto; overflow-y: hidden; overscroll-behavior-inline: contain; scroll-snap-type: x proximity; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+  .objectPickers::-webkit-scrollbar { display: none; }
+  .objectPickers > * { flex: 0 0 142px; width: 142px; scroll-snap-align: start; }
+}
 .shell[data-ui-rebuild] { overflow-x: clip; overflow-y: visible; }
 .shell[data-ui-rebuild] .appLauncher button strong { font-size: 14px; }
 
