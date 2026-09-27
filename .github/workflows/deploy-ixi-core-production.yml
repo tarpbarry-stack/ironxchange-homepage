@@ -40,14 +40,37 @@ jobs:
         run: |
           test "$AWS_INSTANCE_ID" = i-06d9ae98889f6fdab
           test "$(aws sts get-caller-identity --query Account --output text)" = "$IXI_EXPECTED_ACCOUNT_ID"
+      - name: Provision SES event foundation
+        id: communication-events
+        env:
+          IXI_SES_EVENT_ENDPOINT: https://staging.ironxchange.com/ix-core/communications/v1/provider-events/ses
+          IXI_SES_CONFIGURATION_SET: my-first-configuration-set
+        run: |
+          set -euo pipefail
+          aws cloudformation deploy --region "$AWS_REGION" \
+            --stack-name ixi-communications-events \
+            --template-file ops/cloudformation/ixi-communications-events.yaml \
+            --no-fail-on-empty-changeset \
+            --parameter-overrides \
+              ConfigurationSetName="$IXI_SES_CONFIGURATION_SET" \
+              EndpointUrl="$IXI_SES_EVENT_ENDPOINT" \
+              EnableDeliveryEvents=false
+          topic_arn="$(aws cloudformation describe-stacks --region "$AWS_REGION" \
+            --stack-name ixi-communications-events \
+            --query 'Stacks[0].Outputs[?OutputKey==`TopicArn`].OutputValue' \
+            --output text)"
+          test "$topic_arn" = "arn:aws:sns:${AWS_REGION}:${IXI_EXPECTED_ACCOUNT_ID}:ixi-ses-communication-events"
+          echo "topic_arn=$topic_arn" >> "$GITHUB_OUTPUT"
       - name: Install and verify complete runtime
+        env:
+          IXI_SES_EVENT_TOPIC_ARN: ${{ steps.communication-events.outputs.topic_arn }}
         run: |
           set -euo pipefail
           python3 - <<'PY'
           import json,os,pathlib,re,shlex
           sha=os.environ['IXI_CORE_SHA']
           assert re.fullmatch('[a-f0-9]{40}',sha)
-          names=['AWS_REGION','IXI_CORE_SHA','IXI_RECOVERY_BUCKET','IXI_RECOVERY_ACCOUNT_ID']
+          names=['AWS_REGION','IXI_CORE_SHA','IXI_RECOVERY_BUCKET','IXI_RECOVERY_ACCOUNT_ID','IXI_SES_EVENT_TOPIC_ARN']
           environment=' '.join(name+'='+shlex.quote(os.environ[name]) for name in names)
           source=pathlib.Path('ops/deploy-complete-runtime.sh').read_text()
           command='env '+environment+" bash -s <<'IXI_COMPLETE_RELEASE'\n"+source+"\nIXI_COMPLETE_RELEASE"
@@ -72,3 +95,35 @@ jobs:
           done
           jq -r '.StandardOutputContent, .StandardErrorContent' "$RUNNER_TEMP/ixi-release-invocation.json"
           test "$status" = Success
+      - name: Activate and verify SES delivery events
+        env:
+          IXI_SES_EVENT_ENDPOINT: https://staging.ironxchange.com/ix-core/communications/v1/provider-events/ses
+          IXI_SES_CONFIGURATION_SET: my-first-configuration-set
+          IXI_SES_EVENT_TOPIC_ARN: ${{ steps.communication-events.outputs.topic_arn }}
+        run: |
+          set -euo pipefail
+          aws cloudformation deploy --region "$AWS_REGION" \
+            --stack-name ixi-communications-events \
+            --template-file ops/cloudformation/ixi-communications-events.yaml \
+            --no-fail-on-empty-changeset \
+            --parameter-overrides \
+              ConfigurationSetName="$IXI_SES_CONFIGURATION_SET" \
+              EndpointUrl="$IXI_SES_EVENT_ENDPOINT" \
+              EnableDeliveryEvents=true
+          subscription_arn=""
+          for attempt in {1..30}; do
+            subscription_arn="$(aws sns list-subscriptions-by-topic --region "$AWS_REGION" \
+              --topic-arn "$IXI_SES_EVENT_TOPIC_ARN" \
+              --query "Subscriptions[?Endpoint=='$IXI_SES_EVENT_ENDPOINT'].SubscriptionArn | [0]" \
+              --output text)"
+            if [[ -n "$subscription_arn" && "$subscription_arn" != "None" && "$subscription_arn" != "PendingConfirmation" ]]; then
+              break
+            fi
+            sleep 2
+          done
+          [[ -n "$subscription_arn" && "$subscription_arn" != "None" && "$subscription_arn" != "PendingConfirmation" ]]
+          event_destination="$(aws sesv2 get-configuration-set-event-destinations --region "$AWS_REGION" \
+            --configuration-set-name "$IXI_SES_CONFIGURATION_SET" \
+            --query "EventDestinations[?Name=='ixi-passport-communication-lifecycle' && Enabled==\`true\` && SnsDestination.TopicArn=='$IXI_SES_EVENT_TOPIC_ARN'].Name | [0]" \
+            --output text)"
+          test "$event_destination" = ixi-passport-communication-lifecycle
