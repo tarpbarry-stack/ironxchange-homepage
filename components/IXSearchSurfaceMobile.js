@@ -1,5 +1,3 @@
-import { useState } from "react";
-
 import {
   getListingCategory,
   getListingMake,
@@ -73,8 +71,6 @@ export default function IXSearchSurfaceMobile({
           )
         ];
 
-  const [panelLit, setPanelLit] = useState(false);
-
   function updateFilter(key, value) {
     setFilters({
       ...filters,
@@ -103,20 +99,15 @@ export default function IXSearchSurfaceMobile({
   }
 
   return (
-    <div className={`ix-mobile-search-surface ${panelLit ? "lit" : ""}`}>
+    <div className="ix-mobile-search-surface lit">
   <div className="mobile-panel-head">
   <span>IXSearchSurface™</span>
 
-  <button
-    type="button"
-    className="mobile-panel-power"
-    onClick={() => setPanelLit(current => !current)}
-    aria-label="Toggle search labels"
-  />
 </div>
       <div className="ix-mobile-search-row">
         <input
-          type="text"
+          type="search"
+          placeholder="Search machine, serial or ID…"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           autoComplete="off"
@@ -182,11 +173,6 @@ export default function IXSearchSurfaceMobile({
           ))}
         </select>
 
-       <button
-  type="button"
-  className="mobile-search-dash"
-  aria-label="Go"
-/>
       </div>
 
       <div className="ix-mobile-range-row">
@@ -261,8 +247,8 @@ export default function IXSearchSurfaceMobile({
           type="button"
           className="mobile-clear"
           onClick={clearAll}
-          aria-label="Clear"
-        />
+          aria-label="Clear search and filters"
+        >CLEAR</button>
       </div>
 
       <style jsx>{`

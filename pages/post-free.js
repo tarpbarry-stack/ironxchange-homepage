@@ -4059,6 +4059,284 @@ textarea:focus,
     grid-template-columns: 1fr;
   }
 }
+
+/* Field intake: keep every control inside the phone viewport and put the
+   machine details ahead of the large desktop card preview. */
+@media (max-width: 600px) {
+  .launch-wrap {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-width: 0;
+    padding: 8px 12px 40px;
+  }
+
+  .launch-header { order: 0; }
+  .photo-workbench { order: 1; }
+  .inventory-rail { order: 2; }
+  .preview-zone { order: 3; }
+  .lower-grid { order: 4; }
+  .footer-ops { order: 5; }
+  .distribution-center { order: 6; }
+
+  .launch-header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 10px;
+    padding: 12px;
+  }
+
+  .launch-title {
+    grid-column: 1 / -1;
+    min-width: 0;
+    align-items: flex-start;
+  }
+
+  .launch-title > div {
+    min-width: 0;
+  }
+
+  .launch-title h1 {
+    max-width: 100%;
+    line-height: 1.2;
+  }
+
+  .launch-title p {
+    display: none;
+  }
+
+  .post-header-imports {
+    grid-column: 1;
+    width: auto;
+    min-width: 0;
+    margin: 0;
+    transform: none;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .post-header-imports button {
+    width: auto;
+    min-width: 0;
+    height: 44px;
+    padding: 0 10px;
+  }
+
+  .launch-header-actions {
+    grid-column: 2;
+    justify-content: flex-end;
+    align-content: start;
+  }
+
+  .launch-header-actions button,
+  .launch-title button {
+    min-height: 44px;
+  }
+
+  .status-command {
+    display: none;
+  }
+
+  .photo-workbench {
+    min-width: 0;
+    padding: 12px;
+  }
+
+  .workbench-head,
+  .workbench-actions {
+    flex-wrap: wrap;
+    min-width: 0;
+  }
+
+  .workbench-head > div,
+  .workbench-actions {
+    width: 100%;
+  }
+
+  .workbench-head strong {
+    font-size: 11px;
+  }
+
+  .photo-polish-toggle button {
+    min-height: 44px;
+  }
+
+  .photo-add {
+    min-height: 44px;
+    white-space: nowrap;
+  }
+
+  .studio-grid {
+    display: contents;
+  }
+
+  .inventory-rail {
+    order: 1;
+    width: 100%;
+    min-width: 0;
+    height: auto;
+    overflow: visible;
+  }
+
+  .inventory-scroll {
+    display: grid;
+    overflow: visible;
+    min-width: 0;
+  }
+
+  .inventory-scroll input,
+  .inventory-scroll select {
+    min-width: 0;
+    height: 44px;
+    font-size: 16px;
+  }
+
+  .split-inputs,
+  .post-link-row {
+    min-width: 0;
+  }
+
+  .preview-zone {
+    order: 2;
+    min-width: 0;
+  }
+
+  .live-card-shell {
+    width: min(430px, 100%);
+  }
+
+  .live-card-shell :global(.card.seller-mode) {
+    width: 100%;
+    height: auto;
+    min-height: 0;
+    max-height: none;
+  }
+
+  .live-card-shell :global(.card-photo) {
+    height: auto;
+    aspect-ratio: 430 / 317;
+  }
+
+  .live-card-shell :global(.card.seller-mode .card-body) {
+    height: auto;
+    min-height: 250px;
+    max-height: none;
+    padding-bottom: 30px;
+  }
+
+  .live-card-shell :global(.seller-meta-row) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 7px;
+    margin-top: 9px;
+    padding-top: 9px;
+  }
+
+  .live-card-shell :global(.seller-placement-control) {
+    width: 100%;
+    flex: none;
+  }
+
+  .live-card-shell :global(.ixi-machine-placement-control) {
+    gap: 6px;
+  }
+
+  .live-card-shell :global(.ixi-machine-placement-control button) {
+    height: 34px;
+    font-size: 10px;
+    letter-spacing: .4px;
+  }
+
+  .live-card-shell :global(.seller-stats) {
+    display: none;
+  }
+
+  .distribution-center {
+    width: 100%;
+    min-width: 0;
+    height: auto;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    padding: 16px;
+    margin-top: 12px;
+    overflow: visible;
+  }
+
+  .distribution-head,
+  .utility-grid {
+    grid-column: 1 / -1;
+  }
+
+  .distribution-head h2 {
+    font-size: 20px;
+    line-height: 1.15;
+  }
+
+  .distribution-head p {
+    max-width: 40ch;
+    font-size: 13px;
+  }
+
+  .launch-btn {
+    width: 100%;
+    min-width: 0;
+    min-height: 72px;
+    padding: 11px;
+    gap: 8px;
+  }
+
+  .launch-btn i {
+    flex: 0 0 22px;
+  }
+
+  .launch-btn div {
+    min-width: 0;
+  }
+
+  .launch-btn strong {
+    font-size: 13px;
+    line-height: 1.15;
+  }
+
+  .launch-btn span {
+    font-size: 11px;
+    line-height: 1.25;
+    overflow-wrap: anywhere;
+  }
+
+  .utility-grid {
+    width: 100%;
+    min-width: 0;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .utility-grid button {
+    min-width: 0;
+    min-height: 48px;
+    overflow-wrap: anywhere;
+  }
+
+  .card-nav-row {
+    width: 100%;
+    grid-template-columns: 1fr;
+    height: auto;
+  }
+
+  .card-nav-row button[disabled] {
+    display: none;
+  }
+}
+
+@media (max-width: 374px) {
+  .distribution-center {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .launch-btn {
+    min-height: 56px;
+  }
+}
       `}</style>
     </>
   );

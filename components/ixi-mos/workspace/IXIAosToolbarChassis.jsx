@@ -167,6 +167,7 @@ export default function IXIAosToolbarChassis({ children, controls, registry, ind
   });
   const [folded, setFolded] = useState({ left: false, right: false });
   const [browse, setBrowse] = useState({ left: "", right: "" });
+  const [mobileQuery, setMobileQuery] = useState("");
   const [error, setError] = useState("");
   const [pending, setPending] = useState(0);
   const [loadedKey, setLoadedKey] = useState("");
@@ -208,7 +209,7 @@ export default function IXIAosToolbarChassis({ children, controls, registry, ind
     try {
       const saved = JSON.parse(localStorage.getItem(preferenceKey) || "null");
       if (saved) {
-        setFolded({ left: saved.folded?.left === true, right: saved.folded?.right === true });
+        if (!smallScreen) setFolded({ left: saved.folded?.left === true, right: saved.folded?.right === true });
         setBrowse({ left: typeof saved.browse?.left === "string" ? saved.browse.left : "",
           right: typeof saved.browse?.right === "string" ? saved.browse.right : "" });
       }
@@ -217,6 +218,7 @@ export default function IXIAosToolbarChassis({ children, controls, registry, ind
   }, [preferenceKey]);
   useEffect(() => {
     if (!preferenceKey || loadedKey !== preferenceKey) return;
+    if (window.matchMedia("(max-width: 999px)").matches) return;
     try { localStorage.setItem(preferenceKey, JSON.stringify({ folded, browse })); } catch { /* Optional presentation preference. */ }
   }, [folded, browse, preferenceKey, loadedKey]);
   async function run(action) {
@@ -229,6 +231,14 @@ export default function IXIAosToolbarChassis({ children, controls, registry, ind
     setBrowse(current => ({ ...current, [other]: objectId }));
     setFolded(current => ({ ...current, [other]: false }));
   }
+  const quickIds = [...new Set([
+    ...indexes.map(object => object.objectId),
+    ...getAosToolbarObjectIds(placements, "left"),
+    ...getAosToolbarObjectIds(placements, "right")
+  ])];
+  const visibleIds = mobileQuery.trim() ? [...new Set([...quickIds, ...registry.keys()])] : quickIds;
+  const quickObjects = visibleIds.map(id => registry.get(id)).filter(Boolean)
+    .filter(object => `${getAosToolbarName(object)} ${object.passportId || ""}`.toLowerCase().includes(mobileQuery.toLowerCase()));
   return (
     <section ref={chassisRef} className={`${styles.chassis} ${folded.left ? styles.leftClosed : ""} ${folded.right ? styles.rightClosed : ""}`} aria-label="AOS workspace">
       {["left", "right"].map(side => <Toolbar key={side} side={side} folded={folded[side]}
@@ -240,6 +250,20 @@ export default function IXIAosToolbarChassis({ children, controls, registry, ind
       )}
       <div className={styles.center}>
         {controls}
+        <section className={styles.mobilePicker} aria-label="AOS objects and machines">
+          <div className={styles.mobilePickerHead}><strong>AOS / WORK</strong><span>{quickObjects.length} OBJECTS</span></div>
+          <input type="search" aria-label="Find an AOS object or machine" placeholder="Find object, machine or Passport…" value={mobileQuery} onChange={event => setMobileQuery(event.target.value)} />
+          <div className={styles.mobilePickerScroll} role="group" aria-label="AOS objects">
+            {quickObjects.map(object => {
+              const view = getAosToolbarPresentation(object, registry);
+              return <button type="button" key={object.objectId} disabled={!ready} onClick={() => run(() => onBoard(object.objectId))}>
+                <span className={styles.mobilePickerImage}><PreviewImage src={view.image || view.previews[0]?.image} name={getAosToolbarName(object)} /></span>
+                <strong>{getAosToolbarName(object)}</strong><small>{view.machine ? "OPEN ON BOARD ↗" : `${view.count} MEMBERS · OPEN ↗`}</small>
+              </button>;
+            })}
+            {ready && !quickObjects.length && <p>No matching Objects in the system indexes or toolbars.</p>}
+          </div>
+        </section>
         <div className={styles.edgeControls}>
           {["left", "right"].map(side => <button key={side} type="button" ref={node => { openButtons.current[side] = node; }}
             className={`${styles.railToggle} ${!folded[side] ? styles.railActive : ""}`}

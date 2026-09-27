@@ -11,7 +11,8 @@ import {
 export default function IXICardScaleControl({
   value = "xl",
   onChange,
-  surfaceLabel = "Cards"
+  surfaceLabel = "Cards",
+  mobileDensity = false
 }) {
   const currentIndex =
     getCardScaleIndex(value);
@@ -34,6 +35,7 @@ export default function IXICardScaleControl({
       role="group"
       aria-label={`${surfaceLabel} card size`}
       data-ixi-card-scale-control="true"
+      data-mobile-density={mobileDensity ? "true" : undefined}
       data-ixi-card-scale-mode={currentMode}
     >
       <button
@@ -283,6 +285,7 @@ export default function IXICardScaleControl({
         }
 
         @media (max-width: 850px) {
+          .ixi-card-scale-control[data-mobile-density="true"] { display: none; }
           .ixi-card-scale-control {
             right: 12px;
             bottom: 12px;

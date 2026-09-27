@@ -417,11 +417,15 @@ export default function IXIAosScoreboard({
           .aos-scorecard-metrics { grid-column: 1 / -1; grid-row: 2; }
           .aos-scorecard-actions { grid-column: 2; grid-row: 1; }
           .aos-metric:first-child { border-left: 0; padding-left: 0; }
+          .aos-metric:nth-child(2) { flex-basis: 145px; }
+          .aos-metric strong { overflow-wrap: normal; white-space: nowrap; font-size: 14px; }
         }
         @media (max-width: 600px) {
-          .aos-scorecard-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 0; }
-          .aos-metric:nth-child(odd) { border-left: 0; padding-left: 0; }
-          .aos-metric:last-child { grid-column: 1 / -1; }
+          .aos-scorecard { gap: 10px; padding: 10px; background: #0c100e; }
+          .aos-scorecard-metrics { display: flex; grid-column: 1 / -1; gap: 0; width: 100%; overflow-x: auto; overscroll-behavior-inline: contain; scrollbar-width: none; }
+          .aos-scorecard-metrics::-webkit-scrollbar { display: none; }
+          .aos-metric, .aos-metric:last-child { flex: 0 0 104px; min-height: 44px; padding: 0 10px; border-left: 1px solid #364535; }
+          .aos-metric:first-child { border-left: 0; padding-left: 0; }
         }
       `}</style>
     </section>

@@ -12,3 +12,6 @@
 .pickerResults button[aria-selected="true"] { background: #ffc40019; box-shadow: inset 2px 0 var(--ix-yellow); }
 .pickerResults small { color: #bababa; overflow-wrap: anywhere; }
 .picker :focus-visible { outline: 2px solid var(--ix-yellow); outline-offset: 2px; }
+@media (max-width: 760px) {
+  .pickerMenu, .picker:nth-last-child(-n + 3) .pickerMenu { position: fixed; z-index: 1000; top: auto; bottom: max(12px, env(safe-area-inset-bottom)); left: 12px; right: 12px; width: auto; max-height: 70dvh; overflow-y: auto; }
+}

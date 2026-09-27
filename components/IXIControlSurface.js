@@ -83,11 +83,13 @@ box-shadow:
 
 @media (max-width: 850px) {
   .ixi-control-surface {
+    box-sizing: border-box;
     width: 100%;
     max-width: 100%;
     min-width: 0;
-    margin-top: 18px;
-    padding: 12px;
+    margin-top: 8px;
+    padding: 8px 10px 6px;
+    border-radius: 8px;
   }
 }
 `}</style>

@@ -90,7 +90,7 @@ export default function IXIRelationshipControls({
     <div
       className={`ixi-relationship-shell ${
         railRevealed ? "revealed" : ""
-      } ${machineControlsHinted ? "machine-hinted" : ""} ${className}`}
+      } ${machineControlsHinted ? "machine-hinted" : ""} ${workspaceToolbars ? "aos-workspace-filters" : ""} ${className}`}
     >
       <div className="ixi-relationship-head">
         <span>IXI Machine Controls™</span>
@@ -268,7 +268,7 @@ export default function IXIRelationshipControls({
         )}
       </div>
 
-      {hasAnyRelationship && (
+      {hasAnyRelationship && !workspaceToolbars && (
         <div className="ixi-mobile-nav-row">
           <a href="/browse-v2" className="ixi-mobile-nav-link">
             IXI MARKETPLACE
@@ -1038,23 +1038,53 @@ export default function IXIRelationshipControls({
 }
         @media (max-width: 850px) {
           .ixi-relationship-shell {
-            width: 100%;
-            margin: 14px auto 0;
+            margin: 5px auto 0;
           }
-
-          .ixi-relationship-controls {
-            margin: 14px auto 0;
-            gap: 14px;
+          .ixi-relationship-head {
+            height: 18px;
+            top: 0;
+            margin: 0 0 3px;
           }
-
+          .ixi-relationship-head span,
+          .ixi-relationship-shell.machine-hinted .ixi-relationship-head span {
+            opacity: 1;
+            color: #aeb6ab;
+            font-size: 10px;
+            letter-spacing: .04em;
+          }
+          .ixi-relationship-power,
+          .ixi-pocket-indicator-row,
+          .ixi-thumb-size-toggle,
           .ixi-mobile-nav-row {
-            width: 100%;
-            margin-top: 10px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 28px;
+            display: none !important;
           }
+          .ixi-relationship-controls,
+          .aos-workspace-filters .ixi-relationship-controls {
+            display: flex;
+            flex-wrap: nowrap;
+            justify-content: flex-start;
+            gap: 2px;
+            margin: 0;
+            overflow-x: auto;
+            scrollbar-width: none;
+            -webkit-overflow-scrolling: touch;
+          }
+          .ixi-relationship-controls::-webkit-scrollbar { display: none; }
+          .ixi-color-with-thumb,
+          .ixi-relationship-outline {
+            flex: 0 0 32px;
+            min-width: 32px;
+            min-height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+          }
+          .ixi-relationship-color { width: 20px; height: 8px; }
+          .aos-workspace-filters .aos-toolbar-destinations { display: none; }
+          .ixi-relationship-shell.aos-workspace-filters { margin-top: 5px; }
+          .aos-workspace-filters .ixi-relationship-controls { margin-top: 5px; }
+          .ixi-relationship-shell { width: 100%; }
         }
       `}</style>
     </div>

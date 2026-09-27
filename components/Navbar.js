@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import AtlasHelpLink from "./ixi-atlas/AtlasHelpLink";
+import IXIMobileEnvironmentNav from "./IXIMobileEnvironmentNav";
 
 export default function Navbar() {
   const [loggedIn, setLoggedIn] = useState(false);
@@ -23,7 +24,7 @@ export default function Navbar() {
     checkAuth();
   }, []);
 
-  return (
+  return (<>
     <nav className="nav">
       <div className="brand-side">
         <a href="/browse-v2" className="logo-wrap">
@@ -226,5 +227,7 @@ export default function Navbar() {
         }
       `}</style>
     </nav>
+    <IXIMobileEnvironmentNav />
+    </>
   );
 }

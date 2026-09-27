@@ -416,7 +416,7 @@ return (
         ? "ixi-seller-object-sortable-card"
         : ""
     } ${
-      effectiveConsoleDepth > 1
+      (effectiveConsoleDepth > 1 || ixiCardState?.[id]?.transactOpen === true || ixiCardState?.[id]?.transactVisible === true || customNativeWidth > 300)
         ? "ixi-console-expanded"
         : ""
     }`}

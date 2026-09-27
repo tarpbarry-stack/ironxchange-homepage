@@ -46,10 +46,10 @@ export default function IXIObjectCardActuator({
       }
 
       onPointerDown={event => {
-        event.preventDefault();
         event.stopPropagation();
       }}
 
+      style={{ "--ixi-actuator-center": `${actuatorTop + actuatorHeight / 2}px`, "--ixi-actuator-height": `${actuatorHeight}px` }}
       onClick={
         handleClick
       }
@@ -102,6 +102,8 @@ export default function IXIObjectCardActuator({
         :global(.marketplace-listing-card) .ixi-object-card-actuator {
           top: 335px;
           height: 34px;
+          --ixi-actuator-center: 352px !important;
+          --ixi-actuator-height: 34px !important;
         }
 
         .ixi-object-card-actuator.right {
@@ -136,6 +138,29 @@ export default function IXIObjectCardActuator({
                 .38
               );
         }
+        :global([data-ixi-mobile-assembly="true"]) .ixi-object-card-actuator {
+          top: calc(var(--ixi-actuator-center) - 22px * var(--ixi-mobile-inverse-scale));
+          width: calc(44px * var(--ixi-mobile-inverse-scale));
+          height: calc(44px * var(--ixi-mobile-inverse-scale));
+          background: transparent;
+          box-shadow: none;
+          touch-action: manipulation;
+        }
+        :global([data-ixi-mobile-assembly="true"]) .ixi-object-card-actuator.left { left: 0; }
+        :global([data-ixi-mobile-assembly="true"]) .ixi-object-card-actuator.right { right: 0; }
+        :global([data-ixi-mobile-assembly="true"]) .ixi-object-card-actuator::after {
+          content: "";
+          position: absolute;
+          top: 50%;
+          width: 5px;
+          height: var(--ixi-actuator-height);
+          transform: translateY(-50%);
+          background: rgba(255,255,255,.3);
+          border-radius: 3px;
+        }
+        :global([data-ixi-mobile-assembly="true"]) .ixi-object-card-actuator.left::after { left: 0; }
+        :global([data-ixi-mobile-assembly="true"]) .ixi-object-card-actuator.right::after { right: 0; }
+        :global([data-ixi-mobile-assembly="true"]) .ixi-object-card-actuator:focus-visible { outline: 2px solid #ffc400; outline-offset: -2px; }
       `}</style>
     </button>
   );

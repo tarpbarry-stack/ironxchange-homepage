@@ -639,6 +639,31 @@ border-radius: 14px;
   font-weight: 950;
   letter-spacing: .08em;
 }
+@media (max-width: 850px) {
+  .seller-object-card {
+    padding: 12px 12px 8px;
+  }
+  .seller-object-stats {
+    margin-top: 14px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+  .seller-object-stats div {
+    min-width: 0;
+    padding: 10px 8px;
+  }
+  .seller-object-stats strong {
+    font-size: 17px;
+    overflow-wrap: anywhere;
+  }
+  .seller-object-stats span { font-size: 8px; }
+  .seller-object-cats {
+    margin-top: 12px;
+    gap: 5px;
+  }
+  .seller-object-footer { padding-top: 8px; }
+  .seller-object-footer a { min-height: 40px; }
+}
       `}</style>
     </section>
   );

@@ -125,6 +125,61 @@ export default function Footer() {
       gap: 24px;
     }
   }
+
+  @media (max-width: 600px) {
+    .footer {
+      gap: 16px;
+      padding: 20px 16px 24px;
+    }
+
+    .footer > div:first-child {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .footer img {
+      height: 20px;
+    }
+
+    .footer p {
+      margin: 0;
+      font-size: 10px;
+      line-height: 1.3;
+      text-align: right;
+    }
+
+    .foot-cols {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      align-items: start;
+      gap: 10px;
+      border-top: 1px solid rgba(255,255,255,.08);
+      padding-top: 13px;
+    }
+
+    .foot-cols > div {
+      min-width: 0;
+    }
+
+    .foot-cols h4 {
+      margin: 0 0 6px;
+      font-size: 10px;
+      letter-spacing: .45px;
+    }
+
+    .foot-cols a {
+      display: flex;
+      align-items: center;
+      min-height: 44px;
+      margin: 0;
+      font-size: 11px;
+      line-height: 1.2;
+      overflow-wrap: anywhere;
+    }
+  }
 `}</style>
     </footer>
   );
