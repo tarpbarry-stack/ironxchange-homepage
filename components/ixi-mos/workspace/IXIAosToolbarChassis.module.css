@@ -82,7 +82,7 @@
   .mobilePickerHead strong { color: #ffcf34; }
   .mobilePickerHead span { color: #9faa97; }
   .mobilePicker input { width: 100%; min-height: 44px; margin-bottom: 8px; padding: 9px; border: 1px solid #3a4635; border-radius: 2px; background: #090e0b; color: #fff; font-size: 14px; }
-  .mobilePickerScroll { display: flex; gap: 7px; overflow-x: auto; overscroll-behavior-inline: contain; scroll-snap-type: x proximity; scrollbar-width: none; }
+  .mobilePickerScroll { display: flex; gap: 7px; overflow-x: auto; overscroll-behavior-inline: contain; scroll-snap-type: x proximity; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
   .mobilePickerScroll::-webkit-scrollbar { display: none; }
   .mobilePickerScroll > button { flex: 0 0 112px; width: 112px; min-height: 118px; padding: 3px; border: 1px solid #3b4534; background: #1b2118; color: #e9eee4; text-align: left; scroll-snap-align: start; }
   .mobilePickerScroll > button:focus-visible { outline: 2px solid #ffc400; }
