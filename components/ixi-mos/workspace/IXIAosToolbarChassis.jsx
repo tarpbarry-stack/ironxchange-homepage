@@ -179,7 +179,7 @@ export default function IXIAosToolbarChassis({ children, controls, registry, ind
     try {
       const saved = JSON.parse(localStorage.getItem(preferenceKey) || "null");
       if (saved) {
-        setFolded({ left: saved.folded?.left === true, right: saved.folded?.right === true });
+        if (!smallScreen) setFolded({ left: saved.folded?.left === true, right: saved.folded?.right === true });
         setBrowse({ left: typeof saved.browse?.left === "string" ? saved.browse.left : "",
           right: typeof saved.browse?.right === "string" ? saved.browse.right : "" });
       }
@@ -188,6 +188,7 @@ export default function IXIAosToolbarChassis({ children, controls, registry, ind
   }, [preferenceKey]);
   useEffect(() => {
     if (!preferenceKey || loadedKey !== preferenceKey) return;
+    if (window.matchMedia("(max-width: 999px)").matches) return;
     try { localStorage.setItem(preferenceKey, JSON.stringify({ folded, browse })); } catch { /* Optional presentation preference. */ }
   }, [folded, browse, preferenceKey, loadedKey]);
   async function run(action) {
@@ -205,7 +206,8 @@ export default function IXIAosToolbarChassis({ children, controls, registry, ind
     ...getAosToolbarObjectIds(placements, "left"),
     ...getAosToolbarObjectIds(placements, "right")
   ])];
-  const quickObjects = quickIds.map(id => registry.get(id)).filter(Boolean)
+  const visibleIds = mobileQuery.trim() ? [...new Set([...quickIds, ...registry.keys()])] : quickIds;
+  const quickObjects = visibleIds.map(id => registry.get(id)).filter(Boolean)
     .filter(object => `${getAosToolbarName(object)} ${object.passportId || ""}`.toLowerCase().includes(mobileQuery.toLowerCase()));
   return (
     <section className={`${styles.chassis} ${folded.left ? styles.leftClosed : ""} ${folded.right ? styles.rightClosed : ""}`} aria-label="AOS workspace">
@@ -218,7 +220,7 @@ export default function IXIAosToolbarChassis({ children, controls, registry, ind
       )}
       <div className={styles.center}>
         <section className={styles.mobilePicker} aria-label="AOS objects and machines">
-          <div className={styles.mobilePickerHead}><strong>OBJECTS & MACHINES</strong><span>{quickObjects.length} AVAILABLE</span></div>
+          <div className={styles.mobilePickerHead}><strong>AOS / WORK</strong><span>{quickObjects.length} OBJECTS</span></div>
           <input type="search" aria-label="Find an AOS object or machine" placeholder="Find object, machine or Passport…" value={mobileQuery} onChange={event => setMobileQuery(event.target.value)} />
           <div className={styles.mobilePickerScroll}>
             {quickObjects.map(object => {
