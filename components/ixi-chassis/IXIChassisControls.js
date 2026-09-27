@@ -60,10 +60,11 @@ export default function IXIChassisControls({
         </div>
 
         <div className="mobile-search-surface">
-          {workspaceToolbars && <button type="button" className="aos-board-search-toggle"
-            aria-expanded={mobileBoardSearchOpen} onClick={() => setMobileBoardSearchOpen(open => !open)}>
-            <span>BOARD SEARCH {boardSearchActive ? "· ACTIVE" : ""}</span><strong>{mobileBoardSearchOpen ? "CLOSE −" : "OPEN +"}</strong>
-          </button>}
+          {workspaceToolbars && <div className="aos-board-search-actions"><button type="button" className="aos-board-search-toggle"
+            aria-label={`${mobileBoardSearchOpen ? "Close" : "Open"} board search`} aria-expanded={mobileBoardSearchOpen}
+            onClick={() => setMobileBoardSearchOpen(open => !open)}>
+            <span>BOARD SEARCH{boardSearchActive ? " · ACTIVE" : ""}</span><strong aria-hidden="true">{mobileBoardSearchOpen ? "−" : "+"}</strong>
+          </button></div>}
           {(!workspaceToolbars || mobileBoardSearchOpen) && <IXSearchSurfaceMobile
             listings={listings}
             searchQuery={searchQuery}
@@ -113,8 +114,9 @@ export default function IXIChassisControls({
         }
 
         @media (max-width: 850px) {
-          .aos-board-search-toggle { display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 44px; padding: 0 12px; border: 1px solid #343c30; background: #101411; color: #e2e8dd; font: inherit; font-size: 11px; font-weight: 800; letter-spacing: .04em; cursor: pointer; }
-          .aos-board-search-toggle strong { color: #ffc400; font-size: 10px; }
+          .aos-board-search-actions { display: flex; justify-content: flex-end; margin: 0 0 9px; }
+          .aos-board-search-toggle { display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: auto; min-height: 44px; padding: 0 10px; border: 1px solid #343c30; border-radius: 3px; background: #101411; color: #e2e8dd; font: inherit; font-size: 10px; font-weight: 800; letter-spacing: .04em; white-space: nowrap; cursor: pointer; }
+          .aos-board-search-toggle strong { color: #ffc400; font-size: 17px; line-height: 1; }
           .aos-board-search-toggle:focus-visible { outline: 2px solid #ffc400; outline-offset: -2px; }
           .desktop-search-surface {
             display: none;
