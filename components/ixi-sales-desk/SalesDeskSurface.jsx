@@ -2,6 +2,7 @@ import Head from "next/head";
 import AtlasHelpLink from "../ixi-atlas/AtlasHelpLink";
 import dynamic from "next/dynamic";
 import { useEffect,useMemo,useRef,useState } from "react";
+import Board from "../ixi-dashboard/DashboardBoard";
 import {SortableRail,SortableRailTile,useRailOrder} from "./SortableRail";
 import {railStorageKey} from "./railOrder.mjs";
 import SalesDeskRail from "./SalesDeskRail";
@@ -13,7 +14,6 @@ import { salesRequest,todayLocal,stageLabel,machineReference } from "./salesDesk
 import { dashboardKey,passportOf } from "../ixi-dashboard/dashboardContract.mjs";
 import styles from "./salesDesk.module.css";
 
-const Board=dynamic(()=>import("../ixi-dashboard/DashboardBoard"),{ssr:false,loading:()=> <div className="sales-empty" role="status">Preparing your machine board…</div>});
 const Quote=dynamic(()=>import("./SalesDeskQuote"),{ssr:false,loading:()=> <div className="sales-empty" role="status">Preparing the quote…</div>});
 const Calendar=dynamic(()=>import("./SalesDeskCalendar"),{ssr:false});
 const Inquiries=dynamic(()=>import("./SalesDeskInquiries"),{ssr:false});
