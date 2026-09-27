@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { cloneElement, useEffect, useRef, useState } from "react";
 import { useDndContext, useDraggable, useDroppable } from "@dnd-kit/core";
 import { evaluateAosSystemIndexMembership } from "../../../lib/mos/IXIAosSystemIndexMembershipPolicy";
 import {
@@ -222,7 +222,8 @@ export default function IXIAosToolbarChassis({ children, controls, registry, ind
         <section className={styles.mobilePicker} aria-label="AOS objects and machines">
           <div className={styles.mobilePickerHead}><strong>AOS / WORK</strong><span>{quickObjects.length} OBJECTS</span></div>
           <input type="search" aria-label="Find an AOS object or machine" placeholder="Find object, machine or Passport…" value={mobileQuery} onChange={event => setMobileQuery(event.target.value)} />
-          <div className={styles.mobilePickerScroll}>
+        </section>
+        {cloneElement(controls, { mobileObjectRow: <div className={styles.mobilePickerScroll} role="group" aria-label="AOS objects">
             {quickObjects.map(object => {
               const view = getAosToolbarPresentation(object, registry);
               return <button type="button" key={object.objectId} disabled={!ready} onClick={() => run(() => onBoard(object.objectId))}>
@@ -231,9 +232,7 @@ export default function IXIAosToolbarChassis({ children, controls, registry, ind
               </button>;
             })}
             {ready && !quickObjects.length && <p>No matching Objects in the system indexes or toolbars.</p>}
-          </div>
-        </section>
-        {controls}
+          </div> })}
         <div className={styles.boardTools}>
           {["left", "right"].map(side => <button key={side} type="button" ref={node => { openButtons.current[side] = node; }}
             aria-expanded={!folded[side]} aria-controls={`aos-${side}-toolbar`}
