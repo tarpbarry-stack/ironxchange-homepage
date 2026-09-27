@@ -172,13 +172,6 @@ export default function IXIAosToolbarChassis({ children, controls, registry, ind
   const [pending, setPending] = useState(0);
   const [loadedKey, setLoadedKey] = useState("");
   const openButtons = useRef({});
-  const mobileStripRef = useRef(null);
-  const [mobileStripEdges, setMobileStripEdges] = useState({ back: false, forward: false });
-  function updateMobileStripEdges() {
-    const strip = mobileStripRef.current;
-    if (!strip) return;
-    setMobileStripEdges({ back: strip.scrollLeft > 2, forward: strip.scrollLeft + strip.clientWidth < strip.scrollWidth - 2 });
-  }
   useEffect(() => {
     const smallScreen = window.matchMedia("(max-width: 999px)").matches;
     setFolded({ left: smallScreen, right: smallScreen }); setBrowse({ left: "", right: "" });
@@ -216,15 +209,6 @@ export default function IXIAosToolbarChassis({ children, controls, registry, ind
   const visibleIds = mobileQuery.trim() ? [...new Set([...quickIds, ...registry.keys()])] : quickIds;
   const quickObjects = visibleIds.map(id => registry.get(id)).filter(Boolean)
     .filter(object => `${getAosToolbarName(object)} ${object.passportId || ""}`.toLowerCase().includes(mobileQuery.toLowerCase()));
-  useEffect(() => {
-    const strip = mobileStripRef.current;
-    if (!strip) return;
-    strip.scrollLeft = 0;
-    updateMobileStripEdges();
-    const observer = new ResizeObserver(updateMobileStripEdges);
-    observer.observe(strip);
-    return () => observer.disconnect();
-  }, [mobileQuery, quickObjects.length]);
   return (
     <section className={`${styles.chassis} ${folded.left ? styles.leftClosed : ""} ${folded.right ? styles.rightClosed : ""}`} aria-label="AOS workspace">
       {["left", "right"].map(side => <Toolbar key={side} side={side} folded={folded[side]}
@@ -239,7 +223,7 @@ export default function IXIAosToolbarChassis({ children, controls, registry, ind
         <section className={styles.mobilePicker} aria-label="AOS objects and machines">
           <div className={styles.mobilePickerHead}><strong>AOS / WORK</strong><span>{quickObjects.length} OBJECTS</span></div>
           <input type="search" aria-label="Find an AOS object or machine" placeholder="Find object, machine or Passport…" value={mobileQuery} onChange={event => setMobileQuery(event.target.value)} />
-          <div className={styles.mobilePickerScroll} ref={mobileStripRef} onScroll={updateMobileStripEdges} role="group" aria-label="AOS objects">
+          <div className={styles.mobilePickerScroll} role="group" aria-label="AOS objects">
             {quickObjects.map(object => {
               const view = getAosToolbarPresentation(object, registry);
               return <button type="button" key={object.objectId} disabled={!ready} onClick={() => run(() => onBoard(object.objectId))}>
@@ -249,11 +233,6 @@ export default function IXIAosToolbarChassis({ children, controls, registry, ind
             })}
             {ready && !quickObjects.length && <p>No matching Objects in the system indexes or toolbars.</p>}
           </div>
-          {(mobileStripEdges.back || mobileStripEdges.forward) && <div className={styles.mobilePickerNav} aria-label="Browse AOS objects">
-            <span>SWIPE OR USE ARROWS</span>
-            <button type="button" aria-label="Previous AOS objects" disabled={!mobileStripEdges.back} onClick={() => mobileStripRef.current?.scrollBy({ left: -240, behavior: "smooth" })}>‹</button>
-            <button type="button" aria-label="Next AOS objects" disabled={!mobileStripEdges.forward} onClick={() => mobileStripRef.current?.scrollBy({ left: 240, behavior: "smooth" })}>›</button>
-          </div>}
         </section>
         <div className={styles.boardTools}>
           {["left", "right"].map(side => <button key={side} type="button" ref={node => { openButtons.current[side] = node; }}
