@@ -62,7 +62,9 @@ export default function DashboardBoard({ machines, ownedKeys, states, onPatch, s
             const nativeWidth = regularDepth * 300 - (owned ? (regularDepth - 1) * 2 : 0) + (transactionDepth - 1) * 298;
             const nativeHeight = owned || getMachineCardFamily(item) === "auction" || state.transactOpen ? 475 : 400;
             const expanded = regularDepth > 1 || transactionDepth > 1;
-            const mobileAssembled = mobile && (density === "I" || expanded);
+            // Keep opened Consoles together across the phone, as on Marketplace.
+            // The single-card mobile assembly is only for a closed card.
+            const mobileAssembled = mobile && density === "I" && !expanded;
             const cellWidth = mobile && density === "II" && !expanded ? (width - 28) / 2 : width - 16;
             const scale = Math.min(size === "fit" ? Math.max(0.65, Math.min(1.2, (height - 90) / nativeHeight)) : desiredScale, Math.max(0.25, (cellWidth - (mobile ? 4 : 16)) / nativeWidth));
             const cardContext = owned ? "inventory" : "workspace";
