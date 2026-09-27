@@ -1853,11 +1853,13 @@ if (
 
 <section className="yard-head">
   <div className="yard-identity">
-    <SellerLogoDecal
-      logo={sellerLogo}
-      name={yardTitle}
-      variant="slug"
-    />
+    <div className="yard-logo">
+      <SellerLogoDecal
+        logo={sellerLogo}
+        name={yardTitle}
+        variant="slug"
+      />
+    </div>
 
     <div className="yard-copy">
       <span className="eyebrow">IXI Seller Object Board</span>
@@ -3618,8 +3620,10 @@ outline: none;
     padding: 12px;
   }
 
-  .yard-identity { min-width: 0; }
-  .yard-copy { min-width: 0; }
+  .yard-logo { display: none; }
+  .yard-identity { display: block; width: 100%; min-width: 0; }
+  .yard-copy { width: 100%; min-width: 0; }
+  .yard-copy .eyebrow { display: none; }
   .yard-copy h1 { font-size: clamp(18px, 5vw, 23px); line-height: 1.12; overflow-wrap: anywhere; }
   .yard-copy p { font-size: 11px; }
   .yard-stats { justify-content: flex-start; gap: 8px 18px; flex-wrap: wrap; }
