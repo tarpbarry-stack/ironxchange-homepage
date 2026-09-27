@@ -34,6 +34,24 @@ test("Passport delivery telemetry completes only after confirmed success", () =>
   assert.ok(response > requested);
   assert.ok(completed > response);
   assert.ok(failed > completed);
+  assert.match(dialog, /email_accepted/u);
+  assert.doesNotMatch(dialog, /result: "email_delivered"/u);
+});
+
+test("owner communication history is authenticated, Passport-bound and shared", () => {
+  const dialog = read("components/passport/PassportEmailDialog.jsx");
+  const provider = read("components/ixi-marketplace/ListingShareProvider.jsx");
+  const api = read("pages/api/communications/passports/[passportId]/history.js");
+  const client = read("lib/server/email/ixiPassportEmailClient.mjs");
+
+  assert.match(provider, /historyEnabled/u);
+  assert.match(dialog, /Communication History/u);
+  assert.match(dialog, /transact-document/u);
+  assert.match(dialog, /ACCEPTED BY EMAIL PROVIDER/u);
+  assert.match(api, /resolveAosBrowserSession/u);
+  assert.match(api, /authorId !== clean\(session\.userId\)/u);
+  assert.match(api, /recordedPassportId !== passportId/u);
+  assert.match(client, /\/communications\/v1\/passports\/\$\{encodeURIComponent\(normalizedPassportId\)\}\/history/u);
 });
 
 test("Text Passport presents explicit one-time consent before provider activation", () => {
@@ -143,6 +161,14 @@ test("machine console Email actions use the same Passport dialog", () => {
       facePath
     );
   }
+});
+
+test("seller machine face uses the canonical Passport actions", () => {
+  const face = read("components/ixi-machine-object/IXISellerMachineObjectFace2.js");
+  assert.match(face, /openIXIPassportEmail\(listing, \{ historyEnabled: true \}\)/u);
+  assert.match(face, /initialChannel: "text", historyEnabled: true/u);
+  assert.match(face, /\/p\/\$\{encodeURIComponent\(passportId\)\}/u);
+  assert.doesNotMatch(face, /<button type="button">EMAIL<\/button>/u);
 });
 
 test("Live and the public slug expose the exact Passport email dialog", () => {

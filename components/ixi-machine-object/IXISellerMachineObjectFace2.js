@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { openIXIPassportEmail } from "../../lib/marketplace/passportEmailEvents";
 import { formatHours, getListingHref, cleanMachineTitle, getListingId } from "../../lib/listingFormatters";
 import { getOwnedPrivateActions } from "../ixi-machine-card/private/IXIOwnedPrivateActionBridge";
 import IXIOwnedPrivateTransactRuntime from "../ixi-machine-card/private/IXIOwnedPrivateTransactRuntime";
@@ -314,9 +315,12 @@ export default function IXISellerMachineObjectFace2({
       ) : null}
 
       <div className="mof2-action-row mof2-contact-row" onPointerDown={event => event.stopPropagation()}>
-        <button type="button">EMAIL</button>
-        <button type="button">TEXT</button>
-        <button type="button">PDF</button>
+        <button type="button" onClick={() => openIXIPassportEmail(listing, { historyEnabled: true })}>EMAIL</button>
+        <button type="button" onClick={() => openIXIPassportEmail(listing, { initialChannel: "text", historyEnabled: true })}>TEXT</button>
+        <button type="button" onClick={() => {
+          if (!passportId) return;
+          window.open(`/p/${encodeURIComponent(passportId)}`, "_blank", "noopener,noreferrer");
+        }} disabled={!passportId}>PASSPORT</button>
       </div>
 
       <div className="mof2-action-row mof2-lifecycle-row" onPointerDown={event => event.stopPropagation()}>
