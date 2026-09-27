@@ -285,3 +285,15 @@
 .salesDesk :global(.sales-sortable-tile > .sales-rail-drag:active){cursor:grabbing}
 .salesDesk :global(.sales-sortable-tile > .sales-rail-drag:disabled){opacity:.4;cursor:default}
 .salesDesk :global(.sales-tile-dragging){z-index:10;box-shadow:0 0 0 2px #e0cb65,0 8px 24px #0009;opacity:.92}
+
+/* On phones, let the workspace follow the document instead of clipping under the controls. */
+@media(max-width:760px){
+  .salesDesk{height:auto;min-height:100dvh;overflow:visible}
+  .salesDesk :global(.sales-workspace){flex:none;min-height:0}
+  .salesDesk :global(.sales-board){flex:none;min-height:0}
+  .salesDesk :global(.sales-preserved-board),.salesDesk :global(.sales-preserved-panel){flex:none;min-height:0}
+  .salesDesk :global(.sales-preserved-board > .dash-board-scroll){flex:none;overflow:visible}
+  .salesDesk :global(.sales-panel),.salesDesk :global(.sales-calendar-scroll),.salesDesk :global(.sales-daily-list){flex:none;min-height:0;overflow:visible}
+  .salesDesk :global(.sales-work-strip){flex-wrap:nowrap;overflow-x:auto}
+  .salesDesk :global(.sales-work-strip > button){flex:0 0 auto}
+}
