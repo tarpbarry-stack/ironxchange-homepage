@@ -84,6 +84,10 @@
   .mobilePicker input { width: 100%; min-height: 44px; margin-bottom: 8px; padding: 9px; border: 1px solid #3a4635; border-radius: 2px; background: #090e0b; color: #fff; font-size: 14px; }
   .mobilePickerScroll { display: flex; gap: 7px; overflow-x: auto; overscroll-behavior-inline: contain; scroll-snap-type: x proximity; scrollbar-width: none; }
   .mobilePickerScroll::-webkit-scrollbar { display: none; }
+  .mobilePickerNav { display: flex; align-items: center; justify-content: flex-end; gap: 5px; padding-top: 5px; }
+  .mobilePickerNav span { margin-right: auto; color: #9da999; font-size: 9px; font-weight: 750; letter-spacing: .04em; }
+  .mobilePickerNav button { width: 44px; height: 44px; border: 1px solid #5b5a36; border-radius: 3px; background: #1a2119; color: #ffd23a; font-size: 25px; line-height: 1; cursor: pointer; }
+  .mobilePickerNav button:disabled { opacity: .35; cursor: default; }
   .mobilePickerScroll > button { flex: 0 0 112px; width: 112px; min-height: 118px; padding: 3px; border: 1px solid #3b4534; background: #1b2118; color: #e9eee4; text-align: left; scroll-snap-align: start; }
   .mobilePickerScroll > button:focus-visible { outline: 2px solid #ffc400; }
   .mobilePickerScroll > button:disabled { opacity: .5; }
