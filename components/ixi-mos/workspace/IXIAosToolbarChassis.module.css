@@ -65,6 +65,7 @@
 .status { min-height: 0; font-size: 12px; color: #c9d1bc; }
 .status:not(:empty) { padding: 10px 0; }
 .board { min-width: 0; min-height: 320px; padding-top: 28px; display: flow-root; }
+.mobilePicker { display: none; }
 /* Position only: search keeps its own inputs, sizing and internal geometry. */
 .chassis .center :global(.ixi-control-surface) { margin-top: 0; }
 @media (min-width: 1700px) { .chassis { --rail-width: 280px; gap: 24px; }.leftClosed.rightClosed { column-gap: 0; } }
@@ -76,4 +77,23 @@
   .left { left: 0; }.right { right: 0; }
   .toolbar button, .toolbar select { min-height: 44px; }
   .boardTools button { min-height: 44px; font-size: 10px; padding: 8px; }
+}
+@media (max-width: 760px) {
+  .mobilePicker { display: block; width: 100%; min-width: 0; margin: 0 0 10px; padding: 9px; border: 1px solid #343c30; background: #0e130f; color: #e9eee4; }
+  .mobilePickerHead { display: flex; justify-content: space-between; gap: 10px; margin-bottom: 7px; font-size: 10px; letter-spacing: .5px; }
+  .mobilePickerHead strong { color: #ffcf34; }
+  .mobilePickerHead span { color: #9faa97; }
+  .mobilePicker input { width: 100%; min-height: 44px; margin-bottom: 8px; padding: 9px; border: 1px solid #3a4635; border-radius: 2px; background: #090e0b; color: #fff; font-size: 14px; }
+  .mobilePickerScroll { display: flex; gap: 7px; overflow-x: auto; overscroll-behavior-inline: contain; scroll-snap-type: x proximity; scrollbar-width: none; }
+  .mobilePickerScroll::-webkit-scrollbar { display: none; }
+  .mobilePickerScroll > button { flex: 0 0 112px; width: 112px; min-height: 118px; padding: 3px; border: 1px solid #3b4534; background: #1b2118; color: #e9eee4; text-align: left; scroll-snap-align: start; }
+  .mobilePickerScroll > button:focus-visible { outline: 2px solid #ffc400; }
+  .mobilePickerScroll > button:disabled { opacity: .5; }
+  .mobilePickerImage { display: grid; place-items: center; width: 100%; height: 68px; overflow: hidden; background: #0b100c; }
+  .mobilePickerImage img { width: 100%; height: 100%; object-fit: contain; }
+  .mobilePickerScroll strong { display: block; margin: 4px 2px 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-size: 10px; }
+  .mobilePickerScroll small { display: block; margin: 3px 2px; color: #ffcd35; font-size: 9px; font-weight: 800; }
+  .mobilePickerScroll > p { margin: 12px 4px; font-size: 11px; }
+  .boardTools { margin-top: 8px; }
+  .board { padding-top: 14px; }
 }
