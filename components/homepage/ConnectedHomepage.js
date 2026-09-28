@@ -152,6 +152,7 @@ function BenefitSection({ number, product, headline, body, benefit, href, tone, 
 
 export default function ConnectedHomepage() {
   const [listing, setListing] = useState(FALLBACK_LISTING);
+  const [sessionStatus, setSessionStatus] = useState("checking");
   useEffect(() => {
     captureIXEvent("homepage_viewed", { page: "ixi-bay-gateway-v3" });
     fetchPublicMarketplaceListings({ surface: "home" }).then(listings => {
@@ -161,9 +162,19 @@ export default function ConnectedHomepage() {
     }).catch(error => { if (error?.name !== "AbortError") setListing(FALLBACK_LISTING); });
   }, []);
 
+  useEffect(() => {
+    let active = true;
+    import("sharetribe-flex-sdk").then(SharetribeSdk => {
+      const sdk = SharetribeSdk.createInstance({ clientId: process.env.NEXT_PUBLIC_SHARETRIBE_CLIENT_ID });
+      return sdk.currentUser.show();
+    }).then(() => { if (active) setSessionStatus("signed-in"); })
+      .catch(() => { if (active) setSessionStatus("signed-out"); });
+    return () => { active = false; };
+  }, []);
+
   return <div className={styles.page}>
     <Head><title>IronXchange — Your Machine Is the Beginning</title><meta name="description" content="One Passport connects the marketplace, the work, and the money." /><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" /><link rel="preload" as="image" href="/images/ixi-homepage-bay-gateway.webp" fetchPriority="high" /></Head>
-    <header className={styles.siteHeader}><Link href="/gateway" className={styles.brand} aria-label="IronXchange gateway"><Image src="/images/ironxchange-logo.png" width={1807} height={396} priority alt="IronXchange" /></Link><nav aria-label="IronXchange products">{NAV.map(([href, label]) => <Link href={href} key={label}>{label}</Link>)}</nav><div className={styles.headerActions}><AtlasHelpLink topic="overview" /><Link href="/browse-v2"><Icon name="search" /><span>SEARCH</span></Link><Link href="/login?returnTo=%2Fgateway" className={styles.gatewayHeaderSignIn}>SIGN IN</Link><Link href="/post-free" className={styles.postMachine}>POST A MACHINE</Link></div></header>
+    <header className={styles.siteHeader}><Link href="/gateway" className={styles.brand} aria-label="IronXchange gateway"><Image src="/images/ironxchange-logo.png" width={1807} height={396} priority alt="IronXchange" /></Link><nav aria-label="IronXchange products">{NAV.map(([href, label]) => <Link href={href} key={label}>{label}</Link>)}</nav><div className={styles.headerActions}><AtlasHelpLink topic="overview" /><Link href="/browse-v2"><Icon name="search" /><span>SEARCH</span></Link>{sessionStatus === "signed-in" ? <Link href="/account" className={styles.gatewayHeaderSignIn}>DASHBOARD</Link> : sessionStatus === "signed-out" ? <Link href="/login?returnTo=%2Fgateway" className={styles.gatewayHeaderSignIn}>SIGN IN</Link> : null}<Link href="/post-free" className={styles.postMachine}>POST A MACHINE</Link></div></header>
     <main>
       <section className={styles.mobileGateway} aria-labelledby="mobile-gateway-title">
         <div className={styles.mobileGatewayIntro}>
@@ -175,7 +186,7 @@ export default function ConnectedHomepage() {
           <Link href="/post-free" className={styles.mobilePrimaryAction}><span><b>POST A MACHINE</b><small>Start free · Add photos from your phone</small></span><Icon name="arrow" /></Link>
           <Link href="/browse-v2" className={styles.mobileSecondaryAction}><span><b>BROWSE MACHINES</b><small>Explore the IXI Marketplace</small></span><Icon name="arrow" /></Link>
         </div>
-        <Link href="/login?returnTo=%2Fgateway" className={styles.mobileSignIn}>SIGN IN → CHOOSE YOUR WORKSPACE <Icon name="arrow" /></Link>
+        {sessionStatus === "signed-in" ? <div className={styles.mobileSessionReady}>SIGNED IN · CHOOSE WHERE TO GO</div> : sessionStatus === "signed-out" ? <Link href="/login?returnTo=%2Fgateway" className={styles.mobileSignIn}>SIGN IN → CHOOSE YOUR WORKSPACE <Icon name="arrow" /></Link> : null}
         <div className={styles.mobileWorkspace}>
           <div className={styles.mobileWorkspaceHeading}><span>YOUR WORKSPACE</span><small>Pick up where you left off</small></div>
           <Link href="/account/my-listings-v2" className={styles.mobileWorkspaceLink}><span><b>INVENTORY</b><small>Manage your machines and listings</small></span><Icon name="arrow" /></Link>
