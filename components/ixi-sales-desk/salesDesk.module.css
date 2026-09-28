@@ -428,3 +428,8 @@
     color:#c9a837;
   }
 }
+
+/* Desktop workflow rail thumbnails: frame the lower machine, not the sky. */
+@media (min-width: 901px) {
+  .salesDesk :global(.sales-machine-image img) { object-position: center 70%; }
+}
