@@ -139,3 +139,8 @@
   .dashboard :global(.dash-card-transform.dash-mobile-assembled .ixi-private-console-listing-slot) { width:300px; min-width:300px; max-width:300px; flex-basis:300px; }
   .dashboard :global(.dash-card-transform.dash-mobile-assembled .ixi-private-console-listing-slot[data-transact-open="true"]) { width:var(--ixi-mobile-transact-width); min-width:var(--ixi-mobile-transact-width); max-width:var(--ixi-mobile-transact-width); flex-basis:var(--ixi-mobile-transact-width); }
 }
+
+/* Desktop workflow rail thumbnails: frame the lower machine, not the sky. */
+@media (min-width: 901px) {
+  .dashboard :global(.dash-tile-image img) { object-position: center 70%; }
+}
