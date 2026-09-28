@@ -856,3 +856,8 @@
   }
   .shell[data-ui-rebuild] .queueBands::-webkit-scrollbar { display: none; }
 }
+
+/* Desktop AOS and TRAN$ACT object tiles use a background image. */
+@media (min-width: 901px) {
+  .shell[data-ui-rebuild] .objectTileImage .objectTileMedia[data-context-kind="machine"] { background-position: center 70%; }
+}
