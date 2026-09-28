@@ -1,15 +1,38 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { runPostFreePosting, describePostingFile } from "../lib/post-free/postFreeDurableClient.mjs";
+import { toCorePostFreePlacement, toListingPostFreePlacement } from "../lib/post-free/postFreePlacementContract.mjs";
 import fs from "node:fs";
 import { createRequire } from "node:module";
 const require = createRequire(import.meta.url);
 const { transformSync } = require("next/dist/build/swc");
 const module = { exports: {} };
 const filename = new URL("../lib/server/onboarding/postFreePostingWorkflow.js", import.meta.url).pathname;
-new Function("module", "exports", transformSync(fs.readFileSync(filename, "utf8"), { filename, jsc: { parser: { syntax: "ecmascript" }, target: "es2022" }, module: { type: "commonjs" } }).code)(module, module.exports);
+new Function("require", "module", "exports", transformSync(fs.readFileSync(filename, "utf8"), { filename, jsc: { parser: { syntax: "ecmascript" }, target: "es2022" }, module: { type: "commonjs" } }).code)(name => name.includes("postFreePlacementContract") ? { toListingPostFreePlacement } : require(name), module, module.exports);
 const { startPostFreePosting, finalizePostFreePosting } = module.exports;
 const types = { UUID: class { constructor(uuid) { this.uuid = uuid; } }, Money: class { constructor(amount, currency) { Object.assign(this, { amount, currency }); } } };
+
+test("PRIV placement crosses IX-Core and listing contracts without changing identity", async () => {
+  const original = { operationId: "private-placement", payload: { publicData: { machineAccess: "private", machineChannel: "none" } }, files: [] };
+  const reserve = toCorePostFreePlacement(original);
+  assert.equal(reserve.payload.publicData.machineChannel, "private");
+  assert.equal(original.payload.publicData.machineChannel, "none");
+  assert.equal(toListingPostFreePlacement(reserve.payload.publicData).machineChannel, "none");
+  assert.equal(toCorePostFreePlacement({ payload: { publicData: { machineAccess: "public", machineChannel: "marketplace" } } }).payload.publicData.machineChannel, "marketplace");
+
+  let created;
+  const row = { operationId: "private-placement", payload: { title: "Machine", priceCents: 12300, publicData: reserve.payload.publicData } };
+  const sdk = { ownListings: {
+    createDraft: async data => {
+      created = data;
+      throw new Error("captured listing payload");
+    }
+  } };
+  const core = async action => action === "reserve" ? { row, createGranted: true } : assert.fail(action);
+  await assert.rejects(startPostFreePosting({ sdk, types, core, input: reserve }), /captured listing payload/);
+  assert.equal(created.publicData.machineAccess, "private");
+  assert.equal(created.publicData.machineChannel, "none");
+});
 
 test("lost listing-create response is recovered by owner marker without another create", async () => {
   let creates = 0, listing;
