@@ -66,7 +66,7 @@
   .brand{width:145px}
   .headerActions>.postMachine{height:38px!important;padding-inline:11px!important;font-size:9px!important}
   .mobileGateway{padding:34px 16px 30px}
-  .mobileGateway h1{font-size:clamp(49px,13vw,68px)}
+  .mobileGateway h1{font-size:clamp(42px,11.5vw,58px)}
   .mobileGatewayIntro p{font-size:15px}
   .systemIntro{min-height:0;padding:45px 18px 48px}
   .systemIntro h2{font-size:clamp(34px,9vw,46px)}
