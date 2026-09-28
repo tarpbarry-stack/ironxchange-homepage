@@ -61,6 +61,32 @@ test("refresh and second-session recovery skip saved originals and never publish
   assert.equal(result.status, "complete");
 });
 
+test("new iPhone posting reaches the server when browser photo recovery never responds", async () => {
+  const originals = Array.from({ length: 4 }, (_, index) =>
+    new File([`photo-${index}`], `iphone-${index}.jpg`, { type: "image/jpeg" }));
+  const progress = [];
+  let starts = 0;
+  const posting = runPostFreePosting({
+    operationId: "iphone-four-photos",
+    storageScope: "entity:owner",
+    payload: {},
+    photos: originals.map(file => ({ file })),
+    onProgress: message => progress.push(message),
+    filesStore: () => new Promise(() => {}),
+    request: async action => {
+      if (action === "start") { starts++; throw new Error("draft reached server"); }
+      throw new Error(`unexpected ${action}`);
+    }
+  });
+  await assert.rejects(
+    Promise.race([posting, new Promise((_, reject) =>
+      setTimeout(() => reject(new Error("preflight timed out")), 1500))]),
+    /draft reached server/
+  );
+  assert.equal(starts, 1);
+  assert.ok(progress.includes("CHECKING PHOTO 4/4"));
+});
+
 test("finalization preserves private visibility, sends one hero and verifies persisted references", async () => {
   const row = { operationId: "op3", listingId: "listing3", passportId: "PASS3", files: [{}, {}], payload: { publicData: { machineAccess: "private" } } };
   const manifest = { heroMediaId: "media3", mediaVersion: 1 };
