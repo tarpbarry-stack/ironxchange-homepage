@@ -37,6 +37,7 @@
   .brand{width:174px}
   .headerActions>a{display:none!important}
   .headerActions>.postMachine{display:inline-flex!important;height:42px!important;padding-inline:14px!important;font-size:10px!important}
+  .headerActions>.gatewayHeaderSignIn{display:inline-flex!important;min-height:44px;padding:0 6px;font-size:10px}
   .hero{display:none}
   .mobileGateway{display:block;position:relative;padding:38px 20px 44px;border-bottom:1px solid var(--line);background:radial-gradient(circle at 95% 0%,rgba(255,208,0,.12),transparent 36%),linear-gradient(155deg,#101510,#050806 48%,#030504)}
   .mobileGatewayIntro{max-width:600px;margin:0 auto}
@@ -54,12 +55,12 @@
   .mobileGatewayActions .mobilePrimaryAction{border-color:var(--yellow);background:var(--yellow);color:#071009}
   .mobilePrimaryAction small{color:#273128!important}
   .mobileGatewayActions .mobileSecondaryAction{border-color:#778b7c;background:#172019}
-  .mobileWorkspace{margin-top:38px}
+  .mobileWorkspace{margin-top:24px}
   .mobileWorkspaceHeading{display:flex;justify-content:space-between;gap:10px;align-items:baseline;padding-bottom:10px;border-bottom:1px solid rgba(255,255,255,.18)}
   .mobileWorkspaceHeading small{color:#a5b0a8;font-size:11px}
   .mobileWorkspaceLink{min-height:64px;margin-top:8px;border-color:rgba(255,255,255,.12);background:rgba(255,255,255,.035)}
   .mobileWorkspaceLink .icon{color:var(--yellow)}
-  .mobileSignIn{max-width:600px;min-height:48px;display:flex;align-items:center;justify-content:center;gap:10px;margin:20px auto 0;color:#c7d0c8!important;font-size:11px;font-weight:800;letter-spacing:.09em}
+  .mobileSignIn{max-width:600px;min-height:52px;display:flex;align-items:center;justify-content:center;gap:10px;margin:16px auto 0;border:1px solid rgba(255,208,0,.6);color:var(--yellow)!important;font-size:12px;font-weight:900;letter-spacing:.06em;text-align:center}
 }
 @media(max-width:560px){
   .siteHeader{height:60px;grid-template-rows:60px;padding-inline:16px}
