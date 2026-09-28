@@ -142,5 +142,5 @@
 
 /* Desktop workflow rail thumbnails: frame the lower machine, not the sky. */
 @media (min-width: 901px) {
-  .dashboard :global(.dash-tile-image img) { object-position: center 70%; }
+  .dashboard :global(.dash-tile-image img) { object-position: center 70%; transform: scale(1.16); transform-origin: center 70%; }
 }
