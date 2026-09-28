@@ -38,6 +38,7 @@ import { captureIXEvent } from "../../lib/posthog";
 
 import IXIDragEngine from "../../components/ixi-chassis/IXIDragEngine";
 import IXIEnvironmentRail from "../../components/IXIEnvironmentRail";
+import IXIOperatingNav from "../../components/ixi-os/IXIOperatingNav";
 import IXIActiveStack from "../../components/ixi-chassis/IXIActiveStack";
 import IXIBoard from "../../components/ixi-chassis/IXIBoard";
 import IXIBoardSurface
@@ -580,6 +581,22 @@ const sellerListings = useMemo(() => {
 const workspaceListings = useMemo(() => {
   return sellerListings;
 }, [sellerListings]);
+
+const inventorySummary = useMemo(() => {
+  const owned = workspaceListings.filter(item => !item.inventorySessionOnly);
+  let live = 0;
+  let privateCount = 0;
+  let asking = 0;
+  let priced = 0;
+  owned.forEach(item => {
+    const status = String(item.listingStatus || item.publicData?.listingStatus || item.attributes?.publicData?.listingStatus || "").toLowerCase();
+    if (status === "live" || status === "published") live += 1;
+    else privateCount += 1;
+    const value = Number(String(item.price || item.publicData?.price || "").replace(/[^0-9.-]/g, ""));
+    if (Number.isFinite(value) && value > 0) { asking += value; priced += 1; }
+  });
+  return { count: owned.length, live, privateCount, asking, priced };
+}, [workspaceListings]);
 
 const containerStateKey = useMemo(() => {
   return workspaceListings
@@ -1331,6 +1348,8 @@ function updateCardScaleMode(nextMode) {
 
             <Navbar />
 
+      <IXIOperatingNav active={isSold ? "/sold" : "/account/my-listings-v2"} />
+
    
 <IXIWorkspaceEngine
   workspaceSettings={workspaceSettings}
@@ -1411,7 +1430,7 @@ toggleSearchSurfaceRevealed
     cardScaleMode={cardScaleMode}
   >
     <main>
-  <section className="saved-environment-shell">
+  <section className="saved-environment-shell inventory-legacy-nav">
    <IXIEnvironmentRail
   activeEnvironment={isSold ? "SOLD" : "INVENTORY"}
   hasAccount={!!sdk}
@@ -1555,6 +1574,12 @@ toggleSearchSurfaceRevealed
   getSellerListingCardProps={getSellerListingCardProps}
 />
               
+     {!isSold && <div className="inventory-scoreboard" role="status" aria-label="Inventory summary" aria-busy={inventoryStatus.loading}>
+       <div><span>INVENTORY</span><strong>{inventoryStatus.loading ? "…" : inventorySummary.count}</strong><small>Owned machines</small></div>
+       <div><span>LIVE</span><strong>{inventoryStatus.loading ? "…" : inventorySummary.live}</strong><small>Published</small></div>
+       <div><span>PRIVATE</span><strong>{inventoryStatus.loading ? "…" : inventorySummary.privateCount}</strong><small>In your workspace</small></div>
+       <div><span>TOTAL ASKING</span><strong>{inventoryStatus.loading ? "…" : inventorySummary.priced ? new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(inventorySummary.asking) : "—"}</strong><small>{inventorySummary.priced} priced {inventorySummary.priced === 1 ? "machine" : "machines"}</small></div>
+     </div>}
      {isSold && <div className="sold-toolbar" aria-label="Sold inventory filters">
        <div className="sold-scoreboard" role="status" aria-label="Sold sales summary" aria-busy={inventoryStatus.loading}>
          <strong>SOLD <span>{inventoryStatus.loading ? "…" : inventoryStatus.error ? "—" : `${inventoryStatus.total} ${inventoryStatus.total === 1 ? "sale" : "sales"}`}</span></strong>
@@ -1644,24 +1669,33 @@ toggleSearchSurfaceRevealed
           font-weight:100 900;
           font-display:swap;
         }
-        .sold-toolbar { display:flex; flex-wrap:wrap; align-items:center; gap:20px 32px; margin:20px 0; padding:20px 24px; background:var(--ix-surface-raised); border:1px solid var(--ix-line-strong); border-radius:10px; font-family:'IXI Sold Inter','Inter Variable', Inter, ui-sans-serif, sans-serif; }
-        .sold-scoreboard { display:grid; gap:10px; margin-right:auto; min-width:0; max-width:100%; }
+        .inventory-scoreboard { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; margin:16px 0; font-family:'IXI Sold Inter','Inter Variable',Inter,ui-sans-serif,sans-serif; }
+        .inventory-scoreboard > div { display:flex; flex-direction:column; min-width:0; gap:5px; padding:13px 16px; background:#171717; border:1px solid #383838; border-radius:2px; }
+        .inventory-scoreboard span { color:#aaa; font-size:10px; font-weight:700; letter-spacing:.08em; }
+        .inventory-scoreboard strong { color:#ffcc00; font-size:23px; font-weight:750; line-height:1.15; font-variant-numeric:tabular-nums; overflow-wrap:anywhere; }
+        .inventory-scoreboard small { color:#aaa; font-size:11px; }
+        .sold-toolbar { display:flex; flex-wrap:wrap; align-items:center; gap:12px 20px; margin:16px 0; padding:13px 16px; background:#171717; border:1px solid #383838; border-radius:2px; font-family:'IXI Sold Inter','Inter Variable', Inter, ui-sans-serif, sans-serif; }
+        .sold-scoreboard { display:grid; gap:4px; margin-right:auto; min-width:0; max-width:100%; }
         .sold-scoreboard strong { display:flex; align-items:baseline; gap:14px; color:#ffcc00; font-size:20px; line-height:1.25; font-weight:750; letter-spacing:-.02em; }
         .sold-scoreboard strong span { font-size:13px; font-weight:500; letter-spacing:0; color:var(--ix-text-secondary); }
         .sold-value { display:flex; flex-wrap:wrap; align-items:baseline; gap:8px 14px; }
         .sold-value span { font-size:11px; line-height:1.4; letter-spacing:.08em; font-weight:650; color:var(--ix-text-secondary); }
-        .sold-value b { font-size:28px; line-height:1.15; font-weight:700; letter-spacing:-.025em; color:#ffcc00; font-variant-numeric:tabular-nums; overflow-wrap:anywhere; }
+        .sold-value b { font-size:23px; line-height:1.15; font-weight:700; letter-spacing:-.025em; color:#ffcc00; font-variant-numeric:tabular-nums; overflow-wrap:anywhere; }
         .sold-scoreboard small { font-size:12px; line-height:1.4; color:var(--ix-text-secondary); }
-        .sold-filters { display:flex; flex-wrap:wrap; align-items:end; gap:12px; max-width:100%; }
+        .sold-filters { display:flex; flex-wrap:wrap; align-items:end; gap:8px; max-width:100%; }
         .sold-filter-toggle { display:none; }
-        .sold-toolbar label { display:grid; gap:8px; font-size:12px; line-height:1.4; font-weight:550; color:var(--ix-text-secondary); }
-        .sold-toolbar select, .sold-toolbar input, .sold-toolbar button { box-sizing:border-box; background:var(--ix-surface); color:var(--ix-text-primary); border:1px solid var(--ix-line-strong); border-radius:6px; padding:10px 12px; height:42px; min-width:0; font-family:inherit; font-size:13px; line-height:20px; font-weight:500; color-scheme:dark; }
-        .sold-toolbar input { width:150px; }
+        .sold-toolbar label { display:grid; gap:4px; font-size:11px; line-height:1.4; font-weight:550; color:var(--ix-text-secondary); }
+        .sold-toolbar select, .sold-toolbar input, .sold-toolbar button { box-sizing:border-box; background:var(--ix-surface); color:var(--ix-text-primary); border:1px solid var(--ix-line-strong); border-radius:2px; padding:7px 9px; height:36px; min-width:0; font-family:inherit; font-size:12px; line-height:20px; font-weight:500; color-scheme:dark; }
+        .sold-toolbar input { width:135px; }
         .sold-toolbar button { cursor:pointer; }
         .sold-toolbar button:disabled { opacity:.45; cursor:default; }
         .sold-toolbar :is(input,select,button):focus-visible { outline:2px solid #ffcc00; outline-offset:3px; }
         .sold-toolbar summary { font-size:13px; line-height:1.5; cursor:pointer; }
+        @media(min-width:761px) { .inventory-legacy-nav { display:none; } }
         @media(max-width:760px) {
+          .inventory-scoreboard { grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px; margin:10px 0; }
+          .inventory-scoreboard > div { padding:10px; }
+          .inventory-scoreboard strong { font-size:19px; }
           .sold-toolbar { padding:12px 14px; gap:8px; margin:10px 0; }
           .sold-scoreboard { gap:4px; width:100%; }
           .sold-value { gap:4px 8px; }
