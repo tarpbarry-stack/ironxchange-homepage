@@ -5,6 +5,7 @@ import { paymentHistorySummary } from "../ixi-aos/transact/payments/IXIPaymentHi
 import IXIPaymentStatusBadge from "../ixi-aos/transact/payments/IXIPaymentStatusBadge";
 import paymentStyles from "../ixi-aos/transact/payments/IXIPaymentStatusBadge.module.css";
 import AtlasHelpLink from "../ixi-atlas/AtlasHelpLink";
+import IXIOperatingNav from "../ixi-os/IXIOperatingNav";
 import IXIPaymentsPanel from "../ixi-aos/transact/payments/IXIPaymentsPanel";
 import { paymentDocument, paymentScopeObject } from "../ixi-aos/transact/payments/IXIPaymentModel";
 import { createIXITransactContext } from "../ixi-aos/transact/IXITransactContext";
@@ -973,6 +974,8 @@ export default function IXITransactCommandCenter({ runtime, active = true }) {
       </header>
 
       <IXITransactSidePanel className={styles.newTransactionMenu} label="New transaction" dockAt={100000} open={newMenuOpen} onDismiss={() => setNewMenuOpen(false)}><p>{selectedContext?.title}</p><div className={styles.appLauncher}>{selectedModules.map(module => <button type="button" key={module.id} onClick={() => openTransactModule(module.id)}><strong>{module.label}</strong></button>)}</div></IXITransactSidePanel>
+
+      <IXIOperatingNav active="/transact" />
 
       <div className={styles.desktop}>
         <IXITransactSidePanel className={styles.navigation} label="Object directory" dockAt={1280} open={openPanel === "directory"} onDismiss={() => setOpenPanel("")}>

@@ -165,7 +165,9 @@ export default function IXIAosToolbarChassis({ children, controls, registry, ind
     id: "board", disabled: !ready,
     data: { type: "workspace", containerId: "board", targetSurface: "board", dropIntent: "root" }
   });
-  const [folded, setFolded] = useState({ left: false, right: false });
+  // Give the board the width it needs on first visit. A saved rail preference
+  // still wins, and the right rail remains available through its fold control.
+  const [folded, setFolded] = useState({ left: false, right: true });
   const [browse, setBrowse] = useState({ left: "", right: "" });
   const [mobileQuery, setMobileQuery] = useState("");
   const [error, setError] = useState("");
@@ -204,7 +206,7 @@ export default function IXIAosToolbarChassis({ children, controls, registry, ind
   }, []);
   useEffect(() => {
     const smallScreen = window.matchMedia("(max-width: 999px)").matches;
-    setFolded({ left: smallScreen, right: smallScreen }); setBrowse({ left: "", right: "" });
+    setFolded({ left: smallScreen, right: true }); setBrowse({ left: "", right: "" });
     if (!preferenceKey) return;
     try {
       const saved = JSON.parse(localStorage.getItem(preferenceKey) || "null");

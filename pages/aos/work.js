@@ -22,6 +22,7 @@ import {
 } from "@dnd-kit/utilities";
 
 import Navbar from "../../components/Navbar";
+import IXIOperatingNav from "../../components/ixi-os/IXIOperatingNav";
 import Footer from "../../components/Footer";
 
 import IXIAosToolbarChassis from "../../components/ixi-mos/workspace/IXIAosToolbarChassis";
@@ -3183,8 +3184,9 @@ return null;
   data-ixi-board-skin={boardSkin.skinId}
  >
   <h1 className="aos-work-board-title">IXI AOS WORK</h1>
+  <IXIOperatingNav active="/aos/work" />
   {inventoryRefreshError && <div role="alert" style={{ padding: 12, border: "1px solid #d6aa39", color: "#ffe096", background: "#211e12" }}>{inventoryRefreshError} <button type="button" onClick={() => inventoryReloadRef.current?.()}>RETRY INVENTORY</button></div>}
-  <section className="saved-environment-shell">
+  <details className="aos-legacy-destinations"><summary>MORE DESTINATIONS</summary><section className="saved-environment-shell">
     <IXIEnvironmentRail
       activeEnvironment="AOS"
       hasAccount={!!aosEntity}
@@ -3193,7 +3195,7 @@ return null;
       armedDestination={armedDestination}
       toggleArmedDestination={toggleArmedDestination}
     />
-  </section>
+  </section></details>
 
 <IXIAosScoreboard
   entity={aosEntity}
@@ -3689,6 +3691,9 @@ onDetachContainerFromParents={
   width: 100%;
   margin: 0 auto;
 }
+       .aos-legacy-destinations { margin: 0 18px; color: #aaa; font: 700 10px "Inter Variable", Inter, sans-serif; letter-spacing: .08em; }
+       .aos-legacy-destinations summary { width: fit-content; margin: 8px 0; cursor: pointer; }
+       .aos-legacy-destinations[open] { padding-bottom: 12px; }
 
 
       :global(.ixi-drag-overlay-card) {

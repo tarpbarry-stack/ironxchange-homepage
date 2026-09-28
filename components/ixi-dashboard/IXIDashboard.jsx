@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Navbar from "../Navbar";
 import DashboardMachineRail from "./DashboardMachineRail";
 import MobileMachineStrip from "./MobileMachineStrip";
+import IXIOperatingNav from "../ixi-os/IXIOperatingNav";
 import useIXISellerMachineOps from "../ixi-chassis/useIXISellerMachineOps";
 import { fetchIxiMachineState, saveIxiMachinePatch } from "../../lib/ixiMachineStateClient";
 import { getSavedListingIdsFromUser, toggleSavedListing } from "../../lib/savedListings";
@@ -18,15 +19,6 @@ import styles from "./dashboard.module.css";
 const SalesDeskSurface = dynamic(() => import("../ixi-sales-desk/SalesDeskSurface"), { ssr: false });
 
 const Board = dynamic(() => import("./DashboardBoard"), { ssr: false, loading: () => <div className="dash-board-loading" role="status">Preparing your board…</div> });
-const APPS = [
-  ["AOS / WORK", "/aos/work", "Your company", "▦"],
-  ["TRAN$ACT", "/transact", "Financial desktop", "$"],
-  ["INVENTORY", "/account/my-listings-v2", "Your machines", "▤"],
-  ["SOLD", "/sold", "Sales & settlement", "✓"],
-  ["SALES DESK", "/sales-desk", "Customers & deals", "▣"],
-  ["THEATER", "/theater", "Compare & present", "▣"],
-  ["LAUNCH", "/post-free", "Add a machine", "+"]
-];
 const liveMachine = item => isPublicMarketplaceMachine(item) && item.sharetribeState === "published" && !["paused", "closed", "deleted", "archived"].includes(item.listingStatus);
 const pending = { loading: true, error: "" };
 
@@ -228,7 +220,7 @@ export default function IXIDashboard({ salesDeskContext = null }) {
     <style jsx global>{`body { margin: 0; background: #090c0a; }`}</style>
     <Navbar />
     <header className="dash-identity"><div className="dash-identity-title"><span className="dash-home-mark">IXI</span><div><span className="dash-eyebrow">{company}</span><h1>DASHBOARD</h1></div><span className="dash-version">V12</span></div><nav aria-label="Your account"><a href="/account/profile">PROFILE</a><a href="/account/messages">MESSAGES</a><details className="dash-account-menu"><summary>ACCOUNT <span>⌄</span></summary><div><a href="/account/profile">Profile & company settings</a><a href="/privacy">Privacy</a><a href="/terms">Terms</a><button onClick={async () => { if (dirtyRef.current.size && !window.confirm("Leave with unsaved changes?")) return; persistView(); await auth.sdk?.logout(); dirtyRef.current = new Set(); window.location.href = "/login"; }}>Sign out</button></div></details></nav></header>
-    <nav className="dash-apps" aria-label="IXI applications">{APPS.map(([label, href, detail, icon]) => <a href={href} key={href}><span className="dash-app-icon" aria-hidden="true">{icon}</span><span><strong>{label}</strong><small>{detail}</small></span><span className="dash-app-arrow" aria-hidden="true">↗</span></a>)}</nav>
+    <IXIOperatingNav active="/account" />
     <div className="dash-stats" aria-label="Account overview">{stats.map(stat => { const Tag = stat.href ? "a" : stat.action ? "button" : "div"; return <Tag key={stat.label} href={stat.href} onClick={stat.action} className="dash-stat" title={stat.detail}><span>{stat.label}</span><strong>{stat.value}</strong><small>{stat.detail}</small></Tag>; })}</div>
     {auth.loading ? <div className="dash-page-message" role="status">Opening your dashboard…</div> : auth.error ? <div className="dash-page-message" role="alert"><h2>{auth.error}</h2><a href="/login?next=%2Faccount">SIGN IN</a><button onClick={() => setAuthRevision(value => value + 1)}>TRY AGAIN</button></div> : <main className={`dash-workspace ${hidden.left ? "dash-hide-left" : ""} ${hidden.right ? "dash-hide-right" : ""} ${mobileRail ? `dash-mobile-${mobileRail}` : ""}`}>
       <MobileMachineStrip owned={visibleOwned} related={related} ownedStatus={ownedStatus} relatedStatus={relatedStatus} openKeys={openKeys} selectedKey={selectedKey} onOpen={openMachine} label="WORKING BOARD" />

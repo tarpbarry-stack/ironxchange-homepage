@@ -1,6 +1,7 @@
 import Head from "next/head";
 import AtlasHelpLink from "../ixi-atlas/AtlasHelpLink";
 import IXIMobileEnvironmentNav from "../IXIMobileEnvironmentNav";
+import IXIOperatingNav from "../ixi-os/IXIOperatingNav";
 import dynamic from "next/dynamic";
 import { useEffect,useMemo,useRef,useState } from "react";
 import Board from "../ixi-dashboard/DashboardBoard";
@@ -128,7 +129,8 @@ export default function SalesDeskSurface({initial,dashboardClass,workspace:w}) {
   return <div className={`${dashboardClass} ${styles.salesDesk}`} data-ixi-sales-desk="v3">
     <Head><title>IXI Sales Desk | {initial.context.company}</title><meta name="robots" content="noindex,nofollow" /></Head>
     <style jsx global>{`body{margin:0;background:#090d0b;}`}</style>
-    <header className="sales-header"><a className="sales-brand" href="/account" aria-label="IXI Home">IXI</a><div className="sales-title"><span className="sales-eyebrow">{initial.context.company}</span><h1>SALES DESK</h1></div><span className="sales-access"><i/> {actor.role.toUpperCase()} ACCESS</span><div className="sales-help-slot"><AtlasHelpLink topic={quote ? "quote" : pane === "calendar" ? "calendar" : "sales-desk"} /></div><nav aria-label="IXI environments"><a href="/account">HOME</a><a href="/aos/work">AOS / WORK ↗</a>{actor.canFinancial && <a href="/transact">TRAN$ACT ↗</a>}{actor.canManageTeam && <button onClick={()=>setAdmin("team")}>TEAM</button>}{actor.canImport && <button disabled={!canWrite} onClick={()=>setAdmin("import")}>IMPORT</button>}</nav><button className="sales-new-contact" disabled={!canWrite} onClick={()=>openEditor("contacts")}>+ CONTACT</button><button className="sales-new-deal" disabled={!canWrite} onClick={()=>openEditor("deals")}>+ NEW DEAL</button><button className="sales-primary" disabled={!canWrite} onClick={()=>setInquiry(true)}>+ INQUIRY</button></header>
+    <header className="sales-header"><a className="sales-brand" href="/account" aria-label="IXI Home">IXI</a><div className="sales-title"><span className="sales-eyebrow">{initial.context.company}</span><h1>SALES DESK</h1></div><span className="sales-access"><i/> {actor.role.toUpperCase()} ACCESS</span><div className="sales-help-slot"><AtlasHelpLink topic={quote ? "quote" : pane === "calendar" ? "calendar" : "sales-desk"} /></div><nav aria-label="Sales Desk tools">{actor.canManageTeam && <button onClick={()=>setAdmin("team")}>TEAM</button>}{actor.canImport && <button disabled={!canWrite} onClick={()=>setAdmin("import")}>IMPORT</button>}</nav><button className="sales-new-contact" disabled={!canWrite} onClick={()=>openEditor("contacts")}>+ CONTACT</button><button className="sales-new-deal" disabled={!canWrite} onClick={()=>openEditor("deals")}>+ NEW DEAL</button><button className="sales-primary" disabled={!canWrite} onClick={()=>setInquiry(true)}>+ INQUIRY</button></header>
+    <IXIOperatingNav active="/sales-desk" canFinancial={actor.canFinancial} />
     <IXIMobileEnvironmentNav />
     <div className="sales-scoreboard" aria-label="Sales overview">
       <button onClick={()=>toggleRail("left")}><span>OWNED MACHINES</span><strong>{w.ownedStatus.loading ? "—" : w.owned.length}</strong><small>Ready to work</small></button>
