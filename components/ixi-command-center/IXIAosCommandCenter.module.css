@@ -859,5 +859,5 @@
 
 /* Desktop AOS and TRAN$ACT object tiles use a background image. */
 @media (min-width: 901px) {
-  .shell[data-ui-rebuild] .objectTileImage .objectTileMedia[data-context-kind="machine"] { background-position: center 70%; }
+  .shell[data-ui-rebuild] .objectTileImage .objectTileMedia[data-context-kind="machine"] { background-position: center 70%; transform: scale(1.16); transform-origin: center 70%; }
 }
