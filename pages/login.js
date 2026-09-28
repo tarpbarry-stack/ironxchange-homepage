@@ -21,6 +21,17 @@ export default function LoginPage() {
     }
   }, []);
 
+  useEffect(() => {
+    let active = true;
+    import("sharetribe-flex-sdk").then(SharetribeSdk => {
+      const sdk = SharetribeSdk.createInstance({ clientId: process.env.NEXT_PUBLIC_SHARETRIBE_CLIENT_ID });
+      return sdk.currentUser.show();
+    }).then(() => {
+      if (active) window.location.replace(getSafeIXILoginReturnTarget(window.location.search));
+    }).catch(() => { /* No valid session; the login form remains available. */ });
+    return () => { active = false; };
+  }, []);
+
 async function handleLogin(e) {
   e.preventDefault();
 

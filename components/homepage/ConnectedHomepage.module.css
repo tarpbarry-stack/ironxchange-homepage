@@ -56,6 +56,7 @@
   .mobilePrimaryAction small{color:#273128!important}
   .mobileGatewayActions .mobileSecondaryAction{border-color:#778b7c;background:#172019}
   .mobileWorkspace{margin-top:24px}
+  .mobileSessionReady{max-width:600px;min-height:48px;display:flex;align-items:center;justify-content:center;margin:16px auto 0;border:1px solid rgba(255,208,0,.3);color:var(--yellow);font-size:11px;font-weight:900;letter-spacing:.09em;text-align:center}
   .mobileWorkspaceHeading{display:flex;justify-content:space-between;gap:10px;align-items:baseline;padding-bottom:10px;border-bottom:1px solid rgba(255,255,255,.18)}
   .mobileWorkspaceHeading small{color:#a5b0a8;font-size:11px}
   .mobileWorkspaceLink{min-height:64px;margin-top:8px;border-color:rgba(255,255,255,.12);background:rgba(255,255,255,.035)}
