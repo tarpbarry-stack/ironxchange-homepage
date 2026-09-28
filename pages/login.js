@@ -1,5 +1,5 @@
 import Head from "next/head";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { getSafeIXILoginReturnTarget } from "../lib/auth/ixiLoginReturn";
 
@@ -11,6 +11,15 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [signupHref, setSignupHref] = useState("/signup");
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.has("returnTo") || params.has("next")) {
+      const destination = getSafeIXILoginReturnTarget(window.location.search);
+      setSignupHref(`/signup?next=${encodeURIComponent(destination)}`);
+    }
+  }, []);
 
 async function handleLogin(e) {
   e.preventDefault();
@@ -83,7 +92,7 @@ async function handleLogin(e) {
 <div className="signup-area">
   <span>New to IronXchange?</span>
 
- <a href="/signup" className="signup-link">
+ <a href={signupHref} className="signup-link">
     CREATE ACCOUNT
   </a>
 </div>
