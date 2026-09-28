@@ -392,3 +392,39 @@
   .salesDesk :global(.sales-scoreboard strong) { font-size:20px; }
   .salesDesk :global(.sales-work-strip) { padding:6px 8px; }
 }
+
+/* Sales Desk's mobile machine picker uses the same neutral V12 palette as
+   the surrounding board. The shared Dashboard picker keeps its own styling. */
+@media(max-width:760px) {
+  .salesDesk :global(.ixi-mobile-machines) {
+    background:#101010;
+    border-bottom-color:#3d3d3d;
+    color:#f2f2f2;
+  }
+  .salesDesk :global(.ixi-mobile-machines-head > span) { color:#c8b355; }
+  .salesDesk :global(.ixi-mobile-machines-tabs button) {
+    border-color:#414141;
+    background:#1a1a1a;
+    color:#d2d2d2;
+  }
+  .salesDesk :global(.ixi-mobile-machines-tabs button[aria-pressed="true"]) {
+    border-color:#af9326;
+    background:#252112;
+    color:#ffd23a;
+  }
+  .salesDesk :global(.ixi-mobile-machines input) {
+    border-color:#414141;
+    background:#0d0d0d;
+    color:#f2f2f2;
+  }
+  .salesDesk :global(.ixi-mobile-machines-scroll > p) { color:#bdbdbd; }
+  .salesDesk :global(.ixi-mobile-machine) {
+    border-color:#3e3e3e;
+    background:#1b1b1b;
+    color:#eeeeee;
+  }
+  .salesDesk :global(.ixi-mobile-machine-photo) {
+    background:#0b0b0b;
+    color:#c9a837;
+  }
+}
