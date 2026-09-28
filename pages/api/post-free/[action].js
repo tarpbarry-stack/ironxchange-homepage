@@ -2,6 +2,7 @@ import { types } from "sharetribe-flex-sdk";
 import { resolveAosBrowserSession } from "../../../lib/server/aos/resolveAosBrowserSession";
 import { requestIxCoreMos, resolveIxCoreAosContext } from "../../../lib/server/aos/ixiMosInternalClient";
 import { normalizeOwnedMachineListing } from "../../../lib/server/onboarding/normalizeOwnedMachineListing";
+import { toCorePostFreePlacement } from "../../../lib/post-free/postFreePlacementContract.mjs";
 import { startPostFreePosting, finalizePostFreePosting } from "../../../lib/server/onboarding/postFreePostingWorkflow";
 export default async function handler(req, res) {
   res.setHeader("Cache-Control", "no-store");
@@ -12,7 +13,7 @@ export default async function handler(req, res) {
     const session = await resolveAosBrowserSession(req, res);
     const context = await resolveIxCoreAosContext({ session });
     const core = (operation, body) => requestIxCoreMos({ path: `/aos/post-free/${operation}`, method: "POST",
-      principalId: context.userId, entityId: context.entityId, body });
+      principalId: context.userId, entityId: context.entityId, body: operation === "reserve" ? toCorePostFreePlacement(body) : body });
     const input = req.body || {};
     let result;
     if (["start", "resume", "revise"].includes(action)) {
