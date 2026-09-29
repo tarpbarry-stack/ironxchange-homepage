@@ -1599,6 +1599,16 @@ toggleSearchSurfaceRevealed
   </aside>
   </div>
     </IXIChassis>
+{!searchCollapsed && ["pocketLeft", "pocketLeft2", "pocketRight", "pocketRight2"].some(key => machineContainers[key]?.length) &&
+  <details className="inventory-hidden-pocket-access">
+    <summary>ACCESS HIDDEN POCKETS</summary>
+    {[["pocketLeft2", "III", "outer"], ["pocketLeft", "I", "inner"], ["pocketRight", "II", "inner"], ["pocketRight2", "IV", "outer"]].map(([key, label, group]) =>
+      <div key={key} className={`inventory-hidden-pocket-group ${group}`}><strong>POCKET {label}</strong>
+        {(machineContainers[key] || []).map(id => <button key={id} type="button"
+          onClick={() => moveMachineToContainer(id, "board")}>{getListingById(id)?.title || id} → BOARD</button>)}
+        {!machineContainers[key]?.length && <span>Empty</span>}
+      </div>)}
+  </details>}
 
               
 <IXIActiveStackZone
@@ -1705,6 +1715,17 @@ toggleSearchSurfaceRevealed
       <Footer />
 
       <style jsx global>{`
+        .inventory-hidden-pocket-access { display: none; margin: 6px 0 12px; padding: 8px; border: 1px solid #383838; background: #171717; color: #ddd; font-size: 11px; }
+        .inventory-hidden-pocket-access summary { cursor: pointer; color: #ffcf34; font-weight: 750; }
+        .inventory-hidden-pocket-group { display: flex; align-items: center; flex-wrap: wrap; gap: 7px; padding: 7px 0; border-top: 1px solid #383838; }
+        .inventory-hidden-pocket-group strong { min-width: 68px; color: #aaa; }
+        .inventory-hidden-pocket-group button { min-height: 36px; padding: 5px 8px; border: 1px solid #383838; background: #111; color: #ddd; cursor: pointer; }
+        .inventory-hidden-pocket-group button:focus-visible { outline: 2px solid #ffcf34; }
+        @media (min-width: 851px) and (max-width: 1449px) {
+          .inventory-hidden-pocket-access { display: block; }
+          .inventory-hidden-pocket-group.inner { display: none; }
+        }
+        @media (max-width: 850px) { .inventory-hidden-pocket-access { display: block; } }
         .inventory-search-collapsed .ixi-command-left,
         .inventory-search-collapsed .ixi-command-right { display: none !important; }
         .inventory-search-expanded .ixi-command-left,

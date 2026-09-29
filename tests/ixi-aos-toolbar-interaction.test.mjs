@@ -81,6 +81,9 @@ test("folding keeps Board state mounted, browsed containers and parked Objects s
     assert.equal(boardTarget.data.current.dropIntent, "root", "Board drops are placement, not membership");
     assert.equal(dnd.droppableContainers.get("pocketLeft2")?.data.current.targetSurface, "pocketLeft2");
     assert.match(doc.querySelector('[aria-label="Pocket III"]').textContent, /Pocket selection/);
+    await click(doc.querySelector('details summary'));
+    await click([...doc.querySelectorAll('details button')].find(button => button.textContent.includes('Pocket selection')));
+    assert.deepEqual(opened, [[pocketed.objectId]], "a pocket hidden at narrower widths remains recoverable to Board");
     await click(doc.querySelector('[aria-controls="aos-right-toolbar"]'));
     const boardRect = { left: 330, right: 1016, top: 462, bottom: 1100, width: 686, height: 638 };
     const rightRect = { left: 1036, right: 1280, top: 219, bottom: 1051, width: 244, height: 832 };
@@ -105,7 +108,7 @@ test("folding keeps Board state mounted, browsed containers and parked Objects s
     const mini = right.querySelector('button[aria-label="Open Ripper on board"]');
     assert.equal(right.querySelector('img').getAttribute('src'), "/existing-ripper.jpg");
     await click(mini);
-    assert.deepEqual(opened, [[machine.objectId, yard.objectId]], "clicking a machine opens its canonical Board card");
+    assert.deepEqual(opened, [[pocketed.objectId], [machine.objectId, yard.objectId]], "clicking a machine opens its canonical Board card");
     assert.match(left.textContent, /Customer Yard/, "opening a machine must not replace the opposite container browser");
     await click(left.querySelector('[aria-label="Close LEFT RAIL"]'));
     assert.equal(left.getAttribute("aria-hidden"), "true");

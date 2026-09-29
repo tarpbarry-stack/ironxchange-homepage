@@ -305,6 +305,16 @@ export default function IXIAosToolbarChassis({ children, controls, registry, ind
           {SEARCH_POCKETS.slice(2).map(pocket => <SearchPocket key={pocket.id} pocket={pocket} placements={placements}
             registry={registry} ready={ready} onBoard={id => run(() => onBoard(id))} />)}
         </div>
+        {!searchCollapsed && SEARCH_POCKETS.some(pocket => placements[pocket.id]?.length) && <details className={styles.hiddenPocketAccess}>
+          <summary>ACCESS HIDDEN POCKETS</summary>
+          {SEARCH_POCKETS.map(pocket => <div key={pocket.id} className={pocket.outer ? styles.hiddenOuterPocket : styles.hiddenInnerPocket}>
+            <strong>POCKET {pocket.label}</strong>
+            {(placements[pocket.id] || []).map(id => registry.get(id)).filter(Boolean).map(object =>
+              <button key={object.objectId} type="button" disabled={!ready}
+                onClick={() => run(() => onBoard(object.objectId))}>{getAosToolbarName(object)} → BOARD</button>)}
+            {!placements[pocket.id]?.length && <span>Empty</span>}
+          </div>)}
+        </details>}
         <section className={styles.mobilePicker} aria-label="AOS objects and machines">
           <div className={styles.mobilePickerHead}><strong>AOS / WORK</strong><span>{quickObjects.length} OBJECTS</span></div>
           <input type="search" aria-label="Find an AOS object or machine" placeholder="Find object, machine or Passport…" value={mobileQuery} onChange={event => setMobileQuery(event.target.value)} />

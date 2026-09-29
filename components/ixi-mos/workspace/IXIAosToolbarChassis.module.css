@@ -19,6 +19,12 @@
 .pocketDrag:focus-visible, .pocketBoard:focus-visible { outline: 2px solid var(--ix-yellow); }
 .searchDeckClosed { grid-template-columns: minmax(0, 1fr); }
 .searchDeckClosed .searchPocket { display: none; }
+.hiddenPocketAccess { display: none; margin: 4px 0 8px; padding: 8px; border: 1px solid var(--ix-line-strong); background: var(--ix-surface-raised); color: var(--ix-text-primary); font-size: 11px; }
+.hiddenPocketAccess summary { cursor: pointer; color: var(--ix-yellow); font-weight: 750; }
+.hiddenPocketAccess > div { display: flex; align-items: center; flex-wrap: wrap; gap: 7px; padding: 7px 0; border-top: 1px solid var(--ix-line-strong); }
+.hiddenPocketAccess strong { min-width: 68px; color: #aaa; }
+.hiddenPocketAccess button { min-height: 36px; padding: 5px 8px; border: 1px solid var(--ix-line-strong); background: #171717; color: var(--ix-text-primary); cursor: pointer; }
+.hiddenPocketAccess button:focus-visible { outline: 2px solid var(--ix-yellow); }
 .leftClosed .center { grid-column: 1; }
 .toolbar { grid-row: 1; position: sticky; top: 90px; min-width: 0; height: var(--toolbar-height, calc(100dvh - 230px)); box-sizing: border-box; display: flex; flex-direction: column; border: 0; border-right: 1px solid var(--line); border-radius: 0; background: var(--ix-surface-raised); color: var(--ix-text-primary); overflow: hidden; }
 .left { grid-column: 1; }.right { grid-column: 3; }
@@ -93,8 +99,10 @@
   .searchDeck { grid-template-columns: 106px minmax(0, 1fr) 106px; }
   .outerPocket { display: none; }
   .searchDeckClosed { grid-template-columns: minmax(0, 1fr); }
+  .hiddenPocketAccess { display: block; }
+  .hiddenInnerPocket { display: none !important; }
 }
-@media (max-width: 1199px) { .searchDeck, .searchDeckClosed { grid-template-columns: minmax(0, 1fr); } .searchPocket { display: none; } }
+@media (max-width: 1199px) { .searchDeck, .searchDeckClosed { grid-template-columns: minmax(0, 1fr); } .searchPocket { display: none; } .hiddenInnerPocket { display: flex !important; } }
 @media (max-width: 1250px) { .chassis { --rail-width: 205px; } .center { padding-top: 52px; } }
 @media (max-width: 999px) {
   .chassis, .leftClosed, .rightClosed, .leftClosed.rightClosed { grid-template-columns: minmax(0, 1fr); gap: 0; }
