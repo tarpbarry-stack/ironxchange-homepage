@@ -39,6 +39,7 @@ import { captureIXEvent } from "../../lib/posthog";
 import IXIDragEngine from "../../components/ixi-chassis/IXIDragEngine";
 import IXIEnvironmentRail from "../../components/IXIEnvironmentRail";
 import IXIOperatingNav from "../../components/ixi-os/IXIOperatingNav";
+import InventoryMachineRail from "../../components/ixi-os/InventoryMachineRail";
 import IXIActiveStack from "../../components/ixi-chassis/IXIActiveStack";
 import IXIBoard from "../../components/ixi-chassis/IXIBoard";
 import IXIBoardSurface
@@ -126,6 +127,8 @@ export default function MyListingsV2({ inventoryMode = "owned" }) {
   const [soldFiltersOpen, setSoldFiltersOpen] = useState(false);
   const [inventoryStatus, setInventoryStatus] = useState({ loading: true, error: "", total: 0, page: 1, pageSize: 24 });
   const [inventoryRevision, setInventoryRevision] = useState(0);
+  const [machineRails, setMachineRails] = useState({ left: true, right: true });
+  const [selectedRailMachine, setSelectedRailMachine] = useState("");
   const soldWorkspaceLayoutRef = useRef(null);
   const soldSortRef = useRef(soldQuery.sort);
   const [soldFilterListings, setSoldFilterListings] = useState([]);
@@ -581,6 +584,21 @@ const sellerListings = useMemo(() => {
 const workspaceListings = useMemo(() => {
   return sellerListings;
 }, [sellerListings]);
+
+useEffect(() => {
+  try {
+    const stored = JSON.parse(window.localStorage.getItem(`ixi-${isSold ? "sold" : "inventory"}-machine-rails`) || "null");
+    if (stored && typeof stored.left === "boolean" && typeof stored.right === "boolean") setMachineRails(stored);
+  } catch { /* Use the default open rails. */ }
+}, [isSold]);
+
+function toggleMachineRail(side) {
+  setMachineRails(current => {
+    const next = { ...current, [side]: !current[side] };
+    try { window.localStorage.setItem(`ixi-${isSold ? "sold" : "inventory"}-machine-rails`, JSON.stringify(next)); } catch { /* Visibility still works for this visit. */ }
+    return next;
+  });
+}
 
 const inventorySummary = useMemo(() => {
   const owned = workspaceListings.filter(item => !item.inventorySessionOnly);
@@ -1066,6 +1084,27 @@ function sendListingToBack(listing) {
 
   executeIXITransaction(result);
 }
+
+function openRailMachine(listing) {
+  const id = String(getListingId(listing));
+  sendListingToFront(listing);
+  setSelectedRailMachine(id);
+}
+
+useEffect(() => {
+  if (!selectedRailMachine || typeof window === "undefined") return;
+  const frame = window.requestAnimationFrame(() => {
+    window.requestAnimationFrame(() => {
+      const card = document.getElementById(selectedRailMachine);
+      if (card) {
+        card.scrollIntoView({ behavior: "smooth", block: "center" });
+        setSelectedRailMachine("");
+      }
+    });
+  });
+  return () => window.cancelAnimationFrame(frame);
+}, [selectedRailMachine, machineContainers]);
+
   async function toggleSave(listing) {
     if (!sdk) {
       window.location.href = "/login";
@@ -1602,6 +1641,14 @@ toggleSearchSurfaceRevealed
      {inventoryStatus.loading && <p role="status">Loading {isSold ? "sold machines" : "inventory"}…</p>}
      {isSold && soldIssues.length > 0 && <details className="sold-toolbar"><summary>{soldIssues.length} historical sale facts need review</summary><ul>{soldIssues.map((issue, index) => <li key={`${issue.documentId}:${issue.code}:${index}`}>{issue.passportId ? `${issue.passportId}: ` : ""}{issue.message}</li>)}</ul></details>}
      {inventoryStatus.error && <p role="alert">{inventoryStatus.error} <button type="button" onClick={() => isSold ? setInventoryRevision(value => value + 1) : window.location.reload()}>Retry</button></p>}
+     <div className={`inventory-rail-layout ${machineRails.left ? "" : "inventory-left-folded"} ${machineRails.right ? "" : "inventory-right-folded"}`}>
+       {machineRails.left && <div className="inventory-machine-sidebar"><InventoryMachineRail title={isSold ? "SOLD MACHINES" : "INVENTORY"} items={workspaceListings} savedIds={savedIds} onOpen={openRailMachine} onSave={toggleSave} onClose={() => toggleMachineRail("left")} sold={isSold} emptyMessage={isSold ? "Sold machines will appear here." : "Your machines will appear here."} /></div>}
+       <section className="inventory-board-column" aria-label={isSold ? "Sold machine board" : "Inventory machine board"}>
+         <div className="inventory-board-toolbar">
+           <button type="button" aria-expanded={machineRails.left} onClick={() => toggleMachineRail("left")}>{machineRails.left ? "‹" : "›"} MACHINES</button>
+           <strong>{isSold ? "SOLD BOARD" : "INVENTORY BOARD"}</strong>
+           <button type="button" aria-expanded={machineRails.right} onClick={() => toggleMachineRail("right")}>SAVED {machineRails.right ? "›" : "‹"}</button>
+         </div>
      <IXIBoardSurface mobileCards
   scaleMode={cardScaleMode}
   centerRows={true}
@@ -1631,6 +1678,9 @@ toggleSearchSurfaceRevealed
   }
 />
 </IXIBoardSurface>
+       </section>
+       {machineRails.right && <div className="inventory-machine-sidebar"><InventoryMachineRail title="SAVED" items={workspaceListings.filter(item => savedIds.includes(String(getListingId(item))))} savedIds={savedIds} onOpen={openRailMachine} onSave={toggleSave} onClose={() => toggleMachineRail("right")} sold={isSold} emptyMessage="Save a machine from the left rail to keep it here." /></div>}
+     </div>
     
 <IXICardScaleControl mobileDensity
   value={cardScaleMode}
@@ -1674,6 +1724,20 @@ toggleSearchSurfaceRevealed
         .inventory-scoreboard span { color:#aaa; font-size:10px; font-weight:700; letter-spacing:.08em; }
         .inventory-scoreboard strong { color:#ffcc00; font-size:23px; font-weight:750; line-height:1.15; font-variant-numeric:tabular-nums; overflow-wrap:anywhere; }
         .inventory-scoreboard small { color:#aaa; font-size:11px; }
+        .inventory-rail-layout { display:grid; grid-template-columns:clamp(205px,18vw,280px) minmax(0,1fr) clamp(205px,18vw,280px); gap:12px; align-items:start; }
+        .inventory-rail-layout.inventory-left-folded { grid-template-columns:minmax(0,1fr) clamp(205px,18vw,280px); }
+        .inventory-rail-layout.inventory-right-folded { grid-template-columns:clamp(205px,18vw,280px) minmax(0,1fr); }
+        .inventory-rail-layout.inventory-left-folded.inventory-right-folded { grid-template-columns:minmax(0,1fr); }
+        .inventory-board-column { min-width:0; }
+        .inventory-board-toolbar { display:flex; align-items:center; justify-content:space-between; gap:12px; min-height:42px; padding:5px 12px; border:1px solid #383838; background:#171717; font-family:'IXI Sold Inter','Inter Variable',Inter,ui-sans-serif,sans-serif; }
+        .inventory-board-toolbar strong { color:#dedede; font-size:10px; letter-spacing:.09em; }
+        .inventory-board-toolbar button { border:0; background:transparent; color:#aaa; font-size:10px; font-weight:800; cursor:pointer; }
+        .inventory-board-toolbar button:hover, .inventory-board-toolbar button:focus-visible { color:#ffcc00; }
+        @media(max-width:1100px) and (min-width:761px) {
+          .inventory-rail-layout { grid-template-columns:185px minmax(0,1fr) 185px; }
+          .inventory-rail-layout.inventory-left-folded { grid-template-columns:minmax(0,1fr) 185px; }
+          .inventory-rail-layout.inventory-right-folded { grid-template-columns:185px minmax(0,1fr); }
+        }
         .sold-toolbar { display:flex; flex-wrap:wrap; align-items:center; gap:12px 20px; margin:16px 0; padding:13px 16px; background:#171717; border:1px solid #383838; border-radius:2px; font-family:'IXI Sold Inter','Inter Variable', Inter, ui-sans-serif, sans-serif; }
         .sold-scoreboard { display:grid; gap:4px; margin-right:auto; min-width:0; max-width:100%; }
         .sold-scoreboard strong { display:flex; align-items:baseline; gap:14px; color:#ffcc00; font-size:20px; line-height:1.25; font-weight:750; letter-spacing:-.02em; }
@@ -1693,6 +1757,8 @@ toggleSearchSurfaceRevealed
         .sold-toolbar summary { font-size:13px; line-height:1.5; cursor:pointer; }
         @media(min-width:761px) { .inventory-legacy-nav { display:none; } }
         @media(max-width:760px) {
+          .inventory-rail-layout, .inventory-rail-layout.inventory-left-folded, .inventory-rail-layout.inventory-right-folded, .inventory-rail-layout.inventory-left-folded.inventory-right-folded { display:block; }
+          .inventory-machine-sidebar, .inventory-board-toolbar { display:none; }
           .inventory-scoreboard { grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px; margin:10px 0; }
           .inventory-scoreboard > div { padding:10px; }
           .inventory-scoreboard strong { font-size:19px; }
