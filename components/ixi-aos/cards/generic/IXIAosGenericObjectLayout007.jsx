@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 
 import IXIAosCardHeaderControls from "../../card-runtime/modules/IXIAosCardHeaderControls";
+import IXIAosContainerCommandStrip from "../../card-runtime/modules/IXIAosContainerCommandStrip";
 import IXIAosPrimaryMediaEditor from "../../card-runtime/modules/IXIAosPrimaryMediaEditor";
 import { persistIXIAosMediaDraft } from "../../../../lib/media/ixiMediaClient";
 import {
@@ -177,6 +178,9 @@ export default function IXIAosGenericObjectLayout007({
   onDeleteObject = null,
   onOpenConsole = null,
   onOpenTransact = null,
+  onRecall = null,
+  onBoard = null,
+  onReturn = null,
   skinId = "v12",
   onSkinChange = null,
   showHeaderDisplayName = false,
@@ -267,6 +271,16 @@ export default function IXIAosGenericObjectLayout007({
         <section className="go007-section go007-relationships"><div className="go007-section-title">{relationshipsTitle}</div><div className="go007-relationship-scroll">{relationships.map(relationship => <button key={relationship.id} type="button" onClick={event => event.stopPropagation()}><span><small>{relationship.label}</small><strong>{relationship.value}</strong>{relationship.secondary ? <em>{relationship.secondary}</em> : null}</span><b>›</b></button>)}{!relationships.length ? <div className="go007-empty">NO RELATIONSHIPS</div> : null}</div></section>
       </div>
 
+      {!editing ? (
+        <IXIAosContainerCommandStrip
+          object={runtimeObject}
+          onRecall={onRecall}
+          onBoard={onBoard}
+          onReturn={onReturn}
+          disabled={saving}
+          bottomOffset={20}
+        />
+      ) : null}
       {editing ? <GenericEditor object={runtimeObject} saving={saving} onCancel={() => setEditing(false)} onSave={save}/> : null}
 
       <style jsx global>{`
