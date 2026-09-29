@@ -119,6 +119,8 @@ import {
   setIXIActionNotice
 } from "../../components/ixi-object-system/IXIActionNoticeEngine";
 
+const INVENTORY_RAIL_CONTAINERS = ["railLeft", "railRight"];
+
 export default function MyListingsV2({ inventoryMode = "owned" }) {
   const isSold = inventoryMode === "sold";
   const IXI_WORKSPACE_SETTINGS_ID = isSold ? "__soldWorkspaceSettings" : OWNED_SETTINGS_ID;
@@ -166,15 +168,7 @@ const [activeStacksOpen, setActiveStacksOpen] = useState({
   bottom: false
 });
 
-const [machineContainers, setMachineContainers] = useState({
-  board: [],
-  stackTop: [],
-  stackBottom: [],
-  pocketLeft: [],
-  pocketRight: [],
-  pocketLeft2: [],
-  pocketRight2: []
-});
+const [machineContainers, setMachineContainers] = useState(() => createEmptyWorkspaceContainers(INVENTORY_RAIL_CONTAINERS));
 
 const [activeStackLayouts, setActiveStackLayouts] = useState({
   top: "horizontal",
@@ -613,13 +607,13 @@ const inventorySummary = useMemo(() => {
   return {
     count: owned.length, asking, priced,
     board: (machineContainers.board || []).filter(id => ownedIds.has(String(id))).length,
-    left: (machineContainers.pocketLeft || []).filter(id => ownedIds.has(String(id))).length,
-    right: (machineContainers.pocketRight || []).filter(id => ownedIds.has(String(id))).length
+    left: (machineContainers.railLeft || []).filter(id => ownedIds.has(String(id))).length,
+    right: (machineContainers.railRight || []).filter(id => ownedIds.has(String(id))).length
   };
 }, [workspaceListings, machineContainers]);
 
-const railLeftItems = useMemo(() => (machineContainers.pocketLeft || []).map(id => workspaceListings.find(item => String(getListingId(item)) === String(id))).filter(Boolean), [machineContainers.pocketLeft, workspaceListings]);
-const railRightItems = useMemo(() => (machineContainers.pocketRight || []).map(id => workspaceListings.find(item => String(getListingId(item)) === String(id))).filter(Boolean), [machineContainers.pocketRight, workspaceListings]);
+const railLeftItems = useMemo(() => (machineContainers.railLeft || []).map(id => workspaceListings.find(item => String(getListingId(item)) === String(id))).filter(Boolean), [machineContainers.railLeft, workspaceListings]);
+const railRightItems = useMemo(() => (machineContainers.railRight || []).map(id => workspaceListings.find(item => String(getListingId(item)) === String(id))).filter(Boolean), [machineContainers.railRight, workspaceListings]);
 const boardRailOptions = useMemo(() => (machineContainers.board || []).map(id => workspaceListings.find(item => String(getListingId(item)) === String(id))).filter(Boolean), [machineContainers.board, workspaceListings]);
 
 const containerStateKey = useMemo(() => {
@@ -635,7 +629,7 @@ useEffect(() => {
   if (isSold) {
     const ids = workspaceListings.map(item => String(getListingId(item)));
     const saved = soldWorkspaceLayoutRef.current || ixiCardState?.[IXI_WORKSPACE_LAYOUT_ID]?.machineContainers || {};
-    const visible = sanitizeWorkspaceContainers(saved, ids);
+    const visible = sanitizeWorkspaceContainers(saved, ids, { extraContainers: INVENTORY_RAIL_CONTAINERS });
     // A chosen research sort controls the board; pocket placement survives.
     if (soldSortRef.current !== inventoryStatus.sort || !ids.every(id => Object.values(saved).some(items => items.includes(id)))) {
       const order = new Map(ids.map((id, index) => [id, index]));
@@ -662,7 +656,8 @@ useEffect(() => {
     setMachineContainers(
       sanitizeWorkspaceContainers(
         savedLayout.machineContainers,
-        validMachineIds
+        validMachineIds,
+        { extraContainers: INVENTORY_RAIL_CONTAINERS }
       )
     );
 
@@ -674,7 +669,7 @@ useEffect(() => {
   return;
 }
 
-  const nextContainers = createEmptyWorkspaceContainers();
+  const nextContainers = createEmptyWorkspaceContainers(INVENTORY_RAIL_CONTAINERS);
 
   workspaceListings.forEach(item => {
     const id = String(getListingId(item));
@@ -1440,7 +1435,8 @@ toggleSearchSurfaceRevealed
     setRightPocketMode,
     setRightPocket2Mode,
     setActiveDndId,
-    clearMachineDragState
+    clearMachineDragState,
+    extraContainers: INVENTORY_RAIL_CONTAINERS
   });  
     function sendMachineToArmedDestination(listing) {
   if (!armedDestination) return;
@@ -1657,7 +1653,7 @@ toggleSearchSurfaceRevealed
      {isSold && soldIssues.length > 0 && <details className="sold-toolbar"><summary>{soldIssues.length} historical sale facts need review</summary><ul>{soldIssues.map((issue, index) => <li key={`${issue.documentId}:${issue.code}:${index}`}>{issue.passportId ? `${issue.passportId}: ` : ""}{issue.message}</li>)}</ul></details>}
      {inventoryStatus.error && <p role="alert">{inventoryStatus.error} <button type="button" onClick={() => isSold ? setInventoryRevision(value => value + 1) : window.location.reload()}>Retry</button></p>}
      <div className={`inventory-rail-layout ${machineRails.left ? "" : "inventory-left-folded"} ${machineRails.right ? "" : "inventory-right-folded"}`}>
-       {machineRails.left && <div className="inventory-machine-sidebar"><InventoryMachineRail title="LEFT RAIL" side="left" containerId="pocketLeft" items={railLeftItems} boardItems={boardRailOptions} onOpen={openRailMachine} onMove={moveMachineToContainer} onReorder={reorderRailMachine} onClose={() => toggleMachineRail("left")} sold={isSold} /></div>}
+       {machineRails.left && <div className="inventory-machine-sidebar"><InventoryMachineRail title="LEFT RAIL" side="left" containerId="railLeft" items={railLeftItems} boardItems={boardRailOptions} onOpen={openRailMachine} onMove={moveMachineToContainer} onReorder={reorderRailMachine} onClose={() => toggleMachineRail("left")} sold={isSold} /></div>}
        <section className="inventory-board-column" aria-label={isSold ? "Sold machine board" : "Inventory machine board"}>
          <div className="inventory-board-toolbar">
            <button type="button" aria-expanded={machineRails.left} onClick={() => toggleMachineRail("left")}>{machineRails.left ? "‹" : "›"} LEFT RAIL</button>
@@ -1694,7 +1690,7 @@ toggleSearchSurfaceRevealed
 />
 </IXIBoardSurface>
        </section>
-       {machineRails.right && <div className="inventory-machine-sidebar"><InventoryMachineRail title="RIGHT RAIL" side="right" containerId="pocketRight" items={railRightItems} boardItems={boardRailOptions} onOpen={openRailMachine} onMove={moveMachineToContainer} onReorder={reorderRailMachine} onClose={() => toggleMachineRail("right")} sold={isSold} /></div>}
+       {machineRails.right && <div className="inventory-machine-sidebar"><InventoryMachineRail title="RIGHT RAIL" side="right" containerId="railRight" items={railRightItems} boardItems={boardRailOptions} onOpen={openRailMachine} onMove={moveMachineToContainer} onReorder={reorderRailMachine} onClose={() => toggleMachineRail("right")} sold={isSold} /></div>}
      </div>
     
 <IXICardScaleControl mobileDensity

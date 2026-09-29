@@ -21,7 +21,7 @@ function MachineTile({ item, containerId, onOpen, onMove, onReorder, index, coun
     </div>
     <div className={styles.actions}>
       <button type="button" onClick={() => onMove(id, "board")}>BOARD ↗</button>
-      <button type="button" onClick={() => onMove(id, containerId === "pocketLeft" ? "pocketRight" : "pocketLeft")}>{containerId === "pocketLeft" ? "RIGHT →" : "← LEFT"}</button>
+      <button type="button" onClick={() => onMove(id, containerId === "railLeft" ? "railRight" : "railLeft")}>{containerId === "railLeft" ? "RIGHT →" : "← LEFT"}</button>
       <button type="button" onClick={() => openIXIPassportEmail(item)}>SEND</button>
     </div>
     <div className={styles.order}>

@@ -5,7 +5,7 @@ const IXI_WORKSPACE_LAYOUT_ID =
   "__workspaceLayout";
 
 
-function createEmptyWorkspaceContainers() {
+function createEmptyWorkspaceContainers(extraContainers = []) {
   return {
     board: [],
 
@@ -26,7 +26,8 @@ function createEmptyWorkspaceContainers() {
     pocketLeft: [],
     pocketRight: [],
     pocketLeft2: [],
-    pocketRight2: []
+    pocketRight2: [],
+    ...Object.fromEntries(extraContainers.map(key => [key, []]))
   };
 }
 
@@ -36,7 +37,8 @@ function sanitizeWorkspaceContainers(
   validMachineIds,
   {
     defaultContainer =
-      "board"
+      "board",
+    extraContainers = []
   } = {}
 ) {
   const valid =
@@ -47,7 +49,7 @@ function sanitizeWorkspaceContainers(
     );
 
   const clean =
-    createEmptyWorkspaceContainers();
+    createEmptyWorkspaceContainers(extraContainers);
 
   const seen =
     new Set();

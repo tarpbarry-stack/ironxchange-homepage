@@ -119,7 +119,8 @@ export function createWorkspaceDragEndHandler({
   setRightPocketMode,
   setRightPocket2Mode,
   setActiveDndId,
-  clearMachineDragState
+  clearMachineDragState,
+  extraContainers = []
 }) {
   return function handleWorkspaceDragEnd(event) {
     const dragId = String(event?.active?.id || "");
@@ -138,7 +139,8 @@ export function createWorkspaceDragEndHandler({
       "pocketLeft",
       "pocketRight",
       "pocketLeft2",
-      "pocketRight2"
+      "pocketRight2",
+      ...extraContainers
     ];
 
     const sourceContainer =
@@ -235,7 +237,8 @@ export function createWorkspaceDragEndHandler({
         "pocketLeft",
         "pocketRight",
         "pocketLeft2",
-        "pocketRight2"
+        "pocketRight2",
+        ...extraContainers
       ].includes(targetContainer)
     ) {
       moveMachineToContainer(dragId, targetContainer);
