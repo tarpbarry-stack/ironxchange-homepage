@@ -1495,6 +1495,14 @@ toggleSearchSurfaceRevealed
        </div>
      </div>}
 
+<div className={`inventory-rail-layout ${machineRails.left ? "" : "inventory-left-folded"} ${machineRails.right ? "" : "inventory-right-folded"}`}>
+  {machineRails.left && <div className="inventory-machine-sidebar"><InventoryMachineRail title="LEFT RAIL" side="left" containerId="railLeft" items={railLeftItems} onBoard={id => moveMachineToContainer(id, "board")} onArm={() => toggleArmedDestination("railLeft")} armed={armedDestination === "railLeft"} onClose={() => toggleMachineRail("left")} sold={isSold} /></div>}
+  <section className="inventory-board-column" aria-label={isSold ? "Sold machine board" : "Inventory machine board"}>
+    <div className="inventory-board-toolbar">
+      <button type="button" aria-expanded={machineRails.left} onClick={() => toggleMachineRail("left")}>{machineRails.left ? "‹" : "›"} LEFT RAIL</button>
+      <strong>{isSold ? "SOLD BOARD" : "INVENTORY BOARD"}</strong>
+      <button type="button" aria-expanded={machineRails.right} onClick={() => toggleMachineRail("right")}>RIGHT RAIL {machineRails.right ? "›" : "‹"}</button>
+    </div>
 <IXIChassis>
   <div className={searchCollapsed ? "inventory-search-collapsed" : "inventory-search-expanded"}>
   <aside className="ixi-command-left">
@@ -1644,14 +1652,6 @@ toggleSearchSurfaceRevealed
      {inventoryStatus.loading && <p role="status">Loading {isSold ? "sold machines" : "inventory"}…</p>}
      {isSold && soldIssues.length > 0 && <details className="sold-toolbar"><summary>{soldIssues.length} historical sale facts need review</summary><ul>{soldIssues.map((issue, index) => <li key={`${issue.documentId}:${issue.code}:${index}`}>{issue.passportId ? `${issue.passportId}: ` : ""}{issue.message}</li>)}</ul></details>}
      {inventoryStatus.error && <p role="alert">{inventoryStatus.error} <button type="button" onClick={() => isSold ? setInventoryRevision(value => value + 1) : window.location.reload()}>Retry</button></p>}
-     <div className={`inventory-rail-layout ${machineRails.left ? "" : "inventory-left-folded"} ${machineRails.right ? "" : "inventory-right-folded"}`}>
-       {machineRails.left && <div className="inventory-machine-sidebar"><InventoryMachineRail title="LEFT RAIL" side="left" containerId="railLeft" items={railLeftItems} onBoard={id => moveMachineToContainer(id, "board")} onArm={() => toggleArmedDestination("railLeft")} armed={armedDestination === "railLeft"} onClose={() => toggleMachineRail("left")} sold={isSold} /></div>}
-       <section className="inventory-board-column" aria-label={isSold ? "Sold machine board" : "Inventory machine board"}>
-         <div className="inventory-board-toolbar">
-           <button type="button" aria-expanded={machineRails.left} onClick={() => toggleMachineRail("left")}>{machineRails.left ? "‹" : "›"} LEFT RAIL</button>
-           <strong>{isSold ? "SOLD BOARD" : "INVENTORY BOARD"}</strong>
-           <button type="button" aria-expanded={machineRails.right} onClick={() => toggleMachineRail("right")}>RIGHT RAIL {machineRails.right ? "›" : "‹"}</button>
-         </div>
      <InventoryBoardDrop><IXIBoardSurface mobileCards
   scaleMode={cardScaleMode}
   centerRows={true}
@@ -1739,6 +1739,25 @@ toggleSearchSurfaceRevealed
           .ixi-command-chassis .ixi-command-left .ixi-pocket-left:not(.ixi-pocket-l2),
           .ixi-command-chassis .ixi-command-right .ixi-pocket-right:not(.ixi-pocket-r2) { grid-column: 1; grid-row: 1; }
         }
+        /* The search station responds to the space between the rails, not the viewport. */
+        @container inventory-board (max-width: 1449px) {
+          .inventory-board-column .ixi-command-chassis { --control-half: 300px; --station-gap: 20px; }
+          .inventory-board-column .ixi-command-center { width: min(100%, 600px); }
+          .ixi-command-chassis .ixi-pocket-l2,
+          .ixi-command-chassis .ixi-pocket-r2 { display: none !important; }
+          .inventory-board-column .ixi-command-chassis .ixi-command-left,
+          .inventory-board-column .ixi-command-chassis .ixi-command-right { width: var(--station-w); height: var(--station-h); top: 24px; }
+          .ixi-command-chassis .ixi-pocket-row { grid-template-columns: var(--station-w); grid-template-rows: var(--station-h); }
+          .ixi-command-chassis .ixi-command-left .ixi-pocket-left:not(.ixi-pocket-l2),
+          .ixi-command-chassis .ixi-command-right .ixi-pocket-right:not(.ixi-pocket-r2) { grid-column: 1; grid-row: 1; }
+          .inventory-hidden-pocket-access { display: block; }
+          .inventory-hidden-pocket-group.inner { display: none; }
+        }
+        @container inventory-board (max-width: 949px) {
+          .ixi-command-chassis .ixi-command-left,
+          .ixi-command-chassis .ixi-command-right { display: none !important; }
+          .inventory-hidden-pocket-group.inner { display: flex; }
+        }
       `}</style>
                 
       <style jsx>{`
@@ -1754,14 +1773,14 @@ toggleSearchSurfaceRevealed
         .inventory-scoreboard span { color:#aaa; font-size:10px; font-weight:700; letter-spacing:.08em; }
         .inventory-scoreboard strong { color:#ffcc00; font-size:23px; font-weight:750; line-height:1.15; font-variant-numeric:tabular-nums; overflow-wrap:anywhere; }
         .inventory-scoreboard small { color:#aaa; font-size:11px; }
-        .inventory-rail-layout { display:grid; grid-template-columns:clamp(205px,18vw,280px) minmax(0,1fr) clamp(205px,18vw,280px); gap:12px; align-items:start; }
-        .inventory-rail-layout.inventory-left-folded { grid-template-columns:minmax(0,1fr) clamp(205px,18vw,280px); }
-        .inventory-rail-layout.inventory-right-folded { grid-template-columns:clamp(205px,18vw,280px) minmax(0,1fr); }
+        .inventory-rail-layout { display:grid; grid-template-columns:clamp(185px,16vw,280px) minmax(0,1fr) clamp(185px,16vw,280px); gap:12px; align-items:start; }
+        .inventory-rail-layout.inventory-left-folded { grid-template-columns:minmax(0,1fr) clamp(185px,16vw,280px); }
+        .inventory-rail-layout.inventory-right-folded { grid-template-columns:clamp(185px,16vw,280px) minmax(0,1fr); }
         .inventory-rail-layout.inventory-left-folded.inventory-right-folded { grid-template-columns:minmax(0,1fr); }
-        .inventory-board-column { min-width:0; }
+        .inventory-board-column { min-width:0; container-type:inline-size; container-name:inventory-board; }
         .inventory-board-drop { min-height:320px; }
         .inventory-board-drop-over { outline:2px solid #ffcc00; outline-offset:-3px; }
-        .inventory-board-toolbar { display:flex; align-items:center; justify-content:space-between; gap:12px; min-height:42px; padding:5px 12px; border:1px solid #383838; background:#171717; font-family:'IXI Sold Inter','Inter Variable',Inter,ui-sans-serif,sans-serif; }
+        .inventory-board-toolbar { display:flex; align-items:center; justify-content:space-between; gap:12px; min-height:42px; margin-bottom:16px; padding:5px 12px; border:1px solid #383838; background:#171717; font-family:'IXI Sold Inter','Inter Variable',Inter,ui-sans-serif,sans-serif; }
         .inventory-board-toolbar strong { color:#dedede; font-size:10px; letter-spacing:.09em; }
         .inventory-board-toolbar button { border:0; background:transparent; color:#aaa; font-size:10px; font-weight:800; cursor:pointer; }
         .inventory-board-toolbar button:hover, .inventory-board-toolbar button:focus-visible { color:#ffcc00; }
@@ -1819,7 +1838,7 @@ toggleSearchSurfaceRevealed
 
       main {
   min-height: 72vh;
-  padding: 14px 5% 160px;
+  padding: 14px clamp(16px, 2vw, 64px) 160px;
           background:
             radial-gradient(circle at 50% 0%, rgba(255,196,0,.05), transparent 34%),
             linear-gradient(180deg, rgba(255,255,255,.014), rgba(255,255,255,0)),
