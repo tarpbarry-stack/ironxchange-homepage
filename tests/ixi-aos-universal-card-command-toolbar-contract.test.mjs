@@ -5,16 +5,20 @@ import test from "node:test";
 const read = path =>
   readFile(new URL(`../${path}`, import.meta.url), "utf8");
 
-test("Card 008 leaves Recall Board Return to the one canonical operating toolbar", async () => {
-  const [profileLayout, runtime] = await Promise.all([
+test("Card 008 owns one compact Recall Board Return toolbar without a runtime override", async () => {
+  const [profileLayout, runtime, strip] = await Promise.all([
     read("components/ixi-aos/cards/generic/IXIAosGenericObjectLayout007.jsx"),
-    read("components/ixi-aos/card-runtime/IXIAosOperatingCardRuntime.jsx")
+    read("components/ixi-aos/card-runtime/IXIAosOperatingCardRuntime.jsx"),
+    read("components/ixi-aos/card-runtime/modules/IXIAosContainerCommandStrip.jsx")
   ]);
 
   assert.doesNotMatch(profileLayout, /go007-actions/u);
-  assert.doesNotMatch(profileLayout, />RECALL<\/b>/u);
-  assert.match(runtime, /ixi-aos-canonical-command-overlay/u);
-  assert.match(runtime, /!transactActive/u);
+  assert.match(profileLayout, /<IXIAosContainerCommandStrip[\s\S]*?bottomOffset=\{20\}/u);
+  assert.match(profileLayout, /onRecall=\{onRecall\}[\s\S]*?onBoard=\{onBoard\}[\s\S]*?onReturn=\{onReturn\}/u);
+  assert.match(strip, /bottom: var\(--ixi-aos-command-bottom, 79px\)/u);
+  assert.doesNotMatch(runtime, /ixi-aos-canonical-command-overlay/u);
+  assert.doesNotMatch(runtime, /\[class\*="-commands"\]/u);
+  assert.doesNotMatch(runtime, /<IXIAosContainerCommandStrip/u);
 });
 
 test("every durable numbered AOS card receives the universal command handlers", async () => {
@@ -40,11 +44,12 @@ test("every durable numbered AOS card receives the universal command handlers", 
   assert.match(runtime, /<Card \{\.\.\.consoleProps\} \/>/u);
 });
 
-test("every operating card uses the full-width command geometry and exact handlers", async () => {
-  const [strip, runtime, card018, modules] = await Promise.all([
+test("card families own command placement while sharing exact command behavior", async () => {
+  const [strip, runtime, card018, profileLayout, modules] = await Promise.all([
     read("components/ixi-aos/card-runtime/modules/IXIAosContainerCommandStrip.jsx"),
     read("components/ixi-aos/card-runtime/IXIAosOperatingCardRuntime.jsx"),
     read("components/ixi-aos/cards/018/IXIAosCard018.jsx"),
+    read("components/ixi-aos/cards/generic/IXIAosGenericObjectLayout007.jsx"),
     read("components/ixi-aos/container-runtime/IXIAosContainerModules.jsx")
   ]);
 
@@ -54,14 +59,16 @@ test("every operating card uses the full-width command geometry and exact handle
   assert.match(strip, /flex: 1 1 0/u);
   assert.match(strip, /min-width: 0/u);
   assert.match(strip, /height: 23px/u);
-  assert.match(strip, /bottom: 20px/u);
+  assert.match(strip, /bottomOffset = 79/u);
+  assert.match(strip, /--ixi-aos-command-bottom/u);
   assert.match(strip, /color: var\(--ix-yellow,#ffc400\)/u);
   assert.doesNotMatch(strip, /color: #00c2ff/u);
   assert.match(strip, /onReturn\)/u);
   assert.doesNotMatch(strip, /onReturn \|\| onRecall/u);
-  assert.match(runtime, /<IXIAosContainerCommandStrip[\s\S]*?onRecall=\{onRecall\}[\s\S]*?onBoard=\{onBoard\}[\s\S]*?onReturn=\{onReturn\}/u);
-  assert.match(runtime, /\{!transactActive \? \([\s\S]*?<IXIAosContainerCommandStrip/u);
-  assert.match(card018, /<IXIAosContainerCommandStrip[\s\S]*?onReturn=\{onReturn\}/u);
+  assert.doesNotMatch(runtime, /<IXIAosContainerCommandStrip/u);
+  assert.doesNotMatch(runtime, /display: none !important/u);
+  assert.match(card018, /<IXIAosContainerCommandStrip[\s\S]*?onReturn=\{onReturn\}[\s\S]*?bottomOffset=\{79\}/u);
+  assert.match(profileLayout, /<IXIAosContainerCommandStrip[\s\S]*?onReturn=\{onReturn\}[\s\S]*?bottomOffset=\{20\}/u);
   assert.match(modules, /onReturn=\{\s*onReturn\s*\}/u);
   assert.doesNotMatch(modules, /onReturn=\{\s*onRecall\s*\}/u);
 });
