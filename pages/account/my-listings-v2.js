@@ -1501,8 +1501,8 @@ toggleSearchSurfaceRevealed
   {machineRails.left && <div className="inventory-machine-sidebar"><InventoryMachineRail title="LEFT RAIL" side="left" containerId="railLeft" items={railLeftItems} onBoard={id => moveMachineToContainer(id, "board")} onArm={() => toggleArmedDestination("railLeft")} armed={armedDestination === "railLeft"} onClose={() => toggleMachineRail("left")} sold={isSold} /></div>}
   <section className="inventory-board-column" aria-label={isSold ? "Sold machine board" : "Inventory machine board"}>
     <div className="inventory-rail-toggles">
-      <button type="button" aria-label={`${machineRails.left ? "Close" : "Open"} left rail`} title={`${machineRails.left ? "Close" : "Open"} left rail`} aria-expanded={machineRails.left} onClick={() => toggleMachineRail("left")}>{machineRails.left ? "‹" : "›"}</button>
-      <button type="button" aria-label={`${machineRails.right ? "Close" : "Open"} right rail`} title={`${machineRails.right ? "Close" : "Open"} right rail`} aria-expanded={machineRails.right} onClick={() => toggleMachineRail("right")}>{machineRails.right ? "›" : "‹"}</button>
+      {!machineRails.left && <button type="button" className="left-rail-open" aria-label="Open left rail" title="Open left rail" aria-expanded={false} onClick={() => toggleMachineRail("left")}>›</button>}
+      {!machineRails.right && <button type="button" className="right-rail-open" aria-label="Open right rail" title="Open right rail" aria-expanded={false} onClick={() => toggleMachineRail("right")}>‹</button>}
     </div>
 <IXIChassis>
   <div className={`${searchDeck.deck} ${searchCollapsed ? `${searchDeck.collapsed} inventory-search-collapsed` : "inventory-search-expanded"}`}>
@@ -1753,8 +1753,10 @@ toggleSearchSurfaceRevealed
         .inventory-board-column .active-stack-zone { margin:4px auto 8px; gap:4px; }
         .inventory-board-drop { min-height:320px; }
         .inventory-board-drop-over { outline:2px solid #ffcc00; outline-offset:-3px; }
-        .inventory-rail-toggles { position:absolute; inset:0 -38px auto; display:flex; align-items:center; justify-content:space-between; height:0; pointer-events:none; z-index:25; }
-        .inventory-rail-toggles button { display:grid; place-items:center; width:44px; height:44px; padding:0; border:1px solid #383838; border-radius:3px; background:#171717; color:#c9c9c9; font-size:26px; line-height:1; cursor:pointer; pointer-events:auto; }
+        .inventory-rail-toggles { position:absolute; inset:0 0 auto; height:0; pointer-events:none; z-index:25; }
+        .inventory-rail-toggles button { position:absolute; top:0; display:grid; place-items:center; width:44px; height:44px; padding:0; border:1px solid #383838; border-radius:3px; background:#171717; color:#c9c9c9; font-size:26px; line-height:1; cursor:pointer; pointer-events:auto; }
+        .inventory-rail-toggles .left-rail-open { left:0; }
+        .inventory-rail-toggles .right-rail-open { right:0; }
         .inventory-rail-toggles button:hover, .inventory-rail-toggles button:focus-visible { color:#ffcc00; border-color:#88732c; }
         .inventory-rail-toggles button:focus-visible { outline:2px solid #ffcc00; outline-offset:2px; }
         :global(.inventory-tile-drag-overlay) { max-width:260px; padding:16px; background:#1c1c1c; border:1px solid #ffcc00; color:#eee; box-shadow:0 12px 30px #000a; font-size:12px; font-weight:700; }
