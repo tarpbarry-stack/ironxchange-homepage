@@ -1498,10 +1498,9 @@ toggleSearchSurfaceRevealed
 <div className={`inventory-rail-layout ${machineRails.left ? "" : "inventory-left-folded"} ${machineRails.right ? "" : "inventory-right-folded"}`}>
   {machineRails.left && <div className="inventory-machine-sidebar"><InventoryMachineRail title="LEFT RAIL" side="left" containerId="railLeft" items={railLeftItems} onBoard={id => moveMachineToContainer(id, "board")} onArm={() => toggleArmedDestination("railLeft")} armed={armedDestination === "railLeft"} onClose={() => toggleMachineRail("left")} sold={isSold} /></div>}
   <section className="inventory-board-column" aria-label={isSold ? "Sold machine board" : "Inventory machine board"}>
-    <div className="inventory-board-toolbar">
-      <button type="button" aria-expanded={machineRails.left} onClick={() => toggleMachineRail("left")}>{machineRails.left ? "‹" : "›"} LEFT RAIL</button>
-      <strong>{isSold ? "SOLD BOARD" : "INVENTORY BOARD"}</strong>
-      <button type="button" aria-expanded={machineRails.right} onClick={() => toggleMachineRail("right")}>RIGHT RAIL {machineRails.right ? "›" : "‹"}</button>
+    <div className="inventory-rail-toggles">
+      <button type="button" aria-label={`${machineRails.left ? "Close" : "Open"} left rail`} title={`${machineRails.left ? "Close" : "Open"} left rail`} aria-expanded={machineRails.left} onClick={() => toggleMachineRail("left")}>{machineRails.left ? "‹" : "›"}</button>
+      <button type="button" aria-label={`${machineRails.right ? "Close" : "Open"} right rail`} title={`${machineRails.right ? "Close" : "Open"} right rail`} aria-expanded={machineRails.right} onClick={() => toggleMachineRail("right")}>{machineRails.right ? "›" : "‹"}</button>
     </div>
 <IXIChassis>
   <div className={searchCollapsed ? "inventory-search-collapsed" : "inventory-search-expanded"}>
@@ -1780,10 +1779,10 @@ toggleSearchSurfaceRevealed
         .inventory-board-column { min-width:0; container-type:inline-size; container-name:inventory-board; }
         .inventory-board-drop { min-height:320px; }
         .inventory-board-drop-over { outline:2px solid #ffcc00; outline-offset:-3px; }
-        .inventory-board-toolbar { display:flex; align-items:center; justify-content:space-between; gap:12px; min-height:42px; margin-bottom:16px; padding:5px 12px; border:1px solid #383838; background:#171717; font-family:'IXI Sold Inter','Inter Variable',Inter,ui-sans-serif,sans-serif; }
-        .inventory-board-toolbar strong { color:#dedede; font-size:10px; letter-spacing:.09em; }
-        .inventory-board-toolbar button { border:0; background:transparent; color:#aaa; font-size:10px; font-weight:800; cursor:pointer; }
-        .inventory-board-toolbar button:hover, .inventory-board-toolbar button:focus-visible { color:#ffcc00; }
+        .inventory-rail-toggles { display:flex; align-items:center; justify-content:space-between; height:44px; margin-bottom:6px; }
+        .inventory-rail-toggles button { display:grid; place-items:center; width:44px; height:44px; padding:0; border:1px solid #383838; border-radius:3px; background:#171717; color:#c9c9c9; font-size:26px; line-height:1; cursor:pointer; }
+        .inventory-rail-toggles button:hover, .inventory-rail-toggles button:focus-visible { color:#ffcc00; border-color:#88732c; }
+        .inventory-rail-toggles button:focus-visible { outline:2px solid #ffcc00; outline-offset:2px; }
         :global(.inventory-tile-drag-overlay) { max-width:260px; padding:16px; background:#1c1c1c; border:1px solid #ffcc00; color:#eee; box-shadow:0 12px 30px #000a; font-size:12px; font-weight:700; }
         @media(max-width:1100px) and (min-width:761px) {
           .inventory-rail-layout { grid-template-columns:185px minmax(0,1fr) 185px; }
@@ -1810,7 +1809,7 @@ toggleSearchSurfaceRevealed
         @media(min-width:761px) { .inventory-legacy-nav { display:none; } }
         @media(max-width:760px) {
           .inventory-rail-layout, .inventory-rail-layout.inventory-left-folded, .inventory-rail-layout.inventory-right-folded, .inventory-rail-layout.inventory-left-folded.inventory-right-folded { display:block; }
-          .inventory-machine-sidebar, .inventory-board-toolbar { display:none; }
+          .inventory-machine-sidebar, .inventory-rail-toggles { display:none; }
           .inventory-scoreboard { grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px; margin:10px 0; }
           .inventory-scoreboard > div { padding:10px; }
           .inventory-scoreboard strong { font-size:19px; }
