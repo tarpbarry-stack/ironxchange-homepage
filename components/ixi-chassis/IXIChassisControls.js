@@ -132,11 +132,11 @@ export default function IXIChassisControls({
         .search-fold-actuator::before {
           content: "";
           display: block;
-          width: 17px;
+          width: 34px;
           height: 5px;
-          border-radius: 2px;
-          background: #bababa;
-          box-shadow: 0 0 0 1px #3d3d3d, 0 0 8px #000;
+          border-radius: 1px 1px 3px 3px;
+          background: rgba(255,255,255,.18);
+          box-shadow: inset 1px 0 0 rgba(255,255,255,.12), 0 1px 3px rgba(0,0,0,.32);
         }
         .search-fold-actuator[aria-expanded="false"]::before,
         .search-fold-actuator:hover::before { background: #ffcf34; }

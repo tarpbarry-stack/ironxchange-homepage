@@ -3,6 +3,10 @@ import { useDndContext, useDraggable, useDroppable } from "@dnd-kit/core";
 import { evaluateAosSystemIndexMembership } from "../../../lib/mos/IXIAosSystemIndexMembershipPolicy";
 import IXIWorkspaceRailTile from "../../ixi-os/IXIWorkspaceRailTile";
 import IXIWorkspaceRailHeader from "../../ixi-os/IXIWorkspaceRailHeader";
+import IXIPocketL1 from "../../ixi-chassis/IXIPocketL1.js";
+import IXIPocketL2 from "../../ixi-chassis/IXIPocketL2.js";
+import IXIPocketR1 from "../../ixi-chassis/IXIPocketR1.js";
+import IXIPocketR2 from "../../ixi-chassis/IXIPocketR2.js";
 import {
   AOS_TOOLBAR_SURFACES, getAosToolbarContents, getAosToolbarName,
   getAosToolbarObjectIds, getAosToolbarReturnOperation, getAosToolbarPresentation
@@ -10,47 +14,54 @@ import {
 import styles from "./IXIAosToolbarChassis.module.css";
 
 const SEARCH_POCKETS = [
-  { id: "pocketLeft2", label: "III", side: "left", outer: true },
-  { id: "pocketLeft", label: "I", side: "left" },
-  { id: "pocketRight", label: "II", side: "right" },
-  { id: "pocketRight2", label: "IV", side: "right", outer: true }
+  { id: "pocketLeft2", label: "III", side: "left", outer: true, Component: IXIPocketL2, modeProp: "leftPocket2Mode" },
+  { id: "pocketLeft", label: "I", side: "left", Component: IXIPocketL1, modeProp: "leftPocketMode" },
+  { id: "pocketRight", label: "II", side: "right", Component: IXIPocketR1, modeProp: "rightPocketMode" },
+  { id: "pocketRight2", label: "IV", side: "right", outer: true, Component: IXIPocketR2, modeProp: "rightPocket2Mode" }
 ];
 
-function PocketObject({ object, registry, pocketId, ready, onBoard }) {
-  const view = getAosToolbarPresentation(object, registry);
-  const name = getAosToolbarName(object);
-  const { attributes, listeners, setNodeRef, setActivatorNodeRef, isDragging } = useDraggable({
-    id: `aos-pocket:${pocketId}:${object.objectId}`, disabled: !ready,
-    data: { type: "aos-toolbar-reference", objectId: object.objectId, objectType: object.objectType,
-      object, sourceObject: object, metadata: object.metadata, definitionId: object.definitionId, containerId: pocketId }
+function AosPocketDropPad({ id, ready }) {
+  const { setNodeRef } = useDroppable({
+    id, disabled: !ready, data: { type: "workspace", containerId: id, targetSurface: id, dropIntent: "root" }
   });
-  return <div ref={setNodeRef} className={styles.pocketObject} data-dragging={isDragging}>
-    <button type="button" ref={setActivatorNodeRef} {...attributes} {...listeners} disabled={!ready}
-      className={styles.pocketDrag} aria-label={`Drag ${name} from Pocket ${pocketId}`}>
-      <PreviewImage src={view.image || view.previews[0]?.image} name={name} />
-    </button>
-    <span title={name}>{name}</span>
-    <button type="button" disabled={!ready} className={styles.pocketBoard}
-      aria-label={`Move ${name} to Board`} onClick={() => onBoard(object.objectId)}>→</button>
+  return <div ref={setNodeRef} className={styles.pocketDropPad} aria-label={`Drop on ${id}`} />;
+}
+
+function AosPocketSortable({ id, containerId, className, style, children, registry, ready }) {
+  const object = registry.get(id);
+  const { attributes, listeners, setNodeRef, setActivatorNodeRef } = useDraggable({
+    id: `aos-pocket:${containerId}:${id}`, disabled: !ready || !object,
+    data: { type: "aos-toolbar-reference", objectId: id, objectType: object?.objectType,
+      object, sourceObject: object, metadata: object?.metadata, definitionId: object?.definitionId, containerId }
+  });
+  return <div ref={setNodeRef} className={className} style={style}>
+    {children({ dragHandleProps: { ...attributes, ...listeners, ref: setActivatorNodeRef, role: "button", tabIndex: 0,
+      "aria-label": `Drag ${object ? getAosToolbarName(object) : id} from Pocket` } })}
   </div>;
 }
 
-function SearchPocket({ pocket, placements, registry, ready, onBoard }) {
-  const { setNodeRef, isOver } = useDroppable({
-    id: pocket.id, disabled: !ready,
-    data: { type: "workspace", containerId: pocket.id, targetSurface: pocket.id, dropIntent: "root" }
-  });
+function SearchPocket({ pocket, placements, registry, ready, onBoard, armedDestination, toggleArmedDestination }) {
+  const [mode, setMode] = useState("peek");
   const objects = (placements[pocket.id] || []).map(id => registry.get(id)).filter(Boolean);
-  return <section ref={setNodeRef} aria-label={`Pocket ${pocket.label}`}
-    className={`${styles.searchPocket} ${pocket.outer ? styles.outerPocket : ""} ${objects.length ? styles.occupiedPocket : ""} ${isOver ? styles.over : ""}`}>
-    <div className={styles.pocketHeading}><span>{pocket.label}</span><strong>{pocket.side === "left" ? "IX-256" : "IX-128"}</strong></div>
-    <div className={styles.pocketContents}>
-      {objects.map(object => <PocketObject key={object.objectId} object={object} registry={registry}
-        pocketId={pocket.id} ready={ready} onBoard={onBoard} />)}
-    </div>
-    <span className={styles.pocketLoop} aria-hidden="true" />
-    <span className={styles.pocketDirect} aria-hidden="true" />
-  </section>;
+  const Component = pocket.Component;
+  const machineContainers = { [pocket.id]: objects.map(object => object.objectId) };
+  const getListingById = id => {
+    const object = registry.get(id);
+    if (!object) return null;
+    const view = getAosToolbarPresentation(object, registry);
+    return { image: view.image || view.previews[0]?.image, title: getAosToolbarName(object) };
+  };
+  return <div className={`${styles.searchPocketSlot} ${pocket.outer ? styles.outerPocket : ""}`} aria-label={`Pocket ${pocket.label}`}>
+    <Component {...{ [pocket.modeProp]: mode }} machineContainers={machineContainers}
+      armedDestination={armedDestination} WorkspaceDropPad={props => <AosPocketDropPad {...props} ready={ready} />}
+      IXISortableMachineCard={props => <AosPocketSortable {...props} registry={registry} ready={ready} />}
+      movePocketToStack={() => {}} recallPocketToBoard={() => {
+        if (ready) void (async () => { for (const object of objects) await onBoard(object.objectId); })();
+      }} rotatePocket={() => setMode(current => current === "peek" ? "open" : current === "open" ? "closed" : "peek")}
+      toggleArmedDestination={ready ? toggleArmedDestination : () => {}}
+      pocketThumbSize="small" getListingById={getListingById} getIxiColorValue={() => "rgba(255,255,255,.16)"}
+      ixiCardState={{}} />
+  </div>;
 }
 
 function PreviewImage({ src, name }) {
@@ -301,10 +312,12 @@ export default function IXIAosToolbarChassis({ children, controls, registry, ind
       <div className={styles.center}>
         <div className={`${styles.searchDeck} ${searchCollapsed ? styles.searchDeckClosed : ""}`}>
           {SEARCH_POCKETS.slice(0, 2).map(pocket => <SearchPocket key={pocket.id} pocket={pocket} placements={placements}
-            registry={registry} ready={ready} onBoard={id => run(() => onBoard(id))} />)}
+            registry={registry} ready={ready} onBoard={id => run(() => onBoard(id))}
+            armedDestination={armedDestination} toggleArmedDestination={toggleArmedDestination} />)}
           <div className={styles.searchDeckControls}>{controls}</div>
           {SEARCH_POCKETS.slice(2).map(pocket => <SearchPocket key={pocket.id} pocket={pocket} placements={placements}
-            registry={registry} ready={ready} onBoard={id => run(() => onBoard(id))} />)}
+            registry={registry} ready={ready} onBoard={id => run(() => onBoard(id))}
+            armedDestination={armedDestination} toggleArmedDestination={toggleArmedDestination} />)}
         </div>
         {!searchCollapsed && SEARCH_POCKETS.some(pocket => placements[pocket.id]?.length) && <details className={styles.hiddenPocketAccess}>
           <summary>ACCESS HIDDEN POCKETS</summary>

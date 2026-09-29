@@ -44,12 +44,25 @@ test("folding keeps Board state mounted, browsed containers and parked Objects s
     component, component.exports);
     return component.exports;
   }
+  function loadPocket(name) {
+    const componentFile = new URL(`../components/ixi-chassis/${name}.js`, import.meta.url);
+    const result = transformSync(fs.readFileSync(componentFile, "utf8"), {
+      filename: componentFile.pathname, jsc: { parser: { syntax: "ecmascript", jsx: true }, target: "es2022",
+        transform: { react: { runtime: "automatic" } } }, module: { type: "commonjs" }
+    });
+    const component = { exports: {} };
+    new Function("require", "module", "exports", result.code)(dependency =>
+      dependency.includes("passportEmailEvents") ? { getPocketFrontMachine: () => null, openIXIPassportEmail: () => {} } : require(dependency),
+    component, component.exports);
+    return component.exports;
+  }
   const module = { exports: {} };
   new Function("require", "module", "exports", compiled.code)(name => {
     if (name.endsWith("ToolbarModel.mjs")) return model;
     if (name.endsWith("MembershipPolicy")) return policy;
     if (name.endsWith("IXIWorkspaceRailTile")) return loadShared("IXIWorkspaceRailTile");
     if (name.endsWith("IXIWorkspaceRailHeader")) return loadShared("IXIWorkspaceRailHeader");
+    if (name.includes("/IXIPocket")) return loadPocket(path.basename(name, ".js"));
     if (name.endsWith(".module.css")) return new Proxy({}, { get: (_, key) => String(key) });
     return require(name);
   }, module, module.exports);
@@ -80,7 +93,10 @@ test("folding keeps Board state mounted, browsed containers and parked Objects s
       "the full Board must be registered so blank space cannot fall back to the nearest toolbar");
     assert.equal(boardTarget.data.current.dropIntent, "root", "Board drops are placement, not membership");
     assert.equal(dnd.droppableContainers.get("pocketLeft2")?.data.current.targetSurface, "pocketLeft2");
-    assert.match(doc.querySelector('[aria-label="Pocket III"]').textContent, /Pocket selection/);
+    assert.ok(doc.querySelector('[aria-label="Pocket III"] [data-pocket-target="pocketLeft2"]'),
+      "the AOS station uses the native Pocket III component");
+    assert.ok(doc.querySelector('[aria-label="Pocket III"] [aria-label="Drag Pocket selection from Pocket"]'),
+      "the parked Object remains draggable in the native pocket");
     await click(doc.querySelector('details summary'));
     await click([...doc.querySelectorAll('details button')].find(button => button.textContent.includes('Pocket selection')));
     assert.deepEqual(opened, [[pocketed.objectId]], "a pocket hidden at narrower widths remains recoverable to Board");
