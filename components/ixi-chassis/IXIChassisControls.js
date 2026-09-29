@@ -40,7 +40,7 @@ export default function IXIChassisControls({
       !(["category", "make", "model"].includes(key) && String(value).startsWith("ALL ")));
   return (
     <section className="workspace-controls">
-      <IXIControlSurface>
+      <IXIControlSurface fluid={workspaceToolbars}>
         <button type="button" className="search-fold-actuator"
           aria-label={searchCollapsed ? "Open search surface and pockets" : "Close search surface and pockets"}
           aria-expanded={!searchCollapsed} aria-controls="ixi-workspace-search-controls"

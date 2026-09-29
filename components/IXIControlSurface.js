@@ -1,6 +1,6 @@
-export default function IXIControlSurface({ children, className = "" }) {
+export default function IXIControlSurface({ children, className = "", fluid = false }) {
   return (
-    <section className={`ixi-control-surface ${className}`}>
+    <section className={`ixi-control-surface ${fluid ? "ixi-control-surface-fluid" : ""} ${className}`}>
       {children}
 
 <style jsx>{`
@@ -34,6 +34,14 @@ box-shadow:
   inset 0 1px 0 rgba(255,255,255,.04),
   inset 0 -1px 0 rgba(0,0,0,.28),
   0 10px 24px rgba(0,0,0,.22);
+}
+
+.ixi-control-surface.ixi-control-surface-fluid {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  margin-left: 0;
+  margin-right: 0;
 }
 
 .ixi-control-surface::before {
