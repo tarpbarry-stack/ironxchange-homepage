@@ -1707,6 +1707,8 @@ toggleSearchSurfaceRevealed
       <style jsx global>{`
         .inventory-search-collapsed .ixi-command-left,
         .inventory-search-collapsed .ixi-command-right { display: none !important; }
+        .inventory-search-expanded .ixi-command-left,
+        .inventory-search-expanded .ixi-command-right { top: 24px; }
         @media (min-width: 851px) and (max-width: 1449px) {
           .ixi-command-chassis .ixi-pocket-l2,
           .ixi-command-chassis .ixi-pocket-r2 { display: none !important; }

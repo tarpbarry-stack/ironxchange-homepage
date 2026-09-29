@@ -43,9 +43,7 @@ export default function IXIChassisControls({
       <button type="button" className="search-fold-actuator"
         aria-label={searchCollapsed ? "Open search surface and pockets" : "Close search surface and pockets"}
         aria-expanded={!searchCollapsed} aria-controls="ixi-workspace-search-controls"
-        onClick={onToggleSearchCollapsed}>
-        <span aria-hidden="true">{searchCollapsed ? "▾" : "▴"}</span>
-      </button>
+        onClick={onToggleSearchCollapsed} />
       <IXIControlSurface>
         <div id="ixi-workspace-search-controls" hidden={searchCollapsed}>
         <div className="desktop-search-surface">
@@ -117,21 +115,31 @@ export default function IXIChassisControls({
         }
 
         .search-fold-actuator {
-          position: relative;
+          position: absolute;
+          top: 2px;
+          left: 50%;
+          transform: translateX(-50%);
           z-index: 6;
           display: grid;
           place-items: center;
           width: 44px;
-          height: 28px;
-          margin: 0 auto 3px;
+          height: 44px;
           padding: 0;
-          border: 1px solid #665922;
-          border-radius: 3px;
-          background: #191919;
-          color: #ffcf34;
-          font-size: 18px;
+          border: 0;
+          background: transparent;
           cursor: pointer;
         }
+        .search-fold-actuator::before {
+          content: "";
+          display: block;
+          width: 17px;
+          height: 5px;
+          border-radius: 2px;
+          background: #bababa;
+          box-shadow: 0 0 0 1px #3d3d3d, 0 0 8px #000;
+        }
+        .search-fold-actuator[aria-expanded="false"]::before,
+        .search-fold-actuator:hover::before { background: #ffcf34; }
         .search-fold-actuator:focus-visible { outline: 2px solid #ffcf34; outline-offset: 2px; }
         [hidden] { display: none !important; }
 
@@ -144,6 +152,7 @@ export default function IXIChassisControls({
         }
 
         @media (max-width: 850px) {
+          .search-fold-actuator { top: -14px; }
           .aos-board-search-actions { display: flex; justify-content: flex-start; margin: 0 0 6px; }
           .aos-board-search-toggle { display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: auto; min-height: 44px; padding: 0 10px; border: 1px solid #343c30; border-radius: 3px; background: #101411; color: #e2e8dd; font: inherit; font-size: 10px; font-weight: 800; letter-spacing: .04em; white-space: nowrap; cursor: pointer; }
           .aos-board-search-toggle strong { color: #ffc400; font-size: 17px; line-height: 1; }
