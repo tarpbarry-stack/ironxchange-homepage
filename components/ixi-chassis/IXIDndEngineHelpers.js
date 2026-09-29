@@ -187,6 +187,12 @@ export function createWorkspaceDragEndHandler({
         item => String(item) === String(overId)
       );
 
+      if (fromIndex < 0 || toIndex < 0) {
+        setActiveDndId("");
+        clearMachineDragState();
+        return;
+      }
+
       const insertAfter = fromIndex < toIndex;
 
       moveMachineWithinContainer(
@@ -222,6 +228,18 @@ export function createWorkspaceDragEndHandler({
         false
       );
 
+      setActiveDndId("");
+      clearMachineDragState();
+      return;
+    }
+
+    if (
+      extraContainers.includes(targetContainer) &&
+      targetContainer !== sourceContainer &&
+      overId !== dragId &&
+      (machineContainers[targetContainer] || []).some(id => String(id) === overId)
+    ) {
+      moveMachineToContainerAtPosition(dragId, targetContainer, overId, false);
       setActiveDndId("");
       clearMachineDragState();
       return;

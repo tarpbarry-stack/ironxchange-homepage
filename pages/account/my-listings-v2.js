@@ -121,6 +121,11 @@ import {
 
 const INVENTORY_RAIL_CONTAINERS = ["railLeft", "railRight"];
 
+function InventoryBoardDrop({ children }) {
+  const { setNodeRef, isOver } = useDroppable({ id: "board", data: { containerId: "board" } });
+  return <div ref={setNodeRef} className={`inventory-board-drop ${isOver ? "inventory-board-drop-over" : ""}`}>{children}</div>;
+}
+
 export default function MyListingsV2({ inventoryMode = "owned" }) {
   const isSold = inventoryMode === "sold";
   const IXI_WORKSPACE_SETTINGS_ID = isSold ? "__soldWorkspaceSettings" : OWNED_SETTINGS_ID;
@@ -130,7 +135,6 @@ export default function MyListingsV2({ inventoryMode = "owned" }) {
   const [inventoryStatus, setInventoryStatus] = useState({ loading: true, error: "", total: 0, page: 1, pageSize: 24 });
   const [inventoryRevision, setInventoryRevision] = useState(0);
   const [machineRails, setMachineRails] = useState({ left: true, right: true });
-  const [selectedRailMachine, setSelectedRailMachine] = useState("");
   const [railDraggingId, setRailDraggingId] = useState("");
   const soldWorkspaceLayoutRef = useRef(null);
   const soldSortRef = useRef(soldQuery.sort);
@@ -614,7 +618,6 @@ const inventorySummary = useMemo(() => {
 
 const railLeftItems = useMemo(() => (machineContainers.railLeft || []).map(id => workspaceListings.find(item => String(getListingId(item)) === String(id))).filter(Boolean), [machineContainers.railLeft, workspaceListings]);
 const railRightItems = useMemo(() => (machineContainers.railRight || []).map(id => workspaceListings.find(item => String(getListingId(item)) === String(id))).filter(Boolean), [machineContainers.railRight, workspaceListings]);
-const boardRailOptions = useMemo(() => (machineContainers.board || []).map(id => workspaceListings.find(item => String(getListingId(item)) === String(id))).filter(Boolean), [machineContainers.board, workspaceListings]);
 
 const containerStateKey = useMemo(() => {
   return workspaceListings
@@ -979,7 +982,7 @@ function moveMachineBackToBoard(machineId) {
 }
 
 function getListingById(machineId) {
-  return listings.find(
+  return workspaceListings.find(
     item => String(getListingId(item)) === String(machineId)
   );
 }
@@ -1085,34 +1088,6 @@ function sendListingToBack(listing) {
 
   executeIXITransaction(result);
 }
-
-function openRailMachine(listing) {
-  const id = String(getListingId(listing));
-  sendListingToFront(listing);
-  setSelectedRailMachine(id);
-}
-
-function reorderRailMachine(containerId, id, direction) {
-  const ids = machineContainers[containerId] || [];
-  const index = ids.findIndex(value => String(value) === String(id));
-  const target = ids[index + direction];
-  if (index < 0 || !target) return;
-  moveMachineWithinContainer(containerId, id, String(target), direction > 0);
-}
-
-useEffect(() => {
-  if (!selectedRailMachine || typeof window === "undefined") return;
-  const frame = window.requestAnimationFrame(() => {
-    window.requestAnimationFrame(() => {
-      const card = document.getElementById(selectedRailMachine);
-      if (card) {
-        card.scrollIntoView({ behavior: "smooth", block: "center" });
-        setSelectedRailMachine("");
-      }
-    });
-  });
-  return () => window.cancelAnimationFrame(frame);
-}, [selectedRailMachine, machineContainers]);
 
   async function toggleSave(listing) {
     if (!sdk) {
@@ -1653,14 +1628,14 @@ toggleSearchSurfaceRevealed
      {isSold && soldIssues.length > 0 && <details className="sold-toolbar"><summary>{soldIssues.length} historical sale facts need review</summary><ul>{soldIssues.map((issue, index) => <li key={`${issue.documentId}:${issue.code}:${index}`}>{issue.passportId ? `${issue.passportId}: ` : ""}{issue.message}</li>)}</ul></details>}
      {inventoryStatus.error && <p role="alert">{inventoryStatus.error} <button type="button" onClick={() => isSold ? setInventoryRevision(value => value + 1) : window.location.reload()}>Retry</button></p>}
      <div className={`inventory-rail-layout ${machineRails.left ? "" : "inventory-left-folded"} ${machineRails.right ? "" : "inventory-right-folded"}`}>
-       {machineRails.left && <div className="inventory-machine-sidebar"><InventoryMachineRail title="LEFT RAIL" side="left" containerId="railLeft" items={railLeftItems} boardItems={boardRailOptions} onOpen={openRailMachine} onMove={moveMachineToContainer} onReorder={reorderRailMachine} onClose={() => toggleMachineRail("left")} sold={isSold} /></div>}
+       {machineRails.left && <div className="inventory-machine-sidebar"><InventoryMachineRail title="LEFT RAIL" side="left" containerId="railLeft" items={railLeftItems} onClose={() => toggleMachineRail("left")} sold={isSold} /></div>}
        <section className="inventory-board-column" aria-label={isSold ? "Sold machine board" : "Inventory machine board"}>
          <div className="inventory-board-toolbar">
            <button type="button" aria-expanded={machineRails.left} onClick={() => toggleMachineRail("left")}>{machineRails.left ? "‹" : "›"} LEFT RAIL</button>
            <strong>{isSold ? "SOLD BOARD" : "INVENTORY BOARD"}</strong>
            <button type="button" aria-expanded={machineRails.right} onClick={() => toggleMachineRail("right")}>RIGHT RAIL {machineRails.right ? "›" : "‹"}</button>
          </div>
-     <IXIBoardSurface mobileCards
+     <InventoryBoardDrop><IXIBoardSurface mobileCards
   scaleMode={cardScaleMode}
   centerRows={true}
 >
@@ -1688,9 +1663,9 @@ toggleSearchSurfaceRevealed
     getSellerListingCardProps
   }
 />
-</IXIBoardSurface>
+</IXIBoardSurface></InventoryBoardDrop>
        </section>
-       {machineRails.right && <div className="inventory-machine-sidebar"><InventoryMachineRail title="RIGHT RAIL" side="right" containerId="railRight" items={railRightItems} boardItems={boardRailOptions} onOpen={openRailMachine} onMove={moveMachineToContainer} onReorder={reorderRailMachine} onClose={() => toggleMachineRail("right")} sold={isSold} /></div>}
+       {machineRails.right && <div className="inventory-machine-sidebar"><InventoryMachineRail title="RIGHT RAIL" side="right" containerId="railRight" items={railRightItems} onClose={() => toggleMachineRail("right")} sold={isSold} /></div>}
      </div>
     
 <IXICardScaleControl mobileDensity
@@ -1740,6 +1715,8 @@ toggleSearchSurfaceRevealed
         .inventory-rail-layout.inventory-right-folded { grid-template-columns:clamp(205px,18vw,280px) minmax(0,1fr); }
         .inventory-rail-layout.inventory-left-folded.inventory-right-folded { grid-template-columns:minmax(0,1fr); }
         .inventory-board-column { min-width:0; }
+        .inventory-board-drop { min-height:320px; }
+        .inventory-board-drop-over { outline:2px solid #ffcc00; outline-offset:-3px; }
         .inventory-board-toolbar { display:flex; align-items:center; justify-content:space-between; gap:12px; min-height:42px; padding:5px 12px; border:1px solid #383838; background:#171717; font-family:'IXI Sold Inter','Inter Variable',Inter,ui-sans-serif,sans-serif; }
         .inventory-board-toolbar strong { color:#dedede; font-size:10px; letter-spacing:.09em; }
         .inventory-board-toolbar button { border:0; background:transparent; color:#aaa; font-size:10px; font-weight:800; cursor:pointer; }

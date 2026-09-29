@@ -3,6 +3,8 @@ import dynamic from "next/dynamic";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Navbar from "../Navbar";
 import DashboardMachineRail from "./DashboardMachineRail";
+import MachineWorkspaceDnd from "./MachineWorkspaceDnd";
+import { useRailOrder } from "../ixi-sales-desk/SortableRail";
 import MobileMachineStrip from "./MobileMachineStrip";
 import IXIOperatingNav from "../ixi-os/IXIOperatingNav";
 import useIXISellerMachineOps from "../ixi-chassis/useIXISellerMachineOps";
@@ -14,7 +16,7 @@ import { preserveOpenInventoryTransactions, releaseClosedInventoryTransactions }
 import { subscribeInventoryChanges } from "../../lib/listings/IXIInventoryEvents";
 import { isPublicMarketplaceMachine, isPrivateMachine, getMachineChannel } from "../../lib/machine-access/IXIMachineAccess";
 import { hydrateIXIListingMedia } from "../../lib/listings/hydrateIXIListingMedia";
-import { dashboardId, dashboardKey, uniqueMachines, relationshipIds, collectRelationships, reconcileOpenKeys, viewPatch, relationshipPatch, restoreDashboard, verifiedInquiryCount } from "./dashboardContract.mjs";
+import { dashboardId, dashboardKey, filterMachineSearch, uniqueMachines, relationshipIds, collectRelationships, reconcileOpenKeys, viewPatch, relationshipPatch, restoreDashboard, verifiedInquiryCount } from "./dashboardContract.mjs";
 import styles from "./dashboard.module.css";
 const SalesDeskSurface = dynamic(() => import("../ixi-sales-desk/SalesDeskSurface"), { ssr: false });
 
@@ -132,6 +134,13 @@ export default function IXIDashboard({ salesDeskContext = null }) {
   const ownedKeys = useMemo(() => new Set(owned.map(dashboardKey)), [owned]);
   const currentOwned = useMemo(() => owned.filter(item => !item.inventorySessionOnly), [owned]);
   const visibleOwned = useMemo(() => currentOwned.filter(item => ownedFilter === "all" || (ownedFilter === "live" && liveMachine(item)) || (ownedFilter === "private" && isPrivateMachine(item)) || (ownedFilter === "auction" && getMachineChannel(item) === "auction")), [currentOwned, ownedFilter]);
+  const leftRailOrder = useRailOrder(visibleOwned, dashboardKey, storageKey ? `${storageKey}:owned-rail` : "", setNotice);
+  const rightRailOrder = useRailOrder(related, dashboardKey, storageKey ? `${storageKey}:relationship-rail` : "", setNotice);
+  const reorderRail = (side, active, over) => {
+    const rail = side === "left" ? leftRailOrder : rightRailOrder;
+    const query = side === "left" ? leftQuery : rightQuery;
+    rail.reorder(filterMachineSearch(rail.ordered, query).map(dashboardKey), active, over);
+  };
   useEffect(() => {
     if (ownedStatus.loading || relatedStatus.loading || ownedStatus.error || relatedStatus.error) return;
     setOpenKeys(previous => {
@@ -222,14 +231,14 @@ export default function IXIDashboard({ salesDeskContext = null }) {
     <header className="dash-identity"><div className="dash-identity-title"><span className="dash-home-mark">IXI</span><div><span className="dash-eyebrow">{company}</span><h1>DASHBOARD</h1></div><span className="dash-version">V12</span></div><nav aria-label="Your account"><a href="/account/profile">PROFILE</a><a href="/account/messages">MESSAGES</a><details className="dash-account-menu"><summary>ACCOUNT <span>⌄</span></summary><div><a href="/account/profile">Profile & company settings</a><a href="/privacy">Privacy</a><a href="/terms">Terms</a><button onClick={async () => { if (dirtyRef.current.size && !window.confirm("Leave with unsaved changes?")) return; persistView(); await auth.sdk?.logout(); dirtyRef.current = new Set(); window.location.href = "/login"; }}>Sign out</button></div></details></nav></header>
     <IXIOperatingNav active="/account" />
     <div className="dash-stats" aria-label="Account overview">{stats.map(stat => { const Tag = stat.href ? "a" : stat.action ? "button" : "div"; return <Tag key={stat.label} href={stat.href} onClick={stat.action} className="dash-stat" title={stat.detail}><span>{stat.label}</span><strong>{stat.value}</strong><small>{stat.detail}</small></Tag>; })}</div>
-    {auth.loading ? <div className="dash-page-message" role="status">Opening your dashboard…</div> : auth.error ? <div className="dash-page-message" role="alert"><h2>{auth.error}</h2><a href="/login?next=%2Faccount">SIGN IN</a><button onClick={() => setAuthRevision(value => value + 1)}>TRY AGAIN</button></div> : <main className={`dash-workspace ${hidden.left ? "dash-hide-left" : ""} ${hidden.right ? "dash-hide-right" : ""} ${mobileRail ? `dash-mobile-${mobileRail}` : ""}`}>
+    {auth.loading ? <div className="dash-page-message" role="status">Opening your dashboard…</div> : auth.error ? <div className="dash-page-message" role="alert"><h2>{auth.error}</h2><a href="/login?next=%2Faccount">SIGN IN</a><button onClick={() => setAuthRevision(value => value + 1)}>TRY AGAIN</button></div> : <MachineWorkspaceDnd boardKeys={openMachines.map(dashboardKey)} onBoardOrder={setOpenKeys} onOpen={key => { const item = machineMap.get(key); if (item) openMachine(item); }} onReturn={(key, side) => { if (side === (ownedKeys.has(key) ? "left" : "right")) returnToRail(key); else setNotice("Drop this machine onto its OWNED or RELATIONSHIPS rail."); }} onRailOrder={reorderRail}><main className={`dash-workspace ${hidden.left ? "dash-hide-left" : ""} ${hidden.right ? "dash-hide-right" : ""} ${mobileRail ? `dash-mobile-${mobileRail}` : ""}`}>
       <MobileMachineStrip owned={visibleOwned} related={related} ownedStatus={ownedStatus} relatedStatus={relatedStatus} openKeys={openKeys} selectedKey={selectedKey} onOpen={openMachine} label="WORKING BOARD" />
-      <DashboardMachineRail title="OWNED" side="left" items={visibleOwned} loading={ownedStatus.loading} error={ownedStatus.error} query={leftQuery} onQuery={setLeftQuery} filter={ownedFilter} onFilter={setOwnedFilter} openKeys={openKeys} selectedKey={selectedKey} onSelect={setSelectedKey} onOpen={openMachine} onRetry={() => setRevision(value => value + 1)} onHide={() => hideRail("left")} />
+      <DashboardMachineRail title="OWNED" side="left" items={leftRailOrder.ordered} loading={ownedStatus.loading} error={ownedStatus.error} query={leftQuery} onQuery={setLeftQuery} filter={ownedFilter} onFilter={setOwnedFilter} openKeys={openKeys} selectedKey={selectedKey} onSelect={setSelectedKey} onRetry={() => setRevision(value => value + 1)} onHide={() => hideRail("left")} />
       <section className="dash-board" aria-label="Working board"><div className="dash-board-toolbar"><button className={`dash-rail-toggle ${!hidden.left ? "active" : ""}`} onClick={() => toggleRail("left")}>‹ OWNED</button><div className="dash-board-title"><strong>WORKING BOARD</strong><span>{openMachines.length} OPEN</span></div><div className="dash-board-options"><label>SIZE <select aria-label="Card size" value={size} onChange={event => setSize(event.target.value)}><option value="fit">FIT</option><option value="natural">100%</option><option value="work">120%</option><option value="focus">140%</option></select></label><button className="dash-icon-button" aria-label="Refresh machines" title={dirtyKeys.size ? "Save changes before refreshing" : "Refresh machines"} disabled={Boolean(dirtyKeys.size)} onClick={() => setRevision(value => value + 1)}>↻</button></div><button className={`dash-rail-toggle ${!hidden.right ? "active" : ""}`} onClick={() => toggleRail("right")}>RELATIONSHIPS ›</button></div>
-      <Board machines={openMachines} ownedKeys={ownedKeys} states={states} onPatch={updateState} size={size} onReorder={setOpenKeys} onReturn={returnToRail} selectedKey={selectedKey} onSelect={setSelectedKey} getSellerProps={getSellerListingCardProps} onDirty={markDirty} dirtyKeys={dirtyKeys} onSaved={clearDirty} toggleSave={toggleSave} savedIds={savedIds} scrollTop={scroll} onScroll={value => { scrollPosition.current = value; storageRef.current.scroll = value; }} />
+      <Board externalDnd machines={openMachines} ownedKeys={ownedKeys} states={states} onPatch={updateState} size={size} onReorder={setOpenKeys} onReturn={returnToRail} selectedKey={selectedKey} onSelect={setSelectedKey} getSellerProps={getSellerListingCardProps} onDirty={markDirty} dirtyKeys={dirtyKeys} onSaved={clearDirty} toggleSave={toggleSave} savedIds={savedIds} scrollTop={scroll} onScroll={value => { scrollPosition.current = value; storageRef.current.scroll = value; }} />
       <footer className="dash-board-footer"><span><i /> {dirtyKeys.size ? `${dirtyKeys.size} MACHINE${dirtyKeys.size > 1 ? "S" : ""} WITH UNSAVED CHANGES` : "YOUR IXI WORKING SPACE"}</span><span>OPEN · WORK · RETURN</span></footer></section>
-      <DashboardMachineRail title="RELATIONSHIPS" side="right" items={related} loading={relatedStatus.loading} error={relatedStatus.error} query={rightQuery} onQuery={setRightQuery} openKeys={openKeys} selectedKey={selectedKey} onSelect={setSelectedKey} onOpen={openMachine} onRetry={() => setRevision(value => value + 1)} onHide={() => hideRail("right")} />
-    </main>}
+      <DashboardMachineRail title="RELATIONSHIPS" side="right" items={rightRailOrder.ordered} loading={relatedStatus.loading} error={relatedStatus.error} query={rightQuery} onQuery={setRightQuery} openKeys={openKeys} selectedKey={selectedKey} onSelect={setSelectedKey} onRetry={() => setRevision(value => value + 1)} onHide={() => hideRail("right")} />
+    </main></MachineWorkspaceDnd>}
     {notice && <div className="dash-notice" role="status">{notice}<button aria-label="Dismiss notification" onClick={() => setNotice("")}>×</button></div>}
   </div>;
 }

@@ -50,6 +50,9 @@
 .dashboard :global(.dash-rail-tools input), .dashboard :global(.dash-rail-tools select) { background:#0d0d0d; color:#dddddd; border:1px solid #383838; padding:10px 9px; border-radius:2px; width:100%; min-width:0; font-size:12px; }
 .dashboard :global(.dash-rail-tools select) { font-size:11px; font-weight:750; }
 .dashboard :global(.dash-rail-list) { overflow:auto; flex:1; min-height:0; padding:0 12px 12px; scrollbar-width:thin; scrollbar-color:#655622 #151515; }
+.dashboard :global(.dash-rail-drop-over), .dashboard :global(.dash-board-drop-over) { outline:2px solid var(--dash-yellow); outline-offset:-3px; }
+.dashboard :global(.dash-tile-open) { touch-action:none; cursor:grab; }
+.dashboard :global(.dash-tile-open:active) { cursor:grabbing; }
 .dashboard :global(.dash-machine-tile) { border:1px solid #373737; background:#1b1b1b; margin-bottom:10px; border-radius:3px; overflow:hidden; }
 .dashboard :global(.dash-machine-tile.selected) { border-color:var(--dash-yellow); box-shadow:inset 0 0 0 1px #ffc40044; }
 .dashboard :global(.dash-machine-tile:hover) { background:var(--ix-surface-hover); border-color:#807538; }

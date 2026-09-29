@@ -15,20 +15,25 @@ function PreviewImage({ src, name }) {
     : <span className={styles.monogram} aria-hidden="true">{name.split(/\s+/).slice(0, 2).map(word => word[0]).join("")}</span>;
 }
 
-function ToolbarReference({ object, registry, selected, referenceId, surfaceId, onBoard, onBrowse, onMove, onReturn, returnable, ready, onConnect, connectTarget }) {
+function ToolbarReference({ object, registry, selected, referenceId, surfaceId, group, onBoard, onBrowse, onMove, onReturn, returnable, ready, onConnect, connectTarget }) {
   const name = getAosToolbarName(object);
   const view = getAosToolbarPresentation(object, registry);
   const { attributes, listeners, setNodeRef, setActivatorNodeRef, isDragging } = useDraggable({
     id: referenceId,
     disabled: !ready,
     data: { type: "aos-toolbar-reference", objectId: object.objectId, objectType: object.objectType,
-      object, sourceObject: object, metadata: object.metadata, definitionId: object.definitionId, containerId: surfaceId }
+      object, sourceObject: object, metadata: object.metadata, definitionId: object.definitionId, containerId: surfaceId, group }
+  });
+  const parkedDrop = useDroppable({
+    id: referenceId,
+    disabled: group !== "parked" || !ready,
+    data: { group, objectId: object.objectId, containerId: surfaceId }
   });
   const canConnect = connectTarget && connectTarget.objectId !== object.objectId &&
     object.actorAuthority?.canRelate === true && connectTarget.actorAuthority?.canRelate === true &&
     evaluateAosSystemIndexMembership({ sourceObject: object, targetObject: connectTarget }).allowed;
   return (
-    <article ref={setNodeRef} className={`${styles.reference} ${selected ? styles.selected : ""}`} data-object-id={object.objectId} data-dragging={isDragging}>
+    <article ref={element => { setNodeRef(element); parkedDrop.setNodeRef(element); }} className={`${styles.reference} ${selected ? styles.selected : ""}`} data-object-id={object.objectId} data-dragging={isDragging}>
       <button type="button" className={styles.cardPreview} disabled={!ready}
         onClick={() => view.machine ? onBoard(object.objectId) : onBrowse(object.objectId)}
         title={view.machine ? `Open ${name} on Board` : `Browse ${name}`}
@@ -52,7 +57,7 @@ function ToolbarReference({ object, registry, selected, referenceId, surfaceId, 
           {surfaceId === "board" ? "Focus on Board" : "Open on Board"}<span aria-hidden="true">↗</span>
         </button>
         <button type="button" ref={setActivatorNodeRef} {...attributes} {...listeners}
-          className={styles.dragHandle} disabled={!ready} aria-label={`Drag ${name}`} title="Drag to Board or a toolbar">⠿</button>
+          className={styles.dragHandle} disabled={!ready} aria-label={`Drag ${name} to reorder or move to Board`} title="Drag to reorder or move to Board">⠿</button>
         <select aria-label={`Actions for ${name}`} value="" disabled={!ready}
           onChange={event => {
             const action = event.target.value;
@@ -98,7 +103,7 @@ function Toolbar({ side, folded, onFold, registry, indexes, placements, session,
   const review = parent?.membershipReview;
   const issues = parent?.membershipReviewObjects || [];
   const row = (object, group) => (
-    <ToolbarReference key={object.objectId} object={object} referenceId={`aos-toolbar:${side}:${group}:${object.objectId}`}
+    <ToolbarReference key={object.objectId} object={object} group={group} referenceId={`aos-toolbar:${side}:${group}:${object.objectId}`}
       registry={registry} selected={connectTarget?.objectId === object.objectId}
       surfaceId={Object.keys(placements).find(surface => placements[surface]?.includes(object.objectId)) || ""}
       ready={ready && !folded} returnable={Boolean(getAosToolbarReturnOperation(session, object.objectId))}

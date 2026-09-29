@@ -11,6 +11,8 @@ import { paymentDocument, paymentScopeObject } from "../ixi-aos/transact/payment
 import { createIXITransactContext } from "../ixi-aos/transact/IXITransactContext";
 import { formatIXIAccountingMoney as formatIXIMoney } from "../ixi-aos/transact/IXIMoney";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { TransactDirectoryDnd, TransactDirectoryList, TransactDirectoryTile, TransactWorkspaceDrop } from "./TransactDirectoryDnd";
+import { arrayMove } from "@dnd-kit/sortable";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -400,6 +402,7 @@ export default function IXITransactCommandCenter({ runtime, active = true }) {
   const financialQueryKey = useRef("");
   const [activeModuleId, setActiveModuleId] = useState("");
   const [selectedDirectoryId, setSelectedDirectoryId] = useState("");
+  const [directoryOrder, setDirectoryOrder] = useState({ key: "", ids: [] });
   const [passportRefreshKey, setPassportRefreshKey] = useState(0);
   const [refreshKey, setRefreshKey] = useState(0);
   const [contextRefreshKey, setContextRefreshKey] = useState(0);
@@ -620,6 +623,26 @@ export default function IXITransactCommandCenter({ runtime, active = true }) {
     () => [...safeArray(selectedDirectory?.items)].sort((left, right) => left.title.localeCompare(right.title)),
     [selectedDirectory]
   );
+  const directoryOrderKey = entityPassportId && selectedDirectory?.id
+    ? `ixi:transact-object-order:${entityPassportId}:${selectedDirectory.id}` : "";
+  useEffect(() => {
+    if (!directoryOrderKey) return;
+    let ids = [];
+    try { const saved = JSON.parse(localStorage.getItem(directoryOrderKey) || "[]"); if (Array.isArray(saved)) ids = saved.map(String); } catch {}
+    setDirectoryOrder({ key: directoryOrderKey, ids });
+  }, [directoryOrderKey]);
+  const orderedObjectDirectory = useMemo(() => {
+    if (directoryOrder.key !== directoryOrderKey) return objectDirectory;
+    const byId = new Map(objectDirectory.map(item => [String(item.id), item]));
+    const saved = directoryOrder.ids.filter(id => byId.has(id));
+    return [...saved, ...objectDirectory.map(item => String(item.id)).filter(id => !saved.includes(id))].map(id => byId.get(id));
+  }, [directoryOrder, directoryOrderKey, objectDirectory]);
+  function reorderObjectDirectory(ids, from, to) {
+    if (!directoryOrderKey || directoryOrder.key !== directoryOrderKey) return;
+    const next = arrayMove(ids, ids.indexOf(from), ids.indexOf(to));
+    setDirectoryOrder({ key: directoryOrderKey, ids: next });
+    try { localStorage.setItem(directoryOrderKey, JSON.stringify(next)); } catch {}
+  }
   const selectedQueueItem = queue.find(item => item.id === selectedQueueId) || queue[0] || null;
   useEffect(() => {
     if (query.trim().length < 2 || !entityPassportId || !access) { setSearchLoading(false); return undefined; }
@@ -977,7 +1000,7 @@ export default function IXITransactCommandCenter({ runtime, active = true }) {
 
       <IXIOperatingNav active="/transact" />
 
-      <div className={styles.desktop}>
+      <TransactDirectoryDnd items={orderedObjectDirectory} onReorder={reorderObjectDirectory} onSelect={selectContext}><div className={styles.desktop}>
         <IXITransactSidePanel className={styles.navigation} label="Object directory" dockAt={1280} open={openPanel === "directory"} onDismiss={() => setOpenPanel("")}>
           <nav className={styles.workspaceRail} aria-label="Workspace shortcuts">
             {WORKSPACES.map(([id, label, number]) => <button type="button" key={id} data-active={activeWorkspace === id} aria-current={activeWorkspace === id ? "page" : undefined} onClick={() => selectWorkspace(id)}><span>{number}</span><strong>{label}</strong>{id === "today" && queue.length ? <b>{queue.length}</b> : null}</button>)}
@@ -989,8 +1012,8 @@ export default function IXITransactCommandCenter({ runtime, active = true }) {
             </header>
             {directoryProjection.error ? <p role="alert">The AOS folder list could not load. Use REFRESH to retry.</p> : null}
             <div className={styles.objectDirectoryList} role="list">
-              {objectDirectory.map(item => (
-                <div role="listitem" key={item.id}><button type="button" className={styles.objectTile} data-active={selectedContext?.id === item.id} aria-pressed={selectedContext?.id === item.id} onClick={() => selectContext(item)}>
+              <TransactDirectoryList items={orderedObjectDirectory}>{orderedObjectDirectory.map(item => (
+                <TransactDirectoryTile item={item} key={item.id}><button type="button" className={styles.objectTile} data-active={selectedContext?.id === item.id} aria-pressed={selectedContext?.id === item.id} onClick={() => selectContext(item)}>
                   <span className={styles.objectTileImage}>
                     <IXIContextImage
                       key={item.id}
@@ -1007,14 +1030,14 @@ export default function IXITransactCommandCenter({ runtime, active = true }) {
                   {item.serialNumber ? <small className={`${styles.objectTileField} ${styles.objectTileSerial}`}><b>SN</b><span>{item.serialNumber}</span></small> : null}
                   <small className={`${styles.objectTileField} ${styles.objectTileIdentity}`}><b>ID</b><span>{item.stockNumber || item.assetId || item.passportId || "NOT RECORDED"}</span></small>
                   <span className={styles.objectTileAction}>{item.kind === "company" ? "COMPANY WORKSPACE" : "TRANSACTION HISTORY"}<span aria-hidden="true">↗</span></span>
-                </button></div>
-              ))}
+                </button></TransactDirectoryTile>
+              ))}</TransactDirectoryList>
             </div>
           </section>
           <div className={styles.navFooter}><Link href="/transact/ledger">LEDGER CONTROL →</Link></div>
         </IXITransactSidePanel>
 
-        <main className={styles.main} data-history-active={activeWorkspace === "object-history" && !activeTabId}>
+        <TransactWorkspaceDrop className={styles.main} data-history-active={activeWorkspace === "object-history" && !activeTabId}>
           <div className={styles.pageHeader}>
             <div><span className={styles.eyebrow}>{environment?.entity?.displayName || "IXI ENTITY"} · {contextLabel(selectedContext?.kind)}</span><h1>{workspaceTitle}</h1></div>
             <div className={styles.headerActions}><button type="button" className={styles.directoryToggle} onClick={() => setOpenPanel("directory")}>Objects</button><button type="button" onClick={refreshAuthoritativeContext}>REFRESH</button></div>
@@ -1053,7 +1076,7 @@ export default function IXITransactCommandCenter({ runtime, active = true }) {
             </WorksheetPanel>)}
           </> : null}
           {closingTab ? <UnfinishedWorksheetDialog tab={closingTab} onCancel={() => setClosingTab(null)} onDiscard={() => closeTab(closingTab, true)} onReturn={() => { activateTab(closingTab); setClosingTab(null); }} /> : null}
-        </main>
+        </TransactWorkspaceDrop>
 
         <IXITransactSidePanel className={styles.contextPanel} label="Selected object and apps" dockAt={1000} open={openPanel === "apps"} onDismiss={() => setOpenPanel("")}>
           <div className={styles.contextTitle}><span>ACTIVE CONTEXT</span><strong>{objectContextActive ? "TRAN$ACT APPS" : "PROOF & LINEAGE"}</strong></div>
@@ -1070,7 +1093,7 @@ export default function IXITransactCommandCenter({ runtime, active = true }) {
           {!objectContextActive && selectedDetail ? <section className={styles.detailCard}><span>SELECTED WORK</span><h3>{selectedDetail.title}</h3><p>{selectedDetail.detail || selectedDetail.party || "Authoritative record selected for review."}</p>{selectedDetail.status ? <StatusBadge value={selectedDetail.status} /> : null}</section> : null}
           {!objectContextActive ? <section className={styles.connectionCard}><div><span>CANONICAL RELATIONSHIPS</span><strong>{relationshipEvidence.length}</strong></div>{connections.length ? connections.slice(0, 6).map(item => <p key={item.kind}><span>{item.label}</span><b>{item.count}</b></p>) : <small>No active IX-Core relationships returned.</small>}</section> : null}
         </IXITransactSidePanel>
-      </div>
+      </div></TransactDirectoryDnd>
 
       <footer className={styles.statusbar}><span data-live={connectionHealthy}>● {connectionLabel}</span><span>{financialLoading ? "REFRESHING AUTHORITATIVE PROJECTION" : `${contextLabel(selectedContext?.kind)} CONTEXT · ${period}`}</span><span>VIEWS NEVER CHANGE POSTED TRUTH</span></footer>
     </div>

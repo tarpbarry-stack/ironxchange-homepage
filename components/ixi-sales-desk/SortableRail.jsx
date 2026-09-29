@@ -38,10 +38,10 @@ export function SortableRail({ids,onReorder,children,disabled=false}) {
   </DndContext>;
 }
 
-export function SortableRailTile({id,label,className,children,disabled=false,enabled=true}) {
+export function SortableRailTile({id,label,className,children,disabled=false,enabled=true,moveToBoard=false}) {
   const {attributes,listeners,setNodeRef,setActivatorNodeRef,transform,transition,isDragging}=useSortable({id,disabled:disabled || !enabled});
   return <article ref={setNodeRef} className={`${className}${enabled ? " sales-sortable-tile" : ""}${isDragging ? " sales-tile-dragging" : ""}`} style={{transform:CSS.Transform.toString(transform),transition}}>
-    {enabled && <button ref={setActivatorNodeRef} className="sales-rail-drag" {...attributes} {...listeners} disabled={disabled} aria-label={`Reorder ${label}`} title="Drag to reorder · or press Space and use arrow keys">⠿</button>}
+    {enabled && <button ref={setActivatorNodeRef} className="sales-rail-drag" {...attributes} {...listeners} disabled={disabled} aria-label={`${moveToBoard ? "Drag to reorder or move" : "Reorder"} ${label}`} title={moveToBoard ? "Drag to reorder or move to board" : "Drag to reorder · or press Space and use arrow keys"}>⠿</button>}
     {children}
   </article>;
 }

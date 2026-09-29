@@ -2728,10 +2728,18 @@ let targetContainer =
 
 const overId =
   String(
-    over?.id || ""
+    over?.data?.current?.group === "parked"
+      ? over?.data?.current?.objectId || over?.id || ""
+      : over?.id || ""
   );
 
 if (!dragId) {
+  setActiveDndId(null);
+  clearMachineDragState?.();
+  return;
+}
+
+if (over?.data?.current?.group === "parked" && overId === dragId) {
   setActiveDndId(null);
   clearMachineDragState?.();
   return;

@@ -5,6 +5,7 @@ import IXIOperatingNav from "../ixi-os/IXIOperatingNav";
 import dynamic from "next/dynamic";
 import { useEffect,useMemo,useRef,useState } from "react";
 import Board from "../ixi-dashboard/DashboardBoard";
+import MachineWorkspaceDnd from "../ixi-dashboard/MachineWorkspaceDnd";
 import {SortableRail,SortableRailTile,useRailOrder} from "./SortableRail";
 import {railStorageKey} from "./railOrder.mjs";
 import SalesDeskRail from "./SalesDeskRail";
@@ -30,6 +31,7 @@ const emptyList={items:[],total:0};
 const findMachine=(ref,items)=>items.find(item=>dashboardKey(item)===ref.key) || items.find(item=>ref.passportId ? passportOf(item)===ref.passportId : ref.listingId && String(item.id?.uuid || item.id || "")===ref.listingId);
 
 export default function SalesDeskSurface({initial,dashboardClass,workspace:w}) {
+  const machineRailOrderRef = useRef(null);
   const [tab,setTab]=useState("deals"),[query,setQuery]=useState(""),[lists,setLists]=useState(initial.lists),[loading,setLoading]=useState(false),[listError,setListError]=useState("");
   const [editor,setEditor]=useState(null),[quote,setQuote]=useState(null),[comparison,setComparison]=useState(false),[hidden,setHidden]=useState({left:false,right:false}),[mobile,setMobile]=useState("");
   const [revision,setRevision]=useState(0),[summary,setSummary]=useState(initial.summary || {}),[recordLoading,setRecordLoading]=useState(false);
@@ -140,8 +142,8 @@ export default function SalesDeskSurface({initial,dashboardClass,workspace:w}) {
       <div><span>ON YOUR BOARD</span><strong>{w.openMachines.length}</strong><small>Open · Work · Return</small></div>
     </div>
     <div className="sales-work-strip" aria-label="Daily sales priorities">{[["today","TODAY"],["overdue","OVERDUE"],["unassigned","UNASSIGNED"],["upcoming","NEXT 7 DAYS"],["reminders","REMINDERS"]].map(([key,label])=><button key={key} aria-pressed={pane==="today" && workBucket===key} onClick={()=>{setWorkBucket(key);setPane("today");}}><span>{label}</span><strong>{work.error ? "—" : work.data.counts[key] ?? "—"}</strong></button>)}<span>{workScope==="team" ? "TEAM WORK" : "MY WORK"}</span>{work.error && <button onClick={work.refresh}>RETRY WORK QUEUE</button>}</div>
-    <main className={`sales-workspace ${hidden.left ? "hide-machines" : ""} ${hidden.right ? "hide-sales" : ""} ${mobile ? `mobile-${mobile}` : ""}`}>
-      <SalesDeskRail workspace={w} actor={actor} onClose={()=>{setHidden(v=>({...v,left:true}));setMobile("");}}/>
+    <MachineWorkspaceDnd boardKeys={w.openMachines.map(dashboardKey)} onBoardOrder={w.setOpenKeys} onOpen={key=>{const item=w.allMachines.find(candidate=>dashboardKey(candidate)===key);if(item)w.openMachine(item);}} onReturn={w.returnToRail} onRailOrder={(side,active,over)=>machineRailOrderRef.current?.(side,active,over)}><main className={`sales-workspace ${hidden.left ? "hide-machines" : ""} ${hidden.right ? "hide-sales" : ""} ${mobile ? `mobile-${mobile}` : ""}`}>
+      <SalesDeskRail workspace={w} actor={actor} railOrderRef={machineRailOrderRef} onClose={()=>{setHidden(v=>({...v,left:true}));setMobile("");}}/>
       <MobileMachineStrip owned={w.owned} related={w.related} ownedStatus={w.ownedStatus} relatedStatus={w.relatedStatus} openKeys={w.openKeys} selectedKey={w.selectedKey} onOpen={w.openMachine} label="SALES BOARD" />
       <section className="dash-board sales-board" aria-label="Sales working board">
         <div className="sales-board-toolbar"><button onClick={()=>toggleRail("left")}>‹ MACHINES</button><div className="sales-view-tabs" aria-label="Sales workspace view">{[["board","BOARD"],["calendar","CALENDAR"],["today","DAILY WORK"],["inquiries","INQUIRIES"]].map(([key,label])=><button key={key} aria-pressed={pane===key} onClick={()=>setPane(key)}>{label}</button>)}</div><div className="sales-board-tools" hidden={pane!=="board"}><label>SIZE <select aria-label="Machine card size" value={w.size} onChange={e=>w.setSize(e.target.value)}><option value="fit">FIT</option><option value="natural">100%</option><option value="work">120%</option><option value="focus">140%</option></select></label><button onClick={()=>setComparison(true)} disabled={w.openMachines.length<2}>COMPARE</button><button onClick={()=>openEditor("boards")} disabled={!canWrite || !w.openMachines.length}>SAVE BOARD</button><button onClick={returnAll} disabled={!w.openMachines.length}>RETURN ALL</button></div><button onClick={()=>toggleRail("right")}>SALES ›</button></div>
@@ -149,7 +151,7 @@ export default function SalesDeskSurface({initial,dashboardClass,workspace:w}) {
         {calendarMounted && <div className="sales-preserved-panel" hidden={pane!=="calendar"}><Calendar focus={calendarFocus} actor={actor} team={team} revision={revision} onOpen={openEditor} onContext={openContext} onCreate={appointment} onSaved={onSaved}/></div>}
         {pane==="today" && <SalesDeskDaily work={work} actor={actor} team={team} bucket={workBucket} setBucket={setWorkBucket} scope={workScope} setScope={setWorkScope} onOpen={openEditor} onContext={openContext} onCreate={()=>appointment(todayLocal())}/>}
         {pane==="inquiries" && <Inquiries onCreate={()=>setInquiry(true)} actor={actor} revision={revision} onDeal={activateDeal} onChanged={()=>{setRevision(n=>n+1);refreshSummary();}}/>}
-        <div className="sales-preserved-board" hidden={pane!=="board"}>{w.auth.error ? <div className="sales-empty" role="alert">{w.auth.error}<button onClick={w.retryAuth}>TRY AGAIN</button><a href="/login?next=%2Fsales-desk">SIGN IN</a></div> : <Board machines={w.openMachines} ownedKeys={w.ownedKeys} states={w.states} onPatch={w.updateState} size={w.size} onReorder={w.setOpenKeys} onReturn={w.returnToRail} selectedKey={w.selectedKey} onSelect={w.setSelectedKey} getSellerProps={w.getSellerListingCardProps} onDirty={w.markDirty} dirtyKeys={w.dirtyKeys} onSaved={w.clearDirty} toggleSave={w.toggleSave} savedIds={w.savedIds} scrollTop={w.scroll} onScroll={w.onScroll} />}</div>
+        <div className="sales-preserved-board" hidden={pane!=="board"}>{w.auth.error ? <div className="sales-empty" role="alert">{w.auth.error}<button onClick={w.retryAuth}>TRY AGAIN</button><a href="/login?next=%2Fsales-desk">SIGN IN</a></div> : <Board externalDnd machines={w.openMachines} ownedKeys={w.ownedKeys} states={w.states} onPatch={w.updateState} size={w.size} onReorder={w.setOpenKeys} onReturn={w.returnToRail} selectedKey={w.selectedKey} onSelect={w.setSelectedKey} getSellerProps={w.getSellerListingCardProps} onDirty={w.markDirty} dirtyKeys={w.dirtyKeys} onSaved={w.clearDirty} toggleSave={w.toggleSave} savedIds={w.savedIds} scrollTop={w.scroll} onScroll={w.onScroll} />}</div>
         <footer className="sales-board-footer"><span><i/>{w.dirtyKeys.size ? `${w.dirtyKeys.size} MACHINE(S) WITH UNSAVED CHANGES` : "BOARD RESTORES IN THIS BROWSER"}</span><button onClick={()=>{w.refresh();setRevision(n=>n+1);refreshSummary();}} disabled={!!w.dirtyKeys.size}>REFRESH ↻</button></footer>
       </section>
       <aside className="sales-work-rail" aria-label="Sales records"><div className="sales-rail-heading"><div><span className="sales-eyebrow">CUSTOMERS · CONVERSATIONS · NEXT ACTION</span><h2>YOUR SALES DESK</h2></div><button aria-label="Hide sales rail" onClick={()=>{setHidden(v=>({...v,right:true}));setMobile("");}}>›</button></div>
@@ -170,7 +172,7 @@ export default function SalesDeskSurface({initial,dashboardClass,workspace:w}) {
           {collection.items.length<collection.total && <button className="sales-wide" disabled={loading} onClick={loadMore}>{loading ? "LOADING…" : "LOAD MORE"}</button>}
         </div><footer className="sales-rail-footer"><span>PRIVATE TO YOUR COMPANY</span><button onClick={()=>setPane("inquiries")}>INQUIRIES ↗</button></footer>
       </aside>
-    </main>
+    </main></MachineWorkspaceDnd>
     <footer className="sales-footer"><span><i/> IXI SALES DESK</span><span>{initial.context.company}</span><span>FINANCIAL RECORDS · TRAN$ACT ↗</span></footer>
     {inquiry && <Inquiry actor={actor} team={team} contacts={lists.contacts?.items || []} machines={w.allMachines.map(machineReference)} onClose={()=>setInquiry(false)} onSaved={inquirySaved} onCalendar={inquiryCalendar} onDeal={deal=>{setInquiry(false);activateDeal(deal);}}/>}
     {editor && <SalesDeskEditor key={`${editor.kind}:${editor.instance || editor.record.id || "new"}`} editor={editor} people={initial.people || []} actor={actor} team={team} onOpenLinked={openEditor} onFollowUp={followUp} onPackage={openPackage} boardMachines={w.openMachines.map(machineReference)} readOnly={!canWrite} onClose={()=>setEditor(null)} onSaved={onSaved} onQuote={prepareQuote} onOpenMachines={activateDeal}/>}

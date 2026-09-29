@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
-import { DndContext, PointerSensor, KeyboardSensor, closestCenter, useSensor, useSensors } from "@dnd-kit/core";
+import { DndContext, PointerSensor, KeyboardSensor, closestCenter, useDroppable, useSensor, useSensors } from "@dnd-kit/core";
 import { SortableContext, rectSortingStrategy, sortableKeyboardCoordinates, arrayMove } from "@dnd-kit/sortable";
 import IXISortableMachineCard from "../ixi-chassis/IXISortableMachineCard";
 import IXIObjectConsoleRouter from "../ixi-chassis/IXIObjectConsoleRouter";
@@ -8,13 +8,15 @@ import IXIMachineCard from "../ixi-machine-card/IXIMachineCard";
 import { getMachineCardFamily } from "../ixi-machine-card/getMachineCardFamily";
 import { dashboardId, dashboardKey } from "./dashboardContract.mjs";
 import { IXIMobileCardContext } from "../ixi-mobile/IXIMobileCardContext";
+import { boardTarget } from "./machineWorkspaceDrop.mjs";
 
 const OwnedCard = dynamic(() => import("../ixi-machine-card/private/IXIOwnedPrivateListingRuntime"), { ssr: false });
 
 function SalesReadOnlyMachine({item}) { return <div className="sales-readonly-machine"><img src={item.image || item.imageUrl} alt={item.title}/><h3>{item.title}</h3><p>{item.hours}</p><strong>{item.price}</strong><p>{item.location}</p><dl><dt>SN</dt><dd>{item.serialNumber || "—"}</dd><dt>ID</dt><dd>{item.passportId}</dd></dl><small>COMPANY MACHINE · VIEW ONLY</small></div>; }
 
-export default function DashboardBoard({ machines, ownedKeys, states, onPatch, size, onReorder, onReturn, selectedKey, onSelect, getSellerProps, onDirty, dirtyKeys, onSaved, toggleSave, savedIds, onScroll, scrollTop }) {
+export default function DashboardBoard({ machines, ownedKeys, states, onPatch, size, onReorder, onReturn, selectedKey, onSelect, getSellerProps, onDirty, dirtyKeys, onSaved, toggleSave, savedIds, onScroll, scrollTop, externalDnd = false }) {
   const boardRef = useRef(null);
+  const { setNodeRef: setBoardDropRef, isOver: boardIsOver } = useDroppable({ id: boardTarget, disabled: !externalDnd });
   const [{ width, height }, setBounds] = useState({ width: 900, height: 600 });
   const restoredScroll = useRef(false);
   const [mobile, setMobile] = useState(false);
@@ -46,14 +48,7 @@ export default function DashboardBoard({ machines, ownedKeys, states, onPatch, s
   }, [machines.length, scrollTop]);
   const ids = machines.map(dashboardKey);
   const desiredScale = { natural: 1, work: 1.2, focus: 1.4 }[size] || 1.2;
-  return <div className="dash-board-scroll" ref={boardRef} onScroll={event => onScroll(event.currentTarget.scrollTop)}>
-    <nav className="dash-mobile-density" aria-label="Board card density">
-      {["I", "II"].map(value => <button type="button" key={value} aria-label={value === "I" ? "One working card per row" : "Two cards per row"} aria-pressed={density === value} onClick={() => selectDensity(value)}>{value}</button>)}
-    </nav>
-    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={({ active, over }) => {
-      if (over && active.id !== over.id && ids.includes(over.id)) onReorder(arrayMove(ids, ids.indexOf(active.id), ids.indexOf(over.id)));
-    }}>
-      <SortableContext items={ids} strategy={rectSortingStrategy}>
+  const boardCards = <SortableContext items={ids} strategy={rectSortingStrategy}>
         <div className="dash-board-cards" data-mobile-density={density}>
           {machines.map((item, index) => {
             const key = dashboardKey(item), id = dashboardId(item), owned = ownedKeys.has(key), state = states[id] || {};
@@ -62,8 +57,6 @@ export default function DashboardBoard({ machines, ownedKeys, states, onPatch, s
             const nativeWidth = regularDepth * 300 - (owned ? (regularDepth - 1) * 2 : 0) + (transactionDepth - 1) * 298;
             const nativeHeight = owned || getMachineCardFamily(item) === "auction" || state.transactOpen ? 475 : 400;
             const expanded = regularDepth > 1 || transactionDepth > 1;
-            // Keep opened Consoles together across the phone, as on Marketplace.
-            // The single-card mobile assembly is only for a closed card.
             const mobileAssembled = mobile && density === "I" && !expanded;
             const cellWidth = mobile && density === "II" && !expanded ? (width - 28) / 2 : width - 16;
             const scale = Math.min(size === "fit" ? Math.max(0.65, Math.min(1.2, (height - 90) / nativeHeight)) : desiredScale, Math.max(0.25, (cellWidth - (mobile ? 4 : 16)) / nativeWidth));
@@ -76,7 +69,7 @@ export default function DashboardBoard({ machines, ownedKeys, states, onPatch, s
                 if (event.target.matches("input:not([type=search]),textarea,select") && !event.target.readOnly && !/search|find/i.test(event.target.placeholder || event.target.getAttribute("aria-label") || "")) onDirty(key);
               }}>
                 <div className={`dash-open-caption ${selectedKey === key ? "active" : ""}`}>
-                  <button {...dragHandleProps} className="dash-drag-handle" aria-label={`Reorder ${item.title}`} title="Drag to reorder">⠿</button>
+                  <button {...dragHandleProps} className="dash-drag-handle" aria-label={`Reorder or move ${item.title}`} title="Drag to reorder or return to rail">⠿</button>
                   <span>{String(index + 1).padStart(2, "0")} · {item.inventorySessionOnly ? "OPEN TRANSACTION" : owned ? "OWNED" : "RELATIONSHIP"}</span>
                   {dirtyKeys.has(key) && <strong className="dash-unsaved">UNSAVED</strong>}
                   <button className="dash-return" aria-label={`Return ${item.title} to rail`} onClick={() => onReturn(key)}>RETURN <span aria-hidden="true">×</span></button>
@@ -94,9 +87,17 @@ export default function DashboardBoard({ machines, ownedKeys, states, onPatch, s
               </section>}
             </IXISortableMachineCard>;
           })}
-          {!machines.length && <div className="dash-board-empty"><div className="dash-empty-symbol" aria-hidden="true">IXI</div><h2>Your machines. Your working space.</h2><p>Select a machine from either side and open it here.</p><span>Photos · Details · Consoles · TRAN$ACT</span></div>}
+          {!machines.length && <div className="dash-board-empty"><div className="dash-empty-symbol" aria-hidden="true">IXI</div><h2>Your machines. Your working space.</h2><p>Drag a machine from either rail onto the board.</p><span>Photos · Details · Consoles · TRAN$ACT</span></div>}
         </div>
-      </SortableContext>
-    </DndContext>
+      </SortableContext>;
+  return <div className={`dash-board-scroll ${boardIsOver ? "dash-board-drop-over" : ""}`} ref={element => { boardRef.current = element; setBoardDropRef(element); }} onScroll={event => onScroll(event.currentTarget.scrollTop)}>
+    <nav className="dash-mobile-density" aria-label="Board card density">
+      {["I", "II"].map(value => <button type="button" key={value} aria-label={value === "I" ? "One working card per row" : "Two cards per row"} aria-pressed={density === value} onClick={() => selectDensity(value)}>{value}</button>)}
+    </nav>
+    {externalDnd ? boardCards : <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={({ active, over }) => {
+      if (over && active.id !== over.id && ids.includes(over.id)) onReorder(arrayMove(ids, ids.indexOf(active.id), ids.indexOf(over.id)));
+    }}>
+      {boardCards}
+    </DndContext>}
   </div>;
 }
