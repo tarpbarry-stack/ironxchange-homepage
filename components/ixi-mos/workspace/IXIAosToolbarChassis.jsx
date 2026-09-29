@@ -12,6 +12,7 @@ import {
   getAosToolbarObjectIds, getAosToolbarReturnOperation, getAosToolbarPresentation
 } from "./IXIAosToolbarModel.mjs";
 import styles from "./IXIAosToolbarChassis.module.css";
+import searchDeck from "../../ixi-chassis/IXIWorkspaceSearchDeck.module.css";
 
 const SEARCH_POCKETS = [
   { id: "pocketLeft2", label: "III", side: "left", outer: true, Component: IXIPocketL2, modeProp: "leftPocket2Mode" },
@@ -51,7 +52,7 @@ function SearchPocket({ pocket, placements, registry, ready, onBoard, armedDesti
     const view = getAosToolbarPresentation(object, registry);
     return { image: view.image || view.previews[0]?.image, title: getAosToolbarName(object) };
   };
-  return <div className={`${styles.searchPocketSlot} ${pocket.outer ? styles.outerPocket : ""}`} aria-label={`Pocket ${pocket.label}`}>
+  return <div className={`${styles.searchPocketSlot} ${searchDeck.station} ${pocket.outer ? searchDeck.outer : ""}`} aria-label={`Pocket ${pocket.label}`}>
     <Component {...{ [pocket.modeProp]: mode }} machineContainers={machineContainers}
       armedDestination={armedDestination} WorkspaceDropPad={props => <AosPocketDropPad {...props} ready={ready} />}
       IXISortableMachineCard={props => <AosPocketSortable {...props} registry={registry} ready={ready} />}
@@ -310,14 +311,18 @@ export default function IXIAosToolbarChassis({ children, controls, registry, ind
         onConnect={onConnect} connectTarget={registry.get(browse[side === "left" ? "right" : "left"])}/>
       )}
       <div className={styles.center}>
-        <div className={`${styles.searchDeck} ${searchCollapsed ? styles.searchDeckClosed : ""}`}>
-          {SEARCH_POCKETS.slice(0, 2).map(pocket => <SearchPocket key={pocket.id} pocket={pocket} placements={placements}
-            registry={registry} ready={ready} onBoard={id => run(() => onBoard(id))}
-            armedDestination={armedDestination} toggleArmedDestination={toggleArmedDestination} />)}
-          <div className={styles.searchDeckControls}>{controls}</div>
-          {SEARCH_POCKETS.slice(2).map(pocket => <SearchPocket key={pocket.id} pocket={pocket} placements={placements}
-            registry={registry} ready={ready} onBoard={id => run(() => onBoard(id))}
-            armedDestination={armedDestination} toggleArmedDestination={toggleArmedDestination} />)}
+        <div className={`${styles.searchDeck} ${searchDeck.deck} ${searchCollapsed ? searchDeck.collapsed : ""}`}>
+          <div className={searchDeck.side}>
+            {SEARCH_POCKETS.slice(0, 2).map(pocket => <SearchPocket key={pocket.id} pocket={pocket} placements={placements}
+              registry={registry} ready={ready} onBoard={id => run(() => onBoard(id))}
+              armedDestination={armedDestination} toggleArmedDestination={toggleArmedDestination} />)}
+          </div>
+          <div className={`${styles.searchDeckControls} ${searchDeck.controls}`}>{controls}</div>
+          <div className={searchDeck.side}>
+            {SEARCH_POCKETS.slice(2).map(pocket => <SearchPocket key={pocket.id} pocket={pocket} placements={placements}
+              registry={registry} ready={ready} onBoard={id => run(() => onBoard(id))}
+              armedDestination={armedDestination} toggleArmedDestination={toggleArmedDestination} />)}
+          </div>
         </div>
         {!searchCollapsed && SEARCH_POCKETS.some(pocket => placements[pocket.id]?.length) && <details className={styles.hiddenPocketAccess}>
           <summary>ACCESS HIDDEN POCKETS</summary>
