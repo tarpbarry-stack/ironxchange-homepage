@@ -6,10 +6,15 @@
 .heading button { width:30px; height:30px; background:#222; border:1px solid #444; color:#ddd; font-size:20px; cursor:pointer; }
 .search { padding:10px; }
 .search input { width:100%; min-width:0; height:36px; padding:8px; border:1px solid #444; border-radius:2px; background:#0c0c0c; color:#eee; font:inherit; font-size:11px; }
+.search select { width:100%; min-width:0; height:34px; margin-top:7px; padding:6px; border:1px solid #56502d; border-radius:2px; background:#16140e; color:#e4cf76; font:inherit; font-size:10px; cursor:pointer; }
 .list { flex:1; min-height:0; overflow-y:auto; padding:0 10px 10px; scrollbar-width:thin; scrollbar-color:#6f5e22 #171717; }
+.dropOver { outline:2px solid #ffcc00; outline-offset:-3px; background:#211d0e; }
 .tile { border:1px solid #373737; background:#1c1c1c; margin-bottom:9px; }
 .tile:hover { border-color:#8b7836; }
-.open { width:100%; border:0; background:transparent; color:inherit; padding:6px; text-align:left; cursor:pointer; }
+.tileTop { display:flex; align-items:stretch; }
+.handle { flex:0 0 24px; border:0; border-right:1px solid #333; background:#202020; color:#a68b31; cursor:grab; touch-action:none; font-size:14px; }
+.handle:active { cursor:grabbing; }
+.open { flex:1; min-width:0; border:0; background:transparent; color:inherit; padding:6px; text-align:left; cursor:pointer; }
 .photo { position:relative; aspect-ratio:1.9; display:grid; place-items:center; overflow:hidden; background:#0d0d0d; color:#6f5e22; font-weight:900; }
 .photo img { width:100%; height:100%; object-fit:cover; object-position:center 60%; }
 .photo b { position:absolute; top:5px; left:5px; padding:3px 5px; background:#ffcc00; color:#121212; font-size:9px; }
@@ -19,7 +24,10 @@
 .actions button { min-width:0; min-height:31px; padding:4px 7px; border:0; border-right:1px solid #343434; background:#222; color:#ddd; font-size:9px; font-weight:800; cursor:pointer; }
 .actions button:last-child { border-right:0; }
 .actions button:hover, .actions button[aria-pressed="true"] { color:#ffcc00; }
+.order { display:flex; align-items:center; justify-content:space-between; border-top:1px solid #343434; color:#888; font-size:9px; }
+.order button { width:32px; height:26px; border:0; background:#202020; color:#d2b449; cursor:pointer; font-size:14px; }
+.order button:disabled { opacity:.35; cursor:default; }
 .empty { padding:16px 4px; color:#aaa; font-size:12px; line-height:1.5; }
 .more { width:100%; padding:10px; border:1px solid #444; background:#222; color:#ddd; cursor:pointer; font-size:10px; }
 .footer { padding:10px 12px; border-top:1px solid #383838; color:#999; font-size:9px; letter-spacing:.5px; }
-.rail :is(button,input):focus-visible { outline:2px solid #ffcc00; outline-offset:2px; }
+.rail :is(button,input,select):focus-visible { outline:2px solid #ffcc00; outline-offset:2px; }
