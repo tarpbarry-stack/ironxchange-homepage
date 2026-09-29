@@ -179,11 +179,12 @@ export default function IXIAosOperatingCardRuntime({
     skinId: "v12"
   };
 
-  let rendered;
-  if (
+  const transactActive =
     ixiState?.transactVisible === true &&
-    runtimeObject?.actorAuthority?.canTransact === true
-  ) {
+    runtimeObject?.actorAuthority?.canTransact === true;
+
+  let rendered;
+  if (transactActive) {
     rendered = (
       <IXIOwnedPrivateTransactRuntime
         object={runtimeObject}
@@ -231,15 +232,17 @@ export default function IXIAosOperatingCardRuntime({
     >
       {rendered}
 
-      <div className="ixi-aos-canonical-command-overlay">
-        <IXIAosContainerCommandStrip
-          object={runtimeObject}
-          onRecall={onRecall}
-          onBoard={onBoard}
-          onReturn={onReturn}
-          disabled={Boolean(ixiState?.editing)}
-        />
-      </div>
+      {!transactActive ? (
+        <div className="ixi-aos-canonical-command-overlay">
+          <IXIAosContainerCommandStrip
+            object={runtimeObject}
+            onRecall={onRecall}
+            onBoard={onBoard}
+            onReturn={onReturn}
+            disabled={Boolean(ixiState?.editing)}
+          />
+        </div>
+      ) : null}
 
       <style jsx>{`
         .ixi-aos-operating-card-runtime {

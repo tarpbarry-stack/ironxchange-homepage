@@ -30,8 +30,8 @@ test("CT-260905-000001 and CT-260905-000002 keep one real IXI rail on Cards 004,
 test("the four-card layouts reserve exactly the real 16px IXI rail height", () => {
   assert.match(containerLayout, /\.gcv12-child-rail\{[^}]*bottom:16px;height:57px/u);
   assert.match(containerLayout, /\.gcv12-editor\{[^}]*inset:43px 7px 16px/u);
-  assert.match(objectLayout, /\.go007-scroll\{[^}]*bottom:64px/u);
-  assert.match(objectLayout, /\.go007-actions\{[^}]*bottom:16px;height:48px/u);
+  assert.match(objectLayout, /\.go007-scroll\{[^}]*bottom:51px/u);
+  assert.doesNotMatch(objectLayout, /go007-actions/u);
   assert.match(objectLayout, /\.go007-editor\{[^}]*inset:42px 7px 16px/u);
 });
 
