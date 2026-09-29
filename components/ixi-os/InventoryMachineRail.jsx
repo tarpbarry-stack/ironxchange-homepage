@@ -53,7 +53,7 @@ export default function InventoryMachineRail({ title, side, items, boardItems, c
       </select>
     </div>
     <div ref={setNodeRef} className={`${styles.list} ${isOver ? styles.dropOver : ""}`}>
-      <SortableContext items={items.map(item => String(getListingId(item)))} strategy={verticalListSortingStrategy}>
+      <SortableContext id={containerId} items={items.map(item => String(getListingId(item)))} strategy={verticalListSortingStrategy}>
         {!matches.length && <p className={styles.empty}>{query ? "No matching machines." : "Move a machine here from the board or the other side."}</p>}
         {matches.slice(0, limit).map(item => <MachineTile key={String(getListingId(item))} item={item} index={items.findIndex(candidate => String(getListingId(candidate)) === String(getListingId(item)))} count={items.length} containerId={containerId} onOpen={onOpen} onMove={onMove} onReorder={onReorder} sold={sold} />)}
       </SortableContext>
