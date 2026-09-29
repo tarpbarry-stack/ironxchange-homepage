@@ -1,0 +1,100 @@
+/* Shared geometry for Inventory, Sold, and AOS/Work. The containing board owns width. */
+.deck {
+  --station-width: 150px;
+  --station-gap: clamp(16px, 1.5cqw, 56px);
+  display: grid;
+  grid-template-columns: max-content minmax(0, 600px) max-content;
+  column-gap: var(--station-gap);
+  justify-content: space-evenly;
+  align-items: stretch;
+  min-width: 0;
+  width: 100%;
+}
+
+.side {
+  position: static !important;
+  inset: auto !important;
+  display: flex;
+  align-items: stretch;
+  gap: var(--station-gap);
+  width: auto !important;
+  height: auto !important;
+  min-width: 0;
+  pointer-events: auto;
+}
+
+.sideRow {
+  display: flex !important;
+  align-items: stretch;
+  gap: var(--station-gap);
+  width: auto !important;
+  height: 100% !important;
+  pointer-events: auto;
+}
+
+.station {
+  position: relative;
+  flex: 0 0 var(--station-width);
+  width: var(--station-width);
+  height: 100%;
+  min-height: 0;
+  margin: 0;
+}
+
+.deck .side :global(.ixi-pocket-left),
+.deck .side :global(.ixi-pocket-right) {
+  position: relative !important;
+  inset: auto !important;
+  width: var(--station-width) !important;
+  max-width: var(--station-width) !important;
+  height: 100% !important;
+  min-height: 0;
+  margin: 0 !important;
+}
+
+.deck .controls {
+  width: 100%;
+  min-width: 0;
+  align-self: stretch;
+}
+
+.controls :global(.workspace-controls),
+.controls :global(.ixi-control-surface) {
+  box-sizing: border-box;
+  width: 100% !important;
+  height: 100%;
+  min-width: 0;
+  margin: 0 !important;
+}
+
+.deck .side :global(.ixi-pocket-catch-pad) {
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.deck .side :global(.ixi-pocket-left:not(.occupied):not(.destination-armed)),
+.deck .side :global(.ixi-pocket-right:not(.occupied):not(.destination-armed)) {
+  border-color: rgba(255,255,255,.16);
+}
+
+.deck .side :global(.ixi-pocket-left:not(.occupied):not(.destination-armed) .ixi-pocket-topline span),
+.deck .side :global(.ixi-pocket-right:not(.occupied):not(.destination-armed) .ixi-pocket-topline span) {
+  color: rgba(255,255,255,.55);
+}
+
+.collapsed { grid-template-columns: minmax(0, 600px); }
+.collapsed .side { display: none !important; }
+
+@container (max-width: 1449px) {
+  .deck { grid-template-columns: var(--station-width) minmax(0, 600px) var(--station-width); }
+  .outer,
+  .deck .side :global(.ixi-pocket-l2),
+  .deck .side :global(.ixi-pocket-r2) { display: none !important; }
+  .collapsed { grid-template-columns: minmax(0, 600px); }
+}
+
+@container (max-width: 949px) {
+  .deck, .collapsed { grid-template-columns: minmax(0, 600px); }
+  .deck .side { display: none !important; }
+}

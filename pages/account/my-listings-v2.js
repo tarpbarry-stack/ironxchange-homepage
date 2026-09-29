@@ -54,6 +54,7 @@ import IXIPocketL2 from "../../components/ixi-chassis/IXIPocketL2";
 import IXIPocketR1 from "../../components/ixi-chassis/IXIPocketR1";
 import IXIPocketR2 from "../../components/ixi-chassis/IXIPocketR2";
 import IXIChassis from "../../components/ixi-chassis/IXIChassis";
+import searchDeck from "../../components/ixi-chassis/IXIWorkspaceSearchDeck.module.css";
 import IXIWorkspaceEngine from "../../components/ixi-chassis/IXIWorkspaceEngine";
 import { getIXICardScalePreset } from "../../lib/ixiCardScalePresets";
 import IXIActiveStackZone from "../../components/ixi-chassis/IXIActiveStackZone";
@@ -1483,6 +1484,7 @@ toggleSearchSurfaceRevealed
            : inventoryStatus.salesSummary.missingPriceCount ? "Not recorded" : "$0.00"}</b></div>
          {!inventoryStatus.loading && !inventoryStatus.error && inventoryStatus.salesSummary?.missingPriceCount > 0 && <small>{inventoryStatus.salesSummary.missingPriceCount} {inventoryStatus.salesSummary.missingPriceCount === 1 ? "sale missing its price" : "sales missing prices"}</small>}
          {!inventoryStatus.loading && !inventoryStatus.error && inventoryStatus.salesSummary?.returnedCount > 0 && <small>Returned sales excluded from total</small>}
+         {soldIssues.length > 0 && <details className="sold-review-alert"><summary>{soldIssues.length} {soldIssues.length === 1 ? "sale fact" : "sale facts"} need review</summary><ul>{soldIssues.map((issue, index) => <li key={`${issue.documentId}:${issue.code}:${index}`}>{issue.passportId ? `${issue.passportId}: ` : ""}{issue.message}</li>)}</ul></details>}
        </div>
        <button type="button" className="sold-filter-toggle" aria-expanded={soldFiltersOpen} aria-controls="sold-filter-fields" onClick={() => setSoldFiltersOpen(open => !open)}>FILTER SALES <span aria-hidden="true">{soldFiltersOpen ? "−" : "+"}</span></button>
        <div id="sold-filter-fields" className="sold-filters" data-mobile-open={soldFiltersOpen}>
@@ -1499,13 +1501,13 @@ toggleSearchSurfaceRevealed
   {machineRails.left && <div className="inventory-machine-sidebar"><InventoryMachineRail title="LEFT RAIL" side="left" containerId="railLeft" items={railLeftItems} onBoard={id => moveMachineToContainer(id, "board")} onArm={() => toggleArmedDestination("railLeft")} armed={armedDestination === "railLeft"} onClose={() => toggleMachineRail("left")} sold={isSold} /></div>}
   <section className="inventory-board-column" aria-label={isSold ? "Sold machine board" : "Inventory machine board"}>
     <div className="inventory-rail-toggles">
-      <button type="button" aria-label={`${machineRails.left ? "Close" : "Open"} left rail`} title={`${machineRails.left ? "Close" : "Open"} left rail`} aria-expanded={machineRails.left} onClick={() => toggleMachineRail("left")}>{machineRails.left ? "‹" : "›"}</button>
-      <button type="button" aria-label={`${machineRails.right ? "Close" : "Open"} right rail`} title={`${machineRails.right ? "Close" : "Open"} right rail`} aria-expanded={machineRails.right} onClick={() => toggleMachineRail("right")}>{machineRails.right ? "›" : "‹"}</button>
+      {!machineRails.left && <button type="button" className="left-rail-open" aria-label="Open left rail" title="Open left rail" aria-expanded={false} onClick={() => toggleMachineRail("left")}>›</button>}
+      {!machineRails.right && <button type="button" className="right-rail-open" aria-label="Open right rail" title="Open right rail" aria-expanded={false} onClick={() => toggleMachineRail("right")}>‹</button>}
     </div>
 <IXIChassis>
-  <div className={searchCollapsed ? "inventory-search-collapsed" : "inventory-search-expanded"}>
-  <aside className="ixi-command-left">
-    <section className="ixi-pocket-row">
+  <div className={`${searchDeck.deck} ${searchCollapsed ? `${searchDeck.collapsed} inventory-search-collapsed` : "inventory-search-expanded"}`}>
+  <aside className={`ixi-command-left ${searchDeck.side}`}>
+    <section className={`ixi-pocket-row ${searchDeck.sideRow}`}>
  
  <IXIPocketL1
   leftPocketMode={leftPocketMode}
@@ -1541,7 +1543,7 @@ toggleSearchSurfaceRevealed
 </section>
   </aside>
 
-   <div className="ixi-command-center">
+   <div className={`ixi-command-center ${searchDeck.controls}`}>
   
        <IXIChassisControls
   listings={isSold ? soldFilterListings : workspaceListings.filter(item => !item.inventorySessionOnly)}
@@ -1569,8 +1571,8 @@ toggleSearchSurfaceRevealed
   onToggleSearchCollapsed={() => setSearchCollapsed(value => !value)}/>
                 </div>
 
-  <aside className="ixi-command-right">
-  <section className="ixi-pocket-row">
+  <aside className={`ixi-command-right ${searchDeck.side}`}>
+  <section className={`ixi-pocket-row ${searchDeck.sideRow}`}>
     <IXIPocketR1
   rightPocketMode={rightPocketMode}
   machineContainers={machineContainers}
@@ -1649,7 +1651,6 @@ toggleSearchSurfaceRevealed
 />
               
      {inventoryStatus.loading && <p role="status">Loading {isSold ? "sold machines" : "inventory"}…</p>}
-     {isSold && soldIssues.length > 0 && <details className="sold-toolbar"><summary>{soldIssues.length} historical sale facts need review</summary><ul>{soldIssues.map((issue, index) => <li key={`${issue.documentId}:${issue.code}:${index}`}>{issue.passportId ? `${issue.passportId}: ` : ""}{issue.message}</li>)}</ul></details>}
      {inventoryStatus.error && <p role="alert">{inventoryStatus.error} <button type="button" onClick={() => isSold ? setInventoryRevision(value => value + 1) : window.location.reload()}>Retry</button></p>}
      <InventoryBoardDrop><IXIBoardSurface mobileCards
   scaleMode={cardScaleMode}
@@ -1720,41 +1721,12 @@ toggleSearchSurfaceRevealed
         .inventory-hidden-pocket-group strong { min-width: 68px; color: #aaa; }
         .inventory-hidden-pocket-group button { min-height: 36px; padding: 5px 8px; border: 1px solid #383838; background: #111; color: #ddd; cursor: pointer; }
         .inventory-hidden-pocket-group button:focus-visible { outline: 2px solid #ffcf34; }
-        @media (min-width: 851px) and (max-width: 1449px) {
-          .inventory-hidden-pocket-access { display: block; }
-          .inventory-hidden-pocket-group.inner { display: none; }
-        }
         @media (max-width: 850px) { .inventory-hidden-pocket-access { display: block; } }
-        .inventory-search-collapsed .ixi-command-left,
-        .inventory-search-collapsed .ixi-command-right { display: none !important; }
-        .inventory-search-expanded .ixi-command-left,
-        .inventory-search-expanded .ixi-command-right { top: 24px; }
-        @media (min-width: 851px) and (max-width: 1449px) {
-          .ixi-command-chassis .ixi-pocket-l2,
-          .ixi-command-chassis .ixi-pocket-r2 { display: none !important; }
-          .ixi-command-chassis .ixi-command-left,
-          .ixi-command-chassis .ixi-command-right { width: var(--station-w); height: var(--station-h); }
-          .ixi-command-chassis .ixi-pocket-row { grid-template-columns: var(--station-w); grid-template-rows: var(--station-h); }
-          .ixi-command-chassis .ixi-command-left .ixi-pocket-left:not(.ixi-pocket-l2),
-          .ixi-command-chassis .ixi-command-right .ixi-pocket-right:not(.ixi-pocket-r2) { grid-column: 1; grid-row: 1; }
-        }
-        /* The search station responds to the space between the rails, not the viewport. */
         @container inventory-board (max-width: 1449px) {
-          .inventory-board-column .ixi-command-chassis { --control-half: 300px; --station-gap: 20px; }
-          .inventory-board-column .ixi-command-center { width: min(100%, 600px); }
-          .ixi-command-chassis .ixi-pocket-l2,
-          .ixi-command-chassis .ixi-pocket-r2 { display: none !important; }
-          .inventory-board-column .ixi-command-chassis .ixi-command-left,
-          .inventory-board-column .ixi-command-chassis .ixi-command-right { width: var(--station-w); height: var(--station-h); top: 24px; }
-          .ixi-command-chassis .ixi-pocket-row { grid-template-columns: var(--station-w); grid-template-rows: var(--station-h); }
-          .ixi-command-chassis .ixi-command-left .ixi-pocket-left:not(.ixi-pocket-l2),
-          .ixi-command-chassis .ixi-command-right .ixi-pocket-right:not(.ixi-pocket-r2) { grid-column: 1; grid-row: 1; }
           .inventory-hidden-pocket-access { display: block; }
           .inventory-hidden-pocket-group.inner { display: none; }
         }
         @container inventory-board (max-width: 949px) {
-          .ixi-command-chassis .ixi-command-left,
-          .ixi-command-chassis .ixi-command-right { display: none !important; }
           .inventory-hidden-pocket-group.inner { display: flex; }
         }
       `}</style>
@@ -1776,11 +1748,15 @@ toggleSearchSurfaceRevealed
         .inventory-rail-layout.inventory-left-folded { grid-template-columns:minmax(0,1fr) clamp(185px,16vw,280px); }
         .inventory-rail-layout.inventory-right-folded { grid-template-columns:clamp(185px,16vw,280px) minmax(0,1fr); }
         .inventory-rail-layout.inventory-left-folded.inventory-right-folded { grid-template-columns:minmax(0,1fr); }
-        .inventory-board-column { min-width:0; container-type:inline-size; container-name:inventory-board; }
+        .inventory-board-column { position:relative; min-width:0; container-type:inline-size; container-name:inventory-board; }
+        .inventory-board-column .ixi-command-chassis { margin-bottom:0; }
+        .inventory-board-column .active-stack-zone { margin:4px auto 8px; gap:4px; }
         .inventory-board-drop { min-height:320px; }
         .inventory-board-drop-over { outline:2px solid #ffcc00; outline-offset:-3px; }
-        .inventory-rail-toggles { display:flex; align-items:center; justify-content:space-between; height:44px; margin-bottom:6px; }
-        .inventory-rail-toggles button { display:grid; place-items:center; width:44px; height:44px; padding:0; border:1px solid #383838; border-radius:3px; background:#171717; color:#c9c9c9; font-size:26px; line-height:1; cursor:pointer; }
+        .inventory-rail-toggles { position:absolute; inset:0 0 auto; height:0; pointer-events:none; z-index:25; }
+        .inventory-rail-toggles button { position:absolute; top:0; display:grid; place-items:center; width:44px; height:44px; padding:0; border:1px solid #383838; border-radius:3px; background:#171717; color:#c9c9c9; font-size:26px; line-height:1; cursor:pointer; pointer-events:auto; }
+        .inventory-rail-toggles .left-rail-open { left:0; }
+        .inventory-rail-toggles .right-rail-open { right:0; }
         .inventory-rail-toggles button:hover, .inventory-rail-toggles button:focus-visible { color:#ffcc00; border-color:#88732c; }
         .inventory-rail-toggles button:focus-visible { outline:2px solid #ffcc00; outline-offset:2px; }
         :global(.inventory-tile-drag-overlay) { max-width:260px; padding:16px; background:#1c1c1c; border:1px solid #ffcc00; color:#eee; box-shadow:0 12px 30px #000a; font-size:12px; font-weight:700; }
@@ -1797,6 +1773,9 @@ toggleSearchSurfaceRevealed
         .sold-value span { font-size:11px; line-height:1.4; letter-spacing:.08em; font-weight:650; color:var(--ix-text-secondary); }
         .sold-value b { font-size:23px; line-height:1.15; font-weight:700; letter-spacing:-.025em; color:#ffcc00; font-variant-numeric:tabular-nums; overflow-wrap:anywhere; }
         .sold-scoreboard small { font-size:12px; line-height:1.4; color:var(--ix-text-secondary); }
+        .sold-review-alert { width:fit-content; max-width:100%; color:#ffcf34; font-size:11px; line-height:1.4; }
+        .sold-review-alert summary { cursor:pointer; font-weight:750; }
+        .sold-review-alert ul { max-height:180px; overflow:auto; margin:6px 0 0; padding-left:18px; color:#ddd; }
         .sold-filters { display:flex; flex-wrap:wrap; align-items:end; gap:8px; max-width:100%; }
         .sold-filter-toggle { display:none; }
         .sold-toolbar label { display:grid; gap:4px; font-size:11px; line-height:1.4; font-weight:550; color:var(--ix-text-secondary); }
