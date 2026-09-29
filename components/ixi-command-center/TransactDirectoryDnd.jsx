@@ -1,38 +1,52 @@
-import { DndContext, PointerSensor, KeyboardSensor, pointerWithin, useDroppable, useSensor, useSensors } from "@dnd-kit/core";
+import { DndContext, PointerSensor, KeyboardSensor, pointerWithin, useDroppable, useSensor, useSensors, useDraggable } from "@dnd-kit/core";
 import { SortableContext, useSortable, verticalListSortingStrategy, sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
-const target = "transact-object-workspace";
+const boardTarget = "transact-object-workspace";
+const railTarget = side => `transact-object-rail-${side}`;
 const tileId = id => `transact-object:${id}`;
 
-export function TransactDirectoryDnd({ items, onReorder, onSelect, children }) {
+export function TransactDirectoryDnd({ leftItems, rightItems, onReorder, onMove, onSelect, children }) {
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
-  const ids = items.map(item => String(item.id));
+  const sides = { left: leftItems.map(item => String(item.id)), right: rightItems.map(item => String(item.id)) };
   return <DndContext sensors={sensors} collisionDetection={pointerWithin} onDragEnd={({ active, over }) => {
-    const from = String(active?.data?.current?.objectId || "");
-    const to = String(over?.data?.current?.objectId || "");
-    if (!from || !ids.includes(from) || !over) return;
-    if (String(over.id) === target) onSelect(items.find(item => String(item.id) === from));
-    else if (to && to !== from && ids.includes(to)) onReorder(ids, from, to);
+    const id = String(active?.data?.current?.objectId || "");
+    const source = active?.data?.current?.side || "board";
+    const targetSide = over?.data?.current?.side;
+    const targetId = String(over?.data?.current?.objectId || "");
+    if (!id || !over) return;
+    if (String(over.id) === boardTarget && source !== "board") {
+      const item = [...leftItems, ...rightItems].find(value => String(value.id) === id);
+      if (item) onSelect(item);
+    } else if (targetSide && targetSide !== source) onMove(id, targetSide);
+    else if (targetSide && source === targetSide && targetId && targetId !== id)
+      onReorder(source, sides[source], id, targetId);
   }}>{children}</DndContext>;
 }
 
-export function TransactDirectoryList({ items, children }) {
-  return <SortableContext items={items.map(item => tileId(item.id))} strategy={verticalListSortingStrategy}>{children}</SortableContext>;
-}
-
-export function TransactDirectoryTile({ item, children }) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: tileId(item.id), data: { objectId: String(item.id) } });
-  return <div role="listitem" ref={setNodeRef} style={{ transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? .55 : 1, position: "relative" }}>
-    <button type="button" {...attributes} {...listeners} aria-label={`Drag ${item.title} to reorder or open in workspace`} title="Drag to reorder or open in workspace" style={{ position: "absolute", zIndex: 1, top: 6, right: 6, width: 29, height: 29, border: "1px solid #655622", background: "#191919", color: "#ffcc00", cursor: "grab", touchAction: "none" }}>⠿</button>
-    {children}
+export function TransactDirectoryList({ items, side, children }) {
+  const { setNodeRef, isOver } = useDroppable({ id: railTarget(side), data: { side } });
+  return <div ref={setNodeRef} data-drop-over={isOver || undefined}>
+    <SortableContext items={items.map(item => tileId(item.id))} strategy={verticalListSortingStrategy}>{children}</SortableContext>
   </div>;
 }
 
+export function TransactDirectoryTile({ item, side, children }) {
+  const { attributes, listeners, setNodeRef, setActivatorNodeRef, transform, transition, isDragging } = useSortable({ id: tileId(item.id), data: { objectId: String(item.id), side } });
+  return <div role="listitem" ref={setNodeRef} style={{ transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? .55 : 1, position: "relative" }}>
+    {children({ ...attributes, ...listeners, ref: setActivatorNodeRef })}
+  </div>;
+}
+
+export function TransactBoardDrag({ item }) {
+  const { attributes, listeners, setNodeRef } = useDraggable({ id: `transact-board:${item.id}`, data: { objectId: String(item.id), side: "board" } });
+  return <button type="button" ref={setNodeRef} {...attributes} {...listeners} aria-label={`Drag ${item.title} to a rail`} title="Drag to a rail" style={{ touchAction: "none" }}>⠿</button>;
+}
+
 export function TransactWorkspaceDrop({ className, children, ...props }) {
-  const { setNodeRef, isOver } = useDroppable({ id: target });
+  const { setNodeRef, isOver } = useDroppable({ id: boardTarget });
   return <main {...props} ref={setNodeRef} className={className} style={isOver ? { outline: "2px solid #ffcc00", outlineOffset: -3 } : undefined}>{children}</main>;
 }

@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { useDndContext, useDraggable, useDroppable } from "@dnd-kit/core";
 import { evaluateAosSystemIndexMembership } from "../../../lib/mos/IXIAosSystemIndexMembershipPolicy";
+import IXIWorkspaceRailTile from "../../ixi-os/IXIWorkspaceRailTile";
+import IXIWorkspaceRailHeader from "../../ixi-os/IXIWorkspaceRailHeader";
 import {
   AOS_TOOLBAR_SURFACES, getAosToolbarContents, getAosToolbarName,
   getAosToolbarObjectIds, getAosToolbarReturnOperation, getAosToolbarPresentation
@@ -24,40 +26,27 @@ function ToolbarReference({ object, registry, selected, referenceId, surfaceId, 
     data: { type: "aos-toolbar-reference", objectId: object.objectId, objectType: object.objectType,
       object, sourceObject: object, metadata: object.metadata, definitionId: object.definitionId, containerId: surfaceId, group }
   });
-  const parkedDrop = useDroppable({
+  const rowDrop = useDroppable({
     id: referenceId,
-    disabled: group !== "parked" || !ready,
+    disabled: group === "review" || !ready,
     data: { group, objectId: object.objectId, containerId: surfaceId }
   });
   const canConnect = connectTarget && connectTarget.objectId !== object.objectId &&
     object.actorAuthority?.canRelate === true && connectTarget.actorAuthority?.canRelate === true &&
     evaluateAosSystemIndexMembership({ sourceObject: object, targetObject: connectTarget }).allowed;
   return (
-    <article ref={element => { setNodeRef(element); parkedDrop.setNodeRef(element); }} className={`${styles.reference} ${selected ? styles.selected : ""}`} data-object-id={object.objectId} data-dragging={isDragging}>
-      <button type="button" className={styles.cardPreview} disabled={!ready}
-        onClick={() => view.machine ? onBoard(object.objectId) : onBrowse(object.objectId)}
-        title={view.machine ? `Open ${name} on Board` : `Browse ${name}`}
-        aria-label={view.machine ? `Open ${name} on Board` : `Browse ${name}`}
-        aria-pressed={view.machine ? undefined : selected}>
-        <div className={`${styles.previewMedia} ${view.previews.length > 1 ? styles.collage : ""}`}>
-          {view.previews.length ? view.previews.map(preview => <div key={preview.objectId} className={styles.previewCell}>
-            <PreviewImage src={preview.image} name={preview.name} />
-          </div>) : <PreviewImage src={view.image} name={name} />}
-          {surfaceId === "board" && <span className={styles.boardBadge}>On Board</span>}
-        </div>
-        <strong className={styles.objectName}>{name}</strong>
-        <span className={styles.referenceMeta}>
-          <span>{view.machine ? view.price : `${view.count} ${view.count === 1 ? "member" : "members"}`}</span>
-          <span>{object.passportId}</span>
-        </span>
-        {!view.machine && <span className={styles.browseHint}>View contents <span aria-hidden="true">→</span></span>}
-      </button>
-      <div className={styles.referenceActions}>
-        <button type="button" className={styles.openBoard} disabled={!ready} onClick={() => onBoard(object.objectId)}>
-          {surfaceId === "board" ? "Focus on Board" : "Open on Board"}<span aria-hidden="true">↗</span>
-        </button>
-        <button type="button" ref={setActivatorNodeRef} {...attributes} {...listeners}
-          className={styles.dragHandle} disabled={!ready} aria-label={`Drag ${name} to reorder or move to Board`} title="Drag to reorder or move to Board">⠿</button>
+    <article ref={element => { setNodeRef(element); rowDrop.setNodeRef(element); }} className={`${styles.reference} ${selected ? styles.selected : ""}`} data-object-id={object.objectId} data-dragging={isDragging}>
+      <IXIWorkspaceRailTile title={name} image={view.image} side={surfaceId === AOS_TOOLBAR_SURFACES.right ? "right" : surfaceId === AOS_TOOLBAR_SURFACES.left ? "left" : referenceId.startsWith("aos-toolbar:right:") ? "right" : "left"}
+        media={!view.image && view.previews.length ? <div className={`${styles.previewMedia} ${view.previews.length > 1 ? styles.collage : ""}`}>
+          {view.previews.map(preview => <div key={preview.objectId} className={styles.previewCell}><PreviewImage src={preview.image} name={preview.name} /></div>)}
+        </div> : undefined}
+        selected={selected} disabled={!ready}
+        facts={view.machine ? [
+          { label: "SN", value: object.presentationSource?.serialNumber || object.attributes?.serialNumber || "—" },
+          { label: "ID", value: object.passportId || "—" }
+        ] : [{ label: "MEMBERS", value: String(view.count) }, { label: "ID", value: object.passportId || "—" }]}
+        onSelect={!view.machine ? () => onBrowse(object.objectId) : undefined}
+        onBoard={() => onBoard(object.objectId)} dragHandleRef={setActivatorNodeRef} dragHandleProps={{ ...attributes, ...listeners }}>
         <select aria-label={`Actions for ${name}`} value="" disabled={!ready}
           onChange={event => {
             const action = event.target.value;
@@ -71,13 +60,13 @@ function ToolbarReference({ object, registry, selected, referenceId, surfaceId, 
           {returnable && <option value="return">Return</option>}
           {canConnect && <option value="connect">Connect to {getAosToolbarName(connectTarget)}</option>}
         </select>
-      </div>
+      </IXIWorkspaceRailTile>
     </article>
   );
 }
 
 function Toolbar({ side, folded, onFold, registry, indexes, placements, session, browseId, onSelect,
-  onBrowse, onMove, onBoard, onReturn, onConnect, connectTarget, ready, requiresSignIn, loadError, run }) {
+  onBrowse, onMove, onBoard, onReturn, onConnect, connectTarget, ready, requiresSignIn, loadError, run, armed, onArm, claimedIds }) {
   const title = side === "left" ? "Left toolbar" : "Right toolbar";
   const surfaceId = AOS_TOOLBAR_SURFACES[side];
   const { setNodeRef, isOver } = useDroppable({
@@ -85,9 +74,17 @@ function Toolbar({ side, folded, onFold, registry, indexes, placements, session,
     data: { type: "workspace", containerId: surfaceId, targetSurface: surfaceId, dropIntent: "root" }
   });
   const parent = registry.get(browseId);
-  const contents = browseId === "all" ? [...registry.values()] : parent
-    ? getAosToolbarContents(parent, registry) : indexes;
-  const parked = getAosToolbarObjectIds(placements, side).map(id => registry.get(id)).filter(Boolean);
+  const occupied = new Set([
+    ...(placements.board || []),
+    ...getAosToolbarObjectIds(placements, "left"),
+    ...getAosToolbarObjectIds(placements, "right")
+  ]);
+  const parked = getAosToolbarObjectIds(placements, side).filter(id => !placements.board?.includes(id) &&
+    (side === "left" || !getAosToolbarObjectIds(placements, "left").includes(id)))
+    .map(id => registry.get(id)).filter(Boolean);
+  const contents = (browseId === "all" ? [...registry.values()] : parent
+    ? getAosToolbarContents(parent, registry) : indexes)
+    .filter(object => !occupied.has(object.objectId) && !claimedIds?.has(object.objectId));
   const { active } = useDndContext();
   const draggedId = active?.data?.current?.objectId || active?.id;
   const draggedObject = registry.get(draggedId);
@@ -116,10 +113,7 @@ function Toolbar({ side, folded, onFold, registry, indexes, placements, session,
     <aside ref={setNodeRef} id={`aos-${side}-toolbar`} aria-label={title}
       className={`${styles.toolbar} ${styles[side]} ${folded ? styles.folded : ""} ${isOver ? styles.over : ""}`}
       inert={folded ? true : undefined} aria-hidden={folded || undefined}>
-      <header className={styles.toolbarHeader}>
-        <div><span className={styles.eyebrow}>IXI AOS / WORK</span><h2>{parent ? getAosToolbarName(parent) : browseId === "all" ? "All Objects" : "System Indexes"}<span>{contents.length}</span></h2></div>
-        <button type="button" aria-label={`Fold ${side} toolbar`} onClick={onFold}>{side === "left" ? "‹" : "›"}</button>
-      </header>
+      <IXIWorkspaceRailHeader title={side === "left" ? "LEFT RAIL" : "RIGHT RAIL"} count={parked.length + contents.length} side={side} armed={armed} onArm={onArm} onClose={onFold} />
       <div className={styles.toolbarTools}>
         <label className={styles.browseLabel} htmlFor={`aos-${side}-browse`}>Browse</label>
         <select id={`aos-${side}-browse`} className={styles.browserSelect} value={browseId} onChange={event => onSelect(event.target.value)}>
@@ -163,7 +157,7 @@ function Toolbar({ side, folded, onFold, registry, indexes, placements, session,
 }
 
 export default function IXIAosToolbarChassis({ children, controls, registry, indexes, placements, session, ready,
-  preferenceKey, onMove, onBoard, onReturn, onConnect, requiresSignIn = false, loadError = "" }) {
+  preferenceKey, onMove, onBoard, onReturn, onConnect, armedDestination, toggleArmedDestination, requiresSignIn = false, loadError = "" }) {
   // Register the entire visible Board, including gaps between cards. Without
   // this target, closest-center fallback can dock a drop in a nearby toolbar.
   const boardDrop = useDroppable({
@@ -244,8 +238,12 @@ export default function IXIAosToolbarChassis({ children, controls, registry, ind
     ...getAosToolbarObjectIds(placements, "right")
   ])];
   const visibleIds = mobileQuery.trim() ? [...new Set([...quickIds, ...registry.keys()])] : quickIds;
-  const quickObjects = visibleIds.map(id => registry.get(id)).filter(Boolean)
+  const quickObjects = visibleIds.filter(id => !placements.board?.includes(id)).map(id => registry.get(id)).filter(Boolean)
     .filter(object => `${getAosToolbarName(object)} ${object.passportId || ""}`.toLowerCase().includes(mobileQuery.toLowerCase()));
+  const leftBrowseParent = registry.get(browse.left);
+  const leftBrowseContents = browse.left === "all" ? [...registry.values()] : leftBrowseParent
+    ? getAosToolbarContents(leftBrowseParent, registry) : indexes;
+  const claimedLeft = new Set(folded.left ? [] : leftBrowseContents.map(object => object.objectId));
   return (
     <section ref={chassisRef} className={`${styles.chassis} ${folded.left ? styles.leftClosed : ""} ${folded.right ? styles.rightClosed : ""}`} aria-label="AOS workspace">
       {["left", "right"].map(side => <Toolbar key={side} side={side} folded={folded[side]}
@@ -253,6 +251,8 @@ export default function IXIAosToolbarChassis({ children, controls, registry, ind
         browseId={browse[side]} onSelect={value => setBrowse(current => ({ ...current, [side]: value }))}
         onBrowse={id => browseOther(side, id)} registry={registry} indexes={indexes} placements={placements}
         session={session} ready={ready} requiresSignIn={requiresSignIn} loadError={loadError} run={run} onMove={onMove} onBoard={onBoard} onReturn={onReturn}
+        armed={armedDestination === AOS_TOOLBAR_SURFACES[side]} onArm={() => toggleArmedDestination(AOS_TOOLBAR_SURFACES[side])}
+        claimedIds={side === "right" ? claimedLeft : undefined}
         onConnect={onConnect} connectTarget={registry.get(browse[side === "left" ? "right" : "left"])}/>
       )}
       <div className={styles.center}>

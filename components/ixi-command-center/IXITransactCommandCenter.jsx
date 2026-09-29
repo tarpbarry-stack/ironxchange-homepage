@@ -11,7 +11,10 @@ import { paymentDocument, paymentScopeObject } from "../ixi-aos/transact/payment
 import { createIXITransactContext } from "../ixi-aos/transact/IXITransactContext";
 import { formatIXIAccountingMoney as formatIXIMoney } from "../ixi-aos/transact/IXIMoney";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { TransactDirectoryDnd, TransactDirectoryList, TransactDirectoryTile, TransactWorkspaceDrop } from "./TransactDirectoryDnd";
+import { TransactDirectoryDnd, TransactDirectoryList, TransactDirectoryTile, TransactBoardDrag, TransactWorkspaceDrop } from "./TransactDirectoryDnd";
+import IXIWorkspaceRailTile from "../ixi-os/IXIWorkspaceRailTile";
+import IXIWorkspaceRailHeader from "../ixi-os/IXIWorkspaceRailHeader";
+import { readTransactDirectoryOrder, writeTransactDirectoryOrder, readTransactRailPlacement, writeTransactRailPlacement } from "./TransactRailPresentation.mjs";
 import { arrayMove } from "@dnd-kit/sortable";
 import dynamic from "next/dynamic";
 import Link from "next/link";
@@ -298,6 +301,20 @@ function IXIContextImage({
     : <Element ref={elementRef} className={fallbackClassName} aria-hidden="true">{fallback}</Element>;
 }
 
+function TransactRailTile({ item, side, onOpen }) {
+  return <TransactDirectoryTile item={item} side={side}>{handle => <IXIWorkspaceRailTile
+    title={sidebarObjectTitle(item)} side={side}
+    media={<IXIContextImage key={item.id} context={item} mediaClassName={styles.objectTileMedia}
+      fallbackClassName={styles.objectTileMark} fallback={contextLabel(item.kind).slice(0, 2)}
+      label={`${sidebarObjectTitle(item)} thumbnail`} as="span" />}
+    facts={item.kind === "machine" ? [
+      { label: "SN", value: item.serialNumber },
+      { label: "ID", value: item.stockNumber || item.assetId || item.passportId || "NOT RECORDED" }
+    ] : [{ label: "TYPE", value: contextLabel(item.kind) }]}
+    onSelect={() => onOpen(item)} onBoard={() => onOpen(item)} dragHandleRef={handle.ref}
+    dragHandleProps={Object.fromEntries(Object.entries(handle).filter(([key]) => key !== "ref"))} />}</TransactDirectoryTile>;
+}
+
 function ContextIdentityCard({ context, interactive = false, onActivate }) {
   return <section className={styles.identityCard} aria-label="Selected object">
     <IXIContextImage key={context.id} context={context} mediaClassName={styles.identityMedia} fallbackClassName={styles.identityMark} label={`${context.title} identity image`} eager />
@@ -403,6 +420,8 @@ export default function IXITransactCommandCenter({ runtime, active = true }) {
   const [activeModuleId, setActiveModuleId] = useState("");
   const [selectedDirectoryId, setSelectedDirectoryId] = useState("");
   const [directoryOrder, setDirectoryOrder] = useState({ key: "", ids: [] });
+  const [railPlacement, setRailPlacement] = useState({});
+  const [armedRail, setArmedRail] = useState("");
   const [passportRefreshKey, setPassportRefreshKey] = useState(0);
   const [refreshKey, setRefreshKey] = useState(0);
   const [contextRefreshKey, setContextRefreshKey] = useState(0);
@@ -627,9 +646,8 @@ export default function IXITransactCommandCenter({ runtime, active = true }) {
     ? `ixi:transact-object-order:${entityPassportId}:${selectedDirectory.id}` : "";
   useEffect(() => {
     if (!directoryOrderKey) return;
-    let ids = [];
-    try { const saved = JSON.parse(localStorage.getItem(directoryOrderKey) || "[]"); if (Array.isArray(saved)) ids = saved.map(String); } catch {}
-    setDirectoryOrder({ key: directoryOrderKey, ids });
+    setDirectoryOrder({ key: directoryOrderKey, ids: readTransactDirectoryOrder(directoryOrderKey) });
+    setRailPlacement(readTransactRailPlacement(directoryOrderKey));
   }, [directoryOrderKey]);
   const orderedObjectDirectory = useMemo(() => {
     if (directoryOrder.key !== directoryOrderKey) return objectDirectory;
@@ -637,11 +655,27 @@ export default function IXITransactCommandCenter({ runtime, active = true }) {
     const saved = directoryOrder.ids.filter(id => byId.has(id));
     return [...saved, ...objectDirectory.map(item => String(item.id)).filter(id => !saved.includes(id))].map(id => byId.get(id));
   }, [directoryOrder, directoryOrderKey, objectDirectory]);
-  function reorderObjectDirectory(ids, from, to) {
+  const availableDirectory = orderedObjectDirectory.filter(item => String(item.id) !== String(selectedContext?.id));
+  const leftDirectory = availableDirectory.filter(item => railPlacement[item.id] !== "right");
+  const rightDirectory = availableDirectory.filter(item => railPlacement[item.id] === "right");
+  function moveObjectRail(id, side) {
+    if (!directoryOrderKey || !["left", "right"].includes(side)) return;
+    const next = { ...railPlacement, [id]: side };
+    setRailPlacement(next);
+    writeTransactRailPlacement(directoryOrderKey, next);
+    if (String(selectedContext?.id) === String(id)) {
+      const fallback = contexts.find(item => item.kind === "company" && item.id !== id);
+      if (fallback) selectContext(fallback);
+    }
+  }
+  function reorderObjectDirectory(side, ids, from, to) {
     if (!directoryOrderKey || directoryOrder.key !== directoryOrderKey) return;
-    const next = arrayMove(ids, ids.indexOf(from), ids.indexOf(to));
+    const reordered = arrayMove(ids, ids.indexOf(from), ids.indexOf(to));
+    const visible = new Set(ids);
+    let index = 0;
+    const next = orderedObjectDirectory.map(item => String(item.id)).map(id => visible.has(id) ? reordered[index++] : id);
     setDirectoryOrder({ key: directoryOrderKey, ids: next });
-    try { localStorage.setItem(directoryOrderKey, JSON.stringify(next)); } catch {}
+    writeTransactDirectoryOrder(directoryOrderKey, next);
   }
   const selectedQueueItem = queue.find(item => item.id === selectedQueueId) || queue[0] || null;
   useEffect(() => {
@@ -1000,38 +1034,21 @@ export default function IXITransactCommandCenter({ runtime, active = true }) {
 
       <IXIOperatingNav active="/transact" />
 
-      <TransactDirectoryDnd items={orderedObjectDirectory} onReorder={reorderObjectDirectory} onSelect={selectContext}><div className={styles.desktop}>
+      <TransactDirectoryDnd leftItems={leftDirectory} rightItems={rightDirectory} onReorder={reorderObjectDirectory} onMove={moveObjectRail} onSelect={selectContext}><div className={styles.desktop}>
         <IXITransactSidePanel className={styles.navigation} label="Object directory" dockAt={1280} open={openPanel === "directory"} onDismiss={() => setOpenPanel("")}>
           <nav className={styles.workspaceRail} aria-label="Workspace shortcuts">
             {WORKSPACES.map(([id, label, number]) => <button type="button" key={id} data-active={activeWorkspace === id} aria-current={activeWorkspace === id ? "page" : undefined} onClick={() => selectWorkspace(id)}><span>{number}</span><strong>{label}</strong>{id === "today" && queue.length ? <b>{queue.length}</b> : null}</button>)}
           </nav>
           <section className={styles.objectDirectory} aria-label="Governed AOS Object directory">
-            <header>
-              <strong className={styles.objectDirectoryCount} aria-label={`${objectDirectory.length} objects`}>{objectDirectory.length}</strong>
+            <IXIWorkspaceRailHeader title="LEFT RAIL" count={leftDirectory.length} side="left" armed={armedRail === "left"} onArm={() => setArmedRail(current => current === "left" ? "" : "left")} />
+            <div className={styles.directoryControls}>
               <select className={styles.objectDirectorySelect} aria-label="Object directory" value={selectedDirectory?.id || ""} onChange={event => setSelectedDirectoryId(event.target.value)}>{objectDirectories.map(directory => <option value={directory.id} key={directory.id}>{directory.menuLabel.toUpperCase()}</option>)}</select>
-            </header>
+            </div>
             {directoryProjection.error ? <p role="alert">The AOS folder list could not load. Use REFRESH to retry.</p> : null}
             <div className={styles.objectDirectoryList} role="list">
-              <TransactDirectoryList items={orderedObjectDirectory}>{orderedObjectDirectory.map(item => (
-                <TransactDirectoryTile item={item} key={item.id}><button type="button" className={styles.objectTile} data-active={selectedContext?.id === item.id} aria-pressed={selectedContext?.id === item.id} onClick={() => selectContext(item)}>
-                  <span className={styles.objectTileImage}>
-                    <IXIContextImage
-                      key={item.id}
-                      context={item}
-                      mediaClassName={styles.objectTileMedia}
-                      fallbackClassName={styles.objectTileMark}
-                      fallback={contextLabel(item.kind).slice(0, 2)}
-                      label={`${sidebarObjectTitle(item)} thumbnail`}
-                      as="span"
-                    />
-                    {selectedContext?.id === item.id ? <span className={styles.objectTileSelected} aria-hidden="true">SELECTED</span> : null}
-                  </span>
-                  <strong className={styles.objectTileTitle}>{sidebarObjectTitle(item)}</strong>
-                  {item.serialNumber ? <small className={`${styles.objectTileField} ${styles.objectTileSerial}`}><b>SN</b><span>{item.serialNumber}</span></small> : null}
-                  <small className={`${styles.objectTileField} ${styles.objectTileIdentity}`}><b>ID</b><span>{item.stockNumber || item.assetId || item.passportId || "NOT RECORDED"}</span></small>
-                  <span className={styles.objectTileAction}>{item.kind === "company" ? "COMPANY WORKSPACE" : "TRANSACTION HISTORY"}<span aria-hidden="true">↗</span></span>
-                </button></TransactDirectoryTile>
-              ))}</TransactDirectoryList>
+              <TransactDirectoryList items={leftDirectory} side="left">{leftDirectory.map(item =>
+                <TransactRailTile item={item} key={item.id} side="left" onOpen={selectContext} />
+              )}</TransactDirectoryList>
             </div>
           </section>
           <div className={styles.navFooter}><Link href="/transact/ledger">LEDGER CONTROL →</Link></div>
@@ -1040,7 +1057,7 @@ export default function IXITransactCommandCenter({ runtime, active = true }) {
         <TransactWorkspaceDrop className={styles.main} data-history-active={activeWorkspace === "object-history" && !activeTabId}>
           <div className={styles.pageHeader}>
             <div><span className={styles.eyebrow}>{environment?.entity?.displayName || "IXI ENTITY"} · {contextLabel(selectedContext?.kind)}</span><h1>{workspaceTitle}</h1></div>
-            <div className={styles.headerActions}><button type="button" className={styles.directoryToggle} onClick={() => setOpenPanel("directory")}>Objects</button><button type="button" onClick={refreshAuthoritativeContext}>REFRESH</button></div>
+            <div className={styles.headerActions}>{selectedContext?.kind !== "company" && selectedContext && <><TransactBoardDrag item={selectedContext} /><button type="button" className={styles.railSend} disabled={!armedRail} onClick={() => moveObjectRail(selectedContext.id, armedRail)} title="Send current Object to armed rail">● SEND</button></>}<button type="button" className={styles.directoryToggle} onClick={() => setOpenPanel("directory")}>Objects</button><button type="button" onClick={refreshAuthoritativeContext}>REFRESH</button></div>
           </div>
 
           <div className={styles.compactContext}><strong>{selectedContext?.title || "Connecting…"}</strong><button type="button" className={styles.appsToggle} onClick={() => setOpenPanel("apps")}>Apps</button></div>
@@ -1079,6 +1096,14 @@ export default function IXITransactCommandCenter({ runtime, active = true }) {
         </TransactWorkspaceDrop>
 
         <IXITransactSidePanel className={styles.contextPanel} label="Selected object and apps" dockAt={1000} open={openPanel === "apps"} onDismiss={() => setOpenPanel("")}>
+          <section className={styles.rightObjectRail} aria-label="Right Object rail">
+            <IXIWorkspaceRailHeader title="RIGHT RAIL" count={rightDirectory.length} side="right" armed={armedRail === "right"} onArm={() => setArmedRail(current => current === "right" ? "" : "right")} />
+            <div className={styles.rightObjectList}>
+              <TransactDirectoryList items={rightDirectory} side="right">{rightDirectory.map(item =>
+                <TransactRailTile item={item} key={item.id} side="right" onOpen={selectContext} />
+              )}</TransactDirectoryList>
+            </div>
+          </section>
           <div className={styles.contextTitle}><span>ACTIVE CONTEXT</span><strong>{objectContextActive ? "TRAN$ACT APPS" : "PROOF & LINEAGE"}</strong></div>
           {selectedContext ? <ContextIdentityCard context={selectedContext} interactive={objectContextActive} onActivate={returnToObjectHistory} /> : null}
           {objectContextActive ? <IXITransactAppDirectory key={appPreferenceKey || "session"} modules={selectedModules} activeModuleId={activeModuleId} onOpen={openTransactModule} onHistory={returnToObjectHistory} historyActive={activeWorkspace === "object-history" && !activeTabId} preferenceKey={appPreferenceKey} /> : <section className={styles.proofCard}>

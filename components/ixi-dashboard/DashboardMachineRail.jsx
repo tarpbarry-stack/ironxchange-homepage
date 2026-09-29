@@ -22,7 +22,7 @@ function RailMachine({ item, side, selected, src, onSelect, onOpen }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: machineRailDragId(side, key) });
   return <article ref={setNodeRef} style={{ transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? .5 : 1, marginBottom: 10 }}>
     <IXIWorkspaceRailTile title={cleanMachineTitle(item.title || "Machine")} image={src} side={side} selected={selected}
-      facts={[{ label: "PRICE", value: item.price || "Price on request" }, { label: "ID", value: passportOf(item) }]}
+      facts={[{ label: "SN", value: item.serialNumber || item.publicData?.serialNumber || "—" }, { label: "ID", value: passportOf(item) || "—" }]}
       onSelect={() => onSelect(key)} onBoard={() => onOpen(item)} dragHandleProps={{ ...attributes, ...listeners }} />
   </article>;
 }

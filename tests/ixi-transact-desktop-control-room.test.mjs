@@ -73,13 +73,15 @@ test("Object console is History-first and reuses the governed TRAN$ACT app bus",
   const app = read("components/ixi-aos/transact/IXITransactApp.jsx");
 
   assert.match(source, /Governed AOS Object directory/u);
-  assert.match(source, /className=\{styles\.objectDirectoryCount\}[\s\S]*\{objectDirectory\.length\}/u);
+  assert.match(source, /IXIWorkspaceRailHeader title="LEFT RAIL" count=\{leftDirectory\.length\}/u);
+  assert.match(source, /IXIWorkspaceRailHeader title="RIGHT RAIL" count=\{rightDirectory\.length\}/u);
   assert.match(source, /className=\{styles\.objectDirectorySelect\}[\s\S]*aria-label="Object directory"/u);
   assert.doesNotMatch(source, /selectedDirectory\?\.label \|\| "AOS OBJECTS"/u);
   assert.doesNotMatch(source, /<span>INDEX<\/span>/u);
   // Identity lives in the selected-object card; optional fields do not create noise.
-  assert.match(source, /item\.serialNumber \? [\s\S]*<b>SN<\/b><span>\{item\.serialNumber\}/u);
-  assert.match(source, /<b>ID<\/b><span>\{item\.stockNumber \|\| item\.assetId \|\| item\.passportId/u);
+  assert.match(source, /label: "SN", value: item\.serialNumber/u);
+  assert.match(source, /label: "ID", value: item\.stockNumber \|\| item\.assetId \|\| item\.passportId/u);
+  assert.match(source, /IXIWorkspaceRailTile/u);
   assert.match(source, /aria-label="Selected object"/u);
   assert.match(source, /<dt>PASSPORT<\/dt><dd>\{context\.passportId/u);
   assert.match(source, /<details className=\{styles\.identityDetails\}>[\s\S]*OBJECT ID/u);

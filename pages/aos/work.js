@@ -2728,7 +2728,7 @@ let targetContainer =
 
 const overId =
   String(
-    over?.data?.current?.group === "parked"
+    ["parked", "contents"].includes(over?.data?.current?.group)
       ? over?.data?.current?.objectId || over?.id || ""
       : over?.id || ""
   );
@@ -3251,6 +3251,8 @@ return null;
     onBoard={openAosObjectOnBoard}
     onReturn={returnAosToolbarObject}
     onConnect={connectAosWorkspaceObjects}
+    armedDestination={armedDestination}
+    toggleArmedDestination={toggleArmedDestination}
     controls={<IXIChassisControls
   workspaceToolbars={true}
   listings={workspaceListings.filter(item => !item.inventorySessionOnly)}

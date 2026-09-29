@@ -16,7 +16,7 @@ function MachineTile({ item, containerId, sold, onBoard }) {
     <IXIWorkspaceRailTile title={cleanMachineTitle(item.title || "Machine")}
       image={typeof photo === "string" ? photo : photo?.url || photo?.src}
       badge={sold ? "SOLD" : ""} side={containerId === "railRight" ? "right" : "left"}
-      facts={[{ label: "HRS", value: item.hours }, { label: "ID", value: item.passportId || item.publicData?.passportId }]}
+      facts={[{ label: "SN", value: item.serialNumber || item.publicData?.serialNumber || "—" }, { label: "ID", value: item.passportId || item.publicData?.passportId || "—" }]}
       onBoard={() => onBoard(id)} dragHandleProps={{ ...attributes, ...listeners }}>
       <button type="button" onClick={() => openIXIPassportEmail(item)}>SEND</button>
     </IXIWorkspaceRailTile>
