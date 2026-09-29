@@ -10,6 +10,10 @@ const genericObject = fs.readFileSync(
   new URL("../components/ixi-aos/cards/generic/IXIAosGenericObjectLayout007.jsx", import.meta.url),
   "utf8"
 );
+const headerIdentity = fs.readFileSync(
+  new URL("../components/ixi-aos/card-runtime/modules/IXIAosCardHeaderIdentity.jsx", import.meta.url),
+  "utf8"
+);
 
 test("Card 008 opts into a live display-name header beneath its parent line", () => {
   assert.match(card008, /<IXIAosGenericObjectLayout007[^>]*showHeaderDisplayName/u);
@@ -19,6 +23,9 @@ test("Card 008 opts into a live display-name header beneath its parent line", ()
 
 test("Card 008 shows the employee identifier in the profile body without a duplicate corner identifier", () => {
   assert.match(card008, /<IXIAosDataContractCardAdapter \{\.\.\.props\} showBusinessIdentifier=\{false\}>/u);
+  assert.match(card008, /<IXIAosCardHeaderIdentity object=\{runtimeObject\} showPassportIdentity=\{false\}>/u);
+  assert.match(headerIdentity, /showPassportIdentity = true/u);
+  assert.match(headerIdentity, /\{showPassportIdentity \? <span className="ixi-aos-header-ixi-number">IXI - \{getAosPassportDisplaySerial\(object\)\}<\/span> : null\}/u);
   assert.match(genericObject, /presentationFields\.identifier \? <div className="go007-fact"><small>\{presentationFields\.identifier\.label\}<\/small><strong>\{fieldValueText\(runtimeObject, presentationFields\.identifier\)\}<\/strong><\/div> : null/u);
 });
 
