@@ -19,6 +19,8 @@ export function resolveMachineWorkspaceDrop(activeId, overId, boardKeys) {
   if (sourceRail) {
     if (overId === boardTarget || boardKeys.includes(overId)) return { type: "open", key: sourceRail.key };
     if (targetRail?.side === sourceRail.side) return { type: "rail-order", side: sourceRail.side, from: sourceRail.key, to: targetRail.key };
+    if (targetRail || overId === `${railPrefix}left` || overId === `${railPrefix}right`)
+      return { type: "rail-move", key: sourceRail.key, side: targetRail?.side || overId.slice(railPrefix.length) };
     return null;
   }
   if (!boardKeys.includes(activeId)) return null;

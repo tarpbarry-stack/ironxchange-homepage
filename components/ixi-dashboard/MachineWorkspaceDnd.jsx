@@ -2,7 +2,7 @@ import { DndContext, PointerSensor, KeyboardSensor, pointerWithin, closestCenter
 import { sortableKeyboardCoordinates, arrayMove } from "@dnd-kit/sortable";
 import { resolveMachineWorkspaceDrop } from "./machineWorkspaceDrop.mjs";
 
-export default function MachineWorkspaceDnd({ boardKeys, onBoardOrder, onOpen, onReturn, onRailOrder, children }) {
+export default function MachineWorkspaceDnd({ boardKeys, onBoardOrder, onOpen, onReturn, onRailOrder, onMoveRail, children }) {
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
@@ -14,6 +14,7 @@ export default function MachineWorkspaceDnd({ boardKeys, onBoardOrder, onOpen, o
     if (drop?.type === "open") onOpen(drop.key);
     if (drop?.type === "return") onReturn(drop.key, drop.side);
     if (drop?.type === "rail-order") onRailOrder(drop.side, drop.from, drop.to);
+    if (drop?.type === "rail-move") onMoveRail?.(drop.key, drop.side);
     if (drop?.type === "board-order") onBoardOrder(arrayMove(boardKeys, boardKeys.indexOf(drop.from), boardKeys.indexOf(drop.to)));
   }
 

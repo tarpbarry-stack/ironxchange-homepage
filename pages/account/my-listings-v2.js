@@ -196,7 +196,8 @@ const POCKET_TARGETS = [
 
   const DIRECT_CONTAINER_TARGETS = [
   ...POCKET_TARGETS,
-  "stackTop"
+  "stackTop",
+  ...INVENTORY_RAIL_CONTAINERS
 ];
 
   const [activeStackHover, setActiveStackHover] = useState("");
@@ -1628,7 +1629,7 @@ toggleSearchSurfaceRevealed
      {isSold && soldIssues.length > 0 && <details className="sold-toolbar"><summary>{soldIssues.length} historical sale facts need review</summary><ul>{soldIssues.map((issue, index) => <li key={`${issue.documentId}:${issue.code}:${index}`}>{issue.passportId ? `${issue.passportId}: ` : ""}{issue.message}</li>)}</ul></details>}
      {inventoryStatus.error && <p role="alert">{inventoryStatus.error} <button type="button" onClick={() => isSold ? setInventoryRevision(value => value + 1) : window.location.reload()}>Retry</button></p>}
      <div className={`inventory-rail-layout ${machineRails.left ? "" : "inventory-left-folded"} ${machineRails.right ? "" : "inventory-right-folded"}`}>
-       {machineRails.left && <div className="inventory-machine-sidebar"><InventoryMachineRail title="LEFT RAIL" side="left" containerId="railLeft" items={railLeftItems} onClose={() => toggleMachineRail("left")} sold={isSold} /></div>}
+       {machineRails.left && <div className="inventory-machine-sidebar"><InventoryMachineRail title="LEFT RAIL" side="left" containerId="railLeft" items={railLeftItems} onBoard={id => moveMachineToContainer(id, "board")} onArm={() => toggleArmedDestination("railLeft")} armed={armedDestination === "railLeft"} onClose={() => toggleMachineRail("left")} sold={isSold} /></div>}
        <section className="inventory-board-column" aria-label={isSold ? "Sold machine board" : "Inventory machine board"}>
          <div className="inventory-board-toolbar">
            <button type="button" aria-expanded={machineRails.left} onClick={() => toggleMachineRail("left")}>{machineRails.left ? "‹" : "›"} LEFT RAIL</button>
@@ -1665,7 +1666,7 @@ toggleSearchSurfaceRevealed
 />
 </IXIBoardSurface></InventoryBoardDrop>
        </section>
-       {machineRails.right && <div className="inventory-machine-sidebar"><InventoryMachineRail title="RIGHT RAIL" side="right" containerId="railRight" items={railRightItems} onClose={() => toggleMachineRail("right")} sold={isSold} /></div>}
+       {machineRails.right && <div className="inventory-machine-sidebar"><InventoryMachineRail title="RIGHT RAIL" side="right" containerId="railRight" items={railRightItems} onBoard={id => moveMachineToContainer(id, "board")} onArm={() => toggleArmedDestination("railRight")} armed={armedDestination === "railRight"} onClose={() => toggleMachineRail("right")} sold={isSold} /></div>}
      </div>
     
 <IXICardScaleControl mobileDensity

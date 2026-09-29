@@ -45,9 +45,11 @@ export function relationshipPatch(patch = {}) {
 export function restoreDashboard(raw) {
   if (!raw || raw.version !== 1) return null;
   const states = raw.states && typeof raw.states === "object" && !Array.isArray(raw.states) ? raw.states : {};
+  const rails = raw.rails && typeof raw.rails === "object" && !Array.isArray(raw.rails) ? raw.rails : {};
   return {
     version: 1,
     open: Array.isArray(raw.open) ? [...new Set(raw.open.filter(value => typeof value === "string"))].slice(0, 100) : [],
+    rails: Object.fromEntries(Object.entries(rails).filter(([key, side]) => !["__proto__", "constructor", "prototype"].includes(key) && ["left", "right"].includes(side))),
     states: Object.fromEntries(Object.entries(states).filter(([key]) => !["__proto__", "constructor", "prototype"].includes(key)).map(([key, value]) => [key, viewPatch(value || {})])),
     size: ["fit", "natural", "work", "focus"].includes(raw.size) ? raw.size : "fit",
     ownedFilter: ["all", "live", "private", "auction"].includes(raw.ownedFilter) ? raw.ownedFilter : "all",

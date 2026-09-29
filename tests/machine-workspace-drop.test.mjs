@@ -14,6 +14,6 @@ test("machine rails reorder, open on board, and return without changing rail own
   assert.deepEqual(resolveMachineWorkspaceDrop("machine-c", `${railPrefix}right`, board), { type: "return", key: "machine-c", side: "right" });
   assert.deepEqual(resolveMachineWorkspaceDrop("machine-c", right, board), { type: "return", key: "machine-c", side: "right" });
   assert.deepEqual(resolveMachineWorkspaceDrop("machine-c", "machine-d", board), { type: "board-order", from: "machine-c", to: "machine-d" });
-  assert.equal(resolveMachineWorkspaceDrop(leftA, right, board), null);
+  assert.deepEqual(resolveMachineWorkspaceDrop(leftA, right, board), { type: "rail-move", key: "machine-a", side: "right" });
   assert.equal(resolveMachineWorkspaceDrop("machine-a", boardTarget, board), null);
 });
