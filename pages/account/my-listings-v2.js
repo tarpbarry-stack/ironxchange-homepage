@@ -1703,6 +1703,20 @@ toggleSearchSurfaceRevealed
 
 
       <Footer />
+
+      <style jsx global>{`
+        .inventory-search-collapsed .ixi-command-left,
+        .inventory-search-collapsed .ixi-command-right { display: none !important; }
+        @media (min-width: 851px) and (max-width: 1449px) {
+          .ixi-command-chassis .ixi-pocket-l2,
+          .ixi-command-chassis .ixi-pocket-r2 { display: none !important; }
+          .ixi-command-chassis .ixi-command-left,
+          .ixi-command-chassis .ixi-command-right { width: var(--station-w); height: var(--station-h); }
+          .ixi-command-chassis .ixi-pocket-row { grid-template-columns: var(--station-w); grid-template-rows: var(--station-h); }
+          .ixi-command-chassis .ixi-command-left .ixi-pocket-left:not(.ixi-pocket-l2),
+          .ixi-command-chassis .ixi-command-right .ixi-pocket-right:not(.ixi-pocket-r2) { grid-column: 1; grid-row: 1; }
+        }
+      `}</style>
                 
       <style jsx>{`
         @font-face {
@@ -1717,17 +1731,6 @@ toggleSearchSurfaceRevealed
         .inventory-scoreboard span { color:#aaa; font-size:10px; font-weight:700; letter-spacing:.08em; }
         .inventory-scoreboard strong { color:#ffcc00; font-size:23px; font-weight:750; line-height:1.15; font-variant-numeric:tabular-nums; overflow-wrap:anywhere; }
         .inventory-scoreboard small { color:#aaa; font-size:11px; }
-        .inventory-search-collapsed .ixi-command-left,
-        .inventory-search-collapsed .ixi-command-right { display:none !important; }
-        @media (min-width: 851px) and (max-width: 1449px) {
-          .ixi-command-chassis .ixi-pocket-l2,
-          .ixi-command-chassis .ixi-pocket-r2 { display:none !important; }
-          .ixi-command-chassis .ixi-command-left,
-          .ixi-command-chassis .ixi-command-right { width:var(--station-w); height:var(--station-h); }
-          .ixi-command-chassis .ixi-pocket-row { grid-template-columns:var(--station-w); grid-template-rows:var(--station-h); }
-          .ixi-command-chassis .ixi-command-left .ixi-pocket-left:not(.ixi-pocket-l2),
-          .ixi-command-chassis .ixi-command-right .ixi-pocket-right:not(.ixi-pocket-r2) { grid-column:1; grid-row:1; }
-        }
         .inventory-rail-layout { display:grid; grid-template-columns:clamp(205px,18vw,280px) minmax(0,1fr) clamp(205px,18vw,280px); gap:12px; align-items:start; }
         .inventory-rail-layout.inventory-left-folded { grid-template-columns:minmax(0,1fr) clamp(205px,18vw,280px); }
         .inventory-rail-layout.inventory-right-folded { grid-template-columns:clamp(205px,18vw,280px) minmax(0,1fr); }
