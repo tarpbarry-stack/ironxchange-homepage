@@ -3,11 +3,11 @@ import {
   getAosPassportDisplaySerial
 } from "../../../../lib/mos/ixiAosPassportPresentation.mjs";
 
-export default function IXIAosCardHeaderIdentity({ object = {}, children = null, className = "" }) {
+export default function IXIAosCardHeaderIdentity({ object = {}, children = null, className = "", showPassportIdentity = true }) {
   return (
     <div className={`ixi-aos-header-identity-shell ${className}`.trim()}>
       {children}
-      <span className="ixi-aos-header-ixi-number">IXI - {getAosPassportDisplaySerial(object)}</span>
+      {showPassportIdentity ? <span className="ixi-aos-header-ixi-number">IXI - {getAosPassportDisplaySerial(object)}</span> : null}
       <IXIAosCommercialCardTypography />
       <style jsx>{`
         .ixi-aos-header-identity-shell{position:relative;width:298px;height:471px}
