@@ -17,6 +17,11 @@ test("Card 008 opts into a live display-name header beneath its parent line", ()
   assert.match(genericObject, /showHeaderDisplayName \? <strong title=\{displayName\}>\{displayName\}<\/strong> : null/u);
 });
 
+test("Card 008 shows the employee identifier in the profile body without a duplicate corner identifier", () => {
+  assert.match(card008, /<IXIAosDataContractCardAdapter \{\.\.\.props\} showBusinessIdentifier=\{false\}>/u);
+  assert.match(genericObject, /presentationFields\.identifier \? <div className="go007-fact"><small>\{presentationFields\.identifier\.label\}<\/small><strong>\{fieldValueText\(runtimeObject, presentationFields\.identifier\)\}<\/strong><\/div> : null/u);
+});
+
 test("Card 008's second header line remains bounded inside the native header", () => {
   assert.match(genericObject, /\.go007-header-copy span,\.go007-header-copy strong\{[^}]*max-width:145px[^}]*text-overflow:ellipsis/u);
   assert.match(genericObject, /\.go007-header-copy strong\{[^}]*font-size:11px[^}]*font-weight:950/u);
