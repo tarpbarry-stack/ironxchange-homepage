@@ -4,13 +4,14 @@ import {
   getAosPassportId,
   isAosDraftId
 } from "../../../../../lib/mos/ixiAosProvisioningContract";
+import IXIWorkforceAccessFace from "./IXIWorkforceAccessFace";
 
 const clean = value => String(value ?? "").trim();
 const unique = values => Array.from(new Set((Array.isArray(values) ? values : []).map(clean).filter(Boolean)));
 
 const CAPABILITY_GROUPS = Object.freeze([
   { label: "AOS", capabilities: ["aos.discover", "aos.view", "aos.edit", "aos.move", "aos.delete"] },
-  { label: "WORK", capabilities: ["work-order.view", "work-order.time.create", "work-order.material.create"] },
+  { label: "WORK", capabilities: ["transact.work-order.view", "transact.time.create", "transact.material.create"] },
   { label: "TRAN$ACT", capabilities: ["transact.gl.view", "transact.treasury.view"] },
   { label: "ADMIN", capabilities: ["authority.manage", "identity.invite"] }
 ]);
@@ -56,7 +57,7 @@ async function jsonRequest(url, options = {}) {
 const subjectLabel = rule => clean(rule?.subject?.id) || clean(rule?.subject?.type).toUpperCase() || "SUBJECT";
 const scopeLabel = rule => clean(rule?.scope?.type || "target").replaceAll("-", " ").toUpperCase();
 
-export default function IXIAccessPolicyApp({ context = {}, object = {}, onBack = null, onRecordChange = null }) {
+function IXIGenericAccessPolicyApp({ context = {}, object = {}, onBack = null, onRecordChange = null }) {
   const objectId = clean(object?.objectId || object?.id || context?.primary?.objectId);
   const draftObject = isAosDraftId(objectId) || object?.status === "draft" || object?.metadata?.draftOnly === true;
   const passportId = useMemo(() => resolvePassportId(object, context), [object, context]);
@@ -198,7 +199,7 @@ export default function IXIAccessPolicyApp({ context = {}, object = {}, onBack =
 
   async function addRule() {
     const capabilities = unique(draft.capabilities);
-    if (draft.subjectType !== "authenticated" && !clean(draft.subjectId)) {
+    if (draft.subjectType !== "all-authenticated" && !clean(draft.subjectId)) {
       setError("Choose a role, person, or group ID.");
       return;
     }
@@ -213,7 +214,7 @@ export default function IXIAccessPolicyApp({ context = {}, object = {}, onBack =
         effect: draft.effect,
         subject: {
           type: draft.subjectType,
-          ...(draft.subjectType === "authenticated" ? {} : { id: clean(draft.subjectId) })
+          ...(draft.subjectType === "all-authenticated" ? {} : { id: clean(draft.subjectId) })
         },
         capabilities,
         scope: { type: draft.scopeType, passportId },
@@ -287,9 +288,9 @@ export default function IXIAccessPolicyApp({ context = {}, object = {}, onBack =
                   <div className="section-title"><span>NEW CONTROL</span></div>
                   <div className="two">
                     <label><span>DECISION</span><select value={draft.effect} onChange={event => setDraft(current => ({ ...current, effect: event.target.value }))}><option value="deny">DENY</option><option value="allow">ALLOW</option></select></label>
-                    <label><span>SUBJECT</span><select value={draft.subjectType} onChange={event => setDraft(current => ({ ...current, subjectType: event.target.value }))}><option value="role">ROLE</option><option value="principal">PERSON</option><option value="group">GROUP</option><option value="authenticated">ALL AUTHENTICATED</option></select></label>
+                    <label><span>SUBJECT</span><select value={draft.subjectType} onChange={event => setDraft(current => ({ ...current, subjectType: event.target.value }))}><option value="role">ROLE</option><option value="principal">PERSON</option><option value="group">GROUP</option><option value="all-authenticated">ALL AUTHENTICATED</option></select></label>
                   </div>
-                  {draft.subjectType !== "authenticated" ? <label><span>SUBJECT ID</span><input value={draft.subjectId} onChange={event => setDraft(current => ({ ...current, subjectId: event.target.value }))} placeholder="role / employee / group ID" /></label> : null}
+                  {draft.subjectType !== "all-authenticated" ? <label><span>SUBJECT ID</span><input value={draft.subjectId} onChange={event => setDraft(current => ({ ...current, subjectId: event.target.value }))} placeholder="role / employee / group ID" /></label> : null}
                   <label><span>SCOPE</span><select value={draft.scopeType} onChange={event => setDraft(current => ({ ...current, scopeType: event.target.value }))}><option value="target">THIS CARD</option><option value="target-and-descendants">THIS + DESCENDANTS</option></select></label>
 
                   <div className="cap-groups">
@@ -319,4 +320,11 @@ export default function IXIAccessPolicyApp({ context = {}, object = {}, onBack =
       `}</style>
     </div>
   );
+}
+
+export default function IXIAccessPolicyApp(props = {}) {
+  const objectType = clean(props?.object?.objectType || props?.context?.primary?.objectType).toLowerCase();
+  return objectType === "person"
+    ? <IXIWorkforceAccessFace {...props}/>
+    : <IXIGenericAccessPolicyApp {...props}/>;
 }
