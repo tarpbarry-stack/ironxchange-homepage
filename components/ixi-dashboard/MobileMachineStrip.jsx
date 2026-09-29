@@ -10,15 +10,18 @@ function imageOf(item) {
 export default function MobileMachineStrip({ owned = [], related = [], ownedStatus = {}, relatedStatus = {}, openKeys = [], selectedKey, onOpen, label = "MACHINES" }) {
   const [scope, setScope] = useState("owned");
   const [query, setQuery] = useState("");
-  const items = scope === "owned" ? owned : related;
+  const boardKeys = useMemo(() => new Set(openKeys), [openKeys]);
+  const availableOwned = useMemo(() => owned.filter(item => !boardKeys.has(dashboardKey(item))), [owned, boardKeys]);
+  const availableRelated = useMemo(() => related.filter(item => !boardKeys.has(dashboardKey(item))), [related, boardKeys]);
+  const items = scope === "owned" ? availableOwned : availableRelated;
   const status = scope === "owned" ? ownedStatus : relatedStatus;
   const matches = useMemo(() => filterMachineSearch(items, query).slice(0, 50), [items, query]);
 
   return <section className="ixi-mobile-machines" aria-label={`${label} machine picker`}>
     <div className="ixi-mobile-machines-head">
       <div className="ixi-mobile-machines-tabs" aria-label="Machine source">
-        <button type="button" aria-pressed={scope === "owned"} onClick={() => setScope("owned")}>OWNED <b>{owned.length}</b></button>
-        <button type="button" aria-pressed={scope === "related"} onClick={() => setScope("related")}>RELATIONSHIPS <b>{related.length}</b></button>
+        <button type="button" aria-pressed={scope === "owned"} onClick={() => setScope("owned")}>OWNED <b>{availableOwned.length}</b></button>
+        <button type="button" aria-pressed={scope === "related"} onClick={() => setScope("related")}>RELATIONSHIPS <b>{availableRelated.length}</b></button>
       </div>
       <span>{label}</span>
     </div>
@@ -30,7 +33,7 @@ export default function MobileMachineStrip({ owned = [], related = [], ownedStat
         return <div role="listitem" key={key}><button type="button" className="ixi-mobile-machine" aria-label={`Open ${item.title || "machine"} on board`} aria-pressed={selectedKey === key} onClick={() => onOpen(item)}>
           <span className="ixi-mobile-machine-photo">{src ? <img src={src} alt="" loading="lazy" decoding="async" /> : <b>IXI</b>}</span>
           <strong>{cleanMachineTitle(item.title || "Machine")}</strong>
-          <small>{openKeys.includes(key) ? "ON BOARD" : "OPEN ↗"}</small>
+          <small>OPEN ↗</small>
         </button></div>;
       })}
     </div>

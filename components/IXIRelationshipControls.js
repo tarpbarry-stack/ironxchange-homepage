@@ -103,15 +103,7 @@ export default function IXIRelationshipControls({
         />
       </div>
 
-      {workspaceToolbars ? (
-        <div className="aos-toolbar-destinations">
-          {["left", "right"].map(side => <button key={side} type="button"
-            aria-pressed={armedDestination === `rail:aos-${side}`}
-            onClick={() => onToggleArmedDestination(`rail:aos-${side}`)}>
-            Dock {side}
-          </button>)}
-        </div>
-      ) : (
+      {!workspaceToolbars && (
       <div className="ixi-pocket-indicator-row">
         <div className="ixi-pocket-left-cluster">
           <div className="ixi-pocket-indicator-stack left">
@@ -223,7 +215,10 @@ export default function IXIRelationshipControls({
       </div>
       )}
 
-      <div className="ixi-relationship-controls">
+      <div className={`ixi-relationship-controls ${workspaceToolbars ? "aos-dock-controls" : ""}`}>
+        {workspaceToolbars && <button type="button" className="aos-dock-button"
+          aria-pressed={armedDestination === "rail:aos-left"}
+          onClick={() => onToggleArmedDestination("rail:aos-left")}>DOCK LEFT</button>}
         {COLOR_CONTROLS.map(color => (
           <div key={color} className="ixi-color-with-thumb">
             <button
@@ -266,6 +261,9 @@ export default function IXIRelationshipControls({
             <span />
           </button>
         )}
+        {workspaceToolbars && <button type="button" className="aos-dock-button"
+          aria-pressed={armedDestination === "rail:aos-right"}
+          onClick={() => onToggleArmedDestination("rail:aos-right")}>DOCK RIGHT</button>}
       </div>
 
       {hasAnyRelationship && !workspaceToolbars && (
@@ -281,10 +279,10 @@ export default function IXIRelationshipControls({
       )}
 
       <style jsx>{`
-        .aos-toolbar-destinations { display: flex; justify-content: space-between; gap: 12px; padding: 8px 0; }
-        .aos-toolbar-destinations button { border: 1px solid #445045; border-radius: 4px; background: #15201b; color: #c2cfc4; padding: 5px 12px; font: inherit; font-size: 10px; cursor: pointer; }
-        .aos-toolbar-destinations button[aria-pressed="true"] { color: #ffc400; border-color: #ffc400; }
-        .aos-toolbar-destinations button:focus-visible { outline: 2px solid #ffc400; outline-offset: 2px; }
+        .aos-dock-controls { justify-content: space-between; gap: clamp(3px, .35vw, 6px); }
+        .aos-dock-button { flex: 0 0 auto; min-width: 68px; min-height: 28px; padding: 4px 5px; border: 1px solid #445045; border-radius: 4px; background: #15201b; color: #c2cfc4; font: inherit; font-size: 9px; font-weight: 800; letter-spacing: .03em; white-space: nowrap; cursor: pointer; }
+        .aos-dock-button[aria-pressed="true"] { color: #ffc400; border-color: #ffc400; }
+        .aos-dock-button:focus-visible { outline: 2px solid #ffc400; outline-offset: 2px; }
 
         .ixi-relationship-shell {
           width: 100%;

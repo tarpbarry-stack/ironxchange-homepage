@@ -2,7 +2,24 @@
 .leftClosed { grid-template-columns: minmax(0, 1fr) var(--rail-width); }
 .rightClosed { grid-template-columns: var(--rail-width) minmax(0, 1fr); }
 .leftClosed.rightClosed { grid-template-columns: minmax(0, 1fr); }
-.center { position: relative; grid-column: 2; grid-row: 1; min-width: 0; display: flex; flex-direction: column; align-items: stretch; }
+.center { position: relative; grid-column: 2; grid-row: 1; min-width: 0; display: flex; flex-direction: column; align-items: stretch; container-type: inline-size; container-name: aos-board; }
+.searchDeck { display: grid; grid-template-columns: repeat(2, 150px) minmax(420px, 600px) repeat(2, 150px); justify-content: center; gap: clamp(24px, 2.1vw, 40px); align-items: start; min-width: 0; }
+.searchDeckControls { min-width: 0; }
+.searchDeckControls :global(.workspace-controls) { width: 100%; }
+.searchDeckControls :global(.ixi-control-surface) { box-sizing: border-box; width: 100%; min-width: 0; }
+.searchPocketSlot { width: 150px; height: 102px; margin-top: 24px; position: relative; }
+.searchPocketSlot :global(.ixi-pocket-left), .searchPocketSlot :global(.ixi-pocket-right) { position: relative; top: 0; }
+.pocketDropPad { position: absolute; inset: 0; z-index: 1; pointer-events: auto; }
+/* AOS has no active-stack or theater command; keep the native pocket Board, loop and arm controls. */
+.searchPocketSlot :global(.ixi-pocket-rail-action.stack), .searchPocketSlot :global(.ixi-pocket-rail-action.theater), .searchPocketSlot :global(.ixi-pocket-rail-action.send) { display: none; }
+.searchDeckClosed { grid-template-columns: minmax(0, 600px); }
+.searchDeckClosed .searchPocketSlot { display: none; }
+.hiddenPocketAccess { display: none; margin: 4px 0 8px; padding: 8px; border: 1px solid var(--ix-line-strong); background: var(--ix-surface-raised); color: var(--ix-text-primary); font-size: 11px; }
+.hiddenPocketAccess summary { cursor: pointer; color: var(--ix-yellow); font-weight: 750; }
+.hiddenPocketAccess > div { display: flex; align-items: center; flex-wrap: wrap; gap: 7px; padding: 7px 0; border-top: 1px solid var(--ix-line-strong); }
+.hiddenPocketAccess strong { min-width: 68px; color: #aaa; }
+.hiddenPocketAccess button { min-height: 36px; padding: 5px 8px; border: 1px solid var(--ix-line-strong); background: #171717; color: var(--ix-text-primary); cursor: pointer; }
+.hiddenPocketAccess button:focus-visible { outline: 2px solid var(--ix-yellow); }
 .leftClosed .center { grid-column: 1; }
 .toolbar { grid-row: 1; position: sticky; top: 90px; min-width: 0; height: var(--toolbar-height, calc(100dvh - 230px)); box-sizing: border-box; display: flex; flex-direction: column; border: 0; border-right: 1px solid var(--line); border-radius: 0; background: var(--ix-surface-raised); color: var(--ix-text-primary); overflow: hidden; }
 .left { grid-column: 1; }.right { grid-column: 3; }
@@ -73,6 +90,18 @@
 /* Position only: search keeps its own inputs, sizing and internal geometry. */
 .chassis .center :global(.ixi-control-surface) { margin-top: 0; }
 @media (min-width: 1700px) { .chassis { --rail-width: 280px; } }
+@container aos-board (max-width: 1449px) {
+  .searchDeck { grid-template-columns: 150px minmax(0, 600px) 150px; gap: 20px; }
+  .outerPocket { display: none; }
+  .searchDeckClosed { grid-template-columns: minmax(0, 600px); }
+  .hiddenPocketAccess { display: block; }
+  .hiddenInnerPocket { display: none !important; }
+}
+@container aos-board (max-width: 949px) {
+  .searchDeck, .searchDeckClosed { grid-template-columns: minmax(0, 600px); }
+  .searchPocketSlot { display: none; }
+  .hiddenInnerPocket { display: flex !important; }
+}
 @media (max-width: 1250px) { .chassis { --rail-width: 205px; } .center { padding-top: 52px; } }
 @media (max-width: 999px) {
   .chassis, .leftClosed, .rightClosed, .leftClosed.rightClosed { grid-template-columns: minmax(0, 1fr); gap: 0; }

@@ -38,6 +38,8 @@ import { captureIXEvent } from "../../lib/posthog";
 
 import IXIDragEngine from "../../components/ixi-chassis/IXIDragEngine";
 import IXIEnvironmentRail from "../../components/IXIEnvironmentRail";
+import IXIOperatingNav from "../../components/ixi-os/IXIOperatingNav";
+import InventoryMachineRail from "../../components/ixi-os/InventoryMachineRail";
 import IXIActiveStack from "../../components/ixi-chassis/IXIActiveStack";
 import IXIBoard from "../../components/ixi-chassis/IXIBoard";
 import IXIBoardSurface
@@ -117,6 +119,13 @@ import {
   setIXIActionNotice
 } from "../../components/ixi-object-system/IXIActionNoticeEngine";
 
+const INVENTORY_RAIL_CONTAINERS = ["railLeft", "railRight"];
+
+function InventoryBoardDrop({ children }) {
+  const { setNodeRef, isOver } = useDroppable({ id: "board", data: { containerId: "board" } });
+  return <div ref={setNodeRef} className={`inventory-board-drop ${isOver ? "inventory-board-drop-over" : ""}`}>{children}</div>;
+}
+
 export default function MyListingsV2({ inventoryMode = "owned" }) {
   const isSold = inventoryMode === "sold";
   const IXI_WORKSPACE_SETTINGS_ID = isSold ? "__soldWorkspaceSettings" : OWNED_SETTINGS_ID;
@@ -125,6 +134,8 @@ export default function MyListingsV2({ inventoryMode = "owned" }) {
   const [soldFiltersOpen, setSoldFiltersOpen] = useState(false);
   const [inventoryStatus, setInventoryStatus] = useState({ loading: true, error: "", total: 0, page: 1, pageSize: 24 });
   const [inventoryRevision, setInventoryRevision] = useState(0);
+  const [machineRails, setMachineRails] = useState({ left: true, right: true });
+  const [railDraggingId, setRailDraggingId] = useState("");
   const soldWorkspaceLayoutRef = useRef(null);
   const soldSortRef = useRef(soldQuery.sort);
   const [soldFilterListings, setSoldFilterListings] = useState([]);
@@ -161,15 +172,7 @@ const [activeStacksOpen, setActiveStacksOpen] = useState({
   bottom: false
 });
 
-const [machineContainers, setMachineContainers] = useState({
-  board: [],
-  stackTop: [],
-  stackBottom: [],
-  pocketLeft: [],
-  pocketRight: [],
-  pocketLeft2: [],
-  pocketRight2: []
-});
+const [machineContainers, setMachineContainers] = useState(() => createEmptyWorkspaceContainers(INVENTORY_RAIL_CONTAINERS));
 
 const [activeStackLayouts, setActiveStackLayouts] = useState({
   top: "horizontal",
@@ -193,7 +196,8 @@ const POCKET_TARGETS = [
 
   const DIRECT_CONTAINER_TARGETS = [
   ...POCKET_TARGETS,
-  "stackTop"
+  "stackTop",
+  ...INVENTORY_RAIL_CONTAINERS
 ];
 
   const [activeStackHover, setActiveStackHover] = useState("");
@@ -208,6 +212,7 @@ const POCKET_TARGETS = [
   const [ixiOutlineFilter, setIxiOutlineFilter] = useState("all");
 
   const [pocketThumbSize, setPocketThumbSize] = useState("medium");
+  const [searchCollapsed, setSearchCollapsed] = useState(false);
 
   const [cardScaleMode, setCardScaleMode] = useState("xl");
   const cardScaleMetrics = getIXICardScalePreset(cardScaleMode);
@@ -581,6 +586,41 @@ const workspaceListings = useMemo(() => {
   return sellerListings;
 }, [sellerListings]);
 
+useEffect(() => {
+  try {
+    const stored = JSON.parse(window.localStorage.getItem(`ixi-${isSold ? "sold" : "inventory"}-machine-rails-v2`) || "null");
+    if (stored && typeof stored.left === "boolean" && typeof stored.right === "boolean") setMachineRails(stored);
+  } catch { /* Use the default open rails. */ }
+}, [isSold]);
+
+function toggleMachineRail(side) {
+  setMachineRails(current => {
+    const next = { ...current, [side]: !current[side] };
+    try { window.localStorage.setItem(`ixi-${isSold ? "sold" : "inventory"}-machine-rails-v2`, JSON.stringify(next)); } catch { /* Visibility still works for this visit. */ }
+    return next;
+  });
+}
+
+const inventorySummary = useMemo(() => {
+  const owned = workspaceListings.filter(item => !item.inventorySessionOnly);
+  let asking = 0;
+  let priced = 0;
+  owned.forEach(item => {
+    const value = Number(String(item.price || item.publicData?.price || "").replace(/[^0-9.-]/g, ""));
+    if (Number.isFinite(value) && value > 0) { asking += value; priced += 1; }
+  });
+  const ownedIds = new Set(owned.map(item => String(getListingId(item))));
+  return {
+    count: owned.length, asking, priced,
+    board: (machineContainers.board || []).filter(id => ownedIds.has(String(id))).length,
+    left: (machineContainers.railLeft || []).filter(id => ownedIds.has(String(id))).length,
+    right: (machineContainers.railRight || []).filter(id => ownedIds.has(String(id))).length
+  };
+}, [workspaceListings, machineContainers]);
+
+const railLeftItems = useMemo(() => (machineContainers.railLeft || []).map(id => workspaceListings.find(item => String(getListingId(item)) === String(id))).filter(Boolean), [machineContainers.railLeft, workspaceListings]);
+const railRightItems = useMemo(() => (machineContainers.railRight || []).map(id => workspaceListings.find(item => String(getListingId(item)) === String(id))).filter(Boolean), [machineContainers.railRight, workspaceListings]);
+
 const containerStateKey = useMemo(() => {
   return workspaceListings
     .map(item => {
@@ -594,7 +634,7 @@ useEffect(() => {
   if (isSold) {
     const ids = workspaceListings.map(item => String(getListingId(item)));
     const saved = soldWorkspaceLayoutRef.current || ixiCardState?.[IXI_WORKSPACE_LAYOUT_ID]?.machineContainers || {};
-    const visible = sanitizeWorkspaceContainers(saved, ids);
+    const visible = sanitizeWorkspaceContainers(saved, ids, { extraContainers: INVENTORY_RAIL_CONTAINERS });
     // A chosen research sort controls the board; pocket placement survives.
     if (soldSortRef.current !== inventoryStatus.sort || !ids.every(id => Object.values(saved).some(items => items.includes(id)))) {
       const order = new Map(ids.map((id, index) => [id, index]));
@@ -621,7 +661,8 @@ useEffect(() => {
     setMachineContainers(
       sanitizeWorkspaceContainers(
         savedLayout.machineContainers,
-        validMachineIds
+        validMachineIds,
+        { extraContainers: INVENTORY_RAIL_CONTAINERS }
       )
     );
 
@@ -633,7 +674,7 @@ useEffect(() => {
   return;
 }
 
-  const nextContainers = createEmptyWorkspaceContainers();
+  const nextContainers = createEmptyWorkspaceContainers(INVENTORY_RAIL_CONTAINERS);
 
   workspaceListings.forEach(item => {
     const id = String(getListingId(item));
@@ -943,7 +984,7 @@ function moveMachineBackToBoard(machineId) {
 }
 
 function getListingById(machineId) {
-  return listings.find(
+  return workspaceListings.find(
     item => String(getListingId(item)) === String(machineId)
   );
 }
@@ -1049,6 +1090,7 @@ function sendListingToBack(listing) {
 
   executeIXITransaction(result);
 }
+
   async function toggleSave(listing) {
     if (!sdk) {
       window.location.href = "/login";
@@ -1331,6 +1373,8 @@ function updateCardScaleMode(nextMode) {
 
             <Navbar />
 
+      <IXIOperatingNav active={isSold ? "/sold" : "/account/my-listings-v2"} />
+
    
 <IXIWorkspaceEngine
   workspaceSettings={workspaceSettings}
@@ -1368,7 +1412,8 @@ toggleSearchSurfaceRevealed
     setRightPocketMode,
     setRightPocket2Mode,
     setActiveDndId,
-    clearMachineDragState
+    clearMachineDragState,
+    extraContainers: INVENTORY_RAIL_CONTAINERS
   });  
     function sendMachineToArmedDestination(listing) {
   if (!armedDestination) return;
@@ -1401,17 +1446,18 @@ toggleSearchSurfaceRevealed
     cardContext="inventory"
     sensors={sensors}
     workspaceCollisionDetection={workspaceCollisionDetection}
-    handleWorkspaceDragStart={handleWorkspaceDragStart}
-    handleWorkspaceDragEnd={handleWorkspaceDragEnd}
-    handleWorkspaceDragCancel={handleWorkspaceDragCancel}
+    handleWorkspaceDragStart={event => { setRailDraggingId(event?.active?.data?.current?.railTile ? String(event.active.id) : ""); handleWorkspaceDragStart(event); }}
+    handleWorkspaceDragEnd={event => { handleWorkspaceDragEnd(event); setRailDraggingId(""); }}
+    handleWorkspaceDragCancel={() => { handleWorkspaceDragCancel(); setRailDraggingId(""); }}
     getActiveDndListing={getActiveDndListing}
+    renderActiveDndOverlay={railDraggingId ? ({ object }) => <div className="inventory-tile-drag-overlay">⋮⋮ {object?.title || "Machine"}</div> : undefined}
     activeDndId={activeDndId}
     savedIds={savedIds}
     ixiCardState={ixiCardState}
     cardScaleMode={cardScaleMode}
   >
     <main>
-  <section className="saved-environment-shell">
+  <section className="saved-environment-shell inventory-legacy-nav">
    <IXIEnvironmentRail
   activeEnvironment={isSold ? "SOLD" : "INVENTORY"}
   hasAccount={!!sdk}
@@ -1423,7 +1469,41 @@ toggleSearchSurfaceRevealed
   </section>
       
 
+     {!isSold && <div className="inventory-scoreboard" role="status" aria-label="Inventory summary" aria-busy={inventoryStatus.loading}>
+       <div><span>OWNED MACHINES</span><strong>{inventoryStatus.loading ? "…" : inventorySummary.count}</strong><small>Current inventory</small></div>
+       <div><span>TOTAL ASKING</span><strong>{inventoryStatus.loading ? "…" : inventorySummary.priced ? new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(inventorySummary.asking) : "—"}</strong><small>{inventorySummary.priced} with an asking price</small></div>
+       <div><span>ON BOARD</span><strong>{inventoryStatus.loading ? "…" : inventorySummary.board}</strong><small>Full cards in this workspace</small></div>
+       <div><span>SIDE RAILS</span><strong>{inventoryStatus.loading ? "…" : `${inventorySummary.left} / ${inventorySummary.right}`}</strong><small>Left / Right machine tiles</small></div>
+     </div>}
+     {isSold && <div className="sold-toolbar" aria-label="Sold inventory filters">
+       <div className="sold-scoreboard" role="status" aria-label="Sold sales summary" aria-busy={inventoryStatus.loading}>
+         <strong>SOLD <span>{inventoryStatus.loading ? "…" : inventoryStatus.error ? "—" : `${inventoryStatus.total} ${inventoryStatus.total === 1 ? "sale" : "sales"}`}</span></strong>
+         <div className="sold-value"><span>TOTAL SOLD</span><b>{inventoryStatus.loading ? "…" : inventoryStatus.error || !inventoryStatus.salesSummary ? "Unavailable" : inventoryStatus.salesSummary.totals.length
+           ? inventoryStatus.salesSummary.totals.map(({ currency, amountCents }) => new Intl.NumberFormat("en-US", { style: "currency", currency, currencyDisplay: currency === "USD" ? "symbol" : "code", minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(amountCents / 100)).join(" · ")
+           : inventoryStatus.salesSummary.missingPriceCount ? "Not recorded" : "$0.00"}</b></div>
+         {!inventoryStatus.loading && !inventoryStatus.error && inventoryStatus.salesSummary?.missingPriceCount > 0 && <small>{inventoryStatus.salesSummary.missingPriceCount} {inventoryStatus.salesSummary.missingPriceCount === 1 ? "sale missing its price" : "sales missing prices"}</small>}
+         {!inventoryStatus.loading && !inventoryStatus.error && inventoryStatus.salesSummary?.returnedCount > 0 && <small>Returned sales excluded from total</small>}
+       </div>
+       <button type="button" className="sold-filter-toggle" aria-expanded={soldFiltersOpen} aria-controls="sold-filter-fields" onClick={() => setSoldFiltersOpen(open => !open)}>FILTER SALES <span aria-hidden="true">{soldFiltersOpen ? "−" : "+"}</span></button>
+       <div id="sold-filter-fields" className="sold-filters" data-mobile-open={soldFiltersOpen}>
+       <label>Settlement<select value={soldQuery.settlement} onChange={event => setSoldQuery(current => ({ ...current, settlement: event.target.value, page: 1 }))}><option value="all">All</option><option value="open">Open</option><option value="closed">Closed</option></select></label>
+       <label>Sale status<select value={soldQuery.status} onChange={event => setSoldQuery(current => ({ ...current, status: event.target.value, page: 1 }))}><option value="all">All sales</option><option value="sold">Sold</option><option value="returned">Returned</option></select></label>
+       <label>From<input type="date" value={soldQuery.from} onChange={event => setSoldQuery(current => ({ ...current, from: event.target.value, page: 1 }))} /></label>
+       <label>To<input type="date" value={soldQuery.to} onChange={event => setSoldQuery(current => ({ ...current, to: event.target.value, page: 1 }))} /></label>
+       <label>Sort<select value={soldQuery.sort} onChange={event => setSoldQuery(current => ({ ...current, sort: event.target.value, page: 1 }))}>{[["date-desc", "Newest sale"], ["date-asc", "Oldest sale"], ["price-desc", "Price: high first"], ["price-asc", "Price: low first"], ["buyer-asc", "Buyer"], ["seller-asc", "Sold by"], ["make-asc", "Make / model"]].map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
+       <button type="button" disabled={inventoryStatus.loading} onClick={() => setInventoryRevision(value => value + 1)}>Refresh</button>
+       </div>
+     </div>}
+
+<div className={`inventory-rail-layout ${machineRails.left ? "" : "inventory-left-folded"} ${machineRails.right ? "" : "inventory-right-folded"}`}>
+  {machineRails.left && <div className="inventory-machine-sidebar"><InventoryMachineRail title="LEFT RAIL" side="left" containerId="railLeft" items={railLeftItems} onBoard={id => moveMachineToContainer(id, "board")} onArm={() => toggleArmedDestination("railLeft")} armed={armedDestination === "railLeft"} onClose={() => toggleMachineRail("left")} sold={isSold} /></div>}
+  <section className="inventory-board-column" aria-label={isSold ? "Sold machine board" : "Inventory machine board"}>
+    <div className="inventory-rail-toggles">
+      <button type="button" aria-label={`${machineRails.left ? "Close" : "Open"} left rail`} title={`${machineRails.left ? "Close" : "Open"} left rail`} aria-expanded={machineRails.left} onClick={() => toggleMachineRail("left")}>{machineRails.left ? "‹" : "›"}</button>
+      <button type="button" aria-label={`${machineRails.right ? "Close" : "Open"} right rail`} title={`${machineRails.right ? "Close" : "Open"} right rail`} aria-expanded={machineRails.right} onClick={() => toggleMachineRail("right")}>{machineRails.right ? "›" : "‹"}</button>
+    </div>
 <IXIChassis>
+  <div className={searchCollapsed ? "inventory-search-collapsed" : "inventory-search-expanded"}>
   <aside className="ixi-command-left">
     <section className="ixi-pocket-row">
  
@@ -1484,7 +1564,9 @@ toggleSearchSurfaceRevealed
   toggleRailRevealed={toggleRailRevealed}
 
   searchSurfaceRevealed={searchSurfaceRevealed}
-  toggleSearchSurfaceRevealed={toggleSearchSurfaceRevealed}/>
+  toggleSearchSurfaceRevealed={toggleSearchSurfaceRevealed}
+  searchCollapsed={searchCollapsed}
+  onToggleSearchCollapsed={() => setSearchCollapsed(value => !value)}/>
                 </div>
 
   <aside className="ixi-command-right">
@@ -1522,7 +1604,18 @@ toggleSearchSurfaceRevealed
 />
  </section>
   </aside>
+  </div>
     </IXIChassis>
+{!searchCollapsed && ["pocketLeft", "pocketLeft2", "pocketRight", "pocketRight2"].some(key => machineContainers[key]?.length) &&
+  <details className="inventory-hidden-pocket-access">
+    <summary>ACCESS HIDDEN POCKETS</summary>
+    {[["pocketLeft2", "III", "outer"], ["pocketLeft", "I", "inner"], ["pocketRight", "II", "inner"], ["pocketRight2", "IV", "outer"]].map(([key, label, group]) =>
+      <div key={key} className={`inventory-hidden-pocket-group ${group}`}><strong>POCKET {label}</strong>
+        {(machineContainers[key] || []).map(id => <button key={id} type="button"
+          onClick={() => moveMachineToContainer(id, "board")}>{getListingById(id)?.title || id} → BOARD</button>)}
+        {!machineContainers[key]?.length && <span>Empty</span>}
+      </div>)}
+  </details>}
 
               
 <IXIActiveStackZone
@@ -1555,29 +1648,10 @@ toggleSearchSurfaceRevealed
   getSellerListingCardProps={getSellerListingCardProps}
 />
               
-     {isSold && <div className="sold-toolbar" aria-label="Sold inventory filters">
-       <div className="sold-scoreboard" role="status" aria-label="Sold sales summary" aria-busy={inventoryStatus.loading}>
-         <strong>SOLD <span>{inventoryStatus.loading ? "…" : inventoryStatus.error ? "—" : `${inventoryStatus.total} ${inventoryStatus.total === 1 ? "sale" : "sales"}`}</span></strong>
-         <div className="sold-value"><span>TOTAL SOLD</span><b>{inventoryStatus.loading ? "…" : inventoryStatus.error || !inventoryStatus.salesSummary ? "Unavailable" : inventoryStatus.salesSummary.totals.length
-           ? inventoryStatus.salesSummary.totals.map(({ currency, amountCents }) => new Intl.NumberFormat("en-US", { style: "currency", currency, currencyDisplay: currency === "USD" ? "symbol" : "code", minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(amountCents / 100)).join(" · ")
-           : inventoryStatus.salesSummary.missingPriceCount ? "Not recorded" : "$0.00"}</b></div>
-         {!inventoryStatus.loading && !inventoryStatus.error && inventoryStatus.salesSummary?.missingPriceCount > 0 && <small>{inventoryStatus.salesSummary.missingPriceCount} {inventoryStatus.salesSummary.missingPriceCount === 1 ? "sale missing its price" : "sales missing prices"}</small>}
-         {!inventoryStatus.loading && !inventoryStatus.error && inventoryStatus.salesSummary?.returnedCount > 0 && <small>Returned sales excluded from total</small>}
-       </div>
-       <button type="button" className="sold-filter-toggle" aria-expanded={soldFiltersOpen} aria-controls="sold-filter-fields" onClick={() => setSoldFiltersOpen(open => !open)}>FILTER SALES <span aria-hidden="true">{soldFiltersOpen ? "−" : "+"}</span></button>
-       <div id="sold-filter-fields" className="sold-filters" data-mobile-open={soldFiltersOpen}>
-       <label>Settlement<select value={soldQuery.settlement} onChange={event => setSoldQuery(current => ({ ...current, settlement: event.target.value, page: 1 }))}><option value="all">All</option><option value="open">Open</option><option value="closed">Closed</option></select></label>
-       <label>Sale status<select value={soldQuery.status} onChange={event => setSoldQuery(current => ({ ...current, status: event.target.value, page: 1 }))}><option value="all">All sales</option><option value="sold">Sold</option><option value="returned">Returned</option></select></label>
-       <label>From<input type="date" value={soldQuery.from} onChange={event => setSoldQuery(current => ({ ...current, from: event.target.value, page: 1 }))} /></label>
-       <label>To<input type="date" value={soldQuery.to} onChange={event => setSoldQuery(current => ({ ...current, to: event.target.value, page: 1 }))} /></label>
-       <label>Sort<select value={soldQuery.sort} onChange={event => setSoldQuery(current => ({ ...current, sort: event.target.value, page: 1 }))}>{[["date-desc", "Newest sale"], ["date-asc", "Oldest sale"], ["price-desc", "Price: high first"], ["price-asc", "Price: low first"], ["buyer-asc", "Buyer"], ["seller-asc", "Sold by"], ["make-asc", "Make / model"]].map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
-       <button type="button" disabled={inventoryStatus.loading} onClick={() => setInventoryRevision(value => value + 1)}>Refresh</button>
-       </div>
-     </div>}
      {inventoryStatus.loading && <p role="status">Loading {isSold ? "sold machines" : "inventory"}…</p>}
      {isSold && soldIssues.length > 0 && <details className="sold-toolbar"><summary>{soldIssues.length} historical sale facts need review</summary><ul>{soldIssues.map((issue, index) => <li key={`${issue.documentId}:${issue.code}:${index}`}>{issue.passportId ? `${issue.passportId}: ` : ""}{issue.message}</li>)}</ul></details>}
      {inventoryStatus.error && <p role="alert">{inventoryStatus.error} <button type="button" onClick={() => isSold ? setInventoryRevision(value => value + 1) : window.location.reload()}>Retry</button></p>}
-     <IXIBoardSurface mobileCards
+     <InventoryBoardDrop><IXIBoardSurface mobileCards
   scaleMode={cardScaleMode}
   centerRows={true}
 >
@@ -1605,7 +1679,10 @@ toggleSearchSurfaceRevealed
     getSellerListingCardProps
   }
 />
-</IXIBoardSurface>
+</IXIBoardSurface></InventoryBoardDrop>
+       </section>
+       {machineRails.right && <div className="inventory-machine-sidebar"><InventoryMachineRail title="RIGHT RAIL" side="right" containerId="railRight" items={railRightItems} onBoard={id => moveMachineToContainer(id, "board")} onArm={() => toggleArmedDestination("railRight")} armed={armedDestination === "railRight"} onClose={() => toggleMachineRail("right")} sold={isSold} /></div>}
+     </div>
     
 <IXICardScaleControl mobileDensity
   value={cardScaleMode}
@@ -1635,6 +1712,52 @@ toggleSearchSurfaceRevealed
 
 
       <Footer />
+
+      <style jsx global>{`
+        .inventory-hidden-pocket-access { display: none; margin: 6px 0 12px; padding: 8px; border: 1px solid #383838; background: #171717; color: #ddd; font-size: 11px; }
+        .inventory-hidden-pocket-access summary { cursor: pointer; color: #ffcf34; font-weight: 750; }
+        .inventory-hidden-pocket-group { display: flex; align-items: center; flex-wrap: wrap; gap: 7px; padding: 7px 0; border-top: 1px solid #383838; }
+        .inventory-hidden-pocket-group strong { min-width: 68px; color: #aaa; }
+        .inventory-hidden-pocket-group button { min-height: 36px; padding: 5px 8px; border: 1px solid #383838; background: #111; color: #ddd; cursor: pointer; }
+        .inventory-hidden-pocket-group button:focus-visible { outline: 2px solid #ffcf34; }
+        @media (min-width: 851px) and (max-width: 1449px) {
+          .inventory-hidden-pocket-access { display: block; }
+          .inventory-hidden-pocket-group.inner { display: none; }
+        }
+        @media (max-width: 850px) { .inventory-hidden-pocket-access { display: block; } }
+        .inventory-search-collapsed .ixi-command-left,
+        .inventory-search-collapsed .ixi-command-right { display: none !important; }
+        .inventory-search-expanded .ixi-command-left,
+        .inventory-search-expanded .ixi-command-right { top: 24px; }
+        @media (min-width: 851px) and (max-width: 1449px) {
+          .ixi-command-chassis .ixi-pocket-l2,
+          .ixi-command-chassis .ixi-pocket-r2 { display: none !important; }
+          .ixi-command-chassis .ixi-command-left,
+          .ixi-command-chassis .ixi-command-right { width: var(--station-w); height: var(--station-h); }
+          .ixi-command-chassis .ixi-pocket-row { grid-template-columns: var(--station-w); grid-template-rows: var(--station-h); }
+          .ixi-command-chassis .ixi-command-left .ixi-pocket-left:not(.ixi-pocket-l2),
+          .ixi-command-chassis .ixi-command-right .ixi-pocket-right:not(.ixi-pocket-r2) { grid-column: 1; grid-row: 1; }
+        }
+        /* The search station responds to the space between the rails, not the viewport. */
+        @container inventory-board (max-width: 1449px) {
+          .inventory-board-column .ixi-command-chassis { --control-half: 300px; --station-gap: 20px; }
+          .inventory-board-column .ixi-command-center { width: min(100%, 600px); }
+          .ixi-command-chassis .ixi-pocket-l2,
+          .ixi-command-chassis .ixi-pocket-r2 { display: none !important; }
+          .inventory-board-column .ixi-command-chassis .ixi-command-left,
+          .inventory-board-column .ixi-command-chassis .ixi-command-right { width: var(--station-w); height: var(--station-h); top: 24px; }
+          .ixi-command-chassis .ixi-pocket-row { grid-template-columns: var(--station-w); grid-template-rows: var(--station-h); }
+          .ixi-command-chassis .ixi-command-left .ixi-pocket-left:not(.ixi-pocket-l2),
+          .ixi-command-chassis .ixi-command-right .ixi-pocket-right:not(.ixi-pocket-r2) { grid-column: 1; grid-row: 1; }
+          .inventory-hidden-pocket-access { display: block; }
+          .inventory-hidden-pocket-group.inner { display: none; }
+        }
+        @container inventory-board (max-width: 949px) {
+          .ixi-command-chassis .ixi-command-left,
+          .ixi-command-chassis .ixi-command-right { display: none !important; }
+          .inventory-hidden-pocket-group.inner { display: flex; }
+        }
+      `}</style>
                 
       <style jsx>{`
         @font-face {
@@ -1644,24 +1767,52 @@ toggleSearchSurfaceRevealed
           font-weight:100 900;
           font-display:swap;
         }
-        .sold-toolbar { display:flex; flex-wrap:wrap; align-items:center; gap:20px 32px; margin:20px 0; padding:20px 24px; background:var(--ix-surface-raised); border:1px solid var(--ix-line-strong); border-radius:10px; font-family:'IXI Sold Inter','Inter Variable', Inter, ui-sans-serif, sans-serif; }
-        .sold-scoreboard { display:grid; gap:10px; margin-right:auto; min-width:0; max-width:100%; }
+        .inventory-scoreboard { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; margin:16px 0; font-family:'IXI Sold Inter','Inter Variable',Inter,ui-sans-serif,sans-serif; }
+        .inventory-scoreboard > div { display:flex; flex-direction:column; min-width:0; gap:5px; padding:13px 16px; background:#171717; border:1px solid #383838; border-radius:2px; }
+        .inventory-scoreboard span { color:#aaa; font-size:10px; font-weight:700; letter-spacing:.08em; }
+        .inventory-scoreboard strong { color:#ffcc00; font-size:23px; font-weight:750; line-height:1.15; font-variant-numeric:tabular-nums; overflow-wrap:anywhere; }
+        .inventory-scoreboard small { color:#aaa; font-size:11px; }
+        .inventory-rail-layout { display:grid; grid-template-columns:clamp(185px,16vw,280px) minmax(0,1fr) clamp(185px,16vw,280px); gap:12px; align-items:start; }
+        .inventory-rail-layout.inventory-left-folded { grid-template-columns:minmax(0,1fr) clamp(185px,16vw,280px); }
+        .inventory-rail-layout.inventory-right-folded { grid-template-columns:clamp(185px,16vw,280px) minmax(0,1fr); }
+        .inventory-rail-layout.inventory-left-folded.inventory-right-folded { grid-template-columns:minmax(0,1fr); }
+        .inventory-board-column { min-width:0; container-type:inline-size; container-name:inventory-board; }
+        .inventory-board-drop { min-height:320px; }
+        .inventory-board-drop-over { outline:2px solid #ffcc00; outline-offset:-3px; }
+        .inventory-rail-toggles { display:flex; align-items:center; justify-content:space-between; height:44px; margin-bottom:6px; }
+        .inventory-rail-toggles button { display:grid; place-items:center; width:44px; height:44px; padding:0; border:1px solid #383838; border-radius:3px; background:#171717; color:#c9c9c9; font-size:26px; line-height:1; cursor:pointer; }
+        .inventory-rail-toggles button:hover, .inventory-rail-toggles button:focus-visible { color:#ffcc00; border-color:#88732c; }
+        .inventory-rail-toggles button:focus-visible { outline:2px solid #ffcc00; outline-offset:2px; }
+        :global(.inventory-tile-drag-overlay) { max-width:260px; padding:16px; background:#1c1c1c; border:1px solid #ffcc00; color:#eee; box-shadow:0 12px 30px #000a; font-size:12px; font-weight:700; }
+        @media(max-width:1100px) and (min-width:761px) {
+          .inventory-rail-layout { grid-template-columns:185px minmax(0,1fr) 185px; }
+          .inventory-rail-layout.inventory-left-folded { grid-template-columns:minmax(0,1fr) 185px; }
+          .inventory-rail-layout.inventory-right-folded { grid-template-columns:185px minmax(0,1fr); }
+        }
+        .sold-toolbar { display:flex; flex-wrap:wrap; align-items:center; gap:12px 20px; margin:16px 0; padding:13px 16px; background:#171717; border:1px solid #383838; border-radius:2px; font-family:'IXI Sold Inter','Inter Variable', Inter, ui-sans-serif, sans-serif; }
+        .sold-scoreboard { display:grid; gap:4px; margin-right:auto; min-width:0; max-width:100%; }
         .sold-scoreboard strong { display:flex; align-items:baseline; gap:14px; color:#ffcc00; font-size:20px; line-height:1.25; font-weight:750; letter-spacing:-.02em; }
         .sold-scoreboard strong span { font-size:13px; font-weight:500; letter-spacing:0; color:var(--ix-text-secondary); }
         .sold-value { display:flex; flex-wrap:wrap; align-items:baseline; gap:8px 14px; }
         .sold-value span { font-size:11px; line-height:1.4; letter-spacing:.08em; font-weight:650; color:var(--ix-text-secondary); }
-        .sold-value b { font-size:28px; line-height:1.15; font-weight:700; letter-spacing:-.025em; color:#ffcc00; font-variant-numeric:tabular-nums; overflow-wrap:anywhere; }
+        .sold-value b { font-size:23px; line-height:1.15; font-weight:700; letter-spacing:-.025em; color:#ffcc00; font-variant-numeric:tabular-nums; overflow-wrap:anywhere; }
         .sold-scoreboard small { font-size:12px; line-height:1.4; color:var(--ix-text-secondary); }
-        .sold-filters { display:flex; flex-wrap:wrap; align-items:end; gap:12px; max-width:100%; }
+        .sold-filters { display:flex; flex-wrap:wrap; align-items:end; gap:8px; max-width:100%; }
         .sold-filter-toggle { display:none; }
-        .sold-toolbar label { display:grid; gap:8px; font-size:12px; line-height:1.4; font-weight:550; color:var(--ix-text-secondary); }
-        .sold-toolbar select, .sold-toolbar input, .sold-toolbar button { box-sizing:border-box; background:var(--ix-surface); color:var(--ix-text-primary); border:1px solid var(--ix-line-strong); border-radius:6px; padding:10px 12px; height:42px; min-width:0; font-family:inherit; font-size:13px; line-height:20px; font-weight:500; color-scheme:dark; }
-        .sold-toolbar input { width:150px; }
+        .sold-toolbar label { display:grid; gap:4px; font-size:11px; line-height:1.4; font-weight:550; color:var(--ix-text-secondary); }
+        .sold-toolbar select, .sold-toolbar input, .sold-toolbar button { box-sizing:border-box; background:var(--ix-surface); color:var(--ix-text-primary); border:1px solid var(--ix-line-strong); border-radius:2px; padding:7px 9px; height:36px; min-width:0; font-family:inherit; font-size:12px; line-height:20px; font-weight:500; color-scheme:dark; }
+        .sold-toolbar input { width:135px; }
         .sold-toolbar button { cursor:pointer; }
         .sold-toolbar button:disabled { opacity:.45; cursor:default; }
         .sold-toolbar :is(input,select,button):focus-visible { outline:2px solid #ffcc00; outline-offset:3px; }
         .sold-toolbar summary { font-size:13px; line-height:1.5; cursor:pointer; }
+        @media(min-width:761px) { .inventory-legacy-nav { display:none; } }
         @media(max-width:760px) {
+          .inventory-rail-layout, .inventory-rail-layout.inventory-left-folded, .inventory-rail-layout.inventory-right-folded, .inventory-rail-layout.inventory-left-folded.inventory-right-folded { display:block; }
+          .inventory-machine-sidebar, .inventory-rail-toggles { display:none; }
+          .inventory-scoreboard { grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px; margin:10px 0; }
+          .inventory-scoreboard > div { padding:10px; }
+          .inventory-scoreboard strong { font-size:19px; }
           .sold-toolbar { padding:12px 14px; gap:8px; margin:10px 0; }
           .sold-scoreboard { gap:4px; width:100%; }
           .sold-value { gap:4px 8px; }
@@ -1686,7 +1837,7 @@ toggleSearchSurfaceRevealed
 
       main {
   min-height: 72vh;
-  padding: 14px 5% 160px;
+  padding: 14px clamp(16px, 2vw, 64px) 160px;
           background:
             radial-gradient(circle at 50% 0%, rgba(255,196,0,.05), transparent 34%),
             linear-gradient(180deg, rgba(255,255,255,.014), rgba(255,255,255,0)),

@@ -34,6 +34,7 @@
 .salesDesk :global(.sales-workspace.hide-sales) { grid-template-columns:260px minmax(0,1fr); }
 .salesDesk :global(.sales-workspace.hide-machines.hide-sales) { grid-template-columns:minmax(0,1fr); }
 .salesDesk :global(.hide-machines .sales-machine-rail),.salesDesk :global(.hide-sales .sales-work-rail) { display:none; }
+.salesDesk :global(.sales-rail-drop-over), .salesDesk :global(.dash-board-drop-over) { outline:2px solid #ffcc00; outline-offset:-3px; }
 .salesDesk :global(.sales-machine-rail),.salesDesk :global(.sales-work-rail) { display:flex; flex-direction:column; min-height:0; min-width:0; background:#151515; border-right:1px solid var(--sales-line); }
 .salesDesk :global(.sales-work-rail) { border-right:0; border-left:1px solid var(--sales-line); background:#121212; }
 .salesDesk :global(.sales-rail-heading) { display:flex; justify-content:space-between; align-items:center; gap:6px; padding:17px 13px 13px; }

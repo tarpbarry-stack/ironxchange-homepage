@@ -32,10 +32,37 @@ test("folding keeps Board state mounted, browsed containers and parked Objects s
     filename: file.pathname, jsc: { parser: { syntax: "ecmascript", jsx: true }, target: "es2022",
       transform: { react: { runtime: "automatic" } } }, module: { type: "commonjs" }
   });
+  function loadShared(name) {
+    const componentFile = new URL(`../components/ixi-os/${name}.jsx`, import.meta.url);
+    const result = transformSync(fs.readFileSync(componentFile, "utf8"), {
+      filename: componentFile.pathname, jsc: { parser: { syntax: "ecmascript", jsx: true }, target: "es2022",
+        transform: { react: { runtime: "automatic" } } }, module: { type: "commonjs" }
+    });
+    const component = { exports: {} };
+    new Function("require", "module", "exports", result.code)(dependency =>
+      dependency.endsWith(".module.css") ? new Proxy({}, { get: (_, key) => String(key) }) : require(dependency),
+    component, component.exports);
+    return component.exports;
+  }
+  function loadPocket(name) {
+    const componentFile = new URL(`../components/ixi-chassis/${name}.js`, import.meta.url);
+    const result = transformSync(fs.readFileSync(componentFile, "utf8"), {
+      filename: componentFile.pathname, jsc: { parser: { syntax: "ecmascript", jsx: true }, target: "es2022",
+        transform: { react: { runtime: "automatic" } } }, module: { type: "commonjs" }
+    });
+    const component = { exports: {} };
+    new Function("require", "module", "exports", result.code)(dependency =>
+      dependency.includes("passportEmailEvents") ? { getPocketFrontMachine: () => null, openIXIPassportEmail: () => {} } : require(dependency),
+    component, component.exports);
+    return component.exports;
+  }
   const module = { exports: {} };
   new Function("require", "module", "exports", compiled.code)(name => {
     if (name.endsWith("ToolbarModel.mjs")) return model;
     if (name.endsWith("MembershipPolicy")) return policy;
+    if (name.endsWith("IXIWorkspaceRailTile")) return loadShared("IXIWorkspaceRailTile");
+    if (name.endsWith("IXIWorkspaceRailHeader")) return loadShared("IXIWorkspaceRailHeader");
+    if (name.includes("/IXIPocket")) return loadPocket(path.basename(name, ".js"));
     if (name.endsWith(".module.css")) return new Proxy({}, { get: (_, key) => String(key) });
     return require(name);
   }, module, module.exports);
@@ -45,14 +72,15 @@ test("folding keeps Board state mounted, browsed containers and parked Objects s
   const yard = { objectId: "object_yard", passportId: "IXIYAR2345", displayName: "Customer Yard", itemObjectIds: ["object_machine"] };
   const machine = { objectId: "object_machine", passportId: "IXIMAC2345", displayName: "Ripper", objectType: "machine", imageUrl: "/existing-ripper.jpg" };
   const parked = { objectId: "object_parked", passportId: "IXIPAR2345", displayName: "Working selection" };
+  const pocketed = { objectId: "object_pocketed", passportId: "IXIPOC2345", displayName: "Pocket selection" };
   let boardMounts = 0;
   function Board() {
     React.useEffect(() => { boardMounts++; }, []);
     return React.createElement("input", { "aria-label": "Board draft", defaultValue: "Keep this draft" });
   }
   const moves = [], opened = [];
-  const props = { registry: new Map([locations, yard, machine, parked].map(object => [object.objectId, object])),
-    indexes: [locations], placements: { board: [locations.objectId], pocketLeft2: [parked.objectId] },
+  const props = { registry: new Map([locations, yard, machine, parked, pocketed].map(object => [object.objectId, object])),
+    indexes: [locations], placements: { board: [locations.objectId], "rail:aos-left": [parked.objectId], pocketLeft2: [pocketed.objectId] },
     session: { objects: {} }, ready: true, preferenceKey: "test-entity:test-principal",
     onMove: (...args) => moves.push(args), onBoard: (...args) => opened.push(args), onReturn: () => {}, onConnect: () => {} };
   const doc = dom.window.document;
@@ -64,6 +92,15 @@ test("folding keeps Board state mounted, browsed containers and parked Objects s
     assert.equal(boardTarget?.node.current, doc.querySelector('[aria-label="Working Board"]'),
       "the full Board must be registered so blank space cannot fall back to the nearest toolbar");
     assert.equal(boardTarget.data.current.dropIntent, "root", "Board drops are placement, not membership");
+    assert.equal(dnd.droppableContainers.get("pocketLeft2")?.data.current.targetSurface, "pocketLeft2");
+    assert.ok(doc.querySelector('[aria-label="Pocket III"] [data-pocket-target="pocketLeft2"]'),
+      "the AOS station uses the native Pocket III component");
+    assert.ok(doc.querySelector('[aria-label="Pocket III"] [aria-label="Drag Pocket selection from Pocket"]'),
+      "the parked Object remains draggable in the native pocket");
+    await click(doc.querySelector('details summary'));
+    await click([...doc.querySelectorAll('details button')].find(button => button.textContent.includes('Pocket selection')));
+    assert.deepEqual(opened, [[pocketed.objectId]], "a pocket hidden at narrower widths remains recoverable to Board");
+    await click(doc.querySelector('[aria-controls="aos-right-toolbar"]'));
     const boardRect = { left: 330, right: 1016, top: 462, bottom: 1100, width: 686, height: 638 };
     const rightRect = { left: 1036, right: 1280, top: 219, bottom: 1051, width: 244, height: 832 };
     const dropArgs = { droppableContainers: dnd.droppableContainers.getEnabled(),
@@ -75,27 +112,31 @@ test("folding keeps Board state mounted, browsed containers and parked Objects s
     const right = doc.getElementById("aos-right-toolbar");
     const board = doc.querySelector('[aria-label="Board draft"]');
     assert.match(left.textContent, /Working selection/);
-    await click(left.querySelector('button[title="Browse Locations"]'));
-    assert.match(right.textContent, /Customer Yard/);
-    await click(right.querySelector('button[title="Browse Customer Yard"]'));
-    assert.match(left.textContent, /Ripper/);
+    assert.doesNotMatch(left.textContent, /Pocket selection/, "a pocketed Object has one visible station");
+    await React.act(async () => {
+      const select = doc.getElementById("aos-left-browse");
+      select.value = locations.objectId;
+      select.dispatchEvent(new dom.window.Event("change", { bubbles: true }));
+    });
+    await click(left.querySelector('button[aria-label="Select Customer Yard"]'));
+    assert.match(right.textContent, /Ripper/);
     assert.match(left.textContent, /Working selection/, "browsing must not evict parked Objects");
-    const mini = left.querySelector('button[title="Open Ripper on Board"]');
-    assert.equal(mini.querySelector('img').getAttribute('src'), "/existing-ripper.jpg");
+    const mini = right.querySelector('button[aria-label="Open Ripper on board"]');
+    assert.equal(right.querySelector('img').getAttribute('src'), "/existing-ripper.jpg");
     await click(mini);
-    assert.deepEqual(opened, [[machine.objectId, yard.objectId]], "clicking a machine opens its canonical Board card");
-    assert.match(right.textContent, /Customer Yard/, "opening a machine must not replace the opposite container browser");
-    await click(left.querySelector('[aria-label="Fold left toolbar"]'));
+    assert.deepEqual(opened, [[pocketed.objectId], [machine.objectId, yard.objectId]], "clicking a machine opens its canonical Board card");
+    assert.match(left.textContent, /Customer Yard/, "opening a machine must not replace the opposite container browser");
+    await click(left.querySelector('[aria-label="Close LEFT RAIL"]'));
     assert.equal(left.getAttribute("aria-hidden"), "true");
     assert.equal(right.getAttribute("aria-hidden"), null);
-    await click(right.querySelector('[aria-label="Fold right toolbar"]'));
+    await click(right.querySelector('[aria-label="Close RIGHT RAIL"]'));
     assert.equal(right.getAttribute("aria-hidden"), "true");
     assert.equal(doc.querySelector('[aria-label="Board draft"]'), board);
     assert.equal(board.value, "Keep this draft");
     assert.equal(boardMounts, 1);
     await click(doc.querySelector('[aria-controls="aos-left-toolbar"]'));
     assert.equal(doc.getElementById("aos-left-toolbar"), left);
-    assert.match(left.textContent, /Ripper/);
+    assert.match(right.textContent, /Ripper/);
     assert.match(left.textContent, /Working selection/);
     const action = left.querySelector('[aria-label="Actions for Working selection"]');
     await React.act(async () => { action.value = "right"; action.dispatchEvent(new dom.window.Event("change", { bubbles: true })); });

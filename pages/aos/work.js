@@ -22,6 +22,7 @@ import {
 } from "@dnd-kit/utilities";
 
 import Navbar from "../../components/Navbar";
+import IXIOperatingNav from "../../components/ixi-os/IXIOperatingNav";
 import Footer from "../../components/Footer";
 
 import IXIAosToolbarChassis from "../../components/ixi-mos/workspace/IXIAosToolbarChassis";
@@ -368,6 +369,7 @@ const POCKET_TARGETS = [
   const [ixiOutlineFilter, setIxiOutlineFilter] = useState("all");
 
   const [pocketThumbSize, setPocketThumbSize] = useState("medium");
+  const [searchCollapsed, setSearchCollapsed] = useState(false);
 
   const [cardScaleMode, setCardScaleMode] = useState("xl");
   const cardScaleMetrics = getIXICardScalePreset(cardScaleMode);
@@ -2727,10 +2729,18 @@ let targetContainer =
 
 const overId =
   String(
-    over?.id || ""
+    ["parked", "contents"].includes(over?.data?.current?.group)
+      ? over?.data?.current?.objectId || over?.id || ""
+      : over?.id || ""
   );
 
 if (!dragId) {
+  setActiveDndId(null);
+  clearMachineDragState?.();
+  return;
+}
+
+if (over?.data?.current?.group === "parked" && overId === dragId) {
   setActiveDndId(null);
   clearMachineDragState?.();
   return;
@@ -3183,8 +3193,9 @@ return null;
   data-ixi-board-skin={boardSkin.skinId}
  >
   <h1 className="aos-work-board-title">IXI AOS WORK</h1>
+  <IXIOperatingNav active="/aos/work" />
   {inventoryRefreshError && <div role="alert" style={{ padding: 12, border: "1px solid #d6aa39", color: "#ffe096", background: "#211e12" }}>{inventoryRefreshError} <button type="button" onClick={() => inventoryReloadRef.current?.()}>RETRY INVENTORY</button></div>}
-  <section className="saved-environment-shell">
+  <details className="aos-legacy-destinations"><summary>MORE DESTINATIONS</summary><section className="saved-environment-shell">
     <IXIEnvironmentRail
       activeEnvironment="AOS"
       hasAccount={!!aosEntity}
@@ -3193,7 +3204,7 @@ return null;
       armedDestination={armedDestination}
       toggleArmedDestination={toggleArmedDestination}
     />
-  </section>
+  </section></details>
 
 <IXIAosScoreboard
   entity={aosEntity}
@@ -3228,6 +3239,7 @@ return null;
 />
 
 <IXIAosToolbarChassis
+    searchCollapsed={searchCollapsed}
     registry={aosWorkspaceObjectRegistry}
     indexes={workspaceSystemIndexes.map(index => getAosWorkspaceObjectById(index.objectId)).filter(Boolean)}
     placements={workspacePlacements}
@@ -3241,6 +3253,8 @@ return null;
     onBoard={openAosObjectOnBoard}
     onReturn={returnAosToolbarObject}
     onConnect={connectAosWorkspaceObjects}
+    armedDestination={armedDestination}
+    toggleArmedDestination={toggleArmedDestination}
     controls={<IXIChassisControls
   workspaceToolbars={true}
   listings={workspaceListings.filter(item => !item.inventorySessionOnly)}
@@ -3263,7 +3277,9 @@ return null;
   toggleRailRevealed={toggleRailRevealed}
 
   searchSurfaceRevealed={searchSurfaceRevealed}
-  toggleSearchSurfaceRevealed={toggleSearchSurfaceRevealed}/>}
+  toggleSearchSurfaceRevealed={toggleSearchSurfaceRevealed}
+  searchCollapsed={searchCollapsed}
+  onToggleSearchCollapsed={() => setSearchCollapsed(value => !value)}/>}
   >
 
               
@@ -3689,6 +3705,9 @@ onDetachContainerFromParents={
   width: 100%;
   margin: 0 auto;
 }
+       .aos-legacy-destinations { margin: 0 18px; color: #aaa; font: 700 10px "Inter Variable", Inter, sans-serif; letter-spacing: .08em; }
+       .aos-legacy-destinations summary { width: fit-content; margin: 8px 0; cursor: pointer; }
+       .aos-legacy-destinations[open] { padding-bottom: 12px; }
 
 
       :global(.ixi-drag-overlay-card) {

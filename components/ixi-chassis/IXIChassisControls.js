@@ -26,6 +26,8 @@ export default function IXIChassisControls({
   toggleRailRevealed = () => {},
   searchSurfaceRevealed = false,
   toggleSearchSurfaceRevealed = () => {},
+  searchCollapsed = false,
+  onToggleSearchCollapsed = () => {},
   workspaceFilterErrors = {},
   workspaceFilterErrorMessage = "",
   parkBrakeOn = false,
@@ -38,7 +40,12 @@ export default function IXIChassisControls({
       !(["category", "make", "model"].includes(key) && String(value).startsWith("ALL ")));
   return (
     <section className="workspace-controls">
-      <IXIControlSurface>
+      <IXIControlSurface fluid={workspaceToolbars}>
+        <button type="button" className="search-fold-actuator"
+          aria-label={searchCollapsed ? "Open search surface and pockets" : "Close search surface and pockets"}
+          aria-expanded={!searchCollapsed} aria-controls="ixi-workspace-search-controls"
+          onClick={onToggleSearchCollapsed} />
+        <div id="ixi-workspace-search-controls" hidden={searchCollapsed}>
         <div className="desktop-search-surface">
          <IXSearchSurface
   listings={listings}
@@ -75,6 +82,7 @@ export default function IXIChassisControls({
             setSortMode={setSavedBoardMode}
           />}
         </div>
+        </div>
 
        <IXIRelationshipControls
   workspaceToolbars={workspaceToolbars}
@@ -97,6 +105,7 @@ export default function IXIChassisControls({
 
       <style jsx>{`
         .workspace-controls {
+          position: relative;
           margin: 0 auto;
           padding: 0;
           background: transparent;
@@ -104,6 +113,35 @@ export default function IXIChassisControls({
           border-radius: 0;
           box-shadow: none;
         }
+
+        .search-fold-actuator {
+          position: absolute;
+          top: -22px;
+          left: 50%;
+          transform: translateX(-50%);
+          z-index: 6;
+          display: grid;
+          place-items: center;
+          width: 44px;
+          height: 44px;
+          padding: 0;
+          border: 0;
+          background: transparent;
+          cursor: pointer;
+        }
+        .search-fold-actuator::before {
+          content: "";
+          display: block;
+          width: 34px;
+          height: 5px;
+          border-radius: 1px 1px 3px 3px;
+          background: rgba(255,255,255,.18);
+          box-shadow: inset 1px 0 0 rgba(255,255,255,.12), 0 1px 3px rgba(0,0,0,.32);
+        }
+        .search-fold-actuator[aria-expanded="false"]::before,
+        .search-fold-actuator:hover::before { background: #ffcf34; }
+        .search-fold-actuator:focus-visible { outline: 2px solid #ffcf34; outline-offset: 2px; }
+        [hidden] { display: none !important; }
 
         .mobile-search-surface {
           display: none;
@@ -114,6 +152,7 @@ export default function IXIChassisControls({
         }
 
         @media (max-width: 850px) {
+          .search-fold-actuator { top: -22px; }
           .aos-board-search-actions { display: flex; justify-content: flex-start; margin: 0 0 6px; }
           .aos-board-search-toggle { display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: auto; min-height: 44px; padding: 0 10px; border: 1px solid #343c30; border-radius: 3px; background: #101411; color: #e2e8dd; font: inherit; font-size: 10px; font-weight: 800; letter-spacing: .04em; white-space: nowrap; cursor: pointer; }
           .aos-board-search-toggle strong { color: #ffc400; font-size: 17px; line-height: 1; }

@@ -3,7 +3,10 @@ import dynamic from "next/dynamic";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Navbar from "../Navbar";
 import DashboardMachineRail from "./DashboardMachineRail";
+import MachineWorkspaceDnd from "./MachineWorkspaceDnd";
+import { useRailOrder } from "../ixi-sales-desk/SortableRail";
 import MobileMachineStrip from "./MobileMachineStrip";
+import IXIOperatingNav from "../ixi-os/IXIOperatingNav";
 import useIXISellerMachineOps from "../ixi-chassis/useIXISellerMachineOps";
 import { fetchIxiMachineState, saveIxiMachinePatch } from "../../lib/ixiMachineStateClient";
 import { getSavedListingIdsFromUser, toggleSavedListing } from "../../lib/savedListings";
@@ -13,20 +16,11 @@ import { preserveOpenInventoryTransactions, releaseClosedInventoryTransactions }
 import { subscribeInventoryChanges } from "../../lib/listings/IXIInventoryEvents";
 import { isPublicMarketplaceMachine, isPrivateMachine, getMachineChannel } from "../../lib/machine-access/IXIMachineAccess";
 import { hydrateIXIListingMedia } from "../../lib/listings/hydrateIXIListingMedia";
-import { dashboardId, dashboardKey, uniqueMachines, relationshipIds, collectRelationships, reconcileOpenKeys, viewPatch, relationshipPatch, restoreDashboard, verifiedInquiryCount } from "./dashboardContract.mjs";
+import { dashboardId, dashboardKey, filterMachineSearch, uniqueMachines, relationshipIds, collectRelationships, reconcileOpenKeys, viewPatch, relationshipPatch, restoreDashboard, verifiedInquiryCount } from "./dashboardContract.mjs";
 import styles from "./dashboard.module.css";
 const SalesDeskSurface = dynamic(() => import("../ixi-sales-desk/SalesDeskSurface"), { ssr: false });
 
 const Board = dynamic(() => import("./DashboardBoard"), { ssr: false, loading: () => <div className="dash-board-loading" role="status">Preparing your board…</div> });
-const APPS = [
-  ["AOS / WORK", "/aos/work", "Your company", "▦"],
-  ["TRAN$ACT", "/transact", "Financial desktop", "$"],
-  ["INVENTORY", "/account/my-listings-v2", "Your machines", "▤"],
-  ["SOLD", "/sold", "Sales & settlement", "✓"],
-  ["SALES DESK", "/sales-desk", "Customers & deals", "▣"],
-  ["THEATER", "/theater", "Compare & present", "▣"],
-  ["LAUNCH", "/post-free", "Add a machine", "+"]
-];
 const liveMachine = item => isPublicMarketplaceMachine(item) && item.sharetribeState === "published" && !["paused", "closed", "deleted", "archived"].includes(item.listingStatus);
 const pending = { loading: true, error: "" };
 
@@ -38,6 +32,7 @@ export default function IXIDashboard({ salesDeskContext = null }) {
   const [savedIds, setSavedIds] = useState([]), [states, setStates] = useState({});
   const [inquiries, setInquiries] = useState(null), [openKeys, setOpenKeys] = useState([]);
   const [selectedKey, setSelectedKey] = useState(""), [size, setSize] = useState("fit");
+  const [railPlacement, setRailPlacement] = useState({}), [armedRail, setArmedRail] = useState("");
   const [ownedFilter, setOwnedFilter] = useState("all"), [leftQuery, setLeftQuery] = useState(""), [rightQuery, setRightQuery] = useState("");
   const [hidden, setHidden] = useState({ left: false, right: false }), [mobileRail, setMobileRail] = useState("");
   const [dirtyKeys, setDirtyKeys] = useState(new Set()), [notice, setNotice] = useState("");
@@ -77,7 +72,7 @@ export default function IXIDashboard({ salesDeskContext = null }) {
     try {
       const saved = restoreDashboard(JSON.parse(localStorage.getItem(storageKey) || "null"));
       if (saved) {
-        setOpenKeys(saved.open); setStates(saved.states); setSize(saved.size); setOwnedFilter(saved.ownedFilter);
+        setOpenKeys(saved.open); setRailPlacement(saved.rails); setStates(saved.states); setSize(saved.size); setOwnedFilter(saved.ownedFilter);
         setLeftQuery(saved.leftQuery); setRightQuery(saved.rightQuery); setScroll(saved.scroll); scrollPosition.current = saved.scroll; initialBoard.current = true;
       }
     } catch { /* A damaged local layout must not prevent account access. */ }
@@ -140,6 +135,25 @@ export default function IXIDashboard({ salesDeskContext = null }) {
   const ownedKeys = useMemo(() => new Set(owned.map(dashboardKey)), [owned]);
   const currentOwned = useMemo(() => owned.filter(item => !item.inventorySessionOnly), [owned]);
   const visibleOwned = useMemo(() => currentOwned.filter(item => ownedFilter === "all" || (ownedFilter === "live" && liveMachine(item)) || (ownedFilter === "private" && isPrivateMachine(item)) || (ownedFilter === "auction" && getMachineChannel(item) === "auction")), [currentOwned, ownedFilter]);
+  const boardSet = useMemo(() => new Set(openKeys), [openKeys]);
+  const railSideOf = key => railPlacement[key] || (ownedKeys.has(key) ? "left" : "right");
+  const railItems = useMemo(() => allMachines.filter(item => {
+    const key = dashboardKey(item);
+    return !boardSet.has(key) && !item.inventorySessionOnly;
+  }), [allMachines, boardSet]);
+  const leftRailItems = useMemo(() => railItems.filter(item => {
+    const key = dashboardKey(item);
+    return (railPlacement[key] || (ownedKeys.has(key) ? "left" : "right")) === "left" &&
+      (!ownedKeys.has(key) || ownedFilter === "all" || (ownedFilter === "live" && liveMachine(item)) || (ownedFilter === "private" && isPrivateMachine(item)) || (ownedFilter === "auction" && getMachineChannel(item) === "auction"));
+  }), [railItems, railPlacement, ownedKeys, ownedFilter]);
+  const rightRailItems = useMemo(() => railItems.filter(item => (railPlacement[dashboardKey(item)] || (ownedKeys.has(dashboardKey(item)) ? "left" : "right")) === "right"), [railItems, railPlacement, ownedKeys]);
+  const leftRailOrder = useRailOrder(leftRailItems, dashboardKey, storageKey ? `${storageKey}:owned-rail` : "", setNotice);
+  const rightRailOrder = useRailOrder(rightRailItems, dashboardKey, storageKey ? `${storageKey}:relationship-rail` : "", setNotice);
+  const reorderRail = (side, active, over, visibleIds) => {
+    const rail = side === "left" ? leftRailOrder : rightRailOrder;
+    const query = side === "left" ? leftQuery : rightQuery;
+    rail.reorder(visibleIds || filterMachineSearch(rail.ordered, query).map(dashboardKey), active, over);
+  };
   useEffect(() => {
     if (ownedStatus.loading || relatedStatus.loading || ownedStatus.error || relatedStatus.error) return;
     setOpenKeys(previous => {
@@ -161,12 +175,12 @@ export default function IXIDashboard({ salesDeskContext = null }) {
     }
   }, [openMachines]);
 
-  storageRef.current = { version: 1, open: openKeys, states: Object.fromEntries(Object.entries(states).map(([id, value]) => [id, viewPatch(value)])), size, ownedFilter, leftQuery, rightQuery, scroll: scrollPosition.current };
+  storageRef.current = { version: 1, open: openKeys, rails: railPlacement, states: Object.fromEntries(Object.entries(states).map(([id, value]) => [id, viewPatch(value)])), size, ownedFilter, leftQuery, rightQuery, scroll: scrollPosition.current };
   const persistView = useCallback(() => {
     if (!storageKey || !restored) return;
     try { localStorage.setItem(storageKey, JSON.stringify(storageRef.current)); } catch { setNotice("This browser couldn’t save your board layout."); }
   }, [storageKey, restored]);
-  useEffect(() => { const timer = setTimeout(persistView, 180); return () => clearTimeout(timer); }, [persistView, openKeys, states, size, ownedFilter, leftQuery, rightQuery, scroll]);
+  useEffect(() => { const timer = setTimeout(persistView, 180); return () => clearTimeout(timer); }, [persistView, openKeys, railPlacement, states, size, ownedFilter, leftQuery, rightQuery, scroll]);
   useEffect(() => {
     const beforeLeave = event => { persistView(); if (dirtyRef.current.size) { event.preventDefault(); event.returnValue = ""; } };
     window.addEventListener("beforeunload", beforeLeave); window.addEventListener("pagehide", persistView);
@@ -191,8 +205,10 @@ export default function IXIDashboard({ salesDeskContext = null }) {
     }).catch(() => setNotice("Relationship change wasn’t saved. Please try again."));
     writeQueues.current.set(id, next);
   };
-  const returnToRail = key => {
+  const returnToRail = (key, side) => {
     if (dirtyRef.current.has(key) && !window.confirm("This machine has unsaved changes. Discard them and return it to the rail?")) return;
+    const target = side === "left" || side === "right" ? side : railSideOf(key);
+    setRailPlacement(previous => ({ ...previous, [key]: target }));
     clearDirty(key); setOpenKeys(previous => previous.filter(value => value !== key));
     setOwned(previous => previous.filter(item => dashboardKey(item) !== key || !item.inventorySessionOnly));
   };
@@ -220,7 +236,7 @@ export default function IXIDashboard({ salesDeskContext = null }) {
   ];
   if (salesDeskContext) return <SalesDeskSurface initial={salesDeskContext} dashboardClass={styles.dashboard} workspace={{
     auth,owned:currentOwned,related,ownedStatus,relatedStatus,allMachines,openMachines,openKeys,setOpenKeys,selectedKey,setSelectedKey,
-    ownedKeys,states,updateState,size,setSize,returnToRail,openMachine,getSellerListingCardProps,markDirty,dirtyKeys,clearDirty,toggleSave,savedIds,
+    ownedKeys,railPlacement,railSideOf,leftRailItems:leftRailOrder.ordered,rightRailItems:rightRailOrder.ordered,reorderRail,armedRail,setArmedRail,setRailPlacement,states,updateState,size,setSize,returnToRail,openMachine,getSellerListingCardProps,markDirty,dirtyKeys,clearDirty,toggleSave,savedIds,
     scroll,onScroll:value=>{scrollPosition.current=value;storageRef.current.scroll=value;},refresh:()=>setRevision(value=>value+1),retryAuth:()=>setAuthRevision(value=>value+1),notice,setNotice
   }} />;
   return <div className={styles.dashboard} data-ixi-dashboard="v12">
@@ -228,16 +244,16 @@ export default function IXIDashboard({ salesDeskContext = null }) {
     <style jsx global>{`body { margin: 0; background: #090c0a; }`}</style>
     <Navbar />
     <header className="dash-identity"><div className="dash-identity-title"><span className="dash-home-mark">IXI</span><div><span className="dash-eyebrow">{company}</span><h1>DASHBOARD</h1></div><span className="dash-version">V12</span></div><nav aria-label="Your account"><a href="/account/profile">PROFILE</a><a href="/account/messages">MESSAGES</a><details className="dash-account-menu"><summary>ACCOUNT <span>⌄</span></summary><div><a href="/account/profile">Profile & company settings</a><a href="/privacy">Privacy</a><a href="/terms">Terms</a><button onClick={async () => { if (dirtyRef.current.size && !window.confirm("Leave with unsaved changes?")) return; persistView(); await auth.sdk?.logout(); dirtyRef.current = new Set(); window.location.href = "/login"; }}>Sign out</button></div></details></nav></header>
-    <nav className="dash-apps" aria-label="IXI applications">{APPS.map(([label, href, detail, icon]) => <a href={href} key={href}><span className="dash-app-icon" aria-hidden="true">{icon}</span><span><strong>{label}</strong><small>{detail}</small></span><span className="dash-app-arrow" aria-hidden="true">↗</span></a>)}</nav>
+    <IXIOperatingNav active="/account" />
     <div className="dash-stats" aria-label="Account overview">{stats.map(stat => { const Tag = stat.href ? "a" : stat.action ? "button" : "div"; return <Tag key={stat.label} href={stat.href} onClick={stat.action} className="dash-stat" title={stat.detail}><span>{stat.label}</span><strong>{stat.value}</strong><small>{stat.detail}</small></Tag>; })}</div>
-    {auth.loading ? <div className="dash-page-message" role="status">Opening your dashboard…</div> : auth.error ? <div className="dash-page-message" role="alert"><h2>{auth.error}</h2><a href="/login?next=%2Faccount">SIGN IN</a><button onClick={() => setAuthRevision(value => value + 1)}>TRY AGAIN</button></div> : <main className={`dash-workspace ${hidden.left ? "dash-hide-left" : ""} ${hidden.right ? "dash-hide-right" : ""} ${mobileRail ? `dash-mobile-${mobileRail}` : ""}`}>
+    {auth.loading ? <div className="dash-page-message" role="status">Opening your dashboard…</div> : auth.error ? <div className="dash-page-message" role="alert"><h2>{auth.error}</h2><a href="/login?next=%2Faccount">SIGN IN</a><button onClick={() => setAuthRevision(value => value + 1)}>TRY AGAIN</button></div> : <MachineWorkspaceDnd boardKeys={openMachines.map(dashboardKey)} onBoardOrder={setOpenKeys} onOpen={key => { const item = machineMap.get(key); if (item) openMachine(item); }} onReturn={returnToRail} onMoveRail={(key,side) => setRailPlacement(previous => ({ ...previous, [key]: side }))} onRailOrder={reorderRail}><main className={`dash-workspace ${hidden.left ? "dash-hide-left" : ""} ${hidden.right ? "dash-hide-right" : ""} ${mobileRail ? `dash-mobile-${mobileRail}` : ""}`}>
       <MobileMachineStrip owned={visibleOwned} related={related} ownedStatus={ownedStatus} relatedStatus={relatedStatus} openKeys={openKeys} selectedKey={selectedKey} onOpen={openMachine} label="WORKING BOARD" />
-      <DashboardMachineRail title="OWNED" side="left" items={visibleOwned} loading={ownedStatus.loading} error={ownedStatus.error} query={leftQuery} onQuery={setLeftQuery} filter={ownedFilter} onFilter={setOwnedFilter} openKeys={openKeys} selectedKey={selectedKey} onSelect={setSelectedKey} onOpen={openMachine} onRetry={() => setRevision(value => value + 1)} onHide={() => hideRail("left")} />
+      <DashboardMachineRail title="OWNED & WORKING" description="Owned machines and any machines you move here." side="left" items={leftRailOrder.ordered} loading={ownedStatus.loading} error={ownedStatus.error} query={leftQuery} onQuery={setLeftQuery} filter={ownedFilter} onFilter={setOwnedFilter} badgeOf={item => ownedKeys.has(dashboardKey(item)) ? "" : "RELATIONSHIP"} armed={armedRail === "left"} onArm={() => setArmedRail(current => current === "left" ? "" : "left")} selectedKey={selectedKey} onSelect={setSelectedKey} onOpen={openMachine} onRetry={() => setRevision(value => value + 1)} onHide={() => hideRail("left")} />
       <section className="dash-board" aria-label="Working board"><div className="dash-board-toolbar"><button className={`dash-rail-toggle ${!hidden.left ? "active" : ""}`} onClick={() => toggleRail("left")}>‹ OWNED</button><div className="dash-board-title"><strong>WORKING BOARD</strong><span>{openMachines.length} OPEN</span></div><div className="dash-board-options"><label>SIZE <select aria-label="Card size" value={size} onChange={event => setSize(event.target.value)}><option value="fit">FIT</option><option value="natural">100%</option><option value="work">120%</option><option value="focus">140%</option></select></label><button className="dash-icon-button" aria-label="Refresh machines" title={dirtyKeys.size ? "Save changes before refreshing" : "Refresh machines"} disabled={Boolean(dirtyKeys.size)} onClick={() => setRevision(value => value + 1)}>↻</button></div><button className={`dash-rail-toggle ${!hidden.right ? "active" : ""}`} onClick={() => toggleRail("right")}>RELATIONSHIPS ›</button></div>
-      <Board machines={openMachines} ownedKeys={ownedKeys} states={states} onPatch={updateState} size={size} onReorder={setOpenKeys} onReturn={returnToRail} selectedKey={selectedKey} onSelect={setSelectedKey} getSellerProps={getSellerListingCardProps} onDirty={markDirty} dirtyKeys={dirtyKeys} onSaved={clearDirty} toggleSave={toggleSave} savedIds={savedIds} scrollTop={scroll} onScroll={value => { scrollPosition.current = value; storageRef.current.scroll = value; }} />
+      <Board externalDnd machines={openMachines} ownedKeys={ownedKeys} states={states} onPatch={updateState} size={size} onReorder={setOpenKeys} onReturn={returnToRail} armedRail={armedRail} selectedKey={selectedKey} onSelect={setSelectedKey} getSellerProps={getSellerListingCardProps} onDirty={markDirty} dirtyKeys={dirtyKeys} onSaved={clearDirty} toggleSave={toggleSave} savedIds={savedIds} scrollTop={scroll} onScroll={value => { scrollPosition.current = value; storageRef.current.scroll = value; }} />
       <footer className="dash-board-footer"><span><i /> {dirtyKeys.size ? `${dirtyKeys.size} MACHINE${dirtyKeys.size > 1 ? "S" : ""} WITH UNSAVED CHANGES` : "YOUR IXI WORKING SPACE"}</span><span>OPEN · WORK · RETURN</span></footer></section>
-      <DashboardMachineRail title="RELATIONSHIPS" side="right" items={related} loading={relatedStatus.loading} error={relatedStatus.error} query={rightQuery} onQuery={setRightQuery} openKeys={openKeys} selectedKey={selectedKey} onSelect={setSelectedKey} onOpen={openMachine} onRetry={() => setRevision(value => value + 1)} onHide={() => hideRail("right")} />
-    </main>}
+      <DashboardMachineRail title="SAVED & WORKING" description="Saved or marked relationships, plus machines you move here." side="right" items={rightRailOrder.ordered} loading={relatedStatus.loading} error={relatedStatus.error} query={rightQuery} onQuery={setRightQuery} badgeOf={item => ownedKeys.has(dashboardKey(item)) ? "OWNED" : "RELATIONSHIP"} armed={armedRail === "right"} onArm={() => setArmedRail(current => current === "right" ? "" : "right")} selectedKey={selectedKey} onSelect={setSelectedKey} onOpen={openMachine} onRetry={() => setRevision(value => value + 1)} onHide={() => hideRail("right")} />
+    </main></MachineWorkspaceDnd>}
     {notice && <div className="dash-notice" role="status">{notice}<button aria-label="Dismiss notification" onClick={() => setNotice("")}>×</button></div>}
   </div>;
 }

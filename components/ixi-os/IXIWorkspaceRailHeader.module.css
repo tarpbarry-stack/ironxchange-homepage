@@ -1,0 +1,12 @@
+.header { display:flex; align-items:center; gap:7px; min-height:56px; padding:10px 11px; border-bottom:1px solid #383838; background:#171717; font-family:"Inter Variable",Inter,Arial,sans-serif; color:#eee; }
+.armed { border-color:#55aaff; background:#132237; box-shadow:inset 0 -2px #55aaff; }
+.label { display:grid; gap:4px; flex:1; min-width:0; }
+.label small { color:#999; font-size:9px; font-weight:800; letter-spacing:.08em; }
+.label strong { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:14px; font-weight:800; }
+.label strong span { color:#ffcc00; font-size:11px; }
+.header button { min-height:34px; border:1px solid #474747; background:#222; color:#ddd; cursor:pointer; font:750 10px "Inter Variable",Inter,Arial,sans-serif; }
+.header button:focus-visible { outline:2px solid #ffcc00; outline-offset:2px; }
+.arm { flex:none; padding:5px 7px; }
+.arm span { color:#459de8; font-size:12px; }
+.armed .arm { border-color:#55aaff; background:#174a76; color:#fff; }
+.close { flex:none; width:34px; font-size:20px !important; }
