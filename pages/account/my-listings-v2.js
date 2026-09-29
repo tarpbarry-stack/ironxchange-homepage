@@ -212,6 +212,7 @@ const POCKET_TARGETS = [
   const [ixiOutlineFilter, setIxiOutlineFilter] = useState("all");
 
   const [pocketThumbSize, setPocketThumbSize] = useState("medium");
+  const [searchCollapsed, setSearchCollapsed] = useState(false);
 
   const [cardScaleMode, setCardScaleMode] = useState("xl");
   const cardScaleMetrics = getIXICardScalePreset(cardScaleMode);
@@ -1468,7 +1469,34 @@ toggleSearchSurfaceRevealed
   </section>
       
 
+     {!isSold && <div className="inventory-scoreboard" role="status" aria-label="Inventory summary" aria-busy={inventoryStatus.loading}>
+       <div><span>OWNED MACHINES</span><strong>{inventoryStatus.loading ? "…" : inventorySummary.count}</strong><small>Current inventory</small></div>
+       <div><span>TOTAL ASKING</span><strong>{inventoryStatus.loading ? "…" : inventorySummary.priced ? new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(inventorySummary.asking) : "—"}</strong><small>{inventorySummary.priced} with an asking price</small></div>
+       <div><span>ON BOARD</span><strong>{inventoryStatus.loading ? "…" : inventorySummary.board}</strong><small>Full cards in this workspace</small></div>
+       <div><span>SIDE RAILS</span><strong>{inventoryStatus.loading ? "…" : `${inventorySummary.left} / ${inventorySummary.right}`}</strong><small>Left / Right machine tiles</small></div>
+     </div>}
+     {isSold && <div className="sold-toolbar" aria-label="Sold inventory filters">
+       <div className="sold-scoreboard" role="status" aria-label="Sold sales summary" aria-busy={inventoryStatus.loading}>
+         <strong>SOLD <span>{inventoryStatus.loading ? "…" : inventoryStatus.error ? "—" : `${inventoryStatus.total} ${inventoryStatus.total === 1 ? "sale" : "sales"}`}</span></strong>
+         <div className="sold-value"><span>TOTAL SOLD</span><b>{inventoryStatus.loading ? "…" : inventoryStatus.error || !inventoryStatus.salesSummary ? "Unavailable" : inventoryStatus.salesSummary.totals.length
+           ? inventoryStatus.salesSummary.totals.map(({ currency, amountCents }) => new Intl.NumberFormat("en-US", { style: "currency", currency, currencyDisplay: currency === "USD" ? "symbol" : "code", minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(amountCents / 100)).join(" · ")
+           : inventoryStatus.salesSummary.missingPriceCount ? "Not recorded" : "$0.00"}</b></div>
+         {!inventoryStatus.loading && !inventoryStatus.error && inventoryStatus.salesSummary?.missingPriceCount > 0 && <small>{inventoryStatus.salesSummary.missingPriceCount} {inventoryStatus.salesSummary.missingPriceCount === 1 ? "sale missing its price" : "sales missing prices"}</small>}
+         {!inventoryStatus.loading && !inventoryStatus.error && inventoryStatus.salesSummary?.returnedCount > 0 && <small>Returned sales excluded from total</small>}
+       </div>
+       <button type="button" className="sold-filter-toggle" aria-expanded={soldFiltersOpen} aria-controls="sold-filter-fields" onClick={() => setSoldFiltersOpen(open => !open)}>FILTER SALES <span aria-hidden="true">{soldFiltersOpen ? "−" : "+"}</span></button>
+       <div id="sold-filter-fields" className="sold-filters" data-mobile-open={soldFiltersOpen}>
+       <label>Settlement<select value={soldQuery.settlement} onChange={event => setSoldQuery(current => ({ ...current, settlement: event.target.value, page: 1 }))}><option value="all">All</option><option value="open">Open</option><option value="closed">Closed</option></select></label>
+       <label>Sale status<select value={soldQuery.status} onChange={event => setSoldQuery(current => ({ ...current, status: event.target.value, page: 1 }))}><option value="all">All sales</option><option value="sold">Sold</option><option value="returned">Returned</option></select></label>
+       <label>From<input type="date" value={soldQuery.from} onChange={event => setSoldQuery(current => ({ ...current, from: event.target.value, page: 1 }))} /></label>
+       <label>To<input type="date" value={soldQuery.to} onChange={event => setSoldQuery(current => ({ ...current, to: event.target.value, page: 1 }))} /></label>
+       <label>Sort<select value={soldQuery.sort} onChange={event => setSoldQuery(current => ({ ...current, sort: event.target.value, page: 1 }))}>{[["date-desc", "Newest sale"], ["date-asc", "Oldest sale"], ["price-desc", "Price: high first"], ["price-asc", "Price: low first"], ["buyer-asc", "Buyer"], ["seller-asc", "Sold by"], ["make-asc", "Make / model"]].map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
+       <button type="button" disabled={inventoryStatus.loading} onClick={() => setInventoryRevision(value => value + 1)}>Refresh</button>
+       </div>
+     </div>}
+
 <IXIChassis>
+  <div className={searchCollapsed ? "inventory-search-collapsed" : "inventory-search-expanded"}>
   <aside className="ixi-command-left">
     <section className="ixi-pocket-row">
  
@@ -1529,7 +1557,9 @@ toggleSearchSurfaceRevealed
   toggleRailRevealed={toggleRailRevealed}
 
   searchSurfaceRevealed={searchSurfaceRevealed}
-  toggleSearchSurfaceRevealed={toggleSearchSurfaceRevealed}/>
+  toggleSearchSurfaceRevealed={toggleSearchSurfaceRevealed}
+  searchCollapsed={searchCollapsed}
+  onToggleSearchCollapsed={() => setSearchCollapsed(value => !value)}/>
                 </div>
 
   <aside className="ixi-command-right">
@@ -1567,6 +1597,7 @@ toggleSearchSurfaceRevealed
 />
  </section>
   </aside>
+  </div>
     </IXIChassis>
 
               
@@ -1600,31 +1631,6 @@ toggleSearchSurfaceRevealed
   getSellerListingCardProps={getSellerListingCardProps}
 />
               
-     {!isSold && <div className="inventory-scoreboard" role="status" aria-label="Inventory summary" aria-busy={inventoryStatus.loading}>
-       <div><span>OWNED MACHINES</span><strong>{inventoryStatus.loading ? "…" : inventorySummary.count}</strong><small>Current inventory</small></div>
-       <div><span>TOTAL ASKING</span><strong>{inventoryStatus.loading ? "…" : inventorySummary.priced ? new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(inventorySummary.asking) : "—"}</strong><small>{inventorySummary.priced} with an asking price</small></div>
-       <div><span>ON BOARD</span><strong>{inventoryStatus.loading ? "…" : inventorySummary.board}</strong><small>Full cards in this workspace</small></div>
-       <div><span>SIDE RAILS</span><strong>{inventoryStatus.loading ? "…" : `${inventorySummary.left} / ${inventorySummary.right}`}</strong><small>Left / Right machine tiles</small></div>
-     </div>}
-     {isSold && <div className="sold-toolbar" aria-label="Sold inventory filters">
-       <div className="sold-scoreboard" role="status" aria-label="Sold sales summary" aria-busy={inventoryStatus.loading}>
-         <strong>SOLD <span>{inventoryStatus.loading ? "…" : inventoryStatus.error ? "—" : `${inventoryStatus.total} ${inventoryStatus.total === 1 ? "sale" : "sales"}`}</span></strong>
-         <div className="sold-value"><span>TOTAL SOLD</span><b>{inventoryStatus.loading ? "…" : inventoryStatus.error || !inventoryStatus.salesSummary ? "Unavailable" : inventoryStatus.salesSummary.totals.length
-           ? inventoryStatus.salesSummary.totals.map(({ currency, amountCents }) => new Intl.NumberFormat("en-US", { style: "currency", currency, currencyDisplay: currency === "USD" ? "symbol" : "code", minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(amountCents / 100)).join(" · ")
-           : inventoryStatus.salesSummary.missingPriceCount ? "Not recorded" : "$0.00"}</b></div>
-         {!inventoryStatus.loading && !inventoryStatus.error && inventoryStatus.salesSummary?.missingPriceCount > 0 && <small>{inventoryStatus.salesSummary.missingPriceCount} {inventoryStatus.salesSummary.missingPriceCount === 1 ? "sale missing its price" : "sales missing prices"}</small>}
-         {!inventoryStatus.loading && !inventoryStatus.error && inventoryStatus.salesSummary?.returnedCount > 0 && <small>Returned sales excluded from total</small>}
-       </div>
-       <button type="button" className="sold-filter-toggle" aria-expanded={soldFiltersOpen} aria-controls="sold-filter-fields" onClick={() => setSoldFiltersOpen(open => !open)}>FILTER SALES <span aria-hidden="true">{soldFiltersOpen ? "−" : "+"}</span></button>
-       <div id="sold-filter-fields" className="sold-filters" data-mobile-open={soldFiltersOpen}>
-       <label>Settlement<select value={soldQuery.settlement} onChange={event => setSoldQuery(current => ({ ...current, settlement: event.target.value, page: 1 }))}><option value="all">All</option><option value="open">Open</option><option value="closed">Closed</option></select></label>
-       <label>Sale status<select value={soldQuery.status} onChange={event => setSoldQuery(current => ({ ...current, status: event.target.value, page: 1 }))}><option value="all">All sales</option><option value="sold">Sold</option><option value="returned">Returned</option></select></label>
-       <label>From<input type="date" value={soldQuery.from} onChange={event => setSoldQuery(current => ({ ...current, from: event.target.value, page: 1 }))} /></label>
-       <label>To<input type="date" value={soldQuery.to} onChange={event => setSoldQuery(current => ({ ...current, to: event.target.value, page: 1 }))} /></label>
-       <label>Sort<select value={soldQuery.sort} onChange={event => setSoldQuery(current => ({ ...current, sort: event.target.value, page: 1 }))}>{[["date-desc", "Newest sale"], ["date-asc", "Oldest sale"], ["price-desc", "Price: high first"], ["price-asc", "Price: low first"], ["buyer-asc", "Buyer"], ["seller-asc", "Sold by"], ["make-asc", "Make / model"]].map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
-       <button type="button" disabled={inventoryStatus.loading} onClick={() => setInventoryRevision(value => value + 1)}>Refresh</button>
-       </div>
-     </div>}
      {inventoryStatus.loading && <p role="status">Loading {isSold ? "sold machines" : "inventory"}…</p>}
      {isSold && soldIssues.length > 0 && <details className="sold-toolbar"><summary>{soldIssues.length} historical sale facts need review</summary><ul>{soldIssues.map((issue, index) => <li key={`${issue.documentId}:${issue.code}:${index}`}>{issue.passportId ? `${issue.passportId}: ` : ""}{issue.message}</li>)}</ul></details>}
      {inventoryStatus.error && <p role="alert">{inventoryStatus.error} <button type="button" onClick={() => isSold ? setInventoryRevision(value => value + 1) : window.location.reload()}>Retry</button></p>}
@@ -1711,6 +1717,17 @@ toggleSearchSurfaceRevealed
         .inventory-scoreboard span { color:#aaa; font-size:10px; font-weight:700; letter-spacing:.08em; }
         .inventory-scoreboard strong { color:#ffcc00; font-size:23px; font-weight:750; line-height:1.15; font-variant-numeric:tabular-nums; overflow-wrap:anywhere; }
         .inventory-scoreboard small { color:#aaa; font-size:11px; }
+        .inventory-search-collapsed .ixi-command-left,
+        .inventory-search-collapsed .ixi-command-right { display:none !important; }
+        @media (min-width: 851px) and (max-width: 1449px) {
+          .ixi-command-chassis .ixi-pocket-l2,
+          .ixi-command-chassis .ixi-pocket-r2 { display:none !important; }
+          .ixi-command-chassis .ixi-command-left,
+          .ixi-command-chassis .ixi-command-right { width:var(--station-w); height:var(--station-h); }
+          .ixi-command-chassis .ixi-pocket-row { grid-template-columns:var(--station-w); grid-template-rows:var(--station-h); }
+          .ixi-command-chassis .ixi-command-left .ixi-pocket-left:not(.ixi-pocket-l2),
+          .ixi-command-chassis .ixi-command-right .ixi-pocket-right:not(.ixi-pocket-r2) { grid-column:1; grid-row:1; }
+        }
         .inventory-rail-layout { display:grid; grid-template-columns:clamp(205px,18vw,280px) minmax(0,1fr) clamp(205px,18vw,280px); gap:12px; align-items:start; }
         .inventory-rail-layout.inventory-left-folded { grid-template-columns:minmax(0,1fr) clamp(205px,18vw,280px); }
         .inventory-rail-layout.inventory-right-folded { grid-template-columns:clamp(205px,18vw,280px) minmax(0,1fr); }

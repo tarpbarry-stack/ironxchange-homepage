@@ -26,6 +26,8 @@ export default function IXIChassisControls({
   toggleRailRevealed = () => {},
   searchSurfaceRevealed = false,
   toggleSearchSurfaceRevealed = () => {},
+  searchCollapsed = false,
+  onToggleSearchCollapsed = () => {},
   workspaceFilterErrors = {},
   workspaceFilterErrorMessage = "",
   parkBrakeOn = false,
@@ -38,7 +40,14 @@ export default function IXIChassisControls({
       !(["category", "make", "model"].includes(key) && String(value).startsWith("ALL ")));
   return (
     <section className="workspace-controls">
+      <button type="button" className="search-fold-actuator"
+        aria-label={searchCollapsed ? "Open search surface and pockets" : "Close search surface and pockets"}
+        aria-expanded={!searchCollapsed} aria-controls="ixi-workspace-search-controls"
+        onClick={onToggleSearchCollapsed}>
+        <span aria-hidden="true">{searchCollapsed ? "▾" : "▴"}</span>
+      </button>
       <IXIControlSurface>
+        <div id="ixi-workspace-search-controls" hidden={searchCollapsed}>
         <div className="desktop-search-surface">
          <IXSearchSurface
   listings={listings}
@@ -75,6 +84,7 @@ export default function IXIChassisControls({
             setSortMode={setSavedBoardMode}
           />}
         </div>
+        </div>
 
        <IXIRelationshipControls
   workspaceToolbars={workspaceToolbars}
@@ -97,6 +107,7 @@ export default function IXIChassisControls({
 
       <style jsx>{`
         .workspace-controls {
+          position: relative;
           margin: 0 auto;
           padding: 0;
           background: transparent;
@@ -104,6 +115,25 @@ export default function IXIChassisControls({
           border-radius: 0;
           box-shadow: none;
         }
+
+        .search-fold-actuator {
+          position: relative;
+          z-index: 6;
+          display: grid;
+          place-items: center;
+          width: 44px;
+          height: 28px;
+          margin: 0 auto 3px;
+          padding: 0;
+          border: 1px solid #665922;
+          border-radius: 3px;
+          background: #191919;
+          color: #ffcf34;
+          font-size: 18px;
+          cursor: pointer;
+        }
+        .search-fold-actuator:focus-visible { outline: 2px solid #ffcf34; outline-offset: 2px; }
+        [hidden] { display: none !important; }
 
         .mobile-search-surface {
           display: none;

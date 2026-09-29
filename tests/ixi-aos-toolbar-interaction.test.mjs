@@ -59,14 +59,15 @@ test("folding keeps Board state mounted, browsed containers and parked Objects s
   const yard = { objectId: "object_yard", passportId: "IXIYAR2345", displayName: "Customer Yard", itemObjectIds: ["object_machine"] };
   const machine = { objectId: "object_machine", passportId: "IXIMAC2345", displayName: "Ripper", objectType: "machine", imageUrl: "/existing-ripper.jpg" };
   const parked = { objectId: "object_parked", passportId: "IXIPAR2345", displayName: "Working selection" };
+  const pocketed = { objectId: "object_pocketed", passportId: "IXIPOC2345", displayName: "Pocket selection" };
   let boardMounts = 0;
   function Board() {
     React.useEffect(() => { boardMounts++; }, []);
     return React.createElement("input", { "aria-label": "Board draft", defaultValue: "Keep this draft" });
   }
   const moves = [], opened = [];
-  const props = { registry: new Map([locations, yard, machine, parked].map(object => [object.objectId, object])),
-    indexes: [locations], placements: { board: [locations.objectId], pocketLeft2: [parked.objectId] },
+  const props = { registry: new Map([locations, yard, machine, parked, pocketed].map(object => [object.objectId, object])),
+    indexes: [locations], placements: { board: [locations.objectId], "rail:aos-left": [parked.objectId], pocketLeft2: [pocketed.objectId] },
     session: { objects: {} }, ready: true, preferenceKey: "test-entity:test-principal",
     onMove: (...args) => moves.push(args), onBoard: (...args) => opened.push(args), onReturn: () => {}, onConnect: () => {} };
   const doc = dom.window.document;
@@ -78,6 +79,8 @@ test("folding keeps Board state mounted, browsed containers and parked Objects s
     assert.equal(boardTarget?.node.current, doc.querySelector('[aria-label="Working Board"]'),
       "the full Board must be registered so blank space cannot fall back to the nearest toolbar");
     assert.equal(boardTarget.data.current.dropIntent, "root", "Board drops are placement, not membership");
+    assert.equal(dnd.droppableContainers.get("pocketLeft2")?.data.current.targetSurface, "pocketLeft2");
+    assert.match(doc.querySelector('[aria-label="Pocket III"]').textContent, /Pocket selection/);
     await click(doc.querySelector('[aria-controls="aos-right-toolbar"]'));
     const boardRect = { left: 330, right: 1016, top: 462, bottom: 1100, width: 686, height: 638 };
     const rightRect = { left: 1036, right: 1280, top: 219, bottom: 1051, width: 244, height: 832 };
@@ -90,6 +93,7 @@ test("folding keeps Board state mounted, browsed containers and parked Objects s
     const right = doc.getElementById("aos-right-toolbar");
     const board = doc.querySelector('[aria-label="Board draft"]');
     assert.match(left.textContent, /Working selection/);
+    assert.doesNotMatch(left.textContent, /Pocket selection/, "a pocketed Object has one visible station");
     await React.act(async () => {
       const select = doc.getElementById("aos-left-browse");
       select.value = locations.objectId;

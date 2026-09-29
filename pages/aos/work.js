@@ -369,6 +369,7 @@ const POCKET_TARGETS = [
   const [ixiOutlineFilter, setIxiOutlineFilter] = useState("all");
 
   const [pocketThumbSize, setPocketThumbSize] = useState("medium");
+  const [searchCollapsed, setSearchCollapsed] = useState(false);
 
   const [cardScaleMode, setCardScaleMode] = useState("xl");
   const cardScaleMetrics = getIXICardScalePreset(cardScaleMode);
@@ -3238,6 +3239,7 @@ return null;
 />
 
 <IXIAosToolbarChassis
+    searchCollapsed={searchCollapsed}
     registry={aosWorkspaceObjectRegistry}
     indexes={workspaceSystemIndexes.map(index => getAosWorkspaceObjectById(index.objectId)).filter(Boolean)}
     placements={workspacePlacements}
@@ -3275,7 +3277,9 @@ return null;
   toggleRailRevealed={toggleRailRevealed}
 
   searchSurfaceRevealed={searchSurfaceRevealed}
-  toggleSearchSurfaceRevealed={toggleSearchSurfaceRevealed}/>}
+  toggleSearchSurfaceRevealed={toggleSearchSurfaceRevealed}
+  searchCollapsed={searchCollapsed}
+  onToggleSearchCollapsed={() => setSearchCollapsed(value => !value)}/>}
   >
 
               

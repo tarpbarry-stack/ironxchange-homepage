@@ -9,6 +9,49 @@ import {
 } from "./IXIAosToolbarModel.mjs";
 import styles from "./IXIAosToolbarChassis.module.css";
 
+const SEARCH_POCKETS = [
+  { id: "pocketLeft2", label: "III", side: "left", outer: true },
+  { id: "pocketLeft", label: "I", side: "left" },
+  { id: "pocketRight", label: "II", side: "right" },
+  { id: "pocketRight2", label: "IV", side: "right", outer: true }
+];
+
+function PocketObject({ object, registry, pocketId, ready, onBoard }) {
+  const view = getAosToolbarPresentation(object, registry);
+  const name = getAosToolbarName(object);
+  const { attributes, listeners, setNodeRef, setActivatorNodeRef, isDragging } = useDraggable({
+    id: `aos-pocket:${pocketId}:${object.objectId}`, disabled: !ready,
+    data: { type: "aos-toolbar-reference", objectId: object.objectId, objectType: object.objectType,
+      object, sourceObject: object, metadata: object.metadata, definitionId: object.definitionId, containerId: pocketId }
+  });
+  return <div ref={setNodeRef} className={styles.pocketObject} data-dragging={isDragging}>
+    <button type="button" ref={setActivatorNodeRef} {...attributes} {...listeners} disabled={!ready}
+      className={styles.pocketDrag} aria-label={`Drag ${name} from Pocket ${pocketId}`}>
+      <PreviewImage src={view.image || view.previews[0]?.image} name={name} />
+    </button>
+    <span title={name}>{name}</span>
+    <button type="button" disabled={!ready} className={styles.pocketBoard}
+      aria-label={`Move ${name} to Board`} onClick={() => onBoard(object.objectId)}>→</button>
+  </div>;
+}
+
+function SearchPocket({ pocket, placements, registry, ready, onBoard }) {
+  const { setNodeRef, isOver } = useDroppable({
+    id: pocket.id, disabled: !ready,
+    data: { type: "workspace", containerId: pocket.id, targetSurface: pocket.id, dropIntent: "root" }
+  });
+  const objects = (placements[pocket.id] || []).map(id => registry.get(id)).filter(Boolean);
+  return <section ref={setNodeRef} aria-label={`Pocket ${pocket.label}`}
+    className={`${styles.searchPocket} ${pocket.outer ? styles.outerPocket : ""} ${isOver ? styles.over : ""}`}>
+    <div className={styles.pocketHeading}><strong>{pocket.label}</strong><span>{objects.length}</span></div>
+    <div className={styles.pocketContents}>
+      {objects.map(object => <PocketObject key={object.objectId} object={object} registry={registry}
+        pocketId={pocket.id} ready={ready} onBoard={onBoard} />)}
+      {!objects.length && <span className={styles.pocketEmpty}>DROP HERE</span>}
+    </div>
+  </section>;
+}
+
 function PreviewImage({ src, name }) {
   const [failed, setFailed] = useState(false);
   useEffect(() => setFailed(false), [src]);
@@ -79,8 +122,7 @@ function Toolbar({ side, folded, onFold, registry, indexes, placements, session,
     ...getAosToolbarObjectIds(placements, "left"),
     ...getAosToolbarObjectIds(placements, "right")
   ]);
-  const parked = getAosToolbarObjectIds(placements, side).filter(id => !placements.board?.includes(id) &&
-    (side === "left" || !getAosToolbarObjectIds(placements, "left").includes(id)))
+  const parked = (placements[surfaceId] || []).filter(id => !placements.board?.includes(id))
     .map(id => registry.get(id)).filter(Boolean);
   const contents = (browseId === "all" ? [...registry.values()] : parent
     ? getAosToolbarContents(parent, registry) : indexes)
@@ -157,7 +199,7 @@ function Toolbar({ side, folded, onFold, registry, indexes, placements, session,
 }
 
 export default function IXIAosToolbarChassis({ children, controls, registry, indexes, placements, session, ready,
-  preferenceKey, onMove, onBoard, onReturn, onConnect, armedDestination, toggleArmedDestination, requiresSignIn = false, loadError = "" }) {
+  preferenceKey, onMove, onBoard, onReturn, onConnect, armedDestination, toggleArmedDestination, searchCollapsed = false, requiresSignIn = false, loadError = "" }) {
   // Register the entire visible Board, including gaps between cards. Without
   // this target, closest-center fallback can dock a drop in a nearby toolbar.
   const boardDrop = useDroppable({
@@ -256,7 +298,13 @@ export default function IXIAosToolbarChassis({ children, controls, registry, ind
         onConnect={onConnect} connectTarget={registry.get(browse[side === "left" ? "right" : "left"])}/>
       )}
       <div className={styles.center}>
-        {controls}
+        <div className={`${styles.searchDeck} ${searchCollapsed ? styles.searchDeckClosed : ""}`}>
+          {SEARCH_POCKETS.slice(0, 2).map(pocket => <SearchPocket key={pocket.id} pocket={pocket} placements={placements}
+            registry={registry} ready={ready} onBoard={id => run(() => onBoard(id))} />)}
+          <div className={styles.searchDeckControls}>{controls}</div>
+          {SEARCH_POCKETS.slice(2).map(pocket => <SearchPocket key={pocket.id} pocket={pocket} placements={placements}
+            registry={registry} ready={ready} onBoard={id => run(() => onBoard(id))} />)}
+        </div>
         <section className={styles.mobilePicker} aria-label="AOS objects and machines">
           <div className={styles.mobilePickerHead}><strong>AOS / WORK</strong><span>{quickObjects.length} OBJECTS</span></div>
           <input type="search" aria-label="Find an AOS object or machine" placeholder="Find object, machine or Passport…" value={mobileQuery} onChange={event => setMobileQuery(event.target.value)} />
