@@ -4,7 +4,8 @@ const ENTRY_COOKIE = "ixi_soft_launch";
 const PUBLIC_COMPLIANCE_ROUTES = new Set([
   "/privacy",
   "/terms",
-  "/text-consent"
+  "/text-consent",
+  "/system-access"
 ]);
 
 export function middleware(request) {
