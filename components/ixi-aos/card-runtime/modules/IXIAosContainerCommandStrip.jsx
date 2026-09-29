@@ -64,7 +64,7 @@ export default function IXIAosContainerCommandStrip({
           position: absolute;
           left: 5px;
           right: 5px;
-          bottom: 79px;
+          bottom: 20px;
           height: 27px;
           display: flex;
           align-items: center;
