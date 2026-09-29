@@ -42,13 +42,14 @@ function SearchPocket({ pocket, placements, registry, ready, onBoard }) {
   });
   const objects = (placements[pocket.id] || []).map(id => registry.get(id)).filter(Boolean);
   return <section ref={setNodeRef} aria-label={`Pocket ${pocket.label}`}
-    className={`${styles.searchPocket} ${pocket.outer ? styles.outerPocket : ""} ${isOver ? styles.over : ""}`}>
-    <div className={styles.pocketHeading}><strong>{pocket.label}</strong><span>{objects.length}</span></div>
+    className={`${styles.searchPocket} ${pocket.outer ? styles.outerPocket : ""} ${objects.length ? styles.occupiedPocket : ""} ${isOver ? styles.over : ""}`}>
+    <div className={styles.pocketHeading}><span>{pocket.label}</span><strong>{pocket.side === "left" ? "IX-256" : "IX-128"}</strong></div>
     <div className={styles.pocketContents}>
       {objects.map(object => <PocketObject key={object.objectId} object={object} registry={registry}
         pocketId={pocket.id} ready={ready} onBoard={onBoard} />)}
-      {!objects.length && <span className={styles.pocketEmpty}>DROP HERE</span>}
     </div>
+    <span className={styles.pocketLoop} aria-hidden="true" />
+    <span className={styles.pocketDirect} aria-hidden="true" />
   </section>;
 }
 

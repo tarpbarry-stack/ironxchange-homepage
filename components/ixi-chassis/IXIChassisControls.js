@@ -40,11 +40,11 @@ export default function IXIChassisControls({
       !(["category", "make", "model"].includes(key) && String(value).startsWith("ALL ")));
   return (
     <section className="workspace-controls">
-      <button type="button" className="search-fold-actuator"
-        aria-label={searchCollapsed ? "Open search surface and pockets" : "Close search surface and pockets"}
-        aria-expanded={!searchCollapsed} aria-controls="ixi-workspace-search-controls"
-        onClick={onToggleSearchCollapsed} />
       <IXIControlSurface>
+        <button type="button" className="search-fold-actuator"
+          aria-label={searchCollapsed ? "Open search surface and pockets" : "Close search surface and pockets"}
+          aria-expanded={!searchCollapsed} aria-controls="ixi-workspace-search-controls"
+          onClick={onToggleSearchCollapsed} />
         <div id="ixi-workspace-search-controls" hidden={searchCollapsed}>
         <div className="desktop-search-surface">
          <IXSearchSurface
@@ -116,7 +116,7 @@ export default function IXIChassisControls({
 
         .search-fold-actuator {
           position: absolute;
-          top: 2px;
+          top: -22px;
           left: 50%;
           transform: translateX(-50%);
           z-index: 6;
@@ -152,7 +152,7 @@ export default function IXIChassisControls({
         }
 
         @media (max-width: 850px) {
-          .search-fold-actuator { top: -14px; }
+          .search-fold-actuator { top: -22px; }
           .aos-board-search-actions { display: flex; justify-content: flex-start; margin: 0 0 6px; }
           .aos-board-search-toggle { display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: auto; min-height: 44px; padding: 0 10px; border: 1px solid #343c30; border-radius: 3px; background: #101411; color: #e2e8dd; font: inherit; font-size: 10px; font-weight: 800; letter-spacing: .04em; white-space: nowrap; cursor: pointer; }
           .aos-board-search-toggle strong { color: #ffc400; font-size: 17px; line-height: 1; }
