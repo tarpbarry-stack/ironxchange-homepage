@@ -279,8 +279,8 @@ export default function IXIRelationshipControls({
       )}
 
       <style jsx>{`
-        .aos-dock-controls { justify-content: space-between; gap: clamp(5px, .7vw, 10px); }
-        .aos-dock-button { flex: 0 0 auto; padding: 4px 2px; border: 0; border-bottom: 2px solid rgba(255,255,255,.16); background: transparent; color: #aeb4ae; font: inherit; font-size: 8px; font-weight: 800; letter-spacing: .03em; white-space: nowrap; cursor: pointer; }
+        .aos-dock-controls { justify-content: space-between; gap: clamp(3px, .35vw, 6px); }
+        .aos-dock-button { flex: 0 0 auto; min-width: 68px; min-height: 28px; padding: 4px 5px; border: 1px solid #445045; border-radius: 4px; background: #15201b; color: #c2cfc4; font: inherit; font-size: 9px; font-weight: 800; letter-spacing: .03em; white-space: nowrap; cursor: pointer; }
         .aos-dock-button[aria-pressed="true"] { color: #ffc400; border-color: #ffc400; }
         .aos-dock-button:focus-visible { outline: 2px solid #ffc400; outline-offset: 2px; }
 
