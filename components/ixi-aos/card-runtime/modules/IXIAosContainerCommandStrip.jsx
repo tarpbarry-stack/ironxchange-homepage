@@ -5,9 +5,14 @@ export default function IXIAosContainerCommandStrip({
   onRecall = null,
   onBoard = null,
   onReturn = null,
-  disabled = false
+  disabled = false,
+  bottomOffset = 79
 }) {
   const [pending, setPending] = useState("");
+  const parsedBottomOffset = Number(bottomOffset);
+  const resolvedBottomOffset = Number.isFinite(parsedBottomOffset)
+    ? Math.max(0, parsedBottomOffset)
+    : 79;
 
   async function fire(event, action, handler) {
     event.preventDefault();
@@ -22,7 +27,10 @@ export default function IXIAosContainerCommandStrip({
   }
 
   return (
-    <div className="ixi-aos-container-command-strip">
+    <div
+      className="ixi-aos-container-command-strip"
+      style={{ "--ixi-aos-command-bottom": `${resolvedBottomOffset}px` }}
+    >
       <button
         type="button"
         aria-label="Recall direct children"
@@ -64,7 +72,7 @@ export default function IXIAosContainerCommandStrip({
           position: absolute;
           left: 5px;
           right: 5px;
-          bottom: 20px;
+          bottom: var(--ixi-aos-command-bottom, 79px);
           height: 27px;
           display: flex;
           align-items: center;

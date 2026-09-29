@@ -32,6 +32,7 @@ test("the four-card layouts reserve exactly the real 16px IXI rail height", () =
   assert.match(containerLayout, /\.gcv12-editor\{[^}]*inset:43px 7px 16px/u);
   assert.match(objectLayout, /\.go007-scroll\{[^}]*bottom:51px/u);
   assert.doesNotMatch(objectLayout, /go007-actions/u);
+  assert.match(objectLayout, /<IXIAosContainerCommandStrip[\s\S]*?bottomOffset=\{20\}/u);
   assert.match(objectLayout, /\.go007-editor\{[^}]*inset:42px 7px 16px/u);
 });
 

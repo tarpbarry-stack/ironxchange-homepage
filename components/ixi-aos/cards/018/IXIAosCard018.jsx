@@ -101,6 +101,7 @@ function IXIAosCard018Presentation({
           onBoard={onBoard}
           onReturn={onReturn}
           disabled={Boolean(ixiState?.editing)}
+          bottomOffset={79}
         />
       </div>
 
