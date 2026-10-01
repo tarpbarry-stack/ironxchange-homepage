@@ -24,6 +24,8 @@ const categories = taxonomyRegistry.map(category => {
     name: category.name,
     awsName: category.awsName,
     awsId: category.awsId,
+    hierarchy: category.hierarchy || "make-model",
+    equipmentTypes: category.equipmentTypes || [],
     rows: taxonomy.map(row => ({
       ...row,
       make: normalizeMake(row.make)

@@ -19,6 +19,43 @@ const master = JSON.parse(fs.readFileSync(masterPath, "utf8"));
 function buildCategory(category) {
   const categoryId = category.awsId || slugify(category.awsName || category.name);
   const categoryName = category.awsName || category.name;
+
+  if (category.hierarchy === "type-make-model") {
+    const typeMap = Object.fromEntries(
+      (category.equipmentTypes || []).map(type => [type, {}])
+    );
+
+    category.rows.forEach(row => {
+      const type = String(row.type || "").trim();
+      const make = String(row.make || "").trim();
+      const model = String(row.model || "").trim();
+
+      if (!type || !make || !model) return;
+      if (!typeMap[type]) typeMap[type] = {};
+      if (!typeMap[type][make]) typeMap[type][make] = [];
+      typeMap[type][make].push(model);
+    });
+
+    return {
+      id: categoryId,
+      name: categoryName,
+      hierarchy: "type-make-model",
+      subcategories: Object.entries(typeMap).map(([type, makes]) => ({
+        id: `${categoryId}-${slugify(type)}`,
+        name: type,
+        subcategories: Object.entries(makes).map(([make, models]) => ({
+          id: `${categoryId}-${slugify(type)}-${slugify(make)}`,
+          name: make,
+          subcategories: models.map(model => ({
+            id: `${categoryId}-${slugify(type)}-${slugify(make)}-${slugify(model)}`,
+            name: model,
+            subcategories: []
+          }))
+        }))
+      }))
+    };
+  }
+
   const makeMap = {};
 
   category.rows.forEach(row => {

@@ -16,8 +16,10 @@ from "../components/ixi-machine-placement/IXIMachinePlacementControl";
 
 import {
   getV12CategoryNames,
+  getV12EquipmentTypes,
   getV12Makes,
-  getV12Models
+  getV12Models,
+  getV12TaxonomyPath
 } from "../lib/v12TaxonomyAdapter";
 
 import categoryDnaKeywords from "../lib/categoryDnaKeywords";
@@ -75,6 +77,11 @@ function slugify(text = "") {
 
 function clean(value) {
   return value ? String(value).trim() : "";
+}
+
+function canonicalOption(value, options = []) {
+  const target = clean(value).toUpperCase();
+  return options.find(option => clean(option).toUpperCase() === target) || "";
 }
 
 function cleanNumber(value = "") {
@@ -252,6 +259,7 @@ const machineNotice =
 });
 
   const [category, setCategory] = useState("EXCAVATORS");
+  const [equipmentType, setEquipmentType] = useState("");
   const [year, setYear] = useState("");
   const [make, setMake] = useState("");
   const [model, setModel] = useState("");
@@ -323,6 +331,7 @@ const [machineChannel, setMachineChannel] =
     hasMeaningfulPostFreeDraft(savedDraft)
   ) {
     setCategory(savedDraft.category || "EXCAVATORS");
+    setEquipmentType(savedDraft.equipmentType || "");
     setYear(savedDraft.year || "");
     setMake(savedDraft.make || "");
     setModel(savedDraft.model || "");
@@ -399,6 +408,7 @@ const [machineChannel, setMachineChannel] =
   draftSaveTimerRef.current = setTimeout(() => {
     savePostFreeDraft({
       category,
+      equipmentType,
       year,
       make,
       model,
@@ -442,6 +452,7 @@ const [machineChannel, setMachineChannel] =
   draftHydrated,
 
   category,
+  equipmentType,
   year,
   make,
   model,
@@ -574,12 +585,16 @@ setSellerProfile({
   }, [category]);
 
 const availableMakes = useMemo(() => {
-  return getV12Makes(category);
+  return getV12Makes(category, equipmentType);
+}, [category, equipmentType]);
+
+const availableEquipmentTypes = useMemo(() => {
+  return getV12EquipmentTypes(category);
 }, [category]);
 
 const availableModels = useMemo(() => {
-  return getV12Models(category, make);
-}, [category, make]);
+  return getV12Models(category, make, equipmentType);
+}, [category, equipmentType, make]);
   
   const cardTitle = useMemo(() => {
     return buildCardTitle(year, make, model);
@@ -677,6 +692,7 @@ image: heroPhoto,
 
 publicData: {
     category,
+    equipmentType,
     year,
     make,
     model,
@@ -904,10 +920,37 @@ async function createListing() {
     showMachineNotice({ message: "RESUME YOUR SAVED POSTING BELOW, OR CHOOSE START NEW FOR A DIFFERENT MACHINE", tone: "warning" });
     return;
   }
-  if (!category || !year || !make || !model || !hours || !price || !machineAccess || !machineChannel || !photoItems.length) {
+  if (
+    !category ||
+    (availableEquipmentTypes.length > 0 && !equipmentType) ||
+    !year ||
+    !make ||
+    !model ||
+    !hours ||
+    !price ||
+    !machineAccess ||
+    !machineChannel ||
+    !photoItems.length
+  ) {
     showMachineNotice({ message: "YEAR, MAKE, MODEL, HOURS, PRICE, PLACEMENT AND PHOTOS REQUIRED", tone: "warning" });
     return;
   }
+
+  const taxonomyPath = getV12TaxonomyPath(
+    category,
+    make,
+    model,
+    equipmentType
+  );
+
+  if (!taxonomyPath) {
+    showMachineNotice({
+      message: "SELECT A GOVERNED CATEGORY, TYPE, MAKE AND MODEL — ADD NEW VALUES IN ADMIN DADDY FIRST",
+      tone: "warning"
+    });
+    return;
+  }
+
   const categorySlug = slugify(category);
   const makeSlug = slugify(`${category}-${make}`);
   const modelSlug = slugify(`${category}-${make}-${model}`);
@@ -920,6 +963,7 @@ async function createListing() {
           categoryLevel3: modelSlug,
 
           category,
+          equipmentType,
           year: String(year),
           make,
           model,
@@ -1223,23 +1267,58 @@ async function createListing() {
               <div className="inventory-scroll">
                 <label>
                   Category
-                  <select
+                  <input
+                    list="post-free-category-options"
                     value={category}
                     onChange={e => {
   setCategory(e.target.value);
+  setEquipmentType("");
   setMake("");
   setModel("");
   setSelectedKeywords([]);
   setKeywordSearch("");
 }}
-                  >
+                    onBlur={() => {
+                      const canonical = canonicalOption(category, categories);
+                      if (canonical) setCategory(canonical);
+                    }}
+                    placeholder="Type to find category"
+                  />
+                  <datalist id="post-free-category-options">
                     {categories.map(cat => (
                       <option key={cat} value={cat}>
-                        {cat}
                       </option>
                     ))}
-                  </select>
+                  </datalist>
                 </label>
+
+                {availableEquipmentTypes.length > 0 && (
+                  <label>
+                    Equipment Type
+                    <input
+                      list="post-free-equipment-type-options"
+                      value={equipmentType}
+                      onChange={e => {
+                        setEquipmentType(e.target.value);
+                        setMake("");
+                        setModel("");
+                      }}
+                      onBlur={() => {
+                        const canonical = canonicalOption(
+                          equipmentType,
+                          availableEquipmentTypes
+                        );
+                        if (canonical) setEquipmentType(canonical);
+                      }}
+                      placeholder="Type to find equipment type"
+                    />
+                    <datalist id="post-free-equipment-type-options">
+                      {availableEquipmentTypes.map(type => (
+                        <option key={type} value={type} />
+                      ))}
+                    </datalist>
+                  </label>
+                )}
 
                 <label>
                   Year
@@ -1252,34 +1331,43 @@ async function createListing() {
 
                 <label>
                   Make
-                  <select
+                  <input
+                    list="post-free-make-options"
                     value={make}
                     onChange={e => {
                       setMake(e.target.value);
                       setModel("");
                     }}
-                  >
-                    <option value="">Select Make</option>
-
+                    onBlur={() => {
+                      const canonical = canonicalOption(make, availableMakes);
+                      if (canonical) setMake(canonical);
+                    }}
+                    placeholder="Type to find make"
+                  />
+                  <datalist id="post-free-make-options">
                     {availableMakes.map(item => (
-                      <option key={item} value={item}>
-                        {item}
-                      </option>
+                      <option key={item} value={item} />
                     ))}
-                  </select>
+                  </datalist>
                 </label>
 
                 <label>
                   Model
-                  <select value={model} onChange={e => setModel(e.target.value)}>
-                    <option value="">Select Model</option>
-
+                  <input
+                    list="post-free-model-options"
+                    value={model}
+                    onChange={e => setModel(e.target.value)}
+                    onBlur={() => {
+                      const canonical = canonicalOption(model, availableModels);
+                      if (canonical) setModel(canonical);
+                    }}
+                    placeholder="Type to find model"
+                  />
+                  <datalist id="post-free-model-options">
                     {availableModels.map(item => (
-                      <option key={item} value={item}>
-                        {item}
-                      </option>
+                      <option key={item} value={item} />
                     ))}
-                  </select>
+                  </datalist>
                 </label>
 
                 <label>

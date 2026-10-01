@@ -18,6 +18,7 @@ const CATEGORY_TO_FILE = {
   "EXCAVATORS": "lib/excavatorsTaxonomy.js",
   "FORKLIFTS": "lib/forkliftsTaxonomy.js",
   "MOTOR GRADERS": "lib/motorGradersTaxonomy.js",
+  "PIPELINE EQUIPMENT": "lib/pipelineEquipmentTaxonomy.js",
   "SCRAPERS": "lib/scraperTaxonomy.js",
   "SKID STEER / CTL": "lib/skidSteerCtlTaxonomy.js",
   "SUPPORT EQUIPMENT": "lib/supportEquipmentTaxonomy.js",
@@ -83,11 +84,15 @@ async function githubRequest(path, options = {}) {
   return data;
 }
 
-function deleteTaxonomyRow(fileContent, make, model) {
+function deleteTaxonomyRow(fileContent, equipmentType, make, model) {
+  const escapedType = equipmentType.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   const escapedMake = make.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   const escapedModel = model.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
-  const patterns = [
+  const patterns = equipmentType ? [
+    new RegExp(`\\n\\s*\\{\\s*type:\\s*"${escapedType}",\\s*make:\\s*"${escapedMake}",\\s*model:\\s*"${escapedModel}"\\s*\\},?`, "g"),
+    new RegExp(`\\n\\s*\\{\\s*"type":\\s*"${escapedType}",\\s*"make":\\s*"${escapedMake}",\\s*"model":\\s*"${escapedModel}"\\s*\\},?`, "g")
+  ] : [
     new RegExp(`\\n\\s*\\{\\s*make:\\s*"${escapedMake}",\\s*model:\\s*"${escapedModel}"\\s*\\},?`, "g"),
     new RegExp(`\\n\\s*\\{\\s*"make":\\s*"${escapedMake}",\\s*"model":\\s*"${escapedModel}"\\s*\\},?`, "g")
   ];
@@ -118,6 +123,7 @@ export default async function handler(req, res) {
     }
 
     const category = upper(req.body.category);
+    const equipmentType = upper(req.body.equipmentType);
     const make = normalizeMake(req.body.make);
     const model = normalizeModel(req.body.model);
 
@@ -135,7 +141,7 @@ export default async function handler(req, res) {
     const current = await githubRequest(filePath);
 
     const decoded = Buffer.from(current.content, "base64").toString("utf8");
-    const result = deleteTaxonomyRow(decoded, make, model);
+    const result = deleteTaxonomyRow(decoded, equipmentType, make, model);
 
     if (!result.changed) {
       return res.status(404).json({
@@ -143,6 +149,7 @@ export default async function handler(req, res) {
         changed: false,
         error: "Model row not found.",
         category,
+        equipmentType,
         make,
         model,
         filePath
@@ -167,6 +174,7 @@ export default async function handler(req, res) {
       changed: true,
       message: "Model deleted and committed to GitHub.",
       category,
+      equipmentType,
       make,
       model,
       filePath

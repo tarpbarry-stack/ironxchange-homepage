@@ -547,6 +547,11 @@ const sharetribeImageObjects = imageIds
 
           type: getCategory(publicData),
           category: getCategory(publicData),
+          equipmentType: cleanLabel(
+            publicData.equipmentType ||
+            publicData.subcategory ||
+            ""
+          ),
 
           make: getMake(publicData),
           model: getModel(publicData),

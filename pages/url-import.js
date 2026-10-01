@@ -10,6 +10,7 @@ import Footer from "../components/Footer";
 import {
   applyV12TaxonomyPath,
   getV12CategoryNames,
+  getV12EquipmentTypes,
   getV12Makes,
   getV12Models,
   getV12TaxonomyPath
@@ -157,6 +158,11 @@ function slugify(text = "") {
 
 function clean(value) {
   return value ? String(value).trim() : "";
+}
+
+function canonicalOption(value, options = []) {
+  const target = clean(value).toUpperCase();
+  return options.find(option => clean(option).toUpperCase() === target) || "";
 }
 
 function cleanNumber(value = "") {
@@ -511,6 +517,7 @@ const [sellerProfile, setSellerProfile] = useState({
 });
 
   const [category, setCategory] = useState("EXCAVATORS");
+  const [equipmentType, setEquipmentType] = useState("");
   const [year, setYear] = useState("");
   const [make, setMake] = useState("");
   const [model, setModel] = useState("");
@@ -642,12 +649,16 @@ const categories = useMemo(() => {
 }, [taxonomyRevision]);
 
 const availableMakes = useMemo(() => {
-  return getV12Makes(category);
+  return getV12Makes(category, equipmentType);
+}, [category, equipmentType, taxonomyRevision]);
+
+const availableEquipmentTypes = useMemo(() => {
+  return getV12EquipmentTypes(category);
 }, [category, taxonomyRevision]);
 
 const availableModels = useMemo(() => {
-  return getV12Models(category, make);
-}, [category, make, taxonomyRevision]);
+  return getV12Models(category, make, equipmentType);
+}, [category, equipmentType, make, taxonomyRevision]);
   
   const cardTitle = useMemo(() => {
     return buildCardTitle(year, make, model);
@@ -792,6 +803,7 @@ sale:
 
 publicData: {
     category,
+    equipmentType,
     year,
     make,
     model,
@@ -990,6 +1002,10 @@ const runtimeTaxonomyResult =
       category:
         machine?.category || "",
 
+      equipmentType:
+        machine?.equipmentType ||
+        machine?.subcategory || "",
+
       make:
         machine?.make || "",
 
@@ -1008,6 +1024,11 @@ const importedMake =
     ? runtimeTaxonomyResult.path.make.name
     : String(machine?.make || "").trim();
 
+const importedEquipmentType =
+  runtimeTaxonomyResult?.ok
+    ? runtimeTaxonomyResult.path.equipmentType?.name || ""
+    : String(machine?.equipmentType || machine?.subcategory || "").trim();
+
 const importedModel =
   runtimeTaxonomyResult?.ok
     ? runtimeTaxonomyResult.path.model.name
@@ -1023,6 +1044,10 @@ setTaxonomyRevision(current =>
 
 if (importedCategory) {
   setCategory(importedCategory);
+}
+
+if (importedEquipmentType) {
+  setEquipmentType(importedEquipmentType);
 }
 
 if (importedMake) {
@@ -1226,8 +1251,16 @@ setPhotoItems(current => [...current, ...mapped]);
     return;
   }
 
-  if (!category || !year || !make || !model || !hours || !price) {
-    alert("Category, year, make, model, hours, and price are required.");
+  if (
+    !category ||
+    (availableEquipmentTypes.length > 0 && !equipmentType) ||
+    !year ||
+    !make ||
+    !model ||
+    !hours ||
+    !price
+  ) {
+    alert("Category, equipment type when shown, year, make, model, hours, and price are required.");
     return;
   }
 
@@ -1461,7 +1494,8 @@ const taxonomyPath =
   getV12TaxonomyPath(
     category,
     make,
-    model
+    model,
+    equipmentType
   );
 
 if (!taxonomyPath) {
@@ -1494,12 +1528,17 @@ const listingPayload = {
     taxonomyPath.category.id,
 
   categoryLevel2:
-    taxonomyPath.make.id,
+    taxonomyPath.equipmentType
+      ? slugify(`${category}-${make}`)
+      : taxonomyPath.make.id,
 
   categoryLevel3:
-    taxonomyPath.model.id,
+    taxonomyPath.equipmentType
+      ? slugify(`${category}-${make}-${model}`)
+      : taxonomyPath.model.id,
 
         category,
+        equipmentType,
         year: String(year),
         make,
         model,
@@ -2249,23 +2288,57 @@ showCardNotice({
               <div className="inventory-scroll">
                 <label>
                   Category
-                  <select
+                  <input
+                    list="url-import-category-options"
                     value={category}
                     onChange={e => {
   setCategory(e.target.value);
+  setEquipmentType("");
   setMake("");
   setModel("");
   setSelectedKeywords([]);
   setKeywordSearch("");
 }}
-                  >
+                    onBlur={() => {
+                      const canonical = canonicalOption(category, categories);
+                      if (canonical) setCategory(canonical);
+                    }}
+                    placeholder="Type to find category"
+                  />
+                  <datalist id="url-import-category-options">
                     {categories.map(cat => (
-                      <option key={cat} value={cat}>
-                        {cat}
-                      </option>
+                      <option key={cat} value={cat} />
                     ))}
-                  </select>
+                  </datalist>
                 </label>
+
+                {availableEquipmentTypes.length > 0 && (
+                  <label>
+                    Equipment Type
+                    <input
+                      list="url-import-equipment-type-options"
+                      value={equipmentType}
+                      onChange={e => {
+                        setEquipmentType(e.target.value);
+                        setMake("");
+                        setModel("");
+                      }}
+                      onBlur={() => {
+                        const canonical = canonicalOption(
+                          equipmentType,
+                          availableEquipmentTypes
+                        );
+                        if (canonical) setEquipmentType(canonical);
+                      }}
+                      placeholder="Type to find equipment type"
+                    />
+                    <datalist id="url-import-equipment-type-options">
+                      {availableEquipmentTypes.map(type => (
+                        <option key={type} value={type} />
+                      ))}
+                    </datalist>
+                  </label>
+                )}
 
                 <label>
                   Year
@@ -2278,34 +2351,43 @@ showCardNotice({
 
                 <label>
                   Make
-                  <select
+                  <input
+                    list="url-import-make-options"
                     value={make}
                     onChange={e => {
                       setMake(e.target.value);
                       setModel("");
                     }}
-                  >
-                    <option value="">Select Make</option>
-
+                    onBlur={() => {
+                      const canonical = canonicalOption(make, availableMakes);
+                      if (canonical) setMake(canonical);
+                    }}
+                    placeholder="Type to find make"
+                  />
+                  <datalist id="url-import-make-options">
                     {availableMakes.map(item => (
-                      <option key={item} value={item}>
-                        {item}
-                      </option>
+                      <option key={item} value={item} />
                     ))}
-                  </select>
+                  </datalist>
                 </label>
 
                 <label>
                   Model
-                  <select value={model} onChange={e => setModel(e.target.value)}>
-                    <option value="">Select Model</option>
-
+                  <input
+                    list="url-import-model-options"
+                    value={model}
+                    onChange={e => setModel(e.target.value)}
+                    onBlur={() => {
+                      const canonical = canonicalOption(model, availableModels);
+                      if (canonical) setModel(canonical);
+                    }}
+                    placeholder="Type to find model"
+                  />
+                  <datalist id="url-import-model-options">
                     {availableModels.map(item => (
-                      <option key={item} value={item}>
-                        {item}
-                      </option>
+                      <option key={item} value={item} />
                     ))}
-                  </select>
+                  </datalist>
                 </label>
 
                 <label>

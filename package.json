@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "prebuild": "npm run build-aws-taxonomy-master && npm run generate-taxonomy",
     "build": "next build",
     "start": "next start",
     "test:transact-coa": "node --test tests/ixi-transact-coa-policy.test.mjs",

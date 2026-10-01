@@ -1,11 +1,13 @@
 {
-  "generatedAt": "2026-09-13T19:08:27.080Z",
+  "generatedAt": "2026-10-01T21:43:08.877Z",
   "note": "IronXchange AWS taxonomy master. No broad cleanup applied. CAT → CATERPILLAR is applied during generation.",
   "categories": [
     {
       "name": "AERIAL LIFTS",
       "awsName": "Aerial Equipment",
       "awsId": "aerial-equipment",
+      "hierarchy": "make-model",
+      "equipmentTypes": [],
       "rows": [
         {
           "make": "GENIE",
@@ -14113,6 +14115,8 @@
       "name": "AGGREGATE EQUIPMENT",
       "awsName": "Aggregate",
       "awsId": "aggregate",
+      "hierarchy": "make-model",
+      "equipmentTypes": [],
       "rows": [
         {
           "make": "POWERSCREEN",
@@ -21340,6 +21344,8 @@
       "name": "AGRICULTURE HARVESTERS",
       "awsName": "Agriculture Harvesters",
       "awsId": "agriculture-harvesters",
+      "hierarchy": "make-model",
+      "equipmentTypes": [],
       "rows": [
         {
           "make": "JOHN DEERE",
@@ -27431,6 +27437,8 @@
       "name": "AGRICULTURE TRACTORS",
       "awsName": "Agriculture Tractors",
       "awsId": "agriculture-tractors",
+      "hierarchy": "make-model",
+      "equipmentTypes": [],
       "rows": [
         {
           "make": "JOHN DEERE",
@@ -44798,6 +44806,8 @@
       "name": "ASPHALT EQUIPMENT",
       "awsName": "Asphalt Equipment",
       "awsId": "asphalt-equipment",
+      "hierarchy": "make-model",
+      "equipmentTypes": [],
       "rows": [
         {
           "make": "VOGELE",
@@ -49137,6 +49147,8 @@
       "name": "BACKHOE LOADERS",
       "awsName": "Backhoe Loaders",
       "awsId": "backhoe-loaders",
+      "hierarchy": "make-model",
+      "equipmentTypes": [],
       "rows": [
         {
           "make": "DEERE",
@@ -50704,6 +50716,8 @@
       "name": "COMPACTION / ROLLERS",
       "awsName": "Compaction / Rollers",
       "awsId": "compaction-rollers",
+      "hierarchy": "make-model",
+      "equipmentTypes": [],
       "rows": [
         {
           "make": "CATERPILLAR",
@@ -53619,6 +53633,8 @@
       "name": "CRANES",
       "awsName": "Cranes",
       "awsId": "cranes",
+      "hierarchy": "make-model",
+      "equipmentTypes": [],
       "rows": [
         {
           "make": "ALTEC",
@@ -60850,6 +60866,8 @@
       "name": "CRAWLER CARRIERS",
       "awsName": "Crawler Carriers / Loader",
       "awsId": "crawler-carriers-loader",
+      "hierarchy": "make-model",
+      "equipmentTypes": [],
       "rows": [
         {
           "make": "PRINOTH",
@@ -65077,6 +65095,8 @@
       "name": "DOZERS",
       "awsName": "Dozers",
       "awsId": "dozers",
+      "hierarchy": "make-model",
+      "equipmentTypes": [],
       "rows": [
         {
           "make": "CATERPILLAR",
@@ -69120,6 +69140,8 @@
       "name": "DRILLS / PILING",
       "awsName": "Drills / Piling",
       "awsId": "drills-piling",
+      "hierarchy": "make-model",
+      "equipmentTypes": [],
       "rows": [
         {
           "make": "VERMEER",
@@ -71819,6 +71841,8 @@
       "name": "DUMP TRUCKS",
       "awsName": "Dump Trucks / Artic / Rigid",
       "awsId": "dump-trucks-artic-rigid",
+      "hierarchy": "make-model",
+      "equipmentTypes": [],
       "rows": [
         {
           "make": "CATERPILLAR",
@@ -74926,6 +74950,8 @@
       "name": "EXCAVATORS",
       "awsName": "Excavators",
       "awsId": "excavators",
+      "hierarchy": "make-model",
+      "equipmentTypes": [],
       "rows": [
         {
           "make": "CATERPILLAR",
@@ -83969,6 +83995,8 @@
       "name": "FORKLIFTS",
       "awsName": "Forklifts",
       "awsId": "forklifts",
+      "hierarchy": "make-model",
+      "equipmentTypes": [],
       "rows": [
         {
           "make": "TOYOTA",
@@ -99268,6 +99296,8 @@
       "name": "MOTOR GRADERS",
       "awsName": "Motor Graders",
       "awsId": "motor-graders",
+      "hierarchy": "make-model",
+      "equipmentTypes": [],
       "rows": [
         {
           "make": "KOMATSU",
@@ -99820,9 +99850,25 @@
       ]
     },
     {
+      "name": "PIPELINE EQUIPMENT",
+      "awsName": "Pipeline Equipment",
+      "awsId": "pipeline-equipment",
+      "hierarchy": "type-make-model",
+      "equipmentTypes": [
+        "PIPELAYERS",
+        "BENDING MACHINES",
+        "HYDRAULIC LIFTERS",
+        "PADDING MACHINES",
+        "WELDERS"
+      ],
+      "rows": []
+    },
+    {
       "name": "SCRAPERS",
       "awsName": "Scraper",
       "awsId": "scraper",
+      "hierarchy": "make-model",
+      "equipmentTypes": [],
       "rows": [
         {
           "make": "CATERPILLAR",
@@ -101278,6 +101324,8 @@
       "name": "SKID STEER / CTL",
       "awsName": "Skid Steer / CTL",
       "awsId": "skid-steer-ctl",
+      "hierarchy": "make-model",
+      "equipmentTypes": [],
       "rows": [
         {
           "make": "BOBCAT",
@@ -104953,6 +105001,8 @@
       "name": "TELEHANDLERS",
       "awsName": "Telehandlers",
       "awsId": "telehandlers",
+      "hierarchy": "make-model",
+      "equipmentTypes": [],
       "rows": [
         {
           "make": "JCB",
@@ -107860,6 +107910,8 @@
       "name": "TRENCHERS",
       "awsName": "Trenchers",
       "awsId": "trenchers",
+      "hierarchy": "make-model",
+      "equipmentTypes": [],
       "rows": [
         {
           "make": "DITCHWITCH",
@@ -109095,6 +109147,8 @@
       "name": "TRAILERS",
       "awsName": "Trailers",
       "awsId": "trailers",
+      "hierarchy": "make-model",
+      "equipmentTypes": [],
       "rows": [
         {
           "make": "ASPHALT TRAILERS",
@@ -114474,6 +114528,8 @@
       "name": "TRUCKS",
       "awsName": "Trucks",
       "awsId": "trucks",
+      "hierarchy": "make-model",
+      "equipmentTypes": [],
       "rows": [
         {
           "make": "AMBULANCE",
@@ -119281,6 +119337,8 @@
       "name": "WHEEL LOADERS",
       "awsName": "Wheel Loaders",
       "awsId": "wheel-loaders",
+      "hierarchy": "make-model",
+      "equipmentTypes": [],
       "rows": [
         {
           "make": "CATERPILLAR",
@@ -123980,6 +124038,8 @@
       "name": "ATTACHMENTS / PARTS",
       "awsName": "Attatchments / Parts",
       "awsId": "attatchments-parts",
+      "hierarchy": "make-model",
+      "equipmentTypes": [],
       "rows": [
         {
           "make": "EXCAVATOR - PARTS / ATTACHMENTS",
@@ -124723,6 +124783,8 @@
       "name": "SUPPORT EQUIPMENT",
       "awsName": "Support Equipment",
       "awsId": "support-equipment",
+      "hierarchy": "make-model",
+      "equipmentTypes": [],
       "rows": [
         {
           "make": "DUMPERS",
@@ -125418,6 +125480,8 @@
       "name": "UTILITY CARTS",
       "awsName": "Utility Carts",
       "awsId": "utility-carts",
+      "hierarchy": "make-model",
+      "equipmentTypes": [],
       "rows": [
         {
           "make": "JOHN DEERE",
@@ -131445,6 +131509,8 @@
       "name": "OTHER / SPECIALTY",
       "awsName": "Other / Specialty",
       "awsId": "other-specialty",
+      "hierarchy": "make-model",
+      "equipmentTypes": [],
       "rows": []
     }
   ]

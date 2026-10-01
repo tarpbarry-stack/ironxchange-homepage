@@ -127256,6 +127256,38 @@ const categoriesConfig = {
       ]
     },
     {
+      "id": "pipeline-equipment",
+      "name": "Pipeline Equipment",
+      "hierarchy": "type-make-model",
+      "subcategories": [
+        {
+          "id": "pipeline-equipment-pipelayers",
+          "name": "PIPELAYERS",
+          "subcategories": []
+        },
+        {
+          "id": "pipeline-equipment-bending-machines",
+          "name": "BENDING MACHINES",
+          "subcategories": []
+        },
+        {
+          "id": "pipeline-equipment-hydraulic-lifters",
+          "name": "HYDRAULIC LIFTERS",
+          "subcategories": []
+        },
+        {
+          "id": "pipeline-equipment-padding-machines",
+          "name": "PADDING MACHINES",
+          "subcategories": []
+        },
+        {
+          "id": "pipeline-equipment-welders",
+          "name": "WELDERS",
+          "subcategories": []
+        }
+      ]
+    },
+    {
       "id": "scraper",
       "name": "Scraper",
       "subcategories": [

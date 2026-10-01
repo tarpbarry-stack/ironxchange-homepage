@@ -24,6 +24,7 @@ import dumpTrucksTaxonomy from "../lib/dumpTrucksTaxonomy";
 import excavatorsTaxonomy from "../lib/excavatorsTaxonomy";
 import forkliftsTaxonomy from "../lib/forkliftsTaxonomy";
 import motorGradersTaxonomy from "../lib/motorGradersTaxonomy";
+import pipelineEquipmentTaxonomy from "../lib/pipelineEquipmentTaxonomy";
 import scraperTaxonomy from "../lib/scraperTaxonomy";
 import skidSteerCtlTaxonomy from "../lib/skidSteerCtlTaxonomy";
 import supportEquipmentTaxonomy from "../lib/supportEquipmentTaxonomy";
@@ -127,6 +128,19 @@ const TAXONOMY_REGISTRY = {
     file: "lib/motorGradersTaxonomy.js",
     data: motorGradersTaxonomy
   },
+  "PIPELINE EQUIPMENT": {
+    key: "pipelineEquipmentTaxonomy",
+    file: "lib/pipelineEquipmentTaxonomy.js",
+    hierarchy: "type-make-model",
+    equipmentTypes: [
+      "PIPELAYERS",
+      "BENDING MACHINES",
+      "HYDRAULIC LIFTERS",
+      "PADDING MACHINES",
+      "WELDERS"
+    ],
+    data: pipelineEquipmentTaxonomy
+  },
   "SCRAPERS": {
     key: "scraperTaxonomy",
     file: "lib/scraperTaxonomy.js",
@@ -202,6 +216,11 @@ function clean(value) {
 
 function upper(value) {
   return clean(value).toUpperCase();
+}
+
+function canonicalOption(value, options = []) {
+  const target = upper(value);
+  return options.find(option => upper(option) === target) || "";
 }
 
 function normalizeModel(value) {
@@ -283,6 +302,15 @@ function getRowMake(row = {}) {
   );
 }
 
+function getRowEquipmentType(row = {}) {
+  return clean(
+    row.type ||
+      row.equipmentType ||
+      row.subcategory ||
+      ""
+  );
+}
+
 function getRowModel(row = {}) {
   return clean(
     row.model ||
@@ -325,6 +353,7 @@ function getTaxonomyRows(taxonomy) {
       return {
         id: `${index}`,
         sourceIndex: index,
+        equipmentType: getRowEquipmentType(item),
         make,
         model: getRowModel(item),
         raw: item
@@ -469,10 +498,10 @@ export default function AdminDaddyPage() {
   const [loadingListings, setLoadingListings] = useState(true);
 
   const [selectedCategory, setSelectedCategory] = useState("SKID STEER / CTL");
+  const [selectedEquipmentType, setSelectedEquipmentType] = useState("");
   const [selectedMake, setSelectedMake] = useState("");
   const [taxonomySearch, setTaxonomySearch] = useState("");
 
-  const [newCategoryName, setNewCategoryName] = useState("");
   const [newMakeName, setNewMakeName] = useState("");
   const [newModelName, setNewModelName] = useState("");
 
@@ -488,7 +517,6 @@ export default function AdminDaddyPage() {
   const [deployBusy, setDeployBusy] = useState(false);
   const [deleteBusy, setDeleteBusy] = useState(false);
 
-  const [addMakeBusy, setAddMakeBusy] = useState(false);
   const [deleteMakeBusy, setDeleteMakeBusy] = useState(false);
 
   useEffect(() => {
@@ -514,6 +542,21 @@ export default function AdminDaddyPage() {
     return getTaxonomyRows(selectedRegistryItem?.data);
   }, [selectedRegistryItem]);
 
+  const equipmentTypes = useMemo(() => {
+    return selectedRegistryItem?.equipmentTypes || [];
+  }, [selectedRegistryItem]);
+
+  const activeEquipmentType =
+    selectedEquipmentType || equipmentTypes[0] || "";
+
+  const scopedTaxonomyRows = useMemo(() => {
+    if (!activeEquipmentType) return taxonomyRows;
+
+    return taxonomyRows.filter(
+      row => upper(row.equipmentType) === upper(activeEquipmentType)
+    );
+  }, [taxonomyRows, activeEquipmentType]);
+
   const allTaxonomyRows = useMemo(() => {
     return Object.entries(TAXONOMY_REGISTRY).flatMap(([category, item]) =>
       getTaxonomyRows(item.data).map(row => ({
@@ -526,19 +569,15 @@ export default function AdminDaddyPage() {
   }, []);
 
   const makes = useMemo(() => {
-    return getUniqueMakesFromRows(taxonomyRows);
-  }, [taxonomyRows]);
+    return getUniqueMakesFromRows(scopedTaxonomyRows);
+  }, [scopedTaxonomyRows]);
 
   const activeMake = selectedMake || makes[0] || "";
-
-  const modelsForMake = useMemo(() => {
-    return getModelsForMake(taxonomyRows, activeMake);
-  }, [taxonomyRows, activeMake]);
 
   const filteredRows = useMemo(() => {
     const search = taxonomySearch.trim().toLowerCase();
 
-    const rows = taxonomyRows.filter(row => {
+    const rows = scopedTaxonomyRows.filter(row => {
       if (!activeMake) return true;
       return upper(row.make) === upper(activeMake);
     });
@@ -551,7 +590,7 @@ export default function AdminDaddyPage() {
         return haystack.includes(search);
       })
       .slice(0, 500);
-  }, [taxonomyRows, activeMake, taxonomySearch]);
+  }, [scopedTaxonomyRows, activeMake, taxonomySearch]);
 
   const badMakeRows = useMemo(() => {
     return findBadMakeRows(allTaxonomyRows);
@@ -722,117 +761,6 @@ export default function AdminDaddyPage() {
     );
   }
 
-  function stageAddCategory() {
-    const category = upper(newCategoryName);
-
-    if (!category) {
-      alert("Enter category name.");
-      return;
-    }
-
-    if (TAXONOMY_REGISTRY[category]) {
-      alert(`${category} already exists.`);
-      return;
-    }
-
-    stagePatch({
-      type: "ADD_CATEGORY",
-      category,
-      target: "IX_AWS_TAXONOMY",
-      sharetribeImpact: "REQUIRES_SHARETRIBE_FIELD_SYNC"
-    });
-
-    setNewCategoryName("");
-  }
-
-  function stageAddMake() {
-    const make = upper(newMakeName);
-
-    if (!selectedCategory || !make) {
-      alert("Select category and enter make.");
-      return;
-    }
-
-    if (makes.includes(make)) {
-      alert(`${make} already exists in ${selectedCategory}.`);
-      return;
-    }
-
-    stagePatch({
-      type: "ADD_MAKE",
-      category: selectedCategory,
-      make,
-      file: selectedRegistryItem?.file,
-      target: "IX_AWS_TAXONOMY",
-      sharetribeImpact: "REQUIRES_SHARETRIBE_ALLOWED_VALUE_SYNC"
-    });
-
-    setNewMakeName("");
-  }
-
-  async function commitAddMake() {
-  const make = upper(newMakeName);
-
-  if (!selectedCategory || !make) {
-    alert("Select category and enter make.");
-    return;
-  }
-
-  if (makes.includes(make)) {
-    alert(`${make} already exists in ${selectedCategory}.`);
-    return;
-  }
-
-  const typed = window.prompt(
-    `Commit make to taxonomy?\n\n${selectedCategory}\n${make}\n\nThis will create seed model OTHER.\n\nType ADD MAKE to confirm.`
-  );
-
-  if (typed !== "ADD MAKE") {
-    addLog("Add make cancelled", "warn");
-    return;
-  }
-
-  setAddMakeBusy(true);
-
-  try {
-    const res = await fetch("/api/admin/taxonomy/add-make", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-admin-key": adminKey
-      },
-      body: JSON.stringify({
-        category: selectedCategory,
-        make
-      })
-    });
-
-    const data = await res.json();
-
-    if (!data.ok) {
-      throw new Error(data.error || "Add make failed");
-    }
-
-    stagePatch({
-      type: "COMMIT_MAKE",
-      category: selectedCategory,
-      make,
-      model: "OTHER",
-      file: selectedRegistryItem?.file,
-      target: "GITHUB_TAXONOMY",
-      sharetribeImpact: "REQUIRES_AWS_TAXONOMY_DEPLOY"
-    });
-
-    addLog(`Make committed: ${selectedCategory} / ${make}`, "success");
-    setNewMakeName("");
-  } catch (error) {
-    addLog(`Make commit failed: ${error.message}`, "danger");
-    alert(error.message);
-  } finally {
-    setAddMakeBusy(false);
-  }
-}
-
 async function commitDeleteMake() {
   const make = upper(newMakeName || activeMake);
 
@@ -861,6 +789,7 @@ async function commitDeleteMake() {
       },
       body: JSON.stringify({
         category: selectedCategory,
+        equipmentType: activeEquipmentType,
         make
       })
     });
@@ -874,6 +803,7 @@ async function commitDeleteMake() {
     stagePatch({
       type: "DELETE_MAKE",
       category: selectedCategory,
+      equipmentType: activeEquipmentType,
       make,
       file: selectedRegistryItem?.file,
       target: "GITHUB_TAXONOMY",
@@ -891,25 +821,39 @@ async function commitDeleteMake() {
   }
 }
   
- async function stageAddModel() {
+ async function commitMakeModelPath() {
+  const make = upper(newMakeName || activeMake);
   const model = upper(newModelName);
+  const requiresEquipmentType =
+    selectedRegistryItem?.hierarchy === "type-make-model";
 
-  if (!selectedCategory || !activeMake || !model) {
-    alert("Select category, make, and enter model.");
+  if (
+    !selectedCategory ||
+    (requiresEquipmentType && !activeEquipmentType) ||
+    !make ||
+    !model
+  ) {
+    alert("Select the category and equipment type, then enter the real make and model.");
     return;
   }
 
-  if (modelsForMake.map(normalizeModel).includes(normalizeModel(model))) {
-    alert(`${model} already exists under ${activeMake}.`);
+  const pathExists = scopedTaxonomyRows.some(
+    row =>
+      upper(row.make) === make &&
+      normalizeModel(row.model) === normalizeModel(model)
+  );
+
+  if (pathExists) {
+    alert(`${make} ${model} already exists in ${selectedCategory}.`);
     return;
   }
 
   const typed = window.prompt(
-    `Commit model to taxonomy?\n\n${selectedCategory}\n${activeMake}\n${model}\n\nType ADD MODEL to confirm.`
+    `Add this machine path?\n\n${selectedCategory}${activeEquipmentType ? `\n${activeEquipmentType}` : ""}\n${make}\n${model}\n\nType ADD MACHINE to confirm.`
   );
 
-  if (typed !== "ADD MODEL") {
-    addLog("Add model cancelled", "warn");
+  if (typed !== "ADD MACHINE") {
+    addLog("Add machine path cancelled", "warn");
     return;
   }
 
@@ -924,7 +868,8 @@ async function commitDeleteMake() {
       },
       body: JSON.stringify({
         category: selectedCategory,
-        make: activeMake,
+        equipmentType: activeEquipmentType,
+        make,
         model
       })
     });
@@ -938,14 +883,20 @@ async function commitDeleteMake() {
     stagePatch({
       type: "COMMIT_MODEL",
       category: selectedCategory,
-      make: activeMake,
+      equipmentType: activeEquipmentType,
+      make,
       model,
       file: selectedRegistryItem?.file,
       target: "GITHUB_TAXONOMY",
       sharetribeImpact: "REQUIRES_AWS_TAXONOMY_DEPLOY"
     });
 
-    addLog(`Model committed: ${selectedCategory} / ${activeMake} / ${model}`, "success");
+    addLog(
+      `Machine path committed: ${selectedCategory} / ${activeEquipmentType || "DIRECT"} / ${make} / ${model}`,
+      "success"
+    );
+    setSelectedMake(make);
+    setNewMakeName("");
     setNewModelName("");
   } catch (error) {
     addLog(`Model commit failed: ${error.message}`, "danger");
@@ -983,6 +934,7 @@ async function deleteSelectedModel() {
       },
       body: JSON.stringify({
         category: selectedCategory,
+        equipmentType: activeEquipmentType,
         make: activeMake,
         model
       })
@@ -1225,21 +1177,63 @@ async function deleteSelectedModel() {
 
               {activeTab === "taxonomy" && (
                 <section className="grid taxonomy">
-                  <AdminCard label="Taxonomy Tree" title="Category → Make → Model">
-                    <select
+                  <AdminCard
+                    label="Taxonomy Tree"
+                    title={equipmentTypes.length > 0
+                      ? "Category → Type → Make → Model"
+                      : "Category → Make → Model"}
+                  >
+                    <input
+                      list="admin-category-options"
                       value={selectedCategory}
                       onChange={e => {
                         setSelectedCategory(e.target.value);
+                        setSelectedEquipmentType("");
                         setSelectedMake("");
                         setTaxonomySearch("");
                       }}
-                    >
+                      onBlur={() => {
+                        const canonical = canonicalOption(
+                          selectedCategory,
+                          categoryNames
+                        );
+                        if (canonical) setSelectedCategory(canonical);
+                      }}
+                      placeholder="Type to find category"
+                    />
+                    <datalist id="admin-category-options">
                       {categoryNames.map(category => (
-                        <option key={category} value={category}>
-                          {category}
-                        </option>
+                        <option key={category} value={category} />
                       ))}
-                    </select>
+                    </datalist>
+
+                    {equipmentTypes.length > 0 && (
+                      <>
+                      <input
+                        list="admin-equipment-type-options"
+                        value={activeEquipmentType}
+                        onChange={e => {
+                          setSelectedEquipmentType(e.target.value);
+                          setSelectedMake("");
+                          setTaxonomySearch("");
+                        }}
+                        onBlur={() => {
+                          const canonical = canonicalOption(
+                            activeEquipmentType,
+                            equipmentTypes
+                          );
+                          if (canonical) setSelectedEquipmentType(canonical);
+                        }}
+                        aria-label="Equipment type"
+                        placeholder="Type to find equipment type"
+                      />
+                      <datalist id="admin-equipment-type-options">
+                        {equipmentTypes.map(type => (
+                          <option key={type} value={type} />
+                        ))}
+                      </datalist>
+                      </>
+                    )}
 
                     <select
                       value={activeMake}
@@ -1268,39 +1262,29 @@ async function deleteSelectedModel() {
                     </div>
                   </AdminCard>
 
-                 <AdminCard label="Add / Stage" title="Taxonomy Builder">
-  <input
-    value={newCategoryName}
-    onChange={e => setNewCategoryName(e.target.value)}
-    placeholder="New category"
-  />
-
-  <button type="button" onClick={stageAddCategory}>
-    Stage Category
-  </button>
+                 <AdminCard label="Add Real Machine Path" title="Type → Make → Model">
+  <p>
+    Select the category{equipmentTypes.length > 0 ? " and equipment type" : ""}, then enter the make and model from the actual machine.
+  </p>
 
   <input
-    value={newMakeName}
-    onChange={e => setNewMakeName(e.target.value)}
-    placeholder="New make"
-  />
-
-  <button type="button" onClick={stageAddMake}>
-    Stage Make
-  </button>
-
-     <input
   value={newMakeName}
   onChange={e => setNewMakeName(e.target.value)}
-  placeholder="New make"
+  placeholder="Type make"
 />
+
+  <input
+    value={newModelName}
+    onChange={e => setNewModelName(e.target.value)}
+    placeholder="Type model"
+  />
 
 <button
   type="button"
-  onClick={commitAddMake}
-  disabled={addMakeBusy}
+  onClick={commitMakeModelPath}
+  disabled={commitBusy}
 >
-  {addMakeBusy ? "Committing..." : "Commit Make"}
+  {commitBusy ? "Adding..." : "Add Make + Model"}
 </button>
 
 <button
@@ -1308,21 +1292,7 @@ async function deleteSelectedModel() {
   onClick={commitDeleteMake}
   disabled={deleteMakeBusy}
 >
-  {deleteMakeBusy ? "Deleting..." : "Delete Make"}
-</button> 
-
-  <input
-    value={newModelName}
-    onChange={e => setNewModelName(e.target.value)}
-    placeholder="New model"
-  />
-
-<button
-  type="button"
-  onClick={stageAddModel}
-  disabled={commitBusy}
->
-  {commitBusy ? "Committing..." : "Commit Model"}
+  {deleteMakeBusy ? "Deleting..." : "Delete Selected Make"}
 </button>
 
 <button

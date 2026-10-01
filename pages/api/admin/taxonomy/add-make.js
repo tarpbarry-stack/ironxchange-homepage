@@ -18,6 +18,7 @@ const CATEGORY_TO_FILE = {
   "EXCAVATORS": "lib/excavatorsTaxonomy.js",
   "FORKLIFTS": "lib/forkliftsTaxonomy.js",
   "MOTOR GRADERS": "lib/motorGradersTaxonomy.js",
+  "PIPELINE EQUIPMENT": "lib/pipelineEquipmentTaxonomy.js",
   "SCRAPERS": "lib/scraperTaxonomy.js",
   "SKID STEER / CTL": "lib/skidSteerCtlTaxonomy.js",
   "SUPPORT EQUIPMENT": "lib/supportEquipmentTaxonomy.js",
@@ -84,7 +85,7 @@ function makeExists(fileContent, make) {
 }
 
 function insertSeedRow(fileContent, make) {
-  const row = `{ make: "${make}", model: "OTHER" },`;
+  const row = `{ make: ${JSON.stringify(make)}, model: "OTHER" },`;
 
   const exportIndex = fileContent.lastIndexOf("];");
   if (exportIndex === -1) {
@@ -113,6 +114,13 @@ export default async function handler(req, res) {
 
     if (!category || !make) {
       return res.status(400).json({ ok: false, error: "Missing category or make." });
+    }
+
+    if (category === "PIPELINE EQUIPMENT") {
+      return res.status(400).json({
+        ok: false,
+        error: "Pipeline Equipment requires equipment type, make, and model together."
+      });
     }
 
     const filePath = CATEGORY_TO_FILE[category];
